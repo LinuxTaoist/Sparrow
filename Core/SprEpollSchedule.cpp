@@ -79,7 +79,6 @@ void SprEpollSchedule::Exit()
 void SprEpollSchedule::AddPoll(SprObserver& observer)
 {
     struct epoll_event ep;
-    SPR_LOGD("Add poll %s.\n", observer.getModuleName().c_str());
 
     //EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
     //EPOLLOUT：表示对应的文件描述符可以写；
@@ -93,6 +92,17 @@ void SprEpollSchedule::AddPoll(SprObserver& observer)
     if (epoll_ctl(mEpollFd, EPOLL_CTL_ADD, observer.getMqHandle(), &ep) != 0) {
         SPR_LOGE("%s\n", strerror(errno));
     }
+
+    SPR_LOGD("Poll add module %s\n", observer.getModuleName().c_str());
+}
+
+void SprEpollSchedule::DelPoll(SprObserver& observer)
+{
+    if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, observer.getMqHandle(), nullptr) != 0) {
+        SPR_LOGE("epoll_ctl failed. (%s)\n", strerror(errno));
+    }
+
+    SPR_LOGD("Poll delete module %s\n", observer.getModuleName().c_str());
 }
 
 void SprEpollSchedule::StartEpoll(bool run)
@@ -113,11 +123,12 @@ void SprEpollSchedule::StartEpoll(bool run)
         }
 
         // 监听消息队列有数据, 读取数据, libgo调度
-        SPR_LOGD("Data come from epoll ...\n");
+        SPR_LOGD("Data count %d come from epoll ...\n", count);
         for (int i = 0; i < count; i++) {
             SprObserver* p = static_cast<SprObserver*>(ep[i].data.ptr);
             SprMsg msg;
 
+            // 投递任务至协程，没有回调
             mpGoPool->Post([&p, &msg] {
                 if (p->RecvMsg(msg) < 0) {
                     SPR_LOGE("RecvMsg fail!\n");
@@ -129,16 +140,3 @@ void SprEpollSchedule::StartEpoll(bool run)
 
     } while(!mQuit);
 }
-
-void SprEpollSchedule::DelPoll(SprObserver& observer)
-{
-    if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, observer.getMqHandle(), nullptr) != 0) {
-        SPR_LOGE("epoll_ctl failed. (%s)\n", strerror(errno));
-    }
-}
-
-int SprEpollSchedule::Invoke(SprMsg& msg)
-{
-    return 0;
-}
-

@@ -25,5 +25,6 @@ public:
     virtual ~SprMediatorIpcProxy();
 
     int RegisterObserver(const SprObserver& observer) override;
+    int UnregisterObserver(const SprObserver& observer) override;
     int NotifyObserver() override;
 };
