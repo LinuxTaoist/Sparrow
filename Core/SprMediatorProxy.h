@@ -31,6 +31,7 @@ public:
     SprMediatorProxy& operator=(SprMediatorProxy&&) = delete;
 
     virtual int RegisterObserver(const SprObserver& observer) = 0;
+    virtual int UnregisterObserver(const SprObserver& observer) = 0;
     virtual int NotifyObserver() = 0;
 };
 

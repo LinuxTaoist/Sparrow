@@ -27,6 +27,7 @@ public:
     SprMediator();
     ~SprMediator();
     int RegisterObserver(ESprModuleID id, std::string name);
+    int UnregisterObserver(ESprModuleID id, std::string name);
 
 private:
 };

@@ -2,7 +2,7 @@
  *------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprMediator.cpp
+ *  @file       : DebugSprCore.cc
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,22 +16,12 @@
  *------------------------------------------------------------------------------
  *
  */
-#include <string>
-#include "SprMediator.h"
+#include <stdio.h>
 
-using namespace std;
+#define SPR_LOGD(fmt, args...) printf("%d DebugCore D: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%d DebugCore E: " fmt, __LINE__, ##args)
 
-const string MSG_QUEUE_PORT     = "/SprMdrQ_20231126";          // mqueue
-const string UNIX_DGRAM_PATH    = "/tmp/SprMdrU_20231126";      // unix socket
-const short  INET_PORT = 1126;                                  // inet socket
-
-SprMediator::SprMediator()
+int main(int agrc, const char *argv[])
 {
-
+    return 0;
 }
-
-SprMediator::~SprMediator()
-{
-
-}
-

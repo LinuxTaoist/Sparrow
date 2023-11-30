@@ -27,6 +27,7 @@ enum class ESprModuleID
     MODULE_MSG_MEDIATOR = 0x01,
     MODULE_CONFIG,
     MODULE_LOGM,
+    MODULE_DEBUG,
     MODULE_MAX,
 };
 

@@ -58,13 +58,6 @@ public:
     void AddPoll(SprObserver& observer);
 
     /**
-     * @brief       开始监听
-     *
-     * @param[in]   run 开启/暂停监听
-     */
-    void StartEpoll(bool run);
-
-    /**
      * @brief       删除监听事件
      *
      * @param[in]   observer
@@ -72,11 +65,11 @@ public:
     void DelPoll(SprObserver& observer);
 
     /**
-     * @brief       派发消息
+     * @brief       开始监听
      *
-     * @param[in]   msg
+     * @param[in]   run 开启/暂停监听
      */
-    int Invoke(SprMsg& msg);
+    void StartEpoll(bool run);
 
 private:
     bool mQuit;

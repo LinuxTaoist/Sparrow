@@ -2,7 +2,7 @@
  *------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprMediator.cpp
+ *  @file       : Convert.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,22 +16,14 @@
  *------------------------------------------------------------------------------
  *
  */
+#ifndef __SHARED_H__
+#define __SHARED_H__
+
 #include <string>
-#include "SprMediator.h"
 
-using namespace std;
+namespace Shared {
+    std::string produceRandomStr(int len);
+};
 
-const string MSG_QUEUE_PORT     = "/SprMdrQ_20231126";          // mqueue
-const string UNIX_DGRAM_PATH    = "/tmp/SprMdrU_20231126";      // unix socket
-const short  INET_PORT = 1126;                                  // inet socket
-
-SprMediator::SprMediator()
-{
-
-}
-
-SprMediator::~SprMediator()
-{
-
-}
+#endif
 

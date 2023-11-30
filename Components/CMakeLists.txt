@@ -1,6 +1,14 @@
 ##############################################################################
 include_directories (${PROJECT_PATH}/Core)
 
+# Bin mainsparrow
+aux_source_directory(${PROJECT_PATH}/Components/MainSparrow  SRC_MAIN_SPR_PATH)
+
+add_executable       (BinMainSpr ${SRC_MAIN_SPR_PATH})
+set_target_properties(BinMainSpr PROPERTIES OUTPUT_NAME "sparrow")
+target_link_libraries(BinMainSpr sprcore)
+add_dependencies     (BinMainSpr libsprcore)
+
 # Bin logservice
 aux_source_directory(${PROJECT_PATH}/Components/LogManager  SRC_LOG_SRV_PATH)
 

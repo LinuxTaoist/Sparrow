@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_CXX_STANDARD 11)
+# 兼容CMAKE旧版本
+cmake_policy(SET CMP0046 OLD)
 
+set(CMAKE_CXX_STANDARD 11)
 project(Sparrow)
 
 ## 保存工程路径

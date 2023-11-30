@@ -41,7 +41,18 @@ int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
     ESprModuleID id = observer.getModuleId();
     string name = observer.getModuleName();
 
-    // TODO: 将observer信息发送给远程消息中介
+    // TODO: 将observer信息发送给远程消息中介注册
+    SPR_LOGD("Register observer: [%d] [0x%x] [%s]\n", handle, (uint32_t)id, name.c_str());
+    return 0;
+}
+
+int SprMediatorIpcProxy::UnregisterObserver(const SprObserver& observer)
+{
+    int handle = observer.getMqHandle();
+    ESprModuleID id = observer.getModuleId();
+    string name = observer.getModuleName();
+
+    // TODO: 将observer信息发送给远程消息中介注销
     SPR_LOGD("Register observer: [%d] [0x%x] [%s]\n", handle, (uint32_t)id, name.c_str());
     return 0;
 }

@@ -18,13 +18,13 @@
  */
 #include <iostream>
 #include <string>
-#include <random>
-#include <chrono>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "Util/Shared.h"
 #include "SprObserver.h"
+#include "SprEpollSchedule.h"
 
 using namespace std;
 
@@ -35,16 +35,20 @@ const int MQ_BUFF_MAX_SIZE  = 1024;
 const int RANDOM_STR_LENGTH = 8;
 
 // Module ID, Module Name, fd,
+// TODO: 初始化将自己添加到SprShcedule
 SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMediatorProxy> msgMediator)
         : mMqHandle(-1), mModuleID(id), mModuleName(name), mMsgMediatorPtr(msgMediator)
 {
     mkMq();
+    SprEpollSchedule::GetInstance()->AddPoll(*this);
     mMsgMediatorPtr->RegisterObserver(*this);
     SPR_LOGD("Start Module: %s, mq: %s\n", mModuleName.c_str(), mMqDevName.c_str());
 }
 
 SprObserver::~SprObserver()
 {
+    SprEpollSchedule::GetInstance()->DelPoll(*this);
+
     if (mMqHandle != -1)
     {
         mq_close(mMqHandle);
@@ -58,28 +62,13 @@ SprObserver::~SprObserver()
     }
 }
 
-std::string generateRandomString(const int len)
-{
-    std::string strRandom;
-    const std::string seedStr = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
-    std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
-    std::uniform_int_distribution<int> distribution(0, seedStr.size() - 1);
-
-    for (int i = 0; i < len; i++) {
-        int randomValue = distribution(generator);
-        strRandom += seedStr[randomValue];
-    }
-
-    return strRandom;
-}
-
 int SprObserver::mkMq()
 {
     mq_attr mqAttr;
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    string strRandom = generateRandomString(RANDOM_STR_LENGTH);
+    string strRandom = Shared::produceRandomStr(RANDOM_STR_LENGTH);
     mMqDevName = "/" +  mModuleName + "_" + strRandom;
     mq_unlink(mMqDevName.c_str());
     mMqHandle = mq_open(mMqDevName.c_str(), O_RDWR | O_CREAT | O_EXCL, 0666, &mqAttr);
