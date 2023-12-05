@@ -391,7 +391,7 @@ void SprMsg::decodeU32Vec(std::string& deDatas)
         mU32Vec.push_back(value);
     }
 
-    mU8Vec.assign(deDatas.begin() + sizeof(mU32VecLength), deDatas.begin() + sizeof(mU32VecLength) + mU32VecLength);
+    mU32Vec.assign(deDatas.begin() + sizeof(mU32VecLength), deDatas.begin() + sizeof(mU32VecLength) + mU32VecLength);
     deDatas = deDatas.substr(sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t));
 }
 
