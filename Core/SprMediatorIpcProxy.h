@@ -24,7 +24,12 @@ public:
     SprMediatorIpcProxy();
     virtual ~SprMediatorIpcProxy();
 
+    int ConnectMediator() override;
     int RegisterObserver(const SprObserver& observer) override;
     int UnregisterObserver(const SprObserver& observer) override;
-    int NotifyObserver() override;
+    int NotifyAllObserver() override;
+
+private:
+    int mMediatorHandler;
+    int mkMq();
 };

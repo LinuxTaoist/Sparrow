@@ -41,11 +41,6 @@ public:
     void Init();
 
     /**
-     * @brief       启动
-     */
-    void Run();
-
-    /**
      * @brief       退出
      */
     void Exit();
@@ -66,10 +61,8 @@ public:
 
     /**
      * @brief       开始监听
-     *
-     * @param[in]   run 开启/暂停监听
      */
-    void StartEpoll(bool run);
+    void StartEpoll();
 
 private:
     bool mQuit;

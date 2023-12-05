@@ -22,9 +22,9 @@
 #include <string>
 #include <stdint.h>
 
-enum class ESprModuleID
+enum class ESprModuleID : uint16_t
 {
-    MODULE_MSG_MEDIATOR = 0x01,
+    MODULE_PROXY = 0x01,
     MODULE_CONFIG,
     MODULE_LOGM,
     MODULE_DEBUG,
@@ -36,6 +36,31 @@ struct SModuleInfo
     ESprModuleID id;
     int handle;
     std::string name;
+};
+
+enum class EProxyType
+{
+    PROXY_TYPE_MQ = 1,
+    PROXY_TYPE_UNIX_SOCKET,
+    PROXY_TYPE_INET_SOCKET,
+    PROXY_TYPE_BUTT
+};
+
+enum class EProxyMsgID
+{
+    PROXY_MSG_BEGIN = static_cast<int>(ESprModuleID::MODULE_PROXY) << 16 | 1,
+    PROXY_MSG_REGISTER_REQUEST,
+    PROXY_MSG_REGISTER_RESPONSE,
+    PROXY_MSG_UNREGISTER_REQUEST,
+    PROXY_MSG_UNREGISTER_RESPONSE,
+    PROXY_MSG_BUTT
+};
+
+enum class EDebugMsgID
+{
+    DEBUG_MSG_BEGIN = static_cast<int>(ESprModuleID::MODULE_DEBUG) << 16 | 1,
+    DEBUG_MSG_SERIAL,
+    DEBUG_MSG_BUTT
 };
 
 #endif

@@ -18,8 +18,6 @@
  */
 #include <string.h>
 #include <cstdint>
-#include <string>
-#include <sstream>
 #include "Convert.h"
 
 #define SPR_LOGD(fmt, args...) printf("%d SprMsg D: " fmt, __LINE__, ##args)
@@ -45,27 +43,6 @@ namespace Convert
         const char* pByte = reinterpret_cast<const char*>(&value);
         buf.append(pByte, sizeof(uint32_t));
         return 0;
-    }
-
-    template <typename T>
-    int8_t stringToInt(T& value, const std::string& str) {
-        std::istringstream iss(str);
-        if (iss >> value) {
-            return 0;
-        } else {
-            return -1;
-        }
-    }
-
-    template <typename T>
-    int8_t intToString(const T& value, std::string& str) {
-        std::ostringstream oss;
-        if (oss << value) {
-            str = oss.str();
-            return 0;
-        } else {
-            return -1;
-        }
     }
 };
 

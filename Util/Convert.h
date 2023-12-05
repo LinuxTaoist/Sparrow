@@ -20,15 +20,41 @@
 #define __CONVERT_H__
 
 #include <string>
+#include <sstream>
 #include<stdint.h>
 
 namespace Convert {
     int8_t charPtrToUint32(uint32_t& value, const char* buf, int size);
     int8_t uint32ToString(uint32_t value, std::string& buf);
+
     template <typename T>
-    int8_t stringToInt(T& value, const std::string& str);
-    template <typename T>
-    int8_t intToString(const T& value, std::string& str);
+    int8_t stringToInt(T& value, const std::string& str)
+    {
+        if (str.size() < sizeof(T)) {
+            return -1;
+        }
+
+        value = 0;
+        for (size_t i = 0; i < sizeof(T); i++) {
+            value <<= 8;
+            value |= static_cast<unsigned char>(str[i]);
+        }
+
+        return 0;
+    }
+
+    template<typename T>
+    int8_t intToString(const T& value, std::string& str)
+    {
+        size_t valueSize = sizeof(T);
+
+        for (size_t i = 0; i < valueSize; i++) {
+            char ch = static_cast<char>((value >> ((valueSize - 1 - i) * 8)) & 0xFF);
+            str.push_back(ch);
+        }
+
+        return 0;
+    }
 };
 
 #endif

@@ -44,6 +44,7 @@ public:
     virtual int getMqHandle() const final { return mMqHandle; }
     virtual ModuleIDType getModuleId() const final { return mModuleID; }
     virtual std::string getModuleName() const final { return mModuleName; }
+    virtual std::string getMqDevName() const final { return mMqDevName; }
 
     virtual int ProcessMsg(const SprMsg& msg) = 0;
     int SendMsg(const SprMsg& msg);
