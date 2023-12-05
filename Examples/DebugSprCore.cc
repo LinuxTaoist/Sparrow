@@ -66,7 +66,7 @@ int main(int agrc, const char *argv[])
                 theEnMsg.setString("Test Spr Core");
                 std::vector<uint8_t> u8Vec1 = {'s', 'p', 'a', 'r', 'r', 'o', 'w'};
                 theEnMsg.setU8Vec(u8Vec1);
-                std::vector<uint32_t> u32Vec1 = {0x1111, 0x2222, 0x3333, 0x4444};
+                std::vector<uint32_t> u32Vec1 = {0x1111, 0x2222, 0x3333, 0x4444, 0x5555};
                 theEnMsg.setU32Vec(u32Vec1);
 
                 struct TestSpr
