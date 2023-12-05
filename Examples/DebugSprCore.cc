@@ -87,14 +87,14 @@ int main(int agrc, const char *argv[])
                 vector<uint32_t> u32Vec = theDeMsg.getU32Vec();
                 std::shared_ptr<struct TestSpr> dePtr = theDeMsg.getDatas<struct TestSpr>();
 
-                SPR_LOGD("msgId:    %d \n", theDeMsg.getMsgId());
-                SPR_LOGD("u8Value:  %d \n", theDeMsg.getU8Value());
-                SPR_LOGD("u16Value: %d \n", theDeMsg.getU16Value());
-                SPR_LOGD("string:   %s \n", theDeMsg.getString().c_str());
+                SPR_LOGD("msgId:    %d  \n", theDeMsg.getMsgId());
+                SPR_LOGD("u8Value:  %d  \n", theDeMsg.getU8Value());
+                SPR_LOGD("u16Value: %d  \n", theDeMsg.getU16Value());
+                SPR_LOGD("string:   %s  \n", theDeMsg.getString().c_str());
                 SPR_LOGD("u8Vec:    %ld \n", u8Vec.size());
                 SPR_LOGD("u32Vec:   %ld \n", u32Vec.size());
-                SPR_LOGD("ptr:      %d   \n", dePtr->id);
-                SPR_LOGD("          %s   \n", dePtr->buf);
+                SPR_LOGD("ptr:      %d  \n", dePtr->id);
+                SPR_LOGD("          %s  \n", dePtr->buf);
                 break;
             }
 
