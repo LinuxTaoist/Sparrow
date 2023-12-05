@@ -91,8 +91,8 @@ int main(int agrc, const char *argv[])
                 SPR_LOGD("u8Value:  %d \n", theDeMsg.getU8Value());
                 SPR_LOGD("u16Value: %d \n", theDeMsg.getU16Value());
                 SPR_LOGD("string:   %s \n", theDeMsg.getString().c_str());
-                SPR_LOGD("u8Vec:    %ld: \n", u8Vec.size());
-                SPR_LOGD("u32Vec:   %ld: \n", u32Vec.size());
+                SPR_LOGD("u8Vec:    %ld \n", u8Vec.size());
+                SPR_LOGD("u32Vec:   %ld \n", u32Vec.size());
                 SPR_LOGD("ptr:      %d   \n", dePtr->id);
                 SPR_LOGD("          %s   \n", dePtr->buf);
                 break;
