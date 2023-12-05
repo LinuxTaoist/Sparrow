@@ -1,6 +1,13 @@
 ##############################################################################
 include_directories (${PROJECT_PATH}/Core)
 
+# Bin proxyservice
+aux_source_directory(${PROJECT_PATH}/Components/ProxyService  SRC_PROXY_SRV_PATH)
+add_executable       (BinProxySrv ${SRC_PROXY_SRV_PATH})
+set_target_properties(BinProxySrv PROPERTIES OUTPUT_NAME "proxyservice")
+target_link_libraries(BinProxySrv sprcore pthread)
+add_dependencies     (BinProxySrv libsprcore)
+
 # Bin mainsparrow
 aux_source_directory(${PROJECT_PATH}/Components/MainSparrow  SRC_MAIN_SPR_PATH)
 

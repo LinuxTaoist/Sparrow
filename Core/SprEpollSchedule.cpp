@@ -39,7 +39,7 @@ SprEpollSchedule::SprEpollSchedule(uint32_t size)
     }
 
     if (mEpollFd == -1) {
-        SPR_LOGE("epoll_create failed!\n");
+        SPR_LOGE("epoll_create failed! (%s)\n", strerror(errno));
     }
 }
 
@@ -64,11 +64,6 @@ void SprEpollSchedule::Init()
     mpGoPool = co::AsyncCoroutinePool::Create();
     mpGoPool->InitCoroutinePool(1024);
     mpGoPool->Start(4, 128);
-}
-
-void SprEpollSchedule::Run()
-{
-
 }
 
 void SprEpollSchedule::Exit()
@@ -105,7 +100,7 @@ void SprEpollSchedule::DelPoll(SprObserver& observer)
     SPR_LOGD("Poll delete module %s\n", observer.getModuleName().c_str());
 }
 
-void SprEpollSchedule::StartEpoll(bool run)
+void SprEpollSchedule::StartEpoll()
 {
     struct epoll_event ep[32];
 

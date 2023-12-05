@@ -16,48 +16,81 @@
  *------------------------------------------------------------------------------
  *
  */
+#include <errno.h>
+#include <string.h>
 #include "SprCommonType.h"
 #include "SprMediatorIpcProxy.h"
 #include "SprObserver.h"
+#include "SprMsg.h"
 
 using namespace std;
 
 #define SPR_LOGD(fmt, args...) printf("%d IpcProxy D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d IpcProxy E: " fmt, __LINE__, ##args)
 
+const string MEDIATOR_MSG_QUEUE_PORT     = "/SprMdrQ_20231126";          // mediator mqueue
+
 SprMediatorIpcProxy::SprMediatorIpcProxy()
 {
-
+    mConnected = false;
+    mMediatorHandler = -1;
 }
 
 SprMediatorIpcProxy::~SprMediatorIpcProxy()
 {
+    if (mMediatorHandler != -1)
+    {
+        mq_close(mMediatorHandler);
+        mMediatorHandler = -1;
+    }
+}
 
+int SprMediatorIpcProxy::mkMq()
+{
+    mq_attr mqAttr;
+    mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
+    mqAttr.mq_msgsize = 1025;
+
+    mMediatorHandler = mq_open(MEDIATOR_MSG_QUEUE_PORT.c_str(), O_RDONLY, &mqAttr);
+    if(mMediatorHandler < 0) {
+        SPR_LOGE("Open %s failed. (%s)\n", MEDIATOR_MSG_QUEUE_PORT.c_str(), strerror(errno));
+        return -1;
+    }
+
+    return 0;
+}
+
+int SprMediatorIpcProxy::ConnectMediator()
+{
+
+    return 0;
 }
 
 int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 {
-    int handle = observer.getMqHandle();
-    ESprModuleID id = observer.getModuleId();
-    string name = observer.getModuleName();
-
     // TODO: 将observer信息发送给远程消息中介注册
-    SPR_LOGD("Register observer: [%d] [0x%x] [%s]\n", handle, (uint32_t)id, name.c_str());
+    SprMsg msg((uint32_t)EProxyMsgID::PROXY_MSG_REGISTER_REQUEST);
+    msg.setU32Value((uint32_t)EProxyType::PROXY_TYPE_MQ);
+    msg.setU16Value((uint16_t)observer.getModuleId());
+    msg.setString(observer.getMqDevName());
+
+    SPR_LOGD("Register observer: [0x%x] [%s]\n", (uint32_t)EProxyMsgID::PROXY_MSG_REGISTER_REQUEST, observer.getMqDevName().c_str());
     return 0;
 }
 
 int SprMediatorIpcProxy::UnregisterObserver(const SprObserver& observer)
 {
-    int handle = observer.getMqHandle();
-    ESprModuleID id = observer.getModuleId();
-    string name = observer.getModuleName();
+    // TODO: 将observer信息发送给远程消息中介注册
+    SprMsg msg((uint32_t)EProxyMsgID::PROXY_MSG_UNREGISTER_REQUEST);
+    msg.setU32Value((uint32_t)EProxyType::PROXY_TYPE_MQ);
+    msg.setU16Value((uint16_t)observer.getModuleId());
+    msg.setString(observer.getMqDevName());
 
-    // TODO: 将observer信息发送给远程消息中介注销
-    SPR_LOGD("Register observer: [%d] [0x%x] [%s]\n", handle, (uint32_t)id, name.c_str());
+    SPR_LOGD("Register observer: [0x%x] [%s]\n", (uint32_t)EProxyMsgID::PROXY_MSG_REGISTER_RESPONSE, observer.getMqDevName().c_str());
     return 0;
 }
 
-int SprMediatorIpcProxy::NotifyObserver()
+int SprMediatorIpcProxy::NotifyAllObserver()
 {
     return 0;
 }

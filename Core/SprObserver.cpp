@@ -48,6 +48,7 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
 SprObserver::~SprObserver()
 {
     SprEpollSchedule::GetInstance()->DelPoll(*this);
+    mMsgMediatorPtr->UnregisterObserver(*this);
 
     if (mMqHandle != -1)
     {
@@ -60,6 +61,7 @@ SprObserver::~SprObserver()
         mq_unlink(mMqDevName.c_str());
         mMqDevName = "";
     }
+    SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
 int SprObserver::mkMq()
@@ -79,6 +81,7 @@ int SprObserver::mkMq()
     return 0;
 }
 
+// to self
 int SprObserver::SendMsg(const SprMsg& msg)
 {
     std::string datas;
@@ -92,6 +95,7 @@ int SprObserver::SendMsg(const SprMsg& msg)
     return ret;
 }
 
+// from self
 int SprObserver::RecvMsg(SprMsg& msg)
 {
     char buf[MQ_BUFF_MAX_SIZE] = {0};
@@ -105,7 +109,8 @@ int SprObserver::RecvMsg(SprMsg& msg)
         return -1;
     }
 
-    return msg.decode(buf, bytes);
+    string data = buf;
+    return msg.decode(data);
 }
 
 int SprObserver::NotifyObserver(const SprMsg& msg)
