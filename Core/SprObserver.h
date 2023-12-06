@@ -41,16 +41,16 @@ public:
     SprObserver(SprObserver&&) = delete;
     SprObserver& operator=(SprObserver&&) = delete;
 
-    virtual int getMqHandle() const final { return mMqHandle; }
-    virtual ModuleIDType getModuleId() const final { return mModuleID; }
-    virtual std::string getModuleName() const final { return mModuleName; }
-    virtual std::string getMqDevName() const final { return mMqDevName; }
-
+    virtual int GetMqHandle() const final { return mMqHandle; }
+    virtual ModuleIDType GetModuleId() const final { return mModuleID; }
+    virtual std::string GetModuleName() const final { return mModuleName; }
+    virtual std::string GetMqDevName() const final { return mMqDevName; }
+    virtual int NotifyObserver(const SprMsg& msg);
+    virtual int NotifyObserver(const std::vector<ModuleIDType>& ids, const SprMsg& msg);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
+
     int SendMsg(const SprMsg& msg);
     int RecvMsg(SprMsg& msg);
-    int NotifyObserver(const SprMsg& msg);
-    int NotifyObserver(const std::vector<ModuleIDType>& ids, const SprMsg& msg);
 
 protected:
     int mMqHandle;
@@ -58,7 +58,7 @@ protected:
     std::string mModuleName;
     std::string mMqDevName;
     std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
-    virtual int mkMq() final;
+    virtual int MakeMQ() final;
 };
 
 #endif

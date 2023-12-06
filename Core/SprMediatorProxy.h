@@ -18,6 +18,7 @@
  */
 #ifndef __SPR_MEDIATOR_PROXY_H__
 #define __SPR_MEDIATOR_PROXY_H__
+#include "SprMsg.h"
 
 class SprObserver;
 class SprMediatorProxy
@@ -33,7 +34,8 @@ public:
     virtual int ConnectMediator() = 0;
     virtual int RegisterObserver(const SprObserver& observer) = 0;
     virtual int UnregisterObserver(const SprObserver& observer) = 0;
-    virtual int NotifyAllObserver() = 0;
+    virtual int SendMsg(const SprMsg& msg) = 0;
+    virtual int NotifyAllObserver(const SprMsg& msg) = 0;
 
 protected:
     bool mConnected;

@@ -39,7 +39,7 @@ const int RANDOM_STR_LENGTH = 8;
 SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMediatorProxy> msgMediator)
         : mMqHandle(-1), mModuleID(id), mModuleName(name), mMsgMediatorPtr(msgMediator)
 {
-    mkMq();
+    MakeMQ();
     SprEpollSchedule::GetInstance()->AddPoll(*this);
     mMsgMediatorPtr->RegisterObserver(*this);
     SPR_LOGD("Start Module: %s, mq: %s\n", mModuleName.c_str(), mMqDevName.c_str());
@@ -64,7 +64,7 @@ SprObserver::~SprObserver()
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
-int SprObserver::mkMq()
+int SprObserver::MakeMQ()
 {
     mq_attr mqAttr;
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
@@ -78,7 +78,7 @@ int SprObserver::mkMq()
         SPR_LOGE("Open %s failed. (%s)\n", mMqDevName.c_str(), strerror(errno));
     }
 
-    return 0;
+    return mMqHandle;
 }
 
 // to self

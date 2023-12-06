@@ -27,9 +27,9 @@ public:
     int ConnectMediator() override;
     int RegisterObserver(const SprObserver& observer) override;
     int UnregisterObserver(const SprObserver& observer) override;
-    int NotifyAllObserver() override;
+    virtual int SendMsg(const SprMsg& msg) override;
+    virtual int NotifyAllObserver(const SprMsg& msg) override;
 
 private:
     int mMediatorHandler;
-    int mkMq();
 };

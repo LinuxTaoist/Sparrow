@@ -52,6 +52,7 @@ int main(int agrc, const char *argv[])
     DebugCore theDebug(ESprModuleID::MODULE_LOGM, "Debug", make_shared<SprMediatorIpcProxy>());
 
     char val = 0;
+    bool run = true;
     do {
         SPR_LOGD("Input: ");
         std::cin >> val;
@@ -99,13 +100,14 @@ int main(int agrc, const char *argv[])
             }
 
             case 'q':
+                run = false;
                 break;
 
             default:
                 SPR_LOGE("No this option: %c", val);
             break;
         }
-    } while(1);
+    } while(run);
 
     return 0;
 }

@@ -73,31 +73,40 @@ void SprEpollSchedule::Exit()
 
 void SprEpollSchedule::AddPoll(SprObserver& observer)
 {
+    AddPoll(observer.GetMqHandle(), (void*)&observer);
+    SPR_LOGD("Poll add module %s\n", observer.GetModuleName().c_str());
+}
+
+/**
+ * @brief       添加监听事件
+ *
+ * @param[in]   handler 句柄
+ */
+void SprEpollSchedule::AddPoll(int handler, void* pHandle)
+{
     struct epoll_event ep;
 
     //EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
     //EPOLLOUT：表示对应的文件描述符可以写；
     //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
     ep.events = EPOLLIN | EPOLLET;
-    ep.data.ptr = & observer;
+    ep.data.ptr = pHandle;
 
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
-    if (epoll_ctl(mEpollFd, EPOLL_CTL_ADD, observer.getMqHandle(), &ep) != 0) {
+    if (epoll_ctl(mEpollFd, EPOLL_CTL_ADD, handler, &ep) != 0) {
         SPR_LOGE("%s\n", strerror(errno));
     }
-
-    SPR_LOGD("Poll add module %s\n", observer.getModuleName().c_str());
 }
 
 void SprEpollSchedule::DelPoll(SprObserver& observer)
 {
-    if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, observer.getMqHandle(), nullptr) != 0) {
+    if (epoll_ctl(mEpollFd, EPOLL_CTL_DEL, observer.GetMqHandle(), nullptr) != 0) {
         SPR_LOGE("epoll_ctl failed. (%s)\n", strerror(errno));
     }
 
-    SPR_LOGD("Poll delete module %s\n", observer.getModuleName().c_str());
+    SPR_LOGD("Poll delete module %s\n", observer.GetModuleName().c_str());
 }
 
 void SprEpollSchedule::StartEpoll()
