@@ -53,6 +53,13 @@ public:
     void AddPoll(SprObserver& observer);
 
     /**
+     * @brief       添加监听事件
+     *
+     * @param[in]   handler 句柄
+     */
+    void AddPoll(int handler, void * pHandle);
+
+    /**
      * @brief       删除监听事件
      *
      * @param[in]   observer

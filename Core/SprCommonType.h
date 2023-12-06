@@ -22,6 +22,10 @@
 #include <string>
 #include <stdint.h>
 
+#define     MEDIATOR_MSG_QUEUE          "/SprMdrQ_20231126"          // mqueue
+#define     MEDIATOR_UNIX_DGRAM_PATH    "/tmp/SprMdrU_20231126"      // unix socket
+#define     MEDIATOR_INET_PORT          1126
+
 enum class ESprModuleID : uint16_t
 {
     MODULE_PROXY = 0x01,
@@ -29,13 +33,6 @@ enum class ESprModuleID : uint16_t
     MODULE_LOGM,
     MODULE_DEBUG,
     MODULE_MAX,
-};
-
-struct SModuleInfo
-{
-    ESprModuleID id;
-    int handle;
-    std::string name;
 };
 
 enum class EProxyType

@@ -122,12 +122,6 @@ int8_t SprMsg::decode(std::string& deDatas)
 {
     int8_t ret = 0;
 
-    if (deDatas.size() < sizeof(uint32_t) * 2)
-    {
-        SPR_LOGE("param is invaild!\n");
-        return -1;
-    }
-
     decodeMsgId(deDatas);
     decodeTag(deDatas);
     for (auto i = (int)ESprMsgType::MSG_TYPE_MIN; i < (int)ESprMsgType::MSG_TYPE_MAX; i++)
@@ -141,7 +135,7 @@ int8_t SprMsg::decode(std::string& deDatas)
                 ((SprMsg*)this->*(it->second))(deDatas);
             }
             else {
-                // SPR_LOGW("Not find type: 0x%x!\n", (uint32_t)(type));
+                SPR_LOGW("Not find type: 0x%x!\n", (uint32_t)(type));
             }
         }
     }
@@ -248,25 +242,23 @@ void SprMsg::encodeDatas(std::string& enDatas)
 
 void SprMsg::decodeMsgId(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mMsgId))
+    if (Convert::stringToInt(mMsgId, deDatas) != 0)
     {
-        SPR_LOGE("deDatas is invaild!\n");
+        SPR_LOGE("Decode msgId Fail!\n");
         return;
     }
 
-    Convert::stringToInt(mMsgId, deDatas);
     deDatas = deDatas.substr(sizeof(mMsgId));
 }
 
 void SprMsg::decodeTag(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mTag))
+    if (Convert::stringToInt(mTag, deDatas) != 0)
     {
-        SPR_LOGE("deDatas is invaild!\n");
+        SPR_LOGE("Decode tag Fail!\n");
         return;
     }
 
-    Convert::stringToInt(mTag, deDatas);
     deDatas = deDatas.substr(sizeof(mTag));
 }
 
@@ -314,12 +306,6 @@ void SprMsg::decodeU32Value(std::string& deDatas)
 
 void SprMsg::decodeString(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mStringLength))
-    {
-        SPR_LOGE("deDatas is invalid! size = %zu, length = %zu\n", deDatas.size(), sizeof(mStringLength));
-        return;
-    }
-
     if (Convert::stringToInt(mStringLength, deDatas) != 0)
     {
         SPR_LOGE("Decode string length Fail!\n");
@@ -338,12 +324,6 @@ void SprMsg::decodeString(std::string& deDatas)
 
 void SprMsg::decodeU8Vec(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mU8VecLength))
-    {
-        SPR_LOGE("deDatas is invalid!\n");
-        return;
-    }
-
     if (Convert::stringToInt(mU8VecLength, deDatas) != 0)
     {
         SPR_LOGE("Decode vector size Fail!\n");
@@ -362,12 +342,6 @@ void SprMsg::decodeU8Vec(std::string& deDatas)
 
 void SprMsg::decodeU32Vec(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mU32VecLength))
-    {
-        SPR_LOGE("deDatas is invalid!\n");
-        return;
-    }
-
     if (Convert::stringToInt(mU32VecLength, deDatas) != 0)
     {
         SPR_LOGE("Decode vector size Fail!\n");
