@@ -36,9 +36,6 @@ public:
     virtual int UnregisterObserver(const SprObserver& observer) = 0;
     virtual int SendMsg(const SprMsg& msg) = 0;
     virtual int NotifyAllObserver(const SprMsg& msg) = 0;
-
-protected:
-    bool mConnected;
 };
 
 #endif

@@ -34,10 +34,9 @@ using namespace std;
 const int MQ_BUFF_MAX_SIZE  = 1024;
 const int RANDOM_STR_LENGTH = 8;
 
-// Module ID, Module Name, fd,
-// TODO: 初始化将自己添加到SprShcedule
+// Module ID, Module Name, proxyRpc,
 SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMediatorProxy> msgMediator)
-        : mMqHandle(-1), mModuleID(id), mModuleName(name), mMsgMediatorPtr(msgMediator)
+        : mConnected(false), mMqHandle(-1), mModuleID(id), mModuleName(name), mMsgMediatorPtr(msgMediator)
 {
     MakeMQ();
     SprEpollSchedule::GetInstance()->AddPoll(*this);
@@ -64,21 +63,24 @@ SprObserver::~SprObserver()
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
-int SprObserver::MakeMQ()
+int SprObserver::AbstractProcessMsg(const SprMsg& msg)
 {
-    mq_attr mqAttr;
-    mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
-    mqAttr.mq_msgsize = 1025;
+    switch (msg.GetMsgId())
+    {
+        case InternalEnum::PROXY_MSG_REGISTER_RESPONSE:
+            MsgResponseRegisterRsp(msg);
+            break;
 
-    string strRandom = Shared::produceRandomStr(RANDOM_STR_LENGTH);
-    mMqDevName = "/" +  mModuleName + "_" + strRandom;
-    mq_unlink(mMqDevName.c_str());
-    mMqHandle = mq_open(mMqDevName.c_str(), O_RDWR | O_CREAT | O_EXCL, 0666, &mqAttr);
-    if(mMqHandle < 0) {
-        SPR_LOGE("Open %s failed. (%s)\n", mMqDevName.c_str(), strerror(errno));
+        case InternalEnum::PROXY_MSG_UNREGISTER_REQUEST:
+            MsgResponseUnregisterRsp(msg);
+            break;
+
+        default:
+            ProcessMsg(msg);
+            break;
     }
 
-    return mMqHandle;
+    return 0;
 }
 
 // to self
@@ -113,12 +115,42 @@ int SprObserver::RecvMsg(SprMsg& msg)
     return msg.Decode(data);
 }
 
-int SprObserver::NotifyObserver(const SprMsg& msg)
+int SprObserver::NotifyObserver(ModuleIDType id, const SprMsg& msg)
 {
     return 0;
 }
 
 int SprObserver::NotifyObserver(const vector<ModuleIDType>& ids, const SprMsg& msg)
 {
+    return 0;
+}
+
+int SprObserver::MakeMQ()
+{
+    mq_attr mqAttr;
+    mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
+    mqAttr.mq_msgsize = 1025;
+
+    string strRandom = Shared::produceRandomStr(RANDOM_STR_LENGTH);
+    mMqDevName = "/" +  mModuleName + "_" + strRandom;
+    mq_unlink(mMqDevName.c_str());
+    mMqHandle = mq_open(mMqDevName.c_str(), O_RDWR | O_CREAT | O_EXCL, 0666, &mqAttr);
+    if(mMqHandle < 0) {
+        SPR_LOGE("Open %s failed. (%s)\n", mMqDevName.c_str(), strerror(errno));
+    }
+
+    return mMqHandle;
+}
+
+int SprObserver::MsgResponseRegisterRsp(const SprMsg& msg)
+{
+    mConnected = msg.GetU8Value();
+    return 0;
+}
+
+int SprObserver::MsgResponseUnregisterRsp(const SprMsg& msg)
+{
+    // 注销成功，连接状态为false
+    mConnected = !msg.GetU8Value();
     return 0;
 }
