@@ -138,7 +138,6 @@ int SprMediator::StartEpoll()
             continue;
         }
 
-        // 监听消息队列有数据, 读取数据, libgo调度
         for (int i = 0; i < count; i++) {
             int handler = ep[i].data.fd;
             char buf[MSG_BUF_MAX_LENGTH] = {0};
