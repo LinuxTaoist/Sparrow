@@ -49,6 +49,7 @@ public:
     virtual int NotifyObserver(const std::vector<ModuleIDType>& ids, const SprMsg& msg);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
 
+    int Init();
     int AbstractProcessMsg(const SprMsg& msg);
     int SendMsg(const SprMsg& msg);
     int RecvMsg(SprMsg& msg);

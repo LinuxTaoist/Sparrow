@@ -41,6 +41,8 @@ SprEpollSchedule::SprEpollSchedule(uint32_t size)
     if (mEpollHandler == -1) {
         SPR_LOGE("epoll_create failed! (%s)\n", strerror(errno));
     }
+
+    Init();
 }
 
 SprEpollSchedule::~SprEpollSchedule()
@@ -60,7 +62,7 @@ SprEpollSchedule* SprEpollSchedule::GetInstance()
 
 void SprEpollSchedule::Init()
 {
-    mQuit = true;
+    mRun = true;
     mpGoPool = co::AsyncCoroutinePool::Create();
     mpGoPool->InitCoroutinePool(1024);
     mpGoPool->Start(4, 128);
@@ -68,7 +70,7 @@ void SprEpollSchedule::Init()
 
 void SprEpollSchedule::Exit()
 {
-    mQuit = false;
+    mRun = false;
 }
 
 void SprEpollSchedule::AddPoll(SprObserver& observer)
@@ -120,17 +122,17 @@ void SprEpollSchedule::StartEpoll()
         SPR_LOGD("Data count %d come from epoll ...\n", count);
         for (int i = 0; i < count; i++) {
             SprObserver* p = static_cast<SprObserver*>(ep[i].data.ptr);
-            SprMsg msg;
 
             // 投递任务至协程，没有回调
-            mpGoPool->Post([&p, &msg] {
+            mpGoPool->Post([&p] {
+                SprMsg msg;
                 if (p->RecvMsg(msg) < 0) {
                     SPR_LOGE("RecvMsg fail!\n");
                 } else {
-                    p->ProcessMsg(msg);
+                    p->AbstractProcessMsg(msg);
                 }
             }, nullptr);
         }
 
-    } while(!mQuit);
+    } while(mRun);
 }

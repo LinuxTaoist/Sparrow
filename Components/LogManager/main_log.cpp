@@ -28,7 +28,6 @@ using namespace InternalEnum;
 int main(int agrc, const char *argv[])
 {
     LogManager theLogManager(MODULE_LOGM, "LogM", make_shared<SprMediatorIpcProxy>());
-
-    while(1);
+    theLogManager.Init();
     return 0;
 }
