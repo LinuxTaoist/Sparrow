@@ -63,9 +63,9 @@ int SprMediatorIpcProxy::ConnectMediator()
 int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 {
     SprMsg msg(PROXY_MSG_REGISTER_REQUEST);
-    msg.setU32Value((uint32_t)PROXY_TYPE_MQ);
-    msg.setU16Value((uint16_t)observer.GetModuleId());
-    msg.setString(observer.GetMqDevName());
+    msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
+    msg.SetU16Value((uint16_t)observer.GetModuleId());
+    msg.SetString(observer.GetMqDevName());
 
     SendMsg(msg);
     SPR_LOGD("Register observer: [0x%x] [%s]\n", PROXY_MSG_REGISTER_REQUEST, observer.GetMqDevName().c_str());
@@ -75,9 +75,9 @@ int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 int SprMediatorIpcProxy::UnregisterObserver(const SprObserver& observer)
 {
     SprMsg msg(PROXY_MSG_UNREGISTER_REQUEST);
-    msg.setU32Value((uint32_t)PROXY_TYPE_MQ);
-    msg.setU16Value((uint16_t)observer.GetModuleId());
-    msg.setString(observer.GetMqDevName());
+    msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
+    msg.SetU16Value((uint16_t)observer.GetModuleId());
+    msg.SetString(observer.GetMqDevName());
 
     SendMsg(msg);
     SPR_LOGD("Unregister observer: [0x%x] [%s]\n", PROXY_MSG_REGISTER_RESPONSE, observer.GetMqDevName().c_str());
@@ -88,7 +88,7 @@ int SprMediatorIpcProxy::SendMsg(const SprMsg& msg)
 {
     std::string datas;
 
-    msg.encode(datas);
+    msg.Encode(datas);
     int ret = mq_send(mMediatorHandler, (const char*)datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
