@@ -163,9 +163,9 @@ int SprMediator::StartEpoll()
 
 int SprMediator::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Receive msg: 0x%x\n", msg.getMsgId());
+    SPR_LOGD("Receive msg: 0x%x\n", msg.GetMsgId());
 
-    switch (msg.getMsgId())
+    switch (msg.GetMsgId())
     {
         case PROXY_MSG_REGISTER_REQUEST:
             MsgResponseRegister(msg);
@@ -179,6 +179,7 @@ int SprMediator::ProcessMsg(const SprMsg& msg)
             NotifyAllObserver(msg);
             break;
     }
+
     return 0;
 }
 
@@ -186,7 +187,7 @@ int SprMediator::SendMsg(const SprMsg& msg)
 {
     string datas;
 
-    msg.encode(datas);
+    msg.Encode(datas);
     int ret = mq_send(mHandler, (const char*)datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
@@ -205,7 +206,7 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
         }
 
         string datas;
-        msg.encode(datas);
+        msg.Encode(datas);
         int ret = mq_send(pair.second.handler, (const char*)datas.c_str(), datas.size(), 1);
         if (ret < 0) {
             SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
@@ -217,9 +218,9 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
 
 int SprMediator::MsgResponseRegister(const SprMsg& msg)
 {
-    // EProxyType type = static_cast<EProxyType>(msg.getU32Value());
-    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.getU16Value());
-    std::string name = msg.getString();
+    // EProxyType type = static_cast<EProxyType>(msg.GetU32Value());
+    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
+    std::string name = msg.GetString();
 
     auto it = mModuleMap.find(moduleId);
     if (it != mModuleMap.end())
@@ -249,9 +250,9 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
 
 int SprMediator::MsgResponseUnregister(const SprMsg& msg)
 {
-    // EProxyType type = static_cast<EProxyType>(msg.getU32Value());
-    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.getU16Value());
-    std::string name = msg.getString();
+    // EProxyType type = static_cast<EProxyType>(msg.GetU32Value());
+    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
+    std::string name = msg.GetString();
 
     auto it = mModuleMap.find(moduleId);
     if (it == mModuleMap.end())
@@ -268,9 +269,11 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
     {
         mq_close(it->second.handler);
         it->second.handler = -1;
-        SPR_LOGD("Close mq %s", it->second.name.c_str());
+        SPR_LOGD("Close mq %s \n", it->second.name.c_str());
     }
 
     mModuleMap.erase(moduleId);
+    SPR_LOGD("Unregister successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());
+
     return 0;
 }
