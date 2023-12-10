@@ -23,10 +23,11 @@
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
+using namespace InternalEnum;
 
 int main(int agrc, const char *argv[])
 {
-    LogManager theLogManager(ESprModuleID::MODULE_LOGM, "LogM", make_shared<SprMediatorIpcProxy>());
+    LogManager theLogManager(MODULE_LOGM, "LogM", make_shared<SprMediatorIpcProxy>());
 
     while(1);
     return 0;

@@ -24,6 +24,7 @@
 #include "SprMsg.h"
 
 using namespace std;
+using namespace InternalEnum;
 
 #define SPR_LOGD(fmt, args...) printf("%d IpcProxy D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d IpcProxy E: " fmt, __LINE__, ##args)
@@ -50,7 +51,7 @@ int SprMediatorIpcProxy::ConnectMediator()
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    mMediatorHandler = mq_open(MEDIATOR_MSG_QUEUE, O_RDONLY, &mqAttr);
+    mMediatorHandler = mq_open(MEDIATOR_MSG_QUEUE, O_RDWR, &mqAttr);
     if(mMediatorHandler < 0) {
         SPR_LOGE("Open %s failed. (%s)\n", MEDIATOR_MSG_QUEUE, strerror(errno));
         return -1;
@@ -61,25 +62,25 @@ int SprMediatorIpcProxy::ConnectMediator()
 
 int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 {
-    SprMsg msg((uint32_t)EProxyMsgID::PROXY_MSG_REGISTER_REQUEST);
-    msg.setU32Value((uint32_t)EProxyType::PROXY_TYPE_MQ);
+    SprMsg msg(PROXY_MSG_REGISTER_REQUEST);
+    msg.setU32Value((uint32_t)PROXY_TYPE_MQ);
     msg.setU16Value((uint16_t)observer.GetModuleId());
     msg.setString(observer.GetMqDevName());
 
     SendMsg(msg);
-    SPR_LOGD("Register observer: [0x%x] [%s]\n", (uint32_t)EProxyMsgID::PROXY_MSG_REGISTER_REQUEST, observer.GetMqDevName().c_str());
+    SPR_LOGD("Register observer: [0x%x] [%s]\n", PROXY_MSG_REGISTER_REQUEST, observer.GetMqDevName().c_str());
     return 0;
 }
 
 int SprMediatorIpcProxy::UnregisterObserver(const SprObserver& observer)
 {
-    SprMsg msg((uint32_t)EProxyMsgID::PROXY_MSG_UNREGISTER_REQUEST);
-    msg.setU32Value((uint32_t)EProxyType::PROXY_TYPE_MQ);
+    SprMsg msg(PROXY_MSG_UNREGISTER_REQUEST);
+    msg.setU32Value((uint32_t)PROXY_TYPE_MQ);
     msg.setU16Value((uint16_t)observer.GetModuleId());
     msg.setString(observer.GetMqDevName());
 
     SendMsg(msg);
-    SPR_LOGD("Unregister observer: [0x%x] [%s]\n", (uint32_t)EProxyMsgID::PROXY_MSG_REGISTER_RESPONSE, observer.GetMqDevName().c_str());
+    SPR_LOGD("Unregister observer: [0x%x] [%s]\n", PROXY_MSG_REGISTER_RESPONSE, observer.GetMqDevName().c_str());
     return 0;
 }
 

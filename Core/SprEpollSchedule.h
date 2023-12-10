@@ -66,7 +66,7 @@ public:
 
 private:
     bool mQuit;
-    int mEpollFd;
+    int mEpollHandler;
     co::AsyncCoroutinePool* mpGoPool;
 
     /**

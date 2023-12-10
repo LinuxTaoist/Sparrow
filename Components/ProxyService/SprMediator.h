@@ -27,26 +27,37 @@
 
 struct SModuleInfo
 {
-    int handle;
+    int handler;
     std::string name;
 };
 
 class SprMediator
 {
 public:
-    SprMediator();
     ~SprMediator();
+    static SprMediator* GetInstance();
     int Init();
 
 private:
-    std::vector<int> mListenHandlers;
-    std::map<ESprModuleID, SModuleInfo> mModuleMap;
+    int mEpollHandler;
+    int mHandler;
+    std::map<InternalEnum::ESprModuleID, SModuleInfo> mModuleMap;
 
+    SprMediator(int size);
     int MakeMQ(std::string name);
-    int RegisterObserver(ESprModuleID id, std::string name);
-    int UnregisterObserver(ESprModuleID id, std::string name);
+    int MakeUnixDgramSocket(std::string ip, uint16_t port);
+    int PrepareInternalPort();
+    int DestroyInternalPort();
     int StartEpoll();
+    int SendMsg(const SprMsg& msg);
+    int NotifyAllObserver(const SprMsg& msg);
+
+    /* 消息处理函数 */
     int ProcessMsg(const SprMsg& msg);
+
+    /* 消息响应函数 */
+    int MsgResponseRegister(const SprMsg& msg);
+    int MsgResponseUnregister(const SprMsg& msg);
 };
 
 #endif

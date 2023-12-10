@@ -24,6 +24,7 @@
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
+using namespace InternalEnum;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...) printf("%d DebugCore D: " fmt, __LINE__, ##args)
@@ -49,7 +50,7 @@ public:
 
 int main(int agrc, const char *argv[])
 {
-    DebugCore theDebug(ESprModuleID::MODULE_LOGM, "Debug", make_shared<SprMediatorIpcProxy>());
+    DebugCore theDebug(MODULE_LOGM, "Debug", make_shared<SprMediatorIpcProxy>());
 
     char val = 0;
     bool run = true;
@@ -60,7 +61,7 @@ int main(int agrc, const char *argv[])
         {
             case '0':   // debug SprMsg
             {
-                SprMsg theEnMsg((uint32_t)EDebugMsgID::DEBUG_MSG_SERIAL);
+                SprMsg theEnMsg((uint32_t)DEBUG_MSG_SERIAL);
                 theEnMsg.setU8Value(8);
                 theEnMsg.setU16Value(16);
                 theEnMsg.setU32Value(32);
