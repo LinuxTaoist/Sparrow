@@ -24,9 +24,6 @@
 #include<stdint.h>
 
 namespace Convert {
-    int8_t charPtrToUint32(uint32_t& value, const char* buf, int size);
-    int8_t uint32ToString(uint32_t value, std::string& buf);
-
     template <typename T>
     int8_t stringToInt(T& value, const std::string& str)
     {

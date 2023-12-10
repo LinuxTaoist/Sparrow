@@ -26,23 +26,6 @@
 
 namespace Convert
 {
-    int8_t charPtrToUint32(uint32_t& value, const char* buf, int size)
-    {
-        if (buf == nullptr || size < (int)sizeof(uint32_t))
-        {
-            SPR_LOGE("param is invalid!\n");
-            return -1;
-        }
 
-        memcpy(&value, buf, sizeof(uint32_t));
-        return 0;
-    }
-
-    int8_t uint32ToString(uint32_t value, std::string& buf)
-    {
-        const char* pByte = reinterpret_cast<const char*>(&value);
-        buf.append(pByte, sizeof(uint32_t));
-        return 0;
-    }
 };
 
