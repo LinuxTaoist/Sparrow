@@ -65,7 +65,7 @@ public:
     void StartEpoll();
 
 private:
-    bool mQuit;
+    bool mRun;
     int mEpollHandler;
     co::AsyncCoroutinePool* mpGoPool;
 

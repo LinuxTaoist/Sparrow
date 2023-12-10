@@ -63,15 +63,22 @@ SprObserver::~SprObserver()
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
+int SprObserver::Init()
+{
+    SprEpollSchedule::GetInstance()->StartEpoll();
+    return 0;
+}
+
 int SprObserver::AbstractProcessMsg(const SprMsg& msg)
 {
+    SPR_LOGD("Receive Msg: 0x%x\n", msg.GetMsgId());
     switch (msg.GetMsgId())
     {
         case InternalEnum::PROXY_MSG_REGISTER_RESPONSE:
             MsgResponseRegisterRsp(msg);
             break;
 
-        case InternalEnum::PROXY_MSG_UNREGISTER_REQUEST:
+        case InternalEnum::PROXY_MSG_UNREGISTER_RESPONSE:
             MsgResponseUnregisterRsp(msg);
             break;
 
@@ -105,13 +112,13 @@ int SprObserver::RecvMsg(SprMsg& msg)
     mq_attr mqAttr;
 
     mq_getattr(mMqHandle, &mqAttr);
-    int bytes = mq_receive(mMqHandle, buf, mqAttr.mq_msgsize, &prio);
-    if (bytes <= 0) {
+    int len = mq_receive(mMqHandle, buf, mqAttr.mq_msgsize, &prio);
+    if (len <= 0) {
         SPR_LOGE("mq_receive failed! (%s)\n", strerror(errno));
         return -1;
     }
 
-    string data = buf;
+    string data(buf, len);
     return msg.Decode(data);
 }
 
@@ -144,6 +151,7 @@ int SprObserver::MakeMQ()
 
 int SprObserver::MsgResponseRegisterRsp(const SprMsg& msg)
 {
+    SPR_LOGD("Register Successfully!\n");
     mConnected = msg.GetU8Value();
     return 0;
 }
@@ -151,6 +159,7 @@ int SprObserver::MsgResponseRegisterRsp(const SprMsg& msg)
 int SprObserver::MsgResponseUnregisterRsp(const SprMsg& msg)
 {
     // 注销成功，连接状态为false
+    SPR_LOGD("Unregister Successfully!\n");
     mConnected = !msg.GetU8Value();
     return 0;
 }
