@@ -58,6 +58,7 @@ protected:
     std::string mModuleName;
     std::string mMqDevName;
     std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
+
     virtual int MakeMQ() final;
 };
 
