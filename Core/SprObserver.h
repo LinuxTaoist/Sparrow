@@ -45,14 +45,16 @@ public:
     virtual ModuleIDType GetModuleId() const final { return mModuleID; }
     virtual std::string GetModuleName() const final { return mModuleName; }
     virtual std::string GetMqDevName() const final { return mMqDevName; }
-    virtual int NotifyObserver(const SprMsg& msg);
+    virtual int NotifyObserver(ModuleIDType id, const SprMsg& msg);
     virtual int NotifyObserver(const std::vector<ModuleIDType>& ids, const SprMsg& msg);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
 
+    int AbstractProcessMsg(const SprMsg& msg);
     int SendMsg(const SprMsg& msg);
     int RecvMsg(SprMsg& msg);
 
-protected:
+private:
+    bool mConnected;
     int mMqHandle;
     ModuleIDType mModuleID;
     std::string mModuleName;
@@ -60,6 +62,8 @@ protected:
     std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
 
     virtual int MakeMQ() final;
+    int MsgResponseRegisterRsp(const SprMsg& msg);
+    int MsgResponseUnregisterRsp(const SprMsg& msg);
 };
 
 #endif

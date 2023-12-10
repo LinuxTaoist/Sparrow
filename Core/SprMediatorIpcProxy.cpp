@@ -31,7 +31,6 @@ using namespace InternalEnum;
 
 SprMediatorIpcProxy::SprMediatorIpcProxy()
 {
-    mConnected = false;
     mMediatorHandler = -1;
     ConnectMediator();
 }

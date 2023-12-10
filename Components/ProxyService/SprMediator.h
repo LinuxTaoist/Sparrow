@@ -50,6 +50,7 @@ private:
     int DestroyInternalPort();
     int StartEpoll();
     int SendMsg(const SprMsg& msg);
+    int NotifyObserver(InternalEnum::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);
 
     /* 消息处理函数 */

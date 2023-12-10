@@ -196,6 +196,25 @@ int SprMediator::SendMsg(const SprMsg& msg)
     return 0;
 }
 
+int SprMediator::NotifyObserver(ESprModuleID id, const SprMsg& msg)
+{
+    auto it = mModuleMap.find(id);
+    if (it == mModuleMap.end())
+    {
+        SPR_LOGW("Not exist moduleId: 0x%x\n", id);
+        return 0;
+    }
+
+    string datas;
+    msg.Encode(datas);
+    int ret = mq_send(it->second.handler, (const char*)datas.c_str(), datas.size(), 1);
+    if (ret < 0) {
+        SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
+    }
+
+    return ret;
+}
+
 int SprMediator::NotifyAllObserver(const SprMsg& msg)
 {
     for (const auto& pair : mModuleMap)
@@ -205,12 +224,7 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
             continue;
         }
 
-        string datas;
-        msg.Encode(datas);
-        int ret = mq_send(pair.second.handler, (const char*)datas.c_str(), datas.size(), 1);
-        if (ret < 0) {
-            SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
-        }
+        NotifyObserver(pair.first, msg);
     }
 
     return 0;
@@ -218,6 +232,8 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
 
 int SprMediator::MsgResponseRegister(const SprMsg& msg)
 {
+    bool result = false;
+    int handler = -1;
     // EProxyType type = static_cast<EProxyType>(msg.GetU32Value());
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
     std::string name = msg.GetString();
@@ -226,10 +242,10 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
     if (it != mModuleMap.end())
     {
         SPR_LOGW("Already exist moduleId: 0x%x\n", moduleId);
-        return 0;
+        goto Exit;
     }
 
-    int handler = MakeMQ(name);
+    handler = MakeMQ(name);
     if (handler != -1)
     {
         struct epoll_event ep;
@@ -239,17 +255,25 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
             SPR_LOGE("epoll_ctl fail! (%s)\n", strerror(errno));
         }
 
+        result = true;
         mModuleMap[moduleId] = { handler, name };
         SPR_LOGD("Register successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());
     } else {
         SPR_LOGE("Invaild handler!\n");
     }
 
+Exit:
+    SprMsg rspMsg(PROXY_MSG_REGISTER_RESPONSE);
+    rspMsg.SetU8Value(result);
+    NotifyObserver(moduleId, msg);
+
     return 0;
 }
 
 int SprMediator::MsgResponseUnregister(const SprMsg& msg)
 {
+    bool result = false;
+
     // EProxyType type = static_cast<EProxyType>(msg.GetU32Value());
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
     std::string name = msg.GetString();
@@ -258,7 +282,7 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
     if (it == mModuleMap.end())
     {
         SPR_LOGW("Not exist module id: %x\n", moduleId);
-        return 0;
+        goto Exit;
     }
 
     if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, it->second.handler, nullptr) != 0) {
@@ -270,9 +294,15 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
         mq_close(it->second.handler);
         it->second.handler = -1;
         SPR_LOGD("Close mq %s \n", it->second.name.c_str());
+        result = true;
     }
 
     mModuleMap.erase(moduleId);
+
+Exit:
+    SprMsg rspMsg(PROXY_MSG_REGISTER_RESPONSE);
+    rspMsg.SetU8Value(result);
+    NotifyObserver(moduleId, msg);
     SPR_LOGD("Unregister successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());
 
     return 0;
