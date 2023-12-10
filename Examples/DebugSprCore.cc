@@ -62,14 +62,14 @@ int main(int agrc, const char *argv[])
             case '0':   // debug SprMsg
             {
                 SprMsg theEnMsg((uint32_t)DEBUG_MSG_SERIAL);
-                theEnMsg.setU8Value(8);
-                theEnMsg.setU16Value(16);
-                theEnMsg.setU32Value(32);
-                theEnMsg.setString("Test Spr Core");
+                theEnMsg.SetU8Value(8);
+                theEnMsg.SetU16Value(16);
+                theEnMsg.SetU32Value(32);
+                theEnMsg.SetString("Test Spr Core");
                 std::vector<uint8_t> u8Vec1 = {'s', 'p', 'a', 'r', 'r', 'o', 'w'};
-                theEnMsg.setU8Vec(u8Vec1);
+                theEnMsg.SetU8Vec(u8Vec1);
                 std::vector<uint32_t> u32Vec1 = {0x1111, 0x2222, 0x3333, 0x4444, 0x5555};
-                theEnMsg.setU32Vec(u32Vec1);
+                theEnMsg.SetU32Vec(u32Vec1);
 
                 struct TestSpr
                 {
@@ -79,20 +79,20 @@ int main(int agrc, const char *argv[])
 
                 TestSpr testData = { 10, "hello sparrow"};
                 shared_ptr<struct TestSpr> p = static_pointer_cast<struct TestSpr>(make_shared<TestSpr>(testData));
-                theEnMsg.setDatas(p, sizeof(TestSpr));
+                theEnMsg.SetDatas(p, sizeof(TestSpr));
 
                 std::string enDatas;
-                theEnMsg.encode(enDatas);
+                theEnMsg.Encode(enDatas);
 
                 SprMsg theDeMsg(enDatas);
-                vector<uint8_t> u8Vec = theDeMsg.getU8Vec();
-                vector<uint32_t> u32Vec = theDeMsg.getU32Vec();
-                std::shared_ptr<struct TestSpr> dePtr = theDeMsg.getDatas<struct TestSpr>();
+                vector<uint8_t> u8Vec = theDeMsg.GetU8Vec();
+                vector<uint32_t> u32Vec = theDeMsg.GetU32Vec();
+                std::shared_ptr<struct TestSpr> dePtr = theDeMsg.GetDatas<struct TestSpr>();
 
-                SPR_LOGD("msgId:    %d  \n", theDeMsg.getMsgId());
-                SPR_LOGD("u8Value:  %d  \n", theDeMsg.getU8Value());
-                SPR_LOGD("u16Value: %d  \n", theDeMsg.getU16Value());
-                SPR_LOGD("string:   %s  \n", theDeMsg.getString().c_str());
+                SPR_LOGD("msgId:    %d  \n", theDeMsg.GetMsgId());
+                SPR_LOGD("u8Value:  %d  \n", theDeMsg.GetU8Value());
+                SPR_LOGD("u16Value: %d  \n", theDeMsg.GetU16Value());
+                SPR_LOGD("string:   %s  \n", theDeMsg.GetString().c_str());
                 SPR_LOGD("u8Vec:    %ld \n", u8Vec.size());
                 SPR_LOGD("u32Vec:   %ld \n", u32Vec.size());
                 SPR_LOGD("ptr:      %d  \n", dePtr->id);

@@ -44,42 +44,42 @@ public:
     SprMsg();
     SprMsg(uint32_t msgId);
     SprMsg(std::string datas);
-    void clear();
+    void Clear();
+    int8_t Decode(std::string& deDatas);
+    int8_t Encode(std::string& enDatas) const;
 
-    void setMsgId(uint32_t msgId);
-    void setU8Value(uint8_t value);
-    void setU16Value(uint16_t value);
-    void setU32Value(uint32_t value);
-    void setString(const std::string& str);
-    void setU8Vec(const std::vector<uint8_t>& vec);
-    void setU32Vec(const std::vector<uint32_t>& vec);
+    void SetMsgId(uint32_t msgId);
+    void SetU8Value(uint8_t value);
+    void SetU16Value(uint16_t value);
+    void SetU32Value(uint32_t value);
+    void SetString(const std::string& str);
+    void SetU8Vec(const std::vector<uint8_t>& vec);
+    void SetU32Vec(const std::vector<uint32_t>& vec);
+
     template<typename T>
-    void setDatas(std::shared_ptr<T> datas, uint32_t size) {
+    void SetDatas(std::shared_ptr<T> datas, uint32_t size) {
         mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_PTR);
         mDataSize = size;
         const uint8_t* pData = reinterpret_cast<const uint8_t*>(datas.get());
         mDatas.assign(pData, pData + size);
     }
 
-    uint32_t getMsgId() const { return mMsgId; }
-    uint8_t getU8Value() const { return mU8Value; }
-    uint16_t getU16Value() const { return mU16Value; }
-    uint32_t getU32Value() const { return mU32Value; }
-    std::string getString() const { return mString; }
-    std::vector<uint8_t> getU8Vec() const { return mU8Vec; }
-    std::vector<uint32_t> getU32Vec() const { return mU32Vec; }
+    uint32_t GetMsgId() const { return mMsgId; }
+    uint8_t GetU8Value() const { return mU8Value; }
+    uint16_t GetU16Value() const { return mU16Value; }
+    uint32_t GetU32Value() const { return mU32Value; }
+    std::string GetString() const { return mString; }
+    std::vector<uint8_t> GetU8Vec() const { return mU8Vec; }
+    std::vector<uint32_t> GetU32Vec() const { return mU32Vec; }
 
     template<typename T>
-    std::shared_ptr<T> getDatas() {
+    std::shared_ptr<T> GetDatas() {
         if (mDatas.size() < sizeof(T)) {
             return nullptr;
         }
         std::shared_ptr<T> pData = std::make_shared<T>(*reinterpret_cast<T*>(mDatas.data()));
         return pData;
     }
-
-    int8_t decode(std::string& deDatas);
-    int8_t encode(std::string& enDatas) const;
 
 private:
     uint32_t mMsgId;
@@ -100,26 +100,26 @@ private:
     std::map<ESprMsgType, CodecFunction> mEnFuncs;
     std::map<ESprMsgType, CodecFunction> mDeFuncs;
 
-    void init();
-    void encodeMsgId(std::string& enDatas) const;
-    void encodeTag(std::string& enDatas) const;
-    void encodeU8Value(std::string& enDatas);
-    void encodeU16Value(std::string& enDatas);
-    void encodeU32Value(std::string& enDatas);
-    void encodeString(std::string& enDatas);
-    void encodeU8Vec(std::string& enDatas);
-    void encodeU32Vec(std::string& enDatas);
-    void encodeDatas(std::string& enDatas);
+    void Init();
+    void EncodeMsgId(std::string& enDatas) const;
+    void EncodeTag(std::string& enDatas) const;
+    void EncodeU8Value(std::string& enDatas);
+    void EncodeU16Value(std::string& enDatas);
+    void EncodeU32Value(std::string& enDatas);
+    void EncodeString(std::string& enDatas);
+    void EncodeU8Vec(std::string& enDatas);
+    void EncodeU32Vec(std::string& enDatas);
+    void EncodeDatas(std::string& enDatas);
 
-    void decodeMsgId(std::string& deDatas);
-    void decodeTag(std::string& deDatas);
-    void decodeU8Value(std::string& deDatas);
-    void decodeU16Value(std::string& deDatas);
-    void decodeU32Value(std::string& deDatas);
-    void decodeString(std::string& deDatas);
-    void decodeU8Vec(std::string& deDatas);
-    void decodeU32Vec(std::string& deDatas);
-    void decodeDatas(std::string& deDatas);
+    void DecodeMsgId(std::string& deDatas);
+    void DecodeTag(std::string& deDatas);
+    void DecodeU8Value(std::string& deDatas);
+    void DecodeU16Value(std::string& deDatas);
+    void DecodeU32Value(std::string& deDatas);
+    void DecodeString(std::string& deDatas);
+    void DecodeU8Vec(std::string& deDatas);
+    void DecodeU32Vec(std::string& deDatas);
+    void DecodeDatas(std::string& deDatas);
 };
 
 #endif

@@ -86,7 +86,7 @@ int SprObserver::SendMsg(const SprMsg& msg)
 {
     std::string datas;
 
-    msg.encode(datas);
+    msg.Encode(datas);
     int ret = mq_send(mMqHandle, (const char*)datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
@@ -110,7 +110,7 @@ int SprObserver::RecvMsg(SprMsg& msg)
     }
 
     string data = buf;
-    return msg.decode(data);
+    return msg.Decode(data);
 }
 
 int SprObserver::NotifyObserver(const SprMsg& msg)
