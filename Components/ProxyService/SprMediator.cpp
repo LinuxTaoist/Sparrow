@@ -21,28 +21,62 @@
 #include <errno.h>
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
+#include <sys/epoll.h>
 #include <mqueue.h>
 #include <string.h>
 #include "SprCommonType.h"
 #include "SprMediator.h"
 
 using namespace std;
+using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d SprObs D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SprObs E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%d SprMediator D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%d SprMediator W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%d SprMediator E: " fmt, __LINE__, ##args)
 
-SprMediator::SprMediator()
+const uint32_t EPOLL_FD_NUM = 10;
+
+SprMediator::SprMediator(int size)
 {
-
+    if (size) {
+        mEpollHandler = epoll_create(size);
+    } else {
+        mEpollHandler = epoll_create1(0);
+    }
 }
 
 SprMediator::~SprMediator()
 {
+    DestroyInternalPort();
 
+    for (auto& pair : mModuleMap)
+    {
+        if (pair.second.handler != -1)
+        {
+            mq_close(pair.second.handler);
+            pair.second.handler = -1;
+        }
+    }
+    mModuleMap.clear();
+}
+
+SprMediator* SprMediator::GetInstance()
+{
+    static SprMediator instance(EPOLL_FD_NUM);
+    return &instance;
 }
 
 int SprMediator::Init()
 {
+    if (mEpollHandler == -1) {
+        SPR_LOGE("epoll_create failed! (%s)\n", strerror(errno));
+        return -1;
+    }
+
+    SPR_LOGD("--- Start proxy server ---\n");
+    PrepareInternalPort();
+    StartEpoll();
+
     return 0;
 }
 
@@ -52,7 +86,7 @@ int SprMediator::MakeMQ(string name)
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    int handler = mq_open(name.c_str(), O_RDWR | O_CREAT | O_EXCL, 0666, &mqAttr);
+    int handler = mq_open(name.c_str(), O_RDWR | O_CREAT, 0666, &mqAttr);
     if(handler < 0) {
         SPR_LOGE("Open %s failed. (%s)\n", name.c_str(), strerror(errno));
     }
@@ -60,47 +94,184 @@ int SprMediator::MakeMQ(string name)
     return handler;
 }
 
-int SprMediator::RegisterObserver(ESprModuleID id, std::string name)
+int SprMediator::MakeUnixDgramSocket(std::string ip, uint16_t port)
 {
-    auto it = mModuleMap.find(id);
-    if (it == mModuleMap.end())
-    {
-        int handle = MakeMQ(name);
-        if (handle != -1)
-        {
-            // TODO: 将句柄添加到epoll
-            mModuleMap[id] = { handle, name };
-            SPR_LOGD("Register %d %s success!", (int)id, name.c_str());
-        }
-    }
-
     return 0;
 }
 
-int SprMediator::UnregisterObserver(ESprModuleID id, std::string name)
+int SprMediator::PrepareInternalPort()
 {
-    auto it = mModuleMap.find(id);
-    if (it != mModuleMap.end())
-    {
-        if (it->second.handle != -1)
-        {
-            mq_close(it->second.handle);
-            it->second.handle = -1;
-        }
-        mModuleMap.erase(id);
+    mq_unlink(MEDIATOR_MSG_QUEUE);
+    mHandler = MakeMQ(MEDIATOR_MSG_QUEUE);
+
+    struct epoll_event ep;
+    ep.events = EPOLLIN | EPOLLET;
+    ep.data.fd = mHandler;
+    if (epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, mHandler, &ep) != 0) {
+        SPR_LOGE("epoll_ctl fail! (%s)\n", strerror(errno));
     }
 
-    SPR_LOGD("UnRegister %d %s success!", (int)id, name.c_str());
+    SPR_LOGD("Open Internal Port: %s.\n", MEDIATOR_MSG_QUEUE);
+    return 0;
+}
+
+int SprMediator::DestroyInternalPort()
+{
+    if (mHandler != -1)
+    {
+        mq_close(mHandler);
+        mHandler = -1;
+    }
+
     return 0;
 }
 
 int SprMediator::StartEpoll()
 {
+    struct epoll_event ep[32];
+
+    do {
+        // 无事件时, epoll_wait阻塞, -1 无限等待
+        int count = epoll_wait(mEpollHandler, ep, sizeof(ep)/sizeof(ep[0]), -1);
+        if (count <= 0) {
+            SPR_LOGE("epoll_wait failed. %s\n", strerror(errno));
+            continue;
+        }
+
+        // 监听消息队列有数据, 读取数据, libgo调度
+        for (int i = 0; i < count; i++) {
+            int handler = ep[i].data.fd;
+            char buf[MSG_BUF_MAX_LENGTH] = {0};
+            unsigned int prio;
+            mq_attr mqAttr;
+
+            mq_getattr(handler, &mqAttr);
+            int len = mq_receive(handler, buf, mqAttr.mq_msgsize, &prio);
+            if (len <= 0) {
+                SPR_LOGE("mq_receive failed! (%s)\n", strerror(errno));
+                return -1;
+            }
+
+            string datas(buf, len);
+            SprMsg msg(datas);
+            ProcessMsg(msg);
+        }
+
+    } while(1);
+
     return 0;
 }
 
 int SprMediator::ProcessMsg(const SprMsg& msg)
 {
+    SPR_LOGD("Receive msg: 0x%x\n", msg.getMsgId());
+
+    switch (msg.getMsgId())
+    {
+        case PROXY_MSG_REGISTER_REQUEST:
+            MsgResponseRegister(msg);
+            break;
+
+        case PROXY_MSG_UNREGISTER_REQUEST:
+            MsgResponseUnregister(msg);
+            break;
+
+        default:
+            NotifyAllObserver(msg);
+            break;
+    }
     return 0;
 }
 
+int SprMediator::SendMsg(const SprMsg& msg)
+{
+    string datas;
+
+    msg.encode(datas);
+    int ret = mq_send(mHandler, (const char*)datas.c_str(), datas.size(), 1);
+    if (ret < 0) {
+        SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
+    }
+
+    return 0;
+}
+
+int SprMediator::NotifyAllObserver(const SprMsg& msg)
+{
+    for (const auto& pair : mModuleMap)
+    {
+        if (pair.second.handler == -1)
+        {
+            continue;
+        }
+
+        string datas;
+        msg.encode(datas);
+        int ret = mq_send(pair.second.handler, (const char*)datas.c_str(), datas.size(), 1);
+        if (ret < 0) {
+            SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
+        }
+    }
+
+    return 0;
+}
+
+int SprMediator::MsgResponseRegister(const SprMsg& msg)
+{
+    // EProxyType type = static_cast<EProxyType>(msg.getU32Value());
+    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.getU16Value());
+    std::string name = msg.getString();
+
+    auto it = mModuleMap.find(moduleId);
+    if (it != mModuleMap.end())
+    {
+        SPR_LOGW("Already exist moduleId: 0x%x\n", moduleId);
+        return 0;
+    }
+
+    int handler = MakeMQ(name);
+    if (handler != -1)
+    {
+        struct epoll_event ep;
+        ep.events = EPOLLIN | EPOLLET;
+        ep.data.fd = handler;
+        if (epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, handler, &ep) != 0) {
+            SPR_LOGE("epoll_ctl fail! (%s)\n", strerror(errno));
+        }
+
+        mModuleMap[moduleId] = { handler, name };
+        SPR_LOGD("Register successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());
+    } else {
+        SPR_LOGE("Invaild handler!\n");
+    }
+
+    return 0;
+}
+
+int SprMediator::MsgResponseUnregister(const SprMsg& msg)
+{
+    // EProxyType type = static_cast<EProxyType>(msg.getU32Value());
+    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.getU16Value());
+    std::string name = msg.getString();
+
+    auto it = mModuleMap.find(moduleId);
+    if (it == mModuleMap.end())
+    {
+        SPR_LOGW("Not exist module id: %x\n", moduleId);
+        return 0;
+    }
+
+    if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, it->second.handler, nullptr) != 0) {
+        SPR_LOGE("epoll_ctl failed. (%s)\n", strerror(errno));
+    }
+
+    if (it->second.handler != -1)
+    {
+        mq_close(it->second.handler);
+        it->second.handler = -1;
+        SPR_LOGD("Close mq %s", it->second.name.c_str());
+    }
+
+    mModuleMap.erase(moduleId);
+    return 0;
+}

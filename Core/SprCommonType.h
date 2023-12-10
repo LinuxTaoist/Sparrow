@@ -25,8 +25,11 @@
 #define     MEDIATOR_MSG_QUEUE          "/SprMdrQ_20231126"          // mqueue
 #define     MEDIATOR_UNIX_DGRAM_PATH    "/tmp/SprMdrU_20231126"      // unix socket
 #define     MEDIATOR_INET_PORT          1126
+#define     MSG_BUF_MAX_LENGTH          1024
 
-enum class ESprModuleID : uint16_t
+namespace InternalEnum {
+
+enum ESprModuleID
 {
     MODULE_PROXY = 0x01,
     MODULE_CONFIG,
@@ -35,7 +38,7 @@ enum class ESprModuleID : uint16_t
     MODULE_MAX,
 };
 
-enum class EProxyType
+enum EProxyType
 {
     PROXY_TYPE_MQ = 1,
     PROXY_TYPE_UNIX_SOCKET,
@@ -43,9 +46,9 @@ enum class EProxyType
     PROXY_TYPE_BUTT
 };
 
-enum class EProxyMsgID
+enum EProxyMsgID
 {
-    PROXY_MSG_BEGIN = static_cast<int>(ESprModuleID::MODULE_PROXY) << 16 | 1,
+    PROXY_MSG_BEGIN = static_cast<int>(MODULE_PROXY) << 16 | 1,
     PROXY_MSG_REGISTER_REQUEST,
     PROXY_MSG_REGISTER_RESPONSE,
     PROXY_MSG_UNREGISTER_REQUEST,
@@ -53,11 +56,12 @@ enum class EProxyMsgID
     PROXY_MSG_BUTT
 };
 
-enum class EDebugMsgID
+enum EDebugMsgID
 {
-    DEBUG_MSG_BEGIN = static_cast<int>(ESprModuleID::MODULE_DEBUG) << 16 | 1,
+    DEBUG_MSG_BEGIN = static_cast<int>(MODULE_DEBUG) << 16 | 1,
     DEBUG_MSG_SERIAL,
     DEBUG_MSG_BUTT
 };
 
+} // namespace InternalEnum
 #endif

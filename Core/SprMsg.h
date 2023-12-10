@@ -61,13 +61,13 @@ public:
         mDatas.assign(pData, pData + size);
     }
 
-    uint32_t getMsgId() { return mMsgId; }
-    uint8_t getU8Value() { return mU8Value; }
-    uint16_t getU16Value() { return mU16Value; }
-    uint32_t getU32Value() { return mU32Value; }
-    std::string getString() { return mString; }
-    std::vector<uint8_t> getU8Vec() { return mU8Vec; }
-    std::vector<uint32_t> getU32Vec() { return mU32Vec; }
+    uint32_t getMsgId() const { return mMsgId; }
+    uint8_t getU8Value() const { return mU8Value; }
+    uint16_t getU16Value() const { return mU16Value; }
+    uint32_t getU32Value() const { return mU32Value; }
+    std::string getString() const { return mString; }
+    std::vector<uint8_t> getU8Vec() const { return mU8Vec; }
+    std::vector<uint32_t> getU32Vec() const { return mU32Vec; }
 
     template<typename T>
     std::shared_ptr<T> getDatas() {

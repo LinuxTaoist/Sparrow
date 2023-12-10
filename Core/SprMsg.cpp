@@ -72,6 +72,7 @@ void SprMsg::clear()
     mTag = 0;
     mU8Vec.clear();
     mU32Vec.clear();
+    mDatas.clear();
 }
 
 void SprMsg::setMsgId(uint32_t msgId)

@@ -32,7 +32,7 @@
 class SprObserver
 {
 public:
-    using ModuleIDType = ESprModuleID;
+    using ModuleIDType = InternalEnum::ESprModuleID;
 
     SprObserver(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
     virtual ~SprObserver();
