@@ -138,7 +138,7 @@ int SprObserver::MakeMQ()
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    string strRandom = Shared::produceRandomStr(RANDOM_STR_LENGTH);
+    string strRandom = Shared::ProduceRandomStr(RANDOM_STR_LENGTH);
     mMqDevName = "/" +  mModuleName + "_" + strRandom;
     mq_unlink(mMqDevName.c_str());
     mMqHandle = mq_open(mMqDevName.c_str(), O_RDWR | O_CREAT | O_EXCL, 0666, &mqAttr);

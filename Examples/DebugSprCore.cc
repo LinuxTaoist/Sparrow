@@ -20,6 +20,7 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
+#include "Convert.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
 
@@ -68,7 +69,7 @@ int main(int agrc, const char *argv[])
                 theEnMsg.SetString("Test Spr Core");
                 std::vector<uint8_t> u8Vec1 = {'s', 'p', 'a', 'r', 'r', 'o', 'w'};
                 theEnMsg.SetU8Vec(u8Vec1);
-                std::vector<uint32_t> u32Vec1 = {0x1111, 0x2222, 0x3333, 0x4444, 0x5555};
+                std::vector<uint32_t> u32Vec1 = {0x11111111, 0x22222222, 0x33333333, 0x44444444, 0x55555555};
                 theEnMsg.SetU32Vec(u32Vec1);
 
                 struct TestSpr
@@ -88,13 +89,14 @@ int main(int agrc, const char *argv[])
                 vector<uint8_t> u8Vec = theDeMsg.GetU8Vec();
                 vector<uint32_t> u32Vec = theDeMsg.GetU32Vec();
                 std::shared_ptr<struct TestSpr> dePtr = theDeMsg.GetDatas<struct TestSpr>();
+                std::string u8Str(u8Vec1.begin(), u8Vec.end());
 
                 SPR_LOGD("msgId:    %d  \n", theDeMsg.GetMsgId());
                 SPR_LOGD("u8Value:  %d  \n", theDeMsg.GetU8Value());
                 SPR_LOGD("u16Value: %d  \n", theDeMsg.GetU16Value());
                 SPR_LOGD("string:   %s  \n", theDeMsg.GetString().c_str());
-                SPR_LOGD("u8Vec:    %ld \n", u8Vec.size());
-                SPR_LOGD("u32Vec:   %ld \n", u32Vec.size());
+                SPR_LOGD("u8Vec[%ld]:  %s \n", u8Vec.size(), u8Str.c_str());
+                SPR_LOGD("u32Vec[%ld]: %s \n", u32Vec.size(), Convert::vectorToHexString(u32Vec).c_str());
                 SPR_LOGD("ptr:      %d  \n", dePtr->id);
                 SPR_LOGD("          %s  \n", dePtr->buf);
                 break;
