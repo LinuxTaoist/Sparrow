@@ -22,7 +22,7 @@
 #include <string>
 
 namespace Shared {
-    std::string produceRandomStr(int len);
+    std::string ProduceRandomStr(int len);
 };
 
 #endif

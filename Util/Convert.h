@@ -20,8 +20,10 @@
 #define __CONVERT_H__
 
 #include <string>
+#include <vector>
 #include <sstream>
-#include<stdint.h>
+#include <iomanip>
+#include <stdint.h>
 
 namespace Convert {
     template <typename T>
@@ -51,6 +53,19 @@ namespace Convert {
         }
 
         return 0;
+    }
+
+    template<typename T>
+    std::string vectorToHexString(const std::vector<T>& vec)
+    {
+        std::stringstream ss;
+        ss << std::hex << std::setfill('0');
+
+        for (const auto& value : vec) {
+            ss << std::setw(sizeof(T) * 2) << static_cast<int>(value) << " ";
+        }
+
+        return ss.str();
     }
 };
 

@@ -349,24 +349,23 @@ void SprMsg::DecodeU32Vec(std::string& deDatas)
         return;
     }
 
-    if (deDatas.size() < sizeof(mU32VecLength) + mU32VecLength)
+    if (deDatas.size() < sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t))
     {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
 
-    for (uint32_t i = sizeof(mU32VecLength); i < sizeof(mU32VecLength) + mU32VecLength; i++)
+    for (uint32_t i = 0; i < mU32VecLength; i++)
     {
         uint32_t value = 0;
         for (uint32_t j = 0; j < sizeof(uint32_t); j++)
         {
             value <<= 8;
-            value |= deDatas[i * sizeof(uint32_t) + j];
+            value |= deDatas[sizeof(mU32VecLength) + i * sizeof(uint32_t) + j];
         }
         mU32Vec.push_back(value);
     }
 
-    mU32Vec.assign(deDatas.begin() + sizeof(mU32VecLength), deDatas.begin() + sizeof(mU32VecLength) + mU32VecLength);
     deDatas = deDatas.substr(sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t));
 }
 

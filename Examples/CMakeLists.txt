@@ -1,5 +1,6 @@
 ## Bin DemoSample1
 include_directories (${PROJECT_PATH}/Core)
+include_directories (${PROJECT_PATH}/Util)
 
 set(SRC_BIN_DCORE     DebugSprCore.cc)
 add_executable       (debug_core ${SRC_BIN_DCORE})

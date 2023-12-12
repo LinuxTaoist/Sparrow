@@ -21,7 +21,7 @@
 #include "Shared.h"
 
 namespace Shared {
-    std::string produceRandomStr(int len)
+    std::string ProduceRandomStr(int len)
     {
         std::string strRandom;
         const std::string seedStr = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
