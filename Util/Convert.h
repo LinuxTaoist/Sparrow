@@ -61,8 +61,8 @@ namespace Convert {
         std::stringstream ss;
         ss << std::hex << std::setfill('0');
 
-        for (const auto& value : vec) {
-            ss << std::setw(sizeof(T) * 2) << static_cast<int>(value) << " ";
+        for (const auto& it : vec) {
+            ss << std::setw(sizeof(T) * 2) << static_cast<int>(it) << " ";
         }
 
         return ss.str();

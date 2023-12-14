@@ -94,7 +94,7 @@ private:
     uint32_t mU32VecLength;
     std::vector<uint32_t> mU32Vec;
     uint32_t mDataSize;
-    std::vector<uint8_t> mDatas;    // ptr serialization
+    std::vector<uint8_t> mDatas;
 
     using CodecFunction = void (SprMsg::*)(std::string&);
     std::map<ESprMsgType, CodecFunction> mEnFuncs;
