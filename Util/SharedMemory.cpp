@@ -123,7 +123,7 @@ int SharedMemory::SetValue(const string& key, const string& value)
             strncpy(pNode->value, value.c_str(), VALUE_SIZE);
             pNode->value[VALUE_SIZE - 1] = '\0';
             sem_post(&mSemaphore);
-            break;
+            return 0;
         }
 
         pPrev = pNode;
