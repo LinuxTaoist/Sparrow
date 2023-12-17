@@ -8,6 +8,12 @@ set_target_properties(debug_core PROPERTIES OUTPUT_NAME "debugcore")
 target_link_libraries(debug_core c sprcore)
 add_dependencies     (debug_core libsprcore)
 
+set(SRC_BIN_TIMER     DebugTimer.cc)
+add_executable       (debug_timer ${SRC_BIN_TIMER})
+set_target_properties(debug_timer PROPERTIES OUTPUT_NAME "debugtimer")
+target_link_libraries(debug_timer c sprcore)
+add_dependencies     (debug_timer libsprcore)
+
 set(SRC_BIN_SAMPLE1  Sample1.cc)
 add_executable       (demo_sample1 ${SRC_BIN_SAMPLE1})
 set_target_properties(demo_sample1 PROPERTIES OUTPUT_NAME "demosample1")

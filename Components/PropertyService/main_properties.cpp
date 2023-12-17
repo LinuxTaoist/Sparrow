@@ -24,7 +24,7 @@ using namespace std;
 #define SPR_LOGD(fmt, args...)  printf("%d Properties D: " fmt, __LINE__, ##args)
 
 #define SHARED_MEMORY_PATH      "/tmp/__property_service__"
-#define SHARED_MEMORY_MAX_SIZE  (5 * 1024 * 1024)
+#define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
 
 int main(int argc, char * argv[])
 {
