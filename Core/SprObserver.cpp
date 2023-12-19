@@ -63,7 +63,7 @@ SprObserver::~SprObserver()
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
-int SprObserver::Init()
+int SprObserver::Start()
 {
     SprEpollSchedule::GetInstance()->StartEpoll();
     return 0;
@@ -127,8 +127,9 @@ int SprObserver::NotifyObserver(ModuleIDType id, const SprMsg& msg)
     return 0;
 }
 
-int SprObserver::NotifyObserver(const vector<ModuleIDType>& ids, const SprMsg& msg)
+int SprObserver::NotifyAllObserver(const SprMsg& msg)
 {
+    mMsgMediatorPtr->NotifyAllObserver(msg);
     return 0;
 }
 

@@ -60,6 +60,7 @@ enum EDebugMsgID
 {
     DEBUG_MSG_BEGIN = static_cast<int>(MODULE_DEBUG) << 16 | 1,
     DEBUG_MSG_SERIAL,
+    DEBUG_NOTIFY_ALL,
     DEBUG_MSG_BUTT
 };
 

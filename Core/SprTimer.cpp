@@ -47,11 +47,11 @@ SprTimer::~SprTimer()
     }
 }
 
-void SprTimer::Start(const int& delay, const int& interval)
+int SprTimer::Start(const int& delay, const int& interval)
 {
     if (mRunning) {
         SPR_LOGE("Timer is already running\n");
-        return;
+        return -1;
     }
 
     struct itimerval timer;
@@ -70,35 +70,45 @@ void SprTimer::Start(const int& delay, const int& interval)
     timer.it_interval.tv_usec = 0;
 
     if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
-        SPR_LOGE("Fail to start timer\n");
-        return;
+        SPR_LOGE("Fail to start timer. (%s)\n", strerror(errno));
+        return -1;
     }
 
     mRunning = true;
+    return 0;
 }
 
-void SprTimer::Stop()
+int SprTimer::Stop()
 {
     if (!mRunning) {
         SPR_LOGW("Timer is not running\n");
-        return;
+        return -1;
     }
 
     struct itimerval timer;
     memset(&timer, 0, sizeof(struct itimerval));
-    setitimer(ITIMER_REAL, &timer, nullptr);
 
     mRunning = false;
+    if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
+        SPR_LOGE("Fail to setitimer. (%s)\n", strerror(errno));
+        return -1;
+    }
+
+    return 0;
 }
 
-void SprTimer::UpdateInterval(const int& interval)
+int SprTimer::UpdateInterval(const int& interval)
 {
+    int ret = 0;
     if (mRunning) {
         struct itimerval timer;
 
         // 获取剩余的第一次触发时间
         struct itimerval remaining;
-        getitimer(ITIMER_REAL, &remaining);
+        if (getitimer(ITIMER_REAL, &remaining) == -1) {
+            SPR_LOGE("Fail to getitimer. (%s)\n", strerror(errno));
+            return -1;
+        }
 
         // 设置周期时间
         timer.it_interval.tv_sec = interval;
@@ -106,10 +116,16 @@ void SprTimer::UpdateInterval(const int& interval)
 
         // 恢复剩余的第一次触发时间
         timer.it_value = remaining.it_value;
-        setitimer(ITIMER_REAL, &timer, nullptr);
+        if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
+            SPR_LOGE("Fail to setitimer. (%s)\n", strerror(errno));
+            ret = -1;
+        }
+    } else {
+        SPR_LOGE("Timer is not running\n");
+        ret = -1;
     }
 
-    // SPR_LOGD("Interval updated to %ds\n", interval);
+    return ret;
 }
 
 void SprTimer::CallbackWrapper(int /* signum */)

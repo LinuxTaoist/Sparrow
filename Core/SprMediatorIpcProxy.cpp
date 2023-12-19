@@ -98,5 +98,6 @@ int SprMediatorIpcProxy::SendMsg(const SprMsg& msg)
 
 int SprMediatorIpcProxy::NotifyAllObserver(const SprMsg& msg)
 {
+    SendMsg(msg);
     return 0;
 }
