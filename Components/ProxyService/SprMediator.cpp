@@ -231,7 +231,7 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
             continue;
         }
 
-        SPR_LOGD("Module Id = 0x%x\n", pair.first);
+        // SPR_LOGD("Module Id = 0x%x\n", pair.first);
         NotifyObserver(pair.first, msg);
     }
 

@@ -29,9 +29,16 @@ public:
     SprTimer(TimerCallback callback);
     ~SprTimer();
 
-    void Start(const int& delay, const int& interval);
-    void Stop();
-    void UpdateInterval(const int& interval);
+    int Start(const int& delay, const int& interval);
+    int Stop();
+
+    /**
+     * @brief       更新定时器周期
+     *
+     * @param[in]   interval 定时器周期 其他值, 更新周期; 0, 调整为一次性定时器
+     */
+
+    int UpdateInterval(const int& interval);
 
 private:
     bool mRunning;

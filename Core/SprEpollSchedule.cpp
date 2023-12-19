@@ -39,7 +39,7 @@ SprEpollSchedule::SprEpollSchedule(uint32_t size)
     }
 
     if (mEpollHandler == -1) {
-        SPR_LOGE("epoll_create failed! (%s)\n", strerror(errno));
+        SPR_LOGE("epoll_create fail! (%s)\n", strerror(errno));
     }
 
     Init();
@@ -87,7 +87,7 @@ void SprEpollSchedule::AddPoll(SprObserver& observer)
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
     if (epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, observer.GetMqHandle(), &ep) != 0) {
-        SPR_LOGE("%s\n", strerror(errno));
+        SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     }
     SPR_LOGD("Poll add module %s\n", observer.GetModuleName().c_str());
 }
@@ -95,7 +95,7 @@ void SprEpollSchedule::AddPoll(SprObserver& observer)
 void SprEpollSchedule::DelPoll(SprObserver& observer)
 {
     if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, observer.GetMqHandle(), nullptr) != 0) {
-        SPR_LOGE("epoll_ctl failed. (%s)\n", strerror(errno));
+        SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     }
 
     SPR_LOGD("Poll delete module %s\n", observer.GetModuleName().c_str());
@@ -114,7 +114,7 @@ void SprEpollSchedule::StartEpoll()
         // 无事件时, epoll_wait阻塞, -1 无限等待
         int count = epoll_wait(mEpollHandler, ep, sizeof(ep)/sizeof(ep[0]), -1);
         if (count <= 0) {
-            SPR_LOGE("epoll_wait failed. %s\n", strerror(errno));
+            SPR_LOGE("epoll_wait fail. (%s)\n", strerror(errno));
             continue;
         }
 
