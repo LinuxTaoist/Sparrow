@@ -22,9 +22,6 @@
 #include <vector>
 #include <memory>
 #include <string>
-#include <fcntl.h>           /* For O_* constants */
-#include <sys/stat.h>        /* For mode constants */
-#include <mqueue.h>
 #include "SprMsg.h"
 #include "SprCommonType.h"
 #include "SprMediatorProxy.h"

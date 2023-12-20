@@ -18,6 +18,7 @@
  */
 #include <errno.h>
 #include <string.h>
+#include <mqueue.h>
 #include "SprCommonType.h"
 #include "SprMediatorIpcProxy.h"
 #include "SprObserver.h"
