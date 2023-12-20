@@ -20,8 +20,11 @@
 #include <string>
 #include <errno.h>
 #include <stdio.h>
+#include <mqueue.h>
 #include <string.h>
 #include <stdlib.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
 #include "Util/Shared.h"
 #include "SprObserver.h"
 #include "SprEpollSchedule.h"
