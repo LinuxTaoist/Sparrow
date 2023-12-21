@@ -22,6 +22,28 @@
 
 #include "SprObserver.h"
 
+namespace InternalEnum {
+
+enum EPowerState
+{
+    POWER_STATE_NORMAL,
+    POWER_STATE_STANDBY,
+    POWER_STATE_SLEEP,
+    POWER_STATE_WAKEUP,
+    POWER_STATE_BUTT
+};
+
+};
+
+template <class Lev1State, class Lev2State, class SignalType, class Instance, class MsgType>
+struct StateTransition
+{
+    Lev1State   lev1State;
+    Lev2State   lev2State;
+    SignalType	msgId;
+    void (Instance::*callback)(SprMsg *msg);
+};
+
 class PowerManager : public SprObserver
 {
 public:

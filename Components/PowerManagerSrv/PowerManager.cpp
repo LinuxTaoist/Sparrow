@@ -16,3 +16,20 @@
  *------------------------------------------------------------------------------
  *
  */
+#include "PowerManager.h"
+
+PowerManager::PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
+            : SprObserver(id, name, mMsgMediatorPtr)
+{
+
+}
+
+PowerManager::~PowerManager()
+{
+
+}
+
+int PowerManager::ProcessMsg(const SprMsg& msg)
+{
+    return 0;
+}

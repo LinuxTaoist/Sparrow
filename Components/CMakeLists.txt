@@ -19,7 +19,7 @@ add_dependencies     (BinProxySrv libsprcore)
 
 # Bin powermanagersrv
 aux_source_directory(${PROJECT_PATH}/Components/PowerManagerSrv  SRC_POWER_MANAGER_PATH)
-add_executable       (BinPowerManagerSrv ${SRC_LOG_SRV_PATH})
+add_executable       (BinPowerManagerSrv ${SRC_POWER_MANAGER_PATH})
 set_target_properties(BinPowerManagerSrv PROPERTIES OUTPUT_NAME "powermanagersrv")
 target_link_libraries(BinPowerManagerSrv sprcore pthread)
 add_dependencies     (BinPowerManagerSrv libsprcore)
