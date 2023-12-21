@@ -34,6 +34,7 @@ enum ESprModuleID
     MODULE_PROXY = 0x01,
     MODULE_CONFIG,
     MODULE_LOGM,
+    MODULE_POWERM,
     MODULE_DEBUG,
     MODULE_MAX,
 };
