@@ -22,16 +22,20 @@
 #ifndef __SPR_SIG_ID_H__
 #define __SPR_SIG_ID_H__
 
+namespace InternalEnum {
+
 /* 消息ID转枚举 */
 #ifdef ENUM_OR_STRING
 #undef ENUM_OR_STRING
 #endif
 #define ENUM_OR_STRING(x) x
 
-enum class ESprMsgId
+enum ESprSigId
 {
     #include "SprSigList.gen"
 };
+
+}
 
 const char *GetMsgName(int msgID);
 

@@ -77,11 +77,11 @@ int SprObserver::AbstractProcessMsg(const SprMsg& msg)
     SPR_LOGD("Receive Msg: 0x%x\n", msg.GetMsgId());
     switch (msg.GetMsgId())
     {
-        case InternalEnum::PROXY_MSG_REGISTER_RESPONSE:
+        case InternalEnum::SIG_ID_PROXY_REGISTER_RESPONSE:
             MsgResponseRegisterRsp(msg);
             break;
 
-        case InternalEnum::PROXY_MSG_UNREGISTER_RESPONSE:
+        case InternalEnum::SIG_ID_PROXY_UNREGISTER_RESPONSE:
             MsgResponseUnregisterRsp(msg);
             break;
 
