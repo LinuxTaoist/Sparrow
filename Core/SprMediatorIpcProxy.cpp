@@ -62,25 +62,25 @@ int SprMediatorIpcProxy::ConnectMediator()
 
 int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 {
-    SprMsg msg(PROXY_MSG_REGISTER_REQUEST);
+    SprMsg msg(SIG_ID_PROXY_REGISTER_REQUEST);
     msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
     msg.SetU16Value((uint16_t)observer.GetModuleId());
     msg.SetString(observer.GetMqDevName());
 
     SendMsg(msg);
-    SPR_LOGD("Register observer: [0x%x] [%s]\n", PROXY_MSG_REGISTER_REQUEST, observer.GetMqDevName().c_str());
+    SPR_LOGD("Register observer: [0x%x] [%s]\n", observer.GetModuleId(), observer.GetMqDevName().c_str());
     return 0;
 }
 
 int SprMediatorIpcProxy::UnregisterObserver(const SprObserver& observer)
 {
-    SprMsg msg(PROXY_MSG_UNREGISTER_REQUEST);
+    SprMsg msg(SIG_ID_PROXY_UNREGISTER_REQUEST);
     msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
     msg.SetU16Value((uint16_t)observer.GetModuleId());
     msg.SetString(observer.GetMqDevName());
 
     SendMsg(msg);
-    SPR_LOGD("Unregister observer: [0x%x] [%s]\n", PROXY_MSG_REGISTER_RESPONSE, observer.GetMqDevName().c_str());
+    SPR_LOGD("Unregister observer: [0x%x] [%s]\n", observer.GetModuleId(), observer.GetMqDevName().c_str());
     return 0;
 }
 

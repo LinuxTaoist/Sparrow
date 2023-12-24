@@ -10,6 +10,7 @@
  *
  *  In "signal_list.gen" add the message definition.
  *
+ *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *------------------------------------------------------------------------------

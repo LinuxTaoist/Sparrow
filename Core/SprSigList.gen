@@ -1,7 +1,20 @@
 //-----------------------------------------------------------------------------
+// PROXY_SIG_ID
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_REQUEST),                  \
+ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_RESPONSE),                 \
+ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_REQUEST),                \
+ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_RESPONSE),               \
+
+//-----------------------------------------------------------------------------
 // LOG_MANAGER
 //-----------------------------------------------------------------------------
-ENUM_OR_STRING(SPR_LOG_OPEN),                   \
-ENUM_OR_STRING(SPR_LOG_CLOSE),                  \
+ENUM_OR_STRING(SIG_ID_LOG_OPEN),                                \
+ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
 
+//-----------------------------------------------------------------------------
+// Debug
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_DEBUG_MSG_SERIAL),                        \
+ENUM_OR_STRING(SIG_ID_DEBUG_NOTIFY_ALL),                        \
 

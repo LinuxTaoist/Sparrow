@@ -41,7 +41,7 @@ int main(int agrc, const char *argv[])
         {
             case '0':   // debug SprMsg
             {
-                SprMsg theEnMsg((uint32_t)DEBUG_MSG_SERIAL);
+                SprMsg theEnMsg((uint32_t)SIG_ID_DEBUG_MSG_SERIAL);
                 theEnMsg.SetU8Value(8);
                 theEnMsg.SetU16Value(16);
                 theEnMsg.SetU32Value(32);

@@ -69,7 +69,7 @@ int main(int agrc, const char *argv[])
         {
             case '0':
             {
-                SprMsg msg(DEBUG_NOTIFY_ALL);
+                SprMsg msg(SIG_ID_DEBUG_NOTIFY_ALL);
                 theDebug.NotifyAllObserver(msg);
                 break;
             }

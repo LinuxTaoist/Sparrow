@@ -25,6 +25,7 @@
 #include <sys/epoll.h>
 #include <mqueue.h>
 #include <string.h>
+#include "SprSigId.h"
 #include "SprCommonType.h"
 #include "SprMediator.h"
 
@@ -174,11 +175,11 @@ int SprMediator::ProcessMsg(const SprMsg& msg)
 
     switch (msg.GetMsgId())
     {
-        case PROXY_MSG_REGISTER_REQUEST:
+        case SIG_ID_PROXY_REGISTER_REQUEST:
             MsgResponseRegister(msg);
             break;
 
-        case PROXY_MSG_UNREGISTER_REQUEST:
+        case SIG_ID_PROXY_UNREGISTER_REQUEST:
             MsgResponseUnregister(msg);
             break;
 
@@ -267,7 +268,7 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
         SPR_LOGE("Invaild handler!\n");
     }
 
-    SprMsg rspMsg(PROXY_MSG_REGISTER_RESPONSE);
+    SprMsg rspMsg(SIG_ID_PROXY_REGISTER_RESPONSE);
     rspMsg.SetU8Value(result);
     NotifyObserver(moduleId, rspMsg);
 
@@ -277,16 +278,12 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
 int SprMediator::MsgResponseUnregister(const SprMsg& msg)
 {
     bool result = false;
-
-    // EProxyType type = static_cast<EProxyType>(msg.GetU32Value());
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
     std::string name = msg.GetString();
 
     auto it = mModuleMap.find(moduleId);
     if (it != mModuleMap.end())
     {
-        SPR_LOGW("Not exist module id: %x\n", moduleId);
-
         if (it->second.handler != -1)
         {
             mq_close(it->second.handler);
@@ -296,9 +293,11 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
         }
 
         mModuleMap.erase(moduleId);
+    } else {
+        SPR_LOGW("Not exist module id: %x\n", moduleId);
     }
 
-    SprMsg rspMsg(PROXY_MSG_UNREGISTER_RESPONSE);
+    SprMsg rspMsg(SIG_ID_PROXY_UNREGISTER_RESPONSE);
     rspMsg.SetU8Value(result);
     NotifyObserver(moduleId, rspMsg);
     SPR_LOGD("Unregister successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());

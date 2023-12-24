@@ -33,6 +33,7 @@ enum EPowerState
     POWER_STATE_BUTT
 };
 
+
 };
 
 template <class Lev1State, class Lev2State, class SignalType, class Instance, class MsgType>

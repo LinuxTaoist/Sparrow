@@ -23,6 +23,7 @@
 #include <memory>
 #include <string>
 #include "SprMsg.h"
+#include "SprSigId.h"
 #include "SprCommonType.h"
 #include "SprMediatorProxy.h"
 
