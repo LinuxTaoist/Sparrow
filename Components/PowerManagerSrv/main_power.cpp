@@ -23,6 +23,7 @@
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
+using namespace SprPower;
 using namespace InternalEnum;
 
 int main(int agrc, const char *argv[])
