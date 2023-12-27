@@ -1,5 +1,6 @@
+ENUM_OR_STRING(SIG_ID_ANY),
 //-----------------------------------------------------------------------------
-// PROXY_SIG_ID
+// PROXY
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_REQUEST),                  \
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_RESPONSE),                 \
@@ -17,4 +18,12 @@ ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_DEBUG_MSG_SERIAL),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_NOTIFY_ALL),                        \
+
+//-----------------------------------------------------------------------------
+// POWER_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_POWER_ON),                                \
+ENUM_OR_STRING(SIG_ID_POWER_OFF),                               \
+ENUM_OR_STRING(SIG_ID_POWER_WAKEUP),                            \
+ENUM_OR_STRING(SIG_ID_POWER_SHUTDOWN),
 
