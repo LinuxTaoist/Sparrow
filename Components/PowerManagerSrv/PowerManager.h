@@ -16,33 +16,36 @@
  *------------------------------------------------------------------------------
  *
  */
-
 #ifndef __POWER_MANAGER_H__
 #define __POWER_MANAGER_H__
 
+#include <vector>
 #include "SprObserver.h"
 
-namespace InternalEnum {
+namespace SprPower {
 
-enum EPowerState
+// 一级状态:
+enum EPowerLev1State
 {
-    POWER_STATE_NORMAL,
-    POWER_STATE_STANDBY,
-    POWER_STATE_SLEEP,
-    POWER_STATE_WAKEUP,
-    POWER_STATE_BUTT
+    LEV1_POWER_ANY      = 0x00,
+    LEV1_POWER_WORKING,
+    LEV1_POWER_STANDBY,
+    LEV1_POWER_SLEEP
 };
 
-
+//二级状态:
+enum EPowerLev2State
+{
+    LEV2_POWER_ANY      = 0x00
 };
 
-template <class Lev1State, class Lev2State, class SignalType, class Instance, class MsgType>
+template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
 struct StateTransition
 {
     Lev1State   lev1State;
     Lev2State   lev2State;
-    SignalType	msgId;
-    void (Instance::*callback)(SprMsg *msg);
+    SignalType	sigId;
+    void (ClassName::*callback)(const MsgType& msg);
 };
 
 class PowerManager : public SprObserver
@@ -52,6 +55,24 @@ public:
     virtual ~PowerManager();
 
     int ProcessMsg(const SprMsg& msg);
-};
 
+private:
+    static std::vector<StateTransition <EPowerLev1State,
+                        EPowerLev2State,
+                        InternalEnum::ESprSigId,
+                        PowerManager,
+                        SprMsg> > mStateTable;
+
+    EPowerLev1State mCurLev1State;
+    EPowerLev2State mCurLev2State;
+
+     /* 更新一级状态 */
+    void SetLev1State(EPowerLev1State state) { mCurLev1State = state; }
+    EPowerLev1State GetLev1State() { return mCurLev1State; }
+
+    /* 更新二级状态 */
+    void SetLev2State(EPowerLev2State state) { mCurLev2State = state; }
+    EPowerLev2State GetLev2State() { return mCurLev2State; }
+};
+} // namespace SprPower
 #endif
