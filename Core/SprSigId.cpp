@@ -28,11 +28,11 @@
 #define ENUM_OR_STRING(x) #x
 
 const int MAX_LENGTH_MSG = 50;
-const char msgIdString[][MAX_LENGTH_MSG] = {
+const char sigIdString[][MAX_LENGTH_MSG] = {
     #include "SprSigList.gen"
 };
 
-const char *GetMsgName(int msgID)
+const char *GetSigName(int msgID)
 {
-    return msgIdString[msgID];
+    return sigIdString[msgID];
 }

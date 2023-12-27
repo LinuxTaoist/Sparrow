@@ -47,7 +47,7 @@ SprTimer::~SprTimer()
     }
 }
 
-int SprTimer::Start(const int& delay, const int& interval)
+int SprTimer::Start(const int& delayUs, const int& intervalUs)
 {
     if (mRunning) {
         SPR_LOGE("Timer is already running\n");
@@ -57,17 +57,17 @@ int SprTimer::Start(const int& delay, const int& interval)
     struct itimerval timer;
 
     // 设置第一次触发时间
-    if (delay > 0) {
-        timer.it_value.tv_sec = delay;
-        timer.it_value.tv_usec = 0;
+    if (delayUs > 0) {
+        timer.it_value.tv_sec = delayUs / 1000000;
+        timer.it_value.tv_usec = delayUs % 1000000;
     } else {
         timer.it_value.tv_sec = 0;
         timer.it_value.tv_usec = 1;
     }
 
     // 设置周期时间
-    timer.it_interval.tv_sec = interval;
-    timer.it_interval.tv_usec = 0;
+    timer.it_interval.tv_sec = intervalUs / 1000000;
+    timer.it_interval.tv_usec = intervalUs % 1000000;
 
     if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
         SPR_LOGE("Fail to start timer. (%s)\n", strerror(errno));
@@ -97,7 +97,7 @@ int SprTimer::Stop()
     return 0;
 }
 
-int SprTimer::UpdateInterval(const int& interval)
+int SprTimer::UpdateInterval(const int& intervalUs)
 {
     int ret = 0;
     if (mRunning) {
@@ -111,8 +111,8 @@ int SprTimer::UpdateInterval(const int& interval)
         }
 
         // 设置周期时间
-        timer.it_interval.tv_sec = interval;
-        timer.it_interval.tv_usec = 0;
+        timer.it_interval.tv_sec = intervalUs / 1000000;
+        timer.it_interval.tv_usec = intervalUs % 1000000;
 
         // 恢复剩余的第一次触发时间
         timer.it_value = remaining.it_value;

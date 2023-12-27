@@ -37,6 +37,6 @@ enum ESprSigId
 
 }
 
-const char *GetMsgName(int msgID);
+const char *GetSigName(int msgID);
 
 #endif

@@ -171,7 +171,7 @@ int SprMediator::StartEpoll()
 
 int SprMediator::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Receive msg: 0x%x\n", msg.GetMsgId());
+    SPR_LOGD("Receive msg: %s\n", GetSigName(msg.GetMsgId()));
 
     switch (msg.GetMsgId())
     {

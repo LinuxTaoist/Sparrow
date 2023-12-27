@@ -74,7 +74,7 @@ int SprObserver::Start()
 
 int SprObserver::AbstractProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Receive Msg: 0x%x\n", msg.GetMsgId());
+    SPR_LOGD("Receive Msg: %s\n", GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
         case InternalEnum::SIG_ID_PROXY_REGISTER_RESPONSE:
