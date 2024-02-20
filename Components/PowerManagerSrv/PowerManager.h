@@ -57,7 +57,7 @@ public:
     int ProcessMsg(const SprMsg& msg);
 
 private:
-    static std::vector<StateTransition <EPowerLev1State,
+    static std::vector< StateTransition <EPowerLev1State,
                         EPowerLev2State,
                         InternalEnum::ESprSigId,
                         PowerManager,
@@ -73,6 +73,10 @@ private:
     /* 更新二级状态 */
     void SetLev2State(EPowerLev2State state) { mCurLev2State = state; }
     EPowerLev2State GetLev2State() { return mCurLev2State; }
+
+    /* 消息响应函数 */
+    void MsgRespondPowerOn(const SprMsg &msg);
+    void MsgRespondPowerOff(const SprMsg &msg);
 };
 } // namespace SprPower
 #endif

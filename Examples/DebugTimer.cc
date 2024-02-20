@@ -49,11 +49,11 @@ int main(int agrc, char* argv[])
     });
 
     SPR_LOGD("Start timer delay 2s, timer 100ms...\n");
-    timer.Start(2000000, 100000);       // 延迟2秒开始，周期100ms，20次
+    timer.Start(2000, 100);       // 延迟2秒开始，周期100ms，20次
 
     while(count < 20);
     SPR_LOGD("Update timer 300ms\n");
-    timer.UpdateInterval(300000);       // 周期调整为300ms，10次
+    timer.UpdateInterval(300);       // 周期调整为300ms，10次
 
     while(count < 30);
     SPR_LOGD("Update timer 0\n");

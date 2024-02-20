@@ -42,8 +42,12 @@ class SprMsg
 {
 public:
     SprMsg();
+    SprMsg(const SprMsg& srcMsg);
     SprMsg(uint32_t msgId);
     SprMsg(std::string datas);
+    SprMsg& operator=(const SprMsg &srcMsg); // Assignment Operator
+    int CopyMsg(const SprMsg& srcMsg);
+
     void Clear();
     int8_t Decode(std::string& deDatas);
     int8_t Encode(std::string& enDatas) const;
