@@ -78,6 +78,18 @@ int main(int agrc, const char *argv[])
                 SPR_LOGD("u32Vec[%ld]: %s \n", u32Vec.size(), Convert::vectorToHexString(u32Vec).c_str());
                 SPR_LOGD("ptr:      %d  \n", dePtr->id);
                 SPR_LOGD("          %s  \n", dePtr->buf);
+
+                SprMsg copyMsg(theDeMsg);
+                SPR_LOGD("---------------------------------------\n");
+                SPR_LOGD("msgId:    0x%x  \n", copyMsg.GetMsgId());
+                SPR_LOGD("u8Value:  %d  \n", copyMsg.GetU8Value());
+                SPR_LOGD("u16Value: %d  \n", copyMsg.GetU16Value());
+                SPR_LOGD("string:   %s  \n", copyMsg.GetString().c_str());
+                SPR_LOGD("u8Vec[%ld]:  %s \n", copyMsg.GetU8Vec().size(), Convert::vectorToHexString(copyMsg.GetU8Vec()).c_str());
+                SPR_LOGD("u32Vec[%ld]: %s \n", Convert::vectorToHexString(copyMsg.GetU32Vec()).size(), Convert::vectorToHexString(copyMsg.GetU32Vec()).c_str());
+                std::shared_ptr<struct TestSpr> copMsgDePtr = copyMsg.GetDatas<struct TestSpr>();
+                SPR_LOGD("ptr:      %d  \n", copMsgDePtr->id);
+                SPR_LOGD("          %s  \n", copMsgDePtr->buf);
                 break;
             }
 

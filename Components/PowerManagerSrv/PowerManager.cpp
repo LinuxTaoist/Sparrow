@@ -26,10 +26,12 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%d SprPower W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d SprPower E: " fmt, __LINE__, ##args)
 
-vector<StateTransition <EPowerLev1State, EPowerLev2State, ESprSigId, PowerManager, SprMsg>>
+vector <StateTransition <EPowerLev1State, EPowerLev2State, ESprSigId, PowerManager, SprMsg> >
 PowerManager::mStateTable =
 {
-
+    { LEV1_POWER_STANDBY,   LEV2_POWER_ANY,     SIG_ID_POWER_ON,    &PowerManager::MsgRespondPowerOn },
+    { LEV1_POWER_SLEEP,     LEV2_POWER_ANY,     SIG_ID_POWER_ON,    &PowerManager::MsgRespondPowerOn },
+    { LEV1_POWER_WORKING,   LEV2_POWER_ANY,     SIG_ID_POWER_OFF,   &PowerManager::MsgRespondPowerOff }
 };
 
 PowerManager::PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
@@ -65,4 +67,14 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     }
 
     return 0;
+}
+
+void PowerManager::MsgRespondPowerOn(const SprMsg &msg)
+{
+
+}
+
+void PowerManager::MsgRespondPowerOff(const SprMsg &msg)
+{
+
 }

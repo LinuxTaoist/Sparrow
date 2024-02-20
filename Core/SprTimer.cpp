@@ -17,26 +17,27 @@
  *
  */
 #include <iostream>
-#include <chrono>
-#include <string.h>
-#include <signal.h>
-#include <unistd.h>
-#include <sys/time.h>
+#include <cstring>
 #include "SprTimer.h"
 
-#define SPR_LOGD(fmt, ...) printf("%d Timer D: " fmt "\n", __LINE__, ##__VA_ARGS__)
-#define SPR_LOGW(fmt, ...) printf("%d Timer W: " fmt "\n", __LINE__, ##__VA_ARGS__)
-#define SPR_LOGE(fmt, ...) printf("%d Timer E: " fmt "\n", __LINE__, ##__VA_ARGS__)
+#define SPR_LOGD(fmt, ...) std::cout << __LINE__ << " Timer D: " << fmt << std::endl
+#define SPR_LOGW(fmt, ...) std::cout << __LINE__ << " Timer W: " << fmt << std::endl
+#define SPR_LOGE(fmt, ...) std::cout << __LINE__ << " Timer E: " << fmt << std::endl
 
 SprTimer* curTimer = nullptr;
 
 SprTimer::SprTimer(TimerCallback callback) :
-    mRunning(false), mCallback(std::move(callback))
+    mRunning(false), mTimerID(0), mCallback(std::move(callback))
 {
     struct sigaction sa;
-    memset(&sa, 0, sizeof(struct sigaction));
-    sa.sa_handler = &SprTimer::CallbackWrapper;
-    sigaction(SIGALRM, &sa, nullptr);
+    std::memset(&sa, 0, sizeof(struct sigaction));
+    sa.sa_flags = SA_SIGINFO;
+    sa.sa_sigaction = &SprTimer::CallbackWrapper;
+
+    if (sigaction(SIGALRM, &sa, nullptr) == -1) {
+        SPR_LOGE("Failed to set sigaction for timer. (%s)\n", std::strerror(errno));
+    }
+
     curTimer = this;
 }
 
@@ -47,30 +48,39 @@ SprTimer::~SprTimer()
     }
 }
 
-int SprTimer::Start(const int& delayUs, const int& intervalUs)
+int SprTimer::Start(const int& delayMs, const int& intervalMs)
 {
     if (mRunning) {
         SPR_LOGE("Timer is already running\n");
         return -1;
     }
 
-    struct itimerval timer;
+    struct sigevent sev;
+    std::memset(&sev, 0, sizeof(struct sigevent));
+    sev.sigev_notify = SIGEV_SIGNAL;
+    sev.sigev_signo = SIGALRM;
+    sev.sigev_value.sival_ptr = this;
 
+    if (timer_create(CLOCK_REALTIME, &sev, &mTimerID) == -1) {
+        SPR_LOGE("Failed to create timer. (%s)\n", std::strerror(errno));
+        return -1;
+    }
+
+    struct itimerspec its;
     // 设置第一次触发时间
-    if (delayUs > 0) {
-        timer.it_value.tv_sec = delayUs / 1000000;
-        timer.it_value.tv_usec = delayUs % 1000000;
-    } else {
-        timer.it_value.tv_sec = 0;
-        timer.it_value.tv_usec = 1;
+    if (delayMs >= 0) {
+        its.it_value.tv_sec = delayMs / 1000;
+        its.it_value.tv_nsec = delayMs * 1000000;
     }
 
     // 设置周期时间
-    timer.it_interval.tv_sec = intervalUs / 1000000;
-    timer.it_interval.tv_usec = intervalUs % 1000000;
+    if (intervalMs >= 0) {
+        its.it_interval.tv_sec = intervalMs / 1000;
+        its.it_interval.tv_nsec = intervalMs * 1000000;
+    }
 
-    if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
-        SPR_LOGE("Fail to start timer. (%s)\n", strerror(errno));
+    if (timer_settime(mTimerID, 0, &its, NULL) == -1) {
+        SPR_LOGE("Failed to start timer. (%s)\n", std::strerror(errno));
         return -1;
     }
 
@@ -85,51 +95,54 @@ int SprTimer::Stop()
         return -1;
     }
 
-    struct itimerval timer;
-    memset(&timer, 0, sizeof(struct itimerval));
+    struct itimerspec its;
+    std::memset(&its, 0, sizeof(struct itimerspec));
+
+    if (timer_settime(mTimerID, 0, &its, NULL) == -1) {
+        SPR_LOGE("Failed to stop timer. (%s)\n", std::strerror(errno));
+        return -1;
+    }
 
     mRunning = false;
-    if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
-        SPR_LOGE("Fail to setitimer. (%s)\n", strerror(errno));
+    return 0;
+}
+
+int SprTimer::UpdateInterval(const int& intervalMs)
+{
+    if (!mRunning) {
+        SPR_LOGE("Timer is not running\n");
+        return -1;
+    }
+
+    struct itimerspec its;
+    // 获取剩余的第一次触发时间
+    struct itimerspec remaining;
+    if (timer_gettime(mTimerID, &remaining) == -1) {
+        SPR_LOGE("Failed to get remaining time for timer. (%s)\n", std::strerror(errno));
+        return -1;
+    }
+
+    // 设置周期时间
+    if (intervalMs > 0) {
+        its.it_interval.tv_sec = intervalMs / 1000;
+        its.it_interval.tv_nsec = (intervalMs % 1000) * 1000000;
+    } else {
+        its.it_interval.tv_sec = 0;
+        its.it_interval.tv_nsec = 0;
+    }
+
+    // 恢复剩余的第一次触发时间
+    its.it_value = remaining.it_value;
+    if (timer_settime(mTimerID, 0, &its, NULL) == -1) {
+        SPR_LOGE("Failed to update timer interval. (%s)\n", std::strerror(errno));
         return -1;
     }
 
     return 0;
 }
 
-int SprTimer::UpdateInterval(const int& intervalUs)
+void SprTimer::CallbackWrapper(int /* signum */, siginfo_t* si, void *)
 {
-    int ret = 0;
-    if (mRunning) {
-        struct itimerval timer;
-
-        // 获取剩余的第一次触发时间
-        struct itimerval remaining;
-        if (getitimer(ITIMER_REAL, &remaining) == -1) {
-            SPR_LOGE("Fail to getitimer. (%s)\n", strerror(errno));
-            return -1;
-        }
-
-        // 设置周期时间
-        timer.it_interval.tv_sec = intervalUs / 1000000;
-        timer.it_interval.tv_usec = intervalUs % 1000000;
-
-        // 恢复剩余的第一次触发时间
-        timer.it_value = remaining.it_value;
-        if (setitimer(ITIMER_REAL, &timer, nullptr) == -1) {
-            SPR_LOGE("Fail to setitimer. (%s)\n", strerror(errno));
-            ret = -1;
-        }
-    } else {
-        SPR_LOGE("Timer is not running\n");
-        ret = -1;
-    }
-
-    return ret;
+    SprTimer* timer = static_cast<SprTimer*>(si->si_value.sival_ptr);
+    timer->mCallback();
 }
-
-void SprTimer::CallbackWrapper(int /* signum */)
-{
-    curTimer->mCallback();
-}
-

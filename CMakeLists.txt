@@ -14,6 +14,9 @@ set(OUTPUT_PATH            ${PROJECT_PATH}/Release)
 set(LIBRARY_OUTPUT_PATH    ${OUTPUT_PATH}/Lib)
 set(EXECUTABLE_OUTPUT_PATH ${OUTPUT_PATH}/Bin)
 
+## 保存编译时间
+string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
+
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
 
@@ -31,6 +34,18 @@ set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -g3 -O0 -fpermissive")
+
+## 打印工程信息
+message("======================================================================")
+message("# Sparrow Version Info: ")
+message("# Version: 1.0.0")
+message("# Build Time: ${CURRENT_TIME}")
+message("# Build Number: ${BUILD_NUMBER}")
+message("# Build Type: ${CMAKE_BUILD_TYPE}")
+message("# Compiler: ${CMAKE_C_COMPILER} ${CMAKE_CXX_COMPILER}")
+message("# Platform: ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
+message("# Architecture: ${CMAKE_SYSTEM_PROCESSOR}")
+message("======================================================================")
 
 add_subdirectory(Core)
 add_subdirectory(Components)
