@@ -49,13 +49,13 @@ enum EProxyType
 
 enum EProxyMsgID
 {
-    PROXY_MSG_BEGIN = static_cast<int>(MODULE_PROXY) << 16 | 1,
+    PROXY_MSG_BEGIN = MODULE_PROXY << 16 | 1,
     PROXY_MSG_BUTT
 };
 
 enum EDebugMsgID
 {
-    DEBUG_MSG_BEGIN = static_cast<int>(MODULE_DEBUG) << 16 | 1,
+    DEBUG_MSG_BEGIN = MODULE_DEBUG << 16 | 1,
     DEBUG_MSG_BUTT
 };
 

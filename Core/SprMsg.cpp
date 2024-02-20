@@ -29,6 +29,23 @@ SprMsg::SprMsg()
     Init();
 }
 
+SprMsg::SprMsg(const SprMsg& srcMsg)
+{
+    mMsgId = srcMsg.mMsgId;
+    mTag = srcMsg.mTag;
+    mU8Value = srcMsg.mU8Value;
+    mU16Value = srcMsg.mU16Value;
+    mU32Value = srcMsg.mU32Value;
+    mStringLength = srcMsg.mStringLength;
+    mString = srcMsg.mString;
+    mU8VecLength = srcMsg.mU8VecLength;
+    mU8Vec = srcMsg.mU8Vec;
+    mU32VecLength = srcMsg.mU32VecLength;
+    mU32Vec = srcMsg.mU32Vec;
+    mDataSize = srcMsg.mDataSize;
+    mDatas = srcMsg.mDatas;
+}
+
 SprMsg::SprMsg(uint32_t msgId)
 {
     Init();
@@ -41,14 +58,34 @@ SprMsg::SprMsg(std::string datas)
     Decode(datas);
 }
 
+SprMsg& SprMsg::operator=(const SprMsg &srcMsg)
+{
+    if (this == &srcMsg)
+    {
+        // do nothing
+    }
+    else
+    {
+        CopyMsg(srcMsg);
+    }
+
+    return *this;
+}
+
+int SprMsg::CopyMsg(const SprMsg& srcMsg)
+{
+    return 0;
+}
+
 void SprMsg::Init()
 {
+    mMsgId = 0;
     mTag = 0;
     mU8Value = 0;
     mU16Value = 0;
     mU32Value = 0;
+    mStringLength = 0;
     mDataSize = 0;
-    mMsgId = 0;
 
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VALUE,   &SprMsg::EncodeU8Value));
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VALUE,  &SprMsg::EncodeU16Value));
@@ -70,6 +107,7 @@ void SprMsg::Init()
 void SprMsg::Clear()
 {
     mTag = 0;
+    mString.clear();
     mU8Vec.clear();
     mU32Vec.clear();
     mDatas.clear();
@@ -80,6 +118,7 @@ int8_t SprMsg::Decode(std::string& deDatas)
 {
     int8_t ret = 0;
 
+    Clear();
     DecodeMsgId(deDatas);
     DecodeTag(deDatas);
     for (auto i = (int)ESprMsgType::MSG_TYPE_MIN; i < (int)ESprMsgType::MSG_TYPE_MAX; i++)
@@ -91,8 +130,7 @@ int8_t SprMsg::Decode(std::string& deDatas)
 
             if (it != mDeFuncs.end()) {
                 ((SprMsg*)this->*(it->second))(deDatas);
-            }
-            else {
+            } else {
                 SPR_LOGW("Not find type: 0x%x!\n", (uint32_t)(type));
             }
         }

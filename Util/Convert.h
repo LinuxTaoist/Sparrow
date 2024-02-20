@@ -27,7 +27,7 @@
 
 namespace Convert {
     template <typename T>
-    int8_t stringToInt(T& value, const std::string& str)
+    int stringToInt(T& value, const std::string& str)
     {
         if (str.size() < sizeof(T)) {
             return -1;
@@ -43,7 +43,7 @@ namespace Convert {
     }
 
     template<typename T>
-    int8_t intToString(const T& value, std::string& str)
+    int intToString(const T& value, std::string& str)
     {
         size_t valueSize = sizeof(T);
 
