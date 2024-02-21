@@ -1,4 +1,4 @@
-## Build libprotocol.so
+## Build libsprcore.so
 
 include_directories (${PROJECT_PATH})
 include_directories (${PROJECT_PATH}/3rdParty/libgo)
