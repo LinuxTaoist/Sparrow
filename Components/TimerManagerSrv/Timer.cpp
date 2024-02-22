@@ -2,7 +2,7 @@
  *------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprTimer.cpp
+ *  @file       : Timer.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -18,7 +18,7 @@
  */
 #include <iostream>
 #include <cstring>
-#include "SprTimer.h"
+#include "Timer.h"
 
 #define SPR_LOGD(fmt, ...) std::cout << __LINE__ << " Timer D: " << fmt << std::endl
 #define SPR_LOGW(fmt, ...) std::cout << __LINE__ << " Timer W: " << fmt << std::endl
@@ -107,7 +107,7 @@ int SprTimer::Stop()
     return 0;
 }
 
-int SprTimer::UpdateInterval(const int& intervalMs)
+int SprTimer::Update(const int& intervalMs)
 {
     if (!mRunning) {
         SPR_LOGE("Timer is not running\n");

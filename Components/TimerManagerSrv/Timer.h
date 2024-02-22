@@ -2,7 +2,7 @@
  *------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprTimer.h
+ *  @file       : Timer.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -46,7 +46,7 @@ public:
      *
      * @param[in]   intervalMs 定时器周期(毫秒) 0, 调整为一次性定时器; 其他值, 更新周期
      */
-    int UpdateInterval(const int& intervalMs);
+    int Update(const int& intervalMs);
 
 private:
     bool mRunning;

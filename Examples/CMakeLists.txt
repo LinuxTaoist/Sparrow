@@ -18,8 +18,8 @@ target_link_libraries(debug_msg c sprcore)
 add_dependencies     (debug_msg libsprcore)
 
 ## Bin debugtimer
-set(SRC_BIN_DTIMER    DebugTimer.cc)
-add_executable       (debug_timer ${SRC_BIN_DTIMER})
-set_target_properties(debug_timer PROPERTIES OUTPUT_NAME "debugtimer")
-target_link_libraries(debug_timer c sprcore)
-add_dependencies     (debug_timer libsprcore)
+# set(SRC_BIN_DTIMER    DebugTimer.cc)
+# add_executable       (debug_timer ${SRC_BIN_DTIMER})
+# set_target_properties(debug_timer PROPERTIES OUTPUT_NAME "debugtimer")
+# target_link_libraries(debug_timer c sprcore)
+# add_dependencies     (debug_timer libsprcore)

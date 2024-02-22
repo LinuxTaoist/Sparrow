@@ -43,3 +43,9 @@ add_executable       (BinMainSpr ${SRC_MAIN_SPR_PATH})
 set_target_properties(BinMainSpr PROPERTIES OUTPUT_NAME "sparrowsrv")
 target_link_libraries(BinMainSpr sprcore)
 add_dependencies     (BinMainSpr libsprcore)
+
+# Bin timersrv
+aux_source_directory(${PROJECT_PATH}/Components/TimerManagerSrv  SRC_MAIN_TIMER_PATH)
+add_executable       (BinTimerSrv ${SRC_MAIN_TIMER_PATH})
+set_target_properties(BinTimerSrv PROPERTIES OUTPUT_NAME "timersrv")
+target_link_libraries(BinTimerSrv pthread rt)
