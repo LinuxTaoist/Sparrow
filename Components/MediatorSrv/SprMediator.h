@@ -1,5 +1,5 @@
 /**
- *------------------------------------------------------------------------------
+ *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
  *  @file       : SprMediator.h
@@ -11,9 +11,9 @@
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
- *------------------------------------------------------------------------------
+ *---------------------------------------------------------------------------------------------------------------------
  *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *------------------------------------------------------------------------------
+ *---------------------------------------------------------------------------------------------------------------------
  *
  */
 #ifndef __SPR_MEDIATOR_H__
@@ -48,7 +48,7 @@ private:
     int MakeUnixDgramSocket(std::string ip, uint16_t port);
     int PrepareInternalPort();
     int DestroyInternalPort();
-    int StartEpoll();
+    int EpollLoop();
     int SendMsg(const SprMsg& msg);
     int NotifyObserver(InternalEnum::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);

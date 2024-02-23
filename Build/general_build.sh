@@ -19,7 +19,7 @@ else
     make
 fi
 
-cd ../../../Build/
+cd $PROJECT_PATH/Build/
 rm -rf ../Release/Cache
 rm -rf ../Release/Bin/*
 rm -rf ../Release/Lib/*
