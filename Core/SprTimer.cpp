@@ -16,12 +16,10 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <chrono>
-#include <cstring>
+#include <time.h>
+#include <stdint.h>
+#include <string.h>
 #include "SprTimer.h"
-
-using namespace std::chrono;
 
 #define SPR_LOGD(fmt, args...) printf("%d SprTimer D: " fmt, __LINE__, ##args)
 #define SPR_LOGW(fmt, args...) printf("%d SprTimer W: " fmt, __LINE__, ##args)
