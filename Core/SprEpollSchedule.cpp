@@ -81,12 +81,14 @@ void SprEpollSchedule::AddPoll(SprObserver& observer)
     //EPOLLOUT：表示对应的文件描述符可以写；
     //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
     ep.events = EPOLLIN | EPOLLET;
+    ep.data.u32 = (uint32_t)observer.GetCurListenEventType();
     ep.data.ptr = &observer;
 
+    SPR_LOGD("dx_debug: --- u32 = 0x%x 0x%x %s\n", ep.data.u32, observer.GetCurListenEventType(), observer.GetModuleName().c_str());
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
-    if (epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, observer.GetMqHandle(), &ep) != 0) {
+    if (epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, observer.GetCurListenHandler(), &ep) != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     }
     SPR_LOGD("Poll add module %s\n", observer.GetModuleName().c_str());
@@ -94,7 +96,7 @@ void SprEpollSchedule::AddPoll(SprObserver& observer)
 
 void SprEpollSchedule::DelPoll(SprObserver& observer)
 {
-    if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, observer.GetMqHandle(), nullptr) != 0) {
+    if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, observer.GetCurListenHandler(), nullptr) != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     }
 
@@ -122,15 +124,12 @@ void SprEpollSchedule::EpollLoop()
         SPR_LOGD("Data count %d come from epoll ...\n", count);
         for (int i = 0; i < count; i++) {
             SprObserver* p = static_cast<SprObserver*>(ep[i].data.ptr);
+            uint32_t listenType = ep[i].data.u32;
 
+            SPR_LOGD("Poll module %s, listen type 0x%x\n", p->GetModuleName().c_str(), listenType);
             // 投递任务至协程，没有回调
-            mpGoPool->Post([&p] {
-                SprMsg msg;
-                if (p->RecvMsg(msg) < 0) {
-                    SPR_LOGE("RecvMsg fail!\n");
-                } else {
-                    p->AbstractProcessMsg(msg);
-                }
+            mpGoPool->Post([p, listenType] {
+                p->HandlePollEvent(listenType);
             }, nullptr);
         }
     } while(mRun);

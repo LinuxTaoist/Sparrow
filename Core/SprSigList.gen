@@ -18,6 +18,17 @@ ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_DEBUG_MSG_SERIAL),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_NOTIFY_ALL),                        \
+ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST),                        \
+
+//-----------------------------------------------------------------------------
+// TIMER_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_TIMER_START_SYSTEM_TIMER),                             \
+ENUM_OR_STRING(SIG_ID_TIMER_STOP_SYSTEM_TIMER),                              \
+ENUM_OR_STRING(SIG_ID_TIMER_ADD_ONCE_TIMER),                    \
+ENUM_OR_STRING(SIG_ID_TIMER_ADD_REPEAT_TIMER),                  \
+ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
+ENUM_OR_STRING(SIG_ID_TIMER_DEL),                               \
 
 //-----------------------------------------------------------------------------
 // POWER_MANAGER

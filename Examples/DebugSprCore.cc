@@ -56,12 +56,24 @@ public:
     }
 };
 
+static void usage()
+{
+    SPR_LOG("------------------------------------------------------------------\n"
+            "usage:\n"
+            "0: NotifyAllObserver\n"
+            "1: AddCustomTimer\n"
+            "q: Quit\n"
+            "------------------------------------------------------------------\n"
+    );
+}
+
 int main(int agrc, const char *argv[])
 {
     DebugCore theDebug(MODULE_DEBUG, "Debug", make_shared<SprMediatorIpcProxy>());
 
     char val = 0;
     bool run = true;
+    usage();
     do {
         SPR_LOGD("Input: ");
         std::cin >> val;
@@ -74,12 +86,26 @@ int main(int agrc, const char *argv[])
                 break;
             }
 
+            case '1':
+            {
+                STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST, 0, 100, 100};
+                shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
+                SprMsg msg(SIG_ID_TIMER_ADD_CUSTOM_TIMER);
+                msg.SetModuleId(MODULE_DEBUG);
+                msg.SetDatas(pInfo, sizeof(STimerInfo));
+                theDebug.NotifyAllObserver(msg);
+
+                break;
+            }
+
             case 'q':
             {
                 run = false;
+                break;
             }
 
             default:
+                usage();
             break;
         }
     } while(run);

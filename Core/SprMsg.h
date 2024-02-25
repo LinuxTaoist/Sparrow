@@ -52,6 +52,7 @@ public:
     int8_t Decode(std::string& deDatas);
     int8_t Encode(std::string& enDatas) const;
 
+    void SetModuleId(uint32_t moduleId);
     void SetMsgId(uint32_t msgId);
     void SetU8Value(uint8_t value);
     void SetU16Value(uint16_t value);
@@ -68,6 +69,7 @@ public:
         mDatas.assign(pData, pData + size);
     }
 
+    uint32_t GetModuleId() const { return mModuleId; }
     uint32_t GetMsgId() const { return mMsgId; }
     uint8_t GetU8Value() const { return mU8Value; }
     uint16_t GetU16Value() const { return mU16Value; }
@@ -77,15 +79,17 @@ public:
     std::vector<uint32_t> GetU32Vec() const { return mU32Vec; }
 
     template<typename T>
-    std::shared_ptr<T> GetDatas() {
+    std::shared_ptr<T> GetDatas() const {
         if (mDatas.size() < sizeof(T)) {
             return nullptr;
         }
-        std::shared_ptr<T> pData = std::make_shared<T>(*reinterpret_cast<T*>(mDatas.data()));
+
+        std::shared_ptr<T> pData = std::make_shared<T>(*const_cast<T*>(reinterpret_cast<const T*>(mDatas.data())));
         return pData;
     }
 
 private:
+    uint32_t mModuleId;
     uint32_t mMsgId;
     uint32_t mTag;
     uint8_t mU8Value;
@@ -105,6 +109,7 @@ private:
     std::map<ESprMsgType, CodecFunction> mDeFuncs;
 
     void Init();
+    void EncodeModuleId(std::string& enDatas) const;
     void EncodeMsgId(std::string& enDatas) const;
     void EncodeTag(std::string& enDatas) const;
     void EncodeU8Value(std::string& enDatas);
@@ -115,6 +120,7 @@ private:
     void EncodeU32Vec(std::string& enDatas);
     void EncodeDatas(std::string& enDatas);
 
+    void DecodeModuleId(std::string& deDatas);
     void DecodeMsgId(std::string& deDatas);
     void DecodeTag(std::string& deDatas);
     void DecodeU8Value(std::string& deDatas);

@@ -27,11 +27,21 @@
 #include "SprCommonType.h"
 #include "SprMediatorProxy.h"
 
+using ModuleIDType = InternalEnum::ESprModuleID;
+
 class SprObserver
 {
-public:
-    using ModuleIDType = InternalEnum::ESprModuleID;
+private:
+    bool mConnected;
+    int mMqHandle;
+    int mCurListenHandler;
+    uint32_t mCurListenEventType;
+    ModuleIDType mModuleID;
+    std::string mModuleName;
+    std::string mMqDevName;
+    std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
 
+public:
     SprObserver(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
     virtual ~SprObserver();
     SprObserver(const SprObserver&) = delete;
@@ -43,11 +53,28 @@ public:
     virtual ModuleIDType GetModuleId() const final { return mModuleID; }
     virtual std::string GetModuleName() const final { return mModuleName; }
     virtual std::string GetMqDevName() const final { return mMqDevName; }
-    virtual int NotifyObserver(ModuleIDType id, const SprMsg& msg);
+    virtual int NotifyObserver(uint32_t id, const SprMsg& msg);
     virtual int NotifyAllObserver(const SprMsg& msg);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
 
-    int AbstractProcessMsg(const SprMsg& msg);
+    void SetCurListenEventType(int type) { mCurListenEventType = type; }
+    int  GetCurListenEventType() { return mCurListenEventType; }
+    void SetCurListenHandler(int handler) { mCurListenHandler = handler; }
+    int  GetCurListenHandler() { return mCurListenHandler; }
+    int  AbstractProcessMsg(const SprMsg& msg);
+
+    /**
+     * @brief  AddPoll
+     * @param[in] listenType    listen type in epoll
+     * @param[in] listenHandler listen handler in epoll
+     * @return 0 on success, or -1 if an error occurred
+     *
+     * Use this function to add custom listening events to Epoll
+     */
+    int AddPoll(uint32_t listenType, int listenHandler);
+    int HandlePollEvent(uint32_t listenType);
+    virtual int HandleOtherPollEvent(uint32_t listenType);
+
     int SendMsg(const SprMsg& msg);
     int RecvMsg(SprMsg& msg);
 
@@ -59,13 +86,6 @@ public:
     static int MainLoop();
 
 private:
-    bool mConnected;
-    int mMqHandle;
-    ModuleIDType mModuleID;
-    std::string mModuleName;
-    std::string mMqDevName;
-    std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
-
     virtual int MakeMQ() final;
     int MsgResponseRegisterRsp(const SprMsg& msg);
     int MsgResponseUnregisterRsp(const SprMsg& msg);

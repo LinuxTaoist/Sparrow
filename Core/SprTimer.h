@@ -24,18 +24,29 @@
 class SprTimer
 {
 public:
-    SprTimer(uint32_t moduleId, uint64_t msgId, uint32_t repeatTimes, uint64_t delayInMilliSec, uint64_t intervalInMilliSec);
+    SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec);
+    SprTimer(const SprTimer& timer);
     ~SprTimer();
 
     bool operator < (const SprTimer& t) const;
-    uint32_t GetTick();
+    uint32_t GetTick() const;
+    uint32_t GetModuleId() const { return mModuleId; }
+    uint32_t GetMsgId() const { return mMsgId; }
+    uint32_t GetIntervalInMilliSec() const { return mIntervalInMilliSec; }
+    uint32_t GetExpired() const { return mExpired; }
+    uint32_t GetRepeatTimes() const { return mRepeatTimes; }
+    uint32_t GetRepeatCount() const { return mRepeatCount; }
+
+    void SetExpired(uint32_t expired) { mExpired = expired; }
+    void RepeatCount() const { mRepeatCount++; }
 
 private:
     uint32_t mModuleId;
-    uint64_t mMsgId;
-    uint64_t mIntervalInMilliSec;
+    uint32_t mMsgId;
+    uint32_t mIntervalInMilliSec;
     uint32_t mExpired;
     uint32_t mRepeatTimes;
+    mutable uint32_t mRepeatCount;
 };
 
 #endif  // __SPR_TIMER_H__

@@ -34,6 +34,7 @@ enum ESprModuleID
     MODULE_PROXY = 0x01,
     MODULE_CONFIG,
     MODULE_LOGM,
+    MODULE_TIMERM,
     MODULE_POWERM,
     MODULE_DEBUG,
     MODULE_MAX,
@@ -58,6 +59,22 @@ enum EDebugMsgID
     DEBUG_MSG_BEGIN = MODULE_DEBUG << 16 | 1,
     DEBUG_MSG_BUTT
 };
+
+enum PollScheduleType
+{
+    POLL_SCHEDULE_TYPE_MQ = 0,
+    POLL_SCHEDULE_TYPE_TIMER,
+    POLL_SCHEDULE_TYPE_BUTT
+};
+
+typedef struct
+{
+    uint32_t moduleId;
+    uint32_t msgId;
+    uint32_t repeatTimes;
+    int32_t  delayInMilliSec;
+    int32_t  intervalInMilliSec;
+} STimerInfo;
 
 } // namespace InternalEnum
 #endif

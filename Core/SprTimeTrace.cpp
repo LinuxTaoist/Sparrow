@@ -2,32 +2,45 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : LogManager.h
+ *  @file       : SprTimeTrace.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
- *  @date       : 2023/11/25
+ *  @date       : 2024/02/24
  *
+ *  System initialization file
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/02/24 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __LOG_MANAGER_H__
-#define __LOG_MANAGER_H__
+#include "SprTimeTrace.h"
 
-#include "SprObserver.h"
-
-class LogManager : public SprObserver
+SprTimeTrace::SprTimeTrace()
 {
-public:
-    LogManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr);
-    virtual ~LogManager();
 
-    int ProcessMsg(const SprMsg& msg);
-};
+}
 
-#endif
+SprTimeTrace::~SprTimeTrace()
+{
+
+}
+
+SprTimeTrace* SprTimeTrace::GetInstance()
+{
+    static SprTimeTrace instance;
+    return &instance;
+}
+
+void SprTimeTrace::TimeTracePoint(int id, const std::string& text)
+{
+    EntryInfo entry;
+    entry.eId = id;
+    entry.eText = text;
+    clock_gettime(CLOCK_MONOTONIC, &entry.eTimeStamp);
+    mEntryList.push_back(entry);
+}
+

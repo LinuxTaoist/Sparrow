@@ -27,31 +27,42 @@ using namespace std::chrono;
 #define SPR_LOGW(fmt, ...) std::cout << __LINE__ << " SprTimer W: " << fmt << std::endl
 #define SPR_LOGE(fmt, ...) std::cout << __LINE__ << " SprTimer E: " << fmt << std::endl
 
-SprTimer::SprTimer(uint32_t moduleId, uint64_t msgId, uint32_t repeatTimes, uint64_t delayInMilliSec, uint64_t intervalInMilliSec)
+SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec)
 {
     mModuleId = moduleId;
     mMsgId = msgId;
     mIntervalInMilliSec = intervalInMilliSec;
     mExpired = GetTick() + delayInMilliSec + intervalInMilliSec;
     mRepeatTimes = repeatTimes;
+    mRepeatCount = 0;
+}
+
+SprTimer::SprTimer(const SprTimer& timer)
+{
+    mModuleId = timer.mModuleId;
+    mMsgId = timer.mMsgId;
+    mIntervalInMilliSec = timer.mIntervalInMilliSec;
+    mExpired = timer.mExpired;
+    mRepeatTimes = timer.mRepeatTimes;
+    mRepeatCount = timer.mRepeatCount;
 }
 
 SprTimer::~SprTimer()
 {
 }
 
-bool SprTimer::operator < (const SprTimer& t) const
+bool SprTimer::operator < (const SprTimer& timer) const
 {
-    if (mExpired < t.mExpired) {
+    if (mExpired < timer.mExpired) {
         return true;
-    } else if (mExpired > t.mExpired) {
+    } else if (mExpired > timer.mExpired) {
         return false;
     } else {
-        return (mMsgId < t.mMsgId);
+        return (mMsgId < timer.mMsgId);
     }
 }
 
-uint32_t SprTimer::GetTick()
+uint32_t SprTimer::GetTick() const
 {
     uint32_t td = 0;
     struct timespec ts;

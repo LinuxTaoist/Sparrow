@@ -23,6 +23,12 @@
 
 namespace Shared {
     std::string ProduceRandomStr(int len);
+
+    template<typename T>
+    int AbsValue(T v1, T v2)
+    {
+        return v1 > v2 ? (v1 - v2) : (v2 - v1);
+    }
 };
 
 #endif

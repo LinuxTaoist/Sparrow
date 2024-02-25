@@ -31,6 +31,7 @@ SprMsg::SprMsg()
 
 SprMsg::SprMsg(const SprMsg& srcMsg)
 {
+    mModuleId = srcMsg.mModuleId;
     mMsgId = srcMsg.mMsgId;
     mTag = srcMsg.mTag;
     mU8Value = srcMsg.mU8Value;
@@ -44,6 +45,8 @@ SprMsg::SprMsg(const SprMsg& srcMsg)
     mU32Vec = srcMsg.mU32Vec;
     mDataSize = srcMsg.mDataSize;
     mDatas = srcMsg.mDatas;
+    mEnFuncs = srcMsg.mEnFuncs;
+    mDeFuncs = srcMsg.mDeFuncs;
 }
 
 SprMsg::SprMsg(uint32_t msgId)
@@ -79,6 +82,7 @@ int SprMsg::CopyMsg(const SprMsg& srcMsg)
 
 void SprMsg::Init()
 {
+    mModuleId = 0;
     mMsgId = 0;
     mTag = 0;
     mU8Value = 0;
@@ -119,6 +123,7 @@ int8_t SprMsg::Decode(std::string& deDatas)
     int8_t ret = 0;
 
     Clear();
+    DecodeModuleId(deDatas);
     DecodeMsgId(deDatas);
     DecodeTag(deDatas);
     for (auto i = (int)ESprMsgType::MSG_TYPE_MIN; i < (int)ESprMsgType::MSG_TYPE_MAX; i++)
@@ -143,6 +148,7 @@ int8_t SprMsg::Encode(std::string & enDatas) const
 {
     int ret = 0;
 
+    EncodeModuleId(enDatas);
     EncodeMsgId(enDatas);
     EncodeTag(enDatas);
     for (uint32_t i = (uint32_t)ESprMsgType::MSG_TYPE_MIN; i < (uint32_t)ESprMsgType::MSG_TYPE_MAX; i++)
@@ -161,6 +167,11 @@ int8_t SprMsg::Encode(std::string & enDatas) const
     }
 
     return ret;
+}
+
+void SprMsg::SetModuleId(uint32_t moduleId)
+{
+    mModuleId = moduleId;
 }
 
 void SprMsg::SetMsgId(uint32_t msgId)
@@ -204,6 +215,10 @@ void SprMsg::SetU32Vec(const std::vector<uint32_t>& vec)
     mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_U32VEC);
     mU32VecLength = vec.size();
     mU32Vec.assign(vec.begin(), vec.end());
+}
+void SprMsg::EncodeModuleId(std::string& enDatas) const
+{
+    Convert::intToString(mModuleId, enDatas);
 }
 
 void SprMsg::EncodeMsgId(std::string& enDatas) const
@@ -277,6 +292,17 @@ void SprMsg::EncodeDatas(std::string& enDatas)
     enDatas.push_back(0xFF & (mDataSize >> 8));
     enDatas.push_back(0xFF & mDataSize);
     enDatas.insert(enDatas.end(), mDatas.begin(), mDatas.end());
+}
+
+void SprMsg::DecodeModuleId(std::string& deDatas)
+{
+    if (Convert::stringToInt(mModuleId, deDatas) != 0)
+    {
+        SPR_LOGE("Decode moduleId Fail!\n");
+        return;
+    }
+
+    deDatas = deDatas.substr(sizeof(mModuleId));
 }
 
 void SprMsg::DecodeMsgId(std::string& deDatas)

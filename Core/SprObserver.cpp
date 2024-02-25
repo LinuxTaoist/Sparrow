@@ -30,6 +30,7 @@
 #include "SprEpollSchedule.h"
 
 using namespace std;
+using namespace InternalEnum;
 
 #define SPR_LOGD(fmt, args...) printf("%d SprObs D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d SprObs E: " fmt, __LINE__, ##args)
@@ -39,10 +40,17 @@ const int RANDOM_STR_LENGTH = 8;
 
 // Module ID, Module Name, proxyRpc,
 SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMediatorProxy> msgMediator)
-        : mConnected(false), mMqHandle(-1), mModuleID(id), mModuleName(name), mMsgMediatorPtr(msgMediator)
 {
+    mConnected = false;
+    mMqHandle = -1;
+    mCurListenHandler = -1;
+    mCurListenEventType = POLL_SCHEDULE_TYPE_MQ;
+    mModuleID = id;
+    mModuleName = name;
+    mMsgMediatorPtr = msgMediator;
+
     MakeMQ();
-    SprEpollSchedule::GetInstance()->AddPoll(*this);
+    AddPoll(POLL_SCHEDULE_TYPE_MQ, mMqHandle);
     mMsgMediatorPtr->RegisterObserver(*this);
     SPR_LOGD("Start Module: %s, mq: %s\n", mModuleName.c_str(), mMqDevName.c_str());
 }
@@ -93,6 +101,46 @@ int SprObserver::AbstractProcessMsg(const SprMsg& msg)
     return 0;
 }
 
+int SprObserver::AddPoll(uint32_t listenType, int listenHandler)
+{
+    SetCurListenEventType(listenType);
+    SetCurListenHandler(listenHandler);
+    SPR_LOGD("dx_debug: --- listenType = 0x%x\n", GetCurListenEventType());
+    SprEpollSchedule::GetInstance()->AddPoll(*this);
+    return 0;
+}
+
+int SprObserver::HandlePollEvent(uint32_t listenType)
+{
+    // dx_debug:
+    SPR_LOGD("HandlePollEvent: 0x%x, 0x%x\n", listenType, POLL_SCHEDULE_TYPE_MQ);
+
+    switch (listenType)
+    {
+        case POLL_SCHEDULE_TYPE_MQ:
+        {
+            SprMsg msg;
+            if (RecvMsg(msg) < 0) {
+                SPR_LOGE("RecvMsg fail!\n");
+            } else {
+                AbstractProcessMsg(msg);
+            }
+            break;
+        }
+
+        default:
+            HandleOtherPollEvent(listenType);
+            break;
+    }
+
+    return 0;
+}
+
+int SprObserver::HandleOtherPollEvent(uint32_t listenType)
+{
+    return 0;
+}
+
 // to self
 int SprObserver::SendMsg(const SprMsg& msg)
 {
@@ -125,7 +173,7 @@ int SprObserver::RecvMsg(SprMsg& msg)
     return msg.Decode(data);
 }
 
-int SprObserver::NotifyObserver(ModuleIDType id, const SprMsg& msg)
+int SprObserver::NotifyObserver(uint32_t id, const SprMsg& msg)
 {
     return 0;
 }

@@ -42,6 +42,7 @@ int main(int agrc, const char *argv[])
             case '0':   // debug SprMsg
             {
                 SprMsg theEnMsg((uint32_t)SIG_ID_DEBUG_MSG_SERIAL);
+                theEnMsg.SetModuleId(0x01);
                 theEnMsg.SetU8Value(8);
                 theEnMsg.SetU16Value(16);
                 theEnMsg.SetU32Value(32);
@@ -65,31 +66,34 @@ int main(int agrc, const char *argv[])
                 theEnMsg.Encode(enDatas);
 
                 SprMsg theDeMsg(enDatas);
-                vector<uint8_t> u8Vec = theDeMsg.GetU8Vec();
-                vector<uint32_t> u32Vec = theDeMsg.GetU32Vec();
+                vector<uint8_t> deU8Vec = theDeMsg.GetU8Vec();
+                vector<uint32_t> deU32Vec = theDeMsg.GetU32Vec();
                 std::shared_ptr<struct TestSpr> dePtr = theDeMsg.GetDatas<struct TestSpr>();
-                std::string u8Str(u8Vec1.begin(), u8Vec.end());
 
-                SPR_LOGD("msgId:    0x%x  \n", theDeMsg.GetMsgId());
-                SPR_LOGD("u8Value:  %d  \n", theDeMsg.GetU8Value());
-                SPR_LOGD("u16Value: %d  \n", theDeMsg.GetU16Value());
-                SPR_LOGD("string:   %s  \n", theDeMsg.GetString().c_str());
-                SPR_LOGD("u8Vec[%ld]:  %s \n", u8Vec.size(), u8Str.c_str());
-                SPR_LOGD("u32Vec[%ld]: %s \n", u32Vec.size(), Convert::vectorToHexString(u32Vec).c_str());
-                SPR_LOGD("ptr:      %d  \n", dePtr->id);
-                SPR_LOGD("          %s  \n", dePtr->buf);
+                SPR_LOGD("moduleId      : 0x%x  \n", theDeMsg.GetModuleId());
+                SPR_LOGD("msgId         : 0x%x  \n", theDeMsg.GetMsgId());
+                SPR_LOGD("u8Value       : %d    \n", theDeMsg.GetU8Value());
+                SPR_LOGD("u16Value      : %d    \n", theDeMsg.GetU16Value());
+                SPR_LOGD("string        : %s    \n", theDeMsg.GetString().c_str());
+                SPR_LOGD("u8Vec[%ld]    : %s    \n", deU8Vec.size(), Convert::vectorToString(deU8Vec).c_str());
+                SPR_LOGD("u32Vec[%ld]   : %s    \n", deU32Vec.size(), Convert::vectorToHexString(deU32Vec).c_str());
+                SPR_LOGD("ptr           : %d    \n", dePtr->id);
+                SPR_LOGD("                %s    \n", dePtr->buf);
 
                 SprMsg copyMsg(theDeMsg);
-                SPR_LOGD("---------------------------------------\n");
-                SPR_LOGD("msgId:    0x%x  \n", copyMsg.GetMsgId());
-                SPR_LOGD("u8Value:  %d  \n", copyMsg.GetU8Value());
-                SPR_LOGD("u16Value: %d  \n", copyMsg.GetU16Value());
-                SPR_LOGD("string:   %s  \n", copyMsg.GetString().c_str());
-                SPR_LOGD("u8Vec[%ld]:  %s \n", copyMsg.GetU8Vec().size(), Convert::vectorToHexString(copyMsg.GetU8Vec()).c_str());
-                SPR_LOGD("u32Vec[%ld]: %s \n", Convert::vectorToHexString(copyMsg.GetU32Vec()).size(), Convert::vectorToHexString(copyMsg.GetU32Vec()).c_str());
-                std::shared_ptr<struct TestSpr> copMsgDePtr = copyMsg.GetDatas<struct TestSpr>();
-                SPR_LOGD("ptr:      %d  \n", copMsgDePtr->id);
-                SPR_LOGD("          %s  \n", copMsgDePtr->buf);
+                std::vector<uint8_t> copyU8Vec = copyMsg.GetU8Vec();
+                std::vector<uint32_t> copyU32Vec = copyMsg.GetU32Vec();
+                std::shared_ptr<struct TestSpr> copyPtr = copyMsg.GetDatas<struct TestSpr>();
+                SPR_LOGD("-------------------------------------------------------------\n");
+                SPR_LOGD("moduleId      : 0x%x  \n", copyMsg.GetModuleId());
+                SPR_LOGD("msgId         : 0x%x  \n", copyMsg.GetMsgId());
+                SPR_LOGD("u8Value       : %d    \n", copyMsg.GetU8Value());
+                SPR_LOGD("u16Value      : %d    \n", copyMsg.GetU16Value());
+                SPR_LOGD("string        : %s    \n", copyMsg.GetString().c_str());
+                SPR_LOGD("u8Vec[%ld]    : %s    \n", copyU8Vec.size(), Convert::vectorToString(copyU8Vec).c_str());
+                SPR_LOGD("u32Vec[%ld]   : %s    \n", copyU32Vec.size(), Convert::vectorToHexString(copyU32Vec).c_str());
+                SPR_LOGD("ptr           : %d    \n", copyPtr->id);
+                SPR_LOGD("                %s    \n", copyPtr->buf);
                 break;
             }
 

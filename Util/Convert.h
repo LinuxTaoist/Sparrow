@@ -67,6 +67,13 @@ namespace Convert {
 
         return ss.str();
     }
+
+    template<typename T>
+    std::string vectorToString(const std::vector<T>& vec)
+    {
+        std::string str(vec.begin(), vec.end());
+        return str;
+    }
 };
 
 #endif
