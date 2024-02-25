@@ -80,7 +80,7 @@ int main(int agrc, const char *argv[])
     std::thread t1([&](){
         usage();
         do {
-            SPR_LOGD("Input: ");
+            SPR_LOGD("Input: \n");
             std::cin >> val;
             switch(val)
             {
