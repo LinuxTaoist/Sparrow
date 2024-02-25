@@ -55,9 +55,8 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
         AddPoll(POLL_SCHEDULE_TYPE_MQ, mMqHandle);
     }
 
-    mMsgMediatorPtr->RegisterObserver(*this);
-
     InitSigHandler();
+    mMsgMediatorPtr->RegisterObserver(*this);
     SPR_LOGD("Start Module: %s, mq: %s\n", mModuleName.c_str(), mMqDevName.c_str());
 }
 

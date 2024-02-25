@@ -101,7 +101,8 @@ private:
     void MsgRespondStopSystemTimer(const SprMsg &msg);
     void MsgRespondAddTimer(const SprMsg &msg);
     void MsgRespondDelTimer(const SprMsg &msg);
-    void MsgResponseSystemTimerNotify(const SprMsg &msg);
+    void MsgRespondSystemTimerNotify(const SprMsg &msg);
+    void MsgRespondClearTimersForExitComponent(const SprMsg &msg);
 };
 
 #endif // __TIMER_MANAGER_H__

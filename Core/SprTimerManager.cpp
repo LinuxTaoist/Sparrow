@@ -68,8 +68,7 @@ int SprTimerManager::DeInit()
 
 int SprTimerManager::ProcessMsg(const SprMsg& msg)
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGW("Disable status!\n");
     }
 
@@ -109,9 +108,15 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
         case SIG_ID_SYSTEM_TIMER_NOTIFY:
         {
             // SPR_LOGD("SIG_ID_SYSTEM_TIMER_NOTIFY\n");
-            MsgResponseSystemTimerNotify(msg);
+            MsgRespondSystemTimerNotify(msg);
+            break;
         }
-        break;
+
+        case SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT:
+        {
+            MsgRespondClearTimersForExitComponent(msg);
+            break;
+        }
 
         default:
             break;
@@ -152,8 +157,7 @@ int SprTimerManager::AddTimer(const SprTimer& timer)
 int SprTimerManager::DelTimer(const SprTimer& timer)
 {
     auto it = mTimers.find(timer);
-    if (it != mTimers.end())
-    {
+    if (it != mTimers.end()) {
         mTimers.erase(it);
     } else {
         SPR_LOGW("Not exist the timer! moduleId = 0x%x, msgId = 0x%x", timer.GetModuleId(), timer.GetMsgId());
@@ -180,74 +184,12 @@ uint32_t SprTimerManager::NextExpireTimes()
 int SprTimerManager::InitSystemTimer()
 {
     // systemTimer already initialized in sprSystem.Init()
-    if (mSystemTimerPtr == nullptr)
-    {
+    if (mSystemTimerPtr == nullptr) {
         SPR_LOGE("mSystemTimerPtr is nullptr!");
         return -1;
     }
 
     return 0;
-}
-
-void SprTimerManager::MsgResponseSystemTimerNotify(const SprMsg &msg)
-{
-    std::set<SprTimer> deleteTimers;  // 用于存储需要删除的定时器
-
-    // loop: Execute the triggered timers
-    for (auto it = mTimers.begin(); it != mTimers.end(); ++it)
-    {
-        int32_t diff = it->GetExpired() - it->GetTick();
-        if (diff > TIMER_MIN_PRECISION_MS)
-        {
-            break;
-        }
-        else
-        {
-            if (it->GetRepeatTimes() == 0 || (it->GetRepeatCount() + 1) < it->GetRepeatTimes())
-            {
-                SprTimer t(*it);
-
-                // loop: update timer valid expired time
-                uint32_t tmpExpired = t.GetExpired();
-                do
-                {
-                    tmpExpired += t.GetIntervalInMilliSec();
-                    t.RepeatCount();
-                } while (tmpExpired < it->GetTick());
-
-                if (it->GetRepeatTimes() == 0 || (it->GetRepeatCount() + 1) < it->GetRepeatTimes()) {
-                    t.SetExpired(tmpExpired);
-                    AddTimer(t);
-                }
-            }
-
-            // handle timer event
-            if (Shared::AbsValue(diff) < TIMER_MIN_PRECISION_MS)
-            {
-                // Notify expired timer event to the book component
-                SprMsg msg(it->GetModuleId(), it->GetMsgId());
-                NotifyObserver(msg);
-
-                it->RepeatCount();
-
-                // debug
-                // PrintRealTime();
-            }
-
-            deleteTimers.insert(*it);
-        }
-    }
-
-    // 删除需要删除的定时器
-    for (const auto& timer : deleteTimers) {
-        DelTimer(timer);
-    }
-
-    // Set next system timer
-    uint32_t msgId = mTimers.empty() ? SIG_ID_TIMER_STOP_SYSTEM_TIMER : SIG_ID_TIMER_START_SYSTEM_TIMER;
-    SprMsg sysMsg(msgId);
-    SendMsg(sysMsg);
-    // SPR_LOGD("Current total timers size = %d\n", (int)mTimers.size());
 }
 
 void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
@@ -266,8 +208,7 @@ void SprTimerManager::MsgRespondStopSystemTimer(const SprMsg &msg)
 void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 {
     std::shared_ptr<STimerInfo> p = msg.GetDatas<STimerInfo>();
-    if (p != nullptr)
-    {
+    if (p != nullptr) {
         SPR_LOGD("AddTimer: [0x%x %dms %dms %s]\n", p->ModuleId, p->DelayInMilliSec, p->IntervalInMilliSec, GetSigName(p->MsgId));
         AddTimer(p->ModuleId, p->MsgId, p->RepeatTimes, p->DelayInMilliSec, p->IntervalInMilliSec);
 
@@ -286,3 +227,73 @@ void SprTimerManager::MsgRespondDelTimer(const SprMsg &msg)
 
 }
 
+void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)
+{
+    set<SprTimer> deleteTimers;
+
+    // loop: Execute the triggered timers
+    for (auto it = mTimers.begin(); it != mTimers.end(); ++it) {
+        int32_t diff = it->GetExpired() - it->GetTick();
+        if (diff > TIMER_MIN_PRECISION_MS) {
+            break;
+        } else {
+            if (it->GetRepeatTimes() == 0 || (it->GetRepeatCount() + 1) < it->GetRepeatTimes()) {
+                SprTimer t(*it);
+
+                // loop: update timer valid expired time
+                uint32_t tmpExpired = t.GetExpired();
+                do {
+                    tmpExpired += t.GetIntervalInMilliSec();
+                    t.RepeatCount();
+                } while (tmpExpired < it->GetTick());
+
+                if (it->GetRepeatTimes() == 0 || (it->GetRepeatCount() + 1) < it->GetRepeatTimes()) {
+                    t.SetExpired(tmpExpired);
+                    AddTimer(t);
+                }
+            }
+
+            // handle timer event
+            if (Shared::AbsValue(diff) < TIMER_MIN_PRECISION_MS) {
+                // Notify expired timer event to the book component
+                SprMsg msg(it->GetModuleId(), it->GetMsgId());
+                NotifyObserver(msg);
+
+                it->RepeatCount();
+
+                // debug
+                // PrintRealTime();
+            }
+
+            deleteTimers.insert(*it);
+        }
+    }
+
+    // Delete expired timers
+    for (const auto& timer : deleteTimers) {
+        DelTimer(timer);
+    }
+
+    // Set next system timer
+    uint32_t msgId = mTimers.empty() ? SIG_ID_TIMER_STOP_SYSTEM_TIMER : SIG_ID_TIMER_START_SYSTEM_TIMER;
+    SprMsg sysMsg(msgId);
+    SendMsg(sysMsg);
+    // SPR_LOGD("Current total timers size = %d\n", (int)mTimers.size());
+}
+
+void SprTimerManager::MsgRespondClearTimersForExitComponent(const SprMsg &msg)
+{
+    uint32_t moduleId = msg.GetU32Value();
+    set<SprTimer> deleteTimers;
+
+    // loop: delete times of exit compnent
+    for (auto it = mTimers.begin(); it != mTimers.end(); ++it) {
+        if (it->GetModuleId() == moduleId) {
+            deleteTimers.insert(*it);
+        }
+    }
+
+    for (const auto& timer : deleteTimers) {
+        DelTimer(timer);
+    }
+}

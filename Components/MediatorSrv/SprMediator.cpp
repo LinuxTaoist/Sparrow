@@ -303,5 +303,8 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
     NotifyObserver(moduleId, rspMsg);
     SPR_LOGD("Unregister successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());
 
+    SprMsg exitMsg(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT);
+    exitMsg.SetU32Value(moduleId);
+    NotifyAllObserver(exitMsg);
     return 0;
 }

@@ -6,6 +6,7 @@ ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_REQUEST),                  \
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_RESPONSE),                 \
 ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_REQUEST),                \
 ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_RESPONSE),               \
+ENUM_OR_STRING(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT),          \
 
 //-----------------------------------------------------------------------------
 // LOG_MANAGER
