@@ -62,7 +62,7 @@ int SprMediatorIpcProxy::ConnectMediator()
 
 int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 {
-    SprMsg msg(SIG_ID_PROXY_REGISTER_REQUEST);
+    SprMsg msg(observer.GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_REGISTER_REQUEST);
     msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
     msg.SetU16Value((uint16_t)observer.GetModuleId());
     msg.SetString(observer.GetMqDevName());
@@ -74,7 +74,7 @@ int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 
 int SprMediatorIpcProxy::UnregisterObserver(const SprObserver& observer)
 {
-    SprMsg msg(SIG_ID_PROXY_UNREGISTER_REQUEST);
+    SprMsg msg(observer.GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_UNREGISTER_REQUEST);
     msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
     msg.SetU16Value((uint16_t)observer.GetModuleId());
     msg.SetString(observer.GetMqDevName());
@@ -97,8 +97,16 @@ int SprMediatorIpcProxy::SendMsg(const SprMsg& msg)
     return ret;
 }
 
-int SprMediatorIpcProxy::NotifyAllObserver(const SprMsg& msg)
+int SprMediatorIpcProxy::NotifyObserver(const SprMsg& msg)
 {
     SendMsg(msg);
+    return 0;
+}
+
+int SprMediatorIpcProxy::NotifyAllObserver(const SprMsg& msg)
+{
+    // The default value of mTo in SprMsg is MODULE_NONE.
+    // If you want to notify all, do not modify the mTo value in SprMsg when using
+    NotifyObserver(msg);
     return 0;
 }

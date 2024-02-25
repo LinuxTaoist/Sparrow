@@ -23,6 +23,7 @@
 #include <mqueue.h>
 #include <string.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
 #include "Util/Shared.h"
@@ -50,8 +51,13 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
     mMsgMediatorPtr = msgMediator;
 
     MakeMQ();
-    AddPoll(POLL_SCHEDULE_TYPE_MQ, mMqHandle);
+    if (IsListenMQ()) {
+        AddPoll(POLL_SCHEDULE_TYPE_MQ, mMqHandle);
+    }
+
     mMsgMediatorPtr->RegisterObserver(*this);
+
+    InitSigHandler();
     SPR_LOGD("Start Module: %s, mq: %s\n", mModuleName.c_str(), mMqDevName.c_str());
 }
 
@@ -71,6 +77,7 @@ SprObserver::~SprObserver()
         mq_unlink(mMqDevName.c_str());
         mMqDevName = "";
     }
+
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
@@ -80,9 +87,48 @@ int SprObserver::MainLoop()
     return 0;
 }
 
+int SprObserver::MainExit()
+{
+    SprEpollSchedule::GetInstance()->Exit();
+    return 0;
+}
+
+static void SignalHandler(int signum)
+{
+    SPR_LOGD("signal handler received signal %d!\n", signum);
+
+    switch (signum)
+    {
+        case SIGTERM:
+        case SIGINT:
+        {
+            SprObserver::MainExit();
+            break;
+        }
+
+        default:
+            break;
+    }
+}
+
+void SprObserver::InitSigHandler()
+{
+    struct sigaction signal_action;
+
+    signal_action.sa_handler = SignalHandler;
+    signal_action.sa_flags = 0;
+    sigemptyset(&signal_action.sa_mask);
+
+    /* register signals */
+    sigaction(SIGTERM, &signal_action, NULL);
+    sigaction(SIGINT, &signal_action, NULL);
+    sigaction(SIGPIPE, &signal_action, NULL); /* ignore broken pipe signals */
+    sigaction(SIGABRT, &signal_action, NULL);
+}
+
 int SprObserver::AbstractProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Receive Msg: %s\n", GetSigName(msg.GetMsgId()));
+    // SPR_LOGD("[0x%x -> 0x%x] Receive Msg: %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
         case InternalEnum::SIG_ID_PROXY_REGISTER_RESPONSE:
@@ -91,6 +137,10 @@ int SprObserver::AbstractProcessMsg(const SprMsg& msg)
 
         case InternalEnum::SIG_ID_PROXY_UNREGISTER_RESPONSE:
             MsgResponseUnregisterRsp(msg);
+            break;
+
+        case InternalEnum::SIG_ID_SYSTEM_EXIT:
+            MsgResponseSystemExitRsp(msg);
             break;
 
         default:
@@ -105,21 +155,17 @@ int SprObserver::AddPoll(uint32_t listenType, int listenHandler)
 {
     SetCurListenEventType(listenType);
     SetCurListenHandler(listenHandler);
-    SPR_LOGD("dx_debug: --- listenType = 0x%x\n", GetCurListenEventType());
     SprEpollSchedule::GetInstance()->AddPoll(*this);
     return 0;
 }
 
-int SprObserver::HandlePollEvent(uint32_t listenType)
+int SprObserver::HandlePollEvent()
 {
-    // dx_debug:
-    SPR_LOGD("HandlePollEvent: 0x%x, 0x%x\n", listenType, POLL_SCHEDULE_TYPE_MQ);
-
-    switch (listenType)
+    SprMsg msg;
+    switch (GetCurListenEventType())
     {
         case POLL_SCHEDULE_TYPE_MQ:
         {
-            SprMsg msg;
             if (RecvMsg(msg) < 0) {
                 SPR_LOGE("RecvMsg fail!\n");
             } else {
@@ -128,16 +174,12 @@ int SprObserver::HandlePollEvent(uint32_t listenType)
             break;
         }
 
+        case POLL_SCHEDULE_TYPE_TIMER:
         default:
-            HandleOtherPollEvent(listenType);
+            ProcessMsg(msg);
             break;
     }
 
-    return 0;
-}
-
-int SprObserver::HandleOtherPollEvent(uint32_t listenType)
-{
     return 0;
 }
 
@@ -173,8 +215,9 @@ int SprObserver::RecvMsg(SprMsg& msg)
     return msg.Decode(data);
 }
 
-int SprObserver::NotifyObserver(uint32_t id, const SprMsg& msg)
+int SprObserver::NotifyObserver(const SprMsg& msg)
 {
+    mMsgMediatorPtr->NotifyObserver(msg);
     return 0;
 }
 
@@ -199,6 +242,13 @@ int SprObserver::MakeMQ()
     }
 
     return mMqHandle;
+}
+
+int SprObserver::MsgResponseSystemExitRsp(const SprMsg& msg)
+{
+    SPR_LOGD("System Exit!\n");
+    MainExit();
+    return 0;
 }
 
 int SprObserver::MsgResponseRegisterRsp(const SprMsg& msg)

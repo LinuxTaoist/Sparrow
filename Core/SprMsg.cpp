@@ -31,7 +31,7 @@ SprMsg::SprMsg()
 
 SprMsg::SprMsg(const SprMsg& srcMsg)
 {
-    mModuleId = srcMsg.mModuleId;
+    mFrom = srcMsg.mFrom;
     mMsgId = srcMsg.mMsgId;
     mTag = srcMsg.mTag;
     mU8Value = srcMsg.mU8Value;
@@ -52,6 +52,21 @@ SprMsg::SprMsg(const SprMsg& srcMsg)
 SprMsg::SprMsg(uint32_t msgId)
 {
     Init();
+    mMsgId = msgId;
+}
+
+SprMsg::SprMsg(uint32_t to, uint32_t msgId)
+{
+    Init();
+    mTo = to;
+    mMsgId = msgId;
+}
+
+SprMsg::SprMsg(uint32_t from, uint32_t to, uint32_t msgId)
+{
+    Init();
+    mFrom = from;
+    mTo = to;
     mMsgId = msgId;
 }
 
@@ -82,7 +97,8 @@ int SprMsg::CopyMsg(const SprMsg& srcMsg)
 
 void SprMsg::Init()
 {
-    mModuleId = 0;
+    mFrom = 0;
+    mTo = 0;
     mMsgId = 0;
     mTag = 0;
     mU8Value = 0;
@@ -123,7 +139,8 @@ int8_t SprMsg::Decode(std::string& deDatas)
     int8_t ret = 0;
 
     Clear();
-    DecodeModuleId(deDatas);
+    DecodeFrom(deDatas);
+    DecodeTo(deDatas);
     DecodeMsgId(deDatas);
     DecodeTag(deDatas);
     for (auto i = (int)ESprMsgType::MSG_TYPE_MIN; i < (int)ESprMsgType::MSG_TYPE_MAX; i++)
@@ -148,7 +165,8 @@ int8_t SprMsg::Encode(std::string & enDatas) const
 {
     int ret = 0;
 
-    EncodeModuleId(enDatas);
+    EncodeFrom(enDatas);
+    EncodeTo(enDatas);
     EncodeMsgId(enDatas);
     EncodeTag(enDatas);
     for (uint32_t i = (uint32_t)ESprMsgType::MSG_TYPE_MIN; i < (uint32_t)ESprMsgType::MSG_TYPE_MAX; i++)
@@ -169,9 +187,14 @@ int8_t SprMsg::Encode(std::string & enDatas) const
     return ret;
 }
 
-void SprMsg::SetModuleId(uint32_t moduleId)
+void SprMsg::SetFrom(uint32_t from)
 {
-    mModuleId = moduleId;
+    mFrom = from;
+}
+
+void SprMsg::SetTo(uint32_t to)
+{
+    mTo = to;
 }
 
 void SprMsg::SetMsgId(uint32_t msgId)
@@ -216,9 +239,14 @@ void SprMsg::SetU32Vec(const std::vector<uint32_t>& vec)
     mU32VecLength = vec.size();
     mU32Vec.assign(vec.begin(), vec.end());
 }
-void SprMsg::EncodeModuleId(std::string& enDatas) const
+void SprMsg::EncodeFrom(std::string& enDatas) const
 {
-    Convert::intToString(mModuleId, enDatas);
+    Convert::intToString(mFrom, enDatas);
+}
+
+void SprMsg::EncodeTo(std::string& enDatas) const
+{
+    Convert::intToString(mTo, enDatas);
 }
 
 void SprMsg::EncodeMsgId(std::string& enDatas) const
@@ -294,15 +322,26 @@ void SprMsg::EncodeDatas(std::string& enDatas)
     enDatas.insert(enDatas.end(), mDatas.begin(), mDatas.end());
 }
 
-void SprMsg::DecodeModuleId(std::string& deDatas)
+void SprMsg::DecodeFrom(std::string& deDatas)
 {
-    if (Convert::stringToInt(mModuleId, deDatas) != 0)
+    if (Convert::stringToInt(mFrom, deDatas) != 0)
     {
-        SPR_LOGE("Decode moduleId Fail!\n");
+        SPR_LOGE("Decode from Fail!\n");
         return;
     }
 
-    deDatas = deDatas.substr(sizeof(mModuleId));
+    deDatas = deDatas.substr(sizeof(mFrom));
+}
+
+void SprMsg::DecodeTo(std::string& deDatas)
+{
+    if (Convert::stringToInt(mTo, deDatas) != 0)
+    {
+        SPR_LOGE("Decode to Fail!\n");
+        return;
+    }
+
+    deDatas = deDatas.substr(sizeof(mTo));
 }
 
 void SprMsg::DecodeMsgId(std::string& deDatas)

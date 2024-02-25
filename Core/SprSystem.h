@@ -39,6 +39,8 @@ public:
 
 private:
     SprSystem();
+    void InitEnv();
+    void InitMsgQueueLimit();
 };
 
 #endif // __SPR_SYSTEM_H__

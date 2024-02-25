@@ -65,12 +65,14 @@ void SprEpollSchedule::Init()
     mRun = true;
     mpGoPool = co::AsyncCoroutinePool::Create();
     mpGoPool->InitCoroutinePool(1024);
-    mpGoPool->Start(4, 128);
+    mpGoPool->Start(10, 128);
 }
 
 void SprEpollSchedule::Exit()
 {
     mRun = false;
+    close(mEpollHandler);
+    mEpollHandler = -1;
 }
 
 void SprEpollSchedule::AddPoll(SprObserver& observer)
@@ -84,7 +86,6 @@ void SprEpollSchedule::AddPoll(SprObserver& observer)
     ep.data.u32 = (uint32_t)observer.GetCurListenEventType();
     ep.data.ptr = &observer;
 
-    SPR_LOGD("dx_debug: --- u32 = 0x%x 0x%x %s\n", ep.data.u32, observer.GetCurListenEventType(), observer.GetModuleName().c_str());
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
@@ -120,16 +121,14 @@ void SprEpollSchedule::EpollLoop()
             continue;
         }
 
-        // 监听消息队列有数据, 读取数据, libgo调度
-        SPR_LOGD("Data count %d come from epoll ...\n", count);
+        // IO监听有数据, libgo调度
+        // SPR_LOGD("Data count %d come from epoll ...\n", count);
         for (int i = 0; i < count; i++) {
             SprObserver* p = static_cast<SprObserver*>(ep[i].data.ptr);
-            uint32_t listenType = ep[i].data.u32;
 
-            SPR_LOGD("Poll module %s, listen type 0x%x\n", p->GetModuleName().c_str(), listenType);
             // 投递任务至协程，没有回调
-            mpGoPool->Post([p, listenType] {
-                p->HandlePollEvent(listenType);
+            mpGoPool->Post([p] {
+                p->HandlePollEvent();
             }, nullptr);
         }
     } while(mRun);

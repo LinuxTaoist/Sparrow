@@ -35,6 +35,7 @@ public:
     virtual int RegisterObserver(const SprObserver& observer) = 0;
     virtual int UnregisterObserver(const SprObserver& observer) = 0;
     virtual int SendMsg(const SprMsg& msg) = 0;
+    virtual int NotifyObserver(const SprMsg& msg) = 0;
     virtual int NotifyAllObserver(const SprMsg& msg) = 0;
 };
 

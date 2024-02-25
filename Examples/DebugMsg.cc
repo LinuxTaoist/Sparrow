@@ -42,7 +42,7 @@ int main(int agrc, const char *argv[])
             case '0':   // debug SprMsg
             {
                 SprMsg theEnMsg((uint32_t)SIG_ID_DEBUG_MSG_SERIAL);
-                theEnMsg.SetModuleId(0x01);
+                theEnMsg.SetFrom(0x01);
                 theEnMsg.SetU8Value(8);
                 theEnMsg.SetU16Value(16);
                 theEnMsg.SetU32Value(32);
@@ -70,7 +70,8 @@ int main(int agrc, const char *argv[])
                 vector<uint32_t> deU32Vec = theDeMsg.GetU32Vec();
                 std::shared_ptr<struct TestSpr> dePtr = theDeMsg.GetDatas<struct TestSpr>();
 
-                SPR_LOGD("moduleId      : 0x%x  \n", theDeMsg.GetModuleId());
+                SPR_LOGD("from          : 0x%x  \n", theDeMsg.GetFrom());
+                SPR_LOGD("to            : 0x%x  \n", theDeMsg.GetTo());
                 SPR_LOGD("msgId         : 0x%x  \n", theDeMsg.GetMsgId());
                 SPR_LOGD("u8Value       : %d    \n", theDeMsg.GetU8Value());
                 SPR_LOGD("u16Value      : %d    \n", theDeMsg.GetU16Value());
@@ -85,7 +86,8 @@ int main(int agrc, const char *argv[])
                 std::vector<uint32_t> copyU32Vec = copyMsg.GetU32Vec();
                 std::shared_ptr<struct TestSpr> copyPtr = copyMsg.GetDatas<struct TestSpr>();
                 SPR_LOGD("-------------------------------------------------------------\n");
-                SPR_LOGD("moduleId      : 0x%x  \n", copyMsg.GetModuleId());
+                SPR_LOGD("from          : 0x%x  \n", copyMsg.GetFrom());
+                SPR_LOGD("to            : 0x%x  \n", copyMsg.GetTo());
                 SPR_LOGD("msgId         : 0x%x  \n", copyMsg.GetMsgId());
                 SPR_LOGD("u8Value       : %d    \n", copyMsg.GetU8Value());
                 SPR_LOGD("u16Value      : %d    \n", copyMsg.GetU16Value());

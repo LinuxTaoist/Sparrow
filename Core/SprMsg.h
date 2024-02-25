@@ -44,6 +44,8 @@ public:
     SprMsg();
     SprMsg(const SprMsg& srcMsg);
     SprMsg(uint32_t msgId);
+    SprMsg(uint32_t to, uint32_t msgId);
+    SprMsg(uint32_t from, uint32_t to, uint32_t msgId);
     SprMsg(std::string datas);
     SprMsg& operator=(const SprMsg &srcMsg); // Assignment Operator
     int CopyMsg(const SprMsg& srcMsg);
@@ -52,7 +54,8 @@ public:
     int8_t Decode(std::string& deDatas);
     int8_t Encode(std::string& enDatas) const;
 
-    void SetModuleId(uint32_t moduleId);
+    void SetFrom(uint32_t from);
+    void SetTo(uint32_t to);
     void SetMsgId(uint32_t msgId);
     void SetU8Value(uint8_t value);
     void SetU16Value(uint16_t value);
@@ -69,7 +72,8 @@ public:
         mDatas.assign(pData, pData + size);
     }
 
-    uint32_t GetModuleId() const { return mModuleId; }
+    uint32_t GetFrom() const { return mFrom; }
+    uint32_t GetTo() const { return mTo; }
     uint32_t GetMsgId() const { return mMsgId; }
     uint8_t GetU8Value() const { return mU8Value; }
     uint16_t GetU16Value() const { return mU16Value; }
@@ -89,7 +93,8 @@ public:
     }
 
 private:
-    uint32_t mModuleId;
+    uint32_t mFrom;
+    uint32_t mTo;
     uint32_t mMsgId;
     uint32_t mTag;
     uint8_t mU8Value;
@@ -109,7 +114,8 @@ private:
     std::map<ESprMsgType, CodecFunction> mDeFuncs;
 
     void Init();
-    void EncodeModuleId(std::string& enDatas) const;
+    void EncodeFrom(std::string& enDatas) const;
+    void EncodeTo(std::string& enDatas) const;
     void EncodeMsgId(std::string& enDatas) const;
     void EncodeTag(std::string& enDatas) const;
     void EncodeU8Value(std::string& enDatas);
@@ -120,7 +126,8 @@ private:
     void EncodeU32Vec(std::string& enDatas);
     void EncodeDatas(std::string& enDatas);
 
-    void DecodeModuleId(std::string& deDatas);
+    void DecodeFrom(std::string& deDatas);
+    void DecodeTo(std::string& deDatas);
     void DecodeMsgId(std::string& deDatas);
     void DecodeTag(std::string& deDatas);
     void DecodeU8Value(std::string& deDatas);

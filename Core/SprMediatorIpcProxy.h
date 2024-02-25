@@ -28,6 +28,7 @@ public:
     int RegisterObserver(const SprObserver& observer) override;
     int UnregisterObserver(const SprObserver& observer) override;
     virtual int SendMsg(const SprMsg& msg) override;
+    virtual int NotifyObserver(const SprMsg& msg) override;
     virtual int NotifyAllObserver(const SprMsg& msg) override;
 
 private:

@@ -171,8 +171,7 @@ int SprMediator::EpollLoop()
 
 int SprMediator::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Receive msg: %s\n", GetSigName(msg.GetMsgId()));
-
+    // SPR_LOGD("[0x%x -> 0x%x] msg: %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
         case SIG_ID_PROXY_REGISTER_REQUEST:
@@ -196,7 +195,7 @@ int SprMediator::SendMsg(const SprMsg& msg)
     string datas;
 
     msg.Encode(datas);
-    int ret = mq_send(mHandler, (const char*)datas.c_str(), datas.size(), 1);
+    int ret = mq_send(mHandler, (const char*)datas.c_str(), datas.size(), 0);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }
@@ -215,7 +214,7 @@ int SprMediator::NotifyObserver(ESprModuleID id, const SprMsg& msg)
 
     string datas;
     msg.Encode(datas);
-    int ret = mq_send(it->second.handler, (const char*)datas.c_str(), datas.size(), 1);
+    int ret = mq_send(it->second.handler, (const char*)datas.c_str(), datas.size(), 0);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }
@@ -227,13 +226,15 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
 {
     for (const auto& pair : mModuleMap)
     {
-        if (pair.second.handler == -1)
+        if (pair.second.handler != -1 && pair.first != MODULE_SYSTEM_TIMER)
         {
-            continue;
+            // When the value to is NONE, it is sent to all
+            // and when the value is vaild value, it is sent to the specified module
+            if (msg.GetTo() == MODULE_NONE || msg.GetTo() == pair.first)
+            {
+                NotifyObserver(pair.first, msg);
+            }
         }
-
-        // SPR_LOGD("Module Id = 0x%x\n", pair.first);
-        NotifyObserver(pair.first, msg);
     }
 
     return 0;
@@ -268,7 +269,7 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
         SPR_LOGE("Invaild handler!\n");
     }
 
-    SprMsg rspMsg(SIG_ID_PROXY_REGISTER_RESPONSE);
+    SprMsg rspMsg(MODULE_PROXY, moduleId, SIG_ID_PROXY_REGISTER_RESPONSE);
     rspMsg.SetU8Value(result);
     NotifyObserver(moduleId, rspMsg);
 
@@ -297,7 +298,7 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
         SPR_LOGW("Not exist module id: %x\n", moduleId);
     }
 
-    SprMsg rspMsg(SIG_ID_PROXY_UNREGISTER_RESPONSE);
+    SprMsg rspMsg(MODULE_PROXY, moduleId, SIG_ID_PROXY_UNREGISTER_RESPONSE);
     rspMsg.SetU8Value(result);
     NotifyObserver(moduleId, rspMsg);
     SPR_LOGD("Unregister successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());

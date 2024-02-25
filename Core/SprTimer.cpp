@@ -23,9 +23,9 @@
 
 using namespace std::chrono;
 
-#define SPR_LOGD(fmt, ...) std::cout << __LINE__ << " SprTimer D: " << fmt << std::endl
-#define SPR_LOGW(fmt, ...) std::cout << __LINE__ << " SprTimer W: " << fmt << std::endl
-#define SPR_LOGE(fmt, ...) std::cout << __LINE__ << " SprTimer E: " << fmt << std::endl
+#define SPR_LOGD(fmt, args...) printf("%d SprTimer D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%d SprTimer W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%d SprTimer E: " fmt, __LINE__, ##args)
 
 SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec)
 {
@@ -68,5 +68,6 @@ uint32_t SprTimer::GetTick() const
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     td = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+
     return td;
 }

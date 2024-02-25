@@ -31,10 +31,12 @@ namespace InternalEnum {
 
 enum ESprModuleID
 {
+    MODULE_NONE = 0x00,
     MODULE_PROXY = 0x01,
     MODULE_CONFIG,
     MODULE_LOGM,
     MODULE_TIMERM,
+    MODULE_SYSTEM_TIMER,
     MODULE_POWERM,
     MODULE_DEBUG,
     MODULE_MAX,
@@ -42,7 +44,7 @@ enum ESprModuleID
 
 enum EProxyType
 {
-    PROXY_TYPE_MQ = 1,
+    PROXY_TYPE_MQ = 0,
     PROXY_TYPE_UNIX_SOCKET,
     PROXY_TYPE_INET_SOCKET,
     PROXY_TYPE_BUTT
@@ -62,18 +64,18 @@ enum EDebugMsgID
 
 enum PollScheduleType
 {
-    POLL_SCHEDULE_TYPE_MQ = 0,
+    POLL_SCHEDULE_TYPE_MQ = 0x01,
     POLL_SCHEDULE_TYPE_TIMER,
     POLL_SCHEDULE_TYPE_BUTT
 };
 
 typedef struct
 {
-    uint32_t moduleId;
-    uint32_t msgId;
-    uint32_t repeatTimes;
-    int32_t  delayInMilliSec;
-    int32_t  intervalInMilliSec;
+    uint32_t ModuleId;
+    uint32_t MsgId;
+    uint32_t RepeatTimes;
+    int32_t  DelayInMilliSec;
+    int32_t  IntervalInMilliSec;
 } STimerInfo;
 
 } // namespace InternalEnum

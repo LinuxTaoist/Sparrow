@@ -53,7 +53,9 @@ public:
     virtual ModuleIDType GetModuleId() const final { return mModuleID; }
     virtual std::string GetModuleName() const final { return mModuleName; }
     virtual std::string GetMqDevName() const final { return mMqDevName; }
-    virtual int NotifyObserver(uint32_t id, const SprMsg& msg);
+
+    virtual bool IsListenMQ() { return true; }
+    virtual int NotifyObserver(const SprMsg& msg);
     virtual int NotifyAllObserver(const SprMsg& msg);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
 
@@ -72,21 +74,27 @@ public:
      * Use this function to add custom listening events to Epoll
      */
     int AddPoll(uint32_t listenType, int listenHandler);
-    int HandlePollEvent(uint32_t listenType);
-    virtual int HandleOtherPollEvent(uint32_t listenType);
+    int HandlePollEvent();
 
     int SendMsg(const SprMsg& msg);
     int RecvMsg(SprMsg& msg);
 
     /**
-     * @brief       阻塞监听消息队列，在进程所有组件初始化完后调用
-     *
-     * @return
+     * @brief  MainLoop
+     * @return 0 on success, or -1 if an error occurred
      */
     static int MainLoop();
 
+    /**
+     * @brief  MainExit
+     * @return 0 on success, or -1 if an error occurred
+     */
+    static int MainExit();
+
 private:
     virtual int MakeMQ() final;
+    void InitSigHandler();
+    int MsgResponseSystemExitRsp(const SprMsg& msg);
     int MsgResponseRegisterRsp(const SprMsg& msg);
     int MsgResponseUnregisterRsp(const SprMsg& msg);
 };

@@ -17,14 +17,18 @@
  *
  */
 #include <iostream>
+#include <sstream>
 #include <memory>
+#include <thread>
 #include <stdio.h>
 #include <string.h>
 #include "Convert.h"
+#include "Shared.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
+using namespace Shared;
 using namespace InternalEnum;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
@@ -48,7 +52,7 @@ public:
         switch(msg.GetMsgId())
         {
             default:
-                SPR_LOGD("msg id: 0x%x\n", msg.GetMsgId());
+                SPR_LOGD("msg id: %s %s\n", GetSigName(msg.GetMsgId()), GetCurTimeStr().c_str());
                 break;
         }
 
@@ -73,43 +77,61 @@ int main(int agrc, const char *argv[])
 
     char val = 0;
     bool run = true;
-    usage();
-    do {
-        SPR_LOGD("Input: ");
-        std::cin >> val;
-        switch(val)
-        {
-            case '0':
+    std::thread t1([&](){
+        usage();
+        do {
+            SPR_LOGD("Input: ");
+            std::cin >> val;
+            switch(val)
             {
-                SprMsg msg(SIG_ID_DEBUG_NOTIFY_ALL);
-                theDebug.NotifyAllObserver(msg);
+                case '0':
+                {
+                    SprMsg msg(SIG_ID_DEBUG_NOTIFY_ALL);
+                    theDebug.NotifyAllObserver(msg);
+                    break;
+                }
+
+                case '1':
+                {
+                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 1000, 3000};
+                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
+                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
+                    msg.SetFrom(MODULE_DEBUG);
+                    msg.SetDatas(pInfo, sizeof(STimerInfo));
+                    theDebug.NotifyAllObserver(msg);
+
+                    break;
+                }
+
+                case '2':
+                {
+                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 10, 0, 2000};
+                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
+                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
+                    msg.SetFrom(MODULE_DEBUG);
+                    msg.SetDatas(pInfo, sizeof(STimerInfo));
+                    theDebug.NotifyAllObserver(msg);
+
+                    break;
+                }
+
+                case 'q':
+                {
+                    run = false;
+                    break;
+                }
+
+                default:
+                    usage();
                 break;
             }
+        } while(run);
+    });
 
-            case '1':
-            {
-                STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST, 0, 100, 100};
-                shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
-                SprMsg msg(SIG_ID_TIMER_ADD_CUSTOM_TIMER);
-                msg.SetModuleId(MODULE_DEBUG);
-                msg.SetDatas(pInfo, sizeof(STimerInfo));
-                theDebug.NotifyAllObserver(msg);
-
-                break;
-            }
-
-            case 'q':
-            {
-                run = false;
-                break;
-            }
-
-            default:
-                usage();
-            break;
-        }
-    } while(run);
-
+    SprObserver::MainLoop();
+    run = false;
+    t1.detach();
+    SPR_LOGD("Exit Debug Core.\n");
     return 0;
 }
 
