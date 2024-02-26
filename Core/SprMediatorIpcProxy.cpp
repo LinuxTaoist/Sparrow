@@ -51,7 +51,7 @@ int SprMediatorIpcProxy::ConnectMediator()
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    mMediatorHandler = mq_open(MEDIATOR_MSG_QUEUE, O_RDWR, &mqAttr);
+    mMediatorHandler = mq_open(MEDIATOR_MSG_QUEUE, O_RDWR, 0666, &mqAttr);
     if(mMediatorHandler < 0) {
         SPR_LOGE("Open %s failed. (%s)\n", MEDIATOR_MSG_QUEUE, strerror(errno));
         return -1;
