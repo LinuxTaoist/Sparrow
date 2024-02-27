@@ -42,6 +42,7 @@ int main(int agrc, const char *argv[])
             case '0':   // debug SprMsg
             {
                 SprMsg theEnMsg((uint32_t)SIG_ID_DEBUG_MSG_SERIAL);
+                theEnMsg.SetBoolValue(false);
                 theEnMsg.SetFrom(0x01);
                 theEnMsg.SetU8Value(8);
                 theEnMsg.SetU16Value(16);
@@ -56,9 +57,8 @@ int main(int agrc, const char *argv[])
                 {
                     int id;
                     char buf[20];
-                };
+                } testData = { 10, "hello sparrow"};
 
-                TestSpr testData = { 10, "hello sparrow"};
                 shared_ptr<struct TestSpr> p = static_pointer_cast<struct TestSpr>(make_shared<TestSpr>(testData));
                 theEnMsg.SetDatas(p, sizeof(TestSpr));
 
@@ -73,6 +73,7 @@ int main(int agrc, const char *argv[])
                 SPR_LOGD("from          : 0x%x  \n", theDeMsg.GetFrom());
                 SPR_LOGD("to            : 0x%x  \n", theDeMsg.GetTo());
                 SPR_LOGD("msgId         : 0x%x  \n", theDeMsg.GetMsgId());
+                SPR_LOGD("boolValue     : %d    \n", theDeMsg.GetBoolValue());
                 SPR_LOGD("u8Value       : %d    \n", theDeMsg.GetU8Value());
                 SPR_LOGD("u16Value      : %d    \n", theDeMsg.GetU16Value());
                 SPR_LOGD("string        : %s    \n", theDeMsg.GetString().c_str());
@@ -89,6 +90,7 @@ int main(int agrc, const char *argv[])
                 SPR_LOGD("from          : 0x%x  \n", copyMsg.GetFrom());
                 SPR_LOGD("to            : 0x%x  \n", copyMsg.GetTo());
                 SPR_LOGD("msgId         : 0x%x  \n", copyMsg.GetMsgId());
+                SPR_LOGD("boolValue     : %d    \n", copyMsg.GetBoolValue());
                 SPR_LOGD("u8Value       : %d    \n", copyMsg.GetU8Value());
                 SPR_LOGD("u16Value      : %d    \n", copyMsg.GetU16Value());
                 SPR_LOGD("string        : %s    \n", copyMsg.GetString().c_str());

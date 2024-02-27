@@ -63,6 +63,7 @@ int SprMediatorIpcProxy::ConnectMediator()
 int SprMediatorIpcProxy::RegisterObserver(const SprObserver& observer)
 {
     SprMsg msg(observer.GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_REGISTER_REQUEST);
+    msg.SetBoolValue(observer.IsMonitored());
     msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
     msg.SetU16Value((uint16_t)observer.GetModuleId());
     msg.SetString(observer.GetMqDevName());

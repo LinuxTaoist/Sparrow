@@ -27,6 +27,7 @@ public:
     ~SprTimer();
 
     bool operator < (const SprTimer& t) const;
+    bool IsExpired() const;
     uint32_t GetTick() const;
     uint32_t GetModuleId() const { return mModuleId; }
     uint32_t GetMsgId() const { return mMsgId; }

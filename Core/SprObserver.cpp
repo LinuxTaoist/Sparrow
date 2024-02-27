@@ -40,9 +40,10 @@ const int MQ_BUFF_MAX_SIZE  = 1024;
 const int RANDOM_STR_LENGTH = 8;
 
 // Module ID, Module Name, proxyRpc,
-SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMediatorProxy> msgMediator)
+SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMediatorProxy> msgMediator, bool monitored)
 {
     mConnected = false;
+    mListenMQ = monitored;
     mMqHandle = -1;
     mCurListenHandler = -1;
     mCurListenEventType = POLL_SCHEDULE_TYPE_MQ;
@@ -51,7 +52,7 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
     mMsgMediatorPtr = msgMediator;
 
     MakeMQ();
-    if (IsListenMQ()) {
+    if (IsMonitored()) {
         AddPoll(POLL_SCHEDULE_TYPE_MQ, mMqHandle);
     }
 
@@ -78,6 +79,11 @@ SprObserver::~SprObserver()
     }
 
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
+}
+
+bool SprObserver::IsMonitored() const
+{
+    return mListenMQ;
 }
 
 int SprObserver::MainLoop()

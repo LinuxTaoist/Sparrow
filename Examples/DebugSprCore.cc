@@ -20,6 +20,7 @@
 #include <sstream>
 #include <memory>
 #include <thread>
+#include <unistd.h>
 #include <stdio.h>
 #include <string.h>
 #include "Convert.h"
@@ -65,7 +66,8 @@ static void usage()
     SPR_LOG("------------------------------------------------------------------\n"
             "usage:\n"
             "0: NotifyAllObserver\n"
-            "1: AddCustomTimer\n"
+            "1: AddTimer ( 0, 1s, 2s)\n"
+            "2: AddTimer (10, 0s, 2s)\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -81,7 +83,7 @@ int main(int agrc, const char *argv[])
         usage();
         do {
             SPR_LOGD("Input: \n");
-            std::cin >> val;
+            val = fgetc(stdin);
             switch(val)
             {
                 case '0':
@@ -129,9 +131,11 @@ int main(int agrc, const char *argv[])
     });
 
     SprObserver::MainLoop();
-    run = false;
-    t1.detach();
-    SPR_LOGD("Exit Debug Core.\n");
+
+    val = 'q';
+    int ret = write(STDIN_FILENO, &val, 1);
+    SPR_LOGD("Exit Debug Core. ret = %d\n", ret);
+    t1.join();
     return 0;
 }
 

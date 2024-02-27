@@ -27,6 +27,7 @@
 
 struct SModuleInfo
 {
+    bool monitored;
     int handler;
     std::string name;
 };

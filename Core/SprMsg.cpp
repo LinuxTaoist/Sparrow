@@ -31,22 +31,7 @@ SprMsg::SprMsg()
 
 SprMsg::SprMsg(const SprMsg& srcMsg)
 {
-    mFrom = srcMsg.mFrom;
-    mMsgId = srcMsg.mMsgId;
-    mTag = srcMsg.mTag;
-    mU8Value = srcMsg.mU8Value;
-    mU16Value = srcMsg.mU16Value;
-    mU32Value = srcMsg.mU32Value;
-    mStringLength = srcMsg.mStringLength;
-    mString = srcMsg.mString;
-    mU8VecLength = srcMsg.mU8VecLength;
-    mU8Vec = srcMsg.mU8Vec;
-    mU32VecLength = srcMsg.mU32VecLength;
-    mU32Vec = srcMsg.mU32Vec;
-    mDataSize = srcMsg.mDataSize;
-    mDatas = srcMsg.mDatas;
-    mEnFuncs = srcMsg.mEnFuncs;
-    mDeFuncs = srcMsg.mDeFuncs;
+    CopyMsg(srcMsg);
 }
 
 SprMsg::SprMsg(uint32_t msgId)
@@ -92,6 +77,25 @@ SprMsg& SprMsg::operator=(const SprMsg &srcMsg)
 
 int SprMsg::CopyMsg(const SprMsg& srcMsg)
 {
+    mFrom = srcMsg.mFrom;
+    mTo = srcMsg.mTo;
+    mMsgId = srcMsg.mMsgId;
+    mTag = srcMsg.mTag;
+    mBoolValue = srcMsg.mBoolValue;
+    mU8Value = srcMsg.mU8Value;
+    mU16Value = srcMsg.mU16Value;
+    mU32Value = srcMsg.mU32Value;
+    mStringLength = srcMsg.mStringLength;
+    mString = srcMsg.mString;
+    mU8VecLength = srcMsg.mU8VecLength;
+    mU8Vec = srcMsg.mU8Vec;
+    mU32VecLength = srcMsg.mU32VecLength;
+    mU32Vec = srcMsg.mU32Vec;
+    mDataSize = srcMsg.mDataSize;
+    mDatas = srcMsg.mDatas;
+    mEnFuncs = srcMsg.mEnFuncs;
+    mDeFuncs = srcMsg.mDeFuncs;
+
     return 0;
 }
 
@@ -101,12 +105,16 @@ void SprMsg::Init()
     mTo = 0;
     mMsgId = 0;
     mTag = 0;
+    mBoolValue = false;
     mU8Value = 0;
     mU16Value = 0;
     mU32Value = 0;
     mStringLength = 0;
+    mU8VecLength = 0;
+    mU32VecLength = 0;
     mDataSize = 0;
 
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_BOOLVALUE, &SprMsg::EncodeBoolValue));
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VALUE,   &SprMsg::EncodeU8Value));
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VALUE,  &SprMsg::EncodeU16Value));
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VALUE,  &SprMsg::EncodeU32Value));
@@ -115,6 +123,7 @@ void SprMsg::Init()
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VEC,    &SprMsg::EncodeU32Vec));
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_PTR,       &SprMsg::EncodeDatas));
 
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_BOOLVALUE, &SprMsg::DecodeBoolValue));
     mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VALUE,   &SprMsg::DecodeU8Value));
     mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VALUE,  &SprMsg::DecodeU16Value));
     mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VALUE,  &SprMsg::DecodeU32Value));
@@ -202,6 +211,12 @@ void SprMsg::SetMsgId(uint32_t msgId)
     mMsgId = msgId;
 }
 
+void SprMsg::SetBoolValue(bool value)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_BOOLVALUE);
+    mBoolValue = value;
+}
+
 void SprMsg::SetU8Value(uint8_t value)
 {
     mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_U8VALUE);
@@ -257,6 +272,11 @@ void SprMsg::EncodeMsgId(std::string& enDatas) const
 void SprMsg::EncodeTag(std::string& enDatas) const
 {
     Convert::intToString(mTag, enDatas);
+}
+
+void SprMsg::EncodeBoolValue(std::string& enDatas)
+{
+    enDatas.push_back((uint8_t)mBoolValue);
 }
 
 void SprMsg::EncodeU8Value(std::string& enDatas)
@@ -364,6 +384,18 @@ void SprMsg::DecodeTag(std::string& deDatas)
     }
 
     deDatas = deDatas.substr(sizeof(mTag));
+}
+
+void SprMsg::DecodeBoolValue(std::string& deDatas)
+{
+    if (deDatas.size() < sizeof(mBoolValue))
+    {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    mBoolValue = (deDatas[0] != 0);
+    deDatas = deDatas.substr(sizeof(bool));
 }
 
 void SprMsg::DecodeU8Value(std::string& deDatas)

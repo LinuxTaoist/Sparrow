@@ -32,7 +32,7 @@ using namespace InternalEnum;
 #define SPR_LOGE(fmt, args...) printf("%d SysTimer E: " fmt, __LINE__, ##args)
 
 SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr)
-                : SprObserver(id, name, mediatorPtr)
+                : SprObserver(id, name, mediatorPtr, false)
 {
     mTimerRunning = false;
     mTimerFd = -1;

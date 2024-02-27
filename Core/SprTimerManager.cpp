@@ -32,10 +32,9 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%d TimerM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d TimerM E: " fmt, __LINE__, ##args)
 
-#define TIMER_MIN_PRECISION_MS 10
-
-SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprMediatorProxy> mediatorPtr, shared_ptr<SprSystemTimer> systemTimerPtr)
-                : SprObserver(id, name, mediatorPtr)
+SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name,
+        shared_ptr<SprMediatorProxy> mediatorPtr, shared_ptr<SprSystemTimer> systemTimerPtr)
+        : SprObserver(id, name, mediatorPtr)
 {
     mEnable = false;
     mSystemTimerPtr = systemTimerPtr;
@@ -46,7 +45,8 @@ SprTimerManager::~SprTimerManager()
 
 }
 
-SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr, shared_ptr<SprSystemTimer> systemTimerPtr)
+SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id, const std::string& name,
+        std::shared_ptr<SprMediatorProxy> mediatorPtr, shared_ptr<SprSystemTimer> systemTimerPtr)
 {
     static SprTimerManager instance(id, name, mediatorPtr, systemTimerPtr);
     return &instance;
@@ -231,12 +231,9 @@ void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)
 {
     set<SprTimer> deleteTimers;
 
-    // loop: Execute the triggered timers
+    // loop: Execute the triggered timers, timers are sorted by Expired value from smallest to largest
     for (auto it = mTimers.begin(); it != mTimers.end(); ++it) {
-        int32_t diff = it->GetExpired() - it->GetTick();
-        if (diff > TIMER_MIN_PRECISION_MS) {
-            break;
-        } else {
+        if (it->IsExpired()) {
             if (it->GetRepeatTimes() == 0 || (it->GetRepeatCount() + 1) < it->GetRepeatTimes()) {
                 SprTimer t(*it);
 
@@ -253,19 +250,14 @@ void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)
                 }
             }
 
-            // handle timer event
-            if (Shared::AbsValue(diff) < TIMER_MIN_PRECISION_MS) {
-                // Notify expired timer event to the book component
-                SprMsg msg(it->GetModuleId(), it->GetMsgId());
-                NotifyObserver(msg);
-
-                it->RepeatCount();
-
-                // debug
-                // PrintRealTime();
-            }
+            // Notify expired timer event to the book component
+            SprMsg msg(it->GetModuleId(), it->GetMsgId());
+            NotifyObserver(msg);
+            it->RepeatCount();
 
             deleteTimers.insert(*it);
+        } else {
+            break;
         }
     }
 

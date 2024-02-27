@@ -26,10 +26,6 @@
 
 class SprSystemTimer : public SprObserver
 {
-private:
-    bool mTimerRunning;
-    int  mTimerFd;
-
 public:
     SprSystemTimer(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr);
     ~SprSystemTimer();
@@ -39,13 +35,16 @@ public:
     SprSystemTimer& operator=(SprSystemTimer&&) = delete;
 
     int ProcessMsg(const SprMsg& msg);
-    bool IsListenMQ() override { return false; }
 
     int Init();
     int InitTimer();
     int StartTimer(uint32_t intervalInMilliSec);
     int StopTimer();
     int DestoryTimer();
+
+private:
+    bool mTimerRunning;
+    int  mTimerFd;
 };
 
 #endif

@@ -60,6 +60,11 @@ bool SprTimer::operator < (const SprTimer& timer) const
     }
 }
 
+bool SprTimer::IsExpired() const
+{
+    return (GetTick() >= mExpired);
+}
+
 uint32_t SprTimer::GetTick() const
 {
     uint32_t td = 0;

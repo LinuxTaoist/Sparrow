@@ -31,18 +31,8 @@ using ModuleIDType = InternalEnum::ESprModuleID;
 
 class SprObserver
 {
-private:
-    bool mConnected;
-    int mMqHandle;
-    int mCurListenHandler;
-    uint32_t mCurListenEventType;
-    ModuleIDType mModuleID;
-    std::string mModuleName;
-    std::string mMqDevName;
-    std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
-
 public:
-    SprObserver(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
+    SprObserver(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr, bool monitored = true);
     virtual ~SprObserver();
     SprObserver(const SprObserver&) = delete;
     SprObserver& operator=(SprObserver&) = delete;
@@ -54,7 +44,7 @@ public:
     virtual std::string GetModuleName() const final { return mModuleName; }
     virtual std::string GetMqDevName() const final { return mMqDevName; }
 
-    virtual bool IsListenMQ() { return true; }
+    virtual bool IsMonitored() const final;
     virtual int NotifyObserver(const SprMsg& msg);
     virtual int NotifyAllObserver(const SprMsg& msg);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
@@ -92,11 +82,26 @@ public:
     static int MainExit();
 
 private:
-    virtual int MakeMQ() final;
+    int MakeMQ();
     void InitSigHandler();
+
+    // --------------------------------------------------------------------------------------------
+    // - Message handle functions
+    // --------------------------------------------------------------------------------------------
     int MsgResponseSystemExitRsp(const SprMsg& msg);
     int MsgResponseRegisterRsp(const SprMsg& msg);
     int MsgResponseUnregisterRsp(const SprMsg& msg);
+
+private:
+    bool mConnected;
+    bool mListenMQ;
+    int mMqHandle;
+    int mCurListenHandler;
+    uint32_t mCurListenEventType;
+    ModuleIDType mModuleID;
+    std::string mModuleName;
+    std::string mMqDevName;
+    std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
 };
 
 #endif

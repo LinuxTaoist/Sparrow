@@ -226,7 +226,7 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
 {
     for (const auto& pair : mModuleMap)
     {
-        if (pair.second.handler != -1 && pair.first != MODULE_SYSTEM_TIMER)
+        if (pair.second.handler != -1 && pair.second.monitored)
         {
             // When the value to is NONE, it is sent to all
             // and when the value is vaild value, it is sent to the specified module
@@ -244,6 +244,7 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
 {
     bool result = false;
     // EProxyType type = static_cast<EProxyType>(msg.GetU32Value());
+    bool monitored = msg.GetBoolValue();
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
     std::string name = msg.GetString();
 
@@ -263,8 +264,8 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
     if (handler != -1)
     {
         result = true;
-        mModuleMap[moduleId] = { handler, name };
-        SPR_LOGD("Register successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());
+        mModuleMap[moduleId] = { monitored, handler, name };
+        SPR_LOGD("Register successfully! ID: %d, NAME: %s, monitored = %d\n", (int)moduleId, name.c_str(), monitored);
     } else {
         SPR_LOGE("Invaild handler!\n");
     }
