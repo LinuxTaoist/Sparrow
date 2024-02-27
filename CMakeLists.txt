@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 2.8)
 project(Sparrow)
 
 # 兼容CMAKE旧版本
@@ -18,11 +18,11 @@ set(EXECUTABLE_OUTPUT_PATH ${OUTPUT_PATH}/Bin)
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
 
-## add_definitions(-DFOO -DDEBUG ...)
-# option(TEST_DEBUG "option for debug" OFF)
-# if (TEST_DEBUG)
+#add_definitions(-DFOO -DDEBUG ...)
+#option(TEST_DEBUG "option for debug" OFF)
+#if (TEST_DEBUG)
 #     add_definitions(-DTEST_DEBUG)
-# endif()
+#endif()
 
 ## 打开编译警告
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
@@ -40,7 +40,7 @@ cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
 ## 打印工程信息
 message("======================================================================")
 message("Project      : ${PROJECT_NAME}")
-message("Version      : ${PROJECT_VERSION_NUMBER}")
+message("Version      : ${PROJECT_CUSTOM_VERSION}")
 message("Host Name    : ${HOSTNAME}")
 message("Build Time   : ${CURRENT_TIME}")
 message("Build Type   : ${CMAKE_BUILD_TYPE}")

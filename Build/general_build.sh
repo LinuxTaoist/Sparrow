@@ -1,7 +1,7 @@
 #!/bin/bash
 ENABLE_DEBUG="OFF"
 BUILD_TYPE="Release"
-PROJECT_VERSION="1.0.0"
+PROJECT_CUSTOM_VERSION="1.0.0"
 PROJECT_PATH=$(pwd)/../
 
 if [[ $1 == $"DEBUG" ]]; then
@@ -25,7 +25,7 @@ cd $PROJECT_PATH/Build/
 # rm -rf ../Release/Cache
 # rm -rf ../Release/Bin/*
 # rm -rf ../Release/Lib/*
-# mkdir -p ../Release/Cache/
+mkdir -p ../Release/Cache/
 cd ../Release/Cache/
-cmake ../../ -DTEST_DEBUG=$ENABLE_DEBUG -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPROJECT_VERSION_NUMBER=$PROJECT_VERSION
+cmake ../../ -DTEST_DEBUG=$ENABLE_DEBUG -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPROJECT_CUSTOM_VERSION=$PROJECT_CUSTOM_VERSION
 make
