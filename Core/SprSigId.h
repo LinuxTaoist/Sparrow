@@ -17,7 +17,6 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-
 #ifndef __SPR_SIG_ID_H__
 #define __SPR_SIG_ID_H__
 
@@ -36,6 +35,12 @@ enum ESprSigId
 
 }
 
+/**
+ * @brief Get the signal name string
+ *
+ * @param msgID
+ * @return Signal description
+ */
 const char *GetSigName(int msgID);
 
 #endif

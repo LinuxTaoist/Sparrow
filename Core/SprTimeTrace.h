@@ -34,16 +34,39 @@ typedef struct
 
 class SprTimeTrace
 {
-private:
-    std::vector<EntryInfo> mEntryList;
-
 public:
+    /**
+     * @brief Destroy the Spr Time Trace object
+     *
+     */
     ~SprTimeTrace();
+
+    /**
+     * @brief Get the Instance object
+     *
+     * @return SprTimeTrace*
+     */
     static SprTimeTrace* GetInstance();
+
+    /**
+     * @brief
+     *
+     * @param id    Entry id
+     * @param text  Entry description
+     *
+     * Call it in the system main entry, used to cache information for each entry
+     */
     void TimeTracePoint(int id, const std::string& text);
 
 private:
+    /**
+     * @brief Construct a new Spr Time Trace object
+     *
+     */
     SprTimeTrace();
+
+private:
+    std::vector<EntryInfo> mEntryList;
 };
 
 #endif // __SPR_TIME_TRACE_H__

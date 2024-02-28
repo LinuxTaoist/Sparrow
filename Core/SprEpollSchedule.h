@@ -29,52 +29,63 @@ class SprEpollSchedule
 public:
     using SprMsgHandler = void (*)(void *);
 
-    ~SprEpollSchedule();
     /**
-     * @brief       单例
+     * @brief Destroy the Spr Epoll Schedule object
+     *
+     */
+    ~SprEpollSchedule();
+
+    /**
+     * @brief Get the Instance object
+     *
+     * @return SprEpollSchedule*
      */
     static SprEpollSchedule* GetInstance();
 
     /**
-     * @brief       初始化
+     * @brief Init
+     *
      */
     void Init();
 
     /**
-     * @brief       退出
+     * @brief Exit
+     *
      */
     void Exit();
 
     /**
-     * @brief       添加监听事件
+     * @brief AddPoll
      *
-     * @param[in]   observer
+     * @param[in] observer
      */
     void AddPoll(SprObserver& observer);
 
     /**
-     * @brief       删除监听事件
+     * @brief DelPoll
      *
-     * @param[in]   observer
+     * @param[in] observer
      */
     void DelPoll(SprObserver& observer);
 
     /**
-     * @brief       开始监听
+     * @brief EpollLoop
+     *
      */
     void EpollLoop();
+
+private:
+    /**
+     * @brief Construct a new Spr Epoll Schedule object
+     *
+     * @param[in] size
+     */
+    explicit SprEpollSchedule(uint32_t size);
 
 private:
     bool mRun;
     int mEpollHandler;
     co::AsyncCoroutinePool* mpGoPool;
-
-    /**
-     * @brief       构造
-     *
-     * @param[in]   size 最大监听数目
-     */
-    explicit SprEpollSchedule(uint32_t size);
 };
 
 #endif

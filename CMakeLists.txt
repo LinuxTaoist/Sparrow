@@ -33,7 +33,7 @@ set(CMAKE_CXX_COMPILER "/usr/bin/g++")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -g3")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -std=c++11 -g3 -O0 -fpermissive")
 
-## 保存编译时间
+## 工程信息
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
 cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
 
@@ -47,8 +47,8 @@ message("Build Type   : ${CMAKE_BUILD_TYPE}")
 message("C++ Standard : ${CMAKE_CXX_STANDARD}")
 message("g++ version  : ${CMAKE_CXX_COMPILER_VERSION}")
 message("gcc version  : ${CMAKE_C_COMPILER_VERSION}")
-message("Platform     : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
-message("Architecture : ${CMAKE_SYSTEM_PROCESSOR}")
+message("Platform     : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
+message("OUTPUT_PATH  : ${OUTPUT_PATH}")
 message("======================================================================")
 
 add_subdirectory(Core)

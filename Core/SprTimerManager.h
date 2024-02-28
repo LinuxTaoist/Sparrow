@@ -33,12 +33,11 @@
 
 class SprTimerManager : public SprObserver
 {
-private:
-    bool mEnable;
-    std::set<SprTimer> mTimers;
-    std::shared_ptr<SprSystemTimer> mSystemTimerPtr;
-
 public:
+    /**
+    * @brief Destroy the Spr Timer Manager object
+    *
+    */
     virtual ~SprTimerManager();
 
     /**
@@ -49,9 +48,26 @@ public:
      */
     int Init();
 
+    /**
+     * @brief Get the Instance object
+     *
+     * @param[in] id
+     * @param[in] name
+     * @param[in] mediatorPtr
+     * @param[in] systemTimerPtr
+     * @return SprTimerManager*
+     */
     static SprTimerManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr, std::shared_ptr<SprSystemTimer> systemTimerPtr);
 
 private:
+    /**
+     * @brief Construct a new Spr Timer Manager object
+     *
+     * @param[in] id
+     * @param[in] name
+     * @param[in] mediatorPtr
+     * @param[in] systemTimerPtr
+     */
     SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr, std::shared_ptr<SprSystemTimer> systemTimerPtr);
 
     /**
@@ -66,11 +82,11 @@ private:
      * @brief  InitSystemTimer
      * @return 0 on success, or -1 if an error occurred
      *
-     * Example Initialize the system timer
+     * Initialize the system timer
      */
     int InitSystemTimer();
 
-    int ProcessMsg(const SprMsg& msg);
+    int ProcessMsg(const SprMsg& msg) override;
     int PrintRealTime();
 
     // --------------------------------------------------------------------------------------------
@@ -103,6 +119,11 @@ private:
     void MsgRespondDelTimer(const SprMsg &msg);
     void MsgRespondSystemTimerNotify(const SprMsg &msg);
     void MsgRespondClearTimersForExitComponent(const SprMsg &msg);
+
+private:
+    bool mEnable;                                       // Component init status
+    std::set<SprTimer> mTimers;                         // sort by SprTimer.mExpired from smallest to largest
+    std::shared_ptr<SprSystemTimer> mSystemTimerPtr;    // SysTimer object
 };
 
 #endif // __TIMER_MANAGER_H__
