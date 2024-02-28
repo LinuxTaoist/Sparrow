@@ -51,9 +51,9 @@ public:
     SprMsg& operator=(const SprMsg &srcMsg); // Assignment Operator
     int CopyMsg(const SprMsg& srcMsg);
 
-    void Clear();
-    int8_t Decode(std::string& deDatas);
-    int8_t Encode(std::string& enDatas) const;
+    void    Clear();
+    int8_t  Decode(std::string& deDatas);
+    int8_t  Encode(std::string& enDatas) const;
 
     void SetFrom(uint32_t from);
     void SetTo(uint32_t to);
@@ -74,16 +74,16 @@ public:
         mDatas.assign(pData, pData + size);
     }
 
-    uint32_t GetFrom() const { return mFrom; }
-    uint32_t GetTo() const { return mTo; }
-    uint32_t GetMsgId() const { return mMsgId; }
-    bool GetBoolValue() const { return mBoolValue; }
-    uint8_t GetU8Value() const { return mU8Value; }
-    uint16_t GetU16Value() const { return mU16Value; }
-    uint32_t GetU32Value() const { return mU32Value; }
-    std::string GetString() const { return mString; }
-    std::vector<uint8_t> GetU8Vec() const { return mU8Vec; }
-    std::vector<uint32_t> GetU32Vec() const { return mU32Vec; }
+    uint32_t    GetFrom()       const { return mFrom; }
+    uint32_t    GetTo()         const { return mTo; }
+    uint32_t    GetMsgId()      const { return mMsgId; }
+    bool        GetBoolValue()  const { return mBoolValue; }
+    uint8_t     GetU8Value()    const { return mU8Value; }
+    uint16_t    GetU16Value()   const { return mU16Value; }
+    uint32_t    GetU32Value()   const { return mU32Value; }
+    std::string GetString()     const { return mString; }
+    std::vector<uint8_t>    GetU8Vec() const { return mU8Vec; }
+    std::vector<uint32_t>   GetU32Vec() const { return mU32Vec; }
 
     template<typename T>
     std::shared_ptr<T> GetDatas() const {

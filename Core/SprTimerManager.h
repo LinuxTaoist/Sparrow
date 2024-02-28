@@ -89,7 +89,7 @@ private:
      */
     int AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec);
     int AddTimer(const SprTimer& timer);
-    int DelTimer(const SprTimer& t);
+    int DelTimer(const SprTimer& timer);
     int UpdateTimer();
     int CheckTimer();
     uint32_t NextExpireTimes();
