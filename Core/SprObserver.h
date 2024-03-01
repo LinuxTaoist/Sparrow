@@ -66,7 +66,24 @@ public:
     int AddPoll(uint32_t listenType, int listenHandler);
     int HandlePollEvent();
 
+    /**
+     * @brief SendMsg
+     *
+     * @param[in] msg
+     * @return 0 on success, or -1 if an error occurred
+     *
+     * Send message to self message queue
+     */
     int SendMsg(const SprMsg& msg);
+
+    /**
+     * @brief RecvMsg
+     *
+     * @param[out] msg
+     * @return 0 on success, or -1 if an error occurred
+     *
+     * Receive message from message queue
+     */
     int RecvMsg(SprMsg& msg);
 
     /**

@@ -202,7 +202,6 @@ int SprObserver::SendMsg(const SprMsg& msg)
     return ret;
 }
 
-// from self
 int SprObserver::RecvMsg(SprMsg& msg)
 {
     char buf[MQ_BUFF_MAX_SIZE] = {0};

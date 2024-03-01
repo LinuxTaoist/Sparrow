@@ -1,7 +1,8 @@
-ENUM_OR_STRING(SIG_ID_ANY),
+ENUM_OR_STRING(SIG_ID_ANY = 0x00),
 //-----------------------------------------------------------------------------
-// PROXY
+// PROXY 0x01 ~ 0x1F
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_PROXY_MIN = 0x01),                        \
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_REQUEST),                  \
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_RESPONSE),                 \
 ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_REQUEST),                \
@@ -9,22 +10,25 @@ ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_RESPONSE),               \
 ENUM_OR_STRING(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT),          \
 
 //-----------------------------------------------------------------------------
-// LOG_MANAGER
+// LOG_MANAGER 0x20 ~ 0x3F
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_LOG_MIN = 20),                            \
 ENUM_OR_STRING(SIG_ID_LOG_OPEN),                                \
 ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
 
 //-----------------------------------------------------------------------------
-// Debug
+// Debug 0x40 ~ 0x5F
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_DEBUG_MIN = 0x40),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_MSG_SERIAL),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_NOTIFY_ALL),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_3S),                     \
 ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_2S),                     \
 
 //-----------------------------------------------------------------------------
-// TIMER_MANAGER
+// TIMER_MANAGER 0x60 ~ 0x7F
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_TIMER_MIN = 0x60),                        \
 ENUM_OR_STRING(SIG_ID_TIMER_START_SYSTEM_TIMER),                \
 ENUM_OR_STRING(SIG_ID_TIMER_STOP_SYSTEM_TIMER),                 \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_ONCE_TIMER),                    \
@@ -33,18 +37,21 @@ ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
 ENUM_OR_STRING(SIG_ID_TIMER_DEL),                               \
 
 //-----------------------------------------------------------------------------
-// SPARROW_SYSTEM
+// SPARROW_SYSTEM 0x80 ~ 0x9F
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_SYSTEM_MIN = 0x80),                       \
 ENUM_OR_STRING(SIG_ID_SYSTEM_EXIT),                             \
 
 //-----------------------------------------------------------------------------
-// SYSTEM_TIMER_MANAGER
+// SYSTEM_TIMER_MANAGER 0x100 ~ 0x11F
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_MIN = 0x100),                \
 ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
 
 //-----------------------------------------------------------------------------
-// POWER_MANAGER
+// POWER_MANAGER 0x120 ~ 0x13F
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_POWER_MIN = 0x120),                       \
 ENUM_OR_STRING(SIG_ID_POWER_ON),                                \
 ENUM_OR_STRING(SIG_ID_POWER_OFF),                               \
 ENUM_OR_STRING(SIG_ID_POWER_WAKEUP),                            \
