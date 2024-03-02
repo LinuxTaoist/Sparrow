@@ -16,73 +16,72 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <stdio.h>
 #include <stdarg.h>
 #include "SprLog.h"
 
-// #define GOOGLE_GLOG_DLL_DECL
-// #include "glog/logging.h"
+SprLog::SprLog()
+{
+}
 
-// SprLog::SprLog() {
-//     google::InitGoogleLogging("MyProgram");
-// }
+SprLog::~SprLog()
+{
+}
 
-// SprLog::~SprLog() {
-//     google::ShutdownGoogleLogging();
-// }
+SprLog* SprLog::GetInstance()
+{
+    static SprLog instance;
+    return &instance;
+}
 
-// SprLog* SprLog::GetInstance() {
-//     static SprLog instance;
-//     return &instance;
-// }
+int32_t SprLog::d(const char* tag, const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int32_t result = LogImpl("D", tag, format, args);
+    va_end(args);
+    return result;
+}
 
-// int32_t SprLog::Debug(const char* format, ...)
-// {
-//     va_list args;
-//     va_start(args, format);
-//     char buffer[4096];
-//     vsnprintf(buffer, sizeof(buffer), format, args);
-//     va_end(args);
+int32_t SprLog::i(const char* tag, const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int32_t result = LogImpl("I", tag, format, args);
+    va_end(args);
+    return result;
+}
 
-//     LOG(INFO) << buffer;
+int32_t SprLog::w(const char* tag, const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int32_t result = LogImpl("W", tag, format, args);
+    va_end(args);
+    return result;
+}
 
-//     return 0;
-// }
+int32_t SprLog::e(const char* tag, const char* format, ...)
+{
+    va_list args;
+    va_start(args, format);
+    int32_t result = LogImpl("E", tag, format, args);
+    va_end(args);
+    return result;
+}
 
-// int32_t SprLog::Info(const char* format, ...)
-// {
-//     va_list args;
-//     va_start(args, format);
-//     char buffer[4096];
-//     vsnprintf(buffer, sizeof(buffer), format, args);
-//     va_end(args);
+int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, va_list args)
+{
+    char buffer[256] = {0};
+    int32_t result = vsnprintf(buffer, sizeof(buffer), format, args);
+    if (result < 0 || result >= (int32_t)sizeof(buffer)) {
+        return -1;
+    }
 
-//     LOG(INFO) << buffer;
+    std::lock_guard<std::mutex> lock(mMutex);
+    // mLogBuffers.push_back(std::string(level) + " " + std::string(tag) + ": " + std::string(buffer));
+    std::string log = std::string(level) + " " + std::string(tag) + " " + std::string(buffer);
+    printf("%s", log.c_str());
 
-//     return 0;
-// }
-
-// int32_t SprLog::Warn(const char* format, ...)
-// {
-//     va_list args;
-//     va_start(args, format);
-//     char buffer[4096];
-//     vsnprintf(buffer, sizeof(buffer), format, args);
-//     va_end(args);
-
-//     LOG(WARNING) << buffer;
-
-//     return 0;
-// }
-
-// int32_t SprLog::Error(const char* format, ...)
-// {
-//     va_list args;
-//     va_start(args, format);
-//     char buffer[4096];
-//     vsnprintf(buffer, sizeof(buffer), format, args);
-//     va_end(args);
-
-//     LOG(ERROR) << buffer;
-
-//     return 0;
-// }
+    return result;
+}

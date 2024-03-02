@@ -19,6 +19,9 @@
 #ifndef __SPR_LOG_H__
 #define __SPR_LOG_H__
 
+#include <mutex>
+#include <string>
+#include <vector>
 #include <stdint.h>
 
 class SprLog
@@ -26,14 +29,40 @@ class SprLog
 public:
     ~SprLog();
 
+    /**
+     * @brief Get the Instance object
+     *
+     * @return SprLog*
+     */
     static SprLog* GetInstance();
-    int32_t Debug(const char* format, ...);
-    int32_t Info(const char* format, ...);
-    int32_t Warn(const char* format, ...);
-    int32_t Error(const char* format, ...);
+
+    // --------------------------------------------------------------------------------------------
+    // - External interfaces for printing logs
+    // --------------------------------------------------------------------------------------------
+    int32_t d(const char* tag, const char* format, ...);
+    int32_t i(const char* tag, const char* format, ...);
+    int32_t w(const char* tag, const char* format, ...);
+    int32_t e(const char* tag, const char* format, ...);
 
 private:
     SprLog();
+
+    /**
+     * @brief LogImpl
+     *
+     * @param level     log level
+     * @param tag       Tag of logs
+     * @param format    Format of the output logs string
+     * @param args      Variable parameters
+     * @return          0 on success, or -1 if an error occurred
+     *
+     * The interface for printing logs can be connected to other log interfaces
+     */
+    int32_t LogImpl(const char* level, const char* tag, const char* format, va_list args);
+
+private:
+    std::mutex mMutex;
+    std::vector<std::string> mLogBuffers;
 };
 
 #endif //__SPR_LOG_H__

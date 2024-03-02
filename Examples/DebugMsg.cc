@@ -21,14 +21,16 @@
 #include <stdio.h>
 #include <string.h>
 #include "Convert.h"
+#include "DefineMacro.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d DebugMsg D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d DebugMsg E: " fmt, __LINE__, ##args)
+
+#define SPR_LOGD(fmt, args...) LOGD("DebugMsg", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("DebugMsg", fmt, ##args)
 
 int main(int agrc, const char *argv[])
 {

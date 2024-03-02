@@ -21,20 +21,12 @@
 
 #include "SprLog.h"
 
-#ifndef SPR_LOGD
-#define SPR_LOGD(...) printf(__VA_ARGS__)
-#endif
-
-#ifndef SPR_LOGI
-#define SPR_LOGI(...) printf(__VA_ARGS__)
-#endif
-
-#ifndef SPR_LOGW
-#define SPR_LOGW(...) printf(__VA_ARGS__)
-#endif
-
-#ifndef SPR_LOGE
-#define SPR_LOGE(...) printf(__VA_ARGS__)
-#endif
+// --------------------------------------------------------------------------------------------
+// - Log interface macro
+// --------------------------------------------------------------------------------------------
+#define LOGD(tag, fmt, args...)  SprLog::GetInstance()->d(tag, "%4d: " fmt, __LINE__, ##args)
+#define LOGI(tag, fmt, args...)  SprLog::GetInstance()->i(tag, "%4d: " fmt, __LINE__, ##args)
+#define LOGW(tag, fmt, args...)  SprLog::GetInstance()->w(tag, "%4d: " fmt, __LINE__, ##args)
+#define LOGE(tag, fmt, args...)  SprLog::GetInstance()->e(tag, "%4d: " fmt, __LINE__, ##args)
 
 #endif // __DEFINE_MACRO__
