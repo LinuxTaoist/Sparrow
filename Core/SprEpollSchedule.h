@@ -22,7 +22,7 @@
 #include <memory>
 #include "SprMsg.h"
 #include "SprObserver.h"
-#include "libgo/libgo.h"
+#include "libgo.h"
 
 class SprEpollSchedule
 {
