@@ -28,7 +28,6 @@
 using namespace std;
 using namespace InternalEnum;
 
-
 #define SPR_LOGD(fmt, args...) LOGD("DebugMsg", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("DebugMsg", fmt, ##args)
 

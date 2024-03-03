@@ -8,6 +8,9 @@
  *  @brief      : Blog: https://linuxtaoist.gitee.io
  *  @date       : 2023/11/25
  *
+ *  @TODO:
+ *  The component prints log directly to the library, not through LogManager.
+ *  LogManager only used to monitor real-time log status and manage log storage.
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>

@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __DEFINE_MACRO__
-#define __DEFINE_MACRO__
+#ifndef __DEFINE_MACRO_H__
+#define __DEFINE_MACRO_H__
 
 #include "SprLog.h"
 
