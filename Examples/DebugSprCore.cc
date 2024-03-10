@@ -67,7 +67,9 @@ static void usage()
             "usage:\n"
             "0: NotifyAllObserver\n"
             "1: AddTimer ( 0, 1s, 3s)\n"
-            "2: AddTimer (10, 0s, 2s)\n"
+            "2: DelTimer case 1 \n"
+            "3: AddTimer (10, 0s, 2s)\n"
+            "4: DelTimer case 3 \n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -107,9 +109,32 @@ int main(int agrc, const char *argv[])
 
                 case '2':
                 {
+                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 0, 0};
+                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
+                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
+                    msg.SetDatas(pInfo, sizeof(STimerInfo));
+                    theDebug.NotifyObserver(msg);
+
+                    break;
+                }
+
+                case '3':
+                {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 10, 0, 2000};
                     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
+                    msg.SetFrom(MODULE_DEBUG);
+                    msg.SetDatas(pInfo, sizeof(STimerInfo));
+                    theDebug.NotifyAllObserver(msg);
+
+                    break;
+                }
+
+                case '4':
+                {
+                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 0, 0, 0};
+                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
+                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
                     msg.SetFrom(MODULE_DEBUG);
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
                     theDebug.NotifyAllObserver(msg);

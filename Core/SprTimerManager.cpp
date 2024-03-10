@@ -75,6 +75,18 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
     // SPR_LOGD("[0x%x -> 0x%x] msg.GetMsgId() = %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
+        case SIG_ID_TIMER_START_SYSTEM_TIMER:
+        {
+            MsgRespondStartSystemTimer(msg);
+            break;
+        }
+
+        case SIG_ID_TIMER_STOP_SYSTEM_TIMER:
+        {
+            MsgRespondStopSystemTimer(msg);
+            break;
+        }
+
         case SIG_ID_TIMER_ADD_ONCE_TIMER:
         {
             break;
@@ -89,25 +101,14 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
             break;
         }
 
-        case SIG_ID_TIMER_START_SYSTEM_TIMER:
+        case SIG_ID_TIMER_DEL_TIMER:
         {
-            MsgRespondStartSystemTimer(msg);
+            MsgRespondDelTimer(msg);
             break;
         }
-
-        case SIG_ID_TIMER_STOP_SYSTEM_TIMER:
-        {
-            MsgRespondStopSystemTimer(msg);
-            break;
-        }
-
-        case SIG_ID_TIMER_DEL:
-        break;
-
 
         case SIG_ID_SYSTEM_TIMER_NOTIFY:
         {
-            // SPR_LOGD("SIG_ID_SYSTEM_TIMER_NOTIFY\n");
             MsgRespondSystemTimerNotify(msg);
             break;
         }
@@ -224,7 +225,17 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 
 void SprTimerManager::MsgRespondDelTimer(const SprMsg &msg)
 {
-
+    std::shared_ptr<STimerInfo> p = msg.GetDatas<STimerInfo>();
+    if (p != nullptr) {
+        for (const auto& timer : mTimers)
+        {
+            if (timer.GetMsgId() == p->MsgId && timer.GetModuleId() == p->ModuleId)
+            {
+                DelTimer(timer);
+                break;
+            }
+        }
+    }
 }
 
 void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)

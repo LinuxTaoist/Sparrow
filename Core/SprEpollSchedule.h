@@ -22,7 +22,7 @@
 #include <memory>
 #include "SprMsg.h"
 #include "SprObserver.h"
-#include "libgo.h"
+#include "LibgoAdapter.h"
 
 class SprEpollSchedule
 {
@@ -85,7 +85,7 @@ private:
 private:
     bool mRun;
     int mEpollHandler;
-    co::AsyncCoroutinePool* mpGoPool;
+    LibgoAdapter::GoPool mLibgoAdapter;
 };
 
 #endif

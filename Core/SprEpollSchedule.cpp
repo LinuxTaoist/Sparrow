@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/epoll.h>
+#include "LibgoAdapter.h"
 #include "SprEpollSchedule.h"
 
 #define SPR_LOGD(fmt, args...) printf("%d EpollSch D: " fmt, __LINE__, ##args)
@@ -31,6 +32,8 @@ const uint32_t EPOLL_FD_NUM = 10;
 SprEpollSchedule::SprEpollSchedule(uint32_t size)
 {
     SPR_LOGD("---- Sparrow Epoll Start ----\n");
+
+    mRun = true;
 
     if (size) {
         mEpollHandler = epoll_create(size);
@@ -62,17 +65,18 @@ SprEpollSchedule* SprEpollSchedule::GetInstance()
 
 void SprEpollSchedule::Init()
 {
-    mRun = true;
-    mpGoPool = co::AsyncCoroutinePool::Create();
-    mpGoPool->InitCoroutinePool(1024);
-    mpGoPool->Start(10, 128);
+    mLibgoAdapter.InitCoroutinePool(1024);
+    mLibgoAdapter.Start(10, 128);
 }
 
 void SprEpollSchedule::Exit()
 {
     mRun = false;
-    close(mEpollHandler);
-    mEpollHandler = -1;
+    if (mEpollHandler != -1) {
+        close(mEpollHandler);
+        mEpollHandler = -1;
+    }
+
 }
 
 void SprEpollSchedule::AddPoll(SprObserver& observer)
@@ -111,7 +115,7 @@ void SprEpollSchedule::EpollLoop()
     // 触发回调处理器
     // using GoPoolCb = co::AsyncCoroutinePool::CallbackPoint;
     // std::shared_ptr<GoPoolCb> cbp(new GoPoolCb);
-    // mpGoPool->AddCallbackPoint(cbp.get());
+    // mLibgoAdapter.AddCallbackPoint(cbp.get());
 
     do {
         // 无事件时, epoll_wait阻塞, -1 无限等待
@@ -127,7 +131,7 @@ void SprEpollSchedule::EpollLoop()
             SprObserver* p = static_cast<SprObserver*>(ep[i].data.ptr);
 
             // 投递任务至协程，没有回调
-            mpGoPool->Post([p] {
+            mLibgoAdapter.Post([p] {
                 p->HandlePollEvent();
             }, nullptr);
         }

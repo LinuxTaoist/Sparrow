@@ -62,7 +62,6 @@ private:
 
 private:
     std::mutex mMutex;
-    std::vector<std::string> mLogBuffers;
 };
 
 #endif //__SPR_LOG_H__

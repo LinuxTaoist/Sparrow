@@ -51,8 +51,9 @@ message("Build Platform : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_S
 message("OUTPUT_PATH    : ${OUTPUT_PATH}")
 message("======================================================================")
 
+add_subdirectory(Util)
+add_subdirectory(3rdParty)
+add_subdirectory(Adapter)
 add_subdirectory(Core)
 add_subdirectory(Components)
-add_subdirectory(Util)
 add_subdirectory(Examples)
-add_subdirectory(3rdParty)

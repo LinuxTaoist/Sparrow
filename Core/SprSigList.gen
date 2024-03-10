@@ -30,7 +30,7 @@ ENUM_OR_STRING(SIG_ID_TIMER_STOP_SYSTEM_TIMER),                 \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_ONCE_TIMER),                    \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_REPEAT_TIMER),                  \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
-ENUM_OR_STRING(SIG_ID_TIMER_DEL),                               \
+ENUM_OR_STRING(SIG_ID_TIMER_DEL_TIMER),                               \
 
 //-----------------------------------------------------------------------------
 // SPARROW_SYSTEM 0x80 ~ 0x9F

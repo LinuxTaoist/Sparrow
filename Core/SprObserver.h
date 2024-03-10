@@ -22,7 +22,6 @@
 #include <vector>
 #include <memory>
 #include <string>
-// #include "SprLog.h"
 #include "SprMsg.h"
 #include "SprSigId.h"
 #include "SprCommonType.h"

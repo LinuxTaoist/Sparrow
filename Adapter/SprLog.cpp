@@ -20,6 +20,8 @@
 #include <stdarg.h>
 #include "SprLog.h"
 
+#define LOG_BUFFER_MAX_SIZE     256
+
 SprLog::SprLog()
 {
 }
@@ -40,6 +42,7 @@ int32_t SprLog::d(const char* tag, const char* format, ...)
     va_start(args, format);
     int32_t result = LogImpl("D", tag, format, args);
     va_end(args);
+
     return result;
 }
 
@@ -49,6 +52,7 @@ int32_t SprLog::i(const char* tag, const char* format, ...)
     va_start(args, format);
     int32_t result = LogImpl("I", tag, format, args);
     va_end(args);
+
     return result;
 }
 
@@ -58,6 +62,7 @@ int32_t SprLog::w(const char* tag, const char* format, ...)
     va_start(args, format);
     int32_t result = LogImpl("W", tag, format, args);
     va_end(args);
+
     return result;
 }
 
@@ -67,19 +72,19 @@ int32_t SprLog::e(const char* tag, const char* format, ...)
     va_start(args, format);
     int32_t result = LogImpl("E", tag, format, args);
     va_end(args);
+
     return result;
 }
 
 int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, va_list args)
 {
-    char buffer[256] = {0};
+    char buffer[LOG_BUFFER_MAX_SIZE] = {0};
     int32_t result = vsnprintf(buffer, sizeof(buffer), format, args);
     if (result < 0 || result >= (int32_t)sizeof(buffer)) {
         return -1;
     }
 
     std::lock_guard<std::mutex> lock(mMutex);
-    // mLogBuffers.push_back(std::string(level) + " " + std::string(tag) + ": " + std::string(buffer));
     std::string log = std::string(level) + " " + std::string(tag) + " " + std::string(buffer);
     printf("%s", log.c_str());
 
