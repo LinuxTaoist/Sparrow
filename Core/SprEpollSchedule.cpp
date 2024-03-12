@@ -65,8 +65,8 @@ SprEpollSchedule* SprEpollSchedule::GetInstance()
 
 void SprEpollSchedule::Init()
 {
-    mGoPool.InitCoroutinePool(1024);
-    mGoPool.Start(10, 128);
+    mCoPool.InitCoroutinePool(1024);
+    mCoPool.Start(10, 128);
 }
 
 void SprEpollSchedule::Exit()
@@ -115,7 +115,7 @@ void SprEpollSchedule::EpollLoop()
     // 触发回调处理器
     // using GoPoolCb = co::AsyncCoroutinePool::CallbackPoint;
     // std::shared_ptr<GoPoolCb> cbp(new GoPoolCb);
-    // mGoPool.AddCallbackPoint(cbp.get());
+    // mCoPool.AddCallbackPoint(cbp.get());
 
     do {
         // 无事件时, epoll_wait阻塞, -1 无限等待
@@ -131,7 +131,7 @@ void SprEpollSchedule::EpollLoop()
             SprObserver* p = static_cast<SprObserver*>(ep[i].data.ptr);
 
             // 投递任务至协程，没有回调
-            mGoPool.Post([p] {
+            mCoPool.Post([p] {
                 p->HandlePollEvent();
             }, nullptr);
         }

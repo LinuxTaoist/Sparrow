@@ -85,7 +85,7 @@ private:
 private:
     bool mRun;
     int mEpollHandler;
-    LibgoAdapter::GoPool mGoPool;
+    LibgoAdapter::CoPool mCoPool;
 };
 
 #endif

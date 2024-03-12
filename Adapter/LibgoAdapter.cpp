@@ -21,46 +21,46 @@
 
 using namespace LibgoAdapter;
 
-static co::AsyncCoroutinePool* pGoPool = co::AsyncCoroutinePool::Create();
+static co::AsyncCoroutinePool* pCoPool = co::AsyncCoroutinePool::Create();
 
-GoPool::GoPool()
+CoPool::CoPool()
 {
 }
 
-GoPool::~GoPool()
+CoPool::~CoPool()
 {
 }
 
-void GoPool::InitCoroutinePool(size_t maxCoroutineCount)
+void CoPool::InitCoroutinePool(size_t maxCoroutineCount)
 {
-    if (pGoPool != nullptr)
+    if (pCoPool != nullptr)
     {
-        pGoPool->InitCoroutinePool(maxCoroutineCount);
+        pCoPool->InitCoroutinePool(maxCoroutineCount);
     }
 }
 
-void GoPool::Start(int minThreadNumber, int maxThreadNumber)
+void CoPool::Start(int minThreadNumber, int maxThreadNumber)
 {
-    if (pGoPool != nullptr)
+    if (pCoPool != nullptr)
     {
-        pGoPool->Start(minThreadNumber, maxThreadNumber);
+        pCoPool->Start(minThreadNumber, maxThreadNumber);
     }
 }
 
-void GoPool::Post(std::function<void()> const& func, std::function<void()>  const& callback)
+void CoPool::Post(std::function<void()> const& func, std::function<void()>  const& callback)
 {
-    if (pGoPool != nullptr)
+    if (pCoPool != nullptr)
     {
-        pGoPool->Post(func, callback);
+        pCoPool->Post(func, callback);
     }
 }
 
 template <typename R>
-void GoPool::Post(std::function<R()> const& func, std::function<void(R&)> const& callback)
+void CoPool::Post(std::function<R()> const& func, std::function<void(R&)> const& callback)
 {
-    if (pGoPool != nullptr)
+    if (pCoPool != nullptr)
     {
-        pGoPool->Post(func, callback);
+        pCoPool->Post(func, callback);
     }
 }
 

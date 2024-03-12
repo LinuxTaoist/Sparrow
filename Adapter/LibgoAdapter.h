@@ -23,11 +23,11 @@
 
 namespace LibgoAdapter
 {
-    class GoPool
+    class CoPool
     {
     public:
-        GoPool();
-        ~GoPool();
+        CoPool();
+        ~CoPool();
 
         void InitCoroutinePool(size_t maxCoroutineCount);
 
