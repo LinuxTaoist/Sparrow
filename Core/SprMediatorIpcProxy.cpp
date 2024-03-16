@@ -32,16 +32,16 @@ using namespace InternalEnum;
 
 SprMediatorIpcProxy::SprMediatorIpcProxy()
 {
-    mMediatorHandler = -1;
+    mMediatorHandle = -1;
     ConnectMediator();
 }
 
 SprMediatorIpcProxy::~SprMediatorIpcProxy()
 {
-    if (mMediatorHandler != -1)
+    if (mMediatorHandle != -1)
     {
-        mq_close(mMediatorHandler);
-        mMediatorHandler = -1;
+        mq_close(mMediatorHandle);
+        mMediatorHandle = -1;
     }
 }
 
@@ -51,8 +51,8 @@ int SprMediatorIpcProxy::ConnectMediator()
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    mMediatorHandler = mq_open(MEDIATOR_MSG_QUEUE, O_RDWR, 0666, &mqAttr);
-    if(mMediatorHandler < 0) {
+    mMediatorHandle = mq_open(MEDIATOR_MSG_QUEUE, O_RDWR, 0666, &mqAttr);
+    if(mMediatorHandle < 0) {
         SPR_LOGE("Open %s failed. (%s)\n", MEDIATOR_MSG_QUEUE, strerror(errno));
         return -1;
     }
@@ -90,7 +90,7 @@ int SprMediatorIpcProxy::SendMsg(const SprMsg& msg)
     std::string datas;
 
     msg.Encode(datas);
-    int ret = mq_send(mMediatorHandler, (const char*)datas.c_str(), datas.size(), 1);
+    int ret = mq_send(mMediatorHandle, (const char*)datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }

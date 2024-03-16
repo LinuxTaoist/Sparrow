@@ -36,12 +36,12 @@ SprEpollSchedule::SprEpollSchedule(uint32_t size)
     mRun = true;
 
     if (size) {
-        mEpollHandler = epoll_create(size);
+        mEpollHandle = epoll_create(size);
     } else {
-        mEpollHandler = epoll_create1(0);
+        mEpollHandle = epoll_create1(0);
     }
 
-    if (mEpollHandler == -1) {
+    if (mEpollHandle == -1) {
         SPR_LOGE("epoll_create fail! (%s)\n", strerror(errno));
     }
 
@@ -50,10 +50,10 @@ SprEpollSchedule::SprEpollSchedule(uint32_t size)
 
 SprEpollSchedule::~SprEpollSchedule()
 {
-    if (mEpollHandler != -1)
+    if (mEpollHandle != -1)
     {
-        close(mEpollHandler);
-        mEpollHandler = -1;
+        close(mEpollHandle);
+        mEpollHandle = -1;
     }
 }
 
@@ -72,9 +72,9 @@ void SprEpollSchedule::Init()
 void SprEpollSchedule::Exit()
 {
     mRun = false;
-    if (mEpollHandler != -1) {
-        close(mEpollHandler);
-        mEpollHandler = -1;
+    if (mEpollHandle != -1) {
+        close(mEpollHandle);
+        mEpollHandle = -1;
     }
 
 }
@@ -91,7 +91,7 @@ int SprEpollSchedule::AddPoll(int fd, uint8_t ipcType, SprObserver* observer)
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
-    int ret = epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, fd, &ep);
+    int ret = epoll_ctl(mEpollHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     } else {
@@ -104,7 +104,7 @@ int SprEpollSchedule::AddPoll(int fd, uint8_t ipcType, SprObserver* observer)
 
 void SprEpollSchedule::DelPoll(int fd)
 {
-    if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, fd, nullptr) != 0) {
+    if (epoll_ctl(mEpollHandle, EPOLL_CTL_DEL, fd, nullptr) != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     }
 }
@@ -120,7 +120,7 @@ void SprEpollSchedule::EpollLoop()
 
     do {
         // 无事件时, epoll_wait阻塞, 超时等待
-        int count = epoll_wait(mEpollHandler, ep, sizeof(ep)/sizeof(ep[0]), 5000);
+        int count = epoll_wait(mEpollHandle, ep, sizeof(ep)/sizeof(ep[0]), 5000);
         if (count <= 0) {
             if (!mRun) {
                 break;

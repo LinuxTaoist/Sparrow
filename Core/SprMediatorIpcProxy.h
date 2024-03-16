@@ -61,5 +61,5 @@ public:
     virtual int NotifyAllObserver(const SprMsg& msg) override;
 
 private:
-    int mMediatorHandler;
+    int mMediatorHandle;
 };

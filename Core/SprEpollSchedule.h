@@ -86,7 +86,7 @@ private:
 
 private:
     bool mRun;
-    int mEpollHandler;
+    int mEpollHandle;
     std::map<int, std::pair<int, SprObserver*>> mPollMap;   // fd, ipc type, sprobserver
     LibgoAdapter::CoPool mCoPool;
 };

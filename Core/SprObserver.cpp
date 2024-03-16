@@ -45,7 +45,6 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
     mConnected = false;
     mListenMQ = monitored;
     mMqHandle = -1;
-    mCurListenHandler = -1;
     mModuleID = id;
     mModuleName = name;
     mMsgMediatorPtr = msgMediator;

@@ -111,7 +111,6 @@ private:
     bool mConnected;
     bool mListenMQ;
     int mMqHandle;
-    int mCurListenHandler;
     ModuleIDType mModuleID;
     std::string mModuleName;
     std::string mMqDevName;
