@@ -3,6 +3,11 @@
 include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 
+## copy *.prop
+file(COPY ${PROJECT_PATH}/Configures/default.prop DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
+file(COPY ${PROJECT_PATH}/Configures/system.prop DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
+file(COPY ${PROJECT_PATH}/Configures/${PROJECT_PLATFORM}/vendor.prop DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
+
 # Bin logservice
 aux_source_directory(${PROJECT_PATH}/Components/LogManagerSrv  SRC_LOG_SRV_PATH)
 add_executable       (BinLogSrv ${SRC_LOG_SRV_PATH})
@@ -29,7 +34,8 @@ aux_source_directory(${PROJECT_PATH}/Util                        SRC_PROPERTY_SR
 aux_source_directory(${PROJECT_PATH}/Components/PropertiesSrv    SRC_PROPERTY_SRV_PATH)
 add_executable       (BinPropertySrv ${SRC_PROPERTY_SRV_PATH})
 set_target_properties(BinPropertySrv PROPERTIES OUTPUT_NAME "propertiessrv")
-target_link_libraries(BinPropertySrv pthread)
+target_link_libraries(BinPropertySrv sprcore)
+add_dependencies     (BinPropertySrv libsprcore)
 
 # Bin servicemanagersrv
 aux_source_directory(${PROJECT_PATH}/Components/ServiceManagerSrv  SRC_SRV_PATH)

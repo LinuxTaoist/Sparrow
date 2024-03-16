@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SharedMemory.h
+ *  @file       : ShmHelper.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -22,15 +22,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
-#include "SharedMemory.h"
+#include "ShmHelper.h"
 
 using namespace std;
 
-#define SPR_LOGD(fmt, args...) printf("%d SharedMem D: " fmt "\n", __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d SharedMem W: " fmt "\n", __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SharedMem E: " fmt "\n", __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%d ShmHelper D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%d ShmHelper W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%d ShmHelper E: " fmt, __LINE__, ##args)
 
-SharedMemory::SharedMemory(const string& filename, size_t size)
+ShmHelper::ShmHelper(const string& filename, size_t size)
     : mRoot(nullptr), mSize(size), mCurUsedSize(0), mFirstNode(nullptr), mFilename(filename)
 {
     mHandler = OpenMapFile(filename.c_str(), size);
@@ -62,7 +62,7 @@ SharedMemory::SharedMemory(const string& filename, size_t size)
     SPR_LOGD("Init mmap %s\n", filename.c_str());
 }
 
-SharedMemory::~SharedMemory()
+ShmHelper::~ShmHelper()
 {
     sem_destroy(&mSemaphore);
     if (mRoot != nullptr) {
@@ -79,7 +79,7 @@ SharedMemory::~SharedMemory()
     }
 }
 
-int SharedMemory::GetValue(const string& key, string& value)
+int ShmHelper::GetValue(const string& key, string& value)
 {
     int ret = -1;
     sem_wait(&mSemaphore);
@@ -101,7 +101,7 @@ int SharedMemory::GetValue(const string& key, string& value)
     return ret;
 }
 
-int SharedMemory::SetValue(const string& key, const string& value)
+int ShmHelper::SetValue(const string& key, const string& value)
 {
     sem_wait(&mSemaphore);
 
@@ -159,7 +159,7 @@ int SharedMemory::SetValue(const string& key, const string& value)
     return 0;
 }
 
-int SharedMemory::OpenMapFile(const string& filename, size_t size)
+int ShmHelper::OpenMapFile(const string& filename, size_t size)
 {
     unlink(filename.c_str());
     int fd = open(filename.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
@@ -177,7 +177,7 @@ int SharedMemory::OpenMapFile(const string& filename, size_t size)
     return fd;
 }
 
-Node* SharedMemory::CreateNode(const string& key, const string& value)
+Node* ShmHelper::CreateNode(const string& key, const string& value)
 {
     Node* newNode = (Node*)((char*)mRoot + mCurUsedSize);
 
@@ -190,4 +190,22 @@ Node* SharedMemory::CreateNode(const string& key, const string& value)
     newNode->right = nullptr;
 
     return newNode;
+}
+
+void ShmHelper::GetAllKeyValues(std::map<std::string, std::string>& keyValueMap)
+{
+    sem_wait(&mSemaphore);
+    GetKeyValue(mFirstNode->left, keyValueMap);
+    GetKeyValue(mFirstNode->right, keyValueMap);
+    sem_post(&mSemaphore);
+}
+
+void ShmHelper::GetKeyValue(Node* pNode, std::map<std::string, std::string>& keyValueMap)
+{
+    if (pNode != nullptr)
+    {
+        GetKeyValue(pNode->left, keyValueMap);
+        GetKeyValue(pNode->right, keyValueMap);
+        keyValueMap[pNode->key] = pNode->value;
+    }
 }

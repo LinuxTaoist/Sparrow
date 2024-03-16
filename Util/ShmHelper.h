@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SharedMemory.h
+ *  @file       : ShmHelper.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,10 +16,11 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SHARED_MEMORY_H__
-#define __SHARED_MEMORY_H__
+#ifndef __SHM_HELPER_H__
+#define __SHM_HELPER_H__
 
 #include <semaphore.h>
+#include <map>
 #include <string>
 
 #define KEY_SIZE    32
@@ -33,26 +34,28 @@ struct Node
     Node* right;
 };
 
-class SharedMemory
+class ShmHelper
 {
 public:
-    SharedMemory(const std::string& filename, size_t size);
-    ~SharedMemory();
+    ShmHelper(const std::string& filename, size_t size);
+    ~ShmHelper();
 
     int GetValue(const std::string& key, std::string& value);
     int SetValue(const std::string& key, const std::string& value);
+    void GetAllKeyValues(std::map<std::string, std::string>& keyValueMap);
 
 private:
-    int mHandler;
-    void* mRoot;            // 共享内存根指针
+    int    mHandler;
+    void*  mRoot;           // 共享内存根指针
     size_t mSize;           // 共享内存容量
     size_t mCurUsedSize;    // 当前已使用容量
-    sem_t mSemaphore;
-    Node* mFirstNode;       // 第一个数据节点
+    sem_t  mSemaphore;
+    Node*  mFirstNode;      // 第一个数据节点
     std::string mFilename;
 
-    int OpenMapFile(const std::string& filename, size_t size);
+    int   OpenMapFile(const std::string& filename, size_t size);
     Node* CreateNode(const std::string& key, const std::string& value);
+    void  GetKeyValue(Node* node, std::map<std::string, std::string>& keyValueMap);
 };
 
-#endif //__SHARED_MEMORY_H__
+#endif //__SHM_HELPER_H__

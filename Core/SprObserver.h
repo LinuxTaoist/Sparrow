@@ -39,10 +39,10 @@ public:
     SprObserver(SprObserver&&) = delete;
     SprObserver& operator=(SprObserver&&) = delete;
 
-    virtual int GetMqHandle() const final { return mMqHandle; }
-    virtual ModuleIDType GetModuleId() const final { return mModuleID; }
-    virtual std::string GetModuleName() const final { return mModuleName; }
-    virtual std::string GetMqDevName() const final { return mMqDevName; }
+    int GetMqHandle() const { return mMqHandle; }
+    ModuleIDType GetModuleId() const { return mModuleID; }
+    std::string GetModuleName() const { return mModuleName; }
+    std::string GetMqDevName() const { return mMqDevName; }
 
     virtual bool IsMonitored() const final;
     virtual int NotifyObserver(const SprMsg& msg);
