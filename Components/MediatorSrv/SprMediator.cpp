@@ -279,7 +279,6 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
 
 int SprMediator::MsgResponseUnregister(const SprMsg& msg)
 {
-    bool result = false;
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
     std::string name = msg.GetString();
 
@@ -291,18 +290,12 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
             mq_close(it->second.handler);
             it->second.handler = -1;
             SPR_LOGD("Close mq %s \n", it->second.name.c_str());
-            result = true;
         }
 
         mModuleMap.erase(moduleId);
     } else {
         SPR_LOGW("Not exist module id: %x\n", moduleId);
     }
-
-    SprMsg rspMsg(MODULE_PROXY, moduleId, SIG_ID_PROXY_UNREGISTER_RESPONSE);
-    rspMsg.SetU8Value(result);
-    NotifyObserver(moduleId, rspMsg);
-    SPR_LOGD("Unregister successfully! ID: %d, NAME: %s\n", (int)moduleId, name.c_str());
 
     SprMsg exitMsg(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT);
     exitMsg.SetU32Value(moduleId);

@@ -43,26 +43,22 @@ SprSystemTimer::~SprSystemTimer()
 
 }
 
-int SprSystemTimer::ProcessMsg(const SprMsg& msg)
+int SprSystemTimer::HandleEvent(int fd)
 {
-    // Event is triggered by timer, msg will be empty and not needed.
-    // Only notify to TimerManager
-
-    // SPR_LOGD("Receive timer trigger event.\n");
-    switch (msg.GetMsgId())
+    // Event is triggered by timer, only notify to TimerManager
+    if (fd == mTimerFd)
     {
-        case SIG_ID_ANY:    // timer trigger event
-        {
-            mTimerRunning = false;
-            SprMsg timerMsg(MODULE_TIMERM, SIG_ID_SYSTEM_TIMER_NOTIFY);
-            NotifyObserver(timerMsg);
-            break;
-        }
-
-        default:
-            break;
+        mTimerRunning = false;
+        SprMsg timerMsg(MODULE_TIMERM, SIG_ID_SYSTEM_TIMER_NOTIFY);
+        NotifyObserver(timerMsg);
     }
 
+    return 0;
+}
+
+// Not need implement
+int SprSystemTimer::ProcessMsg(const SprMsg& msg)
+{
     return 0;
 }
 
@@ -74,7 +70,7 @@ int SprSystemTimer::Init()
 int SprSystemTimer::InitTimer()
 {
     mTimerFd = timerfd_create(CLOCK_REALTIME, 0);
-    AddPoll(POLL_SCHEDULE_TYPE_TIMER, mTimerFd);
+    AddPoll(mTimerFd, IPC_TYPE_TIMERFD);
     return 0;
 }
 

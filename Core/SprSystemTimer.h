@@ -34,13 +34,13 @@ public:
     SprSystemTimer(SprSystemTimer&&) = delete;
     SprSystemTimer& operator=(SprSystemTimer&&) = delete;
 
-    int ProcessMsg(const SprMsg& msg);
-
     int Init();
     int InitTimer();
     int StartTimer(uint32_t intervalInMilliSec);
     int StopTimer();
     int DestoryTimer();
+    int HandleEvent(int fd) override;
+    int ProcessMsg(const SprMsg& msg);
 
 private:
     bool mTimerRunning;

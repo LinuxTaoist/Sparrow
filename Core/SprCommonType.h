@@ -63,12 +63,20 @@ enum EDebugMsgID
     DEBUG_MSG_BUTT
 };
 
-enum PollScheduleType
+enum EIPCType : uint8_t
 {
-    POLL_SCHEDULE_TYPE_MQ = 0x01,
-    POLL_SCHEDULE_TYPE_TIMER,
-    POLL_SCHEDULE_TYPE_BUTT
+    IPC_TYPE_MQ = 0,
+    IPC_TYPE_SOCKET,
+    IPC_TYPE_TIMERFD,
+    IPC_TYPE_BUTT
 };
+
+// enum PollScheduleType
+// {
+//     POLL_SCHEDULE_TYPE_MQ = 0x01,
+//     POLL_SCHEDULE_TYPE_TIMER,
+//     POLL_SCHEDULE_TYPE_BUTT
+// };
 
 typedef struct
 {

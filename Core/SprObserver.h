@@ -19,6 +19,7 @@
 #ifndef __SPR_OBSERVER_H__
 #define __SPR_OBSERVER_H__
 
+#include <set>
 #include <vector>
 #include <memory>
 #include <string>
@@ -44,27 +45,24 @@ public:
     std::string GetModuleName() const { return mModuleName; }
     std::string GetMqDevName() const { return mMqDevName; }
 
-    virtual bool IsMonitored() const final;
+    bool IsMonitored() const;
     virtual int NotifyObserver(const SprMsg& msg);
     virtual int NotifyAllObserver(const SprMsg& msg);
+    virtual int HandleEvent(int fd);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
 
-    void SetCurListenEventType(int type) { mCurListenEventType = type; }
-    int  GetCurListenEventType() { return mCurListenEventType; }
-    void SetCurListenHandler(int handler) { mCurListenHandler = handler; }
-    int  GetCurListenHandler() { return mCurListenHandler; }
     int  AbstractProcessMsg(const SprMsg& msg);
 
     /**
      * @brief  AddPoll
      * @param[in] listenType    listen type in epoll
-     * @param[in] listenHandler listen handler in epoll
+     * @param[in] fd listen handler in epoll
      * @return 0 on success, or -1 if an error occurred
      *
      * Use this function to add custom listening events to Epoll
      */
-    int AddPoll(uint32_t listenType, int listenHandler);
-    int HandlePollEvent();
+    int AddPoll(int fd, uint8_t type);
+    int HandlePollEvent(int fd, uint8_t ipcType);
 
     /**
      * @brief SendMsg
@@ -114,10 +112,10 @@ private:
     bool mListenMQ;
     int mMqHandle;
     int mCurListenHandler;
-    uint32_t mCurListenEventType;
     ModuleIDType mModuleID;
     std::string mModuleName;
     std::string mMqDevName;
+    std::set<int> mPollFds;
     std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
 };
 

@@ -19,6 +19,7 @@
 #ifndef SPR_EPOLL_SCHEDULE_H__
 #define SPR_EPOLL_SCHEDULE_H__
 
+#include <map>
 #include <memory>
 #include "SprMsg.h"
 #include "SprObserver.h"
@@ -37,8 +38,8 @@ public:
 
     /**
      * @brief Get the Instance object
-     *
      * @return SprEpollSchedule*
+     *
      */
     static SprEpollSchedule* GetInstance();
 
@@ -56,17 +57,18 @@ public:
 
     /**
      * @brief AddPoll
-     *
      * @param[in] observer
+     * @return
+     *
      */
-    void AddPoll(SprObserver& observer);
+    int AddPoll(int fd, uint8_t ipcType, SprObserver* observer);
 
     /**
      * @brief DelPoll
-     *
      * @param[in] observer
+     *
      */
-    void DelPoll(SprObserver& observer);
+    void DelPoll(int fd);
 
     /**
      * @brief EpollLoop
@@ -77,14 +79,15 @@ public:
 private:
     /**
      * @brief Construct a new Spr Epoll Schedule object
-     *
      * @param[in] size
+     *
      */
     explicit SprEpollSchedule(uint32_t size);
 
 private:
     bool mRun;
     int mEpollHandler;
+    std::map<int, std::pair<int, SprObserver*>> mPollMap;   // fd, ipc type, sprobserver
     LibgoAdapter::CoPool mCoPool;
 };
 

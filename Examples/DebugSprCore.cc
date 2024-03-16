@@ -149,8 +149,8 @@ int main(int agrc, const char *argv[])
                 }
 
                 default:
-                    usage();
-                break;
+                    // usage();
+                    break;
             }
         } while(run);
     });

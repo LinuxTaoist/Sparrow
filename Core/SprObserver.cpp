@@ -46,14 +46,13 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
     mListenMQ = monitored;
     mMqHandle = -1;
     mCurListenHandler = -1;
-    mCurListenEventType = POLL_SCHEDULE_TYPE_MQ;
     mModuleID = id;
     mModuleName = name;
     mMsgMediatorPtr = msgMediator;
 
     MakeMQ();
     if (IsMonitored()) {
-        AddPoll(POLL_SCHEDULE_TYPE_MQ, mMqHandle);
+        AddPoll(mMqHandle, IPC_TYPE_MQ);
     }
 
     InitSigHandler();
@@ -63,7 +62,11 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
 
 SprObserver::~SprObserver()
 {
-    SprEpollSchedule::GetInstance()->DelPoll(*this);
+    for (const auto& it : mPollFds)
+    {
+        SprEpollSchedule::GetInstance()->DelPoll(it);
+    }
+
     mMsgMediatorPtr->UnregisterObserver(*this);
 
     if (mMqHandle != -1)
@@ -78,6 +81,7 @@ SprObserver::~SprObserver()
         mMqDevName = "";
     }
 
+    mPollFds.clear();
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
@@ -131,6 +135,11 @@ void SprObserver::InitSigHandler()
     sigaction(SIGABRT, &signal_action, NULL);
 }
 
+int SprObserver::HandleEvent(int fd)
+{
+    return 0;
+}
+
 int SprObserver::AbstractProcessMsg(const SprMsg& msg)
 {
     // SPR_LOGD("[0x%x -> 0x%x] Receive Msg: %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
@@ -156,20 +165,23 @@ int SprObserver::AbstractProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-int SprObserver::AddPoll(uint32_t listenType, int listenHandler)
+int SprObserver::AddPoll(int fd, uint8_t type)
 {
-    SetCurListenEventType(listenType);
-    SetCurListenHandler(listenHandler);
-    SprEpollSchedule::GetInstance()->AddPoll(*this);
-    return 0;
+    int ret = SprEpollSchedule::GetInstance()->AddPoll(fd, type, this);
+    if (ret == 0)
+    {
+        mPollFds.insert(fd);
+    }
+
+    return ret;
 }
 
-int SprObserver::HandlePollEvent()
+int SprObserver::HandlePollEvent(int fd, uint8_t ipcType)
 {
     SprMsg msg;
-    switch (GetCurListenEventType())
+    switch (ipcType)
     {
-        case POLL_SCHEDULE_TYPE_MQ:
+        case IPC_TYPE_MQ:
         {
             if (RecvMsg(msg) < 0) {
                 SPR_LOGE("RecvMsg fail!\n");
@@ -179,9 +191,9 @@ int SprObserver::HandlePollEvent()
             break;
         }
 
-        case POLL_SCHEDULE_TYPE_TIMER:
+        case IPC_TYPE_TIMERFD:
         default:
-            ProcessMsg(msg);
+            HandleEvent(fd);
             break;
     }
 

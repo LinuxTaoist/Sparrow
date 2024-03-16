@@ -79,33 +79,34 @@ void SprEpollSchedule::Exit()
 
 }
 
-void SprEpollSchedule::AddPoll(SprObserver& observer)
+int SprEpollSchedule::AddPoll(int fd, uint8_t ipcType, SprObserver* observer)
 {
-    struct epoll_event ep;
-
     //EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
     //EPOLLOUT：表示对应的文件描述符可以写；
     //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
+    struct epoll_event ep;
     ep.events = EPOLLIN | EPOLLET;
-    ep.data.u32 = (uint32_t)observer.GetCurListenEventType();
-    ep.data.ptr = &observer;
+    ep.data.fd = fd;
 
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
-    if (epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, observer.GetCurListenHandler(), &ep) != 0) {
+    int ret = epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, fd, &ep);
+    if (ret != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
+    } else {
+        mPollMap.insert(std::make_pair(fd, std::make_pair(ipcType, observer)));
+        SPR_LOGD("Poll add module %s\n", observer->GetModuleName().c_str());
     }
-    SPR_LOGD("Poll add module %s\n", observer.GetModuleName().c_str());
+
+    return ret;
 }
 
-void SprEpollSchedule::DelPoll(SprObserver& observer)
+void SprEpollSchedule::DelPoll(int fd)
 {
-    if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, observer.GetCurListenHandler(), nullptr) != 0) {
+    if (epoll_ctl(mEpollHandler, EPOLL_CTL_DEL, fd, nullptr) != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     }
-
-    SPR_LOGD("Poll delete module %s\n", observer.GetModuleName().c_str());
 }
 
 void SprEpollSchedule::EpollLoop()
@@ -118,22 +119,34 @@ void SprEpollSchedule::EpollLoop()
     // mCoPool.AddCallbackPoint(cbp.get());
 
     do {
-        // 无事件时, epoll_wait阻塞, -1 无限等待
-        int count = epoll_wait(mEpollHandler, ep, sizeof(ep)/sizeof(ep[0]), -1);
+        // 无事件时, epoll_wait阻塞, 超时等待
+        int count = epoll_wait(mEpollHandler, ep, sizeof(ep)/sizeof(ep[0]), 5000);
         if (count <= 0) {
-            SPR_LOGE("epoll_wait fail. (%s)\n", strerror(errno));
+            if (!mRun) {
+                break;
+            }
+
             continue;
         }
 
         // IO监听有数据, libgo调度
-        // SPR_LOGD("Data count %d come from epoll ...\n", count);
         for (int i = 0; i < count; i++) {
-            SprObserver* p = static_cast<SprObserver*>(ep[i].data.ptr);
+            int fd = ep[i].data.fd;
 
-            // 投递任务至协程，没有回调
-            mCoPool.Post([p] {
-                p->HandlePollEvent();
-            }, nullptr);
+            // SPR_LOGD("Data count %d come from epoll %d\n", count, fd);
+            if (mPollMap.count(fd) != 0 && mPollMap[fd].second != nullptr)
+            {
+                // 投递任务至协程，没有回调
+                mCoPool.Post([&] {
+                    int ipcType = mPollMap[fd].first;
+                    // SPR_LOGD("HandlePollEvent fd = %d, ipc = %d\n", fd, ipcType);
+                    mPollMap[fd].second->HandlePollEvent(fd, ipcType);
+                }, nullptr);
+            } else {
+                SPR_LOGE("fd %d not found\n", fd);
+            }
+
+
         }
     } while(mRun);
 }
