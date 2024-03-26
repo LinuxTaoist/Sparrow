@@ -31,9 +31,7 @@ const uint32_t EPOLL_FD_NUM = 10;
 
 SprEpollSchedule::SprEpollSchedule(uint32_t size)
 {
-    SPR_LOGD("---- Sparrow Epoll Start ----\n");
-
-    mRun = true;
+    SPR_LOGD("===========  Sparrow Epoll Start  ===========\n");
 
     if (size) {
         mEpollHandle = epoll_create(size);
@@ -45,6 +43,7 @@ SprEpollSchedule::SprEpollSchedule(uint32_t size)
         SPR_LOGE("epoll_create fail! (%s)\n", strerror(errno));
     }
 
+    mRun = true;
     Init();
 }
 
@@ -76,7 +75,6 @@ void SprEpollSchedule::Exit()
         close(mEpollHandle);
         mEpollHandle = -1;
     }
-
 }
 
 int SprEpollSchedule::AddPoll(int fd, uint8_t ipcType, SprObserver* observer)

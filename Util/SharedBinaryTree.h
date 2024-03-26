@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : ShmHelper.h
+ *  @file       : SharedBinaryTree.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SHM_HELPER_H__
-#define __SHM_HELPER_H__
+#ifndef __SHARED_BINARY_TREE_H__
+#define __SHARED_BINARY_TREE_H__
 
 #include <semaphore.h>
 #include <map>
@@ -34,11 +34,11 @@ struct Node
     Node* right;
 };
 
-class ShmHelper
+class SharedBinaryTree
 {
 public:
-    ShmHelper(const std::string& filename, size_t size);
-    ~ShmHelper();
+    SharedBinaryTree(const std::string& filename, size_t size);
+    ~SharedBinaryTree();
 
     int GetValue(const std::string& key, std::string& value);
     int SetValue(const std::string& key, const std::string& value);
@@ -58,4 +58,4 @@ private:
     void  GetKeyValue(Node* node, std::map<std::string, std::string>& keyValueMap);
 };
 
-#endif //__SHM_HELPER_H__
+#endif //__SHARED_BINARY_TREE_H__

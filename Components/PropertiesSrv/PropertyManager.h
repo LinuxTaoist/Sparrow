@@ -21,7 +21,7 @@
 
 #include <string>
 #include <memory>
-#include "ShmHelper.h"
+#include "SharedBinaryTree.h"
 #include "SprObserver.h"
 
 class PropertyManager : public SprObserver
@@ -92,7 +92,7 @@ private:
 private:
     int mSize;
     std::string mDevName;
-    std::unique_ptr<ShmHelper> mSharedMemoryPtr;
+    std::unique_ptr<SharedBinaryTree> mSharedMemoryPtr;
 };
 
 #endif

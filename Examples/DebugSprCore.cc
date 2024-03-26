@@ -86,6 +86,7 @@ int main(int agrc, const char *argv[])
         do {
             SPR_LOGD("Input: \n");
             val = fgetc(stdin);
+            getchar();
             switch(val)
             {
                 case '0':
@@ -149,7 +150,7 @@ int main(int agrc, const char *argv[])
                 }
 
                 default:
-                    // usage();
+                    usage();
                     break;
             }
         } while(run);

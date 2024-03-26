@@ -22,19 +22,6 @@ fi
 #     make
 # fi
 
-# ## build glog
-# GLOG_LIBRARY_PATH=$PROJECT_PATH/3rdParty/glog/build/libglog.a
-# if [ -f "$GLOG_LIBRARY_PATH" ]; then
-#     echo "libglog.a already exists"
-# else
-#     echo "libglog.a not exists, start build glog"
-#     cd $PROJECT_PATH/3rdParty/glog/
-#     cmake -S . -B build -G "Unix Makefiles"
-#     cmake --build build
-#     cd build
-#     make DESTDIR=./out install
-# fi
-
 cd $PROJECT_PATH/Build/
 # rm -rf ../Release/Cache
 # rm -rf ../Release/Bin/*

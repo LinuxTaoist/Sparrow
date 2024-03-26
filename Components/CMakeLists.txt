@@ -15,6 +15,14 @@ set_target_properties(BinLogSrv PROPERTIES OUTPUT_NAME "logmanagersrv")
 target_link_libraries(BinLogSrv sprcore pthread)
 add_dependencies     (BinLogSrv libsprcore)
 
+# Bin binderserver
+aux_source_directory(${PROJECT_PATH}/Util                   SRC_BINDER_SRV_PATH)
+aux_source_directory(${PROJECT_PATH}/Components/BinderSrv   SRC_BINDER_SRV_PATH)
+add_executable       (BinBinderSrv ${SRC_BINDER_SRV_PATH})
+set_target_properties(BinBinderSrv PROPERTIES OUTPUT_NAME "bindersrv")
+target_link_libraries(BinBinderSrv pthread rt)
+# add_dependencies     (BinBinderSrv)
+
 # Bin mediatorsrv
 aux_source_directory(${PROJECT_PATH}/Components/MediatorSrv  SRC_PROXY_SRV_PATH)
 add_executable       (BinProxySrv ${SRC_PROXY_SRV_PATH})

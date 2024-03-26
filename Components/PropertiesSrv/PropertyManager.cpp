@@ -98,7 +98,7 @@ int PropertyManager::GetProperty()
 
 int PropertyManager::Init()
 {
-    mSharedMemoryPtr = std::make_unique<ShmHelper>(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE);
+    mSharedMemoryPtr = std::make_unique<SharedBinaryTree>(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE);
     if (mSharedMemoryPtr == nullptr)
     {
         SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
@@ -251,7 +251,7 @@ int PropertyManager::SavePersistProperty(const std::string& key, const std::stri
     std::ofstream file(filePath);
     if (file)
     {
-        SPR_LOGD("Save persist property %s = %s\n", key.c_str(), value.c_str());
+        SPR_LOGD("Save persist property %s=%s\n", key.c_str(), value.c_str());
         file << value;
         file.close();
     }
@@ -266,6 +266,11 @@ int PropertyManager::SavePersistProperty(const std::string& key, const std::stri
 
 int PropertyManager::ProcessMsg(const SprMsg& msg)
 {
-    // switch()
+    switch (msg.GetMsgId())
+    {
+        default:
+            break;
+    }
+
     return 0;
 }

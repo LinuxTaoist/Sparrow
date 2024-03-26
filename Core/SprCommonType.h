@@ -31,8 +31,8 @@ namespace InternalEnum {
 
 enum ESprModuleID
 {
-    MODULE_NONE = 0x00,
-    MODULE_PROXY = 0x01,
+    MODULE_NONE     = 0x00,
+    MODULE_PROXY    = 0x01,
     MODULE_PROPERTYM,
     MODULE_CONFIG,
     MODULE_LOGM,
@@ -70,13 +70,6 @@ enum EIPCType : uint8_t
     IPC_TYPE_TIMERFD,
     IPC_TYPE_BUTT
 };
-
-// enum PollScheduleType
-// {
-//     POLL_SCHEDULE_TYPE_MQ = 0x01,
-//     POLL_SCHEDULE_TYPE_TIMER,
-//     POLL_SCHEDULE_TYPE_BUTT
-// };
 
 typedef struct
 {

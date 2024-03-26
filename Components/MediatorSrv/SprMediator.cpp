@@ -229,7 +229,7 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
         if (pair.second.handler != -1 && pair.second.monitored)
         {
             // When the value to is NONE, it is sent to all
-            // and when the value is vaild value, it is sent to the specified module
+            // and when the value is vaild value, it is sent to the destination
             if (msg.GetTo() == MODULE_NONE || msg.GetTo() == pair.first)
             {
                 NotifyObserver(pair.first, msg);
