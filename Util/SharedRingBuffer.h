@@ -25,7 +25,7 @@
 
 struct Root
 {
-    uint8_t  cmd;      // 使能状态
+    uint8_t  cmd;       // 使能状态
     uint8_t  busy;      // 忙碌状态
     uint8_t  rwStatus;  // 可读状态
     uint32_t wp;        // 写入位置
@@ -51,8 +51,8 @@ public:
     int  read(void* data, int32_t len);
 
 private:
-    int32_t AvailSpace()   const noexcept;
-    int32_t AvailData()    const noexcept;
+    int32_t  AvailSpace()   const noexcept;
+    int32_t  AvailData()    const noexcept;
     void     SetRWStatus(ECmdType type) const noexcept;
     void     DumpMemory(const char* pAddr, uint32_t size);
     void     DumpErrorInfo();

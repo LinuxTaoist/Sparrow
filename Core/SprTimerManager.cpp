@@ -24,6 +24,7 @@
 #include "SprMsg.h"
 #include "Util/Shared.h"
 #include "SprTimerManager.h"
+#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalEnum;
@@ -32,9 +33,8 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%d TimerM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d TimerM E: " fmt, __LINE__, ##args)
 
-SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name,
-        shared_ptr<SprMediatorProxy> mediatorPtr, shared_ptr<SprSystemTimer> systemTimerPtr)
-        : SprObserver(id, name, mediatorPtr)
+SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprSystemTimer> systemTimerPtr)
+        : SprObserver(id, name, make_shared<SprMediatorIpcProxy>())
 {
     mEnable = false;
     mSystemTimerPtr = systemTimerPtr;
@@ -45,10 +45,10 @@ SprTimerManager::~SprTimerManager()
 
 }
 
-SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id, const std::string& name,
-        std::shared_ptr<SprMediatorProxy> mediatorPtr, shared_ptr<SprSystemTimer> systemTimerPtr)
+SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id,
+                    const std::string& name, shared_ptr<SprSystemTimer> systemTimerPtr)
 {
-    static SprTimerManager instance(id, name, mediatorPtr, systemTimerPtr);
+    static SprTimerManager instance(id, name, systemTimerPtr);
     return &instance;
 }
 

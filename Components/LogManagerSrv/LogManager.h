@@ -27,7 +27,7 @@
 class LogManager : public SprObserver
 {
 public:
-    LogManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr);
+    LogManager(ModuleIDType id, const std::string& name);
     virtual ~LogManager();
 
     int ProcessMsg(const SprMsg& msg);

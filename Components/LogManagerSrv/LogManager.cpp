@@ -19,6 +19,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <memory>
+#include "SprMediatorIpcProxy.h"
 #include "LogManager.h"
 
 using namespace std;
@@ -28,8 +30,8 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%d LOGM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d LOGM E: " fmt, __LINE__, ##args)
 
-LogManager::LogManager(ModuleIDType id, const std::string& name, shared_ptr<SprMediatorProxy> mediatorPtr)
-            : SprObserver(id, name, mediatorPtr)
+LogManager::LogManager(ModuleIDType id, const std::string& name)
+            : SprObserver(id, name, make_shared<SprMediatorIpcProxy>())
 {
 
 }

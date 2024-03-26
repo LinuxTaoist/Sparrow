@@ -18,7 +18,6 @@
  */
 #include "SprCommonType.h"
 #include "PropertyManager.h"
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalEnum;
@@ -27,7 +26,7 @@ using namespace InternalEnum;
 
 int main(int argc, char * argv[])
 {
-    PropertyManager* pProperM = PropertyManager::GetInstance(MODULE_PROPERTYM, "PropertyManager", std::make_shared<SprMediatorIpcProxy>());
+    PropertyManager* pProperM = PropertyManager::GetInstance(MODULE_PROPERTYM, "PropertyManager");
     pProperM->Init();
 
     pProperM->MainLoop();

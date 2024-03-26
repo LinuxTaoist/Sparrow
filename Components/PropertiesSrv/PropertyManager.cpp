@@ -26,6 +26,7 @@
 #include <errno.h>
 #include <string.h>
 #include "PropertyManager.h"
+#include "SprMediatorIpcProxy.h"
 
 #define SYSTEM_PROP_PATH    "system.prop"
 #define DEFAULT_PROP_PATH   "default.prop"
@@ -41,8 +42,8 @@
 #define SPR_LOGW(fmt, args...)  printf("%d Properties W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...)  printf("%d Properties E: " fmt, __LINE__, ##args)
 
-PropertyManager::PropertyManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr)
-            : SprObserver(id, name, mediatorPtr)
+PropertyManager::PropertyManager(ModuleIDType id, const std::string& name)
+            : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>())
 {
 }
 
@@ -50,9 +51,9 @@ PropertyManager::~PropertyManager()
 {
 }
 
-PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr)
+PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name)
 {
-    static PropertyManager instance(id, name, mediatorPtr);
+    static PropertyManager instance(id, name);
     return &instance;
 }
 

@@ -45,7 +45,7 @@ public:
      * @return PropertyManager*
      *
      */
-    static PropertyManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr);
+    static PropertyManager* GetInstance(ModuleIDType id, const std::string& name);
 
     /**
      * @brief SetProperty
@@ -76,10 +76,8 @@ public:
      */
     int GetProperty();
 
-    int ProcessMsg(const SprMsg& msg);
-
 private:
-    PropertyManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr);
+    PropertyManager(ModuleIDType id, const std::string& name);
     PropertyManager(const PropertyManager&) = delete;
     PropertyManager& operator=(const PropertyManager&) = delete;
 
@@ -88,6 +86,8 @@ private:
     int LoadPersistProperty();
     int HandleKeyValue(const std::string& key, const std::string& value);
     int SavePersistProperty(const std::string& key, const std::string& value);
+
+    int ProcessMsg(const SprMsg& msg) override;
 
 private:
     int mSize;

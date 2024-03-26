@@ -57,7 +57,7 @@ public:
      * @param[in] systemTimerPtr
      * @return SprTimerManager*
      */
-    static SprTimerManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr, std::shared_ptr<SprSystemTimer> systemTimerPtr);
+    static SprTimerManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> systemTimerPtr);
 
 private:
     /**
@@ -68,7 +68,7 @@ private:
      * @param[in] mediatorPtr
      * @param[in] systemTimerPtr
      */
-    SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr, std::shared_ptr<SprSystemTimer> systemTimerPtr);
+    SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> systemTimerPtr);
 
     /**
      * @brief  DeInit

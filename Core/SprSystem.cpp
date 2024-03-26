@@ -23,7 +23,6 @@
 #include "SprSystem.h"
 #include "SprTimeTrace.h"
 #include "SprCommonType.h"
-#include "SprMediatorIpcProxy.h"
 
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
@@ -82,11 +81,11 @@ void SprSystem::Init()
     InitEnv();
 
     TTP(9, "systemTimerPtr->Init()");
-    shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer", make_shared<SprMediatorIpcProxy>());
+    shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
     systemTimerPtr->Init();
 
     TTP(10, "TimerManager->Init()");
-    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", make_shared<SprMediatorIpcProxy>(), systemTimerPtr)->Init();
+    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Init();
 
     // Permanently block waiting for message driver to trigger
     SprObserver::MainLoop();

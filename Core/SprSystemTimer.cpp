@@ -24,6 +24,7 @@
 #include <sys/timerfd.h>
 #include "SprCommonType.h"
 #include "SprSystemTimer.h"
+#include "SprMediatorIpcProxy.h"
 
 using namespace InternalEnum;
 
@@ -31,8 +32,8 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%d SysTimer W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d SysTimer E: " fmt, __LINE__, ##args)
 
-SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mediatorPtr)
-                : SprObserver(id, name, mediatorPtr, false)
+SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name)
+                : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>(), false)
 {
     mTimerRunning = false;
     mTimerFd = -1;

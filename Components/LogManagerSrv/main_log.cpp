@@ -18,16 +18,14 @@
  *******************************************************************************
  */
 #include <stdio.h>
-#include <memory>
 #include "LogManager.h"
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalEnum;
 
 int main(int agrc, const char *argv[])
 {
-    LogManager theLogManager(MODULE_LOGM, "LogM", make_shared<SprMediatorIpcProxy>());
+    LogManager theLogManager(MODULE_LOGM, "LogM");
     SprObserver::MainLoop();
     return 0;
 }

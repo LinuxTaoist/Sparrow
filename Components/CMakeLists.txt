@@ -21,14 +21,14 @@ aux_source_directory(${PROJECT_PATH}/Components/BinderSrv   SRC_BINDER_SRV_PATH)
 add_executable       (BinBinderSrv ${SRC_BINDER_SRV_PATH})
 set_target_properties(BinBinderSrv PROPERTIES OUTPUT_NAME "bindersrv")
 target_link_libraries(BinBinderSrv pthread rt)
-# add_dependencies     (BinBinderSrv)
+add_dependencies     (BinBinderSrv librt)
 
 # Bin mediatorsrv
 aux_source_directory(${PROJECT_PATH}/Components/MediatorSrv  SRC_PROXY_SRV_PATH)
 add_executable       (BinProxySrv ${SRC_PROXY_SRV_PATH})
 set_target_properties(BinProxySrv PROPERTIES OUTPUT_NAME "mediatorsrv")
 target_link_libraries(BinProxySrv sprcore pthread rt)
-add_dependencies     (BinProxySrv libsprcore)
+add_dependencies     (BinProxySrv libsprcore librt)
 
 # Bin powermanagersrv
 aux_source_directory(${PROJECT_PATH}/Components/PowerManagerSrv  SRC_POWER_MANAGER_PATH)
@@ -42,8 +42,8 @@ aux_source_directory(${PROJECT_PATH}/Util                        SRC_PROPERTY_SR
 aux_source_directory(${PROJECT_PATH}/Components/PropertiesSrv    SRC_PROPERTY_SRV_PATH)
 add_executable       (BinPropertySrv ${SRC_PROPERTY_SRV_PATH})
 set_target_properties(BinPropertySrv PROPERTIES OUTPUT_NAME "propertiessrv")
-target_link_libraries(BinPropertySrv sprcore)
-add_dependencies     (BinPropertySrv libsprcore)
+target_link_libraries(BinPropertySrv sprcore pthread rt)
+add_dependencies     (BinPropertySrv libsprcore librt)
 
 # Bin servicemanagersrv
 aux_source_directory(${PROJECT_PATH}/Components/ServiceManagerSrv  SRC_SRV_PATH)
