@@ -16,3 +16,14 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#ifndef __BINDER_MANAGER_H__
+#define __BINDER_MANAGER_H__
+
+class BinderManager
+{
+public:
+    BinderManager();
+    ~BinderManager();
+};
+
+#endif // __BINDER_MANAGER_H__

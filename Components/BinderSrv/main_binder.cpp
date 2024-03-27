@@ -17,8 +17,6 @@
  *
  */
 #include <stdio.h>
-#include <memory>
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 

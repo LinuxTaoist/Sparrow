@@ -4,9 +4,16 @@ include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 
 ## copy *.prop
-file(COPY ${PROJECT_PATH}/Configures/default.prop DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
-file(COPY ${PROJECT_PATH}/Configures/system.prop DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
-file(COPY ${PROJECT_PATH}/Configures/${PROJECT_PLATFORM}/vendor.prop DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
+set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/Configures/General)
+set (VENDOR_CONFIGURE_PATH  ${PROJECT_PATH}/Configures/Vendor/${PROJECT_PLATFORM})
+
+## General configures
+file(COPY ${GENERAL_CONFIGURE_PATH}/init.conf       DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
+file(COPY ${GENERAL_CONFIGURE_PATH}/default.prop    DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
+file(COPY ${GENERAL_CONFIGURE_PATH}/system.prop     DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
+
+## Vendor configures
+file(COPY ${VENDOR_CONFIGURE_PATH}/vendor.prop      DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 
 # Bin logservice
 aux_source_directory(${PROJECT_PATH}/Components/LogManagerSrv  SRC_LOG_SRV_PATH)
