@@ -26,8 +26,17 @@
 #define     MEDIATOR_UNIX_DGRAM_PATH    "/tmp/SprMdrU_20231126"      // unix socket
 #define     MEDIATOR_INET_PORT          1126
 #define     MSG_BUF_MAX_LENGTH          1024
+#define     MODULE_ID_OFFSET            24
 
 namespace InternalEnum {
+
+enum EProxyType
+{
+    PROXY_TYPE_MQ = 0,
+    PROXY_TYPE_UNIX_SOCKET,
+    PROXY_TYPE_INET_SOCKET,
+    PROXY_TYPE_BUTT
+};
 
 enum ESprModuleID
 {
@@ -43,23 +52,15 @@ enum ESprModuleID
     MODULE_MAX,
 };
 
-enum EProxyType
-{
-    PROXY_TYPE_MQ = 0,
-    PROXY_TYPE_UNIX_SOCKET,
-    PROXY_TYPE_INET_SOCKET,
-    PROXY_TYPE_BUTT
-};
-
 enum EProxyMsgID
 {
-    PROXY_MSG_BEGIN = MODULE_PROXY << 16 | 1,
+    PROXY_MSG_BEGIN = MODULE_PROXY << MODULE_ID_OFFSET | 1,
     PROXY_MSG_BUTT
 };
 
 enum EPropertyBinderCmd
 {
-    PROPERTY_CMD_BEGIN = MODULE_PROPERTYM << 16 | 1,
+    PROPERTY_CMD_BEGIN = MODULE_PROPERTYM << MODULE_ID_OFFSET | 1,
     PROPERTY_CMD_SET_PROPERTY,
     PROPERTY_CMD_GET_PROPERTY,
     PROPERTY_CMD_GET_PROPERTIES,
@@ -68,7 +69,7 @@ enum EPropertyBinderCmd
 
 enum EDebugMsgID
 {
-    DEBUG_MSG_BEGIN = MODULE_DEBUG << 16 | 1,
+    DEBUG_MSG_BEGIN = MODULE_DEBUG << MODULE_ID_OFFSET | 1,
     DEBUG_MSG_BUTT
 };
 
@@ -90,4 +91,5 @@ typedef struct
 } STimerInfo;
 
 } // namespace InternalEnum
+
 #endif
