@@ -214,10 +214,10 @@ int PropertyManager::HandleKeyValue(const std::string& key, const std::string& v
     if (key.rfind("ro.", 0) == 0)
     {
         std::string tmpValue;
-        ret = mSharedMemoryPtr->GetValue(key, tmpValue);
-        if (ret < 0)
+        int rs = mSharedMemoryPtr->GetValue(key, tmpValue);
+        if (rs < 0)
         {
-            mSharedMemoryPtr->SetValue(key, value);
+            ret = mSharedMemoryPtr->SetValue(key, value);
         } else {
             SPR_LOGW("%s already exists, modify fail!\n", key.c_str());
         }
