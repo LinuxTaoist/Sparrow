@@ -23,10 +23,10 @@ fi
 # fi
 
 cd $PROJECT_PATH/Build/
-# rm -rf ../Release/Cache
-# rm -rf ../Release/Bin/*
-# rm -rf ../Release/Lib/*
+rm -rf ../Release/Cache
+rm -rf ../Release/Bin/*
+rm -rf ../Release/Lib/*
 mkdir -p ../Release/Cache/
 cd ../Release/Cache/
 cmake ../../ -DTEST_DEBUG=$ENABLE_DEBUG -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPROJECT_CUSTOM_VERSION=$PROJECT_CUSTOM_VERSION -DPROJECT_PLATFORM=$PROJECT_PLATFORM
-make
+make -j24

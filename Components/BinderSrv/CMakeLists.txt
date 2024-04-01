@@ -8,7 +8,6 @@ add_library(LibBinder SHARED ${SRC_BINDER_LIB_PATH})
 set_target_properties(LibBinder PROPERTIES OUTPUT_NAME "sprbinder")
 set_target_properties(LibBinder PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(LibBinder stdc++ rt dl)
-add_dependencies     (LibBinder librt libdl)
 
 # Bin binderserver
 include_directories (${BINDER_PATH}/Library)
@@ -19,4 +18,3 @@ set(PARCEL_FILES    ${BINDER_PATH}/Library/Parcel.cpp)
 add_executable       (BinBinderSrv ${SRC_BINDER_SRV_PATH}   ${PARCEL_FILES})
 set_target_properties(BinBinderSrv PROPERTIES OUTPUT_NAME   "bindersrv")
 target_link_libraries(BinBinderSrv pthread rt)
-add_dependencies     (BinBinderSrv librt)
