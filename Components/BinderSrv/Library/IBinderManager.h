@@ -2,32 +2,40 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_service.cpp
+ *  @file       : IBinderManager.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
- *  @date       : 2024/03/26
+ *  @date       : 2024/03/16
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/26 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/03/16 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <unistd.h>
-#include "ServiceManager.h"
+#ifndef __IBINDER_MANAGER_H__
+#define __IBINDER_MANAGER_H__
 
-int main(int argc, char* argv[])
+#include <string>
+#include <memory>
+#include "Binder.h"
+#include "IBinder.h"
+
+class IBinderManager
 {
-    ServiceManager theServiceManager;
-    theServiceManager.Init();
+public:
+    ~IBinderManager() = default;
 
-    while(1) {
-        sleep(1);
-    }
+    static IBinderManager* GetInstance();
+    std::shared_ptr<Binder> AddService(const std::string& name);
+    std::shared_ptr<IBinder> GetService(const std::string& name);
+    int32_t RemoveService(const std::string& name);
 
-    return 0;
-}
+private:
+    IBinderManager() = default;
+};
 
+#endif // __IBINDER_MANAGER_H__

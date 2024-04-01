@@ -42,8 +42,7 @@
 #define SPR_LOGW(fmt, args...)  printf("%d Properties W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...)  printf("%d Properties E: " fmt, __LINE__, ##args)
 
-PropertyManager::PropertyManager(ModuleIDType id, const std::string& name)
-            : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>())
+PropertyManager::PropertyManager()
 {
 }
 
@@ -51,9 +50,9 @@ PropertyManager::~PropertyManager()
 {
 }
 
-PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name)
+PropertyManager* PropertyManager::GetInstance()
 {
-    static PropertyManager instance(id, name);
+    static PropertyManager instance;
     return &instance;
 }
 
@@ -86,7 +85,7 @@ int PropertyManager::GetProperty(const std::string key, std::string& value, cons
     return ret;
 }
 
-int PropertyManager::GetProperty()
+int PropertyManager::GetProperties()
 {
     if (mSharedMemoryPtr == nullptr)
     {
@@ -173,7 +172,7 @@ int PropertyManager::LoadPersistProperty()
 
     if (access(PERSIST_FILE_PATH, F_OK) != 0)
     {
-        SPR_LOGW("%s not Exist. (%s)\n", PERSIST_FILE_PATH, strerror(errno));
+        SPR_LOGW("%s not exist. (%s)\n", PERSIST_FILE_PATH, strerror(errno));
         return 0;
     }
 
@@ -181,7 +180,7 @@ int PropertyManager::LoadPersistProperty()
     {
         while ((entry = readdir(dir)) != nullptr)
         {
-            if (entry->d_type == DT_REG) // 只处理常规文件
+            if (entry->d_type == DT_REG)
             {
                 std::string filePath = std::string(PERSIST_FILE_PATH) + entry->d_name;
                 std::ifstream file(filePath);
@@ -260,17 +259,6 @@ int PropertyManager::SavePersistProperty(const std::string& key, const std::stri
     {
         SPR_LOGE("Open %s fail! \n", filePath.c_str());
         return -1;
-    }
-
-    return 0;
-}
-
-int PropertyManager::ProcessMsg(const SprMsg& msg)
-{
-    switch (msg.GetMsgId())
-    {
-        default:
-            break;
     }
 
     return 0;

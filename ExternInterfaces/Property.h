@@ -2,50 +2,33 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : PropertyManager.cpp
+ *  @file       : Property.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
- *  @date       : 2024/03/13
+ *  @date       : 2024/04/01
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/13 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/04/01 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __PROPERTY_MANAGER_H__
-#define __PROPERTY_MANAGER_H__
-
 #include <string>
-#include <memory>
-#include "SharedBinaryTree.h"
-#include "SprObserver.h"
 
-class PropertyManager
+class Property
 {
 public:
-    /**
-     * @brief Destroy the Property Manager object
-     *
-     */
-    virtual ~PropertyManager();
+    ~Property();
 
     /**
-     * @brief Init
+     * @brief Get the Instance object
      *
-     * @return int
+     * @return object
      */
-    int Init();
-
-    /**
-     * @brief GetInstance
-     * @return PropertyManager*
-     *
-     */
-    static PropertyManager* GetInstance();
+    static Property* GetInstance();
 
     /**
      * @brief SetProperty
@@ -77,20 +60,5 @@ public:
     int GetProperties();
 
 private:
-    PropertyManager();
-    PropertyManager(const PropertyManager&) = delete;
-    PropertyManager& operator=(const PropertyManager&) = delete;
-
-    int DumpPropertyList();
-    int LoadPropertiesFromFile(const std::string& fileName);
-    int LoadPersistProperty();
-    int HandleKeyValue(const std::string& key, const std::string& value);
-    int SavePersistProperty(const std::string& key, const std::string& value);
-
-private:
-    int mSize;
-    std::string mDevName;
-    std::unique_ptr<SharedBinaryTree> mSharedMemoryPtr;
+    Property();
 };
-
-#endif

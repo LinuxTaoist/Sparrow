@@ -18,7 +18,6 @@
  */
 #include <map>
 #include <thread>
-#include <memory>
 #include <algorithm>
 #include <fstream>
 #include <sstream>
@@ -27,21 +26,18 @@
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
-#include <signal.h>
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <semaphore.h>
-#include <dirent.h>
 #include "ServiceManager.h"
 
 using namespace std;
 
 #define SPR_LOG(fmt, args...)   printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...)  printf("[%d] %-20s %-4d D: " fmt, getpid(), __FUNCTION__, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...)  printf("[%d] %-20s %-4d W: " fmt, getpid(), __FUNCTION__, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...)  printf("[%d] %-20s %-4d E: " fmt, getpid(), __FUNCTION__,__LINE__, ##args)
+#define SPR_LOGD(fmt, args...)  printf("[%d] %-4d D: " fmt, getpid(), __LINE__, ##args)
+#define SPR_LOGW(fmt, args...)  printf("[%d] %-4d W: " fmt, getpid(), __LINE__, ##args)
+#define SPR_LOGE(fmt, args...)  printf("[%d] %-4d E: " fmt, getpid(), __LINE__, ##args)
 
 #define CONFIG_SUPPORT_SIGCHLD 0 // SIGCHLD不可靠。 1: 信号中断触发 0: 轮询
 
@@ -71,7 +67,7 @@ bool ServiceManager::IsExeAliveByProc(int32_t pid)
     snprintf(pidPath, sizeof(pidPath), "%s/%d", PROC_PATH, pid);
     int ret = lstat(pidPath, &fileStat);
     if (ret) {
-        //SPR_LOGD("%s lstat failed. errno = %d (%s)\n", pidPath, errno, strerror(errno));
+        SPR_LOGD("%s lstat failed. (%s)\n", pidPath, strerror(errno));
         return false;
     }
 

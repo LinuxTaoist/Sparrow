@@ -2,32 +2,40 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_service.cpp
+ *  @file       : Binder.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
- *  @date       : 2024/03/26
+ *  @date       : 2023/03/16
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/26 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/03/16 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <unistd.h>
-#include "ServiceManager.h"
+#ifndef __BINDER_H__
+#define __BINDER_H__
 
-int main(int argc, char* argv[])
+#include <memory>
+#include <string>
+#include <stdint.h>
+#include "Parcel.h"
+
+class Binder
 {
-    ServiceManager theServiceManager;
-    theServiceManager.Init();
+public:
+    Binder(const std::string& name, int key) : mKey(key), mName(name) {};
+    ~Binder() {};
 
-    while(1) {
-        sleep(1);
-    }
+    int32_t GetParcel(std::shared_ptr<Parcel>& reqParcel, std::shared_ptr<Parcel>& rspParcel);
 
-    return 0;
-}
+private:
+    int32_t mKey;
+    std::string mName;
+};
+
+#endif // __BINDER_H__
 

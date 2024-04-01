@@ -18,6 +18,7 @@
  */
 #include <random>
 #include <chrono>
+#include <random>
 #include "Shared.h"
 
 namespace Shared {
@@ -34,6 +35,16 @@ namespace Shared {
         }
 
         return strRandom;
+    }
+
+    int ProduceRandomInt(int len)
+    {
+        int maxValue = pow(10, len) - 1;
+        std::random_device rd;
+        std::mt19937 generator(rd());
+        std::uniform_int_distribution<> distribution(0, maxValue);
+
+        return distribution(generator);
     }
 
     std::string GetCurTimeStr()

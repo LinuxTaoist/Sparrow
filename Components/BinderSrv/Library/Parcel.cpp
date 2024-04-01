@@ -35,12 +35,12 @@ Parcel::Parcel(std::string path, int key, bool master) : mMaster(master), mShmKe
     mRingBuffer = new (std::nothrow)SharedRingBuffer(path, SHM_MAX_SIZE);
     if (mRingBuffer == nullptr)
     {
-        SPR_LOGE("mRingBuffer is nullptr!");
+        SPR_LOGE("mRingBuffer is nullptr!\n");
     }
 
     mSem = sem_open((mShmPath + std::to_string(mShmKey)).c_str(), O_CREAT, 0666, 1);
     if (mSem == SEM_FAILED) {
-        SPR_LOGE("sem_open %s failed! (%s)", (mShmPath + std::to_string(mShmKey)).c_str(), strerror(errno));
+        SPR_LOGE("sem_open %s failed! (%s)\n", (mShmPath + std::to_string(mShmKey)).c_str(), strerror(errno));
     }
 }
 
@@ -172,7 +172,7 @@ int Parcel::ReadData(void* data, int& size)
     return mRingBuffer->read(data, len);
 }
 
-int Parcel::wait()
+int Parcel::Wait()
 {
     while (!mRingBuffer->IsReadable())  {
         if (sem_wait(mSem) != 0)
@@ -184,7 +184,7 @@ int Parcel::wait()
     return 0;
 }
 
-int Parcel::post()
+int Parcel::Post()
 {
     if (sem_post(mSem) != 0)
     {

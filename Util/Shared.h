@@ -23,6 +23,7 @@
 
 namespace Shared {
     std::string ProduceRandomStr(int len);
+    int ProduceRandomInt(int len);
 
     template<typename T>
     int AbsValue(T v)

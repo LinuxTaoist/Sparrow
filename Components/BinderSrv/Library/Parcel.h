@@ -38,8 +38,8 @@ public:
     int ReadString(std::string& value);
     int WriteData(void* data, int size);
     int ReadData(void* data, int& size);
-    int wait();
-    int post();
+    int Wait();
+    int Post();
 
 private:
     bool                mMaster;

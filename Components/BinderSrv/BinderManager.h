@@ -6,7 +6,7 @@
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
- *  @date       : 2023/03/16
+ *  @date       : 2024/03/16
  *
  *
  *  Change History:
@@ -19,11 +19,31 @@
 #ifndef __BINDER_MANAGER_H__
 #define __BINDER_MANAGER_H__
 
+#include <map>
+#include <string>
+#include <stdint.h>
+#include "BinderCommon.h"
+
 class BinderManager
 {
 public:
-    BinderManager();
     ~BinderManager();
+
+    static BinderManager* GetInstance();
+    int32_t HandleMsgLoop();
+
+private:
+    BinderManager();
+    int32_t MsgResponseAddService();
+    int32_t MsgResponseRemoveService();
+    int32_t MsgResponseGetService();
+
+private:
+    using HandleFunction = int32_t (BinderManager::*)(void);
+
+    bool mRunning;
+    std::map<std::string, BinderInfo> mBinderMap;
+    std::map<int32_t, HandleFunction> mHandleFuncs;
 };
 
 #endif // __BINDER_MANAGER_H__
