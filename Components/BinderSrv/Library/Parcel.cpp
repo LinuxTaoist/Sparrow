@@ -26,13 +26,15 @@
 #define SPR_LOGD(fmt, args...)  printf("%4d Parcel D: [%c] " fmt, __LINE__, mMaster ? 'm' : 's', ##args)
 #define SPR_LOGE(fmt, args...)  printf("%4d Parcel E: [%c] " fmt, __LINE__, mMaster ? 'm' : 's', ##args)
 
-typedef     uint16_t    NODE_LENGTH_T;
+typedef  uint16_t       NODE_LENGTH_T;
 
-const int SHM_MAX_SIZE = 10 * 1024;    // 10KB
+#define  SHM_ROOT_PATH  "/tmp/"
+
+const int SHM_MAX_SIZE  = 10 * 1024;    // 10KB
 
 Parcel::Parcel(std::string path, int key, bool master) : mMaster(master), mShmKey(key), mShmPath(path)
 {
-    mRingBuffer = new (std::nothrow)SharedRingBuffer(path, SHM_MAX_SIZE);
+    mRingBuffer = new (std::nothrow)SharedRingBuffer(std::string(SHM_ROOT_PATH) + path, SHM_MAX_SIZE);
     if (mRingBuffer == nullptr)
     {
         SPR_LOGE("mRingBuffer is nullptr!\n");
