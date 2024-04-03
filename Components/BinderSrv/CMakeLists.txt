@@ -11,6 +11,7 @@ target_link_libraries(LibBinder stdc++ rt dl)
 
 # Bin binderserver
 include_directories (${BINDER_PATH}/Library)
+include_directories (${PROJECT_PATH}/Adapter)
 aux_source_directory(${PROJECT_PATH}/Util                   SRC_BINDER_SRV_PATH)
 aux_source_directory(${PROJECT_PATH}/Components/BinderSrv   SRC_BINDER_SRV_PATH)
 set(PARCEL_FILES    ${BINDER_PATH}/Library/Parcel.cpp)

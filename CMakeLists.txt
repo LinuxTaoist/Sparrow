@@ -10,6 +10,9 @@ set(CMAKE_CXX_STANDARD 14)
 ## 保存工程路径
 set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
+## 设置全局位置无关代码标志
+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 ## 保存输出路径
 set(OUTPUT_PATH            ${PROJECT_PATH}/Release)
 set(LIBRARY_OUTPUT_PATH    ${OUTPUT_PATH}/Lib)

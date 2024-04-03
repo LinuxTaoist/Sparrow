@@ -20,8 +20,6 @@
 #define __SPR_LOG_H__
 
 #include <mutex>
-#include <string>
-#include <vector>
 #include <stdint.h>
 
 class SprLog
