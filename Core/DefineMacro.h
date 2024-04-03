@@ -24,9 +24,9 @@
 // --------------------------------------------------------------------------------------------
 // - Log interface macro
 // --------------------------------------------------------------------------------------------
-#define LOGD(tag, fmt, args...)  SprLog::GetInstance()->d(tag, "%4d: " fmt, __LINE__, ##args)
-#define LOGI(tag, fmt, args...)  SprLog::GetInstance()->i(tag, "%4d: " fmt, __LINE__, ##args)
-#define LOGW(tag, fmt, args...)  SprLog::GetInstance()->w(tag, "%4d: " fmt, __LINE__, ##args)
-#define LOGE(tag, fmt, args...)  SprLog::GetInstance()->e(tag, "%4d: " fmt, __LINE__, ##args)
+#define LOGD(tag, fmt, args...)  SprLog::GetInstance()->d(tag, "%4d " fmt, __LINE__, ##args)
+#define LOGI(tag, fmt, args...)  SprLog::GetInstance()->i(tag, "%4d " fmt, __LINE__, ##args)
+#define LOGW(tag, fmt, args...)  SprLog::GetInstance()->w(tag, "%4d " fmt, __LINE__, ##args)
+#define LOGE(tag, fmt, args...)  SprLog::GetInstance()->e(tag, "%4d " fmt, __LINE__, ##args)
 
-#endif // __DEFINE_MACRO__
+#endif // __DEFINE_MACRO_H__

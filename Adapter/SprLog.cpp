@@ -16,10 +16,19 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iomanip>
+#include <sstream>
+#include <algorithm>
 #include <stdio.h>
 #include <stdarg.h>
+#include <time.h>
+#include <unistd.h>
+#include <string.h>
+#include <sys/time.h>
 #include "SprLog.h"
 
+#define PID_MAX_LENGTH          6
+#define TAG_MAX_LENGTH          12
 #define LOG_BUFFER_MAX_SIZE     256
 
 SprLog::SprLog()
@@ -76,6 +85,48 @@ int32_t SprLog::e(const char* tag, const char* format, ...)
     return result;
 }
 
+static std::string GetCurrentTimestamp()
+{
+    struct timeval tv;
+    if (gettimeofday(&tv, nullptr) != 0) {
+        perror("gettimeofday");
+        return "null";
+    }
+
+    struct tm local_tm;
+    localtime_r(&tv.tv_sec, &local_tm);
+
+    char buffer[30] = {0};
+    strftime(buffer, sizeof(buffer), "%m-%d %H:%M:%S.", &local_tm);
+
+    // millisecond
+    snprintf(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer), "%.3ld", tv.tv_usec / 1000);
+
+    return buffer;
+}
+
+// 04-03 07:56:23.032  43930     DebugMsg D:
+static int FormatLog(std::string& log, const char* level, const char* tag, const char* buffer)
+{
+    std::ostringstream oss;
+    std::string timestamp = GetCurrentTimestamp();
+    __pid_t pid = getpid();
+
+    oss << timestamp;
+    oss << " " << std::right << std::setw(PID_MAX_LENGTH) << pid;
+    oss << " " << std::right << std::setw(TAG_MAX_LENGTH) << tag;
+    oss << " " << level;
+    oss << ": " << buffer;
+
+    bool hasNewline = std::any_of(buffer, buffer + strlen(buffer), [](char c){ return c == '\n'; });
+    if (!hasNewline) {
+        oss << "\n";
+    }
+
+    log += oss.str();
+    return 0;
+}
+
 int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, va_list args)
 {
     char buffer[LOG_BUFFER_MAX_SIZE] = {0};
@@ -84,8 +135,9 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
         return -1;
     }
 
+    std::string log;
     std::lock_guard<std::mutex> lock(mMutex);
-    std::string log = std::string(level) + " " + std::string(tag) + " " + std::string(buffer);
+    FormatLog(log, level, tag, buffer);
     printf("%s", log.c_str());
 
     return result;
