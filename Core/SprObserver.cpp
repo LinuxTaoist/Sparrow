@@ -28,13 +28,14 @@
 #include <sys/stat.h>        /* For mode constants */
 #include "Util/Shared.h"
 #include "SprObserver.h"
+#include "DefineMacro.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d SprObs D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SprObs E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("SprObs", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SprObs", fmt, ##args)
 
 const int MQ_BUFF_MAX_SIZE  = 1024;
 const int RANDOM_STR_LENGTH = 8;

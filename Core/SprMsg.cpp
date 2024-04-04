@@ -17,12 +17,12 @@
  *
  */
 #include "SprMsg.h"
+#include "DefineMacro.h"
 #include "Util/Convert.h"
 
-#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...) printf("%d SprMsg D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d SprMsg W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SprMsg E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("SprMsg", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGD("SprMsg", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SprMsg", fmt, ##args)
 
 SprMsg::SprMsg()
 {

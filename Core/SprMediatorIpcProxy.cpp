@@ -19,16 +19,18 @@
 #include <errno.h>
 #include <string.h>
 #include <mqueue.h>
-#include "SprCommonType.h"
-#include "SprMediatorIpcProxy.h"
-#include "SprObserver.h"
 #include "SprMsg.h"
+#include "SprCommonType.h"
+#include "SprObserver.h"
+#include "DefineMacro.h"
+#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d IpcProxy D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d IpcProxy E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("IpcProxy", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("IpcProxy", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("IpcProxy", fmt, ##args)
 
 SprMediatorIpcProxy::SprMediatorIpcProxy()
 {

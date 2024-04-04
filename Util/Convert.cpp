@@ -20,10 +20,6 @@
 #include <cstdint>
 #include "Convert.h"
 
-#define SPR_LOGD(fmt, args...) printf("%d SprMsg D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d SprMsg W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SprMsg E: " fmt, __LINE__, ##args)
-
 namespace Convert
 {
 

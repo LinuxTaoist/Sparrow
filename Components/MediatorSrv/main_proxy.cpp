@@ -16,11 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <stdio.h>
 #include "SprMediator.h"
-
-#define SPR_LOGD(fmt, args...) printf("%d DebugCore D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d DebugCore E: " fmt, __LINE__, ##args)
 
 int main(int agrc, const char *argv[])
 {

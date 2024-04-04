@@ -31,6 +31,8 @@ public:
     virtual ~LogManager();
 
     int ProcessMsg(const SprMsg& msg);
+
+private:
 };
 
 #endif

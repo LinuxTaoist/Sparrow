@@ -16,15 +16,16 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include "DefineMacro.h"
 #include "PowerManager.h"
 
 using namespace std;
 using namespace SprPower;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d SprPower D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d SprPower W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SprPower E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("SprPower", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("SprPower", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SprPower", fmt, ##args)
 
 vector <StateTransition <EPowerLev1State, EPowerLev2State, ESprSigId, PowerManager, SprMsg> >
 PowerManager::mStateTable =

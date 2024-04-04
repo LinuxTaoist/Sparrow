@@ -30,14 +30,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
+#include "DefineMacro.h"
 #include "ServiceManager.h"
 
 using namespace std;
 
-#define SPR_LOG(fmt, args...)   printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...)  printf("[%d] %-4d D: " fmt, getpid(), __LINE__, ##args)
-#define SPR_LOGW(fmt, args...)  printf("[%d] %-4d W: " fmt, getpid(), __LINE__, ##args)
-#define SPR_LOGE(fmt, args...)  printf("[%d] %-4d E: " fmt, getpid(), __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("ServiceM", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("ServiceM", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("ServiceM", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("ServiceM", fmt, ##args)
 
 #define CONFIG_SUPPORT_SIGCHLD 0 // SIGCHLD不可靠。 1: 信号中断触发 0: 轮询
 
@@ -170,7 +171,7 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
         auto it = mPidMap.begin();
         for (; it != mPidMap.end(); ++it) {
             if (exePath == it->second.first) {
-                SPR_LOG("find %s %s.\n", it->second.first.c_str(), exePath.c_str());
+                SPR_LOGW("find %s %s.\n", it->second.first.c_str(), exePath.c_str());
                 break;
             }
         }

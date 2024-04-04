@@ -18,13 +18,14 @@
  */
 #include "Parcel.h"
 #include "Shared.h"
+#include "DefineMacro.h"
 #include "BinderManager.h"
 
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d BinderM D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d BinderM W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d BinderM E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("BinderM", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGD("BinderM", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("BinderM", fmt, ##args)
 
 const int INT_KEY_LENGTH = 5;
 

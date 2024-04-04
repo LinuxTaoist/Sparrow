@@ -27,14 +27,15 @@
 #include <string.h>
 #include "SprSigId.h"
 #include "SprCommonType.h"
+#include "DefineMacro.h"
 #include "SprMediator.h"
 
 using namespace std;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d SprMediator D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d SprMediator W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SprMediator E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("SprMediator", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGD("SprMediator", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SprMediator", fmt, ##args)
 
 const uint32_t EPOLL_FD_NUM = 10;
 

@@ -30,15 +30,15 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%d LOGM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d LOGM E: " fmt, __LINE__, ##args)
 
+#define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
+
 LogManager::LogManager(ModuleIDType id, const std::string& name)
             : SprObserver(id, name, make_shared<SprMediatorIpcProxy>())
 {
-
 }
 
 LogManager::~LogManager()
 {
-
 }
 
 int LogManager::ProcessMsg(const SprMsg& msg)
@@ -47,4 +47,3 @@ int LogManager::ProcessMsg(const SprMsg& msg)
 
     return 0;
 }
-

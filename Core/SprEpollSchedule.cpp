@@ -22,10 +22,12 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include "LibgoAdapter.h"
+#include "DefineMacro.h"
 #include "SprEpollSchedule.h"
 
-#define SPR_LOGD(fmt, args...) printf("%d EpollSch D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d EpollSch E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("EpollSch", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("EpollSch", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("EpollSch", fmt, ##args)
 
 const uint32_t EPOLL_FD_NUM = 10;
 

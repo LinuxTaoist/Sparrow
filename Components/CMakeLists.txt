@@ -2,6 +2,7 @@
 
 include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
+include_directories (${PROJECT_PATH}/Adapter)
 
 ## copy *.prop
 set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/Configures/General)
@@ -19,22 +20,22 @@ file(COPY ${VENDOR_CONFIGURE_PATH}/vendor.prop      DESTINATION ${EXECUTABLE_OUT
 aux_source_directory(${PROJECT_PATH}/Components/LogManagerSrv  SRC_LOG_SRV_PATH)
 add_executable              (BinLogSrv ${SRC_LOG_SRV_PATH})
 set_target_properties       (BinLogSrv PROPERTIES OUTPUT_NAME "logmanagersrv")
-target_link_libraries       (BinLogSrv sprcore pthread)
+target_link_libraries       (BinLogSrv pthread sprcore)
 add_dependencies            (BinLogSrv LibSprCore)
 
 # Bin mediatorsrv
 aux_source_directory(${PROJECT_PATH}/Components/MediatorSrv  SRC_PROXY_SRV_PATH)
 add_executable              (BinProxySrv ${SRC_PROXY_SRV_PATH})
 set_target_properties       (BinProxySrv PROPERTIES OUTPUT_NAME "mediatorsrv")
-target_link_libraries       (BinProxySrv sprcore pthread rt)
+target_link_libraries       (BinProxySrv rt pthread sprcore)
 add_dependencies            (BinProxySrv LibSprCore)
 
 # Bin powermanagersrv
 aux_source_directory(${PROJECT_PATH}/Components/PowerManagerSrv  SRC_POWER_MANAGER_PATH)
 add_executable              (BinPowerManagerSrv ${SRC_POWER_MANAGER_PATH})
 set_target_properties       (BinPowerManagerSrv PROPERTIES OUTPUT_NAME "powermanagersrv")
-target_link_libraries       (BinPowerManagerSrv sprcore pthread)
-add_dependencies            (BinPowerManagerSrv LibSprCore)
+target_link_libraries       (BinPowerManagerSrv pthread sprcore spradapter)
+add_dependencies            (BinPowerManagerSrv LibSprCore LibSprAdapter)
 
 # Bin propertiessrv
 aux_source_directory        (${PROJECT_PATH}/Util                        SRC_PROPERTY_SRV_PATH)
@@ -42,14 +43,15 @@ aux_source_directory        (${PROJECT_PATH}/Components/PropertiesSrv    SRC_PRO
 add_executable              (BinPropertySrv ${SRC_PROPERTY_SRV_PATH})
 target_include_directories  (BinPropertySrv PRIVATE ${PROJECT_PATH}/Components/BinderSrv/Library)
 set_target_properties       (BinPropertySrv PROPERTIES OUTPUT_NAME "propertiessrv")
-target_link_libraries       (BinPropertySrv sprcore pthread sprbinder rt)
-add_dependencies            (BinPropertySrv LibSprCore LibBinder)
+target_link_libraries       (BinPropertySrv pthread rt sprcore sprbinder spradapter)
+add_dependencies            (BinPropertySrv LibSprCore LibBinder LibSprAdapter)
 
 # Bin servicemanagersrv
 aux_source_directory(${PROJECT_PATH}/Components/ServiceManagerSrv  SRC_SRV_PATH)
 add_executable              (BinSrvMgr ${SRC_SRV_PATH})
 set_target_properties       (BinSrvMgr PROPERTIES OUTPUT_NAME "servicemanagersrv")
-target_link_libraries       (BinSrvMgr pthread)
+target_link_libraries       (BinSrvMgr pthread spradapter)
+add_dependencies            (BinSrvMgr LibSprAdapter)
 
 # Bin sparrowsrv
 aux_source_directory        (${PROJECT_PATH}/Components/SparrowSrv  SRC_MAIN_SPR_PATH)

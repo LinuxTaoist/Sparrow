@@ -58,8 +58,6 @@ SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size)
     if (mFirstNode == nullptr) {
         SPR_LOGE("mFirstNode is nullptr!\n");
     }
-
-    SPR_LOGD("Init mmap %s\n", filename.c_str());
 }
 
 SharedBinaryTree::~SharedBinaryTree()

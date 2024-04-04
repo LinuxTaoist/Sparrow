@@ -17,7 +17,6 @@
  *
  *******************************************************************************
  */
-#include <stdio.h>
 #include "LogManager.h"
 
 using namespace std;

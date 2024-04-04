@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include "DefineMacro.h"
 #include "SprCommonType.h"
 #include "IBinderManager.h"
 #include "SprCommonType.h"
@@ -23,8 +24,9 @@
 
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...)  printf("%d Properties D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...)  printf("%d Properties D: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("Properties", fmt, ##args)
 
 static void BinderLoop(PropertyManager* pProperM)
 {

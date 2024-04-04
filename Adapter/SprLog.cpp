@@ -25,11 +25,16 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
+#include "SharedRingBuffer.h"
 #include "SprLog.h"
 
-#define PID_MAX_LENGTH          6
-#define TAG_MAX_LENGTH          12
-#define LOG_BUFFER_MAX_SIZE     256
+#define PID_MAX_LENGTH              6
+#define TAG_MAX_LENGTH              12
+#define LOG_BUFFER_MAX_SIZE         256
+#define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
+#define CACHE_MEMORY_SIZE           50 * 1024 * 1024 // 50MB
+
+SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
 
 SprLog::SprLog()
 {
@@ -139,6 +144,19 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
     std::lock_guard<std::mutex> lock(mMutex);
     FormatLog(log, level, tag, buffer);
     printf("%s", log.c_str());
+    LogsToMemory(log.c_str(), log.length());
 
     return result;
+}
+
+int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
+{
+    int32_t ret = 0;
+
+    ret = theSharedMem.write(&len, sizeof(int32_t));
+    if (ret != 0) {
+        return ret;
+    }
+
+    return theSharedMem.write(logs, len);
 }

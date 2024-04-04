@@ -18,21 +18,20 @@
  *
  */
 #include <memory>
-#include <stdio.h>
 #include <sys/resource.h>
+#include "DefineMacro.h"
 #include "SprSystem.h"
 #include "SprTimeTrace.h"
 #include "SprCommonType.h"
-
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
 
 using namespace std;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d Sys D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d Sys W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d Sys E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("SprSystem", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("SprSystem", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SprSystem", fmt, ##args)
 
 #define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
 

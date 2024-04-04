@@ -25,6 +25,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
+#include "DefineMacro.h"
 #include "PropertyManager.h"
 #include "SprMediatorIpcProxy.h"
 
@@ -37,10 +38,10 @@
 
 #define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
 
-#define SPR_LOGD(fmt, args...)  printf("%d Properties D: " fmt, __LINE__, ##args)
-#define SPR_LOGI(fmt, args...)  printf("%d Properties I: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...)  printf("%d Properties W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...)  printf("%d Properties E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("Properties", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("Properties", fmt, ##args)
 
 PropertyManager::PropertyManager()
 {

@@ -16,6 +16,9 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#ifndef __PROPERTY_H__
+#define __PROPERTY_H__
+
 #include <string>
 
 class Property
@@ -62,3 +65,5 @@ public:
 private:
     Property();
 };
+
+#endif // __PROPERTY_H__

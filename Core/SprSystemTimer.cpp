@@ -22,15 +22,16 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/timerfd.h>
+#include "DefineMacro.h"
 #include "SprCommonType.h"
 #include "SprSystemTimer.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d SysTimer D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d SysTimer W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SysTimer E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("SysTimer", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("SysTimer", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SysTimer", fmt, ##args)
 
 SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name)
                 : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>(), false)

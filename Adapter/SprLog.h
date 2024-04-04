@@ -58,6 +58,14 @@ private:
      */
     int32_t LogImpl(const char* level, const char* tag, const char* format, va_list args);
 
+    /**
+     * @brief Writes a log string into shared memory.
+     * @param logs      The log data to be stored.
+     * @return          -1 if an error occurred,
+     *                  Otherwise, returns the number of bytes written.
+     */
+    int32_t LogsToMemory(const char* logs, int32_t len);
+
 private:
     std::mutex mMutex;
 };

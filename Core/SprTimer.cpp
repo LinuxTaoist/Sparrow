@@ -20,10 +20,11 @@
 #include <stdint.h>
 #include <string.h>
 #include "SprTimer.h"
+#include "DefineMacro.h"
 
-#define SPR_LOGD(fmt, args...) printf("%d SprTimer D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d SprTimer W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d SprTimer E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("SprTimer", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("SprTimer", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SprTimer", fmt, ##args)
 
 SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec)
 {
