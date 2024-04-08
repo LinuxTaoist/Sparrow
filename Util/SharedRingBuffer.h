@@ -45,17 +45,18 @@ public:
     SharedRingBuffer(std::string path, uint32_t capacity);
     ~SharedRingBuffer();
 
-    bool IsReadable()   const noexcept;
-    bool IsWriteable()  const noexcept;
-    int  write(const void* data, int32_t len);
-    int  read(void* data, int32_t len);
+    bool    IsReadable()   const noexcept;
+    bool    IsWriteable()  const noexcept;
+    int     write(const void* data, int32_t len);
+    int     read(void* data, int32_t len);
+
+    int32_t AvailSpace()   const noexcept;
+    int32_t AvailData()    const noexcept;
 
 private:
-    int32_t  AvailSpace()   const noexcept;
-    int32_t  AvailData()    const noexcept;
-    void     SetRWStatus(ECmdType type) const noexcept;
-    void     DumpMemory(const char* pAddr, uint32_t size);
-    void     DumpErrorInfo();
+    void    SetRWStatus(ECmdType type) const noexcept;
+    void    DumpMemory(const char* pAddr, uint32_t size);
+    void    DumpErrorInfo();
 
 private:
     Root*       mRoot;

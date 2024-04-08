@@ -73,7 +73,7 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
         SPR_LOGW("Disable status!\n");
     }
 
-    // SPR_LOGD("[0x%x -> 0x%x] msg.GetMsgId() = %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
+    SPR_LOGD("[0x%x -> 0x%x] msg.GetMsgId() = %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
         case SIG_ID_TIMER_START_SYSTEM_TIMER:

@@ -22,6 +22,9 @@
 #ifndef __LOG_MANAGER_H__
 #define __LOG_MANAGER_H__
 
+#include <thread>
+#include <fstream>
+#include <sstream>
 #include "SprObserver.h"
 
 class LogManager : public SprObserver
@@ -33,6 +36,19 @@ public:
     int ProcessMsg(const SprMsg& msg);
 
 private:
+    void RotateLogsIfNecessary(uint32_t logDataSize);
+    void WriteToLogFile(const std::string& logData);
+    std::string GetNextLogFileName() const;
+
+    static void ReadLoop(LogManager* pSelf);
+
+private:
+    bool            mRunning;
+    uint32_t        mMaxFileSize;
+    std::string     mLogsPath;;
+    std::string     mCurrentLogFile;
+    std::ofstream   mLogFileStream;
+    std::thread     mThread;
 };
 
 #endif

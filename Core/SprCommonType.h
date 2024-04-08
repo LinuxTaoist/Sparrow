@@ -81,6 +81,16 @@ enum EIPCType : uint8_t
     IPC_TYPE_BUTT
 };
 
+enum EModuleBootPriority
+{
+    BOOT_PRIORITY_HIGHEST       = 0,    // used for environment initialization
+    BOOT_PRIORITY_HIGH          = 1,    // used for system core services
+    BOOT_PRIORITY_MEDIUM_HIGH   = 2,    // used for critical services, initial project configuration, etc
+    BOOT_PRIORITY_MEDIUM        = 3,    // used for main business services
+    BOOT_PRIORITY_MEDIUM_LOW    = 4,    // used for ancillary services, not need to start immediately.
+    BOOT_PRIORITY_LOWEST        = 5     // used for optional services
+};
+
 typedef struct
 {
     uint32_t ModuleId;

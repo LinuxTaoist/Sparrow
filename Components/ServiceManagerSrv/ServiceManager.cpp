@@ -127,7 +127,9 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string cfgPath)
         return -1;
     }
 
+    bool isDependency = false;      // It is dependent on other exes
     std::string line;
+    std::string lastExeName;
     while (std::getline(configFile, line))
     {
         line = line.substr(line.find_first_not_of(" \t"));
@@ -139,6 +141,18 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string cfgPath)
             line.pop_back();
         }
 
+        size_t pos = line.find("[d]");
+        if (pos != std::string::npos) {
+            isDependency = true;
+            line = line.substr(0, pos - 1);
+        }
+
+        // TODO: 等待上一个进程启动完成
+        if (isDependency) {
+
+        }
+
+        lastExeName = line;
         if (StartExe(line.c_str()) == 0)
         {
             startedCount++;

@@ -34,8 +34,8 @@
 using namespace std;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) LOGD("SprObs", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprObs", fmt, ##args)
+#define SPR_LOGD(fmt, args...) // LOGD("SprObs", fmt, ##args)
+#define SPR_LOGE(fmt, args...) // LOGE("SprObs", fmt, ##args)
 
 const int MQ_BUFF_MAX_SIZE  = 1024;
 const int RANDOM_STR_LENGTH = 8;

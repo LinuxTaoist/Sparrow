@@ -20,25 +20,58 @@
  *
  */
 #include <memory>
+#include <unistd.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include "SprMediatorIpcProxy.h"
+#include "SharedRingBuffer.h"
 #include "LogManager.h"
 
 using namespace std;
 using namespace InternalEnum;
 
-#define SPR_LOGD(fmt, args...) printf("%d LOGM D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d LOGM W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d LOGM E: " fmt, __LINE__, ##args)
+#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
+#define SPR_LOGD(fmt, args...) printf("%04d LOGM D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%04d LOGM W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%04d LOGM E: " fmt, __LINE__, ##args)
 
+#define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
+#define DEFAULT_LOG_FILE_NAME       "sprlog"
+#define CACHE_MEMORY_SIZE           10 * 1024 * 1024 // 10MB
+
+SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
 
 LogManager::LogManager(ModuleIDType id, const std::string& name)
             : SprObserver(id, name, make_shared<SprMediatorIpcProxy>())
 {
+    mRunning = true;
+
+    // TODO: value from config
+    mMaxFileSize = CACHE_MEMORY_SIZE;
+    mLogsPath = DEFAULT_LOGS_STORAGE_PATH;
+    mCurrentLogFile = DEFAULT_LOG_FILE_NAME;
+
+    if (access(mLogsPath.c_str(), F_OK) != 0)
+    {
+        int ret = mkdir(mLogsPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        if (ret != 0) {
+            SPR_LOGE("mkdir %s failed! (%s)", mLogsPath.c_str(), strerror(errno));
+        }
+    }
+
+    mThread = std::thread(&LogManager::ReadLoop, this);
 }
 
 LogManager::~LogManager()
 {
+    if (mThread.joinable()) {
+        mRunning = false;
+        mThread.join();
+    }
+
+    mLogFileStream.close();
 }
 
 int LogManager::ProcessMsg(const SprMsg& msg)
@@ -46,4 +79,70 @@ int LogManager::ProcessMsg(const SprMsg& msg)
     SPR_LOGD("Receive msg: 0x%x\n", msg.GetMsgId());
 
     return 0;
+}
+
+void LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
+{
+    if (static_cast<uint32_t>(mLogFileStream.tellp()) + logDataSize > mMaxFileSize) {
+        mLogFileStream.close();
+        mLogFileStream.open(GetNextLogFileName(), std::ios_base::app | std::ios_base::out);
+        if (!mLogFileStream.is_open()) {
+            SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
+        }
+    }
+}
+
+void LogManager::WriteToLogFile(const std::string& logData)
+{
+    if (!mLogFileStream.is_open()) {
+        mLogFileStream.open(GetNextLogFileName(), std::ios_base::app | std::ios_base::out);
+        if (!mLogFileStream.is_open()) {
+            SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
+            return;
+        }
+    }
+
+    mLogFileStream.write(logData.c_str(), logData.size());
+    mLogFileStream.flush();
+}
+
+std::string LogManager::GetNextLogFileName() const
+{
+    std::ostringstream oss;
+    oss << mLogsPath << "/" << mCurrentLogFile << "_" << time(nullptr) << ".log";
+    return oss.str();
+}
+
+void LogManager::ReadLoop(LogManager* pSelf)
+{
+    if (pSelf == nullptr) {
+        SPR_LOGE("pSelf is nullptr!");
+        return ;
+    }
+
+    while (pSelf->mRunning)
+    {
+        if (theSharedMem.AvailData() <= 0) {
+            sleep(1);
+            continue;
+        }
+
+        int32_t len = 0;
+        int ret = theSharedMem.read(&len, sizeof(int32_t));
+        if (ret != 0 || len <= 0) {
+            SPR_LOGE("read string len failed! len = %d, ret = %d\n", len, ret);
+            return ;
+        }
+
+        std::string value;
+        value.resize(len);
+        char* data = const_cast<char*>(value.c_str());
+        ret = theSharedMem.read(data, len);
+        if (ret != 0) {
+            SPR_LOGE("read failed! len = %d\n", len);
+        }
+
+        pSelf->RotateLogsIfNecessary(len);
+        pSelf->WriteToLogFile(value);
+    }
 }

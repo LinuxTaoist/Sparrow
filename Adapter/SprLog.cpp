@@ -143,7 +143,7 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
     std::string log;
     std::lock_guard<std::mutex> lock(mMutex);
     FormatLog(log, level, tag, buffer);
-    printf("%s", log.c_str());
+    // printf("%s", log.c_str());
     LogsToMemory(log.c_str(), log.length());
 
     return result;
@@ -151,9 +151,7 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
 
 int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
 {
-    int32_t ret = 0;
-
-    ret = theSharedMem.write(&len, sizeof(int32_t));
+    int32_t ret = theSharedMem.write(&len, sizeof(int32_t));
     if (ret != 0) {
         return ret;
     }
