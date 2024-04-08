@@ -22,6 +22,15 @@
 #include "SprLog.h"
 
 // --------------------------------------------------------------------------------------------
+// - Service name macro
+// --------------------------------------------------------------------------------------------
+#define SRV_NAME_BINDER         "bindersrv"
+#define SRV_NAME_PROPERTY       "propertiessrv"
+#define SRV_NAME_MEDIATOR       "mediatorsrv"
+#define SRV_NAME_LOG            "logmanagersrv"
+#define SRV_NAME_SPARROW        "sparrowsrv"
+
+// --------------------------------------------------------------------------------------------
 // - Log interface macro
 // --------------------------------------------------------------------------------------------
 #define LOGD(tag, fmt, args...)  SprLog::GetInstance()->d(tag, "%4d " fmt, __LINE__, ##args)

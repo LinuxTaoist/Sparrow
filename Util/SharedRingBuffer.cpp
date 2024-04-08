@@ -31,17 +31,17 @@
 const int RETRY_TIMES       = 3;        // 3 times retry
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 
-SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity)
+SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity, bool isRefressh)
     : mCapacity(capacity), mShmPath(path)
 {
-    int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
+    int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         SPR_LOGE("open failed! (%s)", strerror(errno));
     }
 
-    if (ftruncate(fd, mCapacity) == -1) {
+    if (isRefressh && ftruncate(fd, mCapacity) == -1) {
         SPR_LOGE("ftruncate failed! (%s)", strerror(errno));
-     }
+    }
 
     void* mapMemory = mmap(NULL, mCapacity, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (mapMemory == MAP_FAILED) {
@@ -49,8 +49,11 @@ SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity)
     }
 
     mRoot = static_cast<Root*>(mapMemory);
-    mRoot->rp = mRoot->wp;
-    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root) ;
+    if (isRefressh) {
+        mRoot->rp = mRoot->wp;
+    }
+
+    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
     close(fd);
 }
 

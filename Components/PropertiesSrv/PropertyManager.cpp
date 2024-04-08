@@ -19,6 +19,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <fcntl.h>
 #include <unistd.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -29,12 +30,12 @@
 #include "PropertyManager.h"
 #include "SprMediatorIpcProxy.h"
 
-#define SYSTEM_PROP_PATH    "system.prop"
-#define DEFAULT_PROP_PATH   "default.prop"
-#define VENDOR_PROP_PATH    "default.prop"
+#define SYSTEM_PROP_PATH        "system.prop"
+#define DEFAULT_PROP_PATH       "default.prop"
+#define VENDOR_PROP_PATH        "default.prop"
 
-#define PERSIST_FILE_PATH           "/tmp/persist/"
-#define SHARED_MEMORY_PATH          "/tmp/__property_shared_memory__"
+#define PERSIST_FILE_PATH       "/tmp/persist/"
+#define SHARED_MEMORY_PATH      "/tmp/__property_shared_memory__"
 
 #define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
 
@@ -118,6 +119,7 @@ int PropertyManager::Init()
     // load persist properties
     LoadPersistProperty();
 
+    EnvReady(SRV_NAME_PROPERTY);
     return 0;
 }
 
@@ -128,6 +130,17 @@ int PropertyManager::DumpPropertyList()
 
     for (auto& it : keyValueMap) {
         SPR_LOGD("%s=%s\n", it.first.c_str(), it.second.c_str());
+    }
+
+    return 0;
+}
+
+int32_t PropertyManager::EnvReady(const std::string& srvName)
+{
+    std::string node = "/tmp/" + srvName;
+    int fd = creat(node.c_str(), 0644);
+    if (fd != -1) {
+        close(fd);
     }
 
     return 0;

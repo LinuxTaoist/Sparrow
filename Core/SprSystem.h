@@ -20,6 +20,8 @@
 #ifndef __SPR_SYSTEM_H__
 #define __SPR_SYSTEM_H__
 
+#include <string>
+
 class SprSystem
 {
 public:
@@ -40,7 +42,7 @@ private:
     SprSystem();
     void InitEnv();
     void InitMsgQueueLimit();
+    int EnvReady(const std::string& srvName);
 };
 
 #endif // __SPR_SYSTEM_H__
-

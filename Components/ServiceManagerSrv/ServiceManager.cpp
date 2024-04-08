@@ -127,7 +127,7 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string cfgPath)
         return -1;
     }
 
-    bool isDependency = false;      // It is dependent on other exes
+    bool isDependent = false;      // It is dependent on other exes
     std::string line;
     std::string lastExeName;
     while (std::getline(configFile, line))
@@ -143,13 +143,16 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string cfgPath)
 
         size_t pos = line.find("[d]");
         if (pos != std::string::npos) {
-            isDependency = true;
+            isDependent = true;
             line = line.substr(0, pos - 1);
         }
 
-        // TODO: 等待上一个进程启动完成
-        if (isDependency) {
-
+        // Each exe dependent by other exes is marked with [d] in the startup script.
+        // After the dependent exe completes the business, it creates a node that indicates
+        // the completion of the initialization business.
+        // When a node is monitored, the next exe will be started. Timeout 10 * 50ms.
+        if (isDependent) {
+            WaitLastExeFinished(lastExeName);
         }
 
         lastExeName = line;
@@ -174,12 +177,12 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
     pid = fork();
     if (pid == -1) {
         SPR_LOGE("fork failed. errno = %d (%s).\n", errno, strerror(errno));
-    } else if (pid == 0) {          // 子进程
+    } else if (pid == 0) {          // child
         static int startCount = 0;
 
         SPR_LOGD("Pull up %s (%d).\n", exePath.c_str(), ++startCount);
         execl(exePath.c_str(), exePath.c_str(), nullptr);
-    } else {                        // 父进程
+    } else {                        // parent
         SPR_LOGD("Child fork pid: %d.\n", pid);
 
         auto it = mPidMap.begin();
@@ -196,6 +199,27 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
             it->second.second++;
             mPidMap.insert(make_pair(pid, it->second));
             mPidMap.erase(it);
+        }
+    }
+
+    return 0;
+}
+
+int32_t ServiceManager::WaitLastExeFinished(const std::string& exeName)
+{
+    int retryTimes = 10;
+    std::string monitorPath = std::string("/tmp/") + exeName;
+
+    if (exeName.empty()) {
+        return 0;
+    }
+
+    while (retryTimes--) {
+        if (access(monitorPath.c_str(), F_OK) != 0) {
+            SPR_LOGD("Waiting exe: %s, retryTimes = %d\n", exeName.c_str(), 10 - retryTimes);
+            usleep(50000);
+        } else {
+            break;
         }
     }
 

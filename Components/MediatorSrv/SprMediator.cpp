@@ -85,7 +85,18 @@ int SprMediator::Init()
 
     SPR_LOGD("--- Start proxy server ---\n");
     PrepareInternalPort();
-    EpollLoop();
+    EnvReady(SRV_NAME_MEDIATOR);
+
+    return 0;
+}
+
+int SprMediator::EnvReady(const std::string& srvName)
+{
+    std::string node = "/tmp/" + srvName;
+    int fd = creat(node.c_str(), 0644);
+    if (fd != -1) {
+        close(fd);
+    }
 
     return 0;
 }

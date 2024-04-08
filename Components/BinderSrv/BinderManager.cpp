@@ -16,6 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <fcntl.h>
+#include <unistd.h>
 #include "Parcel.h"
 #include "Shared.h"
 #include "DefineMacro.h"
@@ -27,7 +29,7 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) LOGD("BinderM", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("BinderM", fmt, ##args)
 
-const int INT_KEY_LENGTH = 5;
+#define INT_KEY_LENGTH  5
 
 Parcel reqParcel("IBinderM", 66666, false);
 Parcel rspParcel("BinderM",  88888, true);
@@ -39,6 +41,7 @@ BinderManager::BinderManager()
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BinderManager::MsgResponseAddService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::MsgResponseRemoveService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BinderManager::MsgResponseGetService));
+    EnvReady(SRV_NAME_BINDER);
 }
 
 BinderManager::~BinderManager()
@@ -49,6 +52,17 @@ BinderManager* BinderManager::GetInstance()
 {
     static BinderManager instance;
     return &instance;
+}
+
+int32_t BinderManager::EnvReady(const std::string& srvName)
+{
+    std::string node = "/tmp/" + srvName;
+    int fd = creat(node.c_str(), 0644);
+    if (fd != -1) {
+        close(fd);
+    }
+
+    return 0;
 }
 
 int32_t BinderManager::MsgResponseAddService()

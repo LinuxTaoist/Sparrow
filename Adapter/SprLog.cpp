@@ -32,9 +32,9 @@
 #define TAG_MAX_LENGTH              12
 #define LOG_BUFFER_MAX_SIZE         256
 #define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
-#define CACHE_MEMORY_SIZE           50 * 1024 * 1024 // 50MB
+#define CACHE_MEMORY_SIZE           50 * 1024 * 1024    // 50MB
 
-SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
+static SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
 
 SprLog::SprLog()
 {
@@ -143,7 +143,7 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
     std::string log;
     std::lock_guard<std::mutex> lock(mMutex);
     FormatLog(log, level, tag, buffer);
-    // printf("%s", log.c_str());
+    printf("%s", log.c_str());
     LogsToMemory(log.c_str(), log.length());
 
     return result;

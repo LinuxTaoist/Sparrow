@@ -34,6 +34,8 @@ public:
 
 private:
     BinderManager();
+
+    int32_t EnvReady(const std::string& srvName);
     int32_t MsgResponseAddService();
     int32_t MsgResponseRemoveService();
     int32_t MsgResponseGetService();

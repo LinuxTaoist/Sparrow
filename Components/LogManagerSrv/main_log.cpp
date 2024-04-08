@@ -25,6 +25,6 @@ using namespace InternalEnum;
 int main(int agrc, const char *argv[])
 {
     LogManager theLogManager(MODULE_LOGM, "LogM");
-    SprObserver::MainLoop();
+    theLogManager.MainLoop();
     return 0;
 }

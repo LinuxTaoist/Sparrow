@@ -27,20 +27,18 @@
 #include <sstream>
 #include "SprObserver.h"
 
-class LogManager : public SprObserver
+class LogManager
 {
 public:
     LogManager(ModuleIDType id, const std::string& name);
     virtual ~LogManager();
-
-    int ProcessMsg(const SprMsg& msg);
+    int MainLoop();
 
 private:
-    void RotateLogsIfNecessary(uint32_t logDataSize);
-    void WriteToLogFile(const std::string& logData);
+    int EnvReady(const std::string& srvName);
+    int RotateLogsIfNecessary(uint32_t logDataSize);
+    int WriteToLogFile(const std::string& logData);
     std::string GetNextLogFileName() const;
-
-    static void ReadLoop(LogManager* pSelf);
 
 private:
     bool            mRunning;

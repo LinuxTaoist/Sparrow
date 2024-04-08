@@ -82,6 +82,7 @@ private:
     PropertyManager& operator=(const PropertyManager&) = delete;
 
     int DumpPropertyList();
+    int EnvReady(const std::string& srvName);
     int LoadPropertiesFromFile(const std::string& fileName);
     int LoadPersistProperty();
     int HandleKeyValue(const std::string& key, const std::string& value);

@@ -20,6 +20,9 @@
 
 int main(int agrc, const char *argv[])
 {
-    SprMediator::GetInstance()->Init();
+    SprMediator *pObj = SprMediator::GetInstance();
+    pObj->Init();
+    pObj->EpollLoop();
+
     return 0;
 }

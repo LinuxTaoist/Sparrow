@@ -38,18 +38,15 @@ public:
     ~SprMediator();
     static SprMediator* GetInstance();
     int Init();
+    int EpollLoop();
 
 private:
-    int mEpollHandler;
-    int mHandler;
-    std::map<InternalEnum::ESprModuleID, SModuleInfo> mModuleMap;
-
     SprMediator(int size);
+    int EnvReady(const std::string& srvName);
     int MakeMQ(std::string name);
     int MakeUnixDgramSocket(std::string ip, uint16_t port);
     int PrepareInternalPort();
     int DestroyInternalPort();
-    int EpollLoop();
     int SendMsg(const SprMsg& msg);
     int NotifyObserver(InternalEnum::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);
@@ -60,6 +57,11 @@ private:
     /* 消息响应函数 */
     int MsgResponseRegister(const SprMsg& msg);
     int MsgResponseUnregister(const SprMsg& msg);
+
+private:
+    int mHandler;
+    int mEpollHandler;
+    std::map<InternalEnum::ESprModuleID, SModuleInfo> mModuleMap;
 };
 
 #endif

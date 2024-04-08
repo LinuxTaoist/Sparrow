@@ -20,12 +20,14 @@
  *
  */
 #include <memory>
+#include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "SprMediatorIpcProxy.h"
 #include "SharedRingBuffer.h"
+#include "DefineMacro.h"
 #include "LogManager.h"
 
 using namespace std;
@@ -36,20 +38,21 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%04d LOGM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%04d LOGM E: " fmt, __LINE__, ##args)
 
-#define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
 #define DEFAULT_LOG_FILE_NAME       "sprlog"
-#define CACHE_MEMORY_SIZE           10 * 1024 * 1024 // 10MB
+#define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 
-SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
+#define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
+#define CACHE_MEMORY_SIZE           10 * 1024 * 1024        // 10MB
+
+SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE, true);
 
 LogManager::LogManager(ModuleIDType id, const std::string& name)
-            : SprObserver(id, name, make_shared<SprMediatorIpcProxy>())
 {
     mRunning = true;
 
     // TODO: value from config
-    mMaxFileSize = CACHE_MEMORY_SIZE;
+    mMaxFileSize = DEFAULT_LOG_FILE_MAX_SIZE;
     mLogsPath = DEFAULT_LOGS_STORAGE_PATH;
     mCurrentLogFile = DEFAULT_LOG_FILE_NAME;
 
@@ -61,27 +64,26 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
         }
     }
 
-    mThread = std::thread(&LogManager::ReadLoop, this);
+    EnvReady(SRV_NAME_LOG);
 }
 
 LogManager::~LogManager()
 {
-    if (mThread.joinable()) {
-        mRunning = false;
-        mThread.join();
-    }
-
     mLogFileStream.close();
 }
 
-int LogManager::ProcessMsg(const SprMsg& msg)
+int LogManager::EnvReady(const std::string& srvName)
 {
-    SPR_LOGD("Receive msg: 0x%x\n", msg.GetMsgId());
+    std::string node = "/tmp/" + srvName;
+    int fd = creat(node.c_str(), 0644);
+    if (fd != -1) {
+        close(fd);
+    }
 
     return 0;
 }
 
-void LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
+int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 {
     if (static_cast<uint32_t>(mLogFileStream.tellp()) + logDataSize > mMaxFileSize) {
         mLogFileStream.close();
@@ -90,20 +92,23 @@ void LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
             SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
         }
     }
+
+    return 0;
 }
 
-void LogManager::WriteToLogFile(const std::string& logData)
+int LogManager::WriteToLogFile(const std::string& logData)
 {
     if (!mLogFileStream.is_open()) {
         mLogFileStream.open(GetNextLogFileName(), std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
             SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
-            return;
+            return -1;
         }
     }
 
     mLogFileStream.write(logData.c_str(), logData.size());
     mLogFileStream.flush();
+    return 0;
 }
 
 std::string LogManager::GetNextLogFileName() const
@@ -113,14 +118,9 @@ std::string LogManager::GetNextLogFileName() const
     return oss.str();
 }
 
-void LogManager::ReadLoop(LogManager* pSelf)
+int LogManager::MainLoop()
 {
-    if (pSelf == nullptr) {
-        SPR_LOGE("pSelf is nullptr!");
-        return ;
-    }
-
-    while (pSelf->mRunning)
+    while (mRunning)
     {
         if (theSharedMem.AvailData() <= 0) {
             sleep(1);
@@ -129,9 +129,10 @@ void LogManager::ReadLoop(LogManager* pSelf)
 
         int32_t len = 0;
         int ret = theSharedMem.read(&len, sizeof(int32_t));
-        if (ret != 0 || len <= 0) {
-            SPR_LOGE("read string len failed! len = %d, ret = %d\n", len, ret);
-            return ;
+        if (ret != 0 || len < 0) {
+            SPR_LOGE("read memory failed! len = %d, ret = %d\n", len, ret);
+            sleep(1);
+            continue;
         }
 
         std::string value;
@@ -142,7 +143,9 @@ void LogManager::ReadLoop(LogManager* pSelf)
             SPR_LOGE("read failed! len = %d\n", len);
         }
 
-        pSelf->RotateLogsIfNecessary(len);
-        pSelf->WriteToLogFile(value);
+        RotateLogsIfNecessary(len);
+        WriteToLogFile(value);
     }
+
+    return 0;
 }

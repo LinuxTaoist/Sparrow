@@ -18,6 +18,8 @@
  *
  */
 #include <memory>
+#include <fcntl.h>
+#include <unistd.h>
 #include <sys/resource.h>
 #include "DefineMacro.h"
 #include "SprSystem.h"
@@ -71,6 +73,17 @@ void SprSystem::InitMsgQueueLimit()
     }
 }
 
+int SprSystem::EnvReady(const std::string& srvName)
+{
+    std::string node = "/tmp/" + srvName;
+    int fd = creat(node.c_str(), 0644);
+    if (fd != -1) {
+        close(fd);
+    }
+
+    return 0;
+}
+
 void SprSystem::Init()
 {
     SPR_LOGD("=============================================\n");
@@ -86,7 +99,8 @@ void SprSystem::Init()
     TTP(10, "TimerManager->Init()");
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Init();
 
+    EnvReady(SRV_NAME_SPARROW);
+
     // Permanently block waiting for message driver to trigger
     SprObserver::MainLoop();
 }
-
