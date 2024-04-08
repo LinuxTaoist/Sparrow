@@ -42,7 +42,7 @@ enum ECmdType
 class SharedRingBuffer
 {
 public:
-    SharedRingBuffer(std::string path, uint32_t capacity, bool isRefressh = true);
+    SharedRingBuffer(std::string path, uint32_t capacity, bool isMaster = true);
     ~SharedRingBuffer();
 
     bool    IsReadable()   const noexcept;

@@ -32,16 +32,21 @@
 #define TAG_MAX_LENGTH              12
 #define LOG_BUFFER_MAX_SIZE         256
 #define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
-#define CACHE_MEMORY_SIZE           50 * 1024 * 1024    // 50MB
+#define CACHE_MEMORY_SIZE           10 * 1024 * 1024    // 10MB
 
-static SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
+static SharedRingBuffer* pLogSCacheMem = nullptr;
 
 SprLog::SprLog()
 {
+    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE, false);
 }
 
 SprLog::~SprLog()
 {
+    if (pLogSCacheMem != nullptr) {
+        delete pLogSCacheMem;
+        pLogSCacheMem = nullptr;
+    }
 }
 
 SprLog* SprLog::GetInstance()
@@ -151,10 +156,10 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
 
 int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
 {
-    int32_t ret = theSharedMem.write(&len, sizeof(int32_t));
+    int32_t ret = pLogSCacheMem->write(&len, sizeof(int32_t));
     if (ret != 0) {
         return ret;
     }
 
-    return theSharedMem.write(logs, len);
+    return pLogSCacheMem->write(logs, len);
 }

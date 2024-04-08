@@ -45,7 +45,7 @@ using namespace InternalEnum;
 #define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
 #define CACHE_MEMORY_SIZE           10 * 1024 * 1024        // 10MB
 
-SharedRingBuffer theSharedMem(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE, true);
+static SharedRingBuffer* pLogMCacheMem = nullptr;
 
 LogManager::LogManager(ModuleIDType id, const std::string& name)
 {
@@ -64,11 +64,21 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
         }
     }
 
+    pLogMCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE, true);
+    if (pLogMCacheMem == nullptr) {
+        SPR_LOGE("pLogMCacheMem is nullptr!");
+    }
+
     EnvReady(SRV_NAME_LOG);
 }
 
 LogManager::~LogManager()
 {
+    if (pLogMCacheMem != nullptr) {
+        delete pLogMCacheMem;
+        pLogMCacheMem = nullptr;
+    }
+
     mLogFileStream.close();
 }
 
@@ -122,13 +132,13 @@ int LogManager::MainLoop()
 {
     while (mRunning)
     {
-        if (theSharedMem.AvailData() <= 0) {
+        if (pLogMCacheMem->AvailData() <= 0) {
             sleep(1);
             continue;
         }
 
         int32_t len = 0;
-        int ret = theSharedMem.read(&len, sizeof(int32_t));
+        int ret = pLogMCacheMem->read(&len, sizeof(int32_t));
         if (ret != 0 || len < 0) {
             SPR_LOGE("read memory failed! len = %d, ret = %d\n", len, ret);
             sleep(1);
@@ -138,7 +148,7 @@ int LogManager::MainLoop()
         std::string value;
         value.resize(len);
         char* data = const_cast<char*>(value.c_str());
-        ret = theSharedMem.read(data, len);
+        ret = pLogMCacheMem->read(data, len);
         if (ret != 0) {
             SPR_LOGE("read failed! len = %d\n", len);
         }

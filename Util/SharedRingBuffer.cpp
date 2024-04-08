@@ -31,16 +31,29 @@
 const int RETRY_TIMES       = 3;        // 3 times retry
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 
-SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity, bool isRefressh)
+SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity, bool isMaster)
     : mCapacity(capacity), mShmPath(path)
 {
-    int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-    if (fd == -1) {
-        SPR_LOGE("open failed! (%s)", strerror(errno));
-    }
+    int fd = -1;
 
-    if (isRefressh && ftruncate(fd, mCapacity) == -1) {
-        SPR_LOGE("ftruncate failed! (%s)", strerror(errno));
+    // Master: clean up existing mmap file and recreate it.
+    // Slave: use the existing mmap file.
+    if (isMaster) {
+        unlink(mShmPath.c_str());
+        fd = open(mShmPath.c_str(), O_RDWR | O_CREAT | O_EXCL, S_IRUSR | S_IWUSR);
+        if (fd == -1) {
+            SPR_LOGE("open failed! (%s)", strerror(errno));
+        }
+        if (ftruncate(fd, mCapacity) == -1) {
+            SPR_LOGE("ftruncate failed! (%s)", strerror(errno));
+        }
+
+        SPR_LOGD("create %s", mShmPath.c_str());
+    } else {
+        fd = open(mShmPath.c_str(), O_RDWR);
+        if (fd == -1) {
+            SPR_LOGE("open failed! (%s)", strerror(errno));
+        }
     }
 
     void* mapMemory = mmap(NULL, mCapacity, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -49,10 +62,11 @@ SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity, bool isR
     }
 
     mRoot = static_cast<Root*>(mapMemory);
-    if (isRefressh) {
+    if (isMaster) {
         mRoot->rp = mRoot->wp;
     }
 
+    // SPR_LOGD("path = %s, rp = %d, wp = %d\n", mShmPath.c_str(), mRoot->rp, mRoot->wp);
     mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
     close(fd);
 }
