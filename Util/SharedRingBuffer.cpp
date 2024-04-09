@@ -52,13 +52,17 @@ SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity)
     }
 
     mRoot = static_cast<Root*>(mapMemory);
-
     if (mRoot == nullptr) {
+        SPR_LOGE("mRoot is nullptr!");
         exit(0);
     }
 
     mRoot->rp = mRoot->wp;
     mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
+    if (mData == nullptr) {
+        SPR_LOGE("mData is nullptr!");
+        exit(0);
+    }
     close(fd);
 }
 
@@ -84,7 +88,16 @@ SharedRingBuffer::SharedRingBuffer(std::string path)
     mCapacity = fileSize;
     mShmPath = path;
     mRoot = static_cast<Root*>(mapMemory);
+    if (mRoot == nullptr) {
+        SPR_LOGE("mRoot is nullptr!");
+        exit(0);
+    }
+
     mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
+    if (mData == nullptr) {
+        SPR_LOGE("mData is nullptr!");
+        exit(0);
+    }
     close(fd);
 }
 SharedRingBuffer::~SharedRingBuffer()
