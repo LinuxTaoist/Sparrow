@@ -52,6 +52,11 @@ SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity)
     }
 
     mRoot = static_cast<Root*>(mapMemory);
+
+    if (mRoot == nullptr) {
+        exit(0);
+    }
+
     mRoot->rp = mRoot->wp;
     mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
     close(fd);
