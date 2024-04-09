@@ -18,7 +18,7 @@
  */
 #include "SprMediator.h"
 
-int main(int agrc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     SprMediator *pObj = SprMediator::GetInstance();
     pObj->Init();

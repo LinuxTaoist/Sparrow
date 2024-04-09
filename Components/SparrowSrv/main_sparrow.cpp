@@ -18,7 +18,7 @@
  */
 #include "SprSystem.h"
 
-int main(int agrc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     SprSystem::GetInstance()->Init();
     return 0;

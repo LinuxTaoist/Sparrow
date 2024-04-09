@@ -175,7 +175,7 @@ int Client()
     return 0;
 }
 
-int main(int agrc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     std::shared_ptr<Binder> binder;
     InitServer(binder);

@@ -38,7 +38,7 @@ static SharedRingBuffer* pLogSCacheMem = nullptr;
 
 SprLog::SprLog()
 {
-    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE, false);
+    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
 }
 
 SprLog::~SprLog()

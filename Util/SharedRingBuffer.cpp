@@ -21,6 +21,8 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <sys/mman.h>
 #include "SharedRingBuffer.h"
 
@@ -31,11 +33,10 @@
 const int RETRY_TIMES       = 3;        // 3 times retry
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 
-SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity, bool isMaster)
+// Used for master mode
+SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity)
     : mCapacity(capacity), mShmPath(path)
 {
-    // Master: clean up existing mmap file and recreate it.
-    // Slave: use the existing mmap file.
     int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         SPR_LOGE("open failed! (%s)", strerror(errno));
@@ -43,7 +44,7 @@ SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity, bool isM
 
     if (ftruncate(fd, mCapacity) == -1) {
         SPR_LOGE("ftruncate failed! (%s)", strerror(errno));
-     }
+    }
 
     void* mapMemory = mmap(NULL, mCapacity, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (mapMemory == MAP_FAILED) {
@@ -52,10 +53,35 @@ SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity, bool isM
 
     mRoot = static_cast<Root*>(mapMemory);
     mRoot->rp = mRoot->wp;
-    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root) ;
+    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
     close(fd);
 }
 
+// Used for slave mode
+SharedRingBuffer::SharedRingBuffer(std::string path)
+{
+    int fd = open(path.c_str(), O_RDWR);
+    if (fd == -1) {
+        SPR_LOGE("open %s failed! (%s)\n", mShmPath.c_str(), strerror(errno));
+    }
+
+    struct stat fileStat;
+    if (fstat(fd, &fileStat) == -1) {
+        SPR_LOGE("fstat failed! (%s)\n", strerror(errno));
+    }
+
+    off_t fileSize = fileStat.st_size;
+    void* mapMemory = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (mapMemory == MAP_FAILED) {
+        SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
+    }
+
+    mCapacity = fileSize;
+    mShmPath = path;
+    mRoot = static_cast<Root*>(mapMemory);
+    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
+    close(fd);
+}
 SharedRingBuffer::~SharedRingBuffer()
 {
     munmap(mRoot, mCapacity);
@@ -133,6 +159,13 @@ int32_t SharedRingBuffer::AvailData() const noexcept
 int32_t SharedRingBuffer::DumpBuffer(void* data, int32_t len) const noexcept
 {
     static uint32_t pos = mRoot->rp;
+    int32_t diff = mRoot->wp - pos;
+
+    bool avail = (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
+    if (!avail) {
+        return -1;
+    }
+
     memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
     pos = (pos + len) % mCapacity;
 

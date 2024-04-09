@@ -31,7 +31,7 @@ using namespace InternalEnum;
 #define SPR_LOGD(fmt, args...) LOGD("DebugMsg", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("DebugMsg", fmt, ##args)
 
-int main(int agrc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     char val = 0;
     bool run = true;

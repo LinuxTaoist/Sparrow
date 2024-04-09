@@ -42,14 +42,30 @@ enum ECmdType
 class SharedRingBuffer
 {
 public:
-    SharedRingBuffer(std::string path, uint32_t capacity, bool isMaster = true);
+    /**
+     * @brief Constructs a master Shared Ring Buffer object.
+     * @param path  The path to the shared memory.
+     * @param capacity The buffer's capacity.
+     *
+     * Intended for use in master mode with shared memory refreshing.
+     */
+    SharedRingBuffer(std::string path, uint32_t capacity);
+
+    /**
+     * @brief Constructs a slave Shared Ring Buffer object
+     * @param path The path to the shared memory.
+     *
+     * This constructor creates an instance of a slave Shared Ring Buffer, typically used by client applications.
+     * It facilitates access and utilization of the shared buffer by referencing it through the specified path.
+     */
+    SharedRingBuffer(std::string path);
     ~SharedRingBuffer();
 
     bool    IsReadable()    const noexcept;
     bool    IsWriteable()   const noexcept;
     int     write(const void* data, int32_t len);
     int     read(void* data, int32_t len);
-    int     DumpBuffer(void* data, int32_t len)    const noexcept;
+    int     DumpBuffer(void* data, int32_t len) const noexcept;
 
     int32_t AvailSpace()    const noexcept;
     int32_t AvailData()     const noexcept;

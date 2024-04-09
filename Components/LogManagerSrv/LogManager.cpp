@@ -64,7 +64,7 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
         }
     }
 
-    pLogMCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE, true);
+    pLogMCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
     if (pLogMCacheMem == nullptr) {
         SPR_LOGE("pLogMCacheMem is nullptr!");
     }

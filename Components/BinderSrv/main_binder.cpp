@@ -19,7 +19,7 @@
 #include <stdio.h>
 #include "BinderManager.h"
 
-int main(int agrc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     BinderManager::GetInstance()->HandleMsgLoop();
     return 0;

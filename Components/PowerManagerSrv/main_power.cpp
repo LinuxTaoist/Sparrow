@@ -26,7 +26,7 @@ using namespace std;
 using namespace SprPower;
 using namespace InternalEnum;
 
-int main(int agrc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     PowerManager thePowerManager(MODULE_POWERM, "PowerM", make_shared<SprMediatorIpcProxy>());
     SprObserver::MainLoop();

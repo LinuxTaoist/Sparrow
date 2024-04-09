@@ -75,7 +75,7 @@ static void usage()
     );
 }
 
-int main(int agrc, const char *argv[])
+int main(int argc, const char *argv[])
 {
     DebugCore theDebug(MODULE_DEBUG, "Debug", make_shared<SprMediatorIpcProxy>());
 
