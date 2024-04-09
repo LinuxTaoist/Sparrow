@@ -73,7 +73,6 @@ int SharedRingBuffer::write(const void* data, int32_t len)
         std::lock_guard<std::mutex> lock(mMutex);
         int32_t avail = AvailSpace();
         if (avail >= len) {
-
             memcpy(static_cast<char*>(mData) + mRoot->wp, data, len);
             mRoot->wp = (mRoot->wp + len) % mCapacity;
             SetRWStatus(CMD_READABLE);
@@ -100,7 +99,6 @@ int SharedRingBuffer::read(void* data, int32_t len)
         std::lock_guard<std::mutex> lock(mMutex);
         int32_t avail = AvailData();
         if (avail >= len) {
-
             memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
             mRoot->rp = (mRoot->rp + len) % mCapacity;
             SetRWStatus(CMD_WRITEABLE);
@@ -129,6 +127,18 @@ int32_t SharedRingBuffer::AvailData() const noexcept
     return (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
 }
 
+// Dump the buffer content
+// Note: This function is not thread-safe.
+//       It's only used for show logs in terminal debug.
+int32_t SharedRingBuffer::DumpBuffer(void* data, int32_t len) const noexcept
+{
+    static uint32_t pos = mRoot->rp;
+    memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
+    pos = (pos + len) % mCapacity;
+
+    return 0;
+}
+
 bool SharedRingBuffer::IsReadable() const noexcept
 {
     return ((mRoot->rwStatus == CMD_READABLE) && AvailData() != 0);
@@ -136,7 +146,7 @@ bool SharedRingBuffer::IsReadable() const noexcept
 
 bool SharedRingBuffer::IsWriteable() const noexcept
 {
-    return ((mRoot->rwStatus == CMD_WRITEABLE  && AvailData() != 0));
+    return ((mRoot->rwStatus == CMD_WRITEABLE && AvailData() != 0));
 }
 
 void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept

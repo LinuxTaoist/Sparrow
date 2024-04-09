@@ -155,10 +155,11 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string cfgPath)
             WaitLastExeFinished(lastExeName);
         }
 
-        lastExeName = line;
-        if (StartExe(line.c_str()) == 0)
+        ClearExeEnvNode(line);
+        if (StartExe(line) == 0)
         {
             startedCount++;
+            lastExeName = line;
         }
         else
         {
@@ -205,17 +206,31 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
     return 0;
 }
 
+int32_t ServiceManager::ClearExeEnvNode(const std::string& exeName)
+{
+    std::string monitorNode = std::string("/tmp/") + exeName;
+    if (exeName.empty()) {
+        return 0;
+    }
+
+    if (access(monitorNode.c_str(), F_OK) == 0) {
+        unlink(monitorNode.c_str());
+    }
+
+    return 0;
+}
+
 int32_t ServiceManager::WaitLastExeFinished(const std::string& exeName)
 {
     int retryTimes = 10;
-    std::string monitorPath = std::string("/tmp/") + exeName;
+    std::string monitorNode = std::string("/tmp/") + exeName;
 
     if (exeName.empty()) {
         return 0;
     }
 
     while (retryTimes--) {
-        if (access(monitorPath.c_str(), F_OK) != 0) {
+        if (access(monitorNode.c_str(), F_OK) != 0) {
             SPR_LOGD("Waiting exe: %s, retryTimes = %d\n", exeName.c_str(), 10 - retryTimes);
             usleep(50000);
         } else {
