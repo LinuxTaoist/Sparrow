@@ -133,7 +133,7 @@ int LogManager::MainLoop()
     while (mRunning)
     {
         if (pLogMCacheMem->AvailData() <= 0) {
-            sleep(1);
+            usleep(10000);
             continue;
         }
 
@@ -141,7 +141,7 @@ int LogManager::MainLoop()
         int ret = pLogMCacheMem->read(&len, sizeof(int32_t));
         if (ret != 0 || len < 0) {
             SPR_LOGE("read memory failed! len = %d, ret = %d\n", len, ret);
-            sleep(1);
+            usleep(10000);
             continue;
         }
 

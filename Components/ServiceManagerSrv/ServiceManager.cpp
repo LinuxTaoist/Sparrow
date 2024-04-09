@@ -35,16 +35,10 @@
 
 using namespace std;
 
-// #define SPR_LOGD(fmt, args...) LOGD("ServiceM", fmt, ##args)
-// #define SPR_LOGI(fmt, args...) LOGI("ServiceM", fmt, ##args)
-// #define SPR_LOGW(fmt, args...) LOGW("ServiceM", fmt, ##args)
-// #define SPR_LOGE(fmt, args...) LOGE("ServiceM", fmt, ##args)
-
-#define SPR_LOGD(fmt, args...) printf("%04d ServiceM D: " fmt, __LINE__, ##args)
-#define SPR_LOGI(fmt, args...) printf("%04d ServiceM I: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%04d ServiceM W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%04d ServiceM E: " fmt, __LINE__, ##args)
-
+#define SPR_LOGD(fmt, args...) printf("%-4d ServiceM D: " fmt, __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%-4d ServiceM I: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%-4d ServiceM W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%-4d ServiceM E: " fmt, __LINE__, ##args)
 
 #define CONFIG_SUPPORT_SIGCHLD 0 // SIGCHLD不可靠。 1: 信号中断触发 0: 轮询
 
