@@ -45,7 +45,7 @@ using namespace InternalEnum;
 #define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
 #define CACHE_MEMORY_SIZE           10 * 1024 * 1024        // 10MB
 
-static SharedRingBuffer* pLogMCacheMem = nullptr;
+static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
 LogManager::LogManager(ModuleIDType id, const std::string& name)
 {
@@ -64,7 +64,7 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
         }
     }
 
-    pLogMCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
+    pLogMCacheMem = std::make_shared<SharedRingBuffer>(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
     if (pLogMCacheMem == nullptr) {
         SPR_LOGE("pLogMCacheMem is nullptr!");
     }
@@ -74,11 +74,6 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
 
 LogManager::~LogManager()
 {
-    if (pLogMCacheMem != nullptr) {
-        delete pLogMCacheMem;
-        pLogMCacheMem = nullptr;
-    }
-
     mLogFileStream.close();
 }
 

@@ -100,6 +100,7 @@ SharedRingBuffer::SharedRingBuffer(std::string path)
     }
     close(fd);
 }
+
 SharedRingBuffer::~SharedRingBuffer()
 {
     munmap(mRoot, mCapacity);

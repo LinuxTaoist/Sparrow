@@ -7,7 +7,7 @@ aux_source_directory(${BINDER_PATH}/Library SRC_BINDER_LIB_PATH)
 add_library(LibBinder SHARED ${SRC_BINDER_LIB_PATH})
 set_target_properties(LibBinder PROPERTIES OUTPUT_NAME "sprbinder")
 set_target_properties(LibBinder PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries(LibBinder stdc++ rt dl)
+target_link_libraries(LibBinder stdc++ pthread rt dl)
 
 # Bin binderserver
 include_directories (${BINDER_PATH}/Library)
