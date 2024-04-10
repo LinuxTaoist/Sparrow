@@ -20,7 +20,7 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
-#include "Convert.h"
+#include "GeneralConversions.h"
 #include "DefineMacro.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
@@ -78,8 +78,8 @@ int main(int argc, const char *argv[])
                 SPR_LOGD("u8Value       : %d    \n", theDeMsg.GetU8Value());
                 SPR_LOGD("u16Value      : %d    \n", theDeMsg.GetU16Value());
                 SPR_LOGD("string        : %s    \n", theDeMsg.GetString().c_str());
-                SPR_LOGD("u8Vec[%ld]    : %s    \n", deU8Vec.size(), Convert::vectorToString(deU8Vec).c_str());
-                SPR_LOGD("u32Vec[%ld]   : %s    \n", deU32Vec.size(), Convert::vectorToHexString(deU32Vec).c_str());
+                SPR_LOGD("u8Vec[%ld]    : %s    \n", deU8Vec.size(), GeneralConversions::vectorToString(deU8Vec).c_str());
+                SPR_LOGD("u32Vec[%ld]   : %s    \n", deU32Vec.size(), GeneralConversions::vectorToHexString(deU32Vec).c_str());
                 SPR_LOGD("ptr           : %d    \n", dePtr->id);
                 SPR_LOGD("                %s    \n", dePtr->buf);
 
@@ -95,8 +95,8 @@ int main(int argc, const char *argv[])
                 SPR_LOGD("u8Value       : %d    \n", copyMsg.GetU8Value());
                 SPR_LOGD("u16Value      : %d    \n", copyMsg.GetU16Value());
                 SPR_LOGD("string        : %s    \n", copyMsg.GetString().c_str());
-                SPR_LOGD("u8Vec[%ld]    : %s    \n", copyU8Vec.size(), Convert::vectorToString(copyU8Vec).c_str());
-                SPR_LOGD("u32Vec[%ld]   : %s    \n", copyU32Vec.size(), Convert::vectorToHexString(copyU32Vec).c_str());
+                SPR_LOGD("u8Vec[%ld]    : %s    \n", copyU8Vec.size(), GeneralConversions::vectorToString(copyU8Vec).c_str());
+                SPR_LOGD("u32Vec[%ld]   : %s    \n", copyU32Vec.size(), GeneralConversions::vectorToHexString(copyU32Vec).c_str());
                 SPR_LOGD("ptr           : %d    \n", copyPtr->id);
                 SPR_LOGD("                %s    \n", copyPtr->buf);
                 break;

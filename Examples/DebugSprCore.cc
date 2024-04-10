@@ -23,13 +23,13 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
-#include "Convert.h"
-#include "Shared.h"
+#include "GeneralConversions.h"
+#include "GeneralUtils.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
-using namespace Shared;
+using namespace GeneralUtils;
 using namespace InternalEnum;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)

@@ -19,9 +19,9 @@
 #include <random>
 #include <chrono>
 #include <random>
-#include "Shared.h"
+#include "GeneralUtils.h"
 
-namespace Shared {
+namespace GeneralUtils {
     std::string ProduceRandomStr(int len)
     {
         std::string strRandom;

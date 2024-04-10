@@ -26,7 +26,7 @@
 #include <signal.h>
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
-#include "Util/Shared.h"
+#include "GeneralUtils.h"
 #include "SprObserver.h"
 #include "DefineMacro.h"
 #include "SprEpollSchedule.h"
@@ -249,7 +249,7 @@ int SprObserver::MakeMQ()
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    string strRandom = Shared::ProduceRandomStr(RANDOM_STR_LENGTH);
+    string strRandom = GeneralUtils::ProduceRandomStr(RANDOM_STR_LENGTH);
     mMqDevName = "/" +  mModuleName + "_" + strRandom;
     mq_unlink(mMqDevName.c_str());
     mMqHandle = mq_open(mMqDevName.c_str(), O_RDWR | O_CREAT | O_EXCL, 0666, &mqAttr);

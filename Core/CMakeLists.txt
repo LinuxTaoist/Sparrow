@@ -1,6 +1,6 @@
 ## Build libsprcore.so
 
-include_directories (${PROJECT_PATH})
+include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/3rdParty/libgo/include)
 include_directories (${PROJECT_PATH}/Adapter)
 include_directories (${CMAKE_CURRENT_SOURCE_DIR})

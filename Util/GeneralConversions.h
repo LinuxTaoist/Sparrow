@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : Convert.h
+ *  @file       : GeneralConversions.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __CONVERT_H__
-#define __CONVERT_H__
+#ifndef __GENERAL_CONVERSIONS_H__
+#define __GENERAL_CONVERSIONS_H__
 
 #include <string>
 #include <vector>
@@ -25,7 +25,7 @@
 #include <iomanip>
 #include <stdint.h>
 
-namespace Convert {
+namespace GeneralConversions {
     template <typename T>
     int stringToInt(T& value, const std::string& str)
     {
@@ -76,4 +76,4 @@ namespace Convert {
     }
 };
 
-#endif
+#endif // __GENERAL_CONVERSIONS_H__

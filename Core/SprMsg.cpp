@@ -18,7 +18,7 @@
  */
 #include "SprMsg.h"
 #include "DefineMacro.h"
-#include "Util/Convert.h"
+#include "GeneralConversions.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprMsg", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGD("SprMsg", fmt, ##args)
@@ -256,22 +256,22 @@ void SprMsg::SetU32Vec(const std::vector<uint32_t>& vec)
 }
 void SprMsg::EncodeFrom(std::string& enDatas) const
 {
-    Convert::intToString(mFrom, enDatas);
+    GeneralConversions::intToString(mFrom, enDatas);
 }
 
 void SprMsg::EncodeTo(std::string& enDatas) const
 {
-    Convert::intToString(mTo, enDatas);
+    GeneralConversions::intToString(mTo, enDatas);
 }
 
 void SprMsg::EncodeMsgId(std::string& enDatas) const
 {
-    Convert::intToString(mMsgId, enDatas);
+    GeneralConversions::intToString(mMsgId, enDatas);
 }
 
 void SprMsg::EncodeTag(std::string& enDatas) const
 {
-    Convert::intToString(mTag, enDatas);
+    GeneralConversions::intToString(mTag, enDatas);
 }
 
 void SprMsg::EncodeBoolValue(std::string& enDatas)
@@ -344,7 +344,7 @@ void SprMsg::EncodeDatas(std::string& enDatas)
 
 void SprMsg::DecodeFrom(std::string& deDatas)
 {
-    if (Convert::stringToInt(mFrom, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mFrom, deDatas) != 0)
     {
         SPR_LOGE("Decode from Fail!\n");
         return;
@@ -355,7 +355,7 @@ void SprMsg::DecodeFrom(std::string& deDatas)
 
 void SprMsg::DecodeTo(std::string& deDatas)
 {
-    if (Convert::stringToInt(mTo, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mTo, deDatas) != 0)
     {
         SPR_LOGE("Decode to Fail!\n");
         return;
@@ -366,7 +366,7 @@ void SprMsg::DecodeTo(std::string& deDatas)
 
 void SprMsg::DecodeMsgId(std::string& deDatas)
 {
-    if (Convert::stringToInt(mMsgId, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mMsgId, deDatas) != 0)
     {
         SPR_LOGE("Decode msgId Fail!\n");
         return;
@@ -377,7 +377,7 @@ void SprMsg::DecodeMsgId(std::string& deDatas)
 
 void SprMsg::DecodeTag(std::string& deDatas)
 {
-    if (Convert::stringToInt(mTag, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mTag, deDatas) != 0)
     {
         SPR_LOGE("Decode tag Fail!\n");
         return;
@@ -442,7 +442,7 @@ void SprMsg::DecodeU32Value(std::string& deDatas)
 
 void SprMsg::DecodeString(std::string& deDatas)
 {
-    if (Convert::stringToInt(mStringLength, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mStringLength, deDatas) != 0)
     {
         SPR_LOGE("Decode string length Fail!\n");
         return;
@@ -460,7 +460,7 @@ void SprMsg::DecodeString(std::string& deDatas)
 
 void SprMsg::DecodeU8Vec(std::string& deDatas)
 {
-    if (Convert::stringToInt(mU8VecLength, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mU8VecLength, deDatas) != 0)
     {
         SPR_LOGE("Decode vector size Fail!\n");
         return;
@@ -478,7 +478,7 @@ void SprMsg::DecodeU8Vec(std::string& deDatas)
 
 void SprMsg::DecodeU32Vec(std::string& deDatas)
 {
-    if (Convert::stringToInt(mU32VecLength, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mU32VecLength, deDatas) != 0)
     {
         SPR_LOGE("Decode vector size Fail!\n");
         return;
@@ -512,7 +512,7 @@ void SprMsg::DecodeDatas(std::string& deDatas)
         return;
     }
 
-    if (Convert::stringToInt(mDataSize, deDatas) != 0)
+    if (GeneralConversions::stringToInt(mDataSize, deDatas) != 0)
     {
         SPR_LOGE("Decode vector size Fail!\n");
         return;

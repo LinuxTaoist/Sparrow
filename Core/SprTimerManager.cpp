@@ -22,7 +22,7 @@
 #include <string.h>
 #include <sys/timerfd.h>
 #include "SprMsg.h"
-#include "Util/Shared.h"
+#include "GeneralUtils.h"
 #include "DefineMacro.h"
 #include "SprTimerManager.h"
 #include "SprMediatorIpcProxy.h"

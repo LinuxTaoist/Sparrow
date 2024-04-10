@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : Convert.cpp
+ *  @file       : GeneralConversions.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,12 +16,28 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <string.h>
-#include <cstdint>
-#include "Convert.h"
+#ifndef __GENERAL_UTILS_H__
+#define __GENERAL_UTILS_H__
 
-namespace Convert
-{
+#include <string>
 
+namespace GeneralUtils {
+    std::string ProduceRandomStr(int len);
+    int ProduceRandomInt(int len);
+
+    template<typename T>
+    int AbsValue(T v)
+    {
+        return v > 0 ? v : (0 - v);
+    }
+
+    template<typename T>
+    int AbsValue(T v1, T v2)
+    {
+        return v1 > v2 ? (v1 - v2) : (v2 - v1);
+    }
+
+    std::string GetCurTimeStr();
 };
 
+#endif // __GENERAL_UTILS_H__
