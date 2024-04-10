@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : GeneralConversions.h
+ *  @file       : GeneralUtils.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -38,6 +38,7 @@ namespace GeneralUtils {
     }
 
     std::string GetCurTimeStr();
+    int SystemCmd(std::string& out, const char *format, ...);
 };
 
 #endif // __GENERAL_UTILS_H__

@@ -4,16 +4,16 @@ include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/Adapter)
 
-## copy *.prop
-set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/Configures/General)
-set (VENDOR_CONFIGURE_PATH  ${PROJECT_PATH}/Configures/Vendor/${PROJECT_PLATFORM})
+## Project configures path
+set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/ProjectConfigs/General)
+set (VENDOR_CONFIGURE_PATH  ${PROJECT_PATH}/ProjectConfigs/Vendor/${PROJECT_PLATFORM})
 
-## General configures
+## Project general configures
 file(COPY ${GENERAL_CONFIGURE_PATH}/init.conf       DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 file(COPY ${GENERAL_CONFIGURE_PATH}/default.prop    DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 file(COPY ${GENERAL_CONFIGURE_PATH}/system.prop     DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 
-## Vendor configures
+## Project vendor configures
 file(COPY ${VENDOR_CONFIGURE_PATH}/vendor.prop      DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 
 # Bin logservice

@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : Shared.cpp
+ *  @file       : GeneralUtils.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -19,6 +19,7 @@
 #include <random>
 #include <chrono>
 #include <random>
+#include <stdarg.h>
 #include "GeneralUtils.h"
 
 namespace GeneralUtils {
@@ -62,5 +63,42 @@ namespace GeneralUtils {
                 localTime->tm_hour, localTime->tm_min, localTime->tm_sec, milliseconds);
 
         return std::string(buffer);
+    }
+
+    int SystemCmd(std::string& out, const char *format, ...)
+    {
+        va_list vlist;
+        va_start(vlist, format);
+
+        char* fmt = nullptr;
+        if (vasprintf(&fmt, format, vlist) == -1)
+        {
+            va_end(vlist);
+            return -1;
+        }
+
+        va_end(vlist);
+        if (fmt == nullptr)
+        {
+            return -1;
+        }
+
+        FILE *fp = popen(fmt, "r");
+        if (fp == nullptr)
+        {
+            free(fmt);
+            return -1;
+        }
+
+        out.clear();
+        char buffer[256] = {0};
+        while (fgets(buffer, sizeof(buffer), fp) != nullptr)
+        {
+            out.append(buffer);
+        }
+
+        free(fmt);
+        int exitCode = pclose(fp);
+        return (exitCode == 0) ? 0 : -1;
     }
 };
