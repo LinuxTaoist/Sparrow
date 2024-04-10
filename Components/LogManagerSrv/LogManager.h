@@ -36,10 +36,10 @@ public:
 
 private:
     int EnvReady(const std::string& srvName);
+    int UpdateSuffixOfAllFiles();
     int RotateLogsIfNecessary(uint32_t logDataSize);
     int WriteToLogFile(const std::string& logData);
-    std::string GetNextLogFileName() const;
-    std::queue<std::string> GetSortedLogFiles(const std::string& path, const std::string& fileName);
+    std::set<std::string> GetSortedLogFiles(const std::string& path, const std::string& fileName);
 
 private:
     bool            mRunning;
@@ -47,7 +47,7 @@ private:
     std::string     mLogsPath;;
     std::string     mCurrentLogFile;
     std::ofstream   mLogFileStream;
-    std::queue<std::string> mLogFiles;
+    std::set<std::string> mLogFiles;
 };
 
 #endif

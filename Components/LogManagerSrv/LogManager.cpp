@@ -71,6 +71,7 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
         SPR_LOGE("pLogMCacheMem is nullptr!");
     }
 
+    mLogFiles = GetSortedLogFiles(DEFAULT_LOGS_STORAGE_PATH, DEFAULT_LOG_FILE_NAME);
     EnvReady(SRV_NAME_LOG);
 }
 
@@ -90,11 +91,37 @@ int LogManager::EnvReady(const std::string& srvName)
     return 0;
 }
 
+int LogManager::UpdateSuffixOfAllFiles()
+{
+    for (auto &it : mLogFiles) {
+        std::string suffix;
+        std::string baseName = it.substr(0, it.find_last_of(".") + 1);
+
+        if (it.find('.') != std::string::npos) {
+            suffix = it.substr(baseName.length());
+            int version = atoi(suffix.c_str()) + 1;
+            suffix = "." + std::to_string(version);
+        } else {
+            suffix = ".1";
+        }
+
+        std::string newFile = baseName + suffix;
+        rename(it.c_str(), newFile.c_str());
+    }
+
+    return 0;
+}
+
+// E.g: sparrow.log sparrow.log.1 sparrow.log.2 ...
 int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 {
     if (static_cast<uint32_t>(mLogFileStream.tellp()) + logDataSize > mMaxFileSize) {
         mLogFileStream.close();
-        mLogFileStream.open(GetNextLogFileName(), std::ios_base::app | std::ios_base::out);
+
+        // TODO: Add 1 to the suffix of an existing file
+        UpdateSuffixOfAllFiles();
+
+        mLogFileStream.open(mLogsPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
             SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
         }
@@ -106,7 +133,7 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 int LogManager::WriteToLogFile(const std::string& logData)
 {
     if (!mLogFileStream.is_open()) {
-        mLogFileStream.open(GetNextLogFileName(), std::ios_base::app | std::ios_base::out);
+        mLogFileStream.open(mLogsPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
             SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
             return -1;
@@ -118,43 +145,31 @@ int LogManager::WriteToLogFile(const std::string& logData)
     return 0;
 }
 
-std::string LogManager::GetNextLogFileName() const
-{
-    std::ostringstream oss;
-    oss << mLogsPath << "/" << mCurrentLogFile << "_" << time(nullptr) << ".log";
-    return oss.str();
-}
-
-std::queue<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileName)
+std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileName)
 {
     DIR* dir;
     struct dirent* ent;
-    std::vector<std::string> files;
-    std::queue<std::string> sortedLogFiles;
+    std::set<std::string> files;
 
     if ((dir = opendir(path.c_str())) != NULL) {
         // Iterating over each file in directory
         while ((ent = readdir(dir)) != NULL) {
             std::string tmpFile(ent->d_name);
             if (tmpFile.find(fileName) == 0) {
-                files.push_back(tmpFile);
+                files.insert(mLogsPath + '/' + tmpFile);
             }
         }
         closedir(dir);
     } else {
         SPR_LOGE("Open %s failed! (%s)\n", path.c_str(), strerror(errno));
-        return sortedLogFiles;
+        return files;
     }
 
-    // Sorting log files based on suffix
-    std::sort(files.begin(), files.end());
-
-    // Adding sorted log file names to the queue
-    for (const auto& file : files) {
-        sortedLogFiles.push(file);
+    if (files.empty()) {
+        files.insert(mLogsPath + '/' + mCurrentLogFile);
     }
 
-    return sortedLogFiles;
+    return files;
 }
 
 int LogManager::MainLoop()
