@@ -20,8 +20,10 @@
  *
  */
 #include <memory>
+#include <algorithm>
 #include <fcntl.h>
 #include <unistd.h>
+#include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -39,7 +41,7 @@ using namespace InternalEnum;
 #define SPR_LOGE(fmt, args...) printf("%04d LOGM E: " fmt, __LINE__, ##args)
 
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
-#define DEFAULT_LOG_FILE_NAME       "sprlog"
+#define DEFAULT_LOG_FILE_NAME       "sparrow.log"
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 
 #define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
@@ -121,6 +123,38 @@ std::string LogManager::GetNextLogFileName() const
     std::ostringstream oss;
     oss << mLogsPath << "/" << mCurrentLogFile << "_" << time(nullptr) << ".log";
     return oss.str();
+}
+
+std::queue<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileName)
+{
+    DIR* dir;
+    struct dirent* ent;
+    std::vector<std::string> files;
+    std::queue<std::string> sortedLogFiles;
+
+    if ((dir = opendir(path.c_str())) != NULL) {
+        // Iterating over each file in directory
+        while ((ent = readdir(dir)) != NULL) {
+            std::string tmpFile(ent->d_name);
+            if (tmpFile.find(fileName) == 0) {
+                files.push_back(tmpFile);
+            }
+        }
+        closedir(dir);
+    } else {
+        SPR_LOGE("Open %s failed! (%s)\n", path.c_str(), strerror(errno));
+        return sortedLogFiles;
+    }
+
+    // Sorting log files based on suffix
+    std::sort(files.begin(), files.end());
+
+    // Adding sorted log file names to the queue
+    for (const auto& file : files) {
+        sortedLogFiles.push(file);
+    }
+
+    return sortedLogFiles;
 }
 
 int LogManager::MainLoop()

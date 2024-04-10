@@ -22,7 +22,7 @@
 #ifndef __LOG_MANAGER_H__
 #define __LOG_MANAGER_H__
 
-#include <thread>
+#include <queue>
 #include <fstream>
 #include <sstream>
 #include "SprObserver.h"
@@ -39,6 +39,7 @@ private:
     int RotateLogsIfNecessary(uint32_t logDataSize);
     int WriteToLogFile(const std::string& logData);
     std::string GetNextLogFileName() const;
+    std::queue<std::string> GetSortedLogFiles(const std::string& path, const std::string& fileName);
 
 private:
     bool            mRunning;
@@ -46,7 +47,7 @@ private:
     std::string     mLogsPath;;
     std::string     mCurrentLogFile;
     std::ofstream   mLogFileStream;
-    std::thread     mThread;
+    std::queue<std::string> mLogFiles;
 };
 
 #endif
