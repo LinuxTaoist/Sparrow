@@ -87,7 +87,7 @@ int SprSystemTimer::StartTimer(uint32_t intervalInMilliSec)
     its.it_value.tv_nsec = (intervalInMilliSec % 1000) * 1000000;
     its.it_interval.tv_sec = 0;
     its.it_interval.tv_nsec = 0;
-    if (timerfd_settime(mTimerFd, 0, &its, NULL) == -1) {
+    if (timerfd_settime(mTimerFd, 0, &its, nullptr) == -1) {
         SPR_LOGE("timerfd_settime fail! (%s)\n", strerror(errno));
         return -1;
     }
@@ -104,7 +104,7 @@ int SprSystemTimer::StopTimer()
     its.it_interval.tv_sec = 0;
     its.it_interval.tv_nsec = 0;
 
-    if (timerfd_settime(mTimerFd, 0, &its, NULL) == -1) {
+    if (timerfd_settime(mTimerFd, 0, &its, nullptr) == -1) {
         SPR_LOGE("timerfd_settime fail! (%s)\n", strerror(errno));
         return -1;
     }

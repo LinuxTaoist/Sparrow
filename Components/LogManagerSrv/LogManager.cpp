@@ -176,9 +176,9 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
     struct dirent* ent;
     std::set<std::string> files;
 
-    if ((dir = opendir(path.c_str())) != NULL) {
+    if ((dir = opendir(path.c_str())) != nullptr) {
         // Iterating over each file in directory
-        while ((ent = readdir(dir)) != NULL) {
+        while ((ent = readdir(dir)) != nullptr) {
             std::string tmpFile(ent->d_name);
             if (tmpFile.find(fileName) == 0) {
                 files.insert(mLogsDirPath + '/' + tmpFile);

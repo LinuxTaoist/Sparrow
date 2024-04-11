@@ -129,10 +129,10 @@ void SprObserver::InitSigHandler()
     sigemptyset(&signal_action.sa_mask);
 
     /* register signals */
-    sigaction(SIGTERM, &signal_action, NULL);
-    sigaction(SIGINT, &signal_action, NULL);
-    sigaction(SIGPIPE, &signal_action, NULL); /* ignore broken pipe signals */
-    sigaction(SIGABRT, &signal_action, NULL);
+    sigaction(SIGTERM, &signal_action, nullptr);
+    sigaction(SIGINT, &signal_action, nullptr);
+    sigaction(SIGPIPE, &signal_action, nullptr); /* ignore broken pipe signals */
+    sigaction(SIGABRT, &signal_action, nullptr);
 }
 
 int SprObserver::HandleEvent(int fd)
