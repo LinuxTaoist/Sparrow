@@ -27,13 +27,11 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include "SprMediatorIpcProxy.h"
 #include "SharedRingBuffer.h"
 #include "DefineMacro.h"
 #include "LogManager.h"
 
 using namespace std;
-using namespace InternalEnum;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...) printf("%04d LOGM D: " fmt, __LINE__, ##args)
@@ -50,7 +48,7 @@ using namespace InternalEnum;
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
-LogManager::LogManager(ModuleIDType id, const std::string& name)
+LogManager::LogManager()
 {
     mRunning = true;
 

@@ -18,12 +18,9 @@
  */
 #include "LogManager.h"
 
-using namespace std;
-using namespace InternalEnum;
-
 int main(int argc, const char *argv[])
 {
-    LogManager theLogManager(MODULE_LOGM, "LogM");
+    LogManager theLogManager;
     theLogManager.MainLoop();
     return 0;
 }

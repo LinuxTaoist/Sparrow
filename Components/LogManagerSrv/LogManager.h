@@ -22,15 +22,16 @@
 #ifndef __LOG_MANAGER_H__
 #define __LOG_MANAGER_H__
 
+#include <set>
 #include <queue>
+#include <string>
 #include <fstream>
 #include <sstream>
-#include "SprObserver.h"
 
 class LogManager
 {
 public:
-    LogManager(ModuleIDType id, const std::string& name);
+    LogManager();
     virtual ~LogManager();
     int MainLoop();
 
