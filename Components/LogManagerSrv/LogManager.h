@@ -44,10 +44,11 @@ private:
 private:
     bool            mRunning;
     uint32_t        mMaxFileSize;
-    std::string     mLogsPath;;
+    std::string     mBaseLogFile;
+    std::string     mLogsDirPath;
     std::string     mCurrentLogFile;
     std::ofstream   mLogFileStream;
-    std::set<std::string> mLogFiles;
+    std::set<std::string> mLogFilePaths;
 };
 
 #endif

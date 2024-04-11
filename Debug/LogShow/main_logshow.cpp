@@ -25,7 +25,7 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-#define CACHE_MEMORY_PATH  "/tmp/SprLog.shm"
+#define CACHE_MEMORY_PATH  "/tmp/SprLogShm"
 int main(int argc, const char *argv[])
 {
     int ret = 0;

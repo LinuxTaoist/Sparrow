@@ -40,12 +40,13 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%04d LOGM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%04d LOGM E: " fmt, __LINE__, ##args)
 
+#define DEFAULT_LOG_FILE_TOTAL      10
+#define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
-#define DEFAULT_LOG_FILE_NAME       "sparrow.log"
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 
-#define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
-#define CACHE_MEMORY_SIZE           10 * 1024 * 1024        // 10MB
+#define CACHE_MEMORY_PATH           "/tmp/SprLogShm"
+#define CACHE_MEMORY_SIZE           1 * 1024 * 1024        // 10MB
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
@@ -55,14 +56,15 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
 
     // TODO: value from config
     mMaxFileSize = DEFAULT_LOG_FILE_MAX_SIZE;
-    mLogsPath = DEFAULT_LOGS_STORAGE_PATH;
-    mCurrentLogFile = DEFAULT_LOG_FILE_NAME;
+    mLogsDirPath = DEFAULT_LOGS_STORAGE_PATH;
+    mBaseLogFile = DEFAULT_BASE_LOG_FILE_NAME;
+    mCurrentLogFile = DEFAULT_BASE_LOG_FILE_NAME;
 
-    if (access(mLogsPath.c_str(), F_OK) != 0)
+    if (access(mLogsDirPath.c_str(), F_OK) != 0)
     {
-        int ret = mkdir(mLogsPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        int ret = mkdir(mLogsDirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
-            SPR_LOGE("mkdir %s failed! (%s)", mLogsPath.c_str(), strerror(errno));
+            SPR_LOGE("mkdir %s failed! (%s)", mLogsDirPath.c_str(), strerror(errno));
         }
     }
 
@@ -71,7 +73,7 @@ LogManager::LogManager(ModuleIDType id, const std::string& name)
         SPR_LOGE("pLogMCacheMem is nullptr!");
     }
 
-    mLogFiles = GetSortedLogFiles(DEFAULT_LOGS_STORAGE_PATH, DEFAULT_LOG_FILE_NAME);
+    mLogFilePaths = GetSortedLogFiles(mLogsDirPath, mBaseLogFile);
     EnvReady(SRV_NAME_LOG);
 }
 
@@ -93,22 +95,46 @@ int LogManager::EnvReady(const std::string& srvName)
 
 int LogManager::UpdateSuffixOfAllFiles()
 {
-    for (auto &it : mLogFiles) {
-        std::string suffix;
-        std::string baseName = it.substr(0, it.find_last_of(".") + 1);
-
-        if (it.find('.') != std::string::npos) {
-            suffix = it.substr(baseName.length());
-            int version = atoi(suffix.c_str()) + 1;
-            suffix = "." + std::to_string(version);
-        } else {
-            suffix = ".1";
+    while (mLogFilePaths.size() >= DEFAULT_LOG_FILE_TOTAL)
+    {
+        auto it = mLogFilePaths.end();
+        --it;
+        int ret = remove(it->c_str());
+        if (ret != 0) {
+            SPR_LOGE("Remove %s failed! (%s)\n", it->c_str(), strerror(errno));
         }
 
-        std::string newFile = baseName + suffix;
-        rename(it.c_str(), newFile.c_str());
+        mLogFilePaths.erase(it);
     }
 
+    std::set<std::string> tmpLogPaths;
+    for (auto it = mLogFilePaths.rbegin(); it != mLogFilePaths.rend(); ++it) {
+        std::string oldPath = *it;
+        std::string suffix;
+
+        // Add 1 to the suffix of an existing file
+        auto pos = oldPath.find(".log.");
+        if (pos != std::string::npos) {
+            suffix = oldPath.substr(pos + 5, 1);
+            int version = atoi(suffix.c_str()) + 1;
+            suffix = std::to_string(version);
+        } else {
+            oldPath = mLogsDirPath + "/" + mBaseLogFile;
+            suffix = "1";
+        }
+
+        std::string newFile = mBaseLogFile + "." + suffix;
+        std::string newPath = mLogsDirPath + "/" + newFile;
+        int ret = rename(oldPath.c_str(), newPath.c_str());
+        if (ret != 0) {
+            SPR_LOGE("Rename %s to %s failed! (%s)\n", oldPath.c_str(), newPath.c_str(), strerror(errno));
+        }
+
+        tmpLogPaths.insert(newPath);
+    }
+
+    tmpLogPaths.insert(mLogsDirPath + "/" + mCurrentLogFile);
+    mLogFilePaths = std::move(tmpLogPaths);
     return 0;
 }
 
@@ -118,10 +144,8 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
     if (static_cast<uint32_t>(mLogFileStream.tellp()) + logDataSize > mMaxFileSize) {
         mLogFileStream.close();
 
-        // TODO: Add 1 to the suffix of an existing file
         UpdateSuffixOfAllFiles();
-
-        mLogFileStream.open(mLogsPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
+        mLogFileStream.open(mLogsDirPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
             SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
         }
@@ -133,7 +157,7 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 int LogManager::WriteToLogFile(const std::string& logData)
 {
     if (!mLogFileStream.is_open()) {
-        mLogFileStream.open(mLogsPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
+        mLogFileStream.open(mLogsDirPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
             SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
             return -1;
@@ -156,7 +180,7 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
         while ((ent = readdir(dir)) != NULL) {
             std::string tmpFile(ent->d_name);
             if (tmpFile.find(fileName) == 0) {
-                files.insert(mLogsPath + '/' + tmpFile);
+                files.insert(mLogsDirPath + '/' + tmpFile);
             }
         }
         closedir(dir);
@@ -166,7 +190,7 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
     }
 
     if (files.empty()) {
-        files.insert(mLogsPath + '/' + mCurrentLogFile);
+        files.insert(mLogsDirPath + '/' + mCurrentLogFile);
     }
 
     return files;

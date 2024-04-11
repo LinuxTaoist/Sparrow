@@ -31,7 +31,7 @@
 #define PID_MAX_LENGTH              6
 #define TAG_MAX_LENGTH              12
 #define LOG_BUFFER_MAX_SIZE         256
-#define CACHE_MEMORY_PATH           "/tmp/SprLog.shm"
+#define CACHE_MEMORY_PATH           "/tmp/SprLogShm"
 #define CACHE_MEMORY_SIZE           10 * 1024 * 1024    // 10MB
 
 static SharedRingBuffer* pLogSCacheMem = nullptr;
