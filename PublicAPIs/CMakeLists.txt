@@ -3,7 +3,6 @@
 include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/Components/BinderSrv/Library)
-aux_source_directory(${PROJECT_PATH}/PublicAPIs        SRC_SPRCLIENT_PATH)
 
 ## Build libpropertyapi.so
 set (SRC_PROPERTY_API_PATH  ${PROJECT_PATH}/PublicAPIs/Property.cpp)

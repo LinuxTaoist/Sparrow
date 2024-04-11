@@ -58,7 +58,7 @@ message("======================================================================"
 
 add_subdirectory(Util)
 add_subdirectory(3rdParty)
-add_subdirectory(Adapter)
+add_subdirectory(3rdAdapter)
 add_subdirectory(Core)
 add_subdirectory(Components)
 add_subdirectory(Debug)

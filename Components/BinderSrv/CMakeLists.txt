@@ -11,12 +11,12 @@ target_link_libraries(LibBinder stdc++ pthread rt dl)
 
 # Bin binderserver
 include_directories (${BINDER_PATH}/Library)
-include_directories (${PROJECT_PATH}/Adapter)
+include_directories (${PROJECT_PATH}/3rdAdapter)
 aux_source_directory(${PROJECT_PATH}/Util                   SRC_BINDER_SRV_PATH)
 aux_source_directory(${PROJECT_PATH}/Components/BinderSrv   SRC_BINDER_SRV_PATH)
 set(PARCEL_SRC_FILES ${BINDER_PATH}/Library/Parcel.cpp)
 
 add_executable       (BinBinderSrv ${SRC_BINDER_SRV_PATH}   ${PARCEL_SRC_FILES})
 set_target_properties(BinBinderSrv PROPERTIES OUTPUT_NAME   "bindersrv")
-target_link_libraries(BinBinderSrv pthread rt spradapter)
-add_dependencies     (BinBinderSrv LibSprAdapter)
+target_link_libraries(BinBinderSrv pthread rt 3rdadapter)
+add_dependencies     (BinBinderSrv Lib3rdAdapter)
