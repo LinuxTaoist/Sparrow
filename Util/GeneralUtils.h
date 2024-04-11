@@ -22,9 +22,6 @@
 #include <string>
 
 namespace GeneralUtils {
-    std::string ProduceRandomStr(int len);
-    int ProduceRandomInt(int len);
-
     template<typename T>
     int AbsValue(T v)
     {
@@ -37,8 +34,11 @@ namespace GeneralUtils {
         return v1 > v2 ? (v1 - v2) : (v2 - v1);
     }
 
-    std::string GetCurTimeStr();
+    int RandomDecimalDigits(int digits);
     int SystemCmd(std::string& out, const char *format, ...);
+
+    std::string GetCurTimeStr();
+    std::string RandomString(int len);
 };
 
 #endif // __GENERAL_UTILS_H__

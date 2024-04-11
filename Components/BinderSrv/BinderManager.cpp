@@ -68,7 +68,7 @@ int32_t BinderManager::EnvReady(const std::string& srvName)
 int32_t BinderManager::MsgResponseAddService()
 {
     std::string name;
-    int32_t key = GeneralUtils::ProduceRandomInt(INT_KEY_LENGTH);
+    int32_t key = GeneralUtils::RandomDecimalDigits(INT_KEY_LENGTH);
     reqParcel.ReadString(name);
 
     if (mBinderMap.count(name) == 0) {
