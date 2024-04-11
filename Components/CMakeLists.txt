@@ -17,21 +17,21 @@ file(COPY ${GENERAL_CONFIGURE_PATH}/system.prop     DESTINATION ${EXECUTABLE_OUT
 file(COPY ${VENDOR_CONFIGURE_PATH}/vendor.prop      DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 
 # Bin logservice
-aux_source_directory(${PROJECT_PATH}/Components/LogManagerSrv  SRC_LOG_SRV_PATH)
+aux_source_directory        (${PROJECT_PATH}/Components/LogManagerSrv  SRC_LOG_SRV_PATH)
 add_executable              (BinLogSrv ${SRC_LOG_SRV_PATH})
 set_target_properties       (BinLogSrv PROPERTIES OUTPUT_NAME "logmanagersrv")
 target_link_libraries       (BinLogSrv pthread sprcore)
 add_dependencies            (BinLogSrv LibSprCore)
 
 # Bin mediatorsrv
-aux_source_directory(${PROJECT_PATH}/Components/MediatorSrv  SRC_PROXY_SRV_PATH)
+aux_source_directory        (${PROJECT_PATH}/Components/MediatorSrv  SRC_PROXY_SRV_PATH)
 add_executable              (BinProxySrv ${SRC_PROXY_SRV_PATH})
 set_target_properties       (BinProxySrv PROPERTIES OUTPUT_NAME "mediatorsrv")
 target_link_libraries       (BinProxySrv rt pthread sprcore)
 add_dependencies            (BinProxySrv LibSprCore)
 
 # Bin powermanagersrv
-aux_source_directory(${PROJECT_PATH}/Components/PowerManagerSrv  SRC_POWER_MANAGER_PATH)
+aux_source_directory        (${PROJECT_PATH}/Components/PowerManagerSrv  SRC_POWER_MANAGER_PATH)
 add_executable              (BinPowerManagerSrv ${SRC_POWER_MANAGER_PATH})
 set_target_properties       (BinPowerManagerSrv PROPERTIES OUTPUT_NAME "powermanagersrv")
 target_link_libraries       (BinPowerManagerSrv pthread sprcore spradapter)
@@ -47,7 +47,7 @@ target_link_libraries       (BinPropertySrv pthread rt sprcore sprbinder spradap
 add_dependencies            (BinPropertySrv LibSprCore LibBinder LibSprAdapter)
 
 # Bin servicemanagersrv
-aux_source_directory(${PROJECT_PATH}/Components/ServiceManagerSrv  SRC_SRV_PATH)
+aux_source_directory        (${PROJECT_PATH}/Components/ServiceManagerSrv  SRC_SRV_PATH)
 add_executable              (BinSrvMgr ${SRC_SRV_PATH})
 set_target_properties       (BinSrvMgr PROPERTIES OUTPUT_NAME "servicemanagersrv")
 target_link_libraries       (BinSrvMgr pthread spradapter)
