@@ -123,6 +123,7 @@ int LogManager::UpdateSuffixOfAllFiles()
             suffix = "1";
         }
 
+        // E.g. /tmp/sprlog/sparrow.log.1 -> /tmp/sprlog/sparrow.log.2
         std::string newFile = mBaseLogFile + "." + suffix;
         std::string newPath = mLogsDirPath + "/" + newFile;
         int ret = rename(oldPath.c_str(), newPath.c_str());
