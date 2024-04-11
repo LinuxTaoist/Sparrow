@@ -40,13 +40,13 @@ using namespace InternalEnum;
 #define SPR_LOGW(fmt, args...) printf("%04d LOGM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%04d LOGM E: " fmt, __LINE__, ##args)
 
-#define DEFAULT_LOG_FILE_TOTAL      10
+#define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 
 #define CACHE_MEMORY_PATH           "/tmp/SprLogShm"
-#define CACHE_MEMORY_SIZE           1 * 1024 * 1024        // 10MB
+#define CACHE_MEMORY_SIZE           1 * 1024 * 1024         // 10MB
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
@@ -95,7 +95,7 @@ int LogManager::EnvReady(const std::string& srvName)
 
 int LogManager::UpdateSuffixOfAllFiles()
 {
-    while (mLogFilePaths.size() >= DEFAULT_LOG_FILE_TOTAL)
+    while (mLogFilePaths.size() >= DEFAULT_LOG_FILE_NUM_LIMIT)
     {
         auto it = mLogFilePaths.end();
         --it;
