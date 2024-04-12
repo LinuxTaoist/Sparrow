@@ -28,7 +28,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include "SharedRingBuffer.h"
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "LogManager.h"
 
 using namespace std;
@@ -41,10 +41,8 @@ using namespace std;
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
-#define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
-
-#define CACHE_MEMORY_PATH           "/tmp/SprLogShm"
-#define CACHE_MEMORY_SIZE           1 * 1024 * 1024         // 10MB
+// #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
+#define DEFAULT_LOG_FILE_MAX_SIZE   1 * 1024 * 1024        // 1MB
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
@@ -66,7 +64,7 @@ LogManager::LogManager()
         }
     }
 
-    pLogMCacheMem = std::make_shared<SharedRingBuffer>(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
+    pLogMCacheMem = std::make_shared<SharedRingBuffer>(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE);
     if (pLogMCacheMem == nullptr) {
         SPR_LOGE("pLogMCacheMem is nullptr!");
     }
@@ -140,7 +138,8 @@ int LogManager::UpdateSuffixOfAllFiles()
 // E.g: sparrow.log sparrow.log.1 sparrow.log.2 ...
 int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 {
-    if (static_cast<uint32_t>(mLogFileStream.tellp()) + logDataSize > mMaxFileSize) {
+    uint32_t curFileSize = static_cast<uint32_t>(mLogFileStream.tellp());
+    if (curFileSize + logDataSize > mMaxFileSize) {
         mLogFileStream.close();
 
         UpdateSuffixOfAllFiles();

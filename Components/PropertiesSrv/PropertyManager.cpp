@@ -26,7 +26,7 @@
 #include <dirent.h>
 #include <errno.h>
 #include <string.h>
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "PropertyManager.h"
 #include "SprMediatorIpcProxy.h"
 

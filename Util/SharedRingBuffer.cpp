@@ -118,6 +118,8 @@ int SharedRingBuffer::write(const void* data, int32_t len)
         std::lock_guard<std::mutex> lock(mMutex);
         int32_t avail = AvailSpace();
         if (avail >= len) {
+            SPR_LOGD("Write: mRoot->wp = %d, rp = %d, len = %d\n", mRoot->wp, mRoot->rp, len);
+            AdjustPosIfOverflow(&mRoot->wp, len);
             memcpy(static_cast<char*>(mData) + mRoot->wp, data, len);
             mRoot->wp = (mRoot->wp + len) % mCapacity;
             SetRWStatus(CMD_READABLE);
@@ -144,6 +146,8 @@ int SharedRingBuffer::read(void* data, int32_t len)
         std::lock_guard<std::mutex> lock(mMutex);
         int32_t avail = AvailData();
         if (avail >= len) {
+            SPR_LOGD("Read: mRoot->wp = %d, rp = %d, len = %d\n", mRoot->wp, mRoot->rp, len);
+            AdjustPosIfOverflow(&mRoot->rp, len);
             memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
             mRoot->rp = (mRoot->rp + len) % mCapacity;
             SetRWStatus(CMD_WRITEABLE);
@@ -199,6 +203,20 @@ bool SharedRingBuffer::IsReadable() const noexcept
 bool SharedRingBuffer::IsWriteable() const noexcept
 {
     return ((mRoot->rwStatus == CMD_WRITEABLE && AvailData() != 0));
+}
+
+void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept
+{
+    if (pos == nullptr)
+    {
+        SPR_LOGE("pos is nullptr!\n");
+        return;
+    }
+
+    if (*pos + size >= mCapacity) {
+        *pos = 0;
+        SPR_LOGD("memory overflow, reset pos. [%u %u %u] wp = %u rp = %u\n", *pos, size, mCapacity, mRoot->wp, mRoot->rp);
+    }
 }
 
 void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept

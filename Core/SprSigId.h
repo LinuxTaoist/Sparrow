@@ -20,7 +20,7 @@
 #ifndef __SPR_SIG_ID_H__
 #define __SPR_SIG_ID_H__
 
-namespace InternalEnum {
+namespace InternalDefs {
 
 /* 消息ID转枚举 */
 #ifdef ENUM_OR_STRING

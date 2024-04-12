@@ -1,5 +1,5 @@
 ## 3rdAdapter
-
+include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/3rdAdapter)
 include_directories (${PROJECT_PATH}/3rdParty/libgo/include)
 aux_source_directory(${PROJECT_PATH}/3rdAdapter     SRC_ADAPTER_PATH)

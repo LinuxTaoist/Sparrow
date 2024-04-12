@@ -26,12 +26,12 @@
 #include <mqueue.h>
 #include <string.h>
 #include "SprSigId.h"
-#include "SprCommonType.h"
-#include "DefineMacro.h"
+#include "CoreTypeDefs.h"
+#include "CommonMacros.h"
 #include "SprMediator.h"
 
 using namespace std;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("SprMediator", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGD("SprMediator", fmt, ##args)

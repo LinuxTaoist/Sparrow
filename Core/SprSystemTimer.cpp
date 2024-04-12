@@ -22,12 +22,12 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/timerfd.h>
-#include "DefineMacro.h"
-#include "SprCommonType.h"
+#include "CommonMacros.h"
+#include "CoreTypeDefs.h"
 #include "SprSystemTimer.h"
 #include "SprMediatorIpcProxy.h"
 
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("SysTimer", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("SysTimer", fmt, ##args)

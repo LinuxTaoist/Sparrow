@@ -23,12 +23,12 @@
 #include <sys/timerfd.h>
 #include "SprMsg.h"
 #include "GeneralUtils.h"
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "SprTimerManager.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("TimerM", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("TimerM", fmt, ##args)

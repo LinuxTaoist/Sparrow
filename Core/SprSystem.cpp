@@ -21,15 +21,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/resource.h>
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "SprSystem.h"
 #include "SprTimeTrace.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
 
 using namespace std;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("SprSystem", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("SprSystem", fmt, ##args)

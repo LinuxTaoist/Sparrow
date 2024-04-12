@@ -2,12 +2,15 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprCommonType.h
+ *  @file       : CoreTypeDefs.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
  *  @date       : 2023/11/25
  *
+ * This header serves as a central repository for standardized definitions to enhance code clarity,
+ * facilitate maintenance, and minimize duplication across various internal modules within the project.
+ * It encapsulates fundamental data types ubiquitously understood and employed across different system components.
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
@@ -28,7 +31,7 @@
 #define     MSG_BUF_MAX_LENGTH          1024
 #define     MODULE_ID_OFFSET            24
 
-namespace InternalEnum {
+namespace InternalDefs {
 
 enum EProxyType
 {
@@ -100,6 +103,6 @@ typedef struct
     int32_t  IntervalInMilliSec;
 } STimerInfo;
 
-} // namespace InternalEnum
+} // namespace InternalDefs
 
 #endif

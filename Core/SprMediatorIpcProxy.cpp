@@ -20,13 +20,13 @@
 #include <string.h>
 #include <mqueue.h>
 #include "SprMsg.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 #include "SprObserver.h"
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("IpcProxy", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("IpcProxy", fmt, ##args)

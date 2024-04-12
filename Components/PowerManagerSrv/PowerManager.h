@@ -59,7 +59,7 @@ public:
 private:
     static std::vector< StateTransition <EPowerLev1State,
                         EPowerLev2State,
-                        InternalEnum::ESprSigId,
+                        InternalDefs::ESprSigId,
                         PowerManager,
                         SprMsg> > mStateTable;
 

@@ -30,7 +30,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "ServiceManager.h"
 
 using namespace std;

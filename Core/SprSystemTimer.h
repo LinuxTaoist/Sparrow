@@ -22,7 +22,7 @@
 #define __SPR_SYSTEM_TIMER_H__
 
 #include "SprObserver.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 
 class SprSystemTimer : public SprObserver
 {

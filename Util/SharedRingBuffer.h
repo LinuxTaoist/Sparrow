@@ -72,6 +72,7 @@ public:
 
 
 private:
+    void    AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept;
     void    SetRWStatus(ECmdType type) const noexcept;
     void    DumpMemory(const char* pAddr, uint32_t size);
     void    DumpErrorInfo();

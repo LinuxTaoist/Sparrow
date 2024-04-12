@@ -26,19 +26,19 @@
 #include <string.h>
 #include <sys/time.h>
 #include "SharedRingBuffer.h"
+#include "CommonMacros.h"
 #include "SprLog.h"
 
 #define PID_MAX_LENGTH              6
 #define TAG_MAX_LENGTH              12
 #define LOG_BUFFER_MAX_SIZE         256
-#define CACHE_MEMORY_PATH           "/tmp/SprLogShm"
-#define CACHE_MEMORY_SIZE           10 * 1024 * 1024    // 10MB
+#define LOG_CACHE_MEMORY_PATH           "/tmp/SprLogShm"
 
 static SharedRingBuffer* pLogSCacheMem = nullptr;
 
 SprLog::SprLog()
 {
-    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(CACHE_MEMORY_PATH, CACHE_MEMORY_SIZE);
+    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE);
 }
 
 SprLog::~SprLog()

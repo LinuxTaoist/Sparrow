@@ -28,7 +28,7 @@
 #include <stdint.h>
 #include "SprTimer.h"
 #include "SprObserver.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 #include "SprSystemTimer.h"
 
 class SprTimerManager : public SprObserver

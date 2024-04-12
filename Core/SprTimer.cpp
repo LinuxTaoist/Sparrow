@@ -20,7 +20,7 @@
 #include <stdint.h>
 #include <string.h>
 #include "SprTimer.h"
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprTimer", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("SprTimer", fmt, ##args)

@@ -24,7 +24,7 @@
 
 using namespace std;
 using namespace SprPower;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 int main(int argc, const char *argv[])
 {

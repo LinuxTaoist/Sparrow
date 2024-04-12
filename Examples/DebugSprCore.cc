@@ -30,7 +30,7 @@
 
 using namespace std;
 using namespace GeneralUtils;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...) printf("%d DebugCore D: " fmt, __LINE__, ##args)

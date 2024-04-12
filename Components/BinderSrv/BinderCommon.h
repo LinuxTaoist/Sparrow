@@ -19,7 +19,7 @@
 #ifndef __BINDER_COMMON_H__
 #define __BINDER_COMMON_H__
 
-namespace InternalEnum {
+namespace InternalDefs {
 
 enum BinderCmd
 {

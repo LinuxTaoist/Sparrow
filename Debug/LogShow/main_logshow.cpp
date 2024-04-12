@@ -25,32 +25,31 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-#define CACHE_MEMORY_PATH  "/tmp/SprLogShm"
 int main(int argc, const char *argv[])
 {
-    int ret = 0;
-    SharedRingBuffer theLogBuffer(CACHE_MEMORY_PATH);
+    // int ret = 0;
+    // SharedRingBuffer theLogBuffer(LOG_CACHE_MEMORY_PATH);
 
-    while (1)
-    {
-        int32_t len = 0;
-        ret = theLogBuffer.DumpBuffer(&len, sizeof(int32_t));
-        if (ret == -1) {
-            usleep(10000);
-            continue;
-        }
+    // while (1)
+    // {
+    //     int32_t len = 0;
+    //     ret = theLogBuffer.DumpBuffer(&len, sizeof(int32_t));
+    //     if (ret == -1) {
+    //         usleep(10000);
+    //         continue;
+    //     }
 
-        std::string logs;
-        logs.resize(len);
-        char* data = const_cast<char*>(logs.c_str());
-        ret = theLogBuffer.DumpBuffer(data, len);
-        if (ret != 0) {
-            usleep(10000);
-            continue;
-        }
+    //     std::string logs;
+    //     logs.resize(len);
+    //     char* data = const_cast<char*>(logs.c_str());
+    //     ret = theLogBuffer.DumpBuffer(data, len);
+    //     if (ret != 0) {
+    //         usleep(10000);
+    //         continue;
+    //     }
 
-        SPR_LOG("%s", logs.c_str());
-    }
+    //     SPR_LOG("%s", logs.c_str());
+    // }
 
     return 0;
 }

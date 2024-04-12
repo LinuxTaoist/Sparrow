@@ -16,13 +16,13 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "DefineMacro.h"
-#include "SprCommonType.h"
+#include "CommonMacros.h"
+#include "CoreTypeDefs.h"
 #include "IBinderManager.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 #include "PropertyManager.h"
 
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)

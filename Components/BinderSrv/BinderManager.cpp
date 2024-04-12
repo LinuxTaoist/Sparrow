@@ -20,10 +20,10 @@
 #include <unistd.h>
 #include "Parcel.h"
 #include "GeneralUtils.h"
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "BinderManager.h"
 
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("BinderM", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGD("BinderM", fmt, ##args)

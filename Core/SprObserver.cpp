@@ -28,11 +28,11 @@
 #include <sys/stat.h>        /* For mode constants */
 #include "GeneralUtils.h"
 #include "SprObserver.h"
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) // LOGD("SprObs", fmt, ##args)
 #define SPR_LOGE(fmt, args...) // LOGE("SprObs", fmt, ##args)
@@ -145,15 +145,15 @@ int SprObserver::AbstractProcessMsg(const SprMsg& msg)
     // SPR_LOGD("[0x%x -> 0x%x] Receive Msg: %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
-        case InternalEnum::SIG_ID_PROXY_REGISTER_RESPONSE:
+        case InternalDefs::SIG_ID_PROXY_REGISTER_RESPONSE:
             MsgResponseRegisterRsp(msg);
             break;
 
-        case InternalEnum::SIG_ID_PROXY_UNREGISTER_RESPONSE:
+        case InternalDefs::SIG_ID_PROXY_UNREGISTER_RESPONSE:
             MsgResponseUnregisterRsp(msg);
             break;
 
-        case InternalEnum::SIG_ID_SYSTEM_EXIT:
+        case InternalDefs::SIG_ID_SYSTEM_EXIT:
             MsgResponseSystemExitRsp(msg);
             break;
 

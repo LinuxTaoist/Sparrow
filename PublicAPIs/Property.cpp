@@ -18,10 +18,10 @@
  */
 #include <memory.h>
 #include "Property.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 #include "IBinderManager.h"
 
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) printf("%d Property D: " fmt, __LINE__, ##args)
 #define SPR_LOGW(fmt, args...) printf("%d Property W: " fmt, __LINE__, ##args)

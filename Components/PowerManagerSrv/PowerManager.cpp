@@ -16,12 +16,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "PowerManager.h"
 
 using namespace std;
 using namespace SprPower;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("SprPower", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("SprPower", fmt, ##args)

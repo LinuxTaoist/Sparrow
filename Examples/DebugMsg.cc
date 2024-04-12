@@ -21,12 +21,12 @@
 #include <stdio.h>
 #include <string.h>
 #include "GeneralConversions.h"
-#include "DefineMacro.h"
+#include "CommonMacros.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("DebugMsg", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("DebugMsg", fmt, ##args)

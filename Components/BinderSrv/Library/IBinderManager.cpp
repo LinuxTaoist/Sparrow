@@ -20,7 +20,7 @@
 #include "BinderCommon.h"
 #include "IBinderManager.h"
 
-using namespace InternalEnum;
+using namespace InternalDefs;
 
 Parcel iReqParcel("IBinderM", 66666, true);
 Parcel iRspParcel("BinderM",  88888, false);

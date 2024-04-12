@@ -23,7 +23,7 @@
 #include <string>
 #include <vector>
 #include "SprMsg.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 
 struct SModuleInfo
 {
@@ -48,7 +48,7 @@ private:
     int PrepareInternalPort();
     int DestroyInternalPort();
     int SendMsg(const SprMsg& msg);
-    int NotifyObserver(InternalEnum::ESprModuleID id, const SprMsg& msg);
+    int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);
 
     /* 消息处理函数 */
@@ -61,7 +61,7 @@ private:
 private:
     int mHandler;
     int mEpollHandler;
-    std::map<InternalEnum::ESprModuleID, SModuleInfo> mModuleMap;
+    std::map<InternalDefs::ESprModuleID, SModuleInfo> mModuleMap;
 };
 
 #endif

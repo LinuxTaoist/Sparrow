@@ -25,10 +25,10 @@
 #include <string>
 #include "SprMsg.h"
 #include "SprSigId.h"
-#include "SprCommonType.h"
+#include "CoreTypeDefs.h"
 #include "SprMediatorProxy.h"
 
-using ModuleIDType = InternalEnum::ESprModuleID;
+using ModuleIDType = InternalDefs::ESprModuleID;
 
 class SprObserver
 {
