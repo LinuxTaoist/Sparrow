@@ -213,7 +213,6 @@ void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const no
 
     if (*pos + size >= mCapacity) {
         *pos = 0;
-        SPR_LOGD("memory overflow, reset pos. [%u %u %u] wp = %u rp = %u\n", *pos, size, mCapacity, mRoot->wp, mRoot->rp);
     }
 }
 
