@@ -118,7 +118,6 @@ int SharedRingBuffer::write(const void* data, int32_t len)
         std::lock_guard<std::mutex> lock(mMutex);
         int32_t avail = AvailSpace();
         if (avail >= len) {
-            SPR_LOGD("Write: mRoot->wp = %d, rp = %d, len = %d\n", mRoot->wp, mRoot->rp, len);
             AdjustPosIfOverflow(&mRoot->wp, len);
             memcpy(static_cast<char*>(mData) + mRoot->wp, data, len);
             mRoot->wp = (mRoot->wp + len) % mCapacity;
@@ -146,7 +145,6 @@ int SharedRingBuffer::read(void* data, int32_t len)
         std::lock_guard<std::mutex> lock(mMutex);
         int32_t avail = AvailData();
         if (avail >= len) {
-            SPR_LOGD("Read: mRoot->wp = %d, rp = %d, len = %d\n", mRoot->wp, mRoot->rp, len);
             AdjustPosIfOverflow(&mRoot->rp, len);
             memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
             mRoot->rp = (mRoot->rp + len) % mCapacity;
