@@ -41,7 +41,7 @@ using namespace std;
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
-#define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
+#define DEFAULT_LOG_FILE_MAX_SIZE   1 * 1024 * 1024        // 10MB
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 

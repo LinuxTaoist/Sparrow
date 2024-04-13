@@ -37,11 +37,16 @@ static SharedRingBuffer* pLogSCacheMem = nullptr;
 
 SprLog::SprLog()
 {
+    if (sem_init(&mWriteSem, 1, 1) == -1) {
+        perror("sem_init");
+    }
+
     pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE);
 }
 
 SprLog::~SprLog()
 {
+    sem_destroy(&mWriteSem);
     if (pLogSCacheMem != nullptr) {
         delete pLogSCacheMem;
         pLogSCacheMem = nullptr;
@@ -110,7 +115,6 @@ static std::string GetCurrentTimestamp()
 
     // millisecond
     snprintf(buffer + strlen(buffer), sizeof(buffer) - strlen(buffer), "%.3ld", tv.tv_usec / 1000);
-
     return buffer;
 }
 
@@ -145,10 +149,12 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
     }
 
     std::string log;
-    std::lock_guard<std::mutex> lock(mMutex);
     FormatLog(log, level, tag, buffer);
     printf("%s", log.c_str());
+
+    sem_wait(&mWriteSem);
     LogsToMemory(log.c_str(), log.length());
+    sem_post(&mWriteSem);
 
     return result;
 }

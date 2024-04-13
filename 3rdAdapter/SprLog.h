@@ -19,8 +19,9 @@
 #ifndef __SPR_LOG_H__
 #define __SPR_LOG_H__
 
-#include <mutex>
+#include <stdarg.h>
 #include <stdint.h>
+#include <semaphore.h>
 
 class SprLog
 {
@@ -67,7 +68,7 @@ private:
     int32_t LogsToMemory(const char* logs, int32_t len);
 
 private:
-    std::mutex mMutex;
+    sem_t mWriteSem;
 };
 
 #endif //__SPR_LOG_H__
