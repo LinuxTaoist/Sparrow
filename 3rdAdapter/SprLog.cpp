@@ -150,7 +150,7 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
 
     std::string log;
     FormatLog(log, level, tag, buffer);
-    printf("%s", log.c_str());
+    // printf("%s", log.c_str());
 
     sem_wait(&mWriteSem);
     LogsToMemory(log.c_str(), log.length());
