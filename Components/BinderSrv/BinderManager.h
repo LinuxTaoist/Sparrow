@@ -43,7 +43,6 @@ private:
 private:
     using HandleFunction = int32_t (BinderManager::*)(void);
 
-    bool mRunning;
     std::map<std::string, BinderInfo> mBinderMap;
     std::map<int32_t, HandleFunction> mHandleFuncs;
 };

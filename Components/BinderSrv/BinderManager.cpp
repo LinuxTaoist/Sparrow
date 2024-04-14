@@ -36,8 +36,6 @@ Parcel rspParcel("BinderM",  88888, true);
 
 BinderManager::BinderManager()
 {
-    mRunning = false;
-
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BinderManager::MsgResponseAddService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::MsgResponseRemoveService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BinderManager::MsgResponseGetService));
@@ -46,7 +44,6 @@ BinderManager::BinderManager()
 
 BinderManager::~BinderManager()
 {
-    mRunning = false;
 }
 
 BinderManager* BinderManager::GetInstance()
@@ -124,8 +121,7 @@ int32_t BinderManager::MsgResponseGetService()
 
 int32_t BinderManager::HandleMsgLoop()
 {
-    mRunning = true;
-    while (mRunning)
+    while (true)
     {
         int cmd = 0;
         reqParcel.Wait();

@@ -51,8 +51,8 @@ LogManager::LogManager()
 
     // TODO: value from config
     mMaxFileSize = DEFAULT_LOG_FILE_MAX_SIZE;
-    mLogsDirPath = DEFAULT_LOGS_STORAGE_PATH;
     mBaseLogFile = DEFAULT_BASE_LOG_FILE_NAME;
+    mLogsDirPath = DEFAULT_LOGS_STORAGE_PATH;
     mCurrentLogFile = DEFAULT_BASE_LOG_FILE_NAME;
 
     if (access(mLogsDirPath.c_str(), F_OK) != 0)

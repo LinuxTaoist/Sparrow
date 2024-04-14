@@ -124,22 +124,22 @@ private:
     void DecodeDatas(std::string& deDatas);
 
 private:
-    uint32_t mFrom;
-    uint32_t mTo;
-    uint32_t mMsgId;
-    uint32_t mTag;
-    bool    mBoolValue;
-    uint8_t mU8Value;
-    uint16_t mU16Value;
-    uint32_t mU32Value;
-    uint32_t mStringLength;
-    std::string mString;
-    uint32_t mU8VecLength;
-    std::vector<uint8_t> mU8Vec;
-    uint32_t mU32VecLength;
-    std::vector<uint32_t> mU32Vec;
-    uint32_t mDataSize;
-    std::vector<uint8_t> mDatas;
+    uint32_t                mFrom;
+    uint32_t                mTo;
+    uint32_t                mMsgId;
+    uint32_t                mTag;
+    bool                    mBoolValue;
+    uint8_t                 mU8Value;
+    uint16_t                mU16Value;
+    uint32_t                mU32Value;
+    uint32_t                mStringLength;
+    std::string             mString;
+    uint32_t                mU8VecLength;
+    std::vector<uint8_t>    mU8Vec;
+    uint32_t                mU32VecLength;
+    std::vector<uint32_t>   mU32Vec;
+    uint32_t                mDataSize;
+    std::vector<uint8_t>    mDatas;
 
     using CodecFunction = void (SprMsg::*)(std::string&);
     std::map<ESprMsgType, CodecFunction> mEnFuncs;

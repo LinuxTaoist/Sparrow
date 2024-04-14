@@ -140,7 +140,7 @@ int Parcel::ReadString(std::string& value)
 
     NODE_LENGTH_T len = 0;
     ret = mRingBuffer->read(&len, sizeof(NODE_LENGTH_T));
-    if (ret != 0 || len <= 0) {
+    if (ret != 0 || len == 0) {
         SPR_LOGE("read string len failed! len = %d, ret = %d\n", len, ret);
         return -1;
     }
@@ -166,7 +166,7 @@ int Parcel::ReadData(void* data, int& size)
     int ret = 0;
     NODE_LENGTH_T len = 0;
     ret = mRingBuffer->read(&len, sizeof(NODE_LENGTH_T));
-    if (ret != 0 || len <= 0) {
+    if (ret != 0 || len == 0) {
         return -1;
     }
 
