@@ -32,7 +32,7 @@ typedef  uint16_t       NODE_LENGTH_T;
 
 const int SHM_MAX_SIZE  = 10 * 1024;    // 10KB
 
-Parcel::Parcel(std::string path, int key, bool master) : mMaster(master), mShmKey(key), mShmPath(path)
+Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master), mShmKey(key), mShmPath(path)
 {
     mRingBuffer = new (std::nothrow)SharedRingBuffer(std::string(SHM_ROOT_PATH) + path, SHM_MAX_SIZE);
     if (mRingBuffer == nullptr)

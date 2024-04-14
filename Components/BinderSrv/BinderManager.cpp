@@ -46,6 +46,7 @@ BinderManager::BinderManager()
 
 BinderManager::~BinderManager()
 {
+    mRunning = false;
 }
 
 BinderManager* BinderManager::GetInstance()

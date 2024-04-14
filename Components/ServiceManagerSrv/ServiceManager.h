@@ -31,17 +31,17 @@ public:
     ~ServiceManager();
 
     int32_t Init();
+    int32_t DumpPidMapInfo();
 
 private:
     bool IsExeAliveByProc(int32_t pid);
 
     int32_t StartWork();
     int32_t StopWork();
-    int32_t StartAllExesFromConfigure(const std::string cfgPath);
+    int32_t StartAllExesFromConfigure(const std::string& cfgPath);
     int32_t StartExe(const std::string& exePath);
     int32_t ClearExeEnvNode(const std::string& exeName);
     int32_t WaitLastExeFinished(const std::string& exeName);
-    int32_t DumpPidMapInfo();
 
 private:
     bool mRunning;

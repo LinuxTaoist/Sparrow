@@ -27,8 +27,12 @@
 class Parcel
 {
 public:
-    Parcel(std::string path, int key, bool master);
+    Parcel(const std::string& path, int key, bool master);
     ~Parcel();
+    Parcel(const Parcel& other) = delete;
+    Parcel& operator=(const Parcel& other) = delete;
+    Parcel(Parcel&& other) = delete;
+    Parcel& operator=(Parcel&& other) = delete;
 
     int WriteBool(bool value);
     int ReadBool(bool& value);

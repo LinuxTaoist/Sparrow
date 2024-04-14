@@ -64,10 +64,6 @@ LogManager::LogManager()
     }
 
     pLogMCacheMem = std::make_shared<SharedRingBuffer>(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE);
-    if (pLogMCacheMem == nullptr) {
-        SPR_LOGE("pLogMCacheMem is nullptr!");
-    }
-
     mLogFilePaths = GetSortedLogFiles(mLogsDirPath, mBaseLogFile);
     EnvReady(SRV_NAME_LOG);
 }
@@ -166,31 +162,36 @@ int LogManager::WriteToLogFile(const std::string& logData)
     return 0;
 }
 
-std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileName)
+std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileNamePrefix)
 {
-    DIR* dir;
-    struct dirent* ent;
-    std::set<std::string> files;
+    DIR* dir = opendir(path.c_str());
 
-    if ((dir = opendir(path.c_str())) != nullptr) {
-        // Iterating over each file in directory
-        while ((ent = readdir(dir)) != nullptr) {
-            std::string tmpFile(ent->d_name);
-            if (tmpFile.find(fileName) == 0) {
-                files.insert(mLogsDirPath + '/' + tmpFile);
-            }
+    if (!dir) {
+        SPR_LOGE("Open %s failed! (%s)\n", mLogsDirPath.c_str(), strerror(errno));
+        return {};
+    }
+
+    std::set<std::string> matchingFiles;
+
+    // Iterate through each file in the directory
+    struct dirent* entry;
+    while ((entry = readdir(dir)) != nullptr) {
+        std::string currentFile(entry->d_name);
+
+        // Check if the file name starts with the given prefix
+        if (currentFile.find(fileNamePrefix) == 0) {
+            matchingFiles.insert(mLogsDirPath + '/' + currentFile);
         }
-        closedir(dir);
-    } else {
-        SPR_LOGE("Open %s failed! (%s)\n", path.c_str(), strerror(errno));
-        return files;
     }
 
-    if (files.empty()) {
-        files.insert(mLogsDirPath + '/' + mCurrentLogFile);
+    closedir(dir);
+
+    // If no files were found, insert the current log file
+    if (matchingFiles.empty()) {
+        matchingFiles.insert(mLogsDirPath + '/' + mCurrentLogFile);
     }
 
-    return files;
+    return matchingFiles;
 }
 
 int LogManager::MainLoop()

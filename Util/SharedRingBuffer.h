@@ -49,7 +49,7 @@ public:
      *
      * Intended for use in master mode with shared memory refreshing.
      */
-    SharedRingBuffer(std::string path, uint32_t capacity);
+    SharedRingBuffer(const std::string& path, uint32_t capacity);
 
     /**
      * @brief Constructs a slave Shared Ring Buffer object
@@ -58,14 +58,14 @@ public:
      * This constructor creates an instance of a slave Shared Ring Buffer, typically used by client applications.
      * It facilitates access and utilization of the shared buffer by referencing it through the specified path.
      */
-    SharedRingBuffer(std::string path);
+    explicit SharedRingBuffer(const std::string& path);
     ~SharedRingBuffer();
 
     bool    IsReadable()    const noexcept;
     bool    IsWriteable()   const noexcept;
     int     write(const void* data, int32_t len);
     int     read(void* data, int32_t len);
-    int     DumpBuffer(void* data, int32_t len) const noexcept;
+    // int     DumpBuffer(void* data, int32_t len) const noexcept;
 
     int32_t AvailSpace()    const noexcept;
     int32_t AvailData()     const noexcept;
@@ -74,7 +74,7 @@ public:
 private:
     void    AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept;
     void    SetRWStatus(ECmdType type) const noexcept;
-    void    DumpMemory(const char* pAddr, uint32_t size);
+    // void    DumpMemory(const char* pAddr, uint32_t size);
     void    DumpErrorInfo();
 
 private:

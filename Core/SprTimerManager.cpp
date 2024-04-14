@@ -62,11 +62,6 @@ int SprTimerManager::Init(void)
     return ret;
 }
 
-int SprTimerManager::DeInit()
-{
-    return 0;
-}
-
 int SprTimerManager::ProcessMsg(const SprMsg& msg)
 {
     if (!mEnable) {
@@ -168,16 +163,6 @@ int SprTimerManager::DelTimer(const SprTimer& timer)
     return 0;
 }
 
-int SprTimerManager::UpdateTimer()
-{
-    return 0;
-}
-
-int SprTimerManager::CheckTimer()
-{
-    return 0;
-}
-
 uint32_t SprTimerManager::NextExpireTimes()
 {
     return 0;
@@ -214,8 +199,8 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
         SPR_LOGD("AddTimer: [0x%x %dms %dms %s]\n", p->ModuleId, p->DelayInMilliSec, p->IntervalInMilliSec, GetSigName(p->MsgId));
         AddTimer(p->ModuleId, p->MsgId, p->RepeatTimes, p->DelayInMilliSec, p->IntervalInMilliSec);
 
-        SprMsg msg(SIG_ID_TIMER_START_SYSTEM_TIMER);
-        SendMsg(msg);
+        SprMsg rspMsg(SIG_ID_TIMER_START_SYSTEM_TIMER);
+        SendMsg(rspMsg);
 
         // debug
         // PrintRealTime();
@@ -263,8 +248,8 @@ void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)
             }
 
             // Notify expired timer event to the book component
-            SprMsg msg(it->GetModuleId(), it->GetMsgId());
-            NotifyObserver(msg);
+            SprMsg bookMsg(it->GetModuleId(), it->GetMsgId());
+            NotifyObserver(bookMsg);
             it->RepeatCount();
 
             deleteTimers.insert(*it);

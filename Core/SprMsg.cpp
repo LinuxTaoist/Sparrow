@@ -160,7 +160,7 @@ int8_t SprMsg::Decode(std::string& deDatas)
             auto it = mDeFuncs.find(type);
 
             if (it != mDeFuncs.end()) {
-                ((SprMsg*)this->*(it->second))(deDatas);
+                ((this)->*(it->second))(deDatas);
             } else {
                 SPR_LOGW("Not find type: 0x%x!\n", (uint32_t)(type));
             }

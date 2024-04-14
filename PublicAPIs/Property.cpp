@@ -77,7 +77,7 @@ int Property::SetProperty(const std::string& key, const std::string& value)
     return ret;
 }
 
-int Property::GetProperty(const std::string key, std::string& value, const std::string& defaultValue)
+int Property::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
 {
     pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY);
     pReqParcel->WriteString(key);

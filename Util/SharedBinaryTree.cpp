@@ -33,7 +33,7 @@ using namespace std;
 SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size)
     : mRoot(nullptr), mSize(size), mCurUsedSize(0), mFirstNode(nullptr), mFilename(filename)
 {
-    mHandler = OpenMapFile(filename.c_str(), size);
+    mHandler = OpenMapFile(filename, size);
     if (mHandler == -1) {
         SPR_LOGE("OpenAndCreateFile fail!\n");
     }
@@ -54,10 +54,12 @@ SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size)
 
     // init first node
     mFirstNode = (Node*)((char*)mRoot + mCurUsedSize);
-    mFirstNode->key[0] = '\0';
-    if (mFirstNode == nullptr) {
+    if (mFirstNode != nullptr) {
+        mFirstNode->key[0] = '\0';
+    } else {
         SPR_LOGE("mFirstNode is nullptr!\n");
     }
+
 }
 
 SharedBinaryTree::~SharedBinaryTree()
@@ -132,7 +134,7 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
     mCurUsedSize += sizeof(Node);
     if (mCurUsedSize > mSize)
     {
-        SPR_LOGE("Resource ou of limit! mCurUsedSize = %ld, mSize = %ld\n", mCurUsedSize, mSize);
+        SPR_LOGE("Resource ou of limit! mCurUsedSize = %zu, mSize = %zu\n", mCurUsedSize, mSize);
         sem_post(&mSemaphore);
         return -1;
     }

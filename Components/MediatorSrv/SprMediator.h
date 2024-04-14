@@ -41,13 +41,12 @@ public:
     int EpollLoop();
 
 private:
-    SprMediator(int size);
+    explicit SprMediator(int size);
     int EnvReady(const std::string& srvName);
-    int MakeMQ(std::string name);
-    int MakeUnixDgramSocket(std::string ip, uint16_t port);
+    int MakeMQ(const std::string& name);
     int PrepareInternalPort();
     int DestroyInternalPort();
-    int SendMsg(const SprMsg& msg);
+    // int SendMsg(const SprMsg& msg);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);
 

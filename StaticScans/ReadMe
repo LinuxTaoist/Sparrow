@@ -1,0 +1,1 @@
+cppcheck --std=c++11 --enable=all --error-exitcode=1 --xml --xml-version=2 --output-file=./StaticScans/StaticScan_2024041401.xml Core/ Components/ PublicAPIs/ Util/ Debug/ Hardware/ 3rdAdapter/

@@ -69,7 +69,7 @@ int PropertyManager::SetProperty(const std::string& key, const std::string& valu
     return HandleKeyValue(key, value);
 }
 
-int PropertyManager::GetProperty(const std::string key, std::string& value, const std::string& defaultValue)
+int PropertyManager::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
 {
     int ret = -1;
     if (mSharedMemoryPtr == nullptr)
@@ -101,11 +101,6 @@ int PropertyManager::GetProperties()
 int PropertyManager::Init()
 {
     mSharedMemoryPtr = std::make_unique<SharedBinaryTree>(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE);
-    if (mSharedMemoryPtr == nullptr)
-    {
-        SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
-        return -1;
-    }
 
     // load default property
     LoadPropertiesFromFile(DEFAULT_PROP_PATH);
@@ -182,7 +177,6 @@ int PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
 int PropertyManager::LoadPersistProperty()
 {
     DIR* dir;
-    struct dirent* entry;
 
     if (access(PERSIST_FILE_PATH, F_OK) != 0)
     {
@@ -192,6 +186,7 @@ int PropertyManager::LoadPersistProperty()
 
     if ((dir = opendir(PERSIST_FILE_PATH)) != nullptr)
     {
+        struct dirent* entry;
         while ((entry = readdir(dir)) != nullptr)
         {
             if (entry->d_type == DT_REG)

@@ -71,14 +71,6 @@ private:
     SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> systemTimerPtr);
 
     /**
-     * @brief  DeInit
-     * @return 0 on success, or -1 if an error occurred
-     *
-     * Will be called once to end of the object instance
-     */
-    int DeInit();
-
-    /**
      * @brief  InitSystemTimer
      * @return 0 on success, or -1 if an error occurred
      *
@@ -106,8 +98,6 @@ private:
     int AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec);
     int AddTimer(const SprTimer& timer);
     int DelTimer(const SprTimer& timer);
-    int UpdateTimer();
-    int CheckTimer();
     uint32_t NextExpireTimes();
 
     // --------------------------------------------------------------------------------------------

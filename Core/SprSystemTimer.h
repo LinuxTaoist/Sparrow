@@ -40,7 +40,7 @@ public:
     int StopTimer();
     int DestoryTimer();
     int HandleEvent(int fd) override;
-    int ProcessMsg(const SprMsg& msg);
+    int ProcessMsg(const SprMsg& msg) override;
 
 private:
     bool mTimerRunning;

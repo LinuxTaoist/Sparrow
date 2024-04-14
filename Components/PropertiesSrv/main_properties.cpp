@@ -59,7 +59,7 @@ static void BinderLoop(PropertyManager* pProperM)
                 std::string value;
                 pReqParcel->ReadString(key);
                 pReqParcel->ReadString(value);
-                int ret = pProperM->SetProperty(key, value);
+                ret = pProperM->SetProperty(key, value);
 
                 pRspParcel->WriteInt(ret);
                 pRspParcel->Post();
@@ -73,7 +73,7 @@ static void BinderLoop(PropertyManager* pProperM)
                 std::string defaultValue;
                 pReqParcel->ReadString(key);
                 pReqParcel->ReadString(defaultValue);
-                int ret = pProperM->GetProperty(key, value, defaultValue);
+                ret = pProperM->GetProperty(key, value, defaultValue);
 
                 pRspParcel->WriteString(value);
                 pRspParcel->WriteInt(ret);

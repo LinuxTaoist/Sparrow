@@ -116,7 +116,7 @@ int32_t ServiceManager::StopWork()
     return 0;
 }
 
-int32_t ServiceManager::StartAllExesFromConfigure(const std::string cfgPath)
+int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
 {
     int32_t startedCount = 0;
     std::ifstream configFile(cfgPath);
@@ -137,7 +137,7 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string cfgPath)
             continue;
         }
 
-        if (!line.empty() && line.back() == '\n') {
+        if (line.back() == '\n') {
             line.pop_back();
         }
 

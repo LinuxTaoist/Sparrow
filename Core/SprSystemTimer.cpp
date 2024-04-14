@@ -42,7 +42,7 @@ SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name)
 
 SprSystemTimer::~SprSystemTimer()
 {
-
+    DestoryTimer();
 }
 
 int SprSystemTimer::HandleEvent(int fd)

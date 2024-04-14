@@ -38,7 +38,8 @@ PowerManager::mStateTable =
 PowerManager::PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
             : SprObserver(id, name, mMsgMediatorPtr)
 {
-
+    mCurLev1State = LEV1_POWER_ANY;
+    mCurLev2State = LEV2_POWER_ANY;
 }
 
 PowerManager::~PowerManager()

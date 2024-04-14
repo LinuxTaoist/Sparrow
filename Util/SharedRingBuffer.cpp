@@ -34,7 +34,7 @@ const int RETRY_TIMES       = 3;        // 3 times retry
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 
 // Used for master mode
-SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity)
+SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
     : mCapacity(capacity), mShmPath(path)
 {
     int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -67,7 +67,7 @@ SharedRingBuffer::SharedRingBuffer(std::string path, uint32_t capacity)
 }
 
 // Used for slave mode
-SharedRingBuffer::SharedRingBuffer(std::string path)
+SharedRingBuffer::SharedRingBuffer(const std::string& path)
 {
     int fd = open(path.c_str(), O_RDWR);
     if (fd == -1) {
@@ -174,24 +174,24 @@ int32_t SharedRingBuffer::AvailData() const noexcept
     return (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
 }
 
-// Dump the buffer content
-// Note: This function is not thread-safe.
-//       It's only used for show logs in terminal debug.
-int32_t SharedRingBuffer::DumpBuffer(void* data, int32_t len) const noexcept
-{
-    static uint32_t pos = mRoot->rp;
-    int32_t diff = mRoot->wp - pos;
+// // Dump the buffer content
+// // Note: This function is not thread-safe.
+// //       It's only used for show logs in terminal debug.
+// int32_t SharedRingBuffer::DumpBuffer(void* data, int32_t len) const noexcept
+// {
+//     static uint32_t pos = mRoot->rp;
+//     int32_t diff = mRoot->wp - pos;
 
-    bool avail = (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
-    if (!avail) {
-        return -1;
-    }
+//     bool avail = (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
+//     if (!avail) {
+//         return -1;
+//     }
 
-    memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
-    pos = (pos + len) % mCapacity;
+//     memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
+//     pos = (pos + len) % mCapacity;
 
-    return 0;
-}
+//     return 0;
+// }
 
 bool SharedRingBuffer::IsReadable() const noexcept
 {
@@ -221,14 +221,14 @@ void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
     mRoot->rwStatus = type;
 }
 
-void SharedRingBuffer::DumpMemory(const char* pAddr, uint32_t size)
-{
-    for (uint32_t i = 0; i < size; i++) {
-        SPR_LOGD("0x%p: 0x%x [%c]\n", pAddr, pAddr[i], pAddr[i]);
-    }
-}
+// void SharedRingBuffer::DumpMemory(const char* pAddr, uint32_t size)
+// {
+//     for (uint32_t i = 0; i < size; i++) {
+//         SPR_LOGD("0x%p: 0x%x [%c]\n", pAddr, pAddr[i], pAddr[i]);
+//     }
+// }
 
 void SharedRingBuffer::DumpErrorInfo()
 {
-    SPR_LOGD("rp: %d, wp: %d, capacity: %d\n", mRoot->rp, mRoot->wp, mCapacity);
+    SPR_LOGD("rp: %u, wp: %u, capacity: %u\n", mRoot->rp, mRoot->wp, mCapacity);
 }

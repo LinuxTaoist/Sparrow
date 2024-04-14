@@ -52,7 +52,7 @@ public:
      * @return 0 on success, or -1 if an error occurred
      *
      */
-    int GetProperty(const std::string key, std::string& value, const std::string& defaultValue);
+    int GetProperty(const std::string& key, std::string& value, const std::string& defaultValue);
 
     /**
      * @brief GetProperties

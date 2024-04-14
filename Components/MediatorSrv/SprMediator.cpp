@@ -41,6 +41,7 @@ const uint32_t EPOLL_FD_NUM = 10;
 
 SprMediator::SprMediator(int size)
 {
+    mHandler = -1;
     if (size) {
         mEpollHandler = epoll_create(size);
     } else {
@@ -101,7 +102,7 @@ int SprMediator::EnvReady(const std::string& srvName)
     return 0;
 }
 
-int SprMediator::MakeMQ(string name)
+int SprMediator::MakeMQ(const string& name)
 {
     mq_attr mqAttr;
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
@@ -113,11 +114,6 @@ int SprMediator::MakeMQ(string name)
     }
 
     return handler;
-}
-
-int SprMediator::MakeUnixDgramSocket(std::string ip, uint16_t port)
-{
-    return 0;
 }
 
 int SprMediator::PrepareInternalPort()
@@ -202,18 +198,18 @@ int SprMediator::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-int SprMediator::SendMsg(const SprMsg& msg)
-{
-    string datas;
+// int SprMediator::SendMsg(const SprMsg& msg)
+// {
+//     string datas;
 
-    msg.Encode(datas);
-    int ret = mq_send(mHandler, (const char*)datas.c_str(), datas.size(), 0);
-    if (ret < 0) {
-        SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
-    }
+//     msg.Encode(datas);
+//     int ret = mq_send(mHandler, (const char*)datas.c_str(), datas.size(), 0);
+//     if (ret < 0) {
+//         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
+//     }
 
-    return 0;
-}
+//     return 0;
+// }
 
 int SprMediator::NotifyObserver(ESprModuleID id, const SprMsg& msg)
 {
@@ -292,7 +288,6 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
 int SprMediator::MsgResponseUnregister(const SprMsg& msg)
 {
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
-    std::string name = msg.GetString();
 
     auto it = mModuleMap.find(moduleId);
     if (it != mModuleMap.end())

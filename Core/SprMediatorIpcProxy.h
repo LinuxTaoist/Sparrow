@@ -38,7 +38,7 @@ public:
      *
      * @return int
      */
-    int ConnectMediator() override;
+    int ConnectMediator();
 
     /**
      * @brief RegisterObserver
