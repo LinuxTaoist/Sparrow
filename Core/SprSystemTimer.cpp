@@ -79,6 +79,7 @@ int SprSystemTimer::InitTimer()
 int SprSystemTimer::StartTimer(uint32_t intervalInMilliSec)
 {
     if (mTimerRunning) {
+        SPR_LOGW("System timer is running!\n");
         return 0;
     }
 
@@ -92,7 +93,8 @@ int SprSystemTimer::StartTimer(uint32_t intervalInMilliSec)
         return -1;
     }
 
-    mTimerRunning = true;
+    SPR_LOGD("Start system timer (%d)!\n", intervalInMilliSec);
+    mTimerRunning = (intervalInMilliSec > 0) ? true : false;
     return 0;
 }
 

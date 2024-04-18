@@ -28,9 +28,10 @@
 
 #define SPR_LOG(fmt, args...)   printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...)  printf("%4d RingBuf D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...)  printf("%4d RingBuf W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...)  printf("%4d RingBuf E: " fmt, __LINE__, ##args)
 
-const int RETRY_TIMES       = 3;        // 3 times retry
+const int RETRY_TIMES       = 10;
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 
 // Used for master mode
@@ -153,7 +154,7 @@ int SharedRingBuffer::read(void* data, int32_t len)
 
             break;
         } else {
-            SPR_LOGE("AvailData invalid! avail = %d, len = %d\n", avail, len);
+            SPR_LOGW("AvailData invalid! avail = %d, len = %d. (%d)\n", avail, len, retry);
             DumpErrorInfo();
             retry--;
             usleep(RETRY_INTERVAL_US);

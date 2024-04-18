@@ -15,7 +15,7 @@ add_dependencies            (debug_core LibSprCore)
 set(SRC_BIN_DMSG            DebugMsg.cc)
 add_executable              (debug_msg ${SRC_BIN_DMSG})
 set_target_properties       (debug_msg PROPERTIES OUTPUT_NAME "debugmsg")
-target_link_libraries       (debug_msg c 3rdadapter sprcore)
+target_link_libraries       (debug_msg c 3rdadapter pthread sprcore)
 add_dependencies            (debug_msg Lib3rdAdapter LibSprCore)
 
 ## Bin debugbinder

@@ -34,6 +34,8 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("TimerM", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("TimerM", fmt, ##args)
 
+#define TIMER_MIN_INTERVAL_MS 100   // 100ms
+
 SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprSystemTimer> systemTimerPtr)
         : SprObserver(id, name, make_shared<SprMediatorIpcProxy>())
 {
@@ -182,7 +184,15 @@ int SprTimerManager::InitSystemTimer()
 void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
 {
     auto timerNode = mTimers.begin();
-    uint32_t timeValueInMilliSec = timerNode->GetExpired() - timerNode->GetTick();
+    uint32_t expired = timerNode->GetExpired();
+    uint32_t tick = timerNode->GetTick();
+    int32_t timeValueInMilliSec = expired - tick;
+
+    if (timeValueInMilliSec <= 0) {
+        SPR_LOGW("timeValueInMilliSec <= 0! (%u) (%u)\n", expired, tick);
+        return;
+    }
+
     mSystemTimerPtr->StartTimer(timeValueInMilliSec);
 }
 
@@ -197,8 +207,12 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
     std::shared_ptr<STimerInfo> p = msg.GetDatas<STimerInfo>();
     if (p != nullptr) {
         SPR_LOGD("AddTimer: [0x%x %dms %dms %s]\n", p->ModuleId, p->DelayInMilliSec, p->IntervalInMilliSec, GetSigName(p->MsgId));
-        AddTimer(p->ModuleId, p->MsgId, p->RepeatTimes, p->DelayInMilliSec, p->IntervalInMilliSec);
+        // if (p->IntervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
+        //     SPR_LOGW("Interval in milliseconds is too small: %d !\n", p->IntervalInMilliSec);
+        //     return;
+        // }
 
+        AddTimer(p->ModuleId, p->MsgId, p->RepeatTimes, p->DelayInMilliSec, p->IntervalInMilliSec);
         SprMsg rspMsg(SIG_ID_TIMER_START_SYSTEM_TIMER);
         SendMsg(rspMsg);
 
@@ -251,7 +265,6 @@ void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)
             SprMsg bookMsg(it->GetModuleId(), it->GetMsgId());
             NotifyObserver(bookMsg);
             it->RepeatCount();
-
             deleteTimers.insert(*it);
         } else {
             break;
