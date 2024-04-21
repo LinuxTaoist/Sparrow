@@ -27,7 +27,7 @@
 class SprSystemTimer : public SprObserver
 {
 public:
-    SprSystemTimer(ModuleIDType id, const std::string& name);
+    explicit SprSystemTimer(ModuleIDType id, const std::string& name);
     ~SprSystemTimer();
     SprSystemTimer(const SprSystemTimer&) = delete;
     SprSystemTimer& operator=(const SprSystemTimer&) = delete;
