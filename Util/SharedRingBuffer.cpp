@@ -38,52 +38,61 @@ const int RETRY_INTERVAL_US = 10000;    // 10ms
 SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
     : mCapacity(capacity), mShmPath(path)
 {
+    mEnable = true;
     int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         SPR_LOGE("open failed! (%s)", strerror(errno));
+        mEnable = false;
     }
 
     if (ftruncate(fd, mCapacity) == -1) {
         SPR_LOGE("ftruncate failed! (%s)", strerror(errno));
+        mEnable = false;
     }
 
     void* mapMemory = mmap(NULL, mCapacity, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (mapMemory == MAP_FAILED) {
         SPR_LOGE("mmap failed! (%s)", strerror(errno));
+        mEnable = false;
     }
 
     mRoot = static_cast<Root*>(mapMemory);
     if (mRoot == nullptr) {
         SPR_LOGE("mRoot is nullptr!");
-        exit(0);
+        mEnable = false;
     }
 
     mRoot->rp = mRoot->wp;
     mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
     if (mData == nullptr) {
         SPR_LOGE("mData is nullptr!");
-        exit(0);
+        mEnable = false;
     }
+
     close(fd);
 }
 
 // Used for slave mode
 SharedRingBuffer::SharedRingBuffer(const std::string& path)
 {
+    mEnable = true;
     int fd = open(path.c_str(), O_RDWR);
     if (fd == -1) {
         SPR_LOGE("open %s failed! (%s)\n", mShmPath.c_str(), strerror(errno));
+        mEnable = false;
     }
 
     struct stat fileStat;
     if (fstat(fd, &fileStat) == -1) {
         SPR_LOGE("fstat failed! (%s)\n", strerror(errno));
+        mEnable = false;
     }
 
     off_t fileSize = fileStat.st_size;
     void* mapMemory = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (mapMemory == MAP_FAILED) {
         SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
+        mEnable = false;
     }
 
     mCapacity = fileSize;
@@ -91,14 +100,15 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     mRoot = static_cast<Root*>(mapMemory);
     if (mRoot == nullptr) {
         SPR_LOGE("mRoot is nullptr!");
-        exit(0);
+        mEnable = false;
     }
 
     mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
     if (mData == nullptr) {
         SPR_LOGE("mData is nullptr!");
-        exit(0);
+        mEnable = false;
     }
+
     close(fd);
 }
 
@@ -111,6 +121,12 @@ int SharedRingBuffer::write(const void* data, int32_t len)
 {
     int ret = -1;
     int retry = RETRY_TIMES;
+
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return -1;
+    }
 
     // It's hard to believe, but it actually happened:
     // Although post after it is written in the shared memory, synchronization still might not be timely,
@@ -141,6 +157,12 @@ int SharedRingBuffer::read(void* data, int32_t len)
     int ret = -1;
     int retry = RETRY_TIMES;
 
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return -1;
+    }
+
     // Refer to write comments
     while (retry > 0) {
         std::lock_guard<std::mutex> lock(mMutex);
@@ -166,11 +188,23 @@ int SharedRingBuffer::read(void* data, int32_t len)
 
 int32_t SharedRingBuffer::AvailSpace() const noexcept
 {
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return -1;
+    }
+
     return (mRoot->wp >= mRoot->rp) ? (mCapacity - mRoot->wp + mRoot->rp) : (mRoot->rp - mRoot->wp);
 }
 
 int32_t SharedRingBuffer::AvailData() const noexcept
 {
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return -1;
+    }
+
     int32_t diff = mRoot->wp - mRoot->rp;
     return (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
 }
@@ -196,16 +230,34 @@ int32_t SharedRingBuffer::AvailData() const noexcept
 
 bool SharedRingBuffer::IsReadable() const noexcept
 {
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return false;
+    }
+
     return ((mRoot->rwStatus == CMD_READABLE) && AvailData() != 0);
 }
 
 bool SharedRingBuffer::IsWriteable() const noexcept
 {
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return false;
+    }
+
     return ((mRoot->rwStatus == CMD_WRITEABLE && AvailData() != 0));
 }
 
 void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept
 {
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return;
+    }
+
     if (pos == nullptr)
     {
         SPR_LOGE("pos is nullptr!\n");
@@ -219,6 +271,12 @@ void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const no
 
 void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
 {
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return;
+    }
+
     mRoot->rwStatus = type;
 }
 
@@ -231,5 +289,11 @@ void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
 
 void SharedRingBuffer::DumpErrorInfo()
 {
+    if (!mEnable)
+    {
+        SPR_LOGE("SharedRingBuffer is disable!\n");
+        return ;
+    }
+
     SPR_LOGD("rp: %u, wp: %u, capacity: %u\n", mRoot->rp, mRoot->wp, mCapacity);
 }

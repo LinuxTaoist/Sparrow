@@ -40,8 +40,6 @@ using namespace std;
 #define SPR_LOGW(fmt, args...) printf("%-4d ServiceM W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%-4d ServiceM E: " fmt, __LINE__, ##args)
 
-#define CONFIG_SUPPORT_SIGCHLD 0 // SIGCHLD不可靠。 1: 信号中断触发 0: 轮询
-
 const char PROC_PATH[] = "/proc";
 const char INIT_CONFIGURE_PATH[] = "init.conf";
 

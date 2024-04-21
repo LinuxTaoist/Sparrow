@@ -82,7 +82,7 @@ public:
     uint16_t    GetU16Value()   const { return mU16Value; }
     uint32_t    GetU32Value()   const { return mU32Value; }
     std::string GetString()     const { return mString; }
-    std::vector<uint8_t>    GetU8Vec() const { return mU8Vec; }
+    std::vector<uint8_t>    GetU8Vec()  const { return mU8Vec;  }
     std::vector<uint32_t>   GetU32Vec() const { return mU32Vec; }
 
     template<typename T>

@@ -78,6 +78,7 @@ private:
     void    DumpErrorInfo();
 
 private:
+    bool        mEnable;
     Root*       mRoot;
     void*       mData;
     uint32_t    mCapacity;

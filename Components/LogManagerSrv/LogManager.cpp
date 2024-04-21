@@ -47,9 +47,8 @@ static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
 LogManager::LogManager()
 {
-    mRunning = true;
-
     // TODO: value from config
+    mRunning = true;
     mMaxFileSize = DEFAULT_LOG_FILE_MAX_SIZE;
     mBaseLogFile = DEFAULT_BASE_LOG_FILE_NAME;
     mLogsDirPath = DEFAULT_LOGS_STORAGE_PATH;
@@ -59,7 +58,8 @@ LogManager::LogManager()
     {
         int ret = mkdir(mLogsDirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
-            SPR_LOGE("mkdir %s failed! (%s)", mLogsDirPath.c_str(), strerror(errno));
+            SPR_LOGE("mkdir %s failed! (%s)\n", mLogsDirPath.c_str(), strerror(errno));
+            mRunning = false;
         }
     }
 
@@ -140,7 +140,7 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
         UpdateSuffixOfAllFiles();
         mLogFileStream.open(mLogsDirPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
-            SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
+            SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
         }
     }
 
@@ -152,7 +152,7 @@ int LogManager::WriteToLogFile(const std::string& logData)
     if (!mLogFileStream.is_open()) {
         mLogFileStream.open(mLogsDirPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
-            SPR_LOGE("Open %s failed!", mCurrentLogFile.c_str());
+            SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
             return -1;
         }
     }
@@ -184,13 +184,12 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
         }
     }
 
-    closedir(dir);
-
     // If no files were found, insert the current log file
     if (matchingFiles.empty()) {
         matchingFiles.insert(mLogsDirPath + '/' + mCurrentLogFile);
     }
 
+    closedir(dir);
     return matchingFiles;
 }
 

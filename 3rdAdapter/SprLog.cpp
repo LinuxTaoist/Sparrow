@@ -41,7 +41,7 @@ SprLog::SprLog()
         perror("sem_init");
     }
 
-    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE);
+    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH);
 }
 
 SprLog::~SprLog()

@@ -34,22 +34,23 @@ std::shared_ptr<Parcel> pRspParcel = nullptr;
 
 Property::Property()
 {
+    mEnable = true;
     pObj = IBinderManager::GetInstance();
     if (pObj == nullptr) {
         SPR_LOGE("GetInstance failed\n");
-        exit(0);
+        mEnable = false;
     }
 
     pBinder = pObj->GetService("property_service");
     if (pBinder == nullptr) {
         SPR_LOGE("GetService failed\n");
-        exit(0);
+        mEnable = false;
     }
 
     pBinder->GetParcel(pReqParcel, pRspParcel);
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
         SPR_LOGE("GetParcel failed!\n");
-        exit(0);
+        mEnable = false;
     }
 }
 
@@ -65,6 +66,11 @@ Property* Property::GetInstance()
 
 int Property::SetProperty(const std::string& key, const std::string& value)
 {
+    if (!mEnable) {
+        SPR_LOGE("Property is disable!\n");
+        return -1;
+    }
+
     pReqParcel->WriteInt(PROPERTY_CMD_SET_PROPERTY);
     pReqParcel->WriteString(key);
     pReqParcel->WriteString(value);
@@ -79,6 +85,11 @@ int Property::SetProperty(const std::string& key, const std::string& value)
 
 int Property::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
 {
+    if (!mEnable) {
+        SPR_LOGE("Property is disable!\n");
+        return -1;
+    }
+
     pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY);
     pReqParcel->WriteString(key);
     pReqParcel->WriteString(defaultValue);
@@ -94,6 +105,11 @@ int Property::GetProperty(const std::string& key, std::string& value, const std:
 
 int Property::GetProperties()
 {
+    if (!mEnable) {
+        SPR_LOGE("Property is disable!\n");
+        return -1;
+    }
+
     pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES);
     pReqParcel->Post();
 

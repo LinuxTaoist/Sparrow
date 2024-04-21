@@ -64,6 +64,9 @@ public:
 
 private:
     Property();
+
+private:
+    bool mEnable;
 };
 
 #endif // __PROPERTY_H__
