@@ -188,9 +188,11 @@ void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
     uint32_t tick = timerNode->GetTick();
     int32_t timeValueInMilliSec = expired - tick;
 
+    // If the timer has already expired or shows no delay, adjust the wait time to the timer's standard interval.
+    // This step ensures continuous operation and logs the change for monitoring purposes.
     if (timeValueInMilliSec <= 0) {
-        SPR_LOGW("timeValueInMilliSec <= 0! (%u) (%u)\n", expired, tick);
-        return;
+        timeValueInMilliSec = timerNode->GetIntervalInMilliSec();
+        SPR_LOGW("timeValueInMilliSec <= 0! (%u) (%u), reset %u %\n", expired, tick, timeValueInMilliSec);
     }
 
     mSystemTimerPtr->StartTimer(timeValueInMilliSec);
