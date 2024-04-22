@@ -22,8 +22,8 @@
 
 using namespace InternalDefs;
 
-Parcel iReqParcel("IBinderM", 66666, true);
-Parcel iRspParcel("BinderM",  88888, false);
+Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, true);
+Parcel iRspParcel("BinderM",  KEY_BINDER_MANAGER,  false);
 
 IBinderManager* IBinderManager::GetInstance()
 {

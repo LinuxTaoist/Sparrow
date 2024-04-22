@@ -21,6 +21,7 @@
 #include "Parcel.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
+#include "BinderCommon.h"
 #include "BinderManager.h"
 
 using namespace InternalDefs;
@@ -31,8 +32,8 @@ using namespace InternalDefs;
 
 #define INT_KEY_LENGTH  5
 
-Parcel reqParcel("IBinderM", 66666, false);
-Parcel rspParcel("BinderM",  88888, true);
+Parcel reqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
+Parcel rspParcel("BinderM",  KEY_BINDER_MANAGER,  true);
 
 BinderManager::BinderManager()
 {
