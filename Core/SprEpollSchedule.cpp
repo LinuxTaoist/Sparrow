@@ -120,7 +120,7 @@ void SprEpollSchedule::EpollLoop()
 
     do {
         // 无事件时, epoll_wait阻塞, 超时等待
-        int count = epoll_wait(mEpollHandle, ep, sizeof(ep)/sizeof(ep[0]), 5000);
+        int count = epoll_wait(mEpollHandle, ep, sizeof(ep)/sizeof(ep[0]), -1);
         if (count <= 0) {
             if (!mRun) {
                 break;
