@@ -42,6 +42,7 @@ using namespace std;
 #define SPR_LOGE(fmt, args...) printf("%-4d ServiceM E: " fmt, __LINE__, ##args)
 
 const char PROC_PATH[] = "/proc";
+const char ENV_ROOT_PATH[] = "/tmp/";
 const char INIT_CONFIGURE_PATH[] = "init.conf";
 
 ServiceManager::ServiceManager() : mRunning(false)
@@ -213,11 +214,11 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
 
 int32_t ServiceManager::ClearExeEnvNode(const std::string& exeName)
 {
-    std::string monitorNode = std::string("/tmp/") + exeName;
     if (exeName.empty()) {
         return 0;
     }
 
+    std::string monitorNode = std::string(ENV_ROOT_PATH) + exeName;
     if (access(monitorNode.c_str(), F_OK) == 0) {
         unlink(monitorNode.c_str());
     }
@@ -227,13 +228,12 @@ int32_t ServiceManager::ClearExeEnvNode(const std::string& exeName)
 
 int32_t ServiceManager::WaitLastExeFinished(const std::string& exeName)
 {
-    int retryTimes = 10;
-    std::string monitorNode = std::string("/tmp/") + exeName;
-
     if (exeName.empty()) {
         return 0;
     }
 
+    int retryTimes = 10;
+    std::string monitorNode = std::string(ENV_ROOT_PATH) + exeName;
     while (retryTimes--) {
         if (access(monitorNode.c_str(), F_OK) != 0) {
             SPR_LOGD("Waiting exe: %-20s retryTimes = %-3d\n", exeName.c_str(), 10 - retryTimes);

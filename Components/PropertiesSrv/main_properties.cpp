@@ -95,8 +95,6 @@ static void BinderLoop(PropertyManager* pProperM)
                 break;
             }
         }
-
-
     } while(1);
 }
 

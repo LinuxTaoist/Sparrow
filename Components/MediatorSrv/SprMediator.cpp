@@ -251,7 +251,6 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
 int SprMediator::MsgResponseRegister(const SprMsg& msg)
 {
     bool result = false;
-    // EProxyType type = static_cast<EProxyType>(msg.GetU32Value());
     bool monitored = msg.GetBoolValue();
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
     std::string name = msg.GetString();
