@@ -10,9 +10,9 @@ add_executable              (BinLogShow ${SRC_BIN_LOGSHOW} ${SRC_OTHER_PATH})
 set_target_properties       (BinLogShow PROPERTIES OUTPUT_NAME "logshow")
 target_link_libraries       (BinLogShow pthread)
 
-# Bin monitorsrv
-# aux_source_directory(${PROJECT_PATH}/Components/MediatorSrv  SRC_MONITOR_SRV_PATH)
-# add_executable              (BinMonitorSrv ${SRC_MONITOR_SRV_PATH})
-# set_target_properties       (BinMonitorSrv PROPERTIES OUTPUT_NAME "monitorsrv")
-# target_link_libraries       (BinMonitorSrv rt pthread sprcore)
-# add_dependencies            (BinMonitorSrv LibSprCore)
+# Bin infrawatch
+aux_source_directory(${PROJECT_PATH}/Debug/InfraWatch SRC_INFRA_WATCH_PATH)
+add_executable              (BinInfraWatch ${SRC_INFRA_WATCH_PATH})
+set_target_properties       (BinInfraWatch PROPERTIES OUTPUT_NAME "infrawatch")
+target_link_libraries       (BinInfraWatch rt pthread)
+# add_dependencies            (BinInfraWatch LibSprCore)
