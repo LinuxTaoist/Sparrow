@@ -39,6 +39,9 @@ namespace GeneralUtils {
 
     std::string GetCurTimeStr();
     std::string RandomString(int len);
+
+    // String general interfaces
+    std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter);
 };
 
-#endif // __GENERAL_UTILS_H__
+#endif //__GENERAL_UTILS_H__

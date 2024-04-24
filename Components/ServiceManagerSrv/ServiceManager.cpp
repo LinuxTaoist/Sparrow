@@ -31,6 +31,7 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include "CommonMacros.h"
+#include "GeneralUtils.h"
 #include "ServiceManager.h"
 
 using namespace std;
@@ -179,10 +180,16 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
     } else if (pid == 0) {          // child
         static int startCount = 0;
 
-        SPR_LOGD("Pull up %s (%d).\n", exePath.c_str(), ++startCount);
+        SPR_LOGD("execl %s (%d).\n", exePath.c_str(), ++startCount);
         execl(exePath.c_str(), exePath.c_str(), nullptr);
     } else {                        // parent
-        SPR_LOGD("Child fork pid: %d.\n", pid);
+        std::string srvName = GeneralUtils::GetSubstringAfterLastDelimiter(exePath, '/').c_str();
+        if (srvName.empty())
+        {
+            srvName = exePath;
+        }
+
+        SPR_LOGD("service: %-20s pid: %6d\n", srvName.c_str(), pid);
 
         auto it = mPidMap.begin();
         for (; it != mPidMap.end(); ++it) {
@@ -229,7 +236,7 @@ int32_t ServiceManager::WaitLastExeFinished(const std::string& exeName)
 
     while (retryTimes--) {
         if (access(monitorNode.c_str(), F_OK) != 0) {
-            SPR_LOGD("Waiting exe: %s, retryTimes = %d\n", exeName.c_str(), 10 - retryTimes);
+            SPR_LOGD("Waiting exe: %-20s retryTimes = %-3d\n", exeName.c_str(), 10 - retryTimes);
             usleep(50000);
         } else {
             break;
@@ -244,7 +251,7 @@ int32_t ServiceManager::DumpPidMapInfo()
     SPR_LOGD("PID     PATH                TIMES+\n");
     SPR_LOGD("----------------------------------------------\n");
     for (const auto& pair : mPidMap) {
-        SPR_LOGD("%-6d  %-20s %-2d \n", pair.first, pair.second.first.c_str(), pair.second.second);
+        SPR_LOGD("%6d  %-20s %2d \n", pair.first, pair.second.first.c_str(), pair.second.second);
     }
     SPR_LOGD("----------------------------------------------\n");
 

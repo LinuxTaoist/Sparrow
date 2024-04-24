@@ -103,4 +103,15 @@ std::string GetCurTimeStr()
     return std::string(buffer);
 }
 
+std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter)
+{
+    std::string subStr;
+    size_t found = str.find_last_of(delimiter);
+    if (found != std::string::npos && found + 1 < str.length()) {
+        subStr = str.substr(found + 1);
+    }
+
+    return subStr;
+}
+
 }; // namespace GeneralUtils

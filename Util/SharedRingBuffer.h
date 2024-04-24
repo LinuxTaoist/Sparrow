@@ -86,4 +86,4 @@ private:
     std::string mShmPath;
 };
 
-#endif // __SHARED_RING_BUFFER_H__
+#endif //__SHARED_RING_BUFFER_H__
