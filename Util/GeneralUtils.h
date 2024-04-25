@@ -44,4 +44,4 @@ namespace GeneralUtils {
     std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter);
 };
 
-#endif //__GENERAL_UTILS_H__
+#endif // __GENERAL_UTILS_H__

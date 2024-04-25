@@ -58,4 +58,4 @@ private:
     void  GetKeyValue(Node* node, std::map<std::string, std::string>& keyValueMap);
 };
 
-#endif //__SHARED_BINARY_TREE_H__
+#endif // __SHARED_BINARY_TREE_H__

@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef SPR_EPOLL_SCHEDULE_H__
-#define SPR_EPOLL_SCHEDULE_H__
+#ifndef __SPR_EPOLL_SCHEDULE_H__
+#define __SPR_EPOLL_SCHEDULE_H__
 
 #include <map>
 #include <memory>
@@ -91,4 +91,4 @@ private:
     LibgoAdapter::CoPool mCoPool;
 };
 
-#endif
+#endif // __SPR_EPOLL_SCHEDULE_H__

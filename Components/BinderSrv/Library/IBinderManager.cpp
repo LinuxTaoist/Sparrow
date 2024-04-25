@@ -84,7 +84,8 @@ int32_t IBinderManager::RemoveService(const std::string& name)
     return ret;
 }
 
-bool IBinderManager::InitializeServiceBinder(const std::string& srvName, std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
+bool IBinderManager::InitializeServiceBinder(const std::string& srvName,
+     std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
 {
     std::shared_ptr<Binder> pBinder = AddService(srvName);
     if (!pBinder) {
@@ -93,6 +94,27 @@ bool IBinderManager::InitializeServiceBinder(const std::string& srvName, std::sh
 
     int ret = pBinder->GetParcel(pReqParcel, pRspParcel);
     if (ret != 0 || !pReqParcel || !pRspParcel) {
+        return false;
+    }
+
+    return true;
+}
+
+bool IBinderManager::InitializeClientBinder(const std::string& srvName,
+        std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
+{
+    IBinderManager* pObj = GetInstance();
+    if (pObj == nullptr) {
+        return false;
+    }
+
+    std::shared_ptr<IBinder> pBinder = pObj->GetService(srvName);
+    if (pBinder == nullptr) {
+        return false;
+    }
+
+    pBinder->GetParcel(pReqParcel, pRspParcel);
+    if (pReqParcel == nullptr || pRspParcel == nullptr) {
         return false;
     }
 

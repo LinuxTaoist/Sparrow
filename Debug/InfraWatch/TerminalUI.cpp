@@ -20,6 +20,7 @@
 #include <iostream>
 #include <stdio.h>
 #include "TerminalUI.h"
+#include "SprMediatorInterface.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
@@ -103,6 +104,9 @@ char TerminalUI::HandleInputInMainMenu(char input)
 
 char TerminalUI::DisplayMessageQueueStatusAndHandleInput()
 {
+    std::vector<mq_attr> mqAttrVec;
+    SprMediatorInterface::GetInstance()->GetAllMQAttrs(mqAttrVec);
+
     ClearScreen();
     SPR_LOG("+---------------------------------------------------------------------+\n");
     SPR_LOG("|                        Message Queue Status                         |\n");

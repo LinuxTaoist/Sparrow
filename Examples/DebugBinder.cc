@@ -32,6 +32,14 @@
 enum TestBinderCmd {
     CMD_TEST = 0,
     CMD_SUM,
+    CMD_VEC,
+    CMD_CUST_VEC,
+    CMD_MAX
+};
+
+struct STestData {
+    int value1;
+    int value2;
 };
 
 void InitServer(std::shared_ptr<Binder>& binder)
@@ -81,6 +89,24 @@ int Server(const std::shared_ptr<Binder>& binder)
                 break;
             }
 
+            case CMD_VEC:
+            {
+                std::vector<int> vec = {1, 2, 3, 4, 5};
+                pRspParcel->WriteVector(vec);
+                pRspParcel->WriteInt(0);
+                pRspParcel->Post();
+                break;
+            }
+
+            case CMD_CUST_VEC:
+            {
+                std::vector<STestData> vec = {{1,1}, {2,2}, {3,4}};
+                pRspParcel->WriteVector(vec);
+                pRspParcel->WriteInt(0);
+                pRspParcel->Post();
+                break;
+            }
+
             default:
             {
                 SPR_LOGE("Unknown cmd: %d\n", cmd);
@@ -99,6 +125,8 @@ void usage()
             "Usage:\n"
             "0: CMD_TEST\n"
             "1: CMD_SUM\n"
+            "2: CMD_VEC\n"
+            "3: CMD_CUST_VEC\n"
             "h: Help\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
@@ -156,6 +184,38 @@ int Client()
                 pRspParcel->ReadInt(sum);
                 pRspParcel->ReadInt(ret);
                 SPR_LOGD("sum = %d, ret = %d\n", sum, ret);
+                break;
+            }
+
+            case '2':
+            {
+                pReqParcel->WriteInt(CMD_VEC);
+                pReqParcel->Post();
+
+                int ret = 0;
+                std::vector<int> vec;
+                pRspParcel->Wait();
+                pRspParcel->ReadVector(vec);
+                pRspParcel->ReadInt(ret);
+                for (auto v : vec) {
+                    SPR_LOGD("vec: %d\n", v);
+                }
+                break;
+            }
+
+            case '3':
+            {
+                pReqParcel->WriteInt(CMD_CUST_VEC);
+                pReqParcel->Post();
+
+                int ret = 0;
+                std::vector<STestData> vec;
+                pRspParcel->Wait();
+                pRspParcel->ReadVector(vec);
+                pRspParcel->ReadInt(ret);
+                for (auto v : vec) {
+                    SPR_LOGD("vec: %d, %d\n", v.value1, v.value2);
+                }
                 break;
             }
 

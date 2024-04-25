@@ -16,6 +16,9 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#ifndef __SPR_MEDIATOR_IPC_PROXY_H__
+#define __SPR_MEDIATOR_IPC_PROXY_H__
+
 #include "SprMediatorProxy.h"
 
 class SprMediatorIpcProxy : public SprMediatorProxy
@@ -63,3 +66,5 @@ public:
 private:
     int mMediatorHandle;
 };
+
+#endif // __SPR_MEDIATOR_IPC_PROXY_H__

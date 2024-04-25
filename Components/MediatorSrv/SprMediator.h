@@ -23,8 +23,10 @@
 #include <string>
 #include <vector>
 #include <thread>
+#include <mqueue.h>
 #include "SprMsg.h"
 #include "CoreTypeDefs.h"
+#include "CommonTypeDefs.h"
 
 struct SModuleInfo
 {
@@ -48,6 +50,7 @@ private:
     int StartBinderThread();
     int PrepareInternalPort();
     int DestroyInternalPort();
+    int GetAllMQAttrs(std::vector<SMQInfo> &mqInfos);
     // int SendMsg(const SprMsg& msg);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);

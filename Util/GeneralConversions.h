@@ -76,4 +76,4 @@ namespace GeneralConversions {
     }
 };
 
-#endif //__GENERAL_CONVERSIONS_H__
+#endif // __GENERAL_CONVERSIONS_H__

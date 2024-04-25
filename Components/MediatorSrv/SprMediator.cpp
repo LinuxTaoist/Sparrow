@@ -23,7 +23,6 @@
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
 #include <sys/epoll.h>
-#include <mqueue.h>
 #include <string.h>
 #include "SprSigId.h"
 #include "CoreTypeDefs.h"
@@ -125,37 +124,6 @@ int SprMediator::MakeMQ(const string& name)
     return handler;
 }
 
-void SprMediator::BinderLoop(SprMediator* self)
-{
-    std::shared_ptr<Parcel> pReqParcel = nullptr;
-    std::shared_ptr<Parcel> pRspParcel = nullptr;
-    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder(SRV_NAME_MEDIATOR, pReqParcel, pRspParcel);
-    if (!ret)
-    {
-        SPR_LOGE("Binder init failed!\n");
-        return;
-    }
-
-    SPR_LOGD("Binder loop start!\n");
-
-    int cmd = 0;
-    do {
-        pReqParcel->Wait();
-        int ret = pReqParcel->ReadInt(cmd);
-        if (ret != 0)
-        {
-            SPR_LOGE("ReadInt failed!\n");
-            continue;
-        }
-
-        switch(cmd) {
-            default:
-                SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
-                break;
-        }
-    } while (self->mBinderRunning);
-}
-
 int SprMediator::StartBinderThread()
 {
     if (!mBinderThread.joinable())
@@ -191,6 +159,64 @@ int SprMediator::DestroyInternalPort()
     }
 
     return 0;
+}
+
+int SprMediator::GetAllMQAttrs(std::vector<SMQInfo> &mqInfos)
+{
+    mqInfos.clear();
+    for (const auto& pair : mModuleMap)
+    {
+        mq_attr mqAttr;
+        mq_getattr(pair.second.handler, &mqAttr);
+
+        // TODO
+        SMQInfo tmpMQInfo; // = {pair.second.name.c_str(), mqAttr};
+        mqInfos.push_back(tmpMQInfo);
+    }
+
+    return 0;
+}
+
+void SprMediator::BinderLoop(SprMediator* self)
+{
+    std::shared_ptr<Parcel> pReqParcel = nullptr;
+    std::shared_ptr<Parcel> pRspParcel = nullptr;
+    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder(SRV_NAME_MEDIATOR, pReqParcel, pRspParcel);
+    if (!ret)
+    {
+        SPR_LOGE("Binder init failed!\n");
+        return;
+    }
+
+    SPR_LOGD("Binder loop start!\n");
+
+    int cmd = 0;
+    do {
+        pReqParcel->Wait();
+        int ret = pReqParcel->ReadInt(cmd);
+        if (ret != 0)
+        {
+            SPR_LOGE("ReadInt failed!\n");
+            continue;
+        }
+
+        switch(cmd)
+        {
+            case PROXY_CMD_GET_ALL_MQ_ATTRS:
+            {
+                // TODO:
+                // std::vector<mq_attr> tmpMQAttrVec;
+                // int ret = self->GetAllMQAttrs(tmpMQAttrVec);
+                // pRspParcel->WriteInt(ret);
+                // pRspParcel->WriteVector(tmpMQAttrVec);
+                break;
+            }
+
+            default:
+                SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
+                break;
+        }
+    } while (self->mBinderRunning);
 }
 
 int SprMediator::EpollLoop()

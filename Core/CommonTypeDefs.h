@@ -2,39 +2,31 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : TerminalUI.h
+ *  @file       : CoreTypeDefs.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
- *  @date       : 2024/04/23
+ *  @date       : 2024/04/25
  *
+ * This header file serves as a repository for shared data structure types utilized by both client and server code.
+ * All common data structure definitions intended for use across both client and server should be encapsulated herein.
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/23 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/04/25 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __TERMINAL_UI_H__
-#define __TERMINAL_UI_H__
+#ifndef __COMMON_TYPE_DEFS_H__
+#define __COMMON_TYPE_DEFS_H__
 
-class TerminalUI
+#include <mqueue.h>
+
+struct SMQInfo
 {
-public:
-    TerminalUI();
-    ~TerminalUI();
-    int MainMenuLoop();
-
-private:
-    void ClearScreen();
-    char WaitUserInput();
-    char DisplayMainMenuAndHandleInput();
-    char HandleInputInMainMenu(char input);
-    char DisplayMessageQueueStatusAndHandleInput();
-    char HandleInputInMessageQueueMenu(char input);
-    char DisplayManagerStatusAndHandleInput();
-    char HandleInputInManagerStatusMenu(char input);
+    char mqName[20];
+    mq_attr mqAttr;
 };
 
-#endif // __TERMINAL_UI_H__
+#endif // __COMMON_TYPE_DEFS_H__

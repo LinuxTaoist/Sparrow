@@ -18,6 +18,7 @@
  */
 #ifndef __SPR_MEDIATOR_PROXY_H__
 #define __SPR_MEDIATOR_PROXY_H__
+
 #include "SprMsg.h"
 
 class SprObserver;

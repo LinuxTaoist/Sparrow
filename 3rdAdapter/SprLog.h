@@ -71,4 +71,4 @@ private:
     sem_t mWriteSem;
 };
 
-#endif //__SPR_LOG_H__
+#endif // __SPR_LOG_H__

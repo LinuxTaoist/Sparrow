@@ -19,8 +19,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SPR_COMMON_TYPE_H__
-#define __SPR_COMMON_TYPE_H__
+#ifndef __CORE_TYPE_DEFS_H__
+#define __CORE_TYPE_DEFS_H__
 
 #include <string>
 #include <stdint.h>
@@ -55,10 +55,11 @@ enum ESprModuleID
     MODULE_MAX,
 };
 
-enum EProxyMsgID
+enum EProxyBinderCmd
 {
-    PROXY_MSG_BEGIN = MODULE_PROXY << MODULE_ID_OFFSET | 1,
-    PROXY_MSG_BUTT
+    PROXY_CMD_BEGIN = MODULE_PROXY << MODULE_ID_OFFSET | 1,
+    PROXY_CMD_GET_ALL_MQ_ATTRS,
+    PROXY_CMD_BUTT
 };
 
 enum EPropertyBinderCmd
@@ -105,4 +106,4 @@ typedef struct
 
 } // namespace InternalDefs
 
-#endif
+#endif // __CORE_TYPE_DEFS_H__

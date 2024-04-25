@@ -2,23 +2,24 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : Property.cpp
+ *  @file       : SprMediatorInterface.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
- *  @date       : 2024/04/01
+ *  @date       : 2024/04/25
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/01 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/04/25 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "Property.h"
+#include <stdio.h>
 #include "CoreTypeDefs.h"
 #include "IBinderManager.h"
+#include "SprMediatorInterface.h"
 
 using namespace InternalDefs;
 
@@ -29,7 +30,7 @@ using namespace InternalDefs;
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-Property::Property()
+SprMediatorInterface::SprMediatorInterface()
 {
     mEnable = true;
     bool ret = IBinderManager::GetInstance()->InitializeClientBinder("property_service", pReqParcel, pRspParcel);
@@ -38,68 +39,32 @@ Property::Property()
     }
 }
 
-Property::~Property()
+SprMediatorInterface::~SprMediatorInterface()
 {
 }
 
-Property* Property::GetInstance()
+SprMediatorInterface* SprMediatorInterface::GetInstance()
 {
-    static Property instance;
+    static SprMediatorInterface instance;
     return &instance;
 }
 
-int Property::SetProperty(const std::string& key, const std::string& value)
+int SprMediatorInterface::GetAllMQAttrs(std::vector<mq_attr>& mqAttrVec)
 {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return -1;
     }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_SET_PROPERTY);
-    pReqParcel->WriteString(key);
-    pReqParcel->WriteString(value);
+    pReqParcel->WriteInt(PROXY_CMD_GET_ALL_MQ_ATTRS);
     pReqParcel->Post();
 
     int ret = 0;
     pRspParcel->Wait();
+    pRspParcel->ReadVector(mqAttrVec);
     pRspParcel->ReadInt(ret);
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
 
-int Property::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
-{
-    if (!mEnable) {
-        SPR_LOGE("Property is disable!\n");
-        return -1;
-    }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY);
-    pReqParcel->WriteString(key);
-    pReqParcel->WriteString(defaultValue);
-    pReqParcel->Post();
-
-    int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadString(value);
-    pRspParcel->ReadInt(ret);
-    SPR_LOGD("ret: %d\n", ret);
-    return ret;
-}
-
-int Property::GetProperties()
-{
-    if (!mEnable) {
-        SPR_LOGE("Property is disable!\n");
-        return -1;
-    }
-
-    pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES);
-    pReqParcel->Post();
-
-    int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
-    SPR_LOGD("ret: %d\n", ret);
-    return ret;
-}

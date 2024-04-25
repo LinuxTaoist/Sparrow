@@ -93,4 +93,4 @@ private:
     std::unique_ptr<SharedBinaryTree> mSharedMemoryPtr;
 };
 
-#endif
+#endif // __PROPERTY_MANAGER_H__

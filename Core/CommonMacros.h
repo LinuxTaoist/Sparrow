@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __DEFINE_MACRO_H__
-#define __DEFINE_MACRO_H__
+#ifndef __COMMON_MACRO_H__
+#define __COMMON_MACRO_H__
 
 #include "SprLog.h"
 
@@ -44,4 +44,4 @@
 #define LOGW(tag, fmt, args...)     SprLog::GetInstance()->w(tag, "%4d " fmt, __LINE__, ##args)
 #define LOGE(tag, fmt, args...)     SprLog::GetInstance()->e(tag, "%4d " fmt, __LINE__, ##args)
 
-#endif // __DEFINE_MACRO_H__
+#endif // __COMMON_MACRO_H__

@@ -19,9 +19,10 @@
 #ifndef __PARCEL_H__
 #define __PARCEL_H__
 
+#include <vector>
+#include <string>
 #include <fcntl.h>
 #include <semaphore.h>
-#include <string>
 #include "SharedRingBuffer.h"
 
 class Parcel
@@ -34,6 +35,8 @@ public:
     Parcel(Parcel&& other) = delete;
     Parcel& operator=(Parcel&& other) = delete;
 
+    int Wait();
+    int Post();
     int WriteBool(bool value);
     int ReadBool(bool& value);
     int WriteInt(int value);
@@ -42,8 +45,47 @@ public:
     int ReadString(std::string& value);
     int WriteData(void* data, int size);
     int ReadData(void* data, int& size);
-    int Wait();
-    int Post();
+
+    template<typename T>
+    int WriteVector(const std::vector<T>& vec)
+    {
+        int size = vec.size() * sizeof(T);
+        if (WriteInt(size) != 0) {
+            return -1;
+        }
+
+        for (const auto& v : vec)
+        {
+            if (WriteData((void*)&v, (int)sizeof(T)) != 0) {
+                return -1;
+            }
+        }
+
+        return 0;
+    }
+
+    template<typename T>
+    int ReadVector(std::vector<T>& vec)
+    {
+        int totalSize = 0;
+        if (ReadInt(totalSize) != 0) {
+            return -1;
+        }
+
+        unsigned capacity = totalSize / sizeof(T);
+        vec.clear();
+        for (unsigned i = 0; i < capacity; i++)
+        {
+            T value;
+            int byteSize;
+            if (ReadData((void*)&value, byteSize) != 0) {
+                return -1;
+            }
+            vec.push_back(value);
+        }
+
+        return 0;
+    }
 
 private:
     bool                mMaster;
