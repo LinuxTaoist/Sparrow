@@ -22,6 +22,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <thread>
 #include "SprMsg.h"
 #include "CoreTypeDefs.h"
 
@@ -44,6 +45,7 @@ private:
     explicit SprMediator(int size);
     int EnvReady(const std::string& srvName);
     int MakeMQ(const std::string& name);
+    int StartBinderThread();
     int PrepareInternalPort();
     int DestroyInternalPort();
     // int SendMsg(const SprMsg& msg);
@@ -57,9 +59,14 @@ private:
     int MsgResponseRegister(const SprMsg& msg);
     int MsgResponseUnregister(const SprMsg& msg);
 
+    /* Binder 线程处理函数 */
+    static void BinderLoop(SprMediator* self);
+
 private:
     int mHandler;
     int mEpollHandler;
+    bool mBinderRunning;
+    std::thread mBinderThread;
     std::map<InternalDefs::ESprModuleID, SModuleInfo> mModuleMap;
 };
 

@@ -3,6 +3,7 @@
 include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/3rdAdapter)
+include_directories (${PROJECT_PATH}/Components/BinderSrv/Library)
 
 ## Project configures path
 set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/ProjectConfigs/General)
@@ -27,8 +28,8 @@ add_dependencies            (BinLogSrv LibSprCore)
 aux_source_directory        (${PROJECT_PATH}/Components/MediatorSrv         SRC_PROXY_SRV_PATH)
 add_executable              (BinProxySrv ${SRC_PROXY_SRV_PATH})
 set_target_properties       (BinProxySrv PROPERTIES OUTPUT_NAME "mediatorsrv")
-target_link_libraries       (BinProxySrv rt pthread sprcore)
-add_dependencies            (BinProxySrv LibSprCore)
+target_link_libraries       (BinProxySrv rt pthread sprcore sprbinder)
+add_dependencies            (BinProxySrv LibSprCore LibBinder)
 
 # Bin powermanagersrv
 aux_source_directory        (${PROJECT_PATH}/Components/PowerManagerSrv     SRC_POWER_MANAGER_PATH)
@@ -41,7 +42,6 @@ add_dependencies            (BinPowerManagerSrv LibSprCore Lib3rdAdapter)
 aux_source_directory        (${PROJECT_PATH}/Util                           SRC_PROPERTY_SRV_PATH)
 aux_source_directory        (${PROJECT_PATH}/Components/PropertiesSrv       SRC_PROPERTY_SRV_PATH)
 add_executable              (BinPropertySrv ${SRC_PROPERTY_SRV_PATH})
-target_include_directories  (BinPropertySrv PRIVATE ${PROJECT_PATH}/Components/BinderSrv/Library)
 set_target_properties       (BinPropertySrv PROPERTIES OUTPUT_NAME "propertiessrv")
 target_link_libraries       (BinPropertySrv pthread rt sprcore sprbinder 3rdadapter)
 add_dependencies            (BinPropertySrv LibSprCore LibBinder Lib3rdAdapter)

@@ -30,14 +30,12 @@ using namespace InternalDefs;
 
 static void BinderLoop(PropertyManager* pProperM)
 {
-    IBinderManager* pInstance = IBinderManager::GetInstance();
-    std::shared_ptr<Binder> pBinder = pInstance->AddService("property_service");
-
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
-    pBinder->GetParcel(pReqParcel, pRspParcel);
-    if (pReqParcel == nullptr || pRspParcel == nullptr) {
-        SPR_LOGE("GetParcel failed!\n");
+    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder("property_service", pReqParcel, pRspParcel);
+    if (!ret)
+    {
+        SPR_LOGE("InitializeServiceBinder failed!\n");
         return;
     }
 

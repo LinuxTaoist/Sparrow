@@ -28,6 +28,7 @@
 #include "SprSigId.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
+#include "IBinderManager.h"
 #include "SprMediator.h"
 
 using namespace std;
@@ -41,6 +42,7 @@ const uint32_t EPOLL_FD_NUM = 10;
 
 SprMediator::SprMediator(int size)
 {
+    mBinderRunning = true;
     mHandler = -1;
     if (size) {
         mEpollHandler = epoll_create(size);
@@ -60,6 +62,12 @@ SprMediator::~SprMediator()
             mq_close(pair.second.handler);
             pair.second.handler = -1;
         }
+    }
+
+    if (mBinderThread.joinable())
+    {
+        mBinderRunning = false;
+        mBinderThread.join();
     }
 
     if (mEpollHandler != -1)
@@ -86,6 +94,7 @@ int SprMediator::Init()
 
     SPR_LOGD("--- Start proxy server ---\n");
     PrepareInternalPort();
+    StartBinderThread();
     EnvReady(SRV_NAME_MEDIATOR);
 
     return 0;
@@ -116,6 +125,47 @@ int SprMediator::MakeMQ(const string& name)
     return handler;
 }
 
+void SprMediator::BinderLoop(SprMediator* self)
+{
+    std::shared_ptr<Parcel> pReqParcel = nullptr;
+    std::shared_ptr<Parcel> pRspParcel = nullptr;
+    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder(SRV_NAME_MEDIATOR, pReqParcel, pRspParcel);
+    if (!ret)
+    {
+        SPR_LOGE("Binder init failed!\n");
+        return;
+    }
+
+    SPR_LOGD("Binder loop start!\n");
+
+    int cmd = 0;
+    do {
+        pReqParcel->Wait();
+        int ret = pReqParcel->ReadInt(cmd);
+        if (ret != 0)
+        {
+            SPR_LOGE("ReadInt failed!\n");
+            continue;
+        }
+
+        switch(cmd) {
+            default:
+                SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
+                break;
+        }
+    } while (self->mBinderRunning);
+}
+
+int SprMediator::StartBinderThread()
+{
+    if (!mBinderThread.joinable())
+    {
+        mBinderRunning = true;
+        mBinderThread = std::thread(BinderLoop, this);
+    }
+
+    return 0;
+}
 int SprMediator::PrepareInternalPort()
 {
     mq_unlink(MEDIATOR_MSG_QUEUE);

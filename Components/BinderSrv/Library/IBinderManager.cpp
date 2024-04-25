@@ -83,3 +83,18 @@ int32_t IBinderManager::RemoveService(const std::string& name)
 
     return ret;
 }
+
+bool IBinderManager::InitializeServiceBinder(const std::string& srvName, std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
+{
+    std::shared_ptr<Binder> pBinder = AddService(srvName);
+    if (!pBinder) {
+        return false;
+    }
+
+    int ret = pBinder->GetParcel(pReqParcel, pRspParcel);
+    if (ret != 0 || !pReqParcel || !pRspParcel) {
+        return false;
+    }
+
+    return true;
+}
