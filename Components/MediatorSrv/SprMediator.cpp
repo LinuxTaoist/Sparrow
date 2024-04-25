@@ -146,6 +146,7 @@ int SprMediator::PrepareInternalPort()
         SPR_LOGE("epoll_ctl fail! (%s)\n", strerror(errno));
     }
 
+    mModuleMap[MODULE_PROXY] = { false, mHandler, MEDIATOR_MSG_QUEUE };
     SPR_LOGD("Open Internal Port: %s.\n", MEDIATOR_MSG_QUEUE);
     return 0;
 }
@@ -166,11 +167,13 @@ int SprMediator::GetAllMQAttrs(std::vector<SMQInfo> &mqInfos)
     mqInfos.clear();
     for (const auto& pair : mModuleMap)
     {
-        mq_attr mqAttr;
-        mq_getattr(pair.second.handler, &mqAttr);
+        mq_attr attr;
+        mq_getattr(pair.second.handler, &attr);
 
-        // TODO
-        SMQInfo tmpMQInfo; // = {pair.second.name.c_str(), mqAttr};
+        SMQInfo tmpMQInfo;
+        tmpMQInfo.mqAttr = attr;
+        strncpy(tmpMQInfo.mqName, pair.second.name.c_str(), sizeof(tmpMQInfo.mqName) - 1);
+        tmpMQInfo.mqName[sizeof(tmpMQInfo.mqName) - 1] = '\0';
         mqInfos.push_back(tmpMQInfo);
     }
 
@@ -181,7 +184,7 @@ void SprMediator::BinderLoop(SprMediator* self)
 {
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
-    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder(SRV_NAME_MEDIATOR, pReqParcel, pRspParcel);
+    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder("mediatorsrv", pReqParcel, pRspParcel);
     if (!ret)
     {
         SPR_LOGE("Binder init failed!\n");
@@ -204,11 +207,14 @@ void SprMediator::BinderLoop(SprMediator* self)
         {
             case PROXY_CMD_GET_ALL_MQ_ATTRS:
             {
-                // TODO:
-                // std::vector<mq_attr> tmpMQAttrVec;
-                // int ret = self->GetAllMQAttrs(tmpMQAttrVec);
-                // pRspParcel->WriteInt(ret);
-                // pRspParcel->WriteVector(tmpMQAttrVec);
+                std::vector<SMQInfo> tmpMQAttrs;
+                int ret = self->GetAllMQAttrs(tmpMQAttrs);
+                pRspParcel->WriteInt(ret);
+                if (ret == 0) {
+                    pRspParcel->WriteVector(tmpMQAttrs);
+                }
+
+                pRspParcel->Post();
                 break;
             }
 

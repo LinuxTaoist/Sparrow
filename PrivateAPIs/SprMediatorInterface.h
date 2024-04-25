@@ -21,6 +21,7 @@
 
 #include <vector>
 #include <mqueue.h>
+#include "CommonTypeDefs.h"
 
 class SprMediatorInterface
 {
@@ -28,7 +29,7 @@ public:
     ~SprMediatorInterface();
     static SprMediatorInterface* GetInstance();
 
-    int GetAllMQAttrs(std::vector<mq_attr>& mqAttrVec);
+    int GetAllMQAttrs(std::vector<SMQInfo>& mqAttrVec);
 
 private:
     bool mEnable;

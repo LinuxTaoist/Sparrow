@@ -1,6 +1,7 @@
 ## Debug
 set(DEBUG_PATH ${PROJECT_PATH}/Debug)
 
+include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/PrivateAPIs)
 

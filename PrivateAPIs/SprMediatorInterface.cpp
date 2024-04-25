@@ -23,9 +23,9 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) printf("%d Property D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d Property W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d Property E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%d IMediator D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%d IMediator W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%d IMediator E: " fmt, __LINE__, ##args)
 
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
@@ -33,7 +33,7 @@ std::shared_ptr<Parcel> pRspParcel = nullptr;
 SprMediatorInterface::SprMediatorInterface()
 {
     mEnable = true;
-    bool ret = IBinderManager::GetInstance()->InitializeClientBinder("property_service", pReqParcel, pRspParcel);
+    bool ret = IBinderManager::GetInstance()->InitializeClientBinder("mediatorsrv", pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }
@@ -49,7 +49,7 @@ SprMediatorInterface* SprMediatorInterface::GetInstance()
     return &instance;
 }
 
-int SprMediatorInterface::GetAllMQAttrs(std::vector<mq_attr>& mqAttrVec)
+int SprMediatorInterface::GetAllMQAttrs(std::vector<SMQInfo>& mqAttrVec)
 {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
@@ -61,8 +61,11 @@ int SprMediatorInterface::GetAllMQAttrs(std::vector<mq_attr>& mqAttrVec)
 
     int ret = 0;
     pRspParcel->Wait();
-    pRspParcel->ReadVector(mqAttrVec);
     pRspParcel->ReadInt(ret);
+    if (ret == 0) {
+        pRspParcel->ReadVector(mqAttrVec);
+    }
+
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }

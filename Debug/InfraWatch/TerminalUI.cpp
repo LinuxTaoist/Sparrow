@@ -104,15 +104,20 @@ char TerminalUI::HandleInputInMainMenu(char input)
 
 char TerminalUI::DisplayMessageQueueStatusAndHandleInput()
 {
-    std::vector<mq_attr> mqAttrVec;
+    std::vector<SMQInfo> mqAttrVec;
     SprMediatorInterface::GetInstance()->GetAllMQAttrs(mqAttrVec);
 
     ClearScreen();
-    SPR_LOG("+---------------------------------------------------------------------+\n");
-    SPR_LOG("|                        Message Queue Status                         |\n");
-    SPR_LOG("+---------------------------------------------------------------------+\n");
-    SPR_LOG("| [q] Back                                                            |\n");
-    SPR_LOG("+---------------------------------------------------------------------+\n");
+    SPR_LOG("handle | size |  max used | cur used  | block | last msg |  total  | name\n");
+    SPR_LOG("-------+------+-----------+-----------+-------+----------+---------+---------------------------\n");
+
+    for (const auto& mqInfo : mqAttrVec) {
+        SPR_LOG("%6d | %4ld | %9d | %9ld | %s | %8u | %7u | %s\n", 0, mqInfo.mqAttr.mq_maxmsg, 1024, mqInfo.mqAttr.mq_curmsgs,
+                (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK", 0, 0, mqInfo.mqName);
+    }
+
+    SPR_LOG("-------+------+-----------+-----------+-------+----------+---------+---------------------------\n");
+    SPR_LOG("- Enter 'q' to Back \n");
 
     char input = WaitUserInput();
     HandleInputInMessageQueueMenu(input);
