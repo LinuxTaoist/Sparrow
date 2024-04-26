@@ -51,7 +51,7 @@ private:
     int PrepareInternalPort();
     int DestroyInternalPort();
     int GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
-    int LoadMQStatusInfo(int handle, const std::string& devName);
+    int LoadMQStaticInfo(int handle, const std::string& devName);
     int LoadMQDynamicInfo(int handle, const SprMsg& msg);
     // int SendMsg(const SprMsg& msg);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);

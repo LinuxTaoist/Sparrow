@@ -40,7 +40,7 @@ int TerminalUI::MainMenuLoop()
 char TerminalUI::WaitUserInput()
 {
     char input;
-    SPR_LOG("- Input: ");
+    SPR_LOG(" : ");
     std::cin >> std::noskipws >> input;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
     return input;
@@ -55,14 +55,17 @@ void TerminalUI::ClearScreen()
 char TerminalUI::DisplayMainMenuAndHandleInput()
 {
     ClearScreen();
-    SPR_LOG("+---------------------------------------------------------------------+\n");
-    SPR_LOG("|                              Main Menu                              |\n");
-    SPR_LOG("+---------------------------------------------------------------------+\n");
-    SPR_LOG("| [1] Show all message queues                                         |\n");
-    SPR_LOG("| [2] Manager status                                                  |\n");
-    SPR_LOG("| [3] Manager debug options                                           |\n");
-    SPR_LOG("| [q] Exit                                                            |\n");
-    SPR_LOG("+---------------------------------------------------------------------+\n");
+
+    SPR_LOG("==================================  MAIN MENU  ==================================\n"
+            "\n"
+            "    1. Display All Message Queues\n"
+            "    2. Display Manager Status \n"
+            "    3. Advanced Debug Options \n"
+            "\n"
+            "    [q] Quit\n"
+            "\n"
+            "=================================================================================\n");
+
 
     char input = WaitUserInput();
     HandleInputInMainMenu(input);
@@ -108,18 +111,20 @@ char TerminalUI::DisplayMessageQueueStatusAndHandleInput()
     SprMediatorInterface::GetInstance()->GetAllMQStatus(mqAttrVec);
 
     ClearScreen();
-    SPR_LOG("                                   Show all message queues                                     \n");
-    SPR_LOG("-------+------+-----------+-----------+-------+----------+---------+---------------------------\n");
-    SPR_LOG("handle | size |  max used | cur used  | block | last msg |  total  | name\n");
-    SPR_LOG("-------+------+-----------+-----------+-------+----------+---------+---------------------------\n");
-
+    SPR_LOG("                                   Show All Message Queues                                     \n");
+    SPR_LOG("-----------------------------------------------------------------------------------------------\n");
+    //        %6d     %5ld  %6ld     %6ld   %8s     %5u   %6u    %5u    %6u     %s\n"
+    SPR_LOG(" HANDLE  QLSUM  QMUSED  QCUSED  BLOCK   MLLEN MMUSED MLAST  MTOTAL  NAME\n");
+    SPR_LOG("-----------------------------------------------------------------------------------------------\n");
     for (const auto& mqInfo : mqAttrVec) {
-        SPR_LOG("%6d | %4ld | %9d | %9ld | %s | %8u | %7u | %s\n", 0, mqInfo.mqAttr.mq_maxmsg, 0, mqInfo.mqAttr.mq_curmsgs,
-                (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK", 0, 0, mqInfo.mqName);
+        SPR_LOG("%7d  %5ld  %6ld  %6ld  %s  %ld %6u %5u  %6u  %s\n", mqInfo.handle, mqInfo.mqAttr.mq_maxmsg, mqInfo.maxCount,
+                    mqInfo.mqAttr.mq_curmsgs, (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK  ",
+                    mqInfo.mqAttr.mq_msgsize, mqInfo.maxBytes, mqInfo.lastMsg, mqInfo.total % 100000, mqInfo.mqName);
     }
 
-    SPR_LOG("-------+------+-----------+-----------+-------+----------+---------+---------------------------\n");
-    SPR_LOG("- Enter 'q' to Back \n");
+    SPR_LOG("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOG(" Press q to back\n");
+
 
     char input = WaitUserInput();
     HandleInputInMessageQueueMenu(input);

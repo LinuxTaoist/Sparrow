@@ -25,12 +25,13 @@
 
 struct SMQStatus
 {
-    int     handle;
-    int     maxCount;
-    int     maxBytes;
-    int     lastMsg;
-    char    mqName[20];
-    mq_attr mqAttr;
+    int         handle;
+    int         maxBytes;
+    int         total;
+    uint32_t    lastMsg;
+    long        maxCount;
+    char        mqName[20];
+    mq_attr     mqAttr;
 };
 
 #endif // __COMMON_TYPE_DEFS_H__

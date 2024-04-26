@@ -77,6 +77,7 @@ SprMsg& SprMsg::operator=(const SprMsg &srcMsg)
 
 int SprMsg::CopyMsg(const SprMsg& srcMsg)
 {
+    mSize = srcMsg.mSize;
     mFrom = srcMsg.mFrom;
     mTo = srcMsg.mTo;
     mMsgId = srcMsg.mMsgId;
@@ -101,6 +102,7 @@ int SprMsg::CopyMsg(const SprMsg& srcMsg)
 
 void SprMsg::Init()
 {
+    mSize = 0;
     mFrom = 0;
     mTo = 0;
     mMsgId = 0;
@@ -135,6 +137,7 @@ void SprMsg::Init()
 
 void SprMsg::Clear()
 {
+    mSize = 0;
     mTag = 0;
     mString.clear();
     mU8Vec.clear();
@@ -148,6 +151,7 @@ int8_t SprMsg::Decode(std::string& deDatas)
     int8_t ret = 0;
 
     Clear();
+    SetSize(deDatas.size());
     DecodeFrom(deDatas);
     DecodeTo(deDatas);
     DecodeMsgId(deDatas);

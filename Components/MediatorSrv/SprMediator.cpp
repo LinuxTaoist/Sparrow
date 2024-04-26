@@ -153,7 +153,8 @@ int SprMediator::PrepareInternalPort()
         SPR_LOGE("epoll_ctl fail! (%s)\n", strerror(errno));
     }
 
-    mModuleMap[MODULE_PROXY] = { false, mHandler, mMqDevName.c_str() };
+    // load mq information of self
+    LoadMQStaticInfo(mHandler, mMqDevName.c_str());
     SPR_LOGD("Open Internal Port: %s.\n", mMqDevName.c_str());
     return 0;
 }
@@ -183,25 +184,51 @@ int SprMediator::GetAllMQStatus(std::vector<SMQStatus> &mqInfoList)
     return 0;
 }
 
-int SprMediator::LoadMQStatusInfo(int handle, const std::string& devName)
+int SprMediator::LoadMQStaticInfo(int handle, const std::string& devName)
 {
-    SMQStatus tmpMQStatus;
+    SMQStatus tmpMQStatus = {};
 
     tmpMQStatus.handle = handle;
     memset(tmpMQStatus.mqName, 0, sizeof(tmpMQStatus.mqName));
     strncpy(tmpMQStatus.mqName, devName.c_str(), sizeof(tmpMQStatus.mqName) - 1);
-    mMQStatusMap.insert(std::make_pair(handle, tmpMQStatus));
+    mMQStatusMap[handle] = tmpMQStatus;
 
     return 0;
 }
 
 int SprMediator::LoadMQDynamicInfo(int handle, const SprMsg& msg)
 {
-    // TODO: update mq dynamic info
+    // Avoid receiving SIG_ID_PROXY_REGISTER_REQUEST and reporting errors
     auto mqStatus = mMQStatusMap.find(handle);
-    if (mqStatus != mMQStatusMap.end()) {
+    if ( msg.GetMsgId() != SIG_ID_PROXY_REGISTER_REQUEST
+      && mqStatus == mMQStatusMap.end()) {
 
+        SPR_LOGE("Not exist mq handle: %d [%s]\n", handle, GetSigName(msg.GetMsgId()));
+        return -1;
     }
+
+    // Update mqAttr
+    int ret = mq_getattr(handle, &mqStatus->second.mqAttr);
+    if (ret != 0) {
+        SPR_LOGE("mq_getattr failed! (%s)\n", strerror(errno));
+        return -1;
+    }
+
+    // Update maxCount
+    const mq_attr& attr = mqStatus->second.mqAttr;
+    if (attr.mq_curmsgs >= mqStatus->second.maxCount) {
+        mqStatus->second.maxCount = attr.mq_curmsgs + 1;
+    }
+
+    // Update maxBytes
+    if (msg.GetSize() > mqStatus->second.maxBytes) {
+        mqStatus->second.maxBytes = msg.GetSize();
+    }
+
+    // Update lastMsg, total times
+    mqStatus->second.lastMsg = msg.GetMsgId();
+    mqStatus->second.total++;
+
     return 0;
 }
 
@@ -380,7 +407,8 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
     {
         result = true;
         mModuleMap[moduleId] = { monitored, handle, name };
-        LoadMQStatusInfo(handle, name);
+        LoadMQStaticInfo(handle, name);
+        LoadMQDynamicInfo(handle,msg);
         SPR_LOGD("Register successfully! ID: %d, NAME: %s, monitored = %d\n", (int)moduleId, name.c_str(), monitored);
     } else {
         SPR_LOGE("Invaild handle!\n");

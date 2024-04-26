@@ -39,6 +39,7 @@ using namespace std;
 #define SPR_LOGE(fmt, args...) printf("%04d LOGM E: " fmt, __LINE__, ##args)
 
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
+#define DEFAULT_FRAME_LEN_LIMIT     1024
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 #define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
@@ -149,6 +150,11 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 
 int LogManager::WriteToLogFile(const std::string& logData)
 {
+    if (logData.size() > DEFAULT_FRAME_LEN_LIMIT) {
+        SPR_LOGE("Out of length limit [%ld %d]!\n", logData.size(), DEFAULT_FRAME_LEN_LIMIT);
+        return -1;
+    }
+
     if (!mLogFileStream.is_open()) {
         mLogFileStream.open(mLogsDirPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {

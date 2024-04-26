@@ -51,9 +51,11 @@ public:
     SprMsg& operator=(const SprMsg &srcMsg); // Assignment Operator
     int CopyMsg(const SprMsg& srcMsg);
 
-    void    Clear();
-    int8_t  Decode(std::string& deDatas);
-    int8_t  Encode(std::string& enDatas) const;
+    void     Clear();
+    int8_t   Decode(std::string& deDatas);
+    int8_t   Encode(std::string& enDatas) const;
+    void     SetSize(int32_t size) { mSize = size; }
+    int32_t  GetSize() const { return mSize; }
 
     void SetFrom(uint32_t from);
     void SetTo(uint32_t to);
@@ -124,6 +126,7 @@ private:
     void DecodeDatas(std::string& deDatas);
 
 private:
+    int32_t                 mSize;
     uint32_t                mFrom;
     uint32_t                mTo;
     uint32_t                mMsgId;
