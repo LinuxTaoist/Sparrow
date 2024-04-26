@@ -29,7 +29,7 @@ public:
     ~SprMediatorInterface();
     static SprMediatorInterface* GetInstance();
 
-    int GetAllMQAttrs(std::vector<SMQInfo>& mqAttrVec);
+    int GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec);
 
 private:
     bool mEnable;

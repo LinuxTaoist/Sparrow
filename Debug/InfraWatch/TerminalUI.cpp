@@ -58,9 +58,9 @@ char TerminalUI::DisplayMainMenuAndHandleInput()
     SPR_LOG("+---------------------------------------------------------------------+\n");
     SPR_LOG("|                              Main Menu                              |\n");
     SPR_LOG("+---------------------------------------------------------------------+\n");
-    SPR_LOG("| [1] Message Queue Status                                            |\n");
-    SPR_LOG("| [2] Manager Status                                                  |\n");
-    SPR_LOG("| [3] Manager Debug Options                                           |\n");
+    SPR_LOG("| [1] Show all message queues                                         |\n");
+    SPR_LOG("| [2] Manager status                                                  |\n");
+    SPR_LOG("| [3] Manager debug options                                           |\n");
     SPR_LOG("| [q] Exit                                                            |\n");
     SPR_LOG("+---------------------------------------------------------------------+\n");
 
@@ -104,15 +104,17 @@ char TerminalUI::HandleInputInMainMenu(char input)
 
 char TerminalUI::DisplayMessageQueueStatusAndHandleInput()
 {
-    std::vector<SMQInfo> mqAttrVec;
-    SprMediatorInterface::GetInstance()->GetAllMQAttrs(mqAttrVec);
+    std::vector<SMQStatus> mqAttrVec;
+    SprMediatorInterface::GetInstance()->GetAllMQStatus(mqAttrVec);
 
     ClearScreen();
+    SPR_LOG("                                   Show all message queues                                     \n");
+    SPR_LOG("-------+------+-----------+-----------+-------+----------+---------+---------------------------\n");
     SPR_LOG("handle | size |  max used | cur used  | block | last msg |  total  | name\n");
     SPR_LOG("-------+------+-----------+-----------+-------+----------+---------+---------------------------\n");
 
     for (const auto& mqInfo : mqAttrVec) {
-        SPR_LOG("%6d | %4ld | %9d | %9ld | %s | %8u | %7u | %s\n", 0, mqInfo.mqAttr.mq_maxmsg, 1024, mqInfo.mqAttr.mq_curmsgs,
+        SPR_LOG("%6d | %4ld | %9d | %9ld | %s | %8u | %7u | %s\n", 0, mqInfo.mqAttr.mq_maxmsg, 0, mqInfo.mqAttr.mq_curmsgs,
                 (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK", 0, 0, mqInfo.mqName);
     }
 

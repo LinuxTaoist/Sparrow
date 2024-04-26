@@ -43,6 +43,7 @@ SprMediator::SprMediator(int size)
 {
     mBinderRunning = true;
     mHandler = -1;
+    mMqDevName = MEDIATOR_MSG_QUEUE;
     if (size) {
         mEpollHandler = epoll_create(size);
     } else {
@@ -56,10 +57,10 @@ SprMediator::~SprMediator()
 
     for (auto& pair : mModuleMap)
     {
-        if (pair.second.handler != -1)
+        if (pair.second.handle != -1)
         {
-            mq_close(pair.second.handler);
-            pair.second.handler = -1;
+            mq_close(pair.second.handle);
+            pair.second.handle = -1;
         }
     }
 
@@ -116,12 +117,12 @@ int SprMediator::MakeMQ(const string& name)
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1025;
 
-    int handler = mq_open(name.c_str(), O_RDWR | O_CREAT, 0666, &mqAttr);
-    if(handler < 0) {
+    int handle = mq_open(name.c_str(), O_RDWR | O_CREAT, 0666, &mqAttr);
+    if(handle < 0) {
         SPR_LOGE("Open %s failed. (%s)\n", name.c_str(), strerror(errno));
     }
 
-    return handler;
+    return handle;
 }
 
 int SprMediator::StartBinderThread()
@@ -136,8 +137,14 @@ int SprMediator::StartBinderThread()
 }
 int SprMediator::PrepareInternalPort()
 {
-    mq_unlink(MEDIATOR_MSG_QUEUE);
-    mHandler = MakeMQ(MEDIATOR_MSG_QUEUE);
+    if (mMqDevName.empty())
+    {
+        SPR_LOGE("mMqDevName is empty!\n");
+        return -1;
+    }
+
+    mq_unlink(mMqDevName.c_str());
+    mHandler = MakeMQ(mMqDevName.c_str());
 
     struct epoll_event ep;
     ep.events = EPOLLIN | EPOLLET;
@@ -146,8 +153,8 @@ int SprMediator::PrepareInternalPort()
         SPR_LOGE("epoll_ctl fail! (%s)\n", strerror(errno));
     }
 
-    mModuleMap[MODULE_PROXY] = { false, mHandler, MEDIATOR_MSG_QUEUE };
-    SPR_LOGD("Open Internal Port: %s.\n", MEDIATOR_MSG_QUEUE);
+    mModuleMap[MODULE_PROXY] = { false, mHandler, mMqDevName.c_str() };
+    SPR_LOGD("Open Internal Port: %s.\n", mMqDevName.c_str());
     return 0;
 }
 
@@ -159,24 +166,42 @@ int SprMediator::DestroyInternalPort()
         mHandler = -1;
     }
 
+    if (!mMqDevName.empty()) {
+        mq_unlink(mMqDevName.c_str());
+    }
+
     return 0;
 }
 
-int SprMediator::GetAllMQAttrs(std::vector<SMQInfo> &mqInfos)
+int SprMediator::GetAllMQStatus(std::vector<SMQStatus> &mqInfoList)
 {
-    mqInfos.clear();
-    for (const auto& pair : mModuleMap)
-    {
-        mq_attr attr;
-        mq_getattr(pair.second.handler, &attr);
-
-        SMQInfo tmpMQInfo;
-        tmpMQInfo.mqAttr = attr;
-        strncpy(tmpMQInfo.mqName, pair.second.name.c_str(), sizeof(tmpMQInfo.mqName) - 1);
-        tmpMQInfo.mqName[sizeof(tmpMQInfo.mqName) - 1] = '\0';
-        mqInfos.push_back(tmpMQInfo);
+    mqInfoList.clear();
+    for (const auto& pair : mMQStatusMap) {
+        mqInfoList.push_back(pair.second);
     }
 
+    return 0;
+}
+
+int SprMediator::LoadMQStatusInfo(int handle, const std::string& devName)
+{
+    SMQStatus tmpMQStatus;
+
+    tmpMQStatus.handle = handle;
+    memset(tmpMQStatus.mqName, 0, sizeof(tmpMQStatus.mqName));
+    strncpy(tmpMQStatus.mqName, devName.c_str(), sizeof(tmpMQStatus.mqName) - 1);
+    mMQStatusMap.insert(std::make_pair(handle, tmpMQStatus));
+
+    return 0;
+}
+
+int SprMediator::LoadMQDynamicInfo(int handle, const SprMsg& msg)
+{
+    // TODO: update mq dynamic info
+    auto mqStatus = mMQStatusMap.find(handle);
+    if (mqStatus != mMQStatusMap.end()) {
+
+    }
     return 0;
 }
 
@@ -207,8 +232,8 @@ void SprMediator::BinderLoop(SprMediator* self)
         {
             case PROXY_CMD_GET_ALL_MQ_ATTRS:
             {
-                std::vector<SMQInfo> tmpMQAttrs;
-                int ret = self->GetAllMQAttrs(tmpMQAttrs);
+                std::vector<SMQStatus> tmpMQAttrs;
+                int ret = self->GetAllMQStatus(tmpMQAttrs);
                 pRspParcel->WriteInt(ret);
                 if (ret == 0) {
                     pRspParcel->WriteVector(tmpMQAttrs);
@@ -238,13 +263,13 @@ int SprMediator::EpollLoop()
         }
 
         for (int i = 0; i < count; i++) {
-            int handler = ep[i].data.fd;
+            int handle = ep[i].data.fd;
             char buf[MSG_BUF_MAX_LENGTH] = {0};
             unsigned int prio;
             mq_attr mqAttr;
 
-            mq_getattr(handler, &mqAttr);
-            int len = mq_receive(handler, buf, mqAttr.mq_msgsize, &prio);
+            mq_getattr(handle, &mqAttr);
+            int len = mq_receive(handle, buf, mqAttr.mq_msgsize, &prio);
             if (len <= 0) {
                 SPR_LOGE("mq_receive failed! (%s)\n", strerror(errno));
                 return -1;
@@ -253,6 +278,7 @@ int SprMediator::EpollLoop()
             string datas(buf, len);
             SprMsg msg(datas);
             ProcessMsg(msg);
+            LoadMQDynamicInfo(handle, msg);
         }
     } while(1);
 
@@ -304,7 +330,7 @@ int SprMediator::NotifyObserver(ESprModuleID id, const SprMsg& msg)
 
     string datas;
     msg.Encode(datas);
-    int ret = mq_send(it->second.handler, (const char*)datas.c_str(), datas.size(), 0);
+    int ret = mq_send(it->second.handle, (const char*)datas.c_str(), datas.size(), 0);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }
@@ -316,7 +342,7 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
 {
     for (const auto& pair : mModuleMap)
     {
-        if (pair.second.handler != -1 && pair.second.monitored)
+        if (pair.second.handle != -1 && pair.second.monitored)
         {
             // When the value to is NONE, it is sent to all
             // and when the value is vaild value, it is sent to the destination
@@ -341,22 +367,23 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
     if (it != mModuleMap.end())
     {
         SPR_LOGW("Already exist moduleId: 0x%x\n", moduleId);
-        if (it->second.handler != -1)
+        if (it->second.handle != -1)
         {
-            mq_close(it->second.handler);
-            it->second.handler = -1;
+            mq_close(it->second.handle);
+            it->second.handle = -1;
         }
         mModuleMap.erase(moduleId);
     }
 
-    int handler = MakeMQ(name);
-    if (handler != -1)
+    int handle = MakeMQ(name);
+    if (handle != -1)
     {
         result = true;
-        mModuleMap[moduleId] = { monitored, handler, name };
+        mModuleMap[moduleId] = { monitored, handle, name };
+        LoadMQStatusInfo(handle, name);
         SPR_LOGD("Register successfully! ID: %d, NAME: %s, monitored = %d\n", (int)moduleId, name.c_str(), monitored);
     } else {
-        SPR_LOGE("Invaild handler!\n");
+        SPR_LOGE("Invaild handle!\n");
     }
 
     SprMsg rspMsg(MODULE_PROXY, moduleId, SIG_ID_PROXY_REGISTER_RESPONSE);
@@ -373,14 +400,19 @@ int SprMediator::MsgResponseUnregister(const SprMsg& msg)
     auto it = mModuleMap.find(moduleId);
     if (it != mModuleMap.end())
     {
-        if (it->second.handler != -1)
+        if (it->second.handle != -1)
         {
-            mq_close(it->second.handler);
-            it->second.handler = -1;
+            mq_close(it->second.handle);
+            it->second.handle = -1;
             SPR_LOGD("Close mq %s \n", it->second.name.c_str());
         }
 
         mModuleMap.erase(moduleId);
+
+        if (mMQStatusMap.count(it->second.handle) > 0) {
+            mMQStatusMap.erase(it->second.handle);
+        }
+
     } else {
         SPR_LOGW("Not exist module id: %x\n", moduleId);
     }

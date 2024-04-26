@@ -31,7 +31,7 @@
 struct SModuleInfo
 {
     bool monitored;
-    int handler;
+    int handle;
     std::string name;
 };
 
@@ -50,7 +50,9 @@ private:
     int StartBinderThread();
     int PrepareInternalPort();
     int DestroyInternalPort();
-    int GetAllMQAttrs(std::vector<SMQInfo> &mqInfos);
+    int GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
+    int LoadMQStatusInfo(int handle, const std::string& devName);
+    int LoadMQDynamicInfo(int handle, const SprMsg& msg);
     // int SendMsg(const SprMsg& msg);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);
@@ -69,7 +71,9 @@ private:
     int mHandler;
     int mEpollHandler;
     bool mBinderRunning;
+    std::string mMqDevName;
     std::thread mBinderThread;
+    std::map<int, SMQStatus> mMQStatusMap;  // handle, mq status
     std::map<InternalDefs::ESprModuleID, SModuleInfo> mModuleMap;
 };
 

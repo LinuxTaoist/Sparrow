@@ -23,9 +23,13 @@
 
 #include <mqueue.h>
 
-struct SMQInfo
+struct SMQStatus
 {
-    char mqName[20];
+    int     handle;
+    int     maxCount;
+    int     maxBytes;
+    int     lastMsg;
+    char    mqName[20];
     mq_attr mqAttr;
 };
 
