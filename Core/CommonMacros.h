@@ -30,7 +30,7 @@
 // --------------------------------------------------------------------------------------------
 // - Service name macro
 // --------------------------------------------------------------------------------------------
-#define SRV_NAME_BINDER             "bindersrv"
+#define SRV_NAME_BINDER             "bindhubsrv"
 #define SRV_NAME_PROPERTY           "propertiessrv"
 #define SRV_NAME_MEDIATOR           "mediatorsrv"
 #define SRV_NAME_LOG                "logmanagersrv"

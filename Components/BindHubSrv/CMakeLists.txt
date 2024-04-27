@@ -10,6 +10,6 @@ aux_source_directory    (${BINDHUB_PATH}            SRC_BINDER_SRV_PATH)
 set(PARCEL_SRC_FILES    ${PROJECT_PATH}/PrivateAPIs/Binder/Parcel.cpp)
 
 add_executable          (BinBinderSrv ${SRC_BINDER_SRV_PATH}    ${PARCEL_SRC_FILES})
-set_target_properties   (BinBinderSrv PROPERTIES OUTPUT_NAME    "bindersrv")
+set_target_properties   (BinBinderSrv PROPERTIES OUTPUT_NAME    "bindhubsrv")
 target_link_libraries   (BinBinderSrv pthread rt 3rdadapter)
 add_dependencies        (BinBinderSrv Lib3rdAdapter)
