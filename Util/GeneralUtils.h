@@ -35,6 +35,7 @@ namespace GeneralUtils {
     }
 
     int RandomDecimalDigits(int digits);
+    int SystemCmd(const char *format, ...);
     int SystemCmd(std::string& out, const char *format, ...);
 
     std::string GetCurTimeStr();

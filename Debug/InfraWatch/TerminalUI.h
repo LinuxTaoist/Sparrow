@@ -28,7 +28,8 @@ public:
 
 private:
     void ClearScreen();
-    char WaitUserInput();
+    char WaitUserInputUntilEnter();
+    char WaitUserInputWithoutEnter();
     char DisplayMainMenuAndHandleInput();
     char HandleInputInMainMenu(char input);
     char DisplayMessageQueueStatusAndHandleInput();

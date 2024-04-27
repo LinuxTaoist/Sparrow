@@ -1,9 +1,9 @@
 ## 3rdAdapter
-include_directories (${PROJECT_PATH}/Core)
-include_directories (${PROJECT_PATH}/3rdAdapter)
-include_directories (${PROJECT_PATH}/3rdParty/libgo/include)
-aux_source_directory(${PROJECT_PATH}/3rdAdapter     SRC_ADAPTER_PATH)
-set(OTHER_SRC_FILES ${PROJECT_PATH}/Util/SharedRingBuffer.cpp)
+include_directories         (${PROJECT_PATH}/Core)
+include_directories         (${PROJECT_PATH}/3rdAdapter)
+include_directories         (${PROJECT_PATH}/3rdParty/libgo/include)
+aux_source_directory        (${PROJECT_PATH}/3rdAdapter     SRC_ADAPTER_PATH)
+set(OTHER_SRC_FILES         ${PROJECT_PATH}/Util/SharedRingBuffer.cpp)
 
 ## Build libspradapter.so
 add_library                 (Lib3rdAdapter STATIC ${SRC_ADAPTER_PATH} ${OTHER_SRC_FILES})

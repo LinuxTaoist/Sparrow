@@ -97,7 +97,7 @@ int32_t BinderManager::MsgResponseRemoveService()
 
 int32_t BinderManager::MsgResponseGetService()
 {
-    int32_t rspRet = 0;
+    int32_t ret = 0;
     int32_t key = 0;
     std::string name;
     std::string shmName;
@@ -108,16 +108,16 @@ int32_t BinderManager::MsgResponseGetService()
         shmName = it->second.GetShmName();
         key = it->second.GetKey();
     } else {
-        rspRet = -1;
+        ret = -1;
         SPR_LOGE("Service %s not exist!\n", name.c_str());
     }
 
     rspParcel.WriteString(shmName);
     rspParcel.WriteInt(key);
-    rspParcel.WriteInt(rspRet);
+    rspParcel.WriteInt(ret);
     rspParcel.Post();
 
-    return 0;
+    return ret;
 }
 
 int32_t BinderManager::HandleMsgLoop()

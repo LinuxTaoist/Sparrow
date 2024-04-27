@@ -20,11 +20,12 @@
 #include <iostream>
 #include <stdio.h>
 #include "TerminalUI.h"
+#include "GeneralUtils.h"
 #include "SprMediatorInterface.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-#define WAIT_UNTIL_QUIT(handle) while((handle()) != 'q')
+#define CONTINUE_ON_NONQUIT(handle) while(toupper((handle())) != 'Q')
 
 TerminalUI::TerminalUI()
 {
@@ -34,16 +35,27 @@ TerminalUI::~TerminalUI()
 }
 int TerminalUI::MainMenuLoop()
 {
-    WAIT_UNTIL_QUIT(DisplayMainMenuAndHandleInput);
+    CONTINUE_ON_NONQUIT(DisplayMainMenuAndHandleInput);
     return 0;
 }
-char TerminalUI::WaitUserInput()
+char TerminalUI::WaitUserInputUntilEnter()
 {
-    char input;
+    char in;
     SPR_LOG(" : ");
-    std::cin >> std::noskipws >> input;
+    std::cin >> std::noskipws >> in;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-    return input;
+
+    return in;
+}
+
+char TerminalUI::WaitUserInputWithoutEnter()
+{
+    char in = 0;
+    GeneralUtils::SystemCmd("stty raw");
+    in = getchar();
+    GeneralUtils::SystemCmd("stty cooked");
+
+    return in;
 }
 
 void TerminalUI::ClearScreen()
@@ -62,12 +74,12 @@ char TerminalUI::DisplayMainMenuAndHandleInput()
             "    2. Display Manager Status \n"
             "    3. Advanced Debug Options \n"
             "\n"
-            "    [q] Quit\n"
+            "    [Q] Quit\n"
             "\n"
             "=================================================================================\n");
 
 
-    char input = WaitUserInput();
+    char input = WaitUserInputUntilEnter();
     HandleInputInMainMenu(input);
 
     return input;
@@ -77,19 +89,19 @@ char TerminalUI::HandleInputInMainMenu(char input)
     switch(input) {
         case '1':
         {
-            WAIT_UNTIL_QUIT(DisplayMessageQueueStatusAndHandleInput);
+            CONTINUE_ON_NONQUIT(DisplayMessageQueueStatusAndHandleInput);
             break;
         }
 
         case '2':
         {
-            WAIT_UNTIL_QUIT(DisplayManagerStatusAndHandleInput);
+            CONTINUE_ON_NONQUIT(DisplayManagerStatusAndHandleInput);
             break;
         }
 
         case '3':
         {
-            WAIT_UNTIL_QUIT(DisplayManagerStatusAndHandleInput);
+            CONTINUE_ON_NONQUIT(DisplayManagerStatusAndHandleInput);
             break;
         }
 
@@ -123,10 +135,10 @@ char TerminalUI::DisplayMessageQueueStatusAndHandleInput()
     }
 
     SPR_LOG("-----------------------------------------------------------------------------------------------\n");
-    SPR_LOG(" Press q to back\n");
+    SPR_LOG("Press 'Q' to back\n");
 
 
-    char input = WaitUserInput();
+    char input = WaitUserInputWithoutEnter();
     HandleInputInMessageQueueMenu(input);
 
     return input;
@@ -143,10 +155,10 @@ char TerminalUI::DisplayManagerStatusAndHandleInput()
     SPR_LOG("+---------------------------------------------------------------------+\n");
     SPR_LOG("|                            Manager Debug                            |\n");
     SPR_LOG("+---------------------------------------------------------------------+\n");
-    SPR_LOG("| [q] Back                                                            |\n");
+    SPR_LOG("| [Q] Back                                                            |\n");
     SPR_LOG("+---------------------------------------------------------------------+\n");
 
-    char input = WaitUserInput();
+    char input = WaitUserInputUntilEnter();
     HandleInputInManagerStatusMenu(input);
 
     return input;

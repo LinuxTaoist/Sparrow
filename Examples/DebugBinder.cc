@@ -59,6 +59,7 @@ int Server(const std::shared_ptr<Binder>& binder)
         return -1;
     }
 
+
     SPR_LOGD("Server start\n");
 
     do {

@@ -34,6 +34,18 @@ int RandomDecimalDigits(int digits)
     return distribution(generator);
 }
 
+int SystemCmd(const char *format, ...)
+{
+    std::string out;
+
+    va_list vlist;
+    va_start(vlist, format);
+    int ret = SystemCmd(out, format, vlist);
+
+    va_end(vlist);
+    return ret;
+}
+
 int SystemCmd(std::string& out, const char *format, ...)
 {
     va_list vlist;

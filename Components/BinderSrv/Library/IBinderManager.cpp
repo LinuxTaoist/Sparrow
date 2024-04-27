@@ -103,12 +103,7 @@ bool IBinderManager::InitializeServiceBinder(const std::string& srvName,
 bool IBinderManager::InitializeClientBinder(const std::string& srvName,
         std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
 {
-    IBinderManager* pObj = GetInstance();
-    if (pObj == nullptr) {
-        return false;
-    }
-
-    std::shared_ptr<IBinder> pBinder = pObj->GetService(srvName);
+    std::shared_ptr<IBinder> pBinder = GetService(srvName);
     if (pBinder == nullptr) {
         return false;
     }
