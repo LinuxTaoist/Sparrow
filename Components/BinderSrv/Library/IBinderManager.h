@@ -30,14 +30,14 @@ public:
     ~IBinderManager() = default;
 
     static IBinderManager* GetInstance();
-    std::shared_ptr<Binder> AddService(const std::string& name);
-    std::shared_ptr<IBinder> GetService(const std::string& name);
-    int32_t RemoveService(const std::string& name);
     bool InitializeServiceBinder(const std::string& srvName, std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel);
     bool InitializeClientBinder(const std::string& srvName, std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel);
 
 private:
     IBinderManager() = default;
+    std::shared_ptr<Binder>  AddService(const std::string& name);
+    std::shared_ptr<IBinder> GetService(const std::string& name);
+    int32_t RemoveService(const std::string& name);
 };
 
 #endif // __IBINDER_MANAGER_H__

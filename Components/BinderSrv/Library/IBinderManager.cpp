@@ -31,6 +31,38 @@ IBinderManager* IBinderManager::GetInstance()
     return &instance;
 }
 
+bool IBinderManager::InitializeServiceBinder(const std::string& srvName,
+     std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
+{
+    std::shared_ptr<Binder> pBinder = AddService(srvName);
+    if (!pBinder) {
+        return false;
+    }
+
+    int ret = pBinder->GetParcel(pReqParcel, pRspParcel);
+    if (ret != 0 || !pReqParcel || !pRspParcel) {
+        return false;
+    }
+
+    return true;
+}
+
+bool IBinderManager::InitializeClientBinder(const std::string& srvName,
+        std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
+{
+    std::shared_ptr<IBinder> pBinder = GetService(srvName);
+    if (pBinder == nullptr) {
+        return false;
+    }
+
+    pBinder->GetParcel(pReqParcel, pRspParcel);
+    if (pReqParcel == nullptr || pRspParcel == nullptr) {
+        return false;
+    }
+
+    return true;
+}
+
 std::shared_ptr<Binder> IBinderManager::AddService(const std::string& name)
 {
     iReqParcel.WriteInt(BINDER_CMD_ADD_SERVICE);
@@ -82,36 +114,4 @@ int32_t IBinderManager::RemoveService(const std::string& name)
     iRspParcel.ReadInt(ret);
 
     return ret;
-}
-
-bool IBinderManager::InitializeServiceBinder(const std::string& srvName,
-     std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
-{
-    std::shared_ptr<Binder> pBinder = AddService(srvName);
-    if (!pBinder) {
-        return false;
-    }
-
-    int ret = pBinder->GetParcel(pReqParcel, pRspParcel);
-    if (ret != 0 || !pReqParcel || !pRspParcel) {
-        return false;
-    }
-
-    return true;
-}
-
-bool IBinderManager::InitializeClientBinder(const std::string& srvName,
-        std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
-{
-    std::shared_ptr<IBinder> pBinder = GetService(srvName);
-    if (pBinder == nullptr) {
-        return false;
-    }
-
-    pBinder->GetParcel(pReqParcel, pRspParcel);
-    if (pReqParcel == nullptr || pRspParcel == nullptr) {
-        return false;
-    }
-
-    return true;
 }

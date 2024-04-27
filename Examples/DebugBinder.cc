@@ -41,19 +41,12 @@ struct STestData {
     int value1;
     int value2;
 };
-
-void InitServer(std::shared_ptr<Binder>& binder)
-{
-    IBinderManager* pObj = IBinderManager::GetInstance();
-    binder = pObj->AddService(SERVICE_NAME);
-}
-
-int Server(const std::shared_ptr<Binder>& binder)
+int Server()
 {
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-    binder->GetParcel(pReqParcel, pRspParcel);
+    IBinderManager::GetInstance()->InitializeServiceBinder(SERVICE_NAME, pReqParcel, pRspParcel);
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
         SPR_LOGE("GetParcel failed\n");
         return -1;
@@ -137,20 +130,16 @@ void usage()
 int Client()
 {
     char in = 0;
-    IBinderManager* pObj = IBinderManager::GetInstance();
-    std::shared_ptr<IBinder> pBinder = pObj->GetService(SERVICE_NAME);
-    if (pBinder == nullptr) {
-        SPR_LOGE("GetService failed\n");
-        return -1;
-    }
-
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
-    pBinder->GetParcel(pReqParcel, pRspParcel);
+
+    IBinderManager::GetInstance()->InitializeClientBinder(SERVICE_NAME, pReqParcel, pRspParcel);
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
         SPR_LOGE("GetParcel failed!\n");
         return -1;
     }
+
+
 
     SPR_LOGD("Client start\n");
     usage();
@@ -238,14 +227,11 @@ int Client()
 
 int main(int argc, const char *argv[])
 {
-    std::shared_ptr<Binder> binder;
-    InitServer(binder);
-
     pid_t pid = fork();
     if (pid == -1) {
         SPR_LOGE("fork failed! (%s)", strerror(errno));
     } else if (pid == 0) {
-        Server(binder);
+        Server();
     } else {
         Client();
     }

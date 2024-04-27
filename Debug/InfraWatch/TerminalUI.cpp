@@ -41,7 +41,7 @@ int TerminalUI::MainMenuLoop()
 char TerminalUI::WaitUserInputUntilEnter()
 {
     char in;
-    SPR_LOG(" : ");
+    SPR_LOG(": ");
     std::cin >> std::noskipws >> in;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
 
