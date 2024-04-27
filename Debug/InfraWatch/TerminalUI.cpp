@@ -158,7 +158,7 @@ char TerminalUI::DisplayManagerStatusAndHandleInput()
     SPR_LOG("| [Q] Back                                                            |\n");
     SPR_LOG("+---------------------------------------------------------------------+\n");
 
-    char input = WaitUserInputUntilEnter();
+    char input = WaitUserInputWithoutEnter();
     HandleInputInManagerStatusMenu(input);
 
     return input;
