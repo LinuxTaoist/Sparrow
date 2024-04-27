@@ -69,5 +69,3 @@ int SprMediatorInterface::GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec)
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
-
-

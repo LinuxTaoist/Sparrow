@@ -6,4 +6,3 @@ execute_process(
     RESULT_VARIABLE result
     OUTPUT_VARIABLE output
 )
-
