@@ -18,7 +18,7 @@
  */
 #include <stdio.h>
 #include "CoreTypeDefs.h"
-#include "IBinderManager.h"
+#include "BindInterface.h"
 #include "SprMediatorInterface.h"
 
 using namespace InternalDefs;
@@ -33,7 +33,7 @@ std::shared_ptr<Parcel> pRspParcel = nullptr;
 SprMediatorInterface::SprMediatorInterface()
 {
     mEnable = true;
-    bool ret = IBinderManager::GetInstance()->InitializeClientBinder("mediatorsrv", pReqParcel, pRspParcel);
+    bool ret = BindInterface::GetInstance()->InitializeClientBinder("mediatorsrv", pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }

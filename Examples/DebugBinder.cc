@@ -21,7 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
-#include "IBinderManager.h"
+#include "BindInterface.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...) printf("%d DebugBinder D: " fmt, __LINE__, ##args)
@@ -46,7 +46,7 @@ int Server()
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-    IBinderManager::GetInstance()->InitializeServiceBinder(SERVICE_NAME, pReqParcel, pRspParcel);
+    BindInterface::GetInstance()->InitializeServiceBinder(SERVICE_NAME, pReqParcel, pRspParcel);
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
         SPR_LOGE("GetParcel failed\n");
         return -1;
@@ -133,7 +133,7 @@ int Client()
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-    IBinderManager::GetInstance()->InitializeClientBinder(SERVICE_NAME, pReqParcel, pRspParcel);
+    BindInterface::GetInstance()->InitializeClientBinder(SERVICE_NAME, pReqParcel, pRspParcel);
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
         SPR_LOGE("GetParcel failed!\n");
         return -1;

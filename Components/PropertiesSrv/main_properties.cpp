@@ -18,7 +18,7 @@
  */
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
-#include "IBinderManager.h"
+#include "BindInterface.h"
 #include "CoreTypeDefs.h"
 #include "PropertyManager.h"
 
@@ -32,7 +32,7 @@ static void BinderLoop(PropertyManager* pProperM)
 {
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
-    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder("property_service", pReqParcel, pRspParcel);
+    bool ret = BindInterface::GetInstance()->InitializeServiceBinder("property_service", pReqParcel, pRspParcel);
     if (!ret)
     {
         SPR_LOGE("InitializeServiceBinder failed!\n");

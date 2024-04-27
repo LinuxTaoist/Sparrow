@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : IBinderManager.cpp
+ *  @file       : BindInterface.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -17,21 +17,21 @@
  *
  */
 #include "Parcel.h"
-#include "BinderCommon.h"
-#include "IBinderManager.h"
+#include "BindCommon.h"
+#include "BindInterface.h"
 
 using namespace InternalDefs;
 
 Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, true);
 Parcel iRspParcel("BinderM",  KEY_BINDER_MANAGER,  false);
 
-IBinderManager* IBinderManager::GetInstance()
+BindInterface* BindInterface::GetInstance()
 {
-    static IBinderManager instance;
+    static BindInterface instance;
     return &instance;
 }
 
-bool IBinderManager::InitializeServiceBinder(const std::string& srvName,
+bool BindInterface::InitializeServiceBinder(const std::string& srvName,
      std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
 {
     std::shared_ptr<Binder> pBinder = AddService(srvName);
@@ -47,7 +47,7 @@ bool IBinderManager::InitializeServiceBinder(const std::string& srvName,
     return true;
 }
 
-bool IBinderManager::InitializeClientBinder(const std::string& srvName,
+bool BindInterface::InitializeClientBinder(const std::string& srvName,
         std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
 {
     std::shared_ptr<IBinder> pBinder = GetService(srvName);
@@ -63,7 +63,7 @@ bool IBinderManager::InitializeClientBinder(const std::string& srvName,
     return true;
 }
 
-std::shared_ptr<Binder> IBinderManager::AddService(const std::string& name)
+std::shared_ptr<Binder> BindInterface::AddService(const std::string& name)
 {
     iReqParcel.WriteInt(BINDER_CMD_ADD_SERVICE);
     iReqParcel.WriteString(name);
@@ -82,7 +82,7 @@ std::shared_ptr<Binder> IBinderManager::AddService(const std::string& name)
     }
 }
 
-std::shared_ptr<IBinder> IBinderManager::GetService(const std::string& name)
+std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name)
 {
     iReqParcel.WriteInt(BINDER_CMD_GET_SERVICE);
     iReqParcel.WriteString(name);
@@ -103,7 +103,7 @@ std::shared_ptr<IBinder> IBinderManager::GetService(const std::string& name)
     }
 }
 
-int32_t IBinderManager::RemoveService(const std::string& name)
+int32_t BindInterface::RemoveService(const std::string& name)
 {
     iReqParcel.WriteInt(BINDER_CMD_REMOVE_SERVICE);
     iReqParcel.WriteString(name);

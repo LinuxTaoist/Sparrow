@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : BinderCommon.h
+ *  @file       : BindCommon.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __BINDER_COMMON_H__
-#define __BINDER_COMMON_H__
+#ifndef __BIND_COMMON_H__
+#define __BIND_COMMON_H__
 
 #define     KEY_IBINDER_MANAGER     66666
 #define     KEY_BINDER_MANAGER      88888
@@ -52,4 +52,4 @@ private:
     std::string mShmName;
 };
 
-#endif // __BINDER_COMMON_H__
+#endif // __BIND_COMMON_H__

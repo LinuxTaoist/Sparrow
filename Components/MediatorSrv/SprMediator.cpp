@@ -27,7 +27,7 @@
 #include "SprSigId.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
-#include "IBinderManager.h"
+#include "BindInterface.h"
 #include "SprMediator.h"
 
 using namespace std;
@@ -236,7 +236,7 @@ void SprMediator::BinderLoop(SprMediator* self)
 {
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
-    bool ret = IBinderManager::GetInstance()->InitializeServiceBinder("mediatorsrv", pReqParcel, pRspParcel);
+    bool ret = BindInterface::GetInstance()->InitializeServiceBinder("mediatorsrv", pReqParcel, pRspParcel);
     if (!ret)
     {
         SPR_LOGE("Binder init failed!\n");

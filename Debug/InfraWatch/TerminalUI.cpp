@@ -79,7 +79,7 @@ char TerminalUI::DisplayMainMenuAndHandleInput()
             "=================================================================================\n");
 
 
-    char input = WaitUserInputUntilEnter();
+    char input = WaitUserInputWithoutEnter();
     HandleInputInMainMenu(input);
 
     return input;

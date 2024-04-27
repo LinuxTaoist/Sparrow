@@ -18,7 +18,7 @@
  */
 #include "Property.h"
 #include "CoreTypeDefs.h"
-#include "IBinderManager.h"
+#include "BindInterface.h"
 
 using namespace InternalDefs;
 
@@ -32,7 +32,7 @@ std::shared_ptr<Parcel> pRspParcel = nullptr;
 Property::Property()
 {
     mEnable = true;
-    bool ret = IBinderManager::GetInstance()->InitializeClientBinder("property_service", pReqParcel, pRspParcel);
+    bool ret = BindInterface::GetInstance()->InitializeClientBinder("property_service", pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }

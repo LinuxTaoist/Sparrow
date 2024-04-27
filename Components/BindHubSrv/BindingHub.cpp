@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : BinderManager.cpp
+ *  @file       : BindingHub.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -21,8 +21,8 @@
 #include "Parcel.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
-#include "BinderCommon.h"
-#include "BinderManager.h"
+#include "BindCommon.h"
+#include "BindingHub.h"
 
 using namespace InternalDefs;
 
@@ -35,25 +35,25 @@ using namespace InternalDefs;
 Parcel reqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
 Parcel rspParcel("BinderM",  KEY_BINDER_MANAGER,  true);
 
-BinderManager::BinderManager()
+BindingHub::BindingHub()
 {
-    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BinderManager::MsgResponseAddService));
-    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::MsgResponseRemoveService));
-    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BinderManager::MsgResponseGetService));
+    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BindingHub::MsgResponseAddService));
+    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BindingHub::MsgResponseRemoveService));
+    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BindingHub::MsgResponseGetService));
     EnvReady(SRV_NAME_BINDER);
 }
 
-BinderManager::~BinderManager()
+BindingHub::~BindingHub()
 {
 }
 
-BinderManager* BinderManager::GetInstance()
+BindingHub* BindingHub::GetInstance()
 {
-    static BinderManager instance;
+    static BindingHub instance;
     return &instance;
 }
 
-int32_t BinderManager::EnvReady(const std::string& srvName)
+int32_t BindingHub::EnvReady(const std::string& srvName)
 {
     std::string node = "/tmp/" + srvName;
     int fd = creat(node.c_str(), 0644);
@@ -64,7 +64,7 @@ int32_t BinderManager::EnvReady(const std::string& srvName)
     return 0;
 }
 
-int32_t BinderManager::MsgResponseAddService()
+int32_t BindingHub::MsgResponseAddService()
 {
     std::string name;
     int32_t key = GeneralUtils::RandomDecimalDigits(INT_KEY_LENGTH);
@@ -83,7 +83,7 @@ int32_t BinderManager::MsgResponseAddService()
     return 0;
 }
 
-int32_t BinderManager::MsgResponseRemoveService()
+int32_t BindingHub::MsgResponseRemoveService()
 {
     std::string name;
     reqParcel.ReadString(name);
@@ -95,7 +95,7 @@ int32_t BinderManager::MsgResponseRemoveService()
     return 0;
 }
 
-int32_t BinderManager::MsgResponseGetService()
+int32_t BindingHub::MsgResponseGetService()
 {
     int32_t ret = 0;
     int32_t key = 0;
@@ -120,7 +120,7 @@ int32_t BinderManager::MsgResponseGetService()
     return ret;
 }
 
-int32_t BinderManager::HandleMsgLoop()
+int32_t BindingHub::HandleMsgLoop()
 {
     while (true)
     {

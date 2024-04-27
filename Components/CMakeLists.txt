@@ -3,7 +3,7 @@
 include_directories         (${PROJECT_PATH}/Core)
 include_directories         (${PROJECT_PATH}/Util)
 include_directories         (${PROJECT_PATH}/3rdAdapter)
-include_directories         (${PROJECT_PATH}/Components/BinderSrv/Library)
+include_directories         (${PROJECT_PATH}/PrivateAPIs/Binder)
 
 ## Project configures path
 set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/ProjectConfigs/General)
@@ -61,4 +61,4 @@ set_target_properties       (BinMainSpr PROPERTIES OUTPUT_NAME "sparrowsrv")
 target_link_libraries       (BinMainSpr sprcore)
 add_dependencies            (BinMainSpr LibSprCore)
 
-add_subdirectory(BinderSrv)
+add_subdirectory(BindHubSrv)

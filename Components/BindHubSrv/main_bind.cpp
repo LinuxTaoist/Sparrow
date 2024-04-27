@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : BinderManager.h
+ *  @file       : main_binder.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -16,35 +16,11 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __BINDER_MANAGER_H__
-#define __BINDER_MANAGER_H__
+#include <stdio.h>
+#include "BindingHub.h"
 
-#include <map>
-#include <string>
-#include <stdint.h>
-#include "BinderCommon.h"
-
-class BinderManager
+int main(int argc, const char *argv[])
 {
-public:
-    ~BinderManager();
-
-    static BinderManager* GetInstance();
-    int32_t HandleMsgLoop();
-
-private:
-    BinderManager();
-
-    int32_t EnvReady(const std::string& srvName);
-    int32_t MsgResponseAddService();
-    int32_t MsgResponseRemoveService();
-    int32_t MsgResponseGetService();
-
-private:
-    using HandleFunction = int32_t (BinderManager::*)(void);
-
-    std::map<std::string, BinderInfo> mBinderMap;
-    std::map<int32_t, HandleFunction> mHandleFuncs;
-};
-
-#endif // __BINDER_MANAGER_H__
+    BindingHub::GetInstance()->HandleMsgLoop();
+    return 0;
+}
