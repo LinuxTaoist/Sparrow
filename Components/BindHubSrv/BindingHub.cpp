@@ -70,11 +70,7 @@ int32_t BindingHub::MsgResponseAddService()
     int32_t key = GeneralUtils::RandomDecimalDigits(INT_KEY_LENGTH);
     reqParcel.ReadString(name);
 
-    if (mBinderMap.count(name) == 0) {
-        mBinderMap.insert(make_pair(name, BinderInfo(key, name)));
-    } else {
-        SPR_LOGE("Service %s has exist!\n", name.c_str());
-    }
+    mBinderMap[name] = BinderInfo(key, name);
 
     rspParcel.WriteInt(key);
     rspParcel.WriteInt(0);

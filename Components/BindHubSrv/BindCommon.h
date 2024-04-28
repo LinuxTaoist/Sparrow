@@ -39,6 +39,7 @@ enum BinderCmd
 class BinderInfo
 {
 public:
+    BinderInfo() = default;
     BinderInfo(int32_t key, const std::string& shmName) : mKey(key), mRefCount(0), mShmName(shmName) {}
     ~BinderInfo() = default;
 

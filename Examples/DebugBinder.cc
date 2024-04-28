@@ -52,9 +52,6 @@ int Server()
         return -1;
     }
 
-
-    SPR_LOGD("Server start\n");
-
     do {
         int cmd = 0;
         pReqParcel->Wait();
@@ -233,6 +230,7 @@ int main(int argc, const char *argv[])
     } else if (pid == 0) {
         Server();
     } else {
+        usleep(10000);
         Client();
     }
 
