@@ -1,10 +1,35 @@
 # Sparrow
 
+[TOC]
+
 #### 介绍
-适用于嵌入式Linux的小系统开发
+适用于嵌入式Linux中间件系统开发微服务架构
 
 #### 软件架构
-软件架构说明
+
+##### 目录
+```c++
+Sparrow
+├── 3rdAdapter          // 第三方软件适配接口
+├── 3rdParty            // 第三方软件库
+├── Build               // 构建脚本
+├── CMakeLists.txt
+├── Components          // 组件
+├── Core                // 核心框架
+├── Debug               // 调试工具
+├── Docs                // 文档
+├── Examples            // 示例
+├── Hardware            // 硬件适配接口
+├── LICENSE             // 许可证
+├── PrivateAPIs         // 内部公开接口
+├── ProjectConfigs      // 项目配置
+├── PublicAPIs          // 外部公开接口
+├── README.en.md
+├── README.md
+├── Release             // 发布路径
+├── StaticScans         // 静态扫描修复纪录
+└── Util                // 通用工具函数
+```
 
 
 #### 安装教程
@@ -29,9 +54,3 @@
 
 #### 特技
 
-1.  使用 Readme\_XXX.md 来支持不同的语言，例如 Readme\_en.md, Readme\_zh.md
-2.  Gitee 官方博客 [blog.gitee.com](https://blog.gitee.com)
-3.  你可以 [https://gitee.com/explore](https://gitee.com/explore) 这个地址来了解 Gitee 上的优秀开源项目
-4.  [GVP](https://gitee.com/gvp) 全称是 Gitee 最有价值开源项目，是综合评定出的优秀开源项目
-5.  Gitee 官方提供的使用手册 [https://gitee.com/help](https://gitee.com/help)
-6.  Gitee 封面人物是一档用来展示 Gitee 会员风采的栏目 [https://gitee.com/gitee-stars/](https://gitee.com/gitee-stars/)
