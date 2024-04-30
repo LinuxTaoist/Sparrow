@@ -81,7 +81,8 @@ private:
     bool        mEnable;
     Root*       mRoot;
     void*       mData;
-    uint32_t    mCapacity;
+    uint32_t    mMapCapacity;       // Mapped memory capacity
+    uint32_t    mDataCapacity;      // Data buffer capacity
     std::mutex  mMutex;
     std::string mShmPath;
 };

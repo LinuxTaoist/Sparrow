@@ -36,7 +36,7 @@ const int RETRY_INTERVAL_US = 10000;    // 10ms
 
 // Used for master mode
 SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
-    : mCapacity(capacity), mShmPath(path)
+    : mMapCapacity(capacity), mShmPath(path)
 {
     mEnable = true;
     int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
@@ -45,12 +45,12 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
         mEnable = false;
     }
 
-    if (ftruncate(fd, mCapacity) == -1) {
+    if (ftruncate(fd, mMapCapacity) == -1) {
         SPR_LOGE("ftruncate failed! (%s)\n", strerror(errno));
         mEnable = false;
     }
 
-    void* mapMemory = mmap(NULL, mCapacity, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    void* mapMemory = mmap(NULL, mMapCapacity, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
     if (mapMemory == MAP_FAILED) {
         SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
         mEnable = false;
@@ -62,6 +62,7 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
         mEnable = false;
     }
 
+    mDataCapacity = mMapCapacity - sizeof(Root);
     mRoot->rp = mRoot->wp;
     mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
     if (mData == nullptr) {
@@ -95,8 +96,9 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
         mEnable = false;
     }
 
-    mCapacity = fileSize;
     mShmPath = path;
+    mMapCapacity = fileSize;
+    mDataCapacity = mMapCapacity - sizeof(Root);
     mRoot = static_cast<Root*>(mapMemory);
     if (mRoot == nullptr) {
         SPR_LOGE("mRoot is nullptr!\n");
@@ -114,7 +116,7 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
 
 SharedRingBuffer::~SharedRingBuffer()
 {
-    munmap(mRoot, mCapacity);
+    munmap(mRoot, mMapCapacity);
 }
 
 int SharedRingBuffer::write(const void* data, int32_t len)
@@ -137,7 +139,7 @@ int SharedRingBuffer::write(const void* data, int32_t len)
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->wp, len);
             memcpy(static_cast<char*>(mData) + mRoot->wp, data, len);
-            mRoot->wp = (mRoot->wp + len) % mCapacity;
+            mRoot->wp = (mRoot->wp + len) % mDataCapacity;
             SetRWStatus(CMD_READABLE);
             ret = 0;
             break;
@@ -170,7 +172,7 @@ int SharedRingBuffer::read(void* data, int32_t len)
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->rp, len);
             memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
-            mRoot->rp = (mRoot->rp + len) % mCapacity;
+            mRoot->rp = (mRoot->rp + len) % mDataCapacity;
             SetRWStatus(CMD_WRITEABLE);
             ret = 0;
 
@@ -194,7 +196,7 @@ int32_t SharedRingBuffer::AvailSpace() const noexcept
         return -1;
     }
 
-    return (mRoot->wp >= mRoot->rp) ? (mCapacity - mRoot->wp + mRoot->rp) : (mRoot->rp - mRoot->wp);
+    return (mRoot->wp >= mRoot->rp) ? (mDataCapacity - mRoot->wp + mRoot->rp) : (mRoot->rp - mRoot->wp);
 }
 
 int32_t SharedRingBuffer::AvailData() const noexcept
@@ -206,7 +208,7 @@ int32_t SharedRingBuffer::AvailData() const noexcept
     }
 
     int32_t diff = mRoot->wp - mRoot->rp;
-    return (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
+    return (diff + ((diff < 0) ? mDataCapacity : 0)) % mDataCapacity;
 }
 
 // // Dump the buffer content
@@ -217,13 +219,13 @@ int32_t SharedRingBuffer::AvailData() const noexcept
 //     static uint32_t pos = mRoot->rp;
 //     int32_t diff = mRoot->wp - pos;
 
-//     bool avail = (diff + ((diff < 0) ? mCapacity : 0)) % mCapacity;
+//     bool avail = (diff + ((diff < 0) ? mDataCapacity : 0)) % mDataCapacity;
 //     if (!avail) {
 //         return -1;
 //     }
 
 //     memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
-//     pos = (pos + len) % mCapacity;
+//     pos = (pos + len) % mDataCapacity;
 
 //     return 0;
 // }
@@ -264,7 +266,7 @@ void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const no
         return;
     }
 
-    if (*pos + size >= mCapacity) {
+    if (*pos + size >= mDataCapacity) {
         *pos = 0;
     }
 }
@@ -295,5 +297,5 @@ void SharedRingBuffer::DumpErrorInfo()
         return ;
     }
 
-    SPR_LOGD("rp: %u, wp: %u, capacity: %u\n", mRoot->rp, mRoot->wp, mCapacity);
+    SPR_LOGD("rp: %u, wp: %u, dataCapacity: %u\n", mRoot->rp, mRoot->wp, mDataCapacity);
 }
