@@ -94,10 +94,11 @@ int SprEpollSchedule::AddPoll(int fd, uint8_t ipcType, SprObserver* observer)
     int ret = epoll_ctl(mEpollHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
-    } else {
-        mPollMap.insert(std::make_pair(fd, std::make_pair(ipcType, observer)));
-        SPR_LOGD("Poll add module %s\n", observer->GetModuleName().c_str());
+        return ret;
     }
+
+    mPollMap.insert(std::make_pair(fd, std::make_pair(ipcType, observer)));
+    SPR_LOGD("Poll add module %s\n", observer->GetModuleName().c_str());
 
     return ret;
 }
@@ -119,34 +120,32 @@ void SprEpollSchedule::EpollLoop()
     // mCoPool.AddCallbackPoint(cbp.get());
 
     do {
+        if (!mRun) {
+            break;
+        }
+
         // 无事件时, epoll_wait阻塞, 超时等待
         int count = epoll_wait(mEpollHandle, ep, sizeof(ep)/sizeof(ep[0]), -1);
         if (count <= 0) {
-            if (!mRun) {
-                break;
-            }
-
             continue;
         }
 
         // IO监听有数据, libgo调度
         for (int i = 0; i < count; i++) {
             int fd = ep[i].data.fd;
-
-            // SPR_LOGD("Data count %d come from epoll %d\n", count, fd);
-            if (mPollMap.count(fd) != 0 && mPollMap[fd].second != nullptr)
-            {
-                // 投递任务至协程，没有回调
-                mCoPool.Post([&] {
-                    int ipcType = mPollMap[fd].first;
-                    // SPR_LOGD("HandlePollEvent fd = %d, ipc = %d\n", fd, ipcType);
-                    mPollMap[fd].second->HandlePollEvent(fd, ipcType);
-                }, nullptr);
-            } else {
-                SPR_LOGE("fd %d not found\n", fd);
+            if (mPollMap.count(fd) != 0 || mPollMap[fd].second == nullptr) {
+                SPR_LOGW("fd %d not found\n", fd);
+                continue;
             }
 
+            // 投递任务至协程，没有回调
+            mCoPool.Post([&] {
+                int ipcType = mPollMap[fd].first;
+                mPollMap[fd].second->HandlePollEvent(fd, ipcType);
+            }, nullptr);
 
         }
     } while(mRun);
+
+    SPR_LOGD("EpollLoop exit!\n");
 }

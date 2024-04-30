@@ -121,9 +121,9 @@ static std::string GetCurrentTimestamp()
 // 04-03 07:56:23.032  43930     DebugMsg D:
 static int FormatLog(std::string& log, const char* level, const char* tag, const char* buffer)
 {
+    __pid_t pid = getpid();
     std::ostringstream oss;
     std::string timestamp = GetCurrentTimestamp();
-    __pid_t pid = getpid();
 
     oss << timestamp;
     oss << " " << std::right << std::setw(PID_PRINT_WIDTH_LIMIT) << pid;

@@ -1,5 +1,5 @@
 【详细描述】
-【修改类型】BugFix
+【修改类型】Optimize
 【问题链接】N/A
 【项目关联】Default
 
@@ -8,6 +8,7 @@
 #【修改类型】从以下类别中选择最合适的描述提交的性质：
 # 新增特性 (Feature)
 # 问题修复 (BugFix)
+# 代码优化 (Optimize)
 # 文档改进 (Documentation)
 # 格式调整 (Style)
 # 代码重构 (Refactor)
