@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="2.7"/>
+    <errors>
+        <error id="invalidPrintfArgType_uint" severity="portability" msg="%lu in format string (no. 2) requires &apos;unsigned long&apos; but the argument type is &apos;std::size_t {aka unsigned long}&apos;." verbose="%lu in format string (no. 2) requires &apos;unsigned long&apos; but the argument type is &apos;std::size_t {aka unsigned long}&apos;." cwe="686" file0="../Components/LogManagerSrv/LogManager.cpp">
+            <location file="../Components/LogManagerSrv/LogManager.cpp" line="154" column="9"/>
+        </error>
+        <error id="shadowVariable" severity="style" msg="Local variable &apos;ret&apos; shadows outer variable" verbose="Local variable &apos;ret&apos; shadows outer variable" cwe="398" file0="../Components/MediatorSrv/SprMediator.cpp">
+            <location file="../Components/MediatorSrv/SprMediator.cpp" line="251" column="13" info="Shadow variable"/>
+            <location file="../Components/MediatorSrv/SprMediator.cpp" line="239" column="10" info="Shadowed declaration"/>
+            <symbol>ret</symbol>
+        </error>
+        <error id="shadowVariable" severity="style" msg="Local variable &apos;ret&apos; shadows outer variable" verbose="Local variable &apos;ret&apos; shadows outer variable" cwe="398" file0="../Components/MediatorSrv/SprMediator.cpp">
+            <location file="../Components/MediatorSrv/SprMediator.cpp" line="263" column="21" info="Shadow variable"/>
+            <location file="../Components/MediatorSrv/SprMediator.cpp" line="251" column="13" info="Shadowed declaration"/>
+            <symbol>ret</symbol>
+        </error>
+        <error id="stlcstrParam" severity="performance" msg="Passing the result of c_str() to a function that takes std::string as argument no. 1 is slow and redundant." verbose="The conversion from const char* as returned by c_str() to std::string creates an unnecessary string copy. Solve that by directly passing the string." cwe="704" file0="../Components/MediatorSrv/SprMediator.cpp">
+            <location file="../Components/MediatorSrv/SprMediator.cpp" line="147" column="16"/>
+        </error>
+        <error id="stlcstrParam" severity="performance" msg="Passing the result of c_str() to a function that takes std::string as argument no. 2 is slow and redundant." verbose="The conversion from const char* as returned by c_str() to std::string creates an unnecessary string copy. Solve that by directly passing the string." cwe="704" file0="../Components/MediatorSrv/SprMediator.cpp">
+            <location file="../Components/MediatorSrv/SprMediator.cpp" line="157" column="5"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::transform algorithm instead of a raw loop." verbose="Consider using std::transform algorithm instead of a raw loop." cwe="398" file0="../Components/MediatorSrv/SprMediator.cpp">
+            <location file="../Components/MediatorSrv/SprMediator.cpp" line="181" column="20"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::find_if algorithm instead of a raw loop." verbose="Consider using std::find_if algorithm instead of a raw loop." cwe="398" file0="../Components/PowerManagerSrv/PowerManager.cpp">
+            <location file="../Components/PowerManagerSrv/PowerManager.cpp" line="65" column="9"/>
+        </error>
+        <error id="shadowVariable" severity="style" msg="Local variable &apos;ret&apos; shadows outer variable" verbose="Local variable &apos;ret&apos; shadows outer variable" cwe="398" file0="../Components/PropertiesSrv/main_properties.cpp">
+            <location file="../Components/PropertiesSrv/main_properties.cpp" line="45" column="13" info="Shadow variable"/>
+            <location file="../Components/PropertiesSrv/main_properties.cpp" line="35" column="10" info="Shadowed declaration"/>
+            <symbol>ret</symbol>
+        </error>
+        <error id="missingOverride" severity="style" msg="The function &apos;ConnectMediator&apos; overrides a function in a base class but is not marked with a &apos;override&apos; specifier." verbose="The function &apos;ConnectMediator&apos; overrides a function in a base class but is not marked with a &apos;override&apos; specifier." file0="../Core/SprMediatorIpcProxy.cpp">
+            <location file="../Core/SprMediatorIpcProxy.h" line="44" column="9" info="Function in derived class"/>
+            <location file="../Core/SprMediatorProxy.h" line="35" column="17" info="Virtual function in base class"/>
+            <symbol>ConnectMediator</symbol>
+        </error>
+        <error id="cstyleCast" severity="style" msg="C-style pointer casting" verbose="C-style pointer casting detected. C++ offers four different kinds of casts as replacements: static_cast, const_cast, dynamic_cast and reinterpret_cast. A C-style cast could evaluate to any of those automatically, thus it is considered safer if the programmer explicitly states which kind of cast is expected. See also: https://www.securecoding.cert.org/confluence/display/cplusplus/EXP05-CPP.+Do+not+use+C-style+casts." cwe="398" file0="../Core/SprMsg.cpp">
+            <location file="../Core/SprMsg.cpp" line="192" column="18"/>
+        </error>
+        <error id="useStlAlgorithm" severity="style" msg="Consider using std::find_if algorithm instead of a raw loop." verbose="Consider using std::find_if algorithm instead of a raw loop." cwe="398" file0="../Core/SprTimerManager.cpp">
+            <location file="../Core/SprTimerManager.cpp" line="234" column="13"/>
+        </error>
+        <error id="unusedPrivateFunction" severity="style" msg="Unused private function: &apos;TerminalUI::WaitUserInputUntilEnter&apos;" verbose="Unused private function: &apos;TerminalUI::WaitUserInputUntilEnter&apos;" cwe="398" file0="../Debug/InfraWatch/TerminalUI.cpp">
+            <location file="../Debug/InfraWatch/TerminalUI.h" line="31" column="10"/>
+            <symbol>TerminalUI::WaitUserInputUntilEnter</symbol>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;mRoot==nullptr&apos; is redundant or there is possible null pointer dereference: mRoot." verbose="Either the condition &apos;mRoot==nullptr&apos; is redundant or there is possible null pointer dereference: mRoot." cwe="476" file0="../Util/SharedRingBuffer.cpp">
+            <location file="../Util/SharedRingBuffer.cpp" line="66" column="5" info="Null pointer dereference"/>
+            <location file="../Util/SharedRingBuffer.cpp" line="60" column="15" info="Assuming that condition &apos;mRoot==nullptr&apos; is not redundant"/>
+            <symbol>mRoot</symbol>
+        </error>
+        <error id="missingInclude" severity="information" msg="Cppcheck cannot find all the include files (use --check-config for details)" verbose="Cppcheck cannot find all the include files. Cppcheck can check the code without the include files found. But the results will probably be more accurate if all the include files are found. Please check your project&apos;s include directories and add all of them as include directories for Cppcheck. To see what files Cppcheck cannot find use --check-config."/>
+    </errors>
+</results>

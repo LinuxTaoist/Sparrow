@@ -151,7 +151,7 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 int LogManager::WriteToLogFile(const std::string& logData)
 {
     if (logData.size() > DEFAULT_FRAME_LEN_LIMIT) {
-        SPR_LOGE("Out of length limit [%ld %d]!\n", logData.size(), DEFAULT_FRAME_LEN_LIMIT);
+        SPR_LOGE("Out of length limit [%d %d]!\n", (int)logData.size(), DEFAULT_FRAME_LEN_LIMIT);
         return -1;
     }
 

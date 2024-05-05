@@ -32,8 +32,8 @@ static void BinderLoop(PropertyManager* pProperM)
 {
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
-    bool ret = BindInterface::GetInstance()->InitializeServiceBinder("property_service", pReqParcel, pRspParcel);
-    if (!ret)
+    bool rs = BindInterface::GetInstance()->InitializeServiceBinder("property_service", pReqParcel, pRspParcel);
+    if (!rs)
     {
         SPR_LOGE("InitializeServiceBinder failed!\n");
         return;

@@ -144,7 +144,7 @@ int SprMediator::PrepareInternalPort()
     }
 
     mq_unlink(mMqDevName.c_str());
-    mHandler = MakeMQ(mMqDevName.c_str());
+    mHandler = MakeMQ(mMqDevName);
 
     struct epoll_event ep;
     ep.events = EPOLLIN | EPOLLET;
@@ -154,7 +154,7 @@ int SprMediator::PrepareInternalPort()
     }
 
     // load mq information of self
-    LoadMQStaticInfo(mHandler, mMqDevName.c_str());
+    LoadMQStaticInfo(mHandler, mMqDevName);
     SPR_LOGD("Open Internal Port: %s.\n", mMqDevName.c_str());
     return 0;
 }
@@ -236,8 +236,8 @@ void SprMediator::BinderLoop(SprMediator* self)
 {
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
-    bool ret = BindInterface::GetInstance()->InitializeServiceBinder("mediatorsrv", pReqParcel, pRspParcel);
-    if (!ret)
+    bool rs = BindInterface::GetInstance()->InitializeServiceBinder("mediatorsrv", pReqParcel, pRspParcel);
+    if (!rs)
     {
         SPR_LOGE("Binder init failed!\n");
         return;
@@ -260,7 +260,7 @@ void SprMediator::BinderLoop(SprMediator* self)
             case PROXY_CMD_GET_ALL_MQ_ATTRS:
             {
                 std::vector<SMQStatus> tmpMQAttrs;
-                int ret = self->GetAllMQStatus(tmpMQAttrs);
+                ret = self->GetAllMQStatus(tmpMQAttrs);
                 pRspParcel->WriteInt(ret);
                 if (ret == 0) {
                     pRspParcel->WriteVector(tmpMQAttrs);
