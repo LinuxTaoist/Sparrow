@@ -20,55 +20,50 @@
 #include <stdio.h>
 #include "SqliteAdapter.h"
 
-#define SPR_LOGD(fmt, args...) printf("%d DebugBinder D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d DebugBinder E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%d SampleSqlite D: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%d SampleSqlite E: " fmt, __LINE__, ##args)
 int main() {
-    try {
-        // 初始化数据库适配器，假设数据库文件路径为"data.db"
-        SqliteAdapter adapter("data.db");
+    // 初始化数据库适配器，假设数据库文件路径为"data.db"
+    SqliteAdapter* pSqlAdapter = SqliteAdapter::GetInstance("data.db");
 
-        // 创建表（仅作为示例，实际使用时可能需要先检查表是否存在）
-        adapter.Remove("users"); // 如果表已存在，先删除以便重新创建
-        std::map<std::string, std::string> columnsDef {
-            {"id", "INTEGER PRIMARY KEY"},
-            {"name", "TEXT NOT NULL"},
-            {"age", "INTEGER"}
-        };
+    // 创建表（仅作为示例，实际使用时可能需要先检查表是否存在）
+    pSqlAdapter->Remove("users"); // 如果表已存在，先删除以便重新创建
+    std::map<std::string, std::string> columnsDef {
+        {"id", "INTEGER PRIMARY KEY"},
+        {"name", "TEXT NOT NULL"},
+        {"age", "INTEGER"}
+    };
 
-        adapter.CreateTable("users", columnsDef);
-        adapter.Insert("users", {{"name", "Alice"}, {"age", "30"}}); // 示例插入数据，id让SQLite自动生成
+    pSqlAdapter->CreateTable("users", columnsDef);
+    pSqlAdapter->Insert("users", {{"name", "Alice"}, {"age", "30"}}); // 示例插入数据，id让SQLite自动生成
 
-        // 插入数据
-        adapter.Insert("users", {{"name", "Bob"}, {"age", "25"}});
+    // 插入数据
+    pSqlAdapter->Insert("users", {{"name", "Bob"}, {"age", "25"}});
 
-        // 查询数据
-        std::vector<std::vector<std::string>> result = adapter.Query("users");
-        for (const auto& row : result) {
-            std::cout << "ID: " << row[0] << ", Name: " << row[1] << ", Age: " << row[2] << std::endl;
-        }
+    // 查询数据
+    std::vector<std::vector<std::string>> result = pSqlAdapter->Query("users");
+    for (const auto& row : result) {
+        SPR_LOGD("ID: %s, Name: %s, Age: %s\n", row[0].c_str(), row[1].c_str(), row[2].c_str());
+    }
 
-        // 更新数据
-        adapter.Update("users", {{"age", "31"}}, "name='Alice'");
+    // 更新数据
+    pSqlAdapter->Update("users", {{"age", "31"}}, "name='Alice'");
 
-        // 再次查询，查看更新效果
-        result = adapter.Query("users");
-        std::cout << "\nAfter Update:\n";
-        for (const auto& row : result) {
-            std::cout << "ID: " << row[0] << ", Name: " << row[1] << ", Age: " << row[2] << std::endl;
-        }
+    // 再次查询，查看更新效果
+    result = pSqlAdapter->Query("users");
+    SPR_LOGD("\nAfter Update:\n");
+    for (const auto& row : result) {
+        SPR_LOGD("ID: %s, Name: %s, Age: %s\n", row[0].c_str(), row[1].c_str(), row[2].c_str());
+    }
 
-        // 删除数据
-        adapter.Remove("users", "name='Bob'");
+    // 删除数据
+    pSqlAdapter->Remove("users", "name='Bob'");
 
-        // 最终查询，验证删除
-        result = adapter.Query("users");
-        std::cout << "\nAfter Delete:\n";
-        for (const auto& row : result) {
-            std::cout << "ID: " << row[0] << ", Name: " << row[1] << ", Age: " << row[2] << std::endl;
-        }
-    } catch (const std::exception& e) {
-        std::cerr << "Error: " << e.what() << std::endl;
-        return 1;
+    // 最终查询，验证删除
+    result = pSqlAdapter->Query("users");
+    SPR_LOGD("\nAfter Delete:\n");
+    for (const auto& row : result) {
+        SPR_LOGD("ID: %s, Name: %s, Age: %s\n", row[0].c_str(), row[1].c_str(), row[2].c_str());
     }
 
     return 0;

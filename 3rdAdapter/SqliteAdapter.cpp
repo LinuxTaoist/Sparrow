@@ -65,6 +65,12 @@ SqliteAdapter::~SqliteAdapter()
     }
 }
 
+SqliteAdapter* SqliteAdapter::GetInstance(const std::string& dbPath)
+{
+    static SqliteAdapter instance(dbPath);
+    return &instance;
+}
+
 bool SqliteAdapter::CreateTable(const std::string& tableName, const std::map<std::string, std::string>& columnsDefinition)
 {
     std::string columnDefs;

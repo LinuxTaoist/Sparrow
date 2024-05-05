@@ -26,8 +26,8 @@
 
 class SqliteAdapter {
 public:
-    explicit SqliteAdapter(const std::string& dbPath);
     ~SqliteAdapter();
+    static SqliteAdapter* GetInstance(const std::string& dbPath);
 
     bool CreateTable(const std::string& tableName, const std::map<std::string, std::string>& columnsDefinition);
     bool Execute(const std::string& sqlStr);
@@ -35,6 +35,9 @@ public:
     bool Remove(const std::string& table, const std::string& condition = "");
     bool Update(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues, const std::string& condition = "");
     std::vector<std::vector<std::string>> Query(const std::string& table, const std::string& columns = "*", const std::string& condition = "");
+
+private:
+    explicit SqliteAdapter(const std::string& dbPath);
 };
 
 #endif // __SQLITE_ADAPTER_H__
