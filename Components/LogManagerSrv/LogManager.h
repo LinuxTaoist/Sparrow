@@ -52,4 +52,4 @@ private:
     std::set<std::string> mLogFilePaths;
 };
 
-#endif
+#endif // __LOG_MANAGER_H__

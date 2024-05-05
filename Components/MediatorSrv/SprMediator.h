@@ -77,5 +77,5 @@ private:
     std::map<InternalDefs::ESprModuleID, SModuleInfo> mModuleMap;
 };
 
-#endif
+#endif // __SPR_MEDIATOR_H__
 

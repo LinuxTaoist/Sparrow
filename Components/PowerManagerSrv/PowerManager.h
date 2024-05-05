@@ -79,4 +79,5 @@ private:
     void MsgRespondPowerOff(const SprMsg &msg);
 };
 } // namespace SprPower
-#endif
+
+#endif // __POWER_MANAGER_H__

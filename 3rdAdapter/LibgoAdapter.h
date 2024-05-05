@@ -42,4 +42,4 @@ namespace LibgoAdapter
 }; // namespace LibgoAdapter
 
 
-#endif
+#endif // __LIBGO_ADAPTER_H__

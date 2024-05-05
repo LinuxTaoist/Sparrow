@@ -29,14 +29,12 @@ int main() {
 
         // 创建表（仅作为示例，实际使用时可能需要先检查表是否存在）
         adapter.Remove("users"); // 如果表已存在，先删除以便重新创建
-        std::string createTable = "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, name TEXT, age INTEGER);";
         std::map<std::string, std::string> columnsDef {
             {"id", "INTEGER PRIMARY KEY"},
             {"name", "TEXT NOT NULL"},
             {"age", "INTEGER"}
         };
 
-        // adapter.Execute(createTable);
         adapter.CreateTable("users", columnsDef);
         adapter.Insert("users", {{"name", "Alice"}, {"age", "30"}}); // 示例插入数据，id让SQLite自动生成
 

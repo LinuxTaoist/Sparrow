@@ -30,7 +30,7 @@ public:
     ~SqliteAdapter();
 
     bool CreateTable(const std::string& tableName, const std::map<std::string, std::string>& columnsDefinition);
-    bool Execute(const std::string& sql);
+    bool Execute(const std::string& sqlStr);
     bool Insert(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues);
     bool Remove(const std::string& table, const std::string& condition = "");
     bool Update(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues, const std::string& condition = "");
