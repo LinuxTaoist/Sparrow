@@ -47,6 +47,7 @@ public:
 
     virtual ~PSocket();
 
+    void Close();
     int AsTcpServer(short bindPort, int backlog);
     int AsTcpClient(bool con = false,
                     const std::string& srvAddr = "",

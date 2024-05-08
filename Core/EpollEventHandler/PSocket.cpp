@@ -68,8 +68,15 @@ PSocket::PSocket(int sock, std::function<void(int, void*)> cb, void* arg)
 
 PSocket::~PSocket()
 {
+    Close();
+}
+
+void PSocket::Close()
+{
     if (mEpollFd > 0) {
         close(mEpollFd);
+        mEpollFd = -1;
+        mEnable = false;
         SPR_LOGD("Close socket [%d %d]\n", mEpollFd, mSockType);
     }
 }

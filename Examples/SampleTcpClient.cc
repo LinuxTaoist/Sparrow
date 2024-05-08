@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <mutex>
 #include <list>
 #include <memory>
 #include <thread>
@@ -32,6 +33,7 @@ using namespace std;
 #define SPR_LOGE(fmt, args...) printf("%4d TcpClient E: " fmt, __LINE__, ##args)
 int main(int argc, const char *argv[])
 {
+    std::mutex epFdMutex;
     EpollEventHandler *pEpoll = EpollEventHandler::GetInstance();
     auto tcpClient = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int sock, void *arg) {
         PSocket* pCliObj = (PSocket*)arg;
@@ -44,6 +46,12 @@ int main(int argc, const char *argv[])
         int rc = pCliObj->Read(sock, rBuf);
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %s\n", sock, rBuf.c_str());
+        } else {
+            pEpoll->DelPoll(pCliObj);
+            SPR_LOGD("## CLOSE [%d]\n", sock);
+
+            std::lock_guard<std::mutex> lock(epFdMutex);
+            pCliObj->Close();
         }
     });
 
@@ -52,7 +60,8 @@ int main(int argc, const char *argv[])
 
     std::thread wThread([&]{
         while(true) {
-            int ret = tcpClient->Write(tcpClient->GetEpollFd(), "Hello World");
+            std::lock_guard<std::mutex> lock(epFdMutex);
+            tcpClient->Write(tcpClient->GetEpollFd(), "Hello World");
             sleep(1);
         }
     });
