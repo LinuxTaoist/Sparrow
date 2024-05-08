@@ -22,7 +22,8 @@
 
 #define SPR_LOGD(fmt, args...) printf("%d SampleSqlite D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d SampleSqlite E: " fmt, __LINE__, ##args)
-int main() {
+int main(int argc, const char *argv[])
+{
     // 初始化数据库适配器，假设数据库文件路径为"data.db"
     SqliteAdapter* pSqlAdapter = SqliteAdapter::GetInstance("data.db");
 

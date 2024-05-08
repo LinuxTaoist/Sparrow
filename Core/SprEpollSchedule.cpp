@@ -108,6 +108,8 @@ void SprEpollSchedule::DelPoll(int fd)
     if (epoll_ctl(mEpollHandle, EPOLL_CTL_DEL, fd, nullptr) != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
     }
+
+    mPollMap.erase(fd);
 }
 
 void SprEpollSchedule::EpollLoop()
