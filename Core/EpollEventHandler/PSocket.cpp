@@ -27,8 +27,8 @@
 #include <sys/socket.h>
 #include "PSocket.h"
 
-#define SPR_LOGD(fmt, args...) printf("%d PSocket D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d PSocket E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%4d PSocket D: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%4d PSocket E: " fmt, __LINE__, ##args)
 
 PSocket::PSocket(int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb)
@@ -55,14 +55,22 @@ PSocket::PSocket(int domain, int type, int protocol, std::function<void(int, voi
 PSocket::PSocket(int sock, std::function<void(int, void*)> cb, void* arg)
     : IEpollEvent(sock, EPOLL_TYPE_SOCKET, arg), mCb(cb)
 {
+    mEnable = true;
+    mSockType = PSOCKET_TYPE_IDLE;
 
+    int op = 1;
+    if (setsockopt(mEpollFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEpollFd, strerror(errno));
+        close(mEpollFd);
+        mEnable = false;
+    }
 }
 
 PSocket::~PSocket()
 {
     if (mEpollFd > 0) {
         close(mEpollFd);
-        SPR_LOGD("socket fd(%d) close\n", mEpollFd);
+        SPR_LOGD("Close socket [%d %d]\n", mEpollFd, mSockType);
     }
 }
 
@@ -109,7 +117,7 @@ int PSocket::AsTcpClient(bool con, const std::string& srvAddr, short srvPort, in
 
     op = rcvLen;
     if (setsockopt(mEpollFd, SOL_SOCKET, SO_RCVBUF, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEpollFd, strerror(errno));
         goto ERROR;
     }
 

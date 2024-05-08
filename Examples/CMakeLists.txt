@@ -31,7 +31,7 @@ set(SRC_BIN_SAMPLESQLITE    SampleSqlite.cc)
 add_executable              (sample_sqlite ${SRC_BIN_SAMPLESQLITE})
 target_include_directories  (sample_sqlite PRIVATE ${PROJECT_PATH}/3rdParty/sqlite/include)
 set_target_properties       (sample_sqlite PROPERTIES OUTPUT_NAME "sample_sqlite")
-target_link_libraries       (sample_sqlite c 3rdadapter sqlite3)
+target_link_libraries       (sample_sqlite c 3rdadapter sqlite3 pthread dl)
 add_dependencies            (sample_sqlite Lib3rdAdapter)
 
 ## Bin sampleTcpServer
@@ -41,6 +41,14 @@ target_include_directories  (sample_tcp_server PRIVATE ${PROJECT_PATH}/Core/Epol
 set_target_properties       (sample_tcp_server PROPERTIES OUTPUT_NAME "sample_tcpserver")
 target_link_libraries       (sample_tcp_server c epollevent)
 add_dependencies            (sample_tcp_server LibEpollEvent)
+
+## Bin sampleTcpClient
+set(SRC_BIN_STCPCLIENT      SampleTcpClient.cc)
+add_executable              (sample_tcp_client ${SRC_BIN_STCPCLIENT})
+target_include_directories  (sample_tcp_client PRIVATE ${PROJECT_PATH}/Core/EpollEventHandler)
+set_target_properties       (sample_tcp_client PROPERTIES OUTPUT_NAME "sample_tcpclient")
+target_link_libraries       (sample_tcp_client c epollevent pthread)
+add_dependencies            (sample_tcp_client LibEpollEvent)
 
 ## Bin property_get
 set(SRC_BIN_PROPERTY_GET     GetProperty.cc)

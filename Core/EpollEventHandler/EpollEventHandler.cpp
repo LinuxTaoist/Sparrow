@@ -23,9 +23,10 @@
 #include <sys/epoll.h>
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) printf("%d EpollEvent D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d EpollEvent W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d EpollEvent E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%4d EpollEvent D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%4d EpollEvent W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%4d EpollEvent E: " fmt, __LINE__, ##args)
+
 EpollEventHandler::EpollEventHandler(int size)
 {
     if (size) {
@@ -63,7 +64,7 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     //EPOLLOUT：表示对应的文件描述符可以写；
     //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
     struct epoll_event ep;
-    ep.events = EPOLLIN | EPOLLET;
+    ep.events = EPOLLIN;
     ep.data.ptr = p;
 
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
@@ -88,6 +89,7 @@ void EpollEventHandler::DelPoll(IEpollEvent* p)
     }
 
     mEpollMap.erase(p->GetEpollFd());
+    SPR_LOGD("Delete epoll fd %d\n", p->GetEpollFd());
 }
 
 void EpollEventHandler::EpollLoop(bool bRun)
@@ -115,9 +117,6 @@ void EpollEventHandler::EpollLoop(bool bRun)
             p->EpollEvent(p->GetEpollFd(), p->GetEpollType(), p->GetArgs());
         }
     } while(mRun);
+
+    SPR_LOGD("EpollLoop exit\n");
 }
-
-
-
-
-
