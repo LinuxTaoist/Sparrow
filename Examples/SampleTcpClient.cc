@@ -47,13 +47,12 @@ int main(int argc, const char *argv[])
         }
     });
 
-    tcpClient->AsTcpClient(true, "10.33.13.53", 9102);
+    tcpClient->AsTcpClient(true, "127.0.0.1", 8080);
     pEpoll->AddPoll(tcpClient.get());
 
     std::thread wThread([&]{
         while(true) {
             int ret = tcpClient->Write(tcpClient->GetEpollFd(), "Hello World");
-            SPR_LOGD("dx_debug: ret = %d\n", ret);
             sleep(1);
         }
     });
