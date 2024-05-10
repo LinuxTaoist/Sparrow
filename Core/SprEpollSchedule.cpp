@@ -98,7 +98,7 @@ int SprEpollSchedule::AddPoll(int fd, uint8_t ipcType, SprObserver* observer)
     }
 
     mPollMap.insert(std::make_pair(fd, std::make_pair(ipcType, observer)));
-    SPR_LOGD("Poll add module %s\n", observer->GetModuleName().c_str());
+    SPR_LOGD("Poll add module %d %s\n", fd, observer->GetModuleName().c_str());
 
     return ret;
 }
@@ -135,7 +135,7 @@ void SprEpollSchedule::EpollLoop()
         // IO监听有数据, libgo调度
         for (int i = 0; i < count; i++) {
             int fd = ep[i].data.fd;
-            if (mPollMap.count(fd) != 0 || mPollMap[fd].second == nullptr) {
+            if (mPollMap.count(fd) == 0 || mPollMap[fd].second == nullptr) {
                 SPR_LOGW("fd %d not found\n", fd);
                 continue;
             }

@@ -70,7 +70,7 @@ static void usage()
             "2: DelTimer case 1 \n"
             "3: AddTimer (10, 0s, 2s)\n"
             "4: DelTimer case 3 \n"
-            "5: AddTimer ( 0, 0s, 10ms)\n"
+            "5: AddTimer ( 0, 0s, 20ms)\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
