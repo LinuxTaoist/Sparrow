@@ -31,7 +31,7 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
     #include "SprSigList.gen"
 };
 
-const char *GetSigName(int msgID)
+const char* GetSigName(int msgID)
 {
     return sigIdString[msgID];
 }

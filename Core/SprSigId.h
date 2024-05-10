@@ -41,6 +41,6 @@ enum ESprSigId
  * @param msgID
  * @return Signal description
  */
-const char *GetSigName(int msgID);
+const char* GetSigName(int msgID);
 
 #endif

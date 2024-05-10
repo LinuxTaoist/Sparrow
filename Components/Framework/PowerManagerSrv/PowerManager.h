@@ -28,7 +28,8 @@ namespace SprPower {
 enum EPowerLev1State
 {
     LEV1_POWER_ANY      = 0x00,
-    LEV1_POWER_WORKING,
+    LEV1_POWER_INIT,
+    LEV1_POWER_ACTIVE,
     LEV1_POWER_STANDBY,
     LEV1_POWER_SLEEP
 };
@@ -57,15 +58,6 @@ public:
     int ProcessMsg(const SprMsg& msg);
 
 private:
-    static std::vector< StateTransition <EPowerLev1State,
-                        EPowerLev2State,
-                        InternalDefs::ESprSigId,
-                        PowerManager,
-                        SprMsg> > mStateTable;
-
-    EPowerLev1State mCurLev1State;
-    EPowerLev2State mCurLev2State;
-
      /* 更新一级状态 */
     void SetLev1State(EPowerLev1State state) { mCurLev1State = state; }
     EPowerLev1State GetLev1State() { return mCurLev1State; }
@@ -75,8 +67,21 @@ private:
     EPowerLev2State GetLev2State() { return mCurLev2State; }
 
     /* 消息响应函数 */
-    void MsgRespondPowerOn(const SprMsg &msg);
-    void MsgRespondPowerOff(const SprMsg &msg);
+    void MsgRespondPowerOnWithDefault(const SprMsg& msg);
+    void MsgRespondPowerOnWithStandby(const SprMsg& msg);
+    void MsgRespondPowerOnWithSleep(const SprMsg& msg);
+    void MsgRespondPowerOffWithDefault(const SprMsg& msg);
+    void MsgRespondPowerOffWithActive(const SprMsg& msg);
+
+private:
+    static std::vector< StateTransition <EPowerLev1State,
+                        EPowerLev2State,
+                        InternalDefs::ESprSigId,
+                        PowerManager,
+                        SprMsg> > mStateTable;
+
+    EPowerLev1State mCurLev1State;
+    EPowerLev2State mCurLev2State;
 };
 } // namespace SprPower
 

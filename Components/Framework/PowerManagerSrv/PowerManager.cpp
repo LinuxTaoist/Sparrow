@@ -23,23 +23,54 @@ using namespace std;
 using namespace SprPower;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("SprPower", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprPower", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprPower", fmt, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("PowerM", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("PowerM", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("PowerM", fmt, ##args)
 
-vector <StateTransition <EPowerLev1State, EPowerLev2State, ESprSigId, PowerManager, SprMsg> >
+vector <StateTransition <   EPowerLev1State,
+                            EPowerLev2State,
+                            ESprSigId,
+                            PowerManager,
+                            SprMsg> >
 PowerManager::mStateTable =
 {
-    { LEV1_POWER_STANDBY,   LEV2_POWER_ANY,     SIG_ID_POWER_ON,    &PowerManager::MsgRespondPowerOn },
-    { LEV1_POWER_SLEEP,     LEV2_POWER_ANY,     SIG_ID_POWER_ON,    &PowerManager::MsgRespondPowerOn },
-    { LEV1_POWER_WORKING,   LEV2_POWER_ANY,     SIG_ID_POWER_OFF,   &PowerManager::MsgRespondPowerOff }
+    // =============================================================
+    // All States for SIG_ID_POWER_ON
+    // =============================================================
+    { LEV1_POWER_INIT, LEV2_POWER_ANY,
+      SIG_ID_POWER_ON,
+      &PowerManager::MsgRespondPowerOnWithDefault
+    },
+
+    { LEV1_POWER_STANDBY, LEV2_POWER_ANY,
+      SIG_ID_POWER_ON,
+      &PowerManager::MsgRespondPowerOnWithStandby
+    },
+
+    { LEV1_POWER_SLEEP, LEV2_POWER_ANY,
+      SIG_ID_POWER_ON,
+      &PowerManager::MsgRespondPowerOnWithSleep
+    },
+
+    // =============================================================
+    // All States for SIG_ID_POWER_OFF
+    // =============================================================
+    { LEV1_POWER_INIT, LEV2_POWER_ANY,
+      SIG_ID_POWER_OFF,
+      &PowerManager::MsgRespondPowerOffWithDefault
+    },
+
+    { LEV1_POWER_ACTIVE, LEV2_POWER_ANY,
+      SIG_ID_POWER_OFF,
+      &PowerManager::MsgRespondPowerOffWithActive
+    }
 };
 
 PowerManager::PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
             : SprObserver(id, name, mMsgMediatorPtr)
 {
-    mCurLev1State = LEV1_POWER_ANY;
-    mCurLev2State = LEV2_POWER_ANY;
+    SetLev1State(LEV1_POWER_INIT);
+    SetLev2State(LEV2_POWER_ANY);
 }
 
 PowerManager::~PowerManager()
@@ -49,7 +80,9 @@ PowerManager::~PowerManager()
 
 int PowerManager::ProcessMsg(const SprMsg& msg)
 {
-    // loop: 遍历状态表，进入与状态匹配的入口
+    SPR_LOGD("Lev1: %d, Lev2: %d, msg: %s\n", mCurLev1State, mCurLev2State, GetSigName(msg.GetMsgId()));
+
+    // Loop: Traverse the state table to find the matching entry
     for (const auto& it : mStateTable)
     {
         if (   (   (it.lev1State  == mCurLev1State)
@@ -71,12 +104,27 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-void PowerManager::MsgRespondPowerOn(const SprMsg &msg)
+void PowerManager::MsgRespondPowerOnWithDefault(const SprMsg& msg)
 {
 
 }
 
-void PowerManager::MsgRespondPowerOff(const SprMsg &msg)
+void PowerManager::MsgRespondPowerOnWithStandby(const SprMsg& msg)
+{
+
+}
+
+void PowerManager::MsgRespondPowerOnWithSleep(const SprMsg& msg)
+{
+
+}
+
+void PowerManager::MsgRespondPowerOffWithDefault(const SprMsg& msg)
+{
+
+}
+
+void PowerManager::MsgRespondPowerOffWithActive(const SprMsg& msg)
 {
 
 }
