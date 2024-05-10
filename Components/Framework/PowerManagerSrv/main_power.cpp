@@ -23,7 +23,6 @@
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
-using namespace SprPower;
 using namespace InternalDefs;
 
 int main(int argc, const char *argv[])

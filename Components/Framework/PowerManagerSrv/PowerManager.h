@@ -22,8 +22,6 @@
 #include <vector>
 #include "SprObserver.h"
 
-namespace SprPower {
-
 // 一级状态:
 enum EPowerLev1State
 {
@@ -83,6 +81,5 @@ private:
     EPowerLev1State mCurLev1State;
     EPowerLev2State mCurLev2State;
 };
-} // namespace SprPower
 
 #endif // __POWER_MANAGER_H__

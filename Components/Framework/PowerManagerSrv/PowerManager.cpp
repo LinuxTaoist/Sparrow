@@ -20,7 +20,6 @@
 #include "PowerManager.h"
 
 using namespace std;
-using namespace SprPower;
 using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("PowerM", fmt, ##args)
