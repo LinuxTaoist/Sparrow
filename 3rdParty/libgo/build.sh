@@ -5,9 +5,7 @@
 # is configured beforehand.
 
 # Check for existing libgo source directory
-if [[ -d "libgo" ]]; then
-    echo "libgo source directory exists."
-else
+if [[ ! -d "libgo" ]]; then
     echo "libgo source directory not found. Extracting..."
     tar -zxvf libgo.tar.gz
 fi
