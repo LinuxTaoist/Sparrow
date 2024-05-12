@@ -1,6 +1,6 @@
 ENUM_OR_STRING(SIG_ID_ANY = 0x00),
 //-----------------------------------------------------------------------------
-// PROXY 0x01 ~ 0x1F
+// PROXY
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_REQUEST),                  \
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_RESPONSE),                 \
@@ -9,7 +9,7 @@ ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_RESPONSE),               \
 ENUM_OR_STRING(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT),          \
 
 //-----------------------------------------------------------------------------
-// LOG_MANAGER 0x20 ~ 0x3F
+// LOG_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_LOG_OPEN),                                \
 ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
@@ -24,17 +24,17 @@ ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_3S),                     \
 ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_2S),                     \
 
 //-----------------------------------------------------------------------------
-// TIMER_MANAGER 0x60 ~ 0x7F
+// TIMER_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_TIMER_START_SYSTEM_TIMER),                \
 ENUM_OR_STRING(SIG_ID_TIMER_STOP_SYSTEM_TIMER),                 \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_ONCE_TIMER),                    \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_REPEAT_TIMER),                  \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
-ENUM_OR_STRING(SIG_ID_TIMER_DEL_TIMER),                               \
+ENUM_OR_STRING(SIG_ID_TIMER_DEL_TIMER),                         \
 
 //-----------------------------------------------------------------------------
-// SPARROW_SYSTEM 0x80 ~ 0x9F
+// SPARROW_SYSTEM
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_SYSTEM_EXIT),                             \
 
@@ -44,10 +44,11 @@ ENUM_OR_STRING(SIG_ID_SYSTEM_EXIT),                             \
 ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
 
 //-----------------------------------------------------------------------------
-// POWER_MANAGER 0x120 ~ 0x13F
+// POWER_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_POWER_ON),                                \
 ENUM_OR_STRING(SIG_ID_POWER_OFF),                               \
 ENUM_OR_STRING(SIG_ID_POWER_WAKEUP),                            \
 ENUM_OR_STRING(SIG_ID_POWER_SHUTDOWN),
+
 

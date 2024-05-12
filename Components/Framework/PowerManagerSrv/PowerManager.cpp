@@ -38,7 +38,7 @@ PowerManager::mStateTable =
     // =============================================================
     { LEV1_POWER_INIT, LEV2_POWER_ANY,
       SIG_ID_POWER_ON,
-      &PowerManager::MsgRespondPowerOnWithDefault
+      &PowerManager::MsgRespondPowerOnWithInit
     },
 
     { LEV1_POWER_STANDBY, LEV2_POWER_ANY,
@@ -56,12 +56,21 @@ PowerManager::mStateTable =
     // =============================================================
     { LEV1_POWER_INIT, LEV2_POWER_ANY,
       SIG_ID_POWER_OFF,
-      &PowerManager::MsgRespondPowerOffWithDefault
+      &PowerManager::MsgRespondPowerOffWithInit
     },
 
     { LEV1_POWER_ACTIVE, LEV2_POWER_ANY,
       SIG_ID_POWER_OFF,
       &PowerManager::MsgRespondPowerOffWithActive
+    },
+
+    // =============================================================
+    // Default case for handling unexpected messages,
+    // mandatory to denote end of message table.
+    // =============================================================
+    { LEV1_POWER_ANY, LEV2_POWER_ANY,
+      SIG_ID_ANY,
+      &PowerManager::MsgRespondUnexpectedMsg
     }
 };
 
@@ -103,27 +112,59 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-void PowerManager::MsgRespondPowerOnWithDefault(const SprMsg& msg)
+void PowerManager::PerformBootBusiness()
 {
+    SetLev1State(LEV1_POWER_ACTIVE);
+}
 
+void PowerManager::PerformResumeBusiness()
+{
+    SetLev1State(LEV1_POWER_ACTIVE);
+}
+
+void PowerManager::PerformStandbyBusiness()
+{
+    SetLev1State(LEV1_POWER_STANDBY);
+}
+
+void PowerManager::PerformSleepBusiness()
+{
+    SetLev1State(LEV1_POWER_SLEEP);
+}
+
+void PowerManager::MsgRespondPowerOnWithInit(const SprMsg& msg)
+{
+    SPR_LOGD("Handle power on with default!\n");
+    PerformBootBusiness();
 }
 
 void PowerManager::MsgRespondPowerOnWithStandby(const SprMsg& msg)
 {
-
+    SPR_LOGD("Handle power on with standby!\n");
+    PerformResumeBusiness();
 }
 
 void PowerManager::MsgRespondPowerOnWithSleep(const SprMsg& msg)
 {
-
+    SPR_LOGD("Handle power on with sleep!\n");
+    PerformResumeBusiness();
 }
 
-void PowerManager::MsgRespondPowerOffWithDefault(const SprMsg& msg)
+void PowerManager::MsgRespondPowerOffWithInit(const SprMsg& msg)
 {
-
+    SPR_LOGD("Handle power off with default!\n");
+    SetLev1State(LEV1_POWER_STANDBY);
 }
 
 void PowerManager::MsgRespondPowerOffWithActive(const SprMsg& msg)
 {
-
+    SPR_LOGD("Handle power off with active!\n");
+    SetLev1State(LEV1_POWER_STANDBY);
 }
+
+void PowerManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
+{
+    SPR_LOGW("IGNORE MSG: Lev1 = %d, Lev2 = %d, msg = %s\n",
+                mCurLev1State, mCurLev2State, GetSigName(msg.GetMsgId()));
+}
+

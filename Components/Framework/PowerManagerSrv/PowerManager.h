@@ -29,7 +29,8 @@ enum EPowerLev1State
     LEV1_POWER_INIT,
     LEV1_POWER_ACTIVE,
     LEV1_POWER_STANDBY,
-    LEV1_POWER_SLEEP
+    LEV1_POWER_SLEEP,
+    LEV1_POWER_BUTT,
 };
 
 //二级状态:
@@ -64,12 +65,18 @@ private:
     void SetLev2State(EPowerLev2State state) { mCurLev2State = state; }
     EPowerLev2State GetLev2State() { return mCurLev2State; }
 
+    void PerformBootBusiness();
+    void PerformResumeBusiness();
+    void PerformStandbyBusiness();
+    void PerformSleepBusiness();
+
     /* 消息响应函数 */
-    void MsgRespondPowerOnWithDefault(const SprMsg& msg);
+    void MsgRespondPowerOnWithInit(const SprMsg& msg);
     void MsgRespondPowerOnWithStandby(const SprMsg& msg);
     void MsgRespondPowerOnWithSleep(const SprMsg& msg);
-    void MsgRespondPowerOffWithDefault(const SprMsg& msg);
+    void MsgRespondPowerOffWithInit(const SprMsg& msg);
     void MsgRespondPowerOffWithActive(const SprMsg& msg);
+    void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
     static std::vector< StateTransition <EPowerLev1State,
