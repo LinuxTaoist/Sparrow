@@ -210,7 +210,7 @@ int LogManager::MainLoop()
 
         int32_t len = 0;
         int ret = pLogMCacheMem->read(&len, sizeof(int32_t));
-        if (ret != 0 || len < 0) {
+        if (ret != 0 || len < 0 || len > DEFAULT_FRAME_LEN_LIMIT) {
             SPR_LOGE("read memory failed! len = %d, ret = %d\n", len, ret);
             usleep(10000);
             continue;
