@@ -1,5 +1,5 @@
 ## Components
 
 add_subdirectory(Business)
-add_subdirectory(Framework)
+add_subdirectory(Basics)
 

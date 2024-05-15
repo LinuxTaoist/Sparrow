@@ -6,7 +6,7 @@ include_directories     (${PROJECT_PATH}/Util)
 include_directories     (${PROJECT_PATH}/PrivateAPIs/Binder)
 
 ## Build libsprbinder.so
-include_directories     (${PROJECT_PATH}/Components/Framework/BindHubSrv)
+include_directories     (${PROJECT_PATH}/Components/Basics/BindHubSrv)
 aux_source_directory    (${PROJECT_PATH}/Util           SRC_BINDER_LIB_PATH)
 aux_source_directory    (${PRIVATE_APIS_PATH}/Binder    SRC_BINDER_LIB_PATH)
 
