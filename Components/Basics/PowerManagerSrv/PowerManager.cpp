@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <algorithm>
 #include "CommonMacros.h"
 #include "PowerManager.h"
 
@@ -90,23 +91,15 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
 {
     SPR_LOGD("Lev1: %d, Lev2: %d, msg: %s\n", mCurLev1State, mCurLev2State, GetSigName(msg.GetMsgId()));
 
-    // Loop: Traverse the state table to find the matching entry
-    for (const auto& it : mStateTable)
-    {
-        if (   (   (it.lev1State  == mCurLev1State)
-                || (it.lev1State  == LEV1_POWER_ANY)
-               )
-            && (   (it.lev2State  == mCurLev2State)
-                || (it.lev2State  == LEV2_POWER_ANY)
-               )
-            && (   (it.sigId      == msg.GetMsgId())
-                || (it.sigId      == SIG_ID_ANY)
-               )
-           )
-        {
-            (this->*(it.callback))(msg);
-            break;
-        }
+    auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
+        [this, &msg](const auto& entry) {
+            return ((entry.lev1State  == mCurLev1State  || entry.lev1State  == LEV1_POWER_ANY) &&
+                    (entry.lev2State  == mCurLev2State  || entry.lev2State  == LEV2_POWER_ANY) &&
+                    (entry.sigId      == msg.GetMsgId() || entry.sigId      == SIG_ID_ANY) );
+        });
+
+    if (stateEntry != mStateTable.end()) {
+        (this->*(stateEntry->callback))(msg);
     }
 
     return 0;
