@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : BindingHub.h
+ *  @file       : BinderManager.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -24,16 +24,16 @@
 #include <stdint.h>
 #include "BindCommon.h"
 
-class BindingHub
+class BinderManager
 {
 public:
-    ~BindingHub();
+    ~BinderManager();
 
-    static BindingHub* GetInstance();
+    static BinderManager* GetInstance();
     int32_t HandleMsgLoop();
 
 private:
-    BindingHub();
+    BinderManager();
 
     int32_t EnvReady(const std::string& srvName);
     int32_t MsgResponseAddService();
@@ -41,7 +41,7 @@ private:
     int32_t MsgResponseGetService();
 
 private:
-    using HandleFunction = int32_t (BindingHub::*)(void);
+    using HandleFunction = int32_t (BinderManager::*)(void);
 
     std::map<std::string, BinderInfo> mBinderMap;
     std::map<int32_t, HandleFunction> mHandleFuncs;

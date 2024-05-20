@@ -17,10 +17,10 @@
  *
  */
 #include <stdio.h>
-#include "BindingHub.h"
+#include "BinderManager.h"
 
 int main(int argc, const char *argv[])
 {
-    BindingHub::GetInstance()->HandleMsgLoop();
+    BinderManager::GetInstance()->HandleMsgLoop();
     return 0;
 }
