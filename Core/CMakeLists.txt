@@ -1,11 +1,13 @@
 ## Build libsprcore.so
 
 include_directories     (${PROJECT_PATH}/Util)
-include_directories     (${PROJECT_PATH}/3rdParty/libgo/include)
 include_directories     (${PROJECT_PATH}/3rdAdapter)
+include_directories     (${PROJECT_PATH}/3rdParty/libgo/include)
 include_directories     (${CMAKE_CURRENT_SOURCE_DIR})
-aux_source_directory    (${CMAKE_CURRENT_SOURCE_DIR}    SRC_CORE_PATH)
-aux_source_directory    (${PROJECT_PATH}/Util           SRC_CORE_PATH)
+include_directories     (${PROJECT_PATH}/PrivateAPIs/Binder)
+aux_source_directory    (${CMAKE_CURRENT_SOURCE_DIR}        SRC_CORE_PATH)
+aux_source_directory    (${PROJECT_PATH}/Util               SRC_CORE_PATH)
+aux_source_directory    (${PROJECT_PATH}/PrivateAPIs/Binder SRC_CORE_PATH)
 
 add_library             (LibSprCore SHARED ${SRC_CORE_PATH})
 set_target_properties   (LibSprCore PROPERTIES OUTPUT_NAME "sprcore")

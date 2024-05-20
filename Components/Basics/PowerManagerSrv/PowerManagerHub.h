@@ -20,14 +20,19 @@
 #define __POWER_MANAGER_HUB_H__
 
 #include <string>
+#include "PowerManager.h"
+#include "SprBinderHub.h"
 
-class PowerManagerHub
+class PowerManagerHub : public SprBinderHub
 {
 public:
-    PowerManagerHub(std::string& srvName);
+    PowerManagerHub(const std::string& srvName, PowerManager* powerManager);
     ~PowerManagerHub();
 
-    virtual void HandleBindCmd(int cmd) = 0;
+    void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd);
+
+private:
+    PowerManager* mPowerManager;
 };
 
 #endif // __POWER_MANAGER_HUB_H__

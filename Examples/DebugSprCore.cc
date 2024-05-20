@@ -27,6 +27,7 @@
 #include "GeneralUtils.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
+#include "PowerManagerInterface.h"
 
 using namespace std;
 using namespace GeneralUtils;
@@ -71,6 +72,8 @@ static void usage()
             "3: AddTimer (10, 0s, 2s)\n"
             "4: DelTimer case 3 \n"
             "5: AddTimer ( 0, 0s, 20ms)\n"
+            "6: PowerOn\n"
+            "7: PowerOff\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -78,6 +81,7 @@ static void usage()
 
 int main(int argc, const char *argv[])
 {
+    PowerManagerInterface* pPowerM = PowerManagerInterface::GetInstance();
     DebugCore theDebug(MODULE_DEBUG, "Debug", make_shared<SprMediatorIpcProxy>());
 
     char val = 0;
@@ -153,6 +157,18 @@ int main(int argc, const char *argv[])
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
                     theDebug.NotifyAllObserver(msg);
 
+                    break;
+                }
+
+                case '6':
+                {
+                    pPowerM->PowerOn();
+                    break;
+                }
+
+                case '7':
+                {
+                    pPowerM->PowerOff();
                     break;
                 }
 

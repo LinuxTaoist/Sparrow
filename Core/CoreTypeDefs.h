@@ -71,6 +71,14 @@ enum EPropertyBinderCmd
     PROPERTY_CMD_BUTT,
 };
 
+enum EPowerMBinderCmd
+{
+    POWERM_CMD_BEGIN = MODULE_POWERM << MODULE_ID_OFFSET | 1,
+    POWERM_CMD_POWER_ON,
+    POWERM_CMD_POWER_OFF,
+    POWERM_CMD_BUTT
+};
+
 enum EDebugMsgID
 {
     DEBUG_MSG_BEGIN = MODULE_DEBUG << MODULE_ID_OFFSET | 1,

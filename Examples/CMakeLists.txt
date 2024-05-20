@@ -3,13 +3,14 @@
 include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/3rdAdapter)
+include_directories (${PROJECT_PATH}/PublicAPIs)
 
 ## Bin debugcore
 set(SRC_BIN_DCORE           DebugSprCore.cc)
 add_executable              (debug_core ${SRC_BIN_DCORE})
 set_target_properties       (debug_core PROPERTIES OUTPUT_NAME "debugcore")
-target_link_libraries       (debug_core c pthread sprcore)
-add_dependencies            (debug_core LibSprCore)
+target_link_libraries       (debug_core c pthread sprcore powermanagerapi)
+add_dependencies            (debug_core LibSprCore LibPowerManagerAPI)
 
 ## Bin debugmsg
 set(SRC_BIN_DMSG            DebugMsg.cc)

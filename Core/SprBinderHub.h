@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : BinderHub.h
+ *  @file       : SprBinderHub.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://linuxtaoist.gitee.io
@@ -24,18 +24,20 @@
 #include <memory>
 #include "Parcel.h"
 
-class BinderHub
+class SprBinderHub
 {
 public:
-    BinderHub(std::string& srvName);
-    virtual ~BinderHub();
+    SprBinderHub(const std::string& srvName);
+    virtual ~SprBinderHub();
 
     bool InitializeHub();
-    void BinderLoop();
-    virtual void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pReqParcel, int cmd) = 0;
+
+    static void BinderLoop(void* pData);
+    virtual void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd) = 0;
 
 private:
-
+    bool mRun;
+    std::string mSrvName;
     std::thread mBindThread;
 };
 

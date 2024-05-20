@@ -26,9 +26,9 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("BinderM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("BinderM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("BinderM", fmt, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("BinderHub", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGD("BinderHub", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("BinderHub", fmt, ##args)
 
 #define INT_KEY_LENGTH  5
 

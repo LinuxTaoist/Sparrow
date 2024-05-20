@@ -19,5 +19,20 @@
 #ifndef __POWER_MANAGER_INTERFACE_H__
 #define __POWER_MANAGER_INTERFACE_H__
 
+class PowerManagerInterface
+{
+public:
+    ~PowerManagerInterface();
+
+    static PowerManagerInterface* GetInstance();
+    int PowerOn();
+    int PowerOff();
+
+private:
+    PowerManagerInterface();
+
+private:
+    bool mEnable;
+};
 
 #endif // __POWER_MANAGER_INTERFACE_H__
