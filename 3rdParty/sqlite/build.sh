@@ -4,6 +4,21 @@
 # For cross-compilation, ensure the appropriate cross-compilation toolchain
 # is configured beforehand.
 
+# platform
+PLATFORM="Default"
+
+# Ensure the include directory exists
+if [[ ! -d "include" ]]; then
+    echo "Creating include directory..."
+    mkdir "include"
+fi
+
+# Ensure the lib/platform directory exists
+if [[ ! -d "lib/$PLATFORM" ]]; then
+    echo "Creating $PLATFORM directory..."
+    mkdir -p "lib/$PLATFORM"
+fi
+
 # Check for existing sqlite source directory
 if [[ ! -d "sqlite-autoconf-3450300" ]]; then
     echo "sqlite source directory not found. Extracting..."
@@ -26,7 +41,7 @@ make
 make install
 
 # Copy the built sqlite libraries and headers to the ../include/ and ../lib/[platform]/
-# cp release/include/* ../include/
-# cp release/lib/*     ../lib/Default/
+cp -rf release/include/*    ../include/
+cp -rf release/lib/*        ../lib/$PLATFORM/
 
 echo "sqlite compilation and installation completed."

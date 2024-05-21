@@ -4,6 +4,21 @@
 # For cross-compilation, ensure the appropriate cross-compilation toolchain
 # is configured beforehand.
 
+# platform
+PLATFORM="Default"
+
+# Ensure the include directory exists
+if [[ ! -d "include" ]]; then
+    echo "Creating include directory..."
+    mkdir "include"
+fi
+
+# Ensure the lib/platform directory exists
+if [[ ! -d "lib/$PLATFORM" ]]; then
+    echo "Creating $PLATFORM directory..."
+    mkdir -p "lib/$PLATFORM"
+fi
+
 # Check for existing libgo source directory
 if [[ ! -d "libgo" ]]; then
     echo "libgo source directory not found. Extracting..."
@@ -26,7 +41,8 @@ make
 make install
 
 # Copy the built libgo libraries and headers to the ../include/ and ../lib/[platform]/
-# cp release/include/libgo/*    ../include/
-# cp release/lib/*              ../lib/Default/
+cd ../
+cp -rf release/include/libgo/*    ../include/
+cp -rf release/lib/*              ../lib/$PLATFORM/
 
 echo "libgo compilation and installation completed."
