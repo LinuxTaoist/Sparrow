@@ -21,9 +21,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/timerfd.h>
+#include "SprLog.h"
 #include "SprMsg.h"
 #include "GeneralUtils.h"
-#include "CommonMacros.h"
 #include "SprTimerManager.h"
 #include "SprMediatorIpcProxy.h"
 

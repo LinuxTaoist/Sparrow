@@ -20,9 +20,9 @@
 #include <string.h>
 #include <mqueue.h>
 #include "SprMsg.h"
+#include "SprLog.h"
 #include "CoreTypeDefs.h"
 #include "SprObserver.h"
-#include "CommonMacros.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;

@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include "SprLog.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"

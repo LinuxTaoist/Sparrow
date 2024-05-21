@@ -35,9 +35,9 @@ public:
      */
     static SprLog* GetInstance();
 
-    // --------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     // - External interfaces for printing logs
-    // --------------------------------------------------------------------------------------------
+    // ----------------------------------------------------------------------------------------------------------------
     int32_t d(const char* tag, const char* format, ...);
     int32_t i(const char* tag, const char* format, ...);
     int32_t w(const char* tag, const char* format, ...);
@@ -70,5 +70,13 @@ private:
 private:
     sem_t mWriteSem;
 };
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Log interface macro
+// --------------------------------------------------------------------------------------------------------------------
+#define LOGD(tag, fmt, args...)     SprLog::GetInstance()->d(tag, "%4d " fmt, __LINE__, ##args)
+#define LOGI(tag, fmt, args...)     SprLog::GetInstance()->i(tag, "%4d " fmt, __LINE__, ##args)
+#define LOGW(tag, fmt, args...)     SprLog::GetInstance()->w(tag, "%4d " fmt, __LINE__, ##args)
+#define LOGE(tag, fmt, args...)     SprLog::GetInstance()->e(tag, "%4d " fmt, __LINE__, ##args)
 
 #endif // __SPR_LOG_H__

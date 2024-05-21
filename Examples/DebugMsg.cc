@@ -20,8 +20,8 @@
 #include <memory>
 #include <stdio.h>
 #include <string.h>
+#include "SprLog.h"
 #include "GeneralConversions.h"
-#include "CommonMacros.h"
 #include "SprObserver.h"
 #include "SprMediatorIpcProxy.h"
 

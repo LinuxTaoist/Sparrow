@@ -16,10 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __COMMON_MACRO_H__
-#define __COMMON_MACRO_H__
-
-#include "SprLog.h"
+#ifndef __COMMON_MACROS_H__
+#define __COMMON_MACROS_H__
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for service and client
@@ -30,18 +28,11 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Service name macro
 // --------------------------------------------------------------------------------------------------------------------
-#define SRV_NAME_BINDER             "bindhubsrv"
+#define SRV_NAME_BINDER             "bindermanagersrv"
 #define SRV_NAME_PROPERTY           "propertiessrv"
 #define SRV_NAME_MEDIATOR           "mediatorsrv"
 #define SRV_NAME_LOG                "logmanagersrv"
 #define SRV_NAME_SPARROW            "sparrowsrv"
+#define SRV_NAME_POWER_MANAGER      "powermanagersrv"
 
-// --------------------------------------------------------------------------------------------------------------------
-// - Log interface macro
-// --------------------------------------------------------------------------------------------------------------------
-#define LOGD(tag, fmt, args...)     SprLog::GetInstance()->d(tag, "%4d " fmt, __LINE__, ##args)
-#define LOGI(tag, fmt, args...)     SprLog::GetInstance()->i(tag, "%4d " fmt, __LINE__, ##args)
-#define LOGW(tag, fmt, args...)     SprLog::GetInstance()->w(tag, "%4d " fmt, __LINE__, ##args)
-#define LOGE(tag, fmt, args...)     SprLog::GetInstance()->e(tag, "%4d " fmt, __LINE__, ##args)
-
-#endif // __COMMON_MACRO_H__
+#endif // __COMMON_MACROS_H__

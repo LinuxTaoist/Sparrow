@@ -25,8 +25,8 @@
 #include <unistd.h>
 #include <string.h>
 #include <sys/time.h>
-#include "SharedRingBuffer.h"
 #include "CommonMacros.h"
+#include "SharedRingBuffer.h"
 #include "SprLog.h"
 
 #define PID_PRINT_WIDTH_LIMIT       6

@@ -28,7 +28,6 @@
 #include <sys/stat.h>        /* For mode constants */
 #include "GeneralUtils.h"
 #include "SprObserver.h"
-#include "CommonMacros.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;

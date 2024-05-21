@@ -21,8 +21,8 @@
 #include <errno.h>
 #include <string.h>
 #include <sys/epoll.h>
+#include "SprLog.h"
 #include "LibgoAdapter.h"
-#include "CommonMacros.h"
 #include "SprEpollSchedule.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("EpollSch", fmt, ##args)

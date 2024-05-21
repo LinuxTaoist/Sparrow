@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include "SprLog.h"
 #include "CoreTypeDefs.h"
-#include "CommonMacros.h"
 #include "PowerManagerHub.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("PowerManager", fmt, ##args)

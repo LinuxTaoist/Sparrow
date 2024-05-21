@@ -17,7 +17,7 @@
  *
  */
 #include "SprMsg.h"
-#include "CommonMacros.h"
+#include "SprLog.h"
 #include "GeneralConversions.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprMsg", fmt, ##args)

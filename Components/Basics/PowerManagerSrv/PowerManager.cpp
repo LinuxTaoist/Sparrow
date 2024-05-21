@@ -17,7 +17,7 @@
  *
  */
 #include <algorithm>
-#include "CommonMacros.h"
+#include "SprLog.h"
 #include "PowerManager.h"
 
 using namespace std;

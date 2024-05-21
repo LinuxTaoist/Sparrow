@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include "SprLog.h"
 #include "SprBinderHub.h"
-#include "CommonMacros.h"
 #include "BindInterface.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
@@ -43,7 +43,6 @@ bool SprBinderHub::InitializeHub()
 {
     bool ret = false;
 
-    SPR_LOGD("dx_debug: joinable = %d\n", mBindThread.joinable());
     if (!mBindThread.joinable()) {
         mBindThread = std::thread(BinderLoop, this);
         ret = true;

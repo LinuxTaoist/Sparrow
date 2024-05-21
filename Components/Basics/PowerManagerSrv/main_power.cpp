@@ -19,6 +19,7 @@
  */
 #include <stdio.h>
 #include <memory>
+#include "CommonMacros.h"
 #include "PowerManager.h"
 #include "PowerManagerHub.h"
 #include "SprMediatorIpcProxy.h"
@@ -29,7 +30,7 @@ using namespace InternalDefs;
 int main(int argc, const char *argv[])
 {
     PowerManager thePowerManager(MODULE_POWERM, "PowerM", make_shared<SprMediatorIpcProxy>());
-    PowerManagerHub thePowerManagerHub("powermanagersrv", &thePowerManager);
+    PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
 
     thePowerManagerHub.InitializeHub();
     SprObserver::MainLoop();

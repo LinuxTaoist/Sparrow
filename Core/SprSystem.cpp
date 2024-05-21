@@ -21,6 +21,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/resource.h>
+#include "SprLog.h"
 #include "CommonMacros.h"
 #include "SprSystem.h"
 #include "SprTimeTrace.h"

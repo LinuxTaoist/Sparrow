@@ -24,6 +24,7 @@
 #include <sys/stat.h>        /* For mode constants */
 #include <sys/epoll.h>
 #include <string.h>
+#include "SprLog.h"
 #include "SprSigId.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
