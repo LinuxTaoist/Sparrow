@@ -5,7 +5,7 @@
  *  @file       : ServiceManager.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : BSPR_log: https://linuxtaoist.gitee.io
+ *  @brief      : BSPR_log: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/26
  *
  *

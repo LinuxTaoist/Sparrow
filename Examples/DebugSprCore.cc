@@ -5,7 +5,7 @@
  *  @file       : DebugSprCore.cc
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : Blog: https://linuxtaoist.gitee.io
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
  *
  *

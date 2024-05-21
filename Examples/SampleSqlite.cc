@@ -5,7 +5,7 @@
  *  @file       : SampleSqlite.cc
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : Blog: https://linuxtaoist.gitee.io
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/05
  *
  *
@@ -52,7 +52,7 @@ int main(int argc, const char *argv[])
 
     // 再次查询，查看更新效果
     result = pSqlAdapter->Query("users");
-    SPR_LOGD("\nAfter Update:\n");
+    SPR_LOGD("After Update:\n");
     for (const auto& row : result) {
         SPR_LOGD("ID: %s, Name: %s, Age: %s\n", row[0].c_str(), row[1].c_str(), row[2].c_str());
     }
@@ -62,7 +62,7 @@ int main(int argc, const char *argv[])
 
     // 最终查询，验证删除
     result = pSqlAdapter->Query("users");
-    SPR_LOGD("\nAfter Delete:\n");
+    SPR_LOGD("After Delete:\n");
     for (const auto& row : result) {
         SPR_LOGD("ID: %s, Name: %s, Age: %s\n", row[0].c_str(), row[1].c_str(), row[2].c_str());
     }

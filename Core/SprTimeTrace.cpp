@@ -5,7 +5,7 @@
  *  @file       : SprTimeTrace.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : Blog: https://linuxtaoist.gitee.io
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
  *
  *  System initialization file

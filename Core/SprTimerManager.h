@@ -5,7 +5,7 @@
  *  @file       : SprTimerManager.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : Blog: https://linuxtaoist.gitee.io
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/12/15
  *
  *  The minimum scale of the timer is milliseconds, and the value set during use must be
