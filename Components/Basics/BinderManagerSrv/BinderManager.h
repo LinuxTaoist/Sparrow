@@ -14,10 +14,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  2024/03/16 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
+ *  2024/05/20 | 1.0.0.2   | Xiang.D        | Rename from BindingHub to BinderManager
+ *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __BINDING_HUB_H__
-#define __BINDING_HUB_H__
+#ifndef __BINDER_MANAGER_H__
+#define __BINDER_MANAGER_H__
 
 #include <map>
 #include <string>
@@ -47,4 +49,4 @@ private:
     std::map<int32_t, HandleFunction> mHandleFuncs;
 };
 
-#endif // __BINDING_HUB_H__
+#endif // __BINDER_MANAGER_H__
