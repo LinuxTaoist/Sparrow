@@ -8,6 +8,8 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/02
  *
+ *  This header is used to define macro definitions common to both client and server code implementations.
+ *  The implementation of this header file is not publicly available
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>

@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_watch.cpp
+ *  @file       : InfraCommon.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,13 +16,17 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <stdio.h>
-#include "MainMenu.h"
+#ifndef __INFRA_COMMON_H__
+#define __INFRA_COMMON_H__
 
-#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
+namespace InfraWatch {
 
-int main(int argc, const char *argv[])
-{
-    theMainMenu.MenuLoop();
-    return 0;
-}
+#define CONTINUE_ON_NONQUIT(handle) while(toupper((handle())) != 'Q')
+
+void ClearScreen();
+char WaitUserInputUntilEnter();
+char WaitUserInputWithoutEnter();
+
+};
+
+#endif // __INFRA_COMMON_H__

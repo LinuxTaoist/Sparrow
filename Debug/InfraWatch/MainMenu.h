@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : TerminalUI.h
+ *  @file       : MainMenu.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,26 +16,24 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __TERMINAL_UI_H__
-#define __TERMINAL_UI_H__
+#ifndef __MAIN_MENU_H__
+#define __MAIN_MENU_H__
 
-class TerminalUI
+#include "InfraCommon.h"
+
+class MainMenu
 {
 public:
-    TerminalUI();
-    ~TerminalUI();
-    int MainMenuLoop();
+    MainMenu() = default;
+    ~MainMenu() = default;
+
+    int  MenuLoop();
 
 private:
-    void ClearScreen();
-    char WaitUserInputUntilEnter();
-    char WaitUserInputWithoutEnter();
-    char DisplayMainMenuAndHandleInput();
-    char HandleInputInMainMenu(char input);
-    char DisplayMessageQueueStatusAndHandleInput();
-    char HandleInputInMessageQueueMenu(char input);
-    char DisplayManagerStatusAndHandleInput();
-    char HandleInputInManagerStatusMenu(char input);
+    char HandleInputInMenu(char input);
+    char MenuEntry();
 };
 
-#endif // __TERMINAL_UI_H__
+extern MainMenu theMainMenu;
+
+#endif

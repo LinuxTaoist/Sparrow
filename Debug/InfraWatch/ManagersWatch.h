@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_watch.cpp
+ *  @file       : ManagersWatch.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,13 +16,21 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <stdio.h>
-#include "MainMenu.h"
+#ifndef __MANAGERS_WATCH_H__
+#define __MANAGERS_WATCH_H__
 
-#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-
-int main(int argc, const char *argv[])
+class ManagersWatch
 {
-    theMainMenu.MenuLoop();
-    return 0;
-}
+public:
+    ManagersWatch() = default;
+    ~ManagersWatch() = default;
+
+    char MenuEntry();
+
+private:
+    char HandleInputInMenu(char input);
+};
+
+extern ManagersWatch theManagersWatch;
+
+#endif // __MANAGERS_WATCH_H__

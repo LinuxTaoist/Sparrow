@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_watch.cpp
+ *  @file       : CustomDebugWatch.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,13 +16,23 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <stdio.h>
-#include "MainMenu.h"
+#ifndef __CUSTOM_DEBUG_WATCH_H__
+#define __CUSTOM_DEBUG_WATCH_H__
 
-#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
+#include "InfraCommon.h"
 
-int main(int argc, const char *argv[])
+class CustomDebugWatch
 {
-    theMainMenu.MenuLoop();
-    return 0;
-}
+public:
+    CustomDebugWatch() = default;
+    ~CustomDebugWatch() = default;
+
+    char MenuEntry();
+
+private:
+    char HandleInputInMenu(char input);
+};
+
+extern CustomDebugWatch theCustomDebugWatch;
+
+#endif // __CUSTOM_DEBUG_WATCH_H__

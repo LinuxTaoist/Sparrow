@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_watch.cpp
+ *  @file       : InfraCommon.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,13 +16,37 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <limits>
+#include <iostream>
 #include <stdio.h>
-#include "MainMenu.h"
+#include "GeneralUtils.h"
+#include "InfraCommon.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-int main(int argc, const char *argv[])
+char InfraWatch::WaitUserInputUntilEnter()
 {
-    theMainMenu.MenuLoop();
-    return 0;
+    char in;
+    SPR_LOG(": ");
+    std::cin >> std::noskipws >> in;
+    std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+
+    return in;
+}
+
+char InfraWatch::WaitUserInputWithoutEnter()
+{
+    char in = 0;
+    GeneralUtils::SystemCmd("stty raw");
+    in = getchar();
+    GeneralUtils::SystemCmd("stty cooked");
+
+    return in;
+}
+
+void InfraWatch::ClearScreen()
+{
+    SPR_LOG("\033[2J");
+    SPR_LOG("\033[H");
+    fflush(stdout);
 }

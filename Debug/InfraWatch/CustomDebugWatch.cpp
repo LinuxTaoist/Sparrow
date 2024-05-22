@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_watch.cpp
+ *  @file       : CustomDebugWatch.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -17,12 +17,28 @@
  *
  */
 #include <stdio.h>
-#include "MainMenu.h"
+#include "InfraCommon.h"
+#include "CustomDebugWatch.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-int main(int argc, const char *argv[])
+CustomDebugWatch theCustomDebugWatch;
+
+char CustomDebugWatch::MenuEntry()
 {
-    theMainMenu.MenuLoop();
+    InfraWatch::ClearScreen();
+    SPR_LOG("+---------------------------------------------------------------------+\n");
+    SPR_LOG("|                            Custom  Debug                            |\n");
+    SPR_LOG("+---------------------------------------------------------------------+\n");
+    SPR_LOG("| [Q] Back                                                            |\n");
+    SPR_LOG("+---------------------------------------------------------------------+\n");
+
+    char input = InfraWatch::WaitUserInputWithoutEnter();
+    HandleInputInMenu(input);
+    return input;
+}
+
+char CustomDebugWatch::HandleInputInMenu(char input)
+{
     return 0;
 }
