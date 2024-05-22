@@ -16,7 +16,6 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
 #include <stdio.h>
 #include "InfraCommon.h"
 #include "ManagersWatch.h"
@@ -37,8 +36,8 @@ char MainMenu::MenuEntry()
     SPR_LOG("==================================  MAIN MENU  ==================================\n"
             "\n"
             "    1. Display All Message Queues \n"
-            "    2. Display Managers Status \n"
-            "    3. Display Custom Debug Options \n"
+            "    2. Manager's Entrance \n"
+            "    3. Custom Debug Options \n"
             "\n"
             "    [Q] Quit\n"
             "\n"
@@ -52,7 +51,8 @@ char MainMenu::MenuEntry()
 
 char MainMenu::HandleInputInMenu(char input)
 {
-    switch(input) {
+    switch(input)
+    {
         case '1':
         {
             CONTINUE_ON_NONQUIT(theMediatorWatch.MenuEntry);

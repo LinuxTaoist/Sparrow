@@ -19,6 +19,8 @@
 #ifndef __INFRA_COMMON_H__
 #define __INFRA_COMMON_H__
 
+#include <iostream>
+
 namespace InfraWatch {
 
 #define CONTINUE_ON_NONQUIT(handle) while(toupper((handle())) != 'Q')

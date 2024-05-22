@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <vector>
 #include <algorithm>
 #include "SprLog.h"
 #include "PowerManager.h"
@@ -55,11 +56,6 @@ PowerManager::mStateTable =
     // =============================================================
     // All States for SIG_ID_POWER_OFF
     // =============================================================
-    { LEV1_POWER_INIT, LEV2_POWER_ANY,
-      SIG_ID_POWER_OFF,
-      &PowerManager::MsgRespondPowerOffWithInit
-    },
-
     { LEV1_POWER_ACTIVE, LEV2_POWER_ANY,
       SIG_ID_POWER_OFF,
       &PowerManager::MsgRespondPowerOffWithActive
@@ -89,7 +85,7 @@ PowerManager::~PowerManager()
 
 int PowerManager::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Lev1: %d, Lev2: %d, msg: %s\n", mCurLev1State, mCurLev2State, GetSigName(msg.GetMsgId()));
+    SPR_LOGD("Lev1: %s, msg: %s\n", GetLev1String(mCurLev1State).c_str(), GetSigName(msg.GetMsgId()));
 
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
         [this, &msg](const auto& entry) {
@@ -103,6 +99,28 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     }
 
     return 0;
+}
+
+std::string PowerManager::GetLev1String(EPowerLev1State lev1)
+{
+    #ifdef ENUM_OR_STRING
+    #undef ENUM_OR_STRING
+    #endif
+    #define ENUM_OR_STRING(x) #x
+
+    static std::vector<std::string> Lev1Strings = {
+        POWER_LEV1_MACROS
+    };
+
+    return (Lev1Strings.size() > lev1) ? Lev1Strings[lev1] : "UNDEFINED";
+}
+
+void PowerManager::SetLev1State(EPowerLev1State state)
+{
+    SPR_LOGD("State changed: %s -> %s\n",
+        GetLev1String(mCurLev1State).c_str(), GetLev1String(state).c_str());
+
+    mCurLev1State = state;
 }
 
 void PowerManager::PerformBootBusiness()
@@ -143,12 +161,6 @@ void PowerManager::MsgRespondPowerOnWithSleep(const SprMsg& msg)
     PerformResumeBusiness();
 }
 
-void PowerManager::MsgRespondPowerOffWithInit(const SprMsg& msg)
-{
-    SPR_LOGD("Handle power off with default!\n");
-    SetLev1State(LEV1_POWER_STANDBY);
-}
-
 void PowerManager::MsgRespondPowerOffWithActive(const SprMsg& msg)
 {
     SPR_LOGD("Handle power off with active!\n");
@@ -157,7 +169,7 @@ void PowerManager::MsgRespondPowerOffWithActive(const SprMsg& msg)
 
 void PowerManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
 {
-    SPR_LOGW("IGNORE MSG: Lev1 = %d, Lev2 = %d, msg = %s\n",
-                mCurLev1State, mCurLev2State, GetSigName(msg.GetMsgId()));
+    SPR_LOGW("IGNORE MSG: Lev1 = %s, msg = %s\n",
+                GetLev1String(mCurLev1State).c_str(), GetSigName(msg.GetMsgId()));
 }
 

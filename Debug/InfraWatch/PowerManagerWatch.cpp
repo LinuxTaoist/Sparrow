@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : ManagersWatch.cpp
+ *  @file       : PowerManagerWatch.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -18,37 +18,44 @@
  */
 #include <stdio.h>
 #include "InfraCommon.h"
-#include "ManagersWatch.h"
+#include "PowerManagerInterface.h"
 #include "PowerManagerWatch.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-ManagersWatch theManagersWatch;
+PowerManagerWatch thePowerManagerWatch;
 
-char ManagersWatch::MenuEntry()
+char PowerManagerWatch::MenuEntry()
 {
     InfraWatch::ClearScreen();
-
-    SPR_LOG("============================   Manager's  Entrance   ============================\n"
+    SPR_LOG("================================  Power Manager  ================================\n"
             "\n"
-            "    1. PowerManager \n"
+            "    1. PowerOn \n"
+            "    2. PowerOff \n"
             "\n"
-            "    [Q] Quit \n"
+            "    [Q] Quit\n"
             "\n"
             "=================================================================================\n");
 
     char input = InfraWatch::WaitUserInputWithoutEnter();
     HandleInputInMenu(input);
+
     return input;
 }
 
-char ManagersWatch::HandleInputInMenu(char input)
+char PowerManagerWatch::HandleInputInMenu(char input)
 {
     switch(input)
     {
         case '1':
         {
-            CONTINUE_ON_NONQUIT(thePowerManagerWatch.MenuEntry);
+            PowerManagerInterface::GetInstance()->PowerOn();
+            break;
+        }
+
+        case '2':
+        {
+            PowerManagerInterface::GetInstance()->PowerOff();
             break;
         }
 

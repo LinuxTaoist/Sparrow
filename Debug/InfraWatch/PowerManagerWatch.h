@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : MainMenu.h
+ *  @file       : PowerManagerWatch.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,24 +16,21 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __MAIN_MENU_H__
-#define __MAIN_MENU_H__
+#ifndef __POWER_MANAGER_WATCH_H__
+#define __POWER_MANAGER_WATCH_H__
 
-#include "InfraCommon.h"
-
-class MainMenu
+class PowerManagerWatch
 {
 public:
-    MainMenu() = default;
-    ~MainMenu() = default;
+    PowerManagerWatch() = default;
+    ~PowerManagerWatch() = default;
 
-    int  MenuLoop();
+    char MenuEntry();
 
 private:
-    char MenuEntry();
     char HandleInputInMenu(char input);
 };
 
-extern MainMenu theMainMenu;
+extern PowerManagerWatch thePowerManagerWatch;
 
-#endif
+#endif // __POWER_MANAGER_WATCH_H__

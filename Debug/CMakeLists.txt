@@ -4,6 +4,7 @@ set(SRC_DEBUG_PATH          ${PROJECT_PATH}/Debug)
 include_directories         (${PROJECT_PATH}/Core)
 include_directories         (${PROJECT_PATH}/Util)
 include_directories         (${PROJECT_PATH}/PrivateAPIs)
+include_directories         (${PROJECT_PATH}/PublicAPIs)
 
 # Bin logshow
 aux_source_directory        (${PROJECT_PATH}/Util               SRC_BIN_LOGSHOW)
@@ -17,5 +18,5 @@ aux_source_directory        (${PROJECT_PATH}/Util               SRC_INFRA_WATCH_
 aux_source_directory        (${SRC_DEBUG_PATH}/InfraWatch       SRC_INFRA_WATCH_PATH)
 add_executable              (BinInfraWatch ${SRC_INFRA_WATCH_PATH})
 set_target_properties       (BinInfraWatch PROPERTIES OUTPUT_NAME "infrawatch")
-target_link_libraries       (BinInfraWatch rt pthread mediatorapi)
-add_dependencies            (BinInfraWatch LibMediatorAPI)
+target_link_libraries       (BinInfraWatch mediatorapi powermanagerapi rt pthread)
+add_dependencies            (BinInfraWatch LibMediatorAPI LibPowerManagerAPI)
