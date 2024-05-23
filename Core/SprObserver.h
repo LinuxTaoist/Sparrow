@@ -46,8 +46,8 @@ public:
     std::string GetMqDevName() const { return mMqDevName; }
 
     bool IsMonitored() const;
-    virtual int NotifyObserver(const SprMsg& msg);
-    virtual int NotifyAllObserver(const SprMsg& msg);
+    virtual int NotifyObserver(SprMsg& msg);
+    virtual int NotifyAllObserver(SprMsg& msg);
     virtual int HandleEvent(int fd);
     virtual int ProcessMsg(const SprMsg& msg) = 0;
 

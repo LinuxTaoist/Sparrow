@@ -339,7 +339,7 @@ int SprMediator::ProcessMsg(const SprMsg& msg)
 //     string datas;
 
 //     msg.Encode(datas);
-//     int ret = mq_send(mHandler, (const char*)datas.c_str(), datas.size(), 0);
+//     int ret = mq_send(mHandler, datas.c_str(), datas.size(), 0);
 //     if (ret < 0) {
 //         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
 //     }
@@ -358,7 +358,7 @@ int SprMediator::NotifyObserver(ESprModuleID id, const SprMsg& msg)
 
     string datas;
     msg.Encode(datas);
-    int ret = mq_send(it->second.handle, (const char*)datas.c_str(), datas.size(), 0);
+    int ret = mq_send(it->second.handle, datas.c_str(), datas.size(), 0);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }
@@ -370,15 +370,19 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
 {
     for (const auto& pair : mModuleMap)
     {
-        if (pair.second.handle != -1 && pair.second.monitored)
+        // Skip modules that are unregistered, inactive, or the source of the message
+        if (pair.second.handle == -1 || !pair.second.monitored || msg.GetFrom() == pair.first)
         {
-            // When the value to is NONE, it is sent to all
-            // and when the value is vaild value, it is sent to the destination
-            if (msg.GetTo() == MODULE_NONE || msg.GetTo() == pair.first)
-            {
-                NotifyObserver(pair.first, msg);
-            }
+            continue;
         }
+
+        // When destination is NONE, dispatch to all modules.
+        // when destination is vaild value, dispatch to the destination
+        if (msg.GetTo() == MODULE_NONE || msg.GetTo() == pair.first)
+        {
+            NotifyObserver(pair.first, msg);
+        }
+
     }
 
     return 0;

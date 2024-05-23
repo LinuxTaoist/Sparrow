@@ -92,7 +92,7 @@ int SprMediatorIpcProxy::SendMsg(const SprMsg& msg)
     std::string datas;
 
     msg.Encode(datas);
-    int ret = mq_send(mMediatorHandle, (const char*)datas.c_str(), datas.size(), 1);
+    int ret = mq_send(mMediatorHandle, datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }

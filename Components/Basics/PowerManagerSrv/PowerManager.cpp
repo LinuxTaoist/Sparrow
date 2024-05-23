@@ -85,7 +85,7 @@ PowerManager::~PowerManager()
 
 int PowerManager::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Lev1: %s, msg: %s\n", GetLev1String(mCurLev1State).c_str(), GetSigName(msg.GetMsgId()));
+    SPR_LOGD("Recv msg: %s on %s\n", GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
 
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
         [this, &msg](const auto& entry) {
@@ -126,21 +126,32 @@ void PowerManager::SetLev1State(EPowerLev1State state)
 void PowerManager::PerformBootBusiness()
 {
     SetLev1State(LEV1_POWER_ACTIVE);
+    BroadcastPowerEvent(SIG_ID_POWER_BOOT);
 }
 
 void PowerManager::PerformResumeBusiness()
 {
     SetLev1State(LEV1_POWER_ACTIVE);
+    BroadcastPowerEvent(SIG_ID_POWER_RESUME);
 }
 
 void PowerManager::PerformStandbyBusiness()
 {
     SetLev1State(LEV1_POWER_STANDBY);
+    BroadcastPowerEvent(SIG_ID_POWER_STANDBY);
 }
 
 void PowerManager::PerformSleepBusiness()
 {
     SetLev1State(LEV1_POWER_SLEEP);
+    BroadcastPowerEvent(SIG_ID_POWER_SLEEP);
+}
+
+void PowerManager::BroadcastPowerEvent(uint32_t event)
+{
+    SprMsg msg(event);
+    NotifyAllObserver(msg);
+    SPR_LOGD("Broadcast power event: %s\n", GetSigName(event));
 }
 
 void PowerManager::MsgRespondPowerOnWithInit(const SprMsg& msg)
@@ -164,12 +175,12 @@ void PowerManager::MsgRespondPowerOnWithSleep(const SprMsg& msg)
 void PowerManager::MsgRespondPowerOffWithActive(const SprMsg& msg)
 {
     SPR_LOGD("Handle power off with active!\n");
-    SetLev1State(LEV1_POWER_STANDBY);
+    PerformStandbyBusiness();
 }
 
 void PowerManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
 {
-    SPR_LOGW("IGNORE MSG: Lev1 = %s, msg = %s\n",
-                GetLev1String(mCurLev1State).c_str(), GetSigName(msg.GetMsgId()));
+    SPR_LOGW("Ignore msg: msg = %s on %s\n",
+                GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
 }
 

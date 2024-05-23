@@ -78,6 +78,7 @@ private:
     void PerformResumeBusiness();
     void PerformStandbyBusiness();
     void PerformSleepBusiness();
+    void BroadcastPowerEvent(uint32_t event);
 
     /* 消息响应函数 */
     void MsgRespondPowerOnWithInit(const SprMsg& msg);

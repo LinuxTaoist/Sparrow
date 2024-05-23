@@ -1,4 +1,4 @@
-ENUM_OR_STRING(SIG_ID_ANY = 0x00),
+ENUM_OR_STRING(SIG_ID_ANY = 0x00),                              \
 //-----------------------------------------------------------------------------
 // PROXY
 //-----------------------------------------------------------------------------
@@ -48,7 +48,9 @@ ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_POWER_ON),                                \
 ENUM_OR_STRING(SIG_ID_POWER_OFF),                               \
-ENUM_OR_STRING(SIG_ID_POWER_WAKEUP),                            \
-ENUM_OR_STRING(SIG_ID_POWER_SHUTDOWN),
+ENUM_OR_STRING(SIG_ID_POWER_BOOT),                              \
+ENUM_OR_STRING(SIG_ID_POWER_RESUME),                            \
+ENUM_OR_STRING(SIG_ID_POWER_STANDBY),                           \
+ENUM_OR_STRING(SIG_ID_POWER_SLEEP),                             \
 
-
+ENUM_OR_STRING(SIG_ID_BUTT)

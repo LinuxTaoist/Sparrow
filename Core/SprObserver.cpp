@@ -205,7 +205,7 @@ int SprObserver::SendMsg(const SprMsg& msg)
     std::string datas;
 
     msg.Encode(datas);
-    int ret = mq_send(mMqHandle, (const char*)datas.c_str(), datas.size(), 1);
+    int ret = mq_send(mMqHandle, datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }
@@ -230,14 +230,19 @@ int SprObserver::RecvMsg(SprMsg& msg)
     return msg.Decode(data);
 }
 
-int SprObserver::NotifyObserver(const SprMsg& msg)
+int SprObserver::NotifyObserver(SprMsg& msg)
 {
+    msg.SetFrom(mModuleID);
     mMsgMediatorPtr->NotifyObserver(msg);
     return 0;
 }
 
-int SprObserver::NotifyAllObserver(const SprMsg& msg)
+int SprObserver::NotifyAllObserver(SprMsg& msg)
 {
+    // Notify all modules by setting destination
+    // to MODULE_NONE, refer to SprMediator::NotifyAllObserver.
+    msg.SetFrom(mModuleID);
+    msg.SetTo(MODULE_NONE);
     mMsgMediatorPtr->NotifyAllObserver(msg);
     return 0;
 }
