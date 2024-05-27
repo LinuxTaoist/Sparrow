@@ -65,12 +65,12 @@ void SprSystem::InitMsgQueueLimit()
     // Note: The values in /proc/sys/fs/mqueue/* seem to have no influence on this issue.
     // Also ulimit -n has no influence on this issue.
     struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
-    const int ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
+    int ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
     if (ret == 0)
     {
-      rlim.rlim_cur = RLIM_INFINITY; //soft limit
-      rlim.rlim_max = RLIM_INFINITY; //hard limit
-      setrlimit(RLIMIT_MSGQUEUE, &rlim);
+        rlim.rlim_cur = RLIM_INFINITY;  // soft limit
+        rlim.rlim_max = RLIM_INFINITY;  // hard limit
+        setrlimit(RLIMIT_MSGQUEUE, &rlim);
     }
 }
 
@@ -101,7 +101,4 @@ void SprSystem::Init()
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Init();
 
     EnvReady(SRV_NAME_SPARROW);
-
-    // Permanently block waiting for message driver to trigger
-    SprObserver::MainLoop();
 }

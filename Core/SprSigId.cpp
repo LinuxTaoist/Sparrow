@@ -18,7 +18,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-
+#include <string>
+#include <vector>
 #include "SprSigId.h"
 
 #ifdef ENUM_OR_STRING
@@ -33,5 +34,5 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
 
 const char* GetSigName(int msgID)
 {
-    return sigIdString[msgID];
+    return (msgID < InternalDefs::SIG_ID_BUTT) ? sigIdString[msgID] : "UNDEFINED";
 }

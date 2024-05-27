@@ -54,7 +54,6 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
         AddPoll(mMqHandle, IPC_TYPE_MQ);
     }
 
-    InitSigHandler();
     mMsgMediatorPtr->RegisterObserver(*this);
     SPR_LOGD("Start Module: %s, mq: %s\n", mModuleName.c_str(), mMqDevName.c_str());
 }
@@ -99,39 +98,6 @@ int SprObserver::MainExit()
 {
     SprEpollSchedule::GetInstance()->Exit();
     return 0;
-}
-
-static void SignalHandler(int signum)
-{
-    SPR_LOGD("signal handler received signal %d!\n", signum);
-
-    switch (signum)
-    {
-        case SIGTERM:
-        case SIGINT:
-        {
-            SprObserver::MainExit();
-            break;
-        }
-
-        default:
-            break;
-    }
-}
-
-void SprObserver::InitSigHandler()
-{
-    struct sigaction signal_action;
-
-    signal_action.sa_handler = SignalHandler;
-    signal_action.sa_flags = 0;
-    sigemptyset(&signal_action.sa_mask);
-
-    /* register signals */
-    sigaction(SIGTERM, &signal_action, nullptr);
-    sigaction(SIGINT, &signal_action, nullptr);
-    sigaction(SIGPIPE, &signal_action, nullptr); /* ignore broken pipe signals */
-    sigaction(SIGABRT, &signal_action, nullptr);
 }
 
 int SprObserver::HandleEvent(int fd)
@@ -200,10 +166,12 @@ int SprObserver::HandlePollEvent(int fd, uint8_t ipcType)
 }
 
 // to self
-int SprObserver::SendMsg(const SprMsg& msg)
+int SprObserver::SendMsg(SprMsg& msg)
 {
     std::string datas;
 
+    msg.SetFrom(mModuleID);
+    msg.SetTo(mModuleID);
     msg.Encode(datas);
     int ret = mq_send(mMqHandle, datas.c_str(), datas.size(), 1);
     if (ret < 0) {

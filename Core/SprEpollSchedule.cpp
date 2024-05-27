@@ -51,11 +51,7 @@ SprEpollSchedule::SprEpollSchedule(uint32_t size)
 
 SprEpollSchedule::~SprEpollSchedule()
 {
-    if (mEpollHandle != -1)
-    {
-        close(mEpollHandle);
-        mEpollHandle = -1;
-    }
+    Exit();
 }
 
 SprEpollSchedule* SprEpollSchedule::GetInstance()
@@ -127,7 +123,7 @@ void SprEpollSchedule::EpollLoop()
         }
 
         // 无事件时, epoll_wait阻塞, 超时等待
-        int count = epoll_wait(mEpollHandle, ep, sizeof(ep)/sizeof(ep[0]), -1);
+        int count = epoll_wait(mEpollHandle, ep, sizeof(ep)/sizeof(ep[0]), 5000);
         if (count <= 0) {
             continue;
         }
@@ -144,8 +140,8 @@ void SprEpollSchedule::EpollLoop()
             mCoPool.Post([&] {
                 int ipcType = mPollMap[fd].first;
                 mPollMap[fd].second->HandlePollEvent(fd, ipcType);
-            }, nullptr);
 
+            }, nullptr);
         }
     } while(mRun);
 

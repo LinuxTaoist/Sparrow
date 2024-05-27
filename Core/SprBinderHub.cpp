@@ -32,11 +32,7 @@ SprBinderHub::SprBinderHub(const std::string& srvName)
 
 SprBinderHub::~SprBinderHub()
 {
-    mRun = false;
-    if (mBindThread.joinable())
-    {
-        mBindThread.join();
-    }
+    DestoryHub();
 }
 
 bool SprBinderHub::InitializeHub()
@@ -51,6 +47,17 @@ bool SprBinderHub::InitializeHub()
     return ret;
 }
 
+bool SprBinderHub::DestoryHub()
+{
+    mRun = false;
+    if (mBindThread.joinable())
+    {
+        mBindThread.join();
+    }
+
+    SPR_LOGE("Destory %s binderHub!\n", mSrvName.c_str());
+    return true;
+}
 void SprBinderHub::BinderLoop(void* pData)
 {
     SprBinderHub* mSelf = (SprBinderHub*)pData;

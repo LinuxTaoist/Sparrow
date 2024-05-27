@@ -108,7 +108,7 @@ int main(int argc, const char *argv[])
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
                     msg.SetFrom(MODULE_DEBUG);
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyAllObserver(msg);
+                    theDebug.NotifyObserver(msg);
 
                     break;
                 }
@@ -169,6 +169,7 @@ int main(int argc, const char *argv[])
                 case '7':
                 {
                     pPowerM->PowerOff();
+                    SprObserver::MainExit();
                     break;
                 }
 

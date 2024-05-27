@@ -72,7 +72,7 @@ public:
      *
      * Send message to self message queue
      */
-    int SendMsg(const SprMsg& msg);
+    int SendMsg(SprMsg& msg);
 
     /**
      * @brief RecvMsg
@@ -98,7 +98,6 @@ public:
 
 private:
     int MakeMQ();
-    void InitSigHandler();
 
     // --------------------------------------------------------------------------------------------
     // - Message handle functions

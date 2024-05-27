@@ -207,7 +207,7 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 {
     std::shared_ptr<STimerInfo> p = msg.GetDatas<STimerInfo>();
     if (p != nullptr) {
-        SPR_LOGD("AddTimer: [0x%x %dms %dms %s]\n", p->ModuleId, p->DelayInMilliSec, p->IntervalInMilliSec, GetSigName(p->MsgId));
+        SPR_LOGD("AddTimer: [0x%x %d %dms %dms %s]\n", p->ModuleId, p->RepeatTimes, p->DelayInMilliSec, p->IntervalInMilliSec, GetSigName(p->MsgId));
         // if (p->IntervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
         //     SPR_LOGW("Interval in milliseconds is too small: %d !\n", p->IntervalInMilliSec);
         //     return;

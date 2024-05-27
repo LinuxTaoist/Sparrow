@@ -20,6 +20,7 @@
 #include <chrono>
 #include <random>
 #include <stdarg.h>
+#include <signal.h>
 #include "GeneralUtils.h"
 
 namespace GeneralUtils {
@@ -34,7 +35,32 @@ int RandomDecimalDigits(int digits)
     return distribution(generator);
 }
 
-int SystemCmd(const char *format, ...)
+int InitSignalHandler(void (*signalHandler)(int))
+{
+    struct sigaction signal_action;
+
+    signal_action.sa_handler = signalHandler;
+    signal_action.sa_flags = 0;
+    sigemptyset(&signal_action.sa_mask);
+
+    sigaction(SIGHUP,    &signal_action, NULL);    // 终端挂断，重载配置或终止
+    sigaction(SIGINT,    &signal_action, NULL);    // 用户中断（Ctrl+C）
+    // sigaction(SIGQUIT,   &signal_action, NULL);    // 退出，带core dump，调试用
+    // sigaction(SIGILL,    &signal_action, NULL);    // 非法指令
+    // sigaction(SIGTRAP,   &signal_action, NULL);    // 调试陷阱
+    // sigaction(SIGABRT,   &signal_action, NULL);    // 应用异常中止（abort函数）
+    // sigaction(SIGBUS,    &signal_action, NULL);    // 总线错误，内存访问对齐问题
+    // sigaction(SIGFPE,    &signal_action, NULL);    // 浮点错误，如除以0
+    // sigaction(SIGUSR1,   &signal_action, NULL);    // 用户自定义信号1
+    // sigaction(SIGSEGV,   &signal_action, NULL);    // 段错误，非法内存访问
+    // sigaction(SIGUSR2,   &signal_action, NULL);    // 用户自定义信号2
+    // sigaction(SIGPIPE,   &signal_action, NULL);    // 管道破裂，写入无读取端的管道
+    // sigaction(SIGALRM,   &signal_action, NULL);    // 定时器信号
+    sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
+
+    return 0;
+}
+int SystemCmd(const char* format, ...)
 {
     std::string out;
 
@@ -46,7 +72,7 @@ int SystemCmd(const char *format, ...)
     return ret;
 }
 
-int SystemCmd(std::string& out, const char *format, ...)
+int SystemCmd(std::string& out, const char* format, ...)
 {
     va_list vlist;
     va_start(vlist, format);

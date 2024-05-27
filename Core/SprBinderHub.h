@@ -31,6 +31,7 @@ public:
     virtual ~SprBinderHub();
 
     bool InitializeHub();
+    bool DestoryHub();
 
     static void BinderLoop(void* pData);
     virtual void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd) = 0;

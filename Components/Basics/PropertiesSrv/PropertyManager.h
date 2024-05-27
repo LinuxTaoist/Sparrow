@@ -22,7 +22,6 @@
 #include <string>
 #include <memory>
 #include "SharedBinaryTree.h"
-#include "SprObserver.h"
 
 class PropertyManager
 {
