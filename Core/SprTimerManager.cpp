@@ -205,15 +205,17 @@ void SprTimerManager::MsgRespondStopSystemTimer(const SprMsg &msg)
 
 void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 {
-    std::shared_ptr<STimerInfo> p = msg.GetDatas<STimerInfo>();
+    auto p = msg.GetDatas<STimerInfo>();
     if (p != nullptr) {
-        SPR_LOGD("AddTimer: [0x%x %d %dms %dms %s]\n", p->ModuleId, p->RepeatTimes, p->DelayInMilliSec, p->IntervalInMilliSec, GetSigName(p->MsgId));
-        // if (p->IntervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
-        //     SPR_LOGW("Interval in milliseconds is too small: %d !\n", p->IntervalInMilliSec);
-        //     return;
-        // }
+        SPR_LOGD("AddTimer: [0x%x %d %dms %dms %s]\n", p->moduleId, p->repeatTimes,
+                            p->delayInMilliSec, p->intervalInMilliSec, GetSigName(p->msgId));
 
-        AddTimer(p->ModuleId, p->MsgId, p->RepeatTimes, p->DelayInMilliSec, p->IntervalInMilliSec);
+        if (p->intervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
+            SPR_LOGW("Interval too small (%d ms), minimum allowed is %d ms!\n", p->intervalInMilliSec, TIMER_MIN_INTERVAL_MS);
+            return;
+        }
+
+        AddTimer(p->moduleId, p->msgId, p->repeatTimes, p->delayInMilliSec, p->intervalInMilliSec);
         SprMsg rspMsg(SIG_ID_TIMER_START_SYSTEM_TIMER);
         SendMsg(rspMsg);
 
@@ -230,7 +232,7 @@ void SprTimerManager::MsgRespondDelTimer(const SprMsg &msg)
     if (p != nullptr) {
         for (const auto& timer : mTimers)
         {
-            if (timer.GetMsgId() == p->MsgId && timer.GetModuleId() == p->ModuleId)
+            if (timer.GetMsgId() == p->msgId && timer.GetModuleId() == p->moduleId)
             {
                 DelTimer(timer);
                 break;

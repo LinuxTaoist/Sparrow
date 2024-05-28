@@ -2,38 +2,37 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : CustomDebugWatch.h
+ *  @file       : DebugModuleHub.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/04/23
+ *  @date       : 2024/05/28
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/23 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/05/28 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __CUSTOM_DEBUG_WATCH_H__
-#define __CUSTOM_DEBUG_WATCH_H__
+#ifndef __DEBUG_MODULE_HUB_H__
+#define __DEBUG_MODULE_HUB_H__
 
-#include <thread>
-#include "InfraCommon.h"
+#include <string>
+#include "DebugModule.h"
+#include "SprBinderHub.h"
 
-class CustomDebugWatch
+class DebugModuleHub : public SprBinderHub
 {
 public:
-    CustomDebugWatch() = default;
-    ~CustomDebugWatch() = default;
+    DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule);
+    ~DebugModuleHub();
 
-    char MenuEntry();
+    void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd);
 
 private:
-    char HandleInputInMenu(char input);
+    DebugModule* mDebugModulePtr;
 };
 
-extern CustomDebugWatch theCustomDebugWatch;
-
-#endif // __CUSTOM_DEBUG_WATCH_H__
+#endif // __DEBUG_MODULE_HUB_H__

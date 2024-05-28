@@ -22,3 +22,11 @@ set_target_properties   (LibMediatorAPI PROPERTIES OUTPUT_NAME "mediatorapi")
 set_target_properties   (LibMediatorAPI PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries   (LibMediatorAPI stdc++ rt dl sprbinder)
 add_dependencies        (LibMediatorAPI LibBinder)
+
+## Build libdebug.so
+set (SRC_DEBUG_API_PATH  ${PRIVATE_APIS_PATH}/DebugInterface.cpp)
+add_library             (LibDebugAPI SHARED ${SRC_DEBUG_API_PATH})
+set_target_properties   (LibDebugAPI PROPERTIES OUTPUT_NAME "debugapi")
+set_target_properties   (LibDebugAPI PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries   (LibDebugAPI stdc++ rt dl sprbinder)
+add_dependencies        (LibDebugAPI LibBinder)

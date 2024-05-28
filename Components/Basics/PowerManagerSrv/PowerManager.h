@@ -62,7 +62,7 @@ public:
     PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
     virtual ~PowerManager();
 
-    int ProcessMsg(const SprMsg& msg);
+    int ProcessMsg(const SprMsg& msg) override;
 
 private:
      /* 更新一级状态 */

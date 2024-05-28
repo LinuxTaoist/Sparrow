@@ -2,38 +2,37 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : CustomDebugWatch.h
+ *  @file       : DebugModule.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/04/23
+ *  @date       : 2024/05/28
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/23 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/05/28 | 1.0.0.1  | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __CUSTOM_DEBUG_WATCH_H__
-#define __CUSTOM_DEBUG_WATCH_H__
+#ifndef __DEBUG_MODULE_H__
+#define __DEBUG_MODULE_H__
 
-#include <thread>
-#include "InfraCommon.h"
+#include "SprLog.h"
+#include "SprObserver.h"
 
-class CustomDebugWatch
+class DebugModule : public SprObserver
 {
 public:
-    CustomDebugWatch() = default;
-    ~CustomDebugWatch() = default;
+    DebugModule(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
+    ~DebugModule();
 
-    char MenuEntry();
+    int ProcessMsg(const SprMsg& msg) override;
 
 private:
-    char HandleInputInMenu(char input);
+    int MsgRespondDispatchTimerMsg(const SprMsg& msg);
+    int MsgRespondBroadcastMsg(const SprMsg& msg);
 };
 
-extern CustomDebugWatch theCustomDebugWatch;
-
-#endif // __CUSTOM_DEBUG_WATCH_H__
+#endif // __DEBUG_MODULE_H__

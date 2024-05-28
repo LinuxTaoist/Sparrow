@@ -126,7 +126,6 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
         return -1;
     }
 
-    bool isDependent = false;      // It is dependent on other exes
     std::string line;
     std::string lastExeName;
     while (std::getline(configFile, line))
@@ -140,6 +139,7 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
             line.pop_back();
         }
 
+        bool isDependent = false;
         size_t pos = line.find("[d]");
         if (pos != std::string::npos) {
             isDependent = true;

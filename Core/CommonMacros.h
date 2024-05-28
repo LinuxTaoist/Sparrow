@@ -36,5 +36,6 @@
 #define SRV_NAME_LOG                "logmanagersrv"
 #define SRV_NAME_SPARROW            "sparrowsrv"
 #define SRV_NAME_POWER_MANAGER      "powermanagersrv"
+#define SRV_NAME_DEBUG_MODULE       "debugsrv"
 
 #endif // __COMMON_MACROS_H__

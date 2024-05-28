@@ -69,3 +69,9 @@ set_target_properties       (BinMainSpr PROPERTIES OUTPUT_NAME                  
 target_link_libraries       (BinMainSpr sprcore)
 add_dependencies            (BinMainSpr LibSprCore)
 
+# Bin debugsrv
+aux_source_directory        (${PROJECT_PATH}/Components/Basics/DebugSrv             DEBUG_SRV_PATH)
+add_executable              (BinDebugSrv ${DEBUG_SRV_PATH})
+set_target_properties       (BinDebugSrv PROPERTIES OUTPUT_NAME                     "debugsrv")
+target_link_libraries       (BinDebugSrv sprcore sprbinder pthread)
+add_dependencies            (BinDebugSrv LibSprCore LibBinder)

@@ -2,17 +2,17 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_power.cpp
+ *  @file       : main_debug.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2023/12/21
+ *  @date       : 2024/05/28
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/21 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/05/28 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
@@ -22,19 +22,19 @@
 #include "SprLog.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
-#include "PowerManager.h"
-#include "PowerManagerHub.h"
+#include "DebugModule.h"
+#include "DebugModuleHub.h"
 #include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("MainPower", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("MainDebug", fmt, ##args)
 
 int main(int argc, const char *argv[])
 {
-    PowerManager thePowerManager(MODULE_POWERM, "PowerM", make_shared<SprMediatorIpcProxy>());
-    PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
+    DebugModule theDebugModule(MODULE_DEBUG, "DebugM", make_shared<SprMediatorIpcProxy>());
+    DebugModuleHub theDebugModuleHub(SRV_NAME_DEBUG_MODULE, &theDebugModule);
 
     GeneralUtils::InitSignalHandler([](int signum) {
 	    SPR_LOGI("Receive signal: %d!\n", signum);
@@ -62,7 +62,7 @@ int main(int argc, const char *argv[])
         }
     });
 
-    thePowerManagerHub.InitializeHub();
+    theDebugModuleHub.InitializeHub();
     SprObserver::MainLoop();
     return 0;
 }

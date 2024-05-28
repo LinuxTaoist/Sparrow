@@ -80,9 +80,13 @@ enum EPowerMBinderCmd
     POWERM_CMD_BUTT
 };
 
-enum EDebugMsgID
+enum EDebugMBinderCmd
 {
-    DEBUG_MSG_BEGIN = MODULE_DEBUG << MODULE_ID_OFFSET | 1,
+    DEBUG_CMD_BEGIN = MODULE_DEBUG << MODULE_ID_OFFSET | 1,
+    DEBUG_CMD_TEST_ADD_1S_TIMER,
+    DEBUG_CMD_TEST_DEL_1S_TIMER,
+    DEBUG_CMD_TEST_ADD_CUSTOM_TIMER,
+    DEBUG_CMD_TEST_DEL_CUSTOM_TIMER,
     DEBUG_MSG_BUTT
 };
 
@@ -106,11 +110,11 @@ enum EModuleBootPriority
 
 typedef struct
 {
-    uint32_t ModuleId;
-    uint32_t MsgId;
-    uint32_t RepeatTimes;
-    int32_t  DelayInMilliSec;
-    int32_t  IntervalInMilliSec;
+    uint32_t moduleId;
+    uint32_t msgId;
+    uint32_t repeatTimes;
+    int32_t  delayInMilliSec;
+    int32_t  intervalInMilliSec;
 } STimerInfo;
 
 } // namespace InternalDefs
