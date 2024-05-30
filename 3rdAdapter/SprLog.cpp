@@ -161,10 +161,9 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
 
 int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
 {
-    int32_t ret = pLogSCacheMem->write(&len, sizeof(int32_t));
-    if (ret != 0) {
-        return ret;
-    }
+    unsigned char buffer[len + sizeof(int32_t)] = {0};
 
-    return pLogSCacheMem->write(logs, len);
+    memcpy(buffer, &len, sizeof(int32_t));
+    memcpy(buffer + sizeof(int32_t), logs, len);
+    return pLogSCacheMem->write(buffer, sizeof(int32_t) + len);
 }

@@ -36,9 +36,9 @@ using namespace std;
 using namespace GeneralUtils;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %04d LOGM D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %04d LOGM W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %04d LOGM E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %4d LOGM D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %4d LOGM W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %4d LOGM E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
 
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_FRAME_LEN_LIMIT     1024
@@ -205,7 +205,7 @@ int LogManager::MainLoop()
 {
     while (mRunning)
     {
-        if (pLogMCacheMem->AvailData() <= 0) {
+        if (pLogMCacheMem->AvailData() < 10) {
             usleep(10000);
             continue;
         }
