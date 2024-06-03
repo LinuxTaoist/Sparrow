@@ -24,6 +24,8 @@
 #include <time.h>
 #include <unistd.h>
 #include <string.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
 #include <sys/time.h>
 #include "CommonMacros.h"
 #include "SharedRingBuffer.h"
@@ -32,13 +34,15 @@
 #define PID_PRINT_WIDTH_LIMIT       6
 #define TAG_PRINT_WIDTH_LIMIT       12
 #define LOG_BUFFER_SIZE_LIMIT       256
+#define SEMAPHORE_NAME              "/SprLogSem"
 
 static SharedRingBuffer* pLogSCacheMem = nullptr;
 
 SprLog::SprLog()
 {
-    if (sem_init(&mWriteSem, 1, 1) == -1) {
-        perror("sem_init");
+    mWriteSem = sem_open(SEMAPHORE_NAME, O_CREAT, 0644, 1);
+    if (SEM_FAILED == mWriteSem) {
+        perror("sem_open failed");
     }
 
     pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH);
@@ -46,7 +50,11 @@ SprLog::SprLog()
 
 SprLog::~SprLog()
 {
-    sem_destroy(&mWriteSem);
+    if (SEM_FAILED != mWriteSem) {
+        sem_close(mWriteSem);
+        sem_unlink(SEMAPHORE_NAME);
+    }
+
     if (pLogSCacheMem != nullptr) {
         delete pLogSCacheMem;
         pLogSCacheMem = nullptr;
@@ -150,11 +158,9 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
 
     std::string log;
     FormatLog(log, level, tag, buffer);
-    // printf("%s", log.c_str());
-
-    sem_wait(&mWriteSem);
+    sem_wait(mWriteSem);
     LogsToMemory(log.c_str(), log.length());
-    sem_post(&mWriteSem);
+    sem_post(mWriteSem);
 
     return result;
 }

@@ -138,8 +138,8 @@ int SharedRingBuffer::write(const void* data, int32_t len)
         int32_t avail = AvailSpace();
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->wp, len);
-            memcpy(static_cast<char*>(mData) + mRoot->wp, data, len);
-            mRoot->wp = (mRoot->wp + len) % mDataCapacity;
+            memmove(static_cast<unsigned char*>(mData) + mRoot->wp, data, len);
+            mRoot->wp = (mRoot->wp + (uint32_t)len) % mDataCapacity;
             SetRWStatus(CMD_READABLE);
             ret = 0;
             break;

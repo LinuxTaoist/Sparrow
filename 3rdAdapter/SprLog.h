@@ -68,7 +68,7 @@ private:
     int32_t LogsToMemory(const char* logs, int32_t len);
 
 private:
-    sem_t mWriteSem;
+    sem_t* mWriteSem;
 };
 
 // --------------------------------------------------------------------------------------------------------------------

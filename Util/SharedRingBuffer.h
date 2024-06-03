@@ -28,6 +28,7 @@ struct Root
     uint8_t  cmd;       // 使能状态
     uint8_t  busy;      // 忙碌状态
     uint8_t  rwStatus;  // 可读状态
+    uint8_t  reserved;  // 预留
     uint32_t wp;        // 写入位置
     uint32_t rp;        // 读取位置
 };
