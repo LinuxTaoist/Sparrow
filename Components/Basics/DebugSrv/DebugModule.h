@@ -19,8 +19,8 @@
 #ifndef __DEBUG_MODULE_H__
 #define __DEBUG_MODULE_H__
 
-#include <thread>
 #include "SprLog.h"
+#include "RemoteShell.h"
 #include "SprObserver.h"
 
 class DebugModule : public SprObserver
@@ -30,8 +30,6 @@ public:
     ~DebugModule();
 
     int  ProcessMsg(const SprMsg& msg) override;
-    int  GetEpollEnable() { return mEpollEnable; }
-    void SetEpollEnable(bool enable) { mEpollEnable = enable; }
 
 private:
     int MsgRespondEnableRemoteShell(const SprMsg& msg);
@@ -40,8 +38,7 @@ private:
     int MsgRespondBroadcastMsg(const SprMsg& msg);
 
 private:
-    bool mEpollEnable;
-    std::thread mRcvThread;
+    RemoteShell mShell;
 };
 
 #endif // __DEBUG_MODULE_H__
