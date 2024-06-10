@@ -23,6 +23,8 @@ ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_1S),                     \
 ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_2S),                     \
 ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_3S),                     \
+ENUM_OR_STRING(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL),               \
+ENUM_OR_STRING(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL),              \
 
 //-----------------------------------------------------------------------------
 // TIMER_MANAGER

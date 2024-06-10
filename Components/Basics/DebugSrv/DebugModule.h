@@ -19,6 +19,7 @@
 #ifndef __DEBUG_MODULE_H__
 #define __DEBUG_MODULE_H__
 
+#include <thread>
 #include "SprLog.h"
 #include "SprObserver.h"
 
@@ -28,11 +29,19 @@ public:
     DebugModule(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
     ~DebugModule();
 
-    int ProcessMsg(const SprMsg& msg) override;
+    int  ProcessMsg(const SprMsg& msg) override;
+    int  GetEpollEnable() { return mEpollEnable; }
+    void SetEpollEnable(bool enable) { mEpollEnable = enable; }
 
 private:
+    int MsgRespondEnableRemoteShell(const SprMsg& msg);
+    int MsgRespondDisableRemoteShell(const SprMsg& msg);
     int MsgRespondDispatchTimerMsg(const SprMsg& msg);
     int MsgRespondBroadcastMsg(const SprMsg& msg);
+
+private:
+    bool mEpollEnable;
+    std::thread mRcvThread;
 };
 
 #endif // __DEBUG_MODULE_H__

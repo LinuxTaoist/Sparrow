@@ -25,7 +25,7 @@
 class EpollEventHandler
 {
 public:
-    EpollEventHandler(int size = 0);
+    EpollEventHandler(int size = 0, int blockTimeOut = -1);
     virtual ~EpollEventHandler();
 
     void AddPoll(IEpollEvent* p);
@@ -33,8 +33,9 @@ public:
     void EpollLoop(bool bRun);
 
 private:
-    int     mHandle;
     bool    mRun;
+    int     mHandle;
+    int     mTimeOut;
     std::map<int, IEpollEvent*> mEpollMap;   // fd, type, IEpollEvent
 };
 

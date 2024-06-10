@@ -31,6 +31,8 @@ public:
     int DelTimerInOneSec();
     int AddCustomTimer(uint32_t RepeatTimes, int32_t DelayInMilliSec, int32_t IntervalInMilliSec);
     int DelCustomTimer();
+    int EnableRemoteShell();
+    int DisableRemoteShell();
 
 private:
     DebugInterface();

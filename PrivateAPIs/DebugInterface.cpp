@@ -126,3 +126,39 @@ int DebugInterface::DelCustomTimer()
     return ret;
 }
 
+int DebugInterface::EnableRemoteShell()
+{
+    if (!mEnable) {
+        SPR_LOGE("DebugModule is disable!\n");
+        return -1;
+    }
+
+    pReqParcel->WriteInt(DEBUG_CMD_ENABLE_REMOTE_SHELL);
+    pReqParcel->Post();
+
+    int ret = 0;
+    pRspParcel->Wait();
+    pRspParcel->ReadInt(ret);
+
+    SPR_LOGD("ret: %d\n", ret);
+    return ret;
+}
+
+int DebugInterface::DisableRemoteShell()
+{
+    if (!mEnable) {
+        SPR_LOGE("DebugModule is disable!\n");
+        return -1;
+    }
+
+    pReqParcel->WriteInt(DEBUG_CMD_DISABLE_REMOTE_SHELL);
+    pReqParcel->Post();
+
+    int ret = 0;
+    pRspParcel->Wait();
+    pRspParcel->ReadInt(ret);
+
+    SPR_LOGD("ret: %d\n", ret);
+    return ret;
+}
+

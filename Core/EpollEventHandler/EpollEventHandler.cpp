@@ -27,7 +27,7 @@
 #define SPR_LOGW(fmt, args...) printf("%4d EpollEvent W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d EpollEvent E: " fmt, __LINE__, ##args)
 
-EpollEventHandler::EpollEventHandler(int size)
+EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
 {
     if (size) {
         mHandle = epoll_create(size);
@@ -40,6 +40,7 @@ EpollEventHandler::EpollEventHandler(int size)
     }
 
     mRun = false;
+    mTimeOut = blockTimeOut;
 }
 
 EpollEventHandler::~EpollEventHandler()
@@ -97,7 +98,7 @@ void EpollEventHandler::EpollLoop(bool bRun)
         }
 
         // 无事件时, epoll_wait阻塞, 等待
-        int count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), -1);
+        int count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), mTimeOut);
         if (count <= 0) {
             continue;
         }

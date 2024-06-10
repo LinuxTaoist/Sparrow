@@ -35,10 +35,12 @@ char CustomDebugWatch::MenuEntry()
 
     SPR_LOG("================================  Custom  Debug  ================================\n"
             "\n"
-            "    1. AddTimerInOneSec \n"
-            "    2. DelTimerInOneSec \n"
-            "    3. AddCustomTimer   \n"
-            "    4. DelCustomTimer   \n"
+            "    1. AddTimerInOneSec    \n"
+            "    2. DelTimerInOneSec    \n"
+            "    3. AddCustomTimer      \n"
+            "    4. DelCustomTimer      \n"
+            "    5. EnableRemoteShell   \n"
+            "    6. DisableRemoteShell  \n"
             "\n"
             "    [Q] Quit\n"
             "\n"
@@ -86,6 +88,18 @@ char CustomDebugWatch::HandleInputInMenu(char input)
         case '4':
         {
             DebugInterface::GetInstance()->DelCustomTimer();
+            break;
+        }
+
+        case '5':
+        {
+            DebugInterface::GetInstance()->EnableRemoteShell();
+            break;
+        }
+
+        case '6':
+        {
+            DebugInterface::GetInstance()->DisableRemoteShell();
             break;
         }
 
