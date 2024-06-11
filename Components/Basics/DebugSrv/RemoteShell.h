@@ -31,10 +31,12 @@ public:
     ~RemoteShell();
 
     int Init();
+    int DeInit();
     int Enable();
     int Disable();
 
 private:
+    bool mEnable;
     std::thread mRcvThread;
     std::shared_ptr<PSocket> mTcpSrvPtr;
     std::shared_ptr<EpollEventHandler> mEpollPtr;

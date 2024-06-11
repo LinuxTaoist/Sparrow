@@ -92,7 +92,7 @@ void EpollEventHandler::EpollLoop(bool bRun)
     struct epoll_event ep[32];
 
     mRun = bRun;
-    do {
+    while(mRun) {
         if (!mRun) {
             break;
         }
@@ -111,7 +111,7 @@ void EpollEventHandler::EpollLoop(bool bRun)
 
             p->EpollEvent(p->GetEpollFd(), p->GetEpollType(), p->GetArgs());
         }
-    } while(mRun);
+    }
 
     SPR_LOGD("EpollLoop exit\n");
 }

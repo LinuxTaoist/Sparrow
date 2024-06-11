@@ -74,10 +74,10 @@ PSocket::~PSocket()
 void PSocket::Close()
 {
     if (mEpollFd > 0) {
+        SPR_LOGD("Close socket [%d %d]\n", mEpollFd, mSockType);
         close(mEpollFd);
         mEpollFd = -1;
         mEnable = false;
-        SPR_LOGD("Close socket [%d %d]\n", mEpollFd, mSockType);
     }
 }
 
