@@ -60,6 +60,10 @@ int main(int argc, const char *argv[])
                 return;
             }
 
+            // Mimics the input display format of a remote terminal session.
+            // Example:
+            // # pwd
+            // /tmp/Release/Bin
             std::string rBuf;
             int rc = pCliObj->Read(sock, rBuf);
             if (rc > 0) {
