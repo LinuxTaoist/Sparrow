@@ -33,6 +33,7 @@
 
 const int RETRY_TIMES       = 10;
 const int RETRY_INTERVAL_US = 10000;    // 10ms
+const int RESERVER_SIZE     = 1024;
 
 // Used for master mode
 SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
@@ -266,7 +267,7 @@ void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const no
         return;
     }
 
-    if (*pos + size >= mDataCapacity) {
+    if (*pos + size >= mDataCapacity || *pos >= (mDataCapacity - RESERVER_SIZE)) {
         *pos = 0;
     }
 }
