@@ -57,6 +57,14 @@ show_env() {
     echo -e "${PURPLE}${delimiter}${NC}"
 }
 
+# cmd commit-template
+config_commit_template() {
+    template_path=$(pwd)/../.git-commit-template
+    echo ""
+    echo -e "${PURPLE}git config --global commit.template ${template_path} ${NC}"
+    git config --global commit.template ${template_path}
+}
+
 # cmd build-all
 build_project() {
     echo -e "${GREEN}开始编译项目...${NC}"
@@ -116,6 +124,7 @@ usage() {
     echo -e ""
     echo -e "${PURPLE}Usage:${NC}"
     echo -e "${PURPLE}  $0 env              查看当前环境${NC}"
+    echo -e "${PURPLE}  $0 commit-template  配置commit模板${NC}"
     echo -e "${PURPLE}  $0 build-all        编译整个项目${NC}"
     echo -e "${PURPLE}  $0 build-3rd        编译依赖的第三方库${NC}"
     echo -e "${PURPLE}  $0 staticscan       执行静态代码扫描${NC}"
@@ -135,6 +144,9 @@ main() {
     case "$1" in
         env)
             show_env
+            ;;
+        commit-template)
+            config_commit_template
             ;;
         build-all)
             ;;
