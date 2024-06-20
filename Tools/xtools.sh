@@ -91,12 +91,8 @@ build_3rdparty() {
 # cmd static_scan
 static_scan() {
     echo -e "${GREEN}开始静态代码扫描...${NC}"
-    cppcheck --enable=all --inconclusive src/
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}静态代码扫描完成，未发现重大问题！${NC}"
-    else
-        echo -e "${RED}静态代码扫描发现潜在问题，请查看报告！${NC}"
-    fi
+    cd $(pwd)/../StaticScans
+    ./RunCppcheck.sh
 }
 
 # Function to print usage information with logo
