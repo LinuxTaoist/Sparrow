@@ -52,6 +52,7 @@ LogManager::LogManager()
 {
     // TODO: value from config
     mRunning = true;
+    mLogLevelLimit = LOG_LEVEL_BUTT;
     mMaxFileSize = DEFAULT_LOG_FILE_MAX_SIZE;
     mBaseLogFile = DEFAULT_BASE_LOG_FILE_NAME;
     mLogsDirPath = DEFAULT_LOGS_STORAGE_PATH;
@@ -150,6 +151,30 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
     return 0;
 }
 
+int LogManager::GetLevelFromLogStrs(const std::string& logData)
+{
+    int level = LOG_LEVEL_BUTT;
+
+    // 04-03 07:56:23.032  43930     DebugMsg D:
+    char levelChar = 0;
+    int rc = GetCharBeforeNthTarget(logData, ':', 3, levelChar);
+    if (rc == 0) {
+        if (levelChar == 'D') {
+            level = LOG_LEVEL_DEBUG;
+        } else if (levelChar == 'I') {
+            level = LOG_LEVEL_INFO;
+        } else if (levelChar == 'W') {
+            level = LOG_LEVEL_WARNING;
+        } else if (levelChar == 'E') {
+            level = LOG_LEVEL_ERROR;
+        } else {
+            level = LOG_LEVEL_BUTT;
+        }
+    }
+
+    return level;
+}
+
 int LogManager::WriteToLogFile(const std::string& logData)
 {
     if (logData.size() > DEFAULT_FRAME_LEN_LIMIT) {
@@ -224,6 +249,12 @@ int LogManager::MainLoop()
         ret = pLogMCacheMem->read(data, len);
         if (ret != 0) {
             SPR_LOGE("read failed! len = %d\n", len);
+        }
+
+        // Ignore the log if level higher than the limit
+        int level = GetLevelFromLogStrs(value);
+        if (level >= mLogLevelLimit) {
+            continue;
         }
 
         RotateLogsIfNecessary(len);

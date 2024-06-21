@@ -44,6 +44,8 @@ namespace GeneralUtils {
 
     // String general interfaces
     std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter);
+    int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out);
+    int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out);
 };
 
 #endif // __GENERAL_UTILS_H__

@@ -152,4 +152,38 @@ std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimite
     return subStr;
 }
 
+int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out)
+{
+    int count = 0;
+
+    for(size_t i = 0; i < str.size(); ++i) {
+        if(str[i] == targetChar) {
+            ++count;
+            if(count == index && i + 1 < str.size()) {
+                out = str[i + 1];;
+                return 0;
+            }
+        }
+    }
+
+    return -1;
+}
+
+int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out)
+{
+    int count = 0;
+
+    for(size_t i = 0; i < str.size(); ++i) {
+        if(str[i] == targetChar) {
+            ++count;
+            if(count == index && i - 1 < str.size() && (int)i - 1 >= 0) {
+                out = str[i - 1];;
+                return 0;
+            }
+        }
+    }
+
+    return -1;
+}
+
 }; // namespace GeneralUtils

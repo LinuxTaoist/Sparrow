@@ -28,6 +28,16 @@
 #include <fstream>
 #include <sstream>
 
+enum LogLevel
+{
+    LOG_LEVEL_MIN   = 0,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_WARNING,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_BUTT
+};
+
 class LogManager
 {
 public:
@@ -35,15 +45,20 @@ public:
     virtual ~LogManager();
     int MainLoop();
 
+    void SetLogLevel(LogLevel level) { mLogLevelLimit = level; }
+    int  GetLogLevel() { return mLogLevelLimit; }
+
 private:
     int EnvReady(const std::string& srvName);
     int UpdateSuffixOfAllFiles();
     int RotateLogsIfNecessary(uint32_t logDataSize);
+    int GetLevelFromLogStrs(const std::string& logData);
     int WriteToLogFile(const std::string& logData);
     std::set<std::string> GetSortedLogFiles(const std::string& path, const std::string& fileName);
 
 private:
     bool            mRunning;
+    uint8_t         mLogLevelLimit;
     uint32_t        mMaxFileSize;
     std::string     mBaseLogFile;
     std::string     mLogsDirPath;
