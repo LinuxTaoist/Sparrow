@@ -85,7 +85,7 @@ LogManager::LogManager()
     EnvReady(SRV_NAME_LOG);
 
     // Dump log attrs for debug
-    DumpLogAttrs();
+    // DumpLogAttrs();
 }
 
 LogManager::~LogManager()
@@ -108,9 +108,9 @@ int LogManager::DumpLogAttrs()
     SPR_LOGD("------------------------- Dump Log Attrs -------------------------\n");
     SPR_LOGD("- mOutputMode         = %d\n", mOutputMode);
     SPR_LOGD("- mLogLevelLimit      = %d\n", mLogLevelLimit);
-    SPR_LOGD("- mLogFrameLength     = %d\n", mLogFrameLength);
+    SPR_LOGD("- mLogFrameLength     = %dB\n", mLogFrameLength);
     SPR_LOGD("- mLogFileNum         = %d\n", mLogFileNum);
-    SPR_LOGD("- mLogFileCapacity    = %d\n", mLogFileCapacity);
+    SPR_LOGD("- mLogFileCapacity    = %dM\n", mLogFileCapacity / (1024 * 1024));
     SPR_LOGD("- mLogFileName        = %s\n", mLogFileName.c_str());
     SPR_LOGD("- mLogsFilePath       = %s\n", mLogsFilePath.c_str());
     SPR_LOGD("- mCurrentLogFile     = %s\n", mCurrentLogFile.c_str());
