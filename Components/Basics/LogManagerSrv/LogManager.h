@@ -28,7 +28,6 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-#include <functional>
 
 enum LogLevel
 {
@@ -77,8 +76,6 @@ private:
     void LoadAttrFilePath(const std::string& value);
 
 private:
-    static uint8_t  mLogLevelLimit;     // defined with "logging.level"
-
     bool            mRunning;
     uint8_t         mOutputMode;        // defined with "logging.output"
     uint32_t        mLogFrameLength;    // defined with "logging.frame_length"
@@ -89,6 +86,8 @@ private:
     std::string     mCurrentLogFile;
     std::ofstream   mLogFileStream;
     std::set<std::string> mLogFilePaths;
+
+    static uint8_t  mLogLevelLimit;     // defined with "logging.level"
 
     using LoadAttrFunc = void (LogManager::*)(const std::string&);
     std::map<std::string, LoadAttrFunc> mLoadAttrMap;
