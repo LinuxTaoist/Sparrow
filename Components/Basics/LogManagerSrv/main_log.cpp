@@ -31,7 +31,7 @@ int main(int argc, const char *argv[])
 {
     LogManager theLogManager;
 
-    GeneralUtils::InitSignalHandler([=](int signum) {
+    GeneralUtils::InitSignalHandler([](int signum) {
 	    SPR_LOGI("Receive signal: %d!\n", signum);
 
         switch (signum) {
@@ -48,14 +48,17 @@ int main(int argc, const char *argv[])
             case SIGALRM:   // 定时器信号
             case SIGTERM:   // 请求进程终止, 清理并退出
                 SPR_LOGW("Main exit!\n");
+                exit(1);
                 break;
 
             case SIGUSR1:   // 用户自定义信号1
-                theLogManager.SetLogLevel(LOG_LEVEL_MIN);
+                LogManager::SetLogLevel(LOG_LEVEL_MIN);
+                SPR_LOGD("disable log!\n");
                 break;
 
             case SIGUSR2:   // 用户自定义信号2
-                theLogManager.SetLogLevel(LOG_LEVEL_BUTT);
+                LogManager::SetLogLevel(LOG_LEVEL_BUTT);
+                SPR_LOGD("enable log!\n");
                 break;
             default:
                 break;

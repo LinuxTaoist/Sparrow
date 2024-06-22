@@ -45,36 +45,51 @@ using namespace GeneralUtils;
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 #define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
+#define LOG_CONFIGURE_FILE_PATH     "sprlog.conf"
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
+uint8_t LogManager::mLogLevelLimit = LOG_LEVEL_BUTT;
+
 LogManager::LogManager()
 {
-    // TODO: value from config
-    mRunning = true;
-    mLogLevelLimit = LOG_LEVEL_BUTT;
-    mMaxFileSize = DEFAULT_LOG_FILE_MAX_SIZE;
-    mBaseLogFile = DEFAULT_BASE_LOG_FILE_NAME;
-    mLogsDirPath = DEFAULT_LOGS_STORAGE_PATH;
-    mCurrentLogFile = DEFAULT_BASE_LOG_FILE_NAME;
+    mRunning            = true;
+    mOutputMode         = LOG_OUTPUT_FILE;
+    mLogFrameLength     = DEFAULT_FRAME_LEN_LIMIT;
+    mLogFileNum         = DEFAULT_LOG_FILE_NUM_LIMIT;
+    mLogFileCapacity    = DEFAULT_LOG_FILE_MAX_SIZE;
+    mLogFileName        = DEFAULT_BASE_LOG_FILE_NAME;
+    mLogsFilePath       = DEFAULT_LOGS_STORAGE_PATH;
+    mCurrentLogFile     = DEFAULT_BASE_LOG_FILE_NAME;
 
-    if (access(mLogsDirPath.c_str(), F_OK) != 0)
+    mLoadAttrMap.insert(std::make_pair("logging.output",        &LogManager::LoadAttrOutputMode));
+    mLoadAttrMap.insert(std::make_pair("logging.level",         &LogManager::LoadAttrLevelLimit));
+    mLoadAttrMap.insert(std::make_pair("logging.file_name",     &LogManager::LoadAttrFileName));
+    mLoadAttrMap.insert(std::make_pair("logging.file_num",      &LogManager::LoadAttrFileNumLimit));
+    mLoadAttrMap.insert(std::make_pair("logging.file_capacity", &LogManager::LoadAttrFileCapacityLimit));
+    mLoadAttrMap.insert(std::make_pair("logging.file_path",     &LogManager::LoadAttrFilePath));
+    mLoadAttrMap.insert(std::make_pair("logging.frame_length",  &LogManager::LoadAttrFrameLengthLimit));
+
+    LoadLogCfgFile(LOG_CONFIGURE_FILE_PATH);
+    if (access(mLogsFilePath.c_str(), F_OK) != 0)
     {
-        int ret = mkdir(mLogsDirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        int ret = mkdir(mLogsFilePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
-            SPR_LOGE("mkdir %s failed! (%s)\n", mLogsDirPath.c_str(), strerror(errno));
+            SPR_LOGE("mkdir %s failed! (%s)\n", mLogsFilePath.c_str(), strerror(errno));
             mRunning = false;
         }
     }
 
     pLogMCacheMem = std::make_shared<SharedRingBuffer>(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE);
-    mLogFilePaths = GetSortedLogFiles(mLogsDirPath, mBaseLogFile);
+    mLogFilePaths = GetSortedLogFiles(mLogsFilePath, mLogFileName);
     EnvReady(SRV_NAME_LOG);
+
+    // Dump log attrs for debug
+    DumpLogAttrs();
 }
 
 LogManager::~LogManager()
 {
-    mLogFileStream.close();
 }
 
 int LogManager::EnvReady(const std::string& srvName)
@@ -88,9 +103,104 @@ int LogManager::EnvReady(const std::string& srvName)
     return 0;
 }
 
+int LogManager::DumpLogAttrs()
+{
+    SPR_LOGD("------------------------- Dump Log Attrs -------------------------\n");
+    SPR_LOGD("- mOutputMode         = %d\n", mOutputMode);
+    SPR_LOGD("- mLogLevelLimit      = %d\n", mLogLevelLimit);
+    SPR_LOGD("- mLogFrameLength     = %d\n", mLogFrameLength);
+    SPR_LOGD("- mLogFileNum         = %d\n", mLogFileNum);
+    SPR_LOGD("- mLogFileCapacity    = %d\n", mLogFileCapacity);
+    SPR_LOGD("- mLogFileName        = %s\n", mLogFileName.c_str());
+    SPR_LOGD("- mLogsFilePath       = %s\n", mLogsFilePath.c_str());
+    SPR_LOGD("- mCurrentLogFile     = %s\n", mCurrentLogFile.c_str());
+    SPR_LOGD("------------------------------------------------------------------\n");
+    return 0;
+}
+
+void LogManager::LoadAttrOutputMode(const std::string& value)
+{
+    mOutputMode = (value == "file") ? LOG_OUTPUT_FILE : LOG_OUTPUT_STDOUT;
+}
+
+void LogManager::LoadAttrLevelLimit(const std::string& value)
+{
+    if (value == "debug") {
+        mLogLevelLimit = LOG_LEVEL_DEBUG;
+    } else if (value == "info") {
+        mLogLevelLimit = LOG_LEVEL_INFO;
+    } else if (value == "warn") {
+        mLogLevelLimit = LOG_LEVEL_WARN;
+    } else if (value == "error") {
+        mLogLevelLimit = LOG_LEVEL_ERROR;
+    } else {
+        mLogLevelLimit = LOG_LEVEL_BUTT;
+    }
+}
+
+void LogManager::LoadAttrFrameLengthLimit(const std::string& value)
+{
+    mLogFrameLength = atoi(value.c_str());
+}
+
+void LogManager::LoadAttrFileNumLimit(const std::string& value)
+{
+    mLogFileNum = atoi(value.c_str());
+}
+
+void LogManager::LoadAttrFileCapacityLimit(const std::string& value)
+{
+    mLogFileCapacity = atoi(value.c_str()) * 1024 * 1024;
+}
+
+void LogManager::LoadAttrFileName(const std::string& value)
+{
+    mLogFileName = value;
+}
+
+void LogManager::LoadAttrFilePath(const std::string& value)
+{
+    mLogsFilePath = value;
+}
+
+int LogManager::LoadLogCfgFile(const std::string& cfgPath)
+{
+    std::ifstream file(cfgPath);
+    if (!file)
+    {
+        SPR_LOGE("Open %s fail! \n", cfgPath.c_str());
+        return -1;
+    }
+
+    SPR_LOGD("Load %s\n", cfgPath.c_str());
+    std::string line;
+    std::string buffer;
+    while (std::getline(file, buffer))
+    {
+        line += buffer + "\n";
+    }
+
+    std::istringstream iss(line);
+    std::string keyValue;
+    while (std::getline(iss, keyValue, '\n'))
+    {
+        size_t delimiter = keyValue.find('=');
+        if (delimiter != std::string::npos)
+        {
+            std::string key = keyValue.substr(0, delimiter);
+            std::string value = keyValue.substr(delimiter + 1);
+            if (mLoadAttrMap.count(key) != 0) {
+                ((LogManager*)this->*(mLoadAttrMap[key]))(value);
+            }
+        }
+    }
+
+    return 0;
+}
+
 int LogManager::UpdateSuffixOfAllFiles()
 {
-    while (mLogFilePaths.size() >= DEFAULT_LOG_FILE_NUM_LIMIT)
+    while (mLogFilePaths.size() >= mLogFileNum)
     {
         auto it = mLogFilePaths.end();
         --it;
@@ -114,13 +224,13 @@ int LogManager::UpdateSuffixOfAllFiles()
             int version = atoi(suffix.c_str()) + 1;
             suffix = std::to_string(version);
         } else {
-            oldPath = mLogsDirPath + "/" + mBaseLogFile;
+            oldPath = mLogsFilePath + "/" + mLogFileName;
             suffix = "1";
         }
 
         // E.g. /tmp/sprlog/sparrow.log.1 -> /tmp/sprlog/sparrow.log.2
-        std::string newFile = mBaseLogFile + "." + suffix;
-        std::string newPath = mLogsDirPath + "/" + newFile;
+        std::string newFile = mLogFileName + "." + suffix;
+        std::string newPath = mLogsFilePath + "/" + newFile;
         int ret = rename(oldPath.c_str(), newPath.c_str());
         if (ret != 0) {
             SPR_LOGE("Rename %s to %s failed! (%s)\n", oldPath.c_str(), newPath.c_str(), strerror(errno));
@@ -129,7 +239,7 @@ int LogManager::UpdateSuffixOfAllFiles()
         tmpLogPaths.insert(newPath);
     }
 
-    tmpLogPaths.insert(mLogsDirPath + "/" + mCurrentLogFile);
+    tmpLogPaths.insert(mLogsFilePath + "/" + mCurrentLogFile);
     mLogFilePaths = std::move(tmpLogPaths);
     return 0;
 }
@@ -138,11 +248,11 @@ int LogManager::UpdateSuffixOfAllFiles()
 int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 {
     uint32_t curFileSize = static_cast<uint32_t>(mLogFileStream.tellp());
-    if (curFileSize + logDataSize > mMaxFileSize) {
+    if (curFileSize + logDataSize > mLogFileCapacity) {
         mLogFileStream.close();
 
         UpdateSuffixOfAllFiles();
-        mLogFileStream.open(mLogsDirPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
+        mLogFileStream.open(mLogsFilePath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
             SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
         }
@@ -159,12 +269,12 @@ int LogManager::GetLevelFromLogStrs(const std::string& logData)
     char levelChar = 0;
     int rc = GetCharBeforeNthTarget(logData, ':', 3, levelChar);
     if (rc == 0) {
-        if (levelChar == 'D') {
+        if  (levelChar == 'D') {
             level = LOG_LEVEL_DEBUG;
         } else if (levelChar == 'I') {
             level = LOG_LEVEL_INFO;
         } else if (levelChar == 'W') {
-            level = LOG_LEVEL_WARNING;
+            level = LOG_LEVEL_WARN;
         } else if (levelChar == 'E') {
             level = LOG_LEVEL_ERROR;
         } else {
@@ -183,7 +293,7 @@ int LogManager::WriteToLogFile(const std::string& logData)
     }
 
     if (!mLogFileStream.is_open()) {
-        mLogFileStream.open(mLogsDirPath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
+        mLogFileStream.open(mLogsFilePath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
         if (!mLogFileStream.is_open()) {
             SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
             return -1;
@@ -198,9 +308,8 @@ int LogManager::WriteToLogFile(const std::string& logData)
 std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileNamePrefix)
 {
     DIR* dir = opendir(path.c_str());
-
     if (!dir) {
-        SPR_LOGE("Open %s failed! (%s)\n", mLogsDirPath.c_str(), strerror(errno));
+        SPR_LOGE("Open %s failed! (%s)\n", mLogsFilePath.c_str(), strerror(errno));
         return {};
     }
 
@@ -213,13 +322,13 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
 
         // Check if the file name starts with the given prefix
         if (currentFile.find(fileNamePrefix) == 0) {
-            matchingFiles.insert(mLogsDirPath + '/' + currentFile);
+            matchingFiles.insert(mLogsFilePath + '/' + currentFile);
         }
     }
 
     // If no files were found, insert the current log file
     if (matchingFiles.empty()) {
-        matchingFiles.insert(mLogsDirPath + '/' + mCurrentLogFile);
+        matchingFiles.insert(mLogsFilePath + '/' + mCurrentLogFile);
     }
 
     closedir(dir);
@@ -251,14 +360,12 @@ int LogManager::MainLoop()
             SPR_LOGE("read failed! len = %d\n", len);
         }
 
-        // Ignore the log if level higher than the limit
+        // Write the log if level less than the limit
         int level = GetLevelFromLogStrs(value);
-        if (level >= mLogLevelLimit) {
-            continue;
+        if (level <= mLogLevelLimit) {
+            RotateLogsIfNecessary(len);
+            WriteToLogFile(value);
         }
-
-        RotateLogsIfNecessary(len);
-        WriteToLogFile(value);
     }
 
     return 0;
