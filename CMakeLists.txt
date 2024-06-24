@@ -7,6 +7,9 @@ cmake_policy(SET CMP0046 OLD)
 ## 保存工程路径
 set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
+## 包含配置文件
+include(${PROJECT_PATH}/version.cmake)
+
 ## 设置全局位置无关代码标志
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -41,7 +44,7 @@ cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
 
 ## 打印工程信息
 message("======================================================================")
-message("Project        : ${PROJECT_NAME} ${PROJECT_CUSTOM_VERSION}")
+message("Project        : ${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}")
 message("C++ Standard   : ${CMAKE_CXX_STANDARD}")
 message("G++ Version    : ${CMAKE_CXX_COMPILER_VERSION}")
 message("Gcc Version    : ${CMAKE_C_COMPILER_VERSION}")
@@ -52,6 +55,16 @@ message("Build Host     : ${HOSTNAME}")
 message("Build Platform : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_SYSTEM_PROCESSOR}")
 message("OUTPUT_PATH    : ${OUTPUT_PATH}")
 message("======================================================================")
+
+add_definitions(-DPROJECT_INFO="${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}")
+add_definitions(-DCXX_STANDARD="${CMAKE_CXX_STANDARD}")
+add_definitions(-DGXX_VERSION="${CMAKE_CXX_COMPILER_VERSION}")
+add_definitions(-DGCC_VERSION="${CMAKE_C_COMPILER_VERSION}")
+add_definitions(-DRUN_ENV="${PROJECT_PLATFORM}")
+add_definitions(-DBUILD_TIME="${CURRENT_TIME}")
+add_definitions(-DBUILD_TYPE="${CMAKE_BUILD_TYPE}")
+add_definitions(-DBUILD_HOST="${HOSTNAME}")
+add_definitions(-DBUILD_PLATFORM="${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
 
 add_subdirectory(3rdParty)
 add_subdirectory(3rdAdapter)

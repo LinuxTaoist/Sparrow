@@ -1,0 +1,4 @@
+# 版本信息
+set(VERSION_MAJOR 1)
+set(VERSION_MINOR 0)
+set(VERSION_REVISION 1)

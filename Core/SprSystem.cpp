@@ -18,6 +18,7 @@
  *
  */
 #include <memory>
+#include <fstream>
 #include <fcntl.h>
 #include <unistd.h>
 #include <sys/resource.h>
@@ -37,6 +38,7 @@ using namespace InternalDefs;
 #define SPR_LOGE(fmt, args...) LOGE("SprSystem", fmt, ##args)
 
 #define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
+#define LOCAL_PATH_VERSION  "/tmp/sparrow_version"
 
 SprSystem::SprSystem()
 {
@@ -56,6 +58,9 @@ void SprSystem::InitEnv()
 {
     // Init msg queue limit
     InitMsgQueueLimit();
+
+    // write release information
+    LoadReleaseInformation();
 }
 
 void SprSystem::InitMsgQueueLimit()
@@ -71,6 +76,43 @@ void SprSystem::InitMsgQueueLimit()
         rlim.rlim_cur = RLIM_INFINITY;  // soft limit
         rlim.rlim_max = RLIM_INFINITY;  // hard limit
         setrlimit(RLIMIT_MSGQUEUE, &rlim);
+    }
+}
+
+void SprSystem::LoadReleaseInformation()
+{
+    std::string projectInfo     = PROJECT_INFO;
+    std::string cxxStandard     = CXX_STANDARD;
+    std::string gxxStandard     = GXX_VERSION;
+    std::string gccVersion      = GCC_VERSION;
+    std::string runEnv          = RUN_ENV;
+    std::string buildTime       = BUILD_TIME;
+    std::string buildType       = BUILD_TYPE;
+    std::string buildHost       = BUILD_HOST;
+    std::string buildPlatform   = BUILD_PLATFORM;
+
+    std::string releaseInfo;
+    releaseInfo += "System Version : " + projectInfo + "\n";
+    releaseInfo += "C++ Standard   : " + cxxStandard + "\n";
+    releaseInfo += "G++ Version    : " + gxxStandard + "\n";
+    releaseInfo += "Gcc Version    : " + gccVersion + "\n";
+    releaseInfo += "Running Env    : " + runEnv + "\n";
+    releaseInfo += "Build Time     : " + buildTime + "\n";
+    releaseInfo += "Build Type     : " + buildType + "\n";
+    releaseInfo += "Build Host     : " + buildHost + "\n";
+    releaseInfo += "Build Platform : " + buildPlatform + "\n";
+
+
+    std::ofstream file(LOCAL_PATH_VERSION);
+    if (file)
+    {
+        SPR_LOGD("Load system version information to %s\n", LOCAL_PATH_VERSION);
+        file << releaseInfo;
+        file.close();
+    }
+    else
+    {
+        SPR_LOGE("Open %s fail!\n", LOCAL_PATH_VERSION);
     }
 }
 
