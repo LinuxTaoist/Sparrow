@@ -4,7 +4,7 @@ include_directories         (${PROJECT_PATH}/Core)
 include_directories         (${PROJECT_PATH}/Util)
 include_directories         (${PROJECT_PATH}/3rdAdapter)
 include_directories         (${PROJECT_PATH}/PrivateAPIs/Binder)
-include_directories         (${PROJECT_PATH}/Core/EpollEventHandler)
+include_directories         (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 
 ## Project configures path
 set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/ProjectConfigs/General)

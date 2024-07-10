@@ -14,7 +14,7 @@ Sparrow
 ├── 3rdParty            // 第三方软件库
 ├── Build               // 构建脚本
 ├── CMakeLists.txt
-├── Components          // 组件
+├── Components          // 独立组件
 ├── Core                // 核心框架
 ├── Debug               // 调试工具
 ├── Docs                // 文档
@@ -28,7 +28,10 @@ Sparrow
 ├── README.md
 ├── Release             // 发布路径
 ├── StaticScans         // 静态扫描修复纪录
-└── Util                // 通用工具函数
+├── Tools               // 常用辅助脚本/可执行程序
+├── Util                // 通用工具函数
+├── UtilModules         // 通用模块库
+└── version.cmake       // 版本信息
 ```
 
 

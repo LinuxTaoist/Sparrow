@@ -4,6 +4,7 @@ include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/3rdAdapter)
 include_directories (${PROJECT_PATH}/PublicAPIs)
+include_directories (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 
 ## Bin debugcore
 set(SRC_BIN_DCORE           DebugSprCore.cc)

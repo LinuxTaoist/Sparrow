@@ -5,6 +5,7 @@ include_directories         (${PROJECT_PATH}/Core)
 include_directories         (${PROJECT_PATH}/Util)
 include_directories         (${PROJECT_PATH}/PrivateAPIs)
 include_directories         (${PROJECT_PATH}/PublicAPIs)
+include_directories         (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 
 # Bin logshow
 aux_source_directory        (${PROJECT_PATH}/Util               SRC_BIN_LOGSHOW)

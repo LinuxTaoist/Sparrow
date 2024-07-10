@@ -22,6 +22,45 @@
 #define __COMMON_MACROS_H__
 
 // --------------------------------------------------------------------------------------------------------------------
+// - Common macros for version and build information
+// --------------------------------------------------------------------------------------------------------------------
+#ifndef PROJECT_INFO
+    #define PROJECT_INFO    "Unknown"
+#endif
+
+#ifndef CXX_STANDARD
+    #define CXX_STANDARD    "Unknown"
+#endif
+
+#ifndef GXX_VERSION
+    #define GXX_VERSION     "Unknown"
+#endif
+
+#ifndef GCC_VERSION
+    #define GCC_VERSION     "Unknown"
+#endif
+
+#ifndef RUN_ENV
+    #define RUN_ENV         "Unknown"
+#endif
+
+#ifndef BUILD_TIME
+    #define BUILD_TIME      "Unknown"
+#endif
+
+#ifndef BUILD_TYPE
+    #define BUILD_TYPE      "Unknown"
+#endif
+
+#ifndef BUILD_HOST
+    #define BUILD_HOST      "Unknown"
+#endif
+
+#ifndef BUILD_PLATFORM
+    #define BUILD_PLATFORM  "Unknown"
+#endif
+
+// --------------------------------------------------------------------------------------------------------------------
 // - Common macros for service and client
 // --------------------------------------------------------------------------------------------------------------------
 #define LOG_CACHE_MEMORY_SIZE       10 * 1024 * 1024    // 10MB

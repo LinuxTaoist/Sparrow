@@ -14,5 +14,3 @@ set_target_properties   (LibSprCore PROPERTIES OUTPUT_NAME "sprcore")
 set_target_properties   (LibSprCore PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries   (LibSprCore stdc++ 3rdadapter libgo rt dl)
 add_dependencies        (LibSprCore Lib3rdAdapter)
-
-add_subdirectory(EpollEventHandler)
