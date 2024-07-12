@@ -24,6 +24,11 @@
 #include <stdint.h>
 #include <mqueue.h>
 
+// --------------------------------------------------------------------------------------------------------------------
+// - Common macros for CommonTypeDefs.h version
+// --------------------------------------------------------------------------------------------------------------------
+#define COMMON_TYPE_DEFS_VERSION   "COMMON_TYPE_DEFS_VERSION_N1001"
+
 struct SMQStatus
 {
     int         handle;

@@ -99,6 +99,14 @@ public:
 private:
     int MakeMQ();
 
+    /**
+     * @brief Dump common versions for current module
+     * @return 0
+     *
+     * Used for verifying the consistency of definitions across each component.
+     */
+    int DumpCommonVersion();
+
     // --------------------------------------------------------------------------------------------
     // - Message handle functions
     // --------------------------------------------------------------------------------------------

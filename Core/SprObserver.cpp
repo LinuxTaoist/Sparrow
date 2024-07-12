@@ -26,15 +26,18 @@
 #include <signal.h>
 #include <fcntl.h>           /* For O_* constants */
 #include <sys/stat.h>        /* For mode constants */
-#include "GeneralUtils.h"
+#include "SprLog.h"
 #include "SprObserver.h"
+#include "GeneralUtils.h"
+#include "CommonMacros.h"
+#include "CommonTypeDefs.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) // LOGD("SprObs", fmt, ##args)
-#define SPR_LOGE(fmt, args...) // LOGE("SprObs", fmt, ##args)
+#define SPR_LOGD(fmt, args...)  LOGD("SprObsBase", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define SPR_LOGE(fmt, args...)  LOGE("SprObsBase", "[%s] " fmt, mModuleName.c_str(), ##args)
 
 const int MQ_BUFF_MAX_SIZE  = 1024;
 const int RANDOM_STR_LENGTH = 8;
@@ -55,6 +58,7 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMedi
     }
 
     mMsgMediatorPtr->RegisterObserver(*this);
+    DumpCommonVersion();
     SPR_LOGD("Start Module: %s, mq: %s\n", mModuleName.c_str(), mMqDevName.c_str());
 }
 
@@ -230,6 +234,13 @@ int SprObserver::MakeMQ()
     }
 
     return mMqHandle;
+}
+
+int SprObserver::DumpCommonVersion()
+{
+    SPR_LOGD("- Dump common version: %s / %s / %s \n",
+                COMMON_TYPE_DEFS_VERSION, COMMON_MACROS_VERSION, CORE_TYPE_DEFS_VERSION);
+    return 0;
 }
 
 int SprObserver::MsgResponseSystemExitRsp(const SprMsg& msg)
