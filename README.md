@@ -61,8 +61,7 @@ Build Platform : Ubuntu 22.04.2 LTS
 ```
 
 ### 编译
-① 编译第三方库
-
+① 编译第三方库    \
 由于集成了第三方库，第一次编译时，需要先交叉编译第三方库，确保依赖库生成，再进行项目编译。
 
 <span style="font-size: 12px;">
@@ -85,6 +84,109 @@ $ ./general_build.sh
 $ cd Release/
 $ ls -al
 Bin  Cache  Lib
+```
+
+④ 程序执行
+
+项目编译完成后，会在`Release/Bin`目录下生成可执行程序。通过执行`servicemanager`程序会自动拉起所有的服务，并启动服务监控。拉起服务配置参考`Release/Bin/init.conf`。
+
+**启动服务**
+```shell
+$ ./servicemanagersrv
+192  ServiceM D: service: logmanagersrv        pid:  70542
+238  ServiceM D: Waiting exe: logmanagersrv        retryTimes = 1
+183  ServiceM D: execl logmanagersrv (1).
+192  ServiceM D: service: bindermanagersrv     pid:  70543
+238  ServiceM D: Waiting exe: bindermanagersrv     retryTimes = 1
+183  ServiceM D: execl bindermanagersrv (1).
+192  ServiceM D: service: propertiessrv        pid:  70544
+238  ServiceM D: Waiting exe: propertiessrv        retryTimes = 1
+183  ServiceM D: execl propertiessrv (1).
+192  ServiceM D: service: mediatorsrv          pid:  70545
+183  ServiceM D: execl mediatorsrv (1).
+238  ServiceM D: Waiting exe: mediatorsrv          retryTimes = 1
+192  ServiceM D: service: sparrowsrv           pid:  70548
+183  ServiceM D: execl sparrowsrv (1).
+192  ServiceM D: service: powermanagersrv      pid:  70549
+183  ServiceM D: execl powermanagersrv (1).
+192  ServiceM D: service: debugsrv             pid:  70550
+183  ServiceM D: execl debugsrv (1).
+```
+
+**实时查看日志**
+```shell
+$ tail -f /tmp/sprlog/sparrow.log
+07-20 10:12:59.104  70543      BinderM D:   80 Add service info(8336, powermanagersrv)
+07-20 10:12:59.107  70550     EpollSch D:   36 ===========  Sparrow Epoll Start  ===========
+07-20 10:12:59.112  70550     EpollSch D:   97 Poll add module 5 DebugM
+07-20 10:12:59.112  70550     IpcProxy D:   74 Register observer: [0x8] [/DebugM_BymUfOrK]
+07-20 10:12:59.112  70550   SprObsBase D:  241 [DebugM] - Dump common version: COMMON_TYPE_DEFS_VERSION_N1001 / COMMON_MACROS_VERSION_M1001 / CORE_TYPE_DEFS_VERSION_R1001
+07-20 10:12:59.112  70550   SprObsBase D:   62 [DebugM] Start Module: DebugM, mq: /DebugM_BymUfOrK
+07-20 10:12:59.112  70545  SprMediator D:  417 Register successfully! ID: 8, NAME: /DebugM_BymUfOrK, monitored = 1
+07-20 10:12:59.112  70543      BinderM D:   80 Add service info(92137, debugsrv)
+07-20 10:12:59.112  70545  SprMediator D:  247 Binder loop start!
+07-20 10:12:59.113  70550   SprObsBase D:  255 [DebugM] Register Successfully!
+```
+
+**调试程序**
+
+项目同时集成了调试程序, 如下：
+* infrawatch   \
+实时查看各组件运行状态，需先启动`servicemanagersrv`拉起各个组件服务。
+```
+$ ./infrawatch
+==================================  MAIN MENU  ==================================
+
+    1. Display All Message Queues
+    2. Manager's Entrance
+    3. Custom Debug Options
+
+    [Q] Quit
+
+=================================================================================
+```
+* rshellx     \
+远程调试程序，在目标平台启动`rshellx`后，远程可通过tcp连接远程执行shell命令。
+```shell
+## 目标平台拉起rshellx
+$ ./shellx 8080
+
+## 远程输入shell命令
+$ telnet localhost 8080
+Trying 127.0.0.1...
+Connected to localhost.
+Escape character is '^]'.
+ls
+bindermanagersrv
+debugbinder
+debugcore
+debugmsg
+debugsrv
+default.prop
+infrawatch
+init.conf
+logmanagersrv
+logshow
+mediatorsrv
+powermanagersrv
+propertiessrv
+property_get
+property_set
+rshellx
+sample_sqlite
+sample_tcpclient
+sample_tcpserver
+servicemanagersrv
+sparrowsrv
+sprlog.conf
+system.prop
+vendor.prop
+```
+* property_set、property_get    \
+用于终端调试时设置和获取系统属性
+```shell
+$ ./property_get ro.SoftwareVersion
+1.0.0
 ```
 
 ## 第三方库依赖
@@ -112,9 +214,9 @@ Docs/
 
 **需要关注的文档**
 
-- C++编程规范.md   
+- C++编程规范.md
 项目代码规范参考依据，并非完全一致，编程风格优先于项目已存在代码保持一致。
-- Issue提交规范.md   
+- Issue提交规范.md
 Github/Gitee Issue提交模板参考。
 
 ## 最后
