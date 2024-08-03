@@ -32,26 +32,22 @@ public:
 
     /**
      * @brief Destroy the Spr Epoll Schedule object
-     *
      */
     ~SprEpollSchedule();
 
     /**
      * @brief Get the Instance object
      * @return SprEpollSchedule*
-     *
      */
     static SprEpollSchedule* GetInstance();
 
     /**
      * @brief Init
-     *
      */
     void Init();
 
     /**
      * @brief Exit
-     *
      */
     void Exit();
 
@@ -59,20 +55,17 @@ public:
      * @brief AddPoll
      * @param[in] observer
      * @return
-     *
      */
     int AddPoll(int fd, uint8_t ipcType, SprObserver* observer);
 
     /**
      * @brief DelPoll
      * @param[in] observer
-     *
      */
     void DelPoll(int fd);
 
     /**
      * @brief EpollLoop
-     *
      */
     void EpollLoop();
 
@@ -80,7 +73,6 @@ private:
     /**
      * @brief Construct a new Spr Epoll Schedule object
      * @param[in] size
-     *
      */
     explicit SprEpollSchedule(uint32_t size);
 

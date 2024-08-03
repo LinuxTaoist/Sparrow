@@ -26,9 +26,26 @@
 class IBinder
 {
 public:
+    /**
+     * @brief  Constructor
+     *
+     * @param name  service name
+     * @param key  service key
+     */
     IBinder(const std::string& name, int key) : mKey(key), mName(name) {};
+
+    /**
+     * @brief Destructor
+     */
     ~IBinder() {};
 
+    /**
+     * @brief Get the Parcel object
+     *
+     * @param reqParcel  request parcel
+     * @param rspParcel  response parcel
+     * @return  0 if success, -1 if failed
+     */
     int32_t GetParcel(std::shared_ptr<Parcel>& reqParcel, std::shared_ptr<Parcel>& rspParcel);
 
 private:

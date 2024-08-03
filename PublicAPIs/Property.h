@@ -24,6 +24,9 @@
 class Property
 {
 public:
+    /**
+     * @brief Destructor
+     */
     ~Property();
 
     /**
@@ -39,7 +42,6 @@ public:
      * @param key
      * @param value
      * @return 0 on success, or -1 if an error occurred
-     *
      */
     int SetProperty(const std::string& key, const std::string& value);
 
@@ -50,7 +52,6 @@ public:
      * @param value
      * @param defaultValue  The default value is returned when error
      * @return 0 on success, or -1 if an error occurred
-     *
      */
     int GetProperty(const std::string& key, std::string& value, const std::string& defaultValue);
 
@@ -63,10 +64,10 @@ public:
     int GetProperties();
 
 private:
+    /**
+     * @brief Constructor
+     */
     Property();
-
-private:
-    bool mEnable;
 };
 
 #endif // __PROPERTY_H__

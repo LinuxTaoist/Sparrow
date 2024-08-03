@@ -26,8 +26,16 @@
 #include <stdint.h>
 
 namespace GeneralConversions {
+
+/**
+ * @brief  String to integer
+ *
+ * @param value  output integer
+ * @param str  input string
+ * @return  0 if success, -1 if failed
+ */
 template <typename T>
-int stringToInt(T& value, const std::string& str)
+int StringToInteger(T& value, const std::string& str)
 {
     if (str.size() < sizeof(T)) {
         return -1;
@@ -42,8 +50,15 @@ int stringToInt(T& value, const std::string& str)
     return 0;
 }
 
+/**
+ * @brief  Integer to string
+ *
+ * @param value  input integer
+ * @param str  output string
+ * @return  0 if success, -1 if failed
+ */
 template<typename T>
-int intToString(const T& value, std::string& str)
+int IntegerToString(const T& value, std::string& str)
 {
     size_t valueSize = sizeof(T);
 
@@ -55,8 +70,33 @@ int intToString(const T& value, std::string& str)
     return 0;
 }
 
+/**
+ * @brief Vector to hex string without space
+ *
+ * @param vec  input vector
+ * @return  The string converted without space
+ */
 template<typename T>
-std::string vectorToHexString(const std::vector<T>& vec)
+std::string VectorToHexString(const std::vector<T>& vec)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+
+    for (const auto& it : vec) {
+        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it);
+    }
+
+    return ss.str();
+}
+
+/**
+ * @brief Vector to hex string with space
+ *
+ * @param vec  input vector
+ * @return  The string converted with space
+ */
+template<typename T>
+std::string VectorToHexStringWithSpace(const std::vector<T>& vec)
 {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
@@ -68,12 +108,19 @@ std::string vectorToHexString(const std::vector<T>& vec)
     return ss.str();
 }
 
+/**
+ * @brief  Vector to string
+ *
+ * @param vec  input vector
+ * @return  The string converted
+ */
 template<typename T>
-std::string vectorToString(const std::vector<T>& vec)
+std::string VectorToString(const std::vector<T>& vec)
 {
     std::string str(vec.begin(), vec.end());
     return str;
 }
-};
+
+}; // namespace GeneralConversions
 
 #endif // __GENERAL_CONVERSIONS_H__

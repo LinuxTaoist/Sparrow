@@ -25,9 +25,9 @@
 
 namespace GeneralUtils {
 
-int RandomDecimalDigits(int digits)
+int GetRandomInteger(int width)
 {
-    int maxValue = pow(10, digits) - 1;
+    int maxValue = pow(10, width) - 1;
     std::random_device rd;
     std::mt19937 generator(rd());
     std::uniform_int_distribution<> distribution(0, maxValue);
@@ -109,14 +109,14 @@ int SystemCmd(std::string& out, const char* format, ...)
     return (exitCode == 0) ? 0 : -1;
 }
 
-std::string RandomString(int len)
+std::string GetRandomString(int width)
 {
     std::string strRandom;
     const std::string seedStr = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<int> distribution(0, seedStr.size() - 1);
 
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < width; i++) {
         int randomValue = distribution(generator);
         strRandom += seedStr[randomValue];
     }
@@ -155,15 +155,15 @@ std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimite
 int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out)
 {
     int count = 0;
+    size_t pos = 0;
 
-    for(size_t i = 0; i < str.size(); ++i) {
-        if(str[i] == targetChar) {
-            ++count;
-            if(count == index && i + 1 < str.size()) {
-                out = str[i + 1];;
-                return 0;
-            }
+    while ((pos = str.find(targetChar, pos)) != std::string::npos) {
+        ++count;
+        if (count == index && pos + 1 < str.size()) {
+            out = str[pos + 1];
+            return 0;
         }
+        pos++;
     }
 
     return -1;
@@ -172,15 +172,15 @@ int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, ch
 int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out)
 {
     int count = 0;
+    size_t pos = 0;
 
-    for(size_t i = 0; i < str.size(); ++i) {
-        if(str[i] == targetChar) {
-            ++count;
-            if(count == index && i - 1 < str.size() && (int)i - 1 >= 0) {
-                out = str[i - 1];;
-                return 0;
-            }
+    while ((pos = str.find(targetChar, pos)) != std::string::npos) {
+        ++count;
+        if (count == index && pos > 0) {
+            out = str[pos - 1];
+            return 0;
         }
+        pos++;
     }
 
     return -1;

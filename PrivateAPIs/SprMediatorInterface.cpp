@@ -27,6 +27,7 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) printf("%d IMediator W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d IMediator E: " fmt, __LINE__, ##args)
 
+static bool mEnable;
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
 
