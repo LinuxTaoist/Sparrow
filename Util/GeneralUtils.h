@@ -22,30 +22,30 @@
 #include <string>
 
 namespace GeneralUtils {
-    template<typename T>
-    int AbsValue(T v)
-    {
-        return v > 0 ? v : (0 - v);
-    }
+template<typename T>
+int AbsValue(T v)
+{
+    return v > 0 ? v : (0 - v);
+}
 
-    template<typename T>
-    int AbsValue(T v1, T v2)
-    {
-        return v1 > v2 ? (v1 - v2) : (v2 - v1);
-    }
+template<typename T>
+int AbsValue(T v1, T v2)
+{
+    return v1 > v2 ? (v1 - v2) : (v2 - v1);
+}
 
-    int RandomDecimalDigits(int digits);
-    int InitSignalHandler(void (*signalHandler)(int));
-    int SystemCmd(const char *format, ...);
-    int SystemCmd(std::string& out, const char *format, ...);
+int RandomDecimalDigits(int digits);
+int InitSignalHandler(void (*signalHandler)(int));
+int SystemCmd(const char *format, ...);
+int SystemCmd(std::string& out, const char *format, ...);
 
-    std::string GetCurTimeStr();
-    std::string RandomString(int len);
+std::string GetCurTimeStr();
+std::string RandomString(int len);
 
-    // String general interfaces
-    std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter);
-    int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out);
-    int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out);
+// String general interfaces
+std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter);
+int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out);
+int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out);
 };
 
 #endif // __GENERAL_UTILS_H__

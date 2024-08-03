@@ -23,5 +23,5 @@
 namespace GeneralConversions
 {
 
-};
+}; // namespace GeneralConversions
 

@@ -20,22 +20,22 @@
 #define __BIT_ALGORITHMS_H__
 
 namespace BitAlgorithms {
-    /**
-     * @brief Extracts a value of range bits from a given value
-     *
-     * @param value The value from which to extract the bits
-     * @param startBit The starting position (inclusive) of the bit range.
-     * @param endBit The ending position (inclusive) of the bit range.
-     * @return Returns the extracted bits as a value of type T.
-     *
-     * @Note startBit and endBit are counted starting from 1.
-     */
-    template <typename T>
-    T GetBitsInRange(T value, int startBit, int endBit) {
-        T mask = (1ULL << endBit) - 1;
-        T valueInRange = (value & mask) >> (startBit - 1);
-        return valueInRange;
-    }
+/**
+ * @brief Extracts a value of range bits from a given value
+ *
+ * @param value The value from which to extract the bits
+ * @param startBit The starting position (inclusive) of the bit range.
+ * @param endBit The ending position (inclusive) of the bit range.
+ * @return Returns the extracted bits as a value of type T.
+ *
+ * @Note startBit and endBit are counted starting from 1.
+ */
+template <typename T>
+T GetValueInRange(T value, int startBit, int endBit) {
+    T mask = (1ULL << endBit) - 1;
+    T valueInRange = (value & mask) >> (startBit - 1);
+    return valueInRange;
+}
 
 }; // namespace BitAlgorithms
 

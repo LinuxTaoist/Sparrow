@@ -23,21 +23,21 @@
 
 namespace LibgoAdapter
 {
-    class CoPool
-    {
-    public:
-        CoPool();
-        ~CoPool();
+class CoPool
+{
+public:
+    CoPool();
+    ~CoPool();
 
-        void InitCoroutinePool(size_t maxCoroutineCount);
+    void InitCoroutinePool(size_t maxCoroutineCount);
 
-        void Start(int minThreadNumber, int maxThreadNumber = 0);
+    void Start(int minThreadNumber, int maxThreadNumber = 0);
 
-        void Post(std::function<void()> const& func, std::function<void()> const& callback);
+    void Post(std::function<void()> const& func, std::function<void()> const& callback);
 
-        template <typename R>
-        void Post(std::function<R()> const& func, std::function<void(R&)> const& callback);
-    };
+    template <typename R>
+    void Post(std::function<R()> const& func, std::function<void(R&)> const& callback);
+};
 
 }; // namespace LibgoAdapter
 

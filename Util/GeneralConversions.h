@@ -26,54 +26,54 @@
 #include <stdint.h>
 
 namespace GeneralConversions {
-    template <typename T>
-    int stringToInt(T& value, const std::string& str)
-    {
-        if (str.size() < sizeof(T)) {
-            return -1;
-        }
-
-        value = 0;
-        for (size_t i = 0; i < sizeof(T); i++) {
-            value <<= 8;
-            value |= static_cast<unsigned char>(str[i]);
-        }
-
-        return 0;
+template <typename T>
+int stringToInt(T& value, const std::string& str)
+{
+    if (str.size() < sizeof(T)) {
+        return -1;
     }
 
-    template<typename T>
-    int intToString(const T& value, std::string& str)
-    {
-        size_t valueSize = sizeof(T);
-
-        for (size_t i = 0; i < valueSize; i++) {
-            char ch = static_cast<char>((value >> ((valueSize - 1 - i) * 8)) & 0xFF);
-            str.push_back(ch);
-        }
-
-        return 0;
+    value = 0;
+    for (size_t i = 0; i < sizeof(T); i++) {
+        value <<= 8;
+        value |= static_cast<unsigned char>(str[i]);
     }
 
-    template<typename T>
-    std::string vectorToHexString(const std::vector<T>& vec)
-    {
-        std::stringstream ss;
-        ss << std::hex << std::setfill('0');
+    return 0;
+}
 
-        for (const auto& it : vec) {
-            ss << std::setw(sizeof(T) * 2) << static_cast<int>(it) << " ";
-        }
+template<typename T>
+int intToString(const T& value, std::string& str)
+{
+    size_t valueSize = sizeof(T);
 
-        return ss.str();
+    for (size_t i = 0; i < valueSize; i++) {
+        char ch = static_cast<char>((value >> ((valueSize - 1 - i) * 8)) & 0xFF);
+        str.push_back(ch);
     }
 
-    template<typename T>
-    std::string vectorToString(const std::vector<T>& vec)
-    {
-        std::string str(vec.begin(), vec.end());
-        return str;
+    return 0;
+}
+
+template<typename T>
+std::string vectorToHexString(const std::vector<T>& vec)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+
+    for (const auto& it : vec) {
+        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it) << " ";
     }
+
+    return ss.str();
+}
+
+template<typename T>
+std::string vectorToString(const std::vector<T>& vec)
+{
+    std::string str(vec.begin(), vec.end());
+    return str;
+}
 };
 
 #endif // __GENERAL_CONVERSIONS_H__
