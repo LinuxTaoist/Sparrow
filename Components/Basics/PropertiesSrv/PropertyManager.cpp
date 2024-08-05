@@ -101,7 +101,7 @@ int PropertyManager::GetProperties()
 
 int PropertyManager::Init()
 {
-    mSharedMemoryPtr = std::make_unique<SharedBinaryTree>(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE);
+    mSharedMemoryPtr = std::unique_ptr<SharedBinaryTree>(new SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
 
     // load default property
     LoadPropertiesFromFile(DEFAULT_PROP_PATH);

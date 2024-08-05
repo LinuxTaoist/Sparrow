@@ -88,7 +88,7 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     SPR_LOGD("Recv msg: %s on %s\n", GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
 
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
-        [this, &msg](const auto& entry) {
+        [this, &msg](const StateTransitionType& entry) {
             return ((entry.lev1State  == mCurLev1State  || entry.lev1State  == LEV1_POWER_ANY) &&
                     (entry.lev2State  == mCurLev2State  || entry.lev2State  == LEV2_POWER_ANY) &&
                     (entry.sigId      == msg.GetMsgId() || entry.sigId      == SIG_ID_ANY) );

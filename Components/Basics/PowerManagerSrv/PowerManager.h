@@ -88,11 +88,12 @@ private:
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
-    static std::vector< StateTransition <EPowerLev1State,
-                        EPowerLev2State,
-                        InternalDefs::ESprSigId,
-                        PowerManager,
-                        SprMsg> > mStateTable;
+    using StateTransitionType = StateTransition<EPowerLev1State,
+                                                EPowerLev2State,
+                                                InternalDefs::ESprSigId,
+                                                PowerManager,
+                                                SprMsg>;
+    static std::vector<StateTransitionType> mStateTable;
 
     EPowerLev1State mCurLev1State;
     EPowerLev2State mCurLev2State;
