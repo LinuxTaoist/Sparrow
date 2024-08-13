@@ -41,21 +41,37 @@ enum MQTT_MSG_TYPE
     MQTT_MSG_BUTT,
 };
 
+#define MQTT_RSP_CONNECT_MACROS                                             \
+    ENUM_OR_STRING(MQTT_CONNECT_ACCEPTED),                                  \
+    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION),     \
+    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_IDENTIFIER_REJECTED),               \
+    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_SERVER_UNAVAILABLE),                \
+    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_BAD_USERNAME_OR_PASSWORD),          \
+    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_NOT_AUTHORIZED),                    \
+    ENUM_OR_STRING(MQTT_CONNECT_BUTT)
+
+#ifdef ENUM_OR_STRING
+#undef ENUM_OR_STRING
+#endif
+#define ENUM_OR_STRING(x) x
+
 enum MQTT_RSP_CONNECT_CODE
 {
-    MQTT_CONNECT_ACCEPTED = 0,
-    MQTT_CONNECT_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION = 1,
-    MQTT_CONNECT_REFUSED_IDENTIFIER_REJECTED = 2,
-    MQTT_CONNECT_REFUSED_SERVER_UNAVAILABLE = 3,
-    MQTT_CONNECT_REFUSED_BAD_USERNAME_OR_PASSWORD = 4,
-    MQTT_CONNECT_REFUSED_NOT_AUTHORIZED = 5,
-    MQTT_CONNECT_BUTT
+    MQTT_RSP_CONNECT_MACROS
 };
 
 class MqttMsgBase
 {
 public:
+    /**
+     * @brief Construct/Destruct
+     *
+     * @param[in] type The type of the MQTT message
+     * @param[in] flags The flags of the MQTT message
+     */
     MqttMsgBase();
+    MqttMsgBase(const std::string& bytes);
+    MqttMsgBase(uint8_t type, uint8_t flags);
     MqttMsgBase(const MqttMsgBase& msg);
     MqttMsgBase& operator=(const MqttMsgBase& msg);
     MqttMsgBase(MqttMsgBase&& msg);
@@ -63,43 +79,139 @@ public:
     MqttMsgBase(uint8_t type, uint8_t flags = 0);
     virtual ~MqttMsgBase();
 
-    virtual int32_t Encode(std::string& data);
-    virtual int32_t Decode(const std::string& data);
+    /**
+     * @brief Set the Fixed Header object
+     *
+     * @param[in] type The type of the MQTT message
+     * @param[in] flags The flags of the MQTT message
+     * @return length on success, or -1 if an error occurred
+     */
     virtual int32_t SetFixedHeader(uint8_t type, uint8_t flags);
+
+    /**
+     * @brief Get the Fixed Header object
+     *
+     * @param[out] type The type of the MQTT message
+     * @param[out] flags The flags of the MQTT message
+     * @return length on success, or -1 if an error occurred
+     */
     virtual int32_t GetFixedHeader(uint8_t& type, uint8_t& flags);
+
+    /**
+     * @brief Set the Variable Header object
+     *
+     * @param[in] variableHeader The Variable Header object
+     * @return length on success, or -1 if an error occurred
+     */
     virtual int32_t SetVariableHeader(const std::string& variableHeader);
+
+    /**
+     * @brief Get the Variable Header object
+     *
+     * @param[out] variableHeader The Variable Header object
+     * @return length on success, or -1 if an error occurred
+     */
     virtual int32_t GetVariableHeader(std::string& variableHeader);
+
+    /**
+     * @brief Set the Payload object
+     *
+     * @param[in] payload The Payload object
+     * @return length on success, or -1 if an error occurred
+     */
     virtual int32_t SetPayload(const std::string& payload);
+
+    /**
+     * @brief Get the Payload object
+     *
+     * @param payload The Payload object
+     * @return length on success, or -1 if an error occurred
+     */
     virtual int32_t GetPayload(std::string& payload);
 
+    /**
+     * @brief Decode the MQTT message from a string
+     *
+     * @param[in] bytes The string to decode
+     * @return length on success, or -1 if an error occurred
+     */
+    virtual int32_t Decode(const std::string& bytes);
+
+    /**
+     * @brief Encode the MQTT message to a string
+     *
+     * @param[in] bytes The string to store the encoded message
+     * @return length on success, or -1 if an error occurred
+     */
+    virtual int32_t Encode(std::string& bytes);
+
 protected:
-    int32_t DecodeU32(uint32_t  data);
-    int32_t EncodeU32(uint32_t& data);
-    int32_t DecodeU16(uint16_t  data);
-    int32_t EncodeU16(uint16_t& data);
-    int32_t DecodeU8(uint8_t  data);
-    int32_t EncodeU8(uint8_t& data);
-    int32_t DecodeStringU8(std::string& data, int32_t len);
-    int32_t EncodeStringU8(std::string& data);
-    int32_t DecodeVectorU8(std::vector<uint8_t>& data, int32_t len);
-    int32_t EncodeVectorU8(std::vector<uint8_t>& data);
-    int32_t DecodeVectorU16(std::vector<uint16_t>& data, int32_t len);
-    int32_t EncodeVectorU16(std::vector<uint16_t>& data);
-    int32_t DecodeRemainingLength();
-    int32_t EncodeRemainingLength();
+    /**
+     * @brief Get string of the connect rsponse code
+     *
+     * @param code  connect response code
+     * @return the string of the connect response code
+     */
+    std::string GetConnectRspCodeStr(uint8_t code);
+
+    // --------------------------------------------------------------------------------------------
+    // Encode/Decode MQTT protocol functions
+    // --------------------------------------------------------------------------------------------
+    virtual int32_t DecodeRemainingLength(const std::string& bytes);
+    virtual int32_t EncodeRemainingLength(std::string& bytes);
+    virtual int32_t DecodeFixedHeader(const std::string& bytes);
+    virtual int32_t EncodeFixedHeader(std::string& bytes);
+    virtual int32_t DecodeVariableHeader(const std::string& bytes);
+    virtual int32_t EncodeVariableHeader(std::string& bytes);
+    virtual int32_t DecodePayload(const std::string& bytes);
+    virtual int32_t EncodePayload(std::string& bytes);
+
+    // --------------------------------------------------------------------------------------------
+    // Encode/Decode common type functions
+    // --------------------------------------------------------------------------------------------
+    template <typename T>
+    int32_t DecodeUintT(const std::string& bytes, T& data)
+    {
+        int32_t len = sizeof(T);
+        if (len > bytes.size())
+        {
+            return -1;
+        }
+
+        data = 0;
+        for (size_t i = 0; i < valueSize; i++) {
+            data <<= 8;
+            data |= static_cast<uint8_t>(str[i]);
+        }
+
+        return len;
+    }
+
+    template <typename T>
+    int32_t EncodeUintT(const T& data, std::string& bytes)
+    {
+        int32_t len = sizeof(T);
+        bytes.resize(len);
+
+        for (int32_t i = len - 1; i >= 0; i--) {
+            bytes[i] = static_cast<uint8_t>(data);
+            data >>= 8;
+        }
+
+        return len;
+    }
 
 private:
-    struct Header
+    struct FixHeader
     {
         uint8_t     type  : 4;
         uint8_t     flags : 4;
         std::string remainingLength;
-        Header(uint8_t type, uint8_t flags) : type(type), flags(flags) {};
-    } mFixedHeader;
-
-    std::string mVariableHeader;
-    std::string mPayload;
-    uint32_t    mPayloadIdx;
+        FixHeader(uint8_t type, uint8_t flags) : type(type), flags(flags) {};
+    } mFixedHeader;                 // Fixed Header in MQTT protocol
+    std::string mVariableHeader;    // Variable Header in MQTT protocol
+    std::string mPayload;           // Payload in MQTT protocol
+    uint64_t    mRemainingLength;   // Value of mFixedHeader.remainingLength
 };
 
 #endif // __MQTT_MSG_H__

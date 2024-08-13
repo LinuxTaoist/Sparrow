@@ -27,6 +27,7 @@
 #include "PSocket.h"
 #include "RemoteShell.h"
 #include "DebugModule.h"
+#include "SprMediatorIpcProxy.h"
 
 using namespace InternalDefs;
 
@@ -36,8 +37,8 @@ using namespace InternalDefs;
 
 #define BUFFER_SIZE 1024
 
-DebugModule::DebugModule(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
-           : SprObserver(id, name, mMsgMediatorPtr)
+DebugModule::DebugModule(ModuleIDType id, const std::string& name)
+           : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>())
 {
 }
 

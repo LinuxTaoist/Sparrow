@@ -24,7 +24,6 @@
 #include "CommonMacros.h"
 #include "PowerManager.h"
 #include "PowerManagerHub.h"
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -33,7 +32,7 @@ using namespace InternalDefs;
 
 int main(int argc, const char *argv[])
 {
-    PowerManager thePowerManager(MODULE_POWERM, "PowerM", make_shared<SprMediatorIpcProxy>());
+    PowerManager thePowerManager(MODULE_POWERM, "PowerM");
     PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
 
     GeneralUtils::InitSignalHandler([](int signum) {

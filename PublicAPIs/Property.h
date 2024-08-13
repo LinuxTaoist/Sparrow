@@ -57,6 +57,7 @@ public:
 
     /**
      * @brief GetProperties
+     *
      * @return 0 on success, or -1 if an error occurred
      *
      * Dump all properties to logs, only used for debug.

@@ -2,43 +2,35 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : MqttDriver.h
+ *  @file       : OneNetManager.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2023/12/21
+ *  @date       : 2024/08/13
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/21 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/08/13 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __MQTT_DRIVER_H__
-#define __MQTT_DRIVER_H__
+#ifndef __ONENET_MANAGER_H__
+#define __ONENET_MANAGER_H__
 
 #include <string>
 #include "SprObserver.h"
 
-class MqttMsgBase
+class OneNetManager : public SprObserver
 {
 public:
-    MqttMsgBase();
-    ~MqttMsgBase();
-};
-
-class MqttDriver : public SprObserver
-{
-public:
-    MqttDriver();
-    ~MqttDriver();
-    void Init();
+    ~OneNetManager();
+    static OneNetManager* GetInstance(ModuleIDType id, const std::string& name);
 
 private:
-    std::string mMqttAddress;
-    uint16_t    mMqttPort;
+    OneNetManager(ModuleIDType id, const std::string& name);
 };
 
-#endif // __MQTT_DRIVER_H__
+
+#endif // __ONENET_MANAGER_H__

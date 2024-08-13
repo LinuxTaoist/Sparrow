@@ -59,7 +59,7 @@ struct StateTransition
 class PowerManager : public SprObserver
 {
 public:
-    PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
+    PowerManager(ModuleIDType id, const std::string& name);
     virtual ~PowerManager();
 
     int ProcessMsg(const SprMsg& msg) override;

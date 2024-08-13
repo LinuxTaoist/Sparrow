@@ -24,7 +24,6 @@
 #include "CommonMacros.h"
 #include "DebugModule.h"
 #include "DebugModuleHub.h"
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -33,7 +32,7 @@ using namespace InternalDefs;
 
 int main(int argc, const char *argv[])
 {
-    DebugModule theDebugModule(MODULE_DEBUG, "DebugM", make_shared<SprMediatorIpcProxy>());
+    DebugModule theDebugModule(MODULE_DEBUG, "DebugM");
     DebugModuleHub theDebugModuleHub(SRV_NAME_DEBUG_MODULE, &theDebugModule);
 
     GeneralUtils::InitSignalHandler([](int signum) {

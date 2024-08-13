@@ -37,17 +37,18 @@ namespace GeneralConversions {
 template <typename T>
 int StringToInteger(T& value, const std::string& str)
 {
-    if (str.size() < sizeof(T)) {
+    size_t valueSize = sizeof(T);
+    if (str.size() < valueSize) {
         return -1;
     }
 
     value = 0;
-    for (size_t i = 0; i < sizeof(T); i++) {
+    for (size_t i = 0; i < valueSize; i++) {
         value <<= 8;
         value |= static_cast<unsigned char>(str[i]);
     }
 
-    return 0;
+    return valueSize;
 }
 
 /**
@@ -67,7 +68,7 @@ int IntegerToString(const T& value, std::string& str)
         str.push_back(ch);
     }
 
-    return 0;
+    return valueSize;
 }
 
 /**

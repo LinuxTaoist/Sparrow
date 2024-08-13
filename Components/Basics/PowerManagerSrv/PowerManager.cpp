@@ -20,6 +20,7 @@
 #include <algorithm>
 #include "SprLog.h"
 #include "PowerManager.h"
+#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -71,8 +72,8 @@ PowerManager::mStateTable =
     }
 };
 
-PowerManager::PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
-            : SprObserver(id, name, mMsgMediatorPtr)
+PowerManager::PowerManager(ModuleIDType id, const std::string& name)
+            : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>())
 {
     SetLev1State(LEV1_POWER_INIT);
     SetLev2State(LEV2_POWER_ANY);
