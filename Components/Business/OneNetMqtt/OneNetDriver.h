@@ -22,6 +22,37 @@
 #include <string>
 #include "SprObserver.h"
 
+// 一级状态:
+enum EOneNetDrvLev1State
+{
+    LEV1_SOCKET_ANY         = 0x00,
+    LEV1_SOCKET_IDLE,
+    LEV1_SOCKET_CONNECTING,
+    LEV1_SOCKET_CONNECTED,
+    LEV1_SOCKET_DISCONNECTED,
+    LEV1_SOCKET_BUTT
+};
+
+//二级状态:
+enum EOneNetDrvLev2State
+{
+    LEV2_ONENET_ANY         = 0x00,
+    LEV2_ONENET_IDLE,
+    LEV2_ONENET_CONNECTING,
+    LEV2_ONENET_CONNECTED,
+    LEV2_ONENET_DISCONNECTED,
+    LEV2_ONENET_BUTT
+};
+
+template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
+struct StateTransition
+{
+    Lev1State   lev1State;
+    Lev2State   lev2State;
+    SignalType	sigId;
+    void (ClassName::*callback)(const MsgType& msg);
+};
+
 class OneNetDriver : public SprObserver
 {
 public:
@@ -32,9 +63,33 @@ public:
 private:
     explicit OneNetDriver(ModuleIDType id, const std::string& name);
 
+    /* 更新一级状态 */
+    void SetLev1State(EOneNetDrvLev1State state);
+    EOneNetDrvLev1State GetLev1State();
+
+    /* 更新二级状态 */
+    void SetLev2State(EOneNetDrvLev2State state);
+    EOneNetDrvLev2State GetLev2State();
+
+    /* 消息响应函数 */
+    void MsgRespondSocketConnect(const SprMsg& msg);
+    void MsgRespondSocketDisconnectActive(const SprMsg& msg);
+    void MsgRespondSocketDisconnectPassive(const SprMsg& msg);
+    void MsgRespondUnexpectedState(const SprMsg& msg);
+    void MsgRespondUnexpectedMsg(const SprMsg& msg);
+
 private:
     std::string mOneNetAddress;
     uint16_t    mOneNetPort;
+    EOneNetDrvLev1State mCurLev1State;
+    EOneNetDrvLev2State mCurLev2State;
+
+    using StateTransitionType = StateTransition<EOneNetDrvLev1State,
+                                                EOneNetDrvLev2State,
+                                                InternalDefs::ESprSigId,
+                                                OneNetDriver,
+                                                SprMsg>;
+    static std::vector<StateTransitionType> mStateTable;
 };
 
 #endif // __ONENET_DRIVER_H__
