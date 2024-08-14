@@ -32,7 +32,7 @@ bool PMsgQueue::mUnlimit = false;
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
             std::function<void(int, std::string, void* arg)>cb,
             void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_QUEUE, arg), mCb(cb)
+    : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mCb(cb)
 {
     mName = name;
     mMaxMsg = maxmsg;
