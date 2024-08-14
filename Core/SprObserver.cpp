@@ -209,6 +209,14 @@ int SprObserver::NotifyObserver(SprMsg& msg)
     return 0;
 }
 
+int SprObserver::NotifyObserver(ModuleIDType id, SprMsg& msg)
+{
+    msg.SetFrom(mModuleID);
+    msg.SetTo(id);
+    mMsgMediatorPtr->NotifyObserver(msg);
+    return 0;
+}
+
 int SprObserver::NotifyAllObserver(SprMsg& msg)
 {
     // Notify all modules by setting destination

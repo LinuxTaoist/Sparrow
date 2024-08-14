@@ -47,22 +47,14 @@ enum EOneNetDrvLev2State
     LEV2_ONENET_BUTT
 };
 
-template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
-struct StateTransition
-{
-    Lev1State   lev1State;
-    Lev2State   lev2State;
-    SignalType	sigId;
-    void (ClassName::*callback)(const MsgType& msg);
-};
-
 class OneNetDriver : public SprObserver
 {
 public:
     ~OneNetDriver();
     static OneNetDriver* GetInstance(ModuleIDType id, const std::string& name);
+
     void Init();
-    int32_t ProcessMsg(const SprMsg& msg) override;
+    int ProcessMsg(const SprMsg& msg) override;
 
 private:
     explicit OneNetDriver(ModuleIDType id, const std::string& name);
@@ -91,7 +83,7 @@ private:
     EOneNetDrvLev2State mCurLev2State;
     std::shared_ptr<PSocket> mSocketPtr;
 
-    using StateTransitionType = StateTransition<EOneNetDrvLev1State,
+    using StateTransitionType = InternalDefs::StateTransition<EOneNetDrvLev1State,
                                                 EOneNetDrvLev2State,
                                                 InternalDefs::ESprSigId,
                                                 OneNetDriver,

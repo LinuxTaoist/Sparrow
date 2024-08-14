@@ -47,15 +47,6 @@ enum EPowerLev2State
     LEV2_POWER_ANY      = 0x00
 };
 
-template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
-struct StateTransition
-{
-    Lev1State   lev1State;
-    Lev2State   lev2State;
-    SignalType	sigId;
-    void (ClassName::*callback)(const MsgType& msg);
-};
-
 class PowerManager : public SprObserver
 {
 public:
@@ -88,7 +79,7 @@ private:
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
-    using StateTransitionType = StateTransition<EPowerLev1State,
+    using StateTransitionType = InternalDefs::StateTransition<EPowerLev1State,
                                                 EPowerLev2State,
                                                 InternalDefs::ESprSigId,
                                                 PowerManager,

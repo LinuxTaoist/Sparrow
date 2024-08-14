@@ -166,7 +166,6 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
         }
     }
 
-    configFile.close();
     return startedCount;
 }
 

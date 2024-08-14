@@ -131,6 +131,15 @@ typedef struct
     int32_t  intervalInMilliSec;
 } STimerInfo;
 
+template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
+struct StateTransition
+{
+    Lev1State   lev1State;
+    Lev2State   lev2State;
+    SignalType	sigId;
+    void (ClassName::*callback)(const MsgType& msg);
+};
+
 } // namespace InternalDefs
 
 #endif // __CORE_TYPE_DEFS_H__

@@ -33,6 +33,7 @@ using namespace InternalDefs;
 int main(int argc, const char *argv[])
 {
     OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneNetDriver")->Init();
-    EpollEventHandler::GetInstance()->EpollLoop(true);
+    OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneNetManager")->Init();
+    SprObserver::MainLoop();
     return 0;
 }

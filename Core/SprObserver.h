@@ -47,6 +47,7 @@ public:
 
     bool IsMonitored() const;
     virtual int NotifyObserver(SprMsg& msg);
+    virtual int NotifyObserver(ModuleIDType id, SprMsg& msg);
     virtual int NotifyAllObserver(SprMsg& msg);
     virtual int HandleEvent(int fd);
     virtual int ProcessMsg(const SprMsg& msg) = 0;

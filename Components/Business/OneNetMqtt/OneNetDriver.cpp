@@ -30,8 +30,11 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("OneNetDrv", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetDrv", fmt, ##args)
 
-const std::string ONENET_MQTT_HOST  = "183.230.40.39";
-const int ONENET_MQTT_PORT        = 1883;
+const std::string ONENET_MQTT_HOST  = "169.254.133.39";
+const int ONENET_MQTT_PORT          = 9102;
+
+// const std::string ONENET_MQTT_HOST  = "183.230.40.39";
+// const int ONENET_MQTT_PORT        = 1883;
 
 vector <StateTransition <   EOneNetDrvLev1State,
                             EOneNetDrvLev2State,
@@ -194,22 +197,26 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
 void OneNetDriver::MsgRespondSocketDisconnectActive(const SprMsg& msg)
 {
     SPR_LOGD("Recv msg id (%s), lev1: %d, lev2: %d\n", GetSigName(msg.GetMsgId()), mCurLev1State, mCurLev2State);
-
-    if ( GetLev2State() == LEV2_ONENET_CONNECTED ||
-         GetLev2State() == LEV2_ONENET_CONNECTING) {
-        // TODO: send cmd disonnect to OneNet
-    }
-
     mSocketPtr = nullptr;  // Smart pointer, self-destruct and close socket
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
 }
 
+/**
+ * @brief Process SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_PASSIVE
+ *
+ * @param[in] msg
+ * @return none
+ */
 void OneNetDriver::MsgRespondSocketDisconnectPassive(const SprMsg& msg)
 {
     mSocketPtr = nullptr;   // Smart pointer, self-destruct and close socket
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
+
+    // Notify disconnect state to OneNetManager
+    SprMsg tmpMsg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT);
+    NotifyObserver(tmpMsg);
 }
 
 void OneNetDriver::MsgRespondUnexpectedState(const SprMsg& msg)
