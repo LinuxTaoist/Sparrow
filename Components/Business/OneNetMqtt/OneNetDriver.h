@@ -19,7 +19,10 @@
 #ifndef __ONENET_DRIVER_H__
 #define __ONENET_DRIVER_H__
 
+#include <mutex>
 #include <string>
+#include <memory>
+#include "PSocket.h"
 #include "SprObserver.h"
 
 // 一级状态:
@@ -57,7 +60,8 @@ class OneNetDriver : public SprObserver
 {
 public:
     ~OneNetDriver();
-    OneNetDriver* GetInstance(ModuleIDType id, const std::string& name);
+    static OneNetDriver* GetInstance(ModuleIDType id, const std::string& name);
+    void Init();
     int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
@@ -79,10 +83,13 @@ private:
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
-    std::string mOneNetAddress;
+    std::mutex  mSockMutex;
+    std::string mSockBuffer;
+    std::string mOneNetHost;
     uint16_t    mOneNetPort;
     EOneNetDrvLev1State mCurLev1State;
     EOneNetDrvLev2State mCurLev2State;
+    std::shared_ptr<PSocket> mSocketPtr;
 
     using StateTransitionType = StateTransition<EOneNetDrvLev1State,
                                                 EOneNetDrvLev2State,

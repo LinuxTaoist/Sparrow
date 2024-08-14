@@ -34,7 +34,7 @@ using namespace std;
 int main(int argc, const char *argv[])
 {
     std::mutex epFdMutex;
-    auto pEpoll = make_shared<EpollEventHandler>();
+    auto pEpoll = EpollEventHandler::GetInstance();
     auto tcpClient = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int sock, void *arg) {
         PSocket* pCliObj = (PSocket*)arg;
         if (pCliObj == nullptr) {

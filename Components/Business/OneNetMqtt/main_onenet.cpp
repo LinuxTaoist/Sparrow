@@ -22,6 +22,8 @@
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "OneNetManager.h"
+#include "OneNetDriver.h"
+#include "EpollEventHandler.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -30,5 +32,7 @@ using namespace InternalDefs;
 
 int main(int argc, const char *argv[])
 {
+    OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneNetDriver")->Init();
+    EpollEventHandler::GetInstance()->EpollLoop(true);
     return 0;
 }

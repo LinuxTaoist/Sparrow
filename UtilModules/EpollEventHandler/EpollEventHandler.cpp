@@ -53,6 +53,12 @@ EpollEventHandler::~EpollEventHandler()
     }
 }
 
+EpollEventHandler* EpollEventHandler::GetInstance(int size, int blockTimeOut)
+{
+    static EpollEventHandler instance(size, blockTimeOut);
+    return &instance;
+}
+
 void EpollEventHandler::AddPoll(IEpollEvent* p)
 {
     //EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；

@@ -25,12 +25,15 @@
 class EpollEventHandler
 {
 public:
-    EpollEventHandler(int size = 0, int blockTimeOut = -1);
     virtual ~EpollEventHandler();
+    static EpollEventHandler* GetInstance(int size = 0, int blockTimeOut = -1);
 
     void AddPoll(IEpollEvent* p);
     void DelPoll(IEpollEvent* p);
     void EpollLoop(bool bRun);
+
+private:
+    explicit EpollEventHandler(int size = 0, int blockTimeOut = -1);
 
 private:
     bool    mRun;
