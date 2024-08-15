@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprObserverr.cpp
+ *  @file       : SprObserver.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -19,7 +19,8 @@
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "CommonTypeDefs.h"
-#include "SprNewObserver.h"
+#include "SprObserver.h"
+#include "SprMediatorFactory.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -31,12 +32,12 @@ const int MQ_BUFF_MAX_SIZE  = 1024;
 const int RANDOM_STR_LENGTH = 8;
 
 // Module ID, Module Name, proxyRpc,
-SprObserver::SprObserver(ModuleIDType id, const string& name, shared_ptr<SprMediatorProxy> msgMediator)
+SprObserver::SprObserver(ModuleIDType id, const string& name, EProxyType proxyType)
+    : mProxyType(proxyType), mModuleID(id), mModuleName(name)
 {
-
     mModuleID = id;
     mModuleName = name;
-    mMsgMediatorPtr = msgMediator;
+    mMsgMediatorPtr = SprMediatorFactory::GetInstance()->GetMediatorProxy(proxyType);
     mMsgMediatorPtr->RegisterObserver(*this);
     DumpCommonVersion();
     SPR_LOGD("Start Module: %d %s\n", id, mModuleName.c_str());

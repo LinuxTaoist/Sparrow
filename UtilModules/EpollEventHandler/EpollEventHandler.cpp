@@ -45,12 +45,7 @@ EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
 
 EpollEventHandler::~EpollEventHandler()
 {
-    mRun = false;
-    if (mHandle != -1)
-    {
-        close(mHandle);
-        mHandle = -1;
-    }
+    ExitLoop();
 }
 
 EpollEventHandler* EpollEventHandler::GetInstance(int size, int blockTimeOut)
@@ -78,7 +73,7 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
         return ;
     }
 
-    mEpollMap.insert(std::make_pair(fd, p));
+    mEpollMap[fd] = p;
     SPR_LOGD("Add epoll fd %d\n", fd);
 }
 
@@ -91,6 +86,11 @@ void EpollEventHandler::DelPoll(IEpollEvent* p)
 
     mEpollMap.erase(p->GetEpollFd());
     SPR_LOGD("Delete epoll fd %d\n", p->GetEpollFd());
+}
+
+void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
+{
+    event.EpollEvent(event.GetEpollFd(), event.GetEpollType(), event.GetArgs());
 }
 
 void EpollEventHandler::EpollLoop(bool bRun)
@@ -115,9 +115,19 @@ void EpollEventHandler::EpollLoop(bool bRun)
                 continue;
             }
 
-            p->EpollEvent(p->GetEpollFd(), p->GetEpollType(), p->GetArgs());
+            HandleEpollEvent(*p);
         }
     }
 
     SPR_LOGD("EpollLoop exit\n");
+}
+
+void EpollEventHandler::ExitLoop()
+{
+    mRun = false;
+    if (mHandle != -1)
+    {
+        close(mHandle);
+        mHandle = -1;
+    }
 }

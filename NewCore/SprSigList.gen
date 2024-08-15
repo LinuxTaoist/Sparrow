@@ -1,0 +1,84 @@
+ENUM_OR_STRING(SIG_ID_ANY = 0x00),                              \
+//-----------------------------------------------------------------------------
+// PROXY
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_REQUEST),                  \
+ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_RESPONSE),                 \
+ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_REQUEST),                \
+ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_RESPONSE),               \
+ENUM_OR_STRING(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT),          \
+
+//-----------------------------------------------------------------------------
+// LOG_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_LOG_OPEN),                                \
+ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
+
+//-----------------------------------------------------------------------------
+// Debug
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_DEBUG_MSG_SERIAL),                        \
+ENUM_OR_STRING(SIG_ID_DEBUG_NOTIFY_ALL),                        \
+ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST),                        \
+ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_1S),                     \
+ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_2S),                     \
+ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_3S),                     \
+ENUM_OR_STRING(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL),               \
+ENUM_OR_STRING(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL),              \
+
+//-----------------------------------------------------------------------------
+// TIMER_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_TIMER_START_SYSTEM_TIMER),                \
+ENUM_OR_STRING(SIG_ID_TIMER_STOP_SYSTEM_TIMER),                 \
+ENUM_OR_STRING(SIG_ID_TIMER_ADD_ONCE_TIMER),                    \
+ENUM_OR_STRING(SIG_ID_TIMER_ADD_REPEAT_TIMER),                  \
+ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
+ENUM_OR_STRING(SIG_ID_TIMER_DEL_TIMER),                         \
+
+//-----------------------------------------------------------------------------
+// SPARROW_SYSTEM
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_SYSTEM_EXIT),                             \
+
+//-----------------------------------------------------------------------------
+// SYSTEM_TIMER_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
+
+//-----------------------------------------------------------------------------
+// POWER_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_POWER_ON),                                \
+ENUM_OR_STRING(SIG_ID_POWER_OFF),                               \
+ENUM_OR_STRING(SIG_ID_POWER_BOOT),                              \
+ENUM_OR_STRING(SIG_ID_POWER_RESUME),                            \
+ENUM_OR_STRING(SIG_ID_POWER_STANDBY),                           \
+ENUM_OR_STRING(SIG_ID_POWER_SLEEP),                             \
+
+//-----------------------------------------------------------------------------
+// ONENET_MANAGER
+//-----------------------------------------------------------------------------
+
+//-----------------------------------------------------------------------------
+// ONENET_DRIVER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_CONNECT),               \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_ACTIVE),     \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_PASSIVE),    \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT),             \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK),             \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH),             \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBACK),              \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBREC),              \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBREL),              \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBCOMP),             \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE),           \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK),              \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_UNSUBSCRIBE),         \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_UNSUBACK),            \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ),             \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP),            \
+ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT),          \
+
+ENUM_OR_STRING(SIG_ID_BUTT)

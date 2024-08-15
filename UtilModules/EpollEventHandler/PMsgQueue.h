@@ -26,28 +26,27 @@
 class PMsgQueue : public IEpollEvent
 {
 public:
-    PMsgQueue(const std::string& name, long maxmsg,
-              std::function<void(int, std::string, void* arg)>cb,
+    PMsgQueue(const std::string& name, long maxmsg = 1025,
+              std::function<void(int, std::string, void*)>cb = nullptr,
               void* arg = nullptr);
 
     virtual ~PMsgQueue();
 
-    int32_t Clear();
-    int32_t Send(const std::string& msg, uint32_t prio = 1);
-    int32_t Recv(std::string& msg, uint32_t& prio);
+    virtual int32_t Clear();
+    virtual int32_t Send(const std::string& msg, uint32_t prio = 1);
+    virtual int32_t Recv(std::string& msg, uint32_t& prio);
+    virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
-    std::string GetName() const { return mName; }
-    long GetMaxMsg() const { return mMaxMsg; }
+    std::string GetMQName() const { return mDevName; }
+    long GetMQMaxMsg() const { return mMaxMsg; }
 
-    void* EpollEvent(int fd, EpollType eType, void* arg) override;
-
-private:
+protected:
+    std::string GetRandomString(int32_t width);
     void OpenMsgQueue();
 
 private:
-    static bool mUnlimit;
-    std::string mName;
-    long        mMaxMsg;
+    long mMaxMsg;
+    std::string mDevName;
     std::function<void(int, std::string, void*)> mCb;
 };
 

@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprObserverr.h
+ *  @file       : SprObserver.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -21,7 +21,6 @@
 
 #include <memory>
 #include <string>
-#include "SprMsg.h"
 #include "SprSigId.h"
 #include "CoreTypeDefs.h"
 #include "SprMediatorProxy.h"
@@ -36,9 +35,9 @@ public:
      *
      * @param id Module id
      * @param name Module name
-     * @param mMsgMediatorPtr Message passing mediation
+     * @param proxyType mediator proxy type
      */
-    SprObserver(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
+    SprObserver(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
     virtual ~SprObserver();
     SprObserver(const SprObserver&) = delete;
     SprObserver& operator=(SprObserver&) = delete;
@@ -107,10 +106,11 @@ private:
      */
     int DumpCommonVersion();
 
-private:
+protected:
+    InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;
     std::string mModuleName;
-    std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
+    SprMediatorProxy* mMsgMediatorPtr;
 };
 
 #endif

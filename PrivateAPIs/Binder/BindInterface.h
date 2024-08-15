@@ -49,7 +49,9 @@ public:
      *
      * Used to the service register the entry for external processes to call.
      */
-    bool InitializeServiceBinder(const std::string& srvName, std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel);
+    bool InitializeServiceBinder(const std::string& srvName,
+                                 std::shared_ptr<Parcel>& pReqParcel,
+                                 std::shared_ptr<Parcel>& pRspParcel);
 
     /**
      * @brief Initializes a client to communicate with a service via binder.
@@ -61,7 +63,9 @@ public:
      *
      * Used to the client connect to binder of target serivce.
      */
-    bool InitializeClientBinder(const std::string& srvName, std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel);
+    bool InitializeClientBinder(const std::string& srvName,
+                                std::shared_ptr<Parcel>& pReqParcel,
+                                std::shared_ptr<Parcel>& pRspParcel);
 
 private:
     /**

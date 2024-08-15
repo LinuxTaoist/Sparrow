@@ -31,8 +31,10 @@ public:
     void AddPoll(IEpollEvent* p);
     void DelPoll(IEpollEvent* p);
     void EpollLoop(bool bRun);
+    void ExitLoop();
+    virtual void HandleEpollEvent(IEpollEvent& pEvent);
 
-private:
+protected:
     explicit EpollEventHandler(int size = 0, int blockTimeOut = -1);
 
 private:
