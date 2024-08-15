@@ -23,7 +23,7 @@
 #include <string>
 #include <memory>
 #include "PSocket.h"
-#include "SprObserver.h"
+#include "SprObserverWithMQueue.h"
 
 // 一级状态:
 enum EOneNetDrvLev1State
@@ -47,14 +47,14 @@ enum EOneNetDrvLev2State
     LEV2_ONENET_BUTT
 };
 
-class OneNetDriver : public SprObserver
+class OneNetDriver : public SprObserverWithMQueue
 {
 public:
     ~OneNetDriver();
     static OneNetDriver* GetInstance(ModuleIDType id, const std::string& name);
 
-    void Init();
-    int ProcessMsg(const SprMsg& msg) override;
+    int32_t Init();
+    int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
     explicit OneNetDriver(ModuleIDType id, const std::string& name);

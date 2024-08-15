@@ -31,8 +31,9 @@ public:
      *
      * @param id module id
      * @param name module name
+     * @param proxyType message proxy type
      */
-    SprObserverWithMQueue(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType);
+    SprObserverWithMQueue(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
     virtual ~SprObserverWithMQueue();
 
     /**

@@ -23,17 +23,19 @@
 #include "CommonMacros.h"
 #include "OneNetManager.h"
 #include "OneNetDriver.h"
-#include "EpollEventHandler.h"
+#include "SprEpollSchedule.h"
 
 using namespace std;
 using namespace InternalDefs;
 
 #define SPR_LOGI(fmt, args...) LOGI("MainOneNet", fmt, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("MainOneNet", fmt, ##args)
 
 int main(int argc, const char *argv[])
 {
-    OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneNetDriver")->Init();
-    OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneNetManager")->Init();
-    SprObserver::MainLoop();
+    OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneNetDriver")->Initialize();
+    OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneNetManager")->Initialize();
+
+    SprEpollSchedule::GetInstance()->EpollLoop(true);
     return 0;
 }

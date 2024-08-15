@@ -18,12 +18,12 @@
  */
 #include "SprLog.h"
 #include "PMsgQueue.h"
-#include "SprMediatorMQProxy.h"
 #include "SprObserverWithMQueue.h"
 
 using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...)  LOGD("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define SPR_LOGW(fmt, args...)  LOGW("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
 #define SPR_LOGE(fmt, args...)  LOGE("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
 
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
@@ -66,7 +66,6 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
 int SprObserverWithMQueue::MsgRespondSystemExitRsp(const SprMsg& msg)
 {
     SPR_LOGD("System Exit!\n");
-    MainExit();
     return 0;
 }
 
@@ -87,6 +86,11 @@ int SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
 
 void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
 {
+    if (fd != GetEpollFd()) {
+        SPR_LOGW("fd is not match!\n");
+        return nullptr;
+    }
+
     SprMsg msg;
     if (RecvMsg(msg) < 0) {
         SPR_LOGE("RecvMsg failed!\n");

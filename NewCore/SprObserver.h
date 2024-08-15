@@ -37,12 +37,26 @@ public:
      * @param name Module name
      * @param proxyType mediator proxy type
      */
-    SprObserver(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
+    SprObserver(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType);
     virtual ~SprObserver();
     SprObserver(const SprObserver&) = delete;
     SprObserver& operator=(SprObserver&) = delete;
     SprObserver(SprObserver&&) = delete;
     SprObserver& operator=(SprObserver&&) = delete;
+
+    /**
+     * @brief Initialize observer
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t Initialize();
+
+     /**
+     * @brief Initialize function for derived class called in Initialize
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t Init();
 
     /**
      * @brief Get the module id
@@ -65,8 +79,8 @@ public:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int NotifyObserver(SprMsg& msg);
-    virtual int NotifyObserver(ModuleIDType id, SprMsg& msg);
+    virtual int32_t NotifyObserver(SprMsg& msg);
+    virtual int32_t NotifyObserver(ModuleIDType id, SprMsg& msg);
 
     /**
      * @brief  Notify msg to all modules
@@ -74,28 +88,7 @@ public:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int NotifyAllObserver(SprMsg& msg);
-
-    /**
-     * @brief Blocking wait to listen messages.
-     *
-     * @return 0 on success, or -1 if an error occurred
-     *
-     * This function blocks the current thread until a message is received.
-     * It utilizes an epoll loop to wait for incoming messages efficiently.
-     */
-    static int MainLoop();
-
-    /**
-     * @brief Exits from MainLoop and performs necessary cleanup.
-     *
-     * @return 0 on success, or -1 if an error occurred
-     *
-     * This function should be called to gracefully exit the application's
-     * main processing loop. It performs necessary cleanup tasks before
-     * terminating the process.
-     */
-    static int MainExit();
+    virtual int32_t NotifyAllObserver(SprMsg& msg);
 
 private:
     /**
@@ -104,7 +97,7 @@ private:
      *
      * Used for verifying the consistency of definitions across each component.
      */
-    int DumpCommonVersion();
+    int32_t DumpCommonVersion();
 
 protected:
     InternalDefs::EProxyType mProxyType;

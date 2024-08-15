@@ -19,7 +19,6 @@
 #include <algorithm>
 #include "SprLog.h"
 #include "OneNetManager.h"
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -82,7 +81,7 @@ OneNetManager::mStateTable =
 };
 
 OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
-              : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>())
+  : SprObserverWithMQueue(id, name)
 {
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
     mCurLev2State = LEV2_ONENET_MGR_ANY;
@@ -90,7 +89,6 @@ OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
 
 OneNetManager::~OneNetManager()
 {
-
 }
 
 OneNetManager* OneNetManager::GetInstance(ModuleIDType id, const std::string& name)
@@ -99,13 +97,14 @@ OneNetManager* OneNetManager::GetInstance(ModuleIDType id, const std::string& na
     return &instance;
 }
 
-void OneNetManager::Init()
+int32_t OneNetManager::Init()
 {
     SPR_LOGD("OneNetManager Init\n");
 
     // debug
     SprMsg msg(SIG_ID_ONENET_DRV_SOCKET_CONNECT);
     NotifyObserver(MODULE_ONENET_DRIVER, msg);
+    return 0;
 }
 
 void OneNetManager::SetLev1State(EOneNetMgrLev1State state)

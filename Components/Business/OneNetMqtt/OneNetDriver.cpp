@@ -17,11 +17,12 @@
  *
  */
 #include <algorithm>
+#include <errno.h>
+#include <string.h>
 #include <sys/socket.h>
 #include "SprLog.h"
 #include "OneNetDriver.h"
 #include "EpollEventHandler.h"
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -113,7 +114,7 @@ OneNetDriver::mStateTable =
 };
 
 OneNetDriver::OneNetDriver(ModuleIDType id, const std::string& name)
-             : SprObserver(id, name, std::make_shared<SprMediatorIpcProxy>())
+             : SprObserverWithMQueue(id, name)
 {
     mOneNetHost = ONENET_MQTT_HOST;
     mOneNetPort = ONENET_MQTT_PORT;
@@ -131,9 +132,10 @@ OneNetDriver* OneNetDriver::GetInstance(ModuleIDType id, const std::string& name
     return &instance;
 }
 
-void OneNetDriver::Init()
+int32_t OneNetDriver::Init()
 {
     SPR_LOGD("OneNetDriver Init\n");
+    return 0;
 }
 
 void OneNetDriver::SetLev1State(EOneNetDrvLev1State state)
@@ -184,7 +186,13 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         }
     });
 
-    mSocketPtr->AsTcpClient(true, mOneNetHost, mOneNetPort);
+    int32_t rc = mSocketPtr->AsTcpClient(true, mOneNetHost, mOneNetPort);
+    if (rc < 0) {
+        SPR_LOGE("Failed build OneNet client! (%s)\n", strerror(errno));
+        SetLev1State(LEV1_SOCKET_DISCONNECTED);
+        SetLev2State(LEV2_ONENET_DISCONNECTED);
+    }
+
     pEpoll->AddPoll(mSocketPtr.get());
 }
 

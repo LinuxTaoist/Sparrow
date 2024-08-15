@@ -30,19 +30,20 @@ public:
     /**
      * @brief Destrcuct
      */
-    ~SprEpollSchedule();
+    virtual ~SprEpollSchedule();
 
     /**
      * @brief Get single instance
      *
+     * @param[in] size the size of epoll
      * @return Instance of SprEpollSchedule
      */
-    static SprEpollSchedule* GetInstance();
+    static SprEpollSchedule* GetInstance(uint32_t size = 0);
 
     /**
      * @brief Handle epoll event
      *
-     * @param pEvent Instance of epoll event
+     * @param[in] pEvent Instance of epoll event
      */
     virtual void HandleEpollEvent(IEpollEvent& event) override;
 
@@ -52,7 +53,7 @@ private:
      *
      * @param[in] size the size of epoll
      */
-    explicit SprEpollSchedule(uint32_t size);
+    explicit SprEpollSchedule(uint32_t size = 0);
 
 private:
     LibgoAdapter::CoPool mCoPool;

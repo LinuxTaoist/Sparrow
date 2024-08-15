@@ -26,7 +26,7 @@
 class PTimer : public IEpollEvent
 {
 public:
-    PTimer(std::function<void(int, uint64_t, void*)> cb, void *arg = nullptr);
+    PTimer(std::function<void(int, uint64_t, void*)> cb = nullptr, void *arg = nullptr);
     virtual ~PTimer();
 
     int32_t InitTimer();

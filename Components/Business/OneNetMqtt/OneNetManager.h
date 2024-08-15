@@ -20,7 +20,7 @@
 #define __ONENET_MANAGER_H__
 
 #include <string>
-#include "SprObserver.h"
+#include "SprObserverWithMQueue.h"
 
 // 一级状态:
 enum EOneNetMgrLev1State
@@ -40,13 +40,13 @@ enum EOneNetMgrLev2State
     LEV2_ONENET_MGR_BUTT
 };
 
-class OneNetManager : public SprObserver
+class OneNetManager : public SprObserverWithMQueue
 {
 public:
     ~OneNetManager();
     static OneNetManager* GetInstance(ModuleIDType id, const std::string& name);
 
-    void Init();
+    int32_t Init() override;
     int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:

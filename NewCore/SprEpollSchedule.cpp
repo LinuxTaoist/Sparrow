@@ -39,6 +39,12 @@ SprEpollSchedule::~SprEpollSchedule()
 {
 }
 
+SprEpollSchedule* SprEpollSchedule::GetInstance(uint32_t size)
+{
+    static SprEpollSchedule instance(size);
+    return &instance;
+}
+
 void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)
 {
     // 触发回调处理器

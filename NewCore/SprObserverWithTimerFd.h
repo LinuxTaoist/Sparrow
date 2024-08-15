@@ -1,0 +1,57 @@
+/**
+ *---------------------------------------------------------------------------------------------------------------------
+ *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
+ *
+ *  @file       : SprObserverWithTimerFd.h
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
+ *  @date       : 2024/08/15
+ *
+ *
+ *  Change History:
+ *  <Date>     | <Version> | <Author>       | <Description>
+ *---------------------------------------------------------------------------------------------------------------------
+ *  2024/08/15 | 1.0.0.1   | Xiang.D        | Create file
+ *---------------------------------------------------------------------------------------------------------------------
+ *
+ */
+#ifndef __SPR_OBSERVER_TIMER_FD_H__
+#define __SPR_OBSERVER_TIMER_FD_H__
+
+#include "PTimer.h"
+#include "SprObserver.h"
+
+class SprObserverWithTimerFd : public SprObserver, public PTimer
+{
+public:
+    /**
+     * @brief  Construct / Destruct
+     *
+     * @param id module id
+     * @param name module name
+     * @param proxyType message proxy type
+     */
+    SprObserverWithTimerFd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType);
+    virtual ~SprObserverWithTimerFd();
+
+    /**
+     * @brief  Process timer event
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t ProcessTimerEvent() = 0;
+
+    /**
+     * @brief  Process message event called by epoll
+     *
+     * @param fd file descriptor
+     * @param eType event type
+     * @param arg user data
+     *
+     * @return void*
+     */
+    virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
+};
+
+#endif // __SPR_OBSERVER_TIMER_FD_H__
