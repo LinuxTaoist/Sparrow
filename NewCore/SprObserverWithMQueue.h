@@ -74,6 +74,16 @@ protected:
      * Receive message from self or other modules
      */
     int32_t RecvMsg(SprMsg& msg);
+
+    // --------------------------------------------------------------------------------------------
+    // - Message handle functions
+    // --------------------------------------------------------------------------------------------
+    int MsgResponseSystemExitRsp(const SprMsg& msg);
+    int MsgResponseRegisterRsp(const SprMsg& msg);
+    int MsgResponseUnregisterRsp(const SprMsg& msg);
+
+private:
+    bool mConnected;
 };
 
 #endif // __SPR_OBSERVER_WITH_MQUEUE_H__
