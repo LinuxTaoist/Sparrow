@@ -61,8 +61,8 @@ private:
     int ProcessMsg(const SprMsg& msg);
 
     /* 消息响应函数 */
-    int MsgResponseRegister(const SprMsg& msg);
-    int MsgResponseUnregister(const SprMsg& msg);
+    int MsgRespondRegister(const SprMsg& msg);
+    int MsgRespondUnregister(const SprMsg& msg);
 
     /* Binder 线程处理函数 */
     static void BinderLoop(SprMediator* self);

@@ -115,15 +115,15 @@ int SprObserver::AbstractProcessMsg(const SprMsg& msg)
     switch (msg.GetMsgId())
     {
         case InternalDefs::SIG_ID_PROXY_REGISTER_RESPONSE:
-            MsgResponseRegisterRsp(msg);
+            MsgRespondRegisterRsp(msg);
             break;
 
         case InternalDefs::SIG_ID_PROXY_UNREGISTER_RESPONSE:
-            MsgResponseUnregisterRsp(msg);
+            MsgRespondUnregisterRsp(msg);
             break;
 
         case InternalDefs::SIG_ID_SYSTEM_EXIT:
-            MsgResponseSystemExitRsp(msg);
+            MsgRespondSystemExitRsp(msg);
             break;
 
         default:
@@ -251,21 +251,21 @@ int SprObserver::DumpCommonVersion()
     return 0;
 }
 
-int SprObserver::MsgResponseSystemExitRsp(const SprMsg& msg)
+int SprObserver::MsgRespondSystemExitRsp(const SprMsg& msg)
 {
     SPR_LOGD("System Exit!\n");
     MainExit();
     return 0;
 }
 
-int SprObserver::MsgResponseRegisterRsp(const SprMsg& msg)
+int SprObserver::MsgRespondRegisterRsp(const SprMsg& msg)
 {
     SPR_LOGD("Register Successfully!\n");
     mConnected = msg.GetU8Value();
     return 0;
 }
 
-int SprObserver::MsgResponseUnregisterRsp(const SprMsg& msg)
+int SprObserver::MsgRespondUnregisterRsp(const SprMsg& msg)
 {
     // 注销成功，连接状态为false
     SPR_LOGD("Unregister Successfully!\n");

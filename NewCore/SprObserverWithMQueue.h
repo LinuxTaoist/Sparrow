@@ -78,9 +78,9 @@ protected:
     // --------------------------------------------------------------------------------------------
     // - Message handle functions
     // --------------------------------------------------------------------------------------------
-    int MsgResponseSystemExitRsp(const SprMsg& msg);
-    int MsgResponseRegisterRsp(const SprMsg& msg);
-    int MsgResponseUnregisterRsp(const SprMsg& msg);
+    int MsgRespondSystemExitRsp(const SprMsg& msg);
+    int MsgRespondRegisterRsp(const SprMsg& msg);
+    int MsgRespondUnregisterRsp(const SprMsg& msg);
 
 private:
     bool mConnected;

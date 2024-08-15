@@ -63,21 +63,21 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
     return msg.Decode(bytes);
 }
 
-int SprObserverWithMQueue::MsgResponseSystemExitRsp(const SprMsg& msg)
+int SprObserverWithMQueue::MsgRespondSystemExitRsp(const SprMsg& msg)
 {
     SPR_LOGD("System Exit!\n");
     MainExit();
     return 0;
 }
 
-int SprObserverWithMQueue::MsgResponseRegisterRsp(const SprMsg& msg)
+int SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
 {
     SPR_LOGD("Register Successfully!\n");
     mConnected = msg.GetU8Value();
     return 0;
 }
 
-int SprObserverWithMQueue::MsgResponseUnregisterRsp(const SprMsg& msg)
+int SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
 {
     // 注销成功，连接状态为false
     SPR_LOGD("Unregister Successfully!\n");
@@ -97,17 +97,17 @@ void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
     {
         case SIG_ID_PROXY_REGISTER_RESPONSE:
         {
-            MsgResponseRegisterRsp(msg);
+            MsgRespondRegisterRsp(msg);
             break;
         }
         case SIG_ID_PROXY_UNREGISTER_RESPONSE:
         {
-            MsgResponseUnregisterRsp(msg);
+            MsgRespondUnregisterRsp(msg);
             break;
         }
         case SIG_ID_SYSTEM_EXIT:
         {
-            MsgResponseSystemExitRsp(msg);
+            MsgRespondSystemExitRsp(msg);
             break;
         }
         default:

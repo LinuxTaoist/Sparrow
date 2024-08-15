@@ -38,9 +38,9 @@ private:
     BinderManager();
 
     int32_t EnvReady(const std::string& srvName);
-    int32_t MsgResponseAddService();
-    int32_t MsgResponseRemoveService();
-    int32_t MsgResponseGetService();
+    int32_t MsgRespondAddService();
+    int32_t MsgRespondRemoveService();
+    int32_t MsgRespondGetService();
 
 private:
     using HandleFunction = int32_t (BinderManager::*)(void);

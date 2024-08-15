@@ -319,11 +319,11 @@ int SprMediator::ProcessMsg(const SprMsg& msg)
     switch (msg.GetMsgId())
     {
         case SIG_ID_PROXY_REGISTER_REQUEST:
-            MsgResponseRegister(msg);
+            MsgRespondRegister(msg);
             break;
 
         case SIG_ID_PROXY_UNREGISTER_REQUEST:
-            MsgResponseUnregister(msg);
+            MsgRespondUnregister(msg);
             break;
 
         default:
@@ -388,7 +388,7 @@ int SprMediator::NotifyAllObserver(const SprMsg& msg)
     return 0;
 }
 
-int SprMediator::MsgResponseRegister(const SprMsg& msg)
+int SprMediator::MsgRespondRegister(const SprMsg& msg)
 {
     bool result = false;
     bool monitored = msg.GetBoolValue();
@@ -426,7 +426,7 @@ int SprMediator::MsgResponseRegister(const SprMsg& msg)
     return 0;
 }
 
-int SprMediator::MsgResponseUnregister(const SprMsg& msg)
+int SprMediator::MsgRespondUnregister(const SprMsg& msg)
 {
     ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
 
