@@ -103,7 +103,8 @@ int32_t OneNetManager::Init()
 
     // debug
     SprMsg msg(SIG_ID_ONENET_DRV_SOCKET_CONNECT);
-    NotifyObserver(MODULE_ONENET_DRIVER, msg);
+    int ret = NotifyObserver(MODULE_ONENET_DRIVER, msg);
+    SPR_LOGD("NotifyObserver ret %d\n", ret);
     return 0;
 }
 

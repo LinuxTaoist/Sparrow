@@ -30,10 +30,12 @@ PTimer::PTimer(std::function<void(int, uint64_t, void*)> cb, void *arg)
     : IEpollEvent(-1, EPOLL_TYPE_TIMERFD, arg), mCb(cb)
 {
     mTimerRun = false;
+    InitTimer();
 }
 
 PTimer::~PTimer()
 {
+    DestoryTimer();
 }
 
 int32_t PTimer::InitTimer()
@@ -46,7 +48,7 @@ int32_t PTimer::InitTimer()
 
     return mEpollFd;
 }
-int32_t PTimer::StartTimer(uint32_t intervalInMilliSec)
+int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
 {
     if (mTimerRun) {
         SPR_LOGW("System timer is running!\n");
@@ -54,17 +56,17 @@ int32_t PTimer::StartTimer(uint32_t intervalInMilliSec)
     }
 
     struct itimerspec its;
-    its.it_value.tv_sec = intervalInMilliSec / 1000;
-    its.it_value.tv_nsec = (intervalInMilliSec % 1000) * 1000000;
-    its.it_interval.tv_sec = 0;
-    its.it_interval.tv_nsec = 0;
+    its.it_value.tv_sec = delayInMSec / 1000;
+    its.it_value.tv_nsec = (delayInMSec % 1000) * 1000000;
+    its.it_interval.tv_sec = intervalInMSec;
+    its.it_interval.tv_nsec = intervalInMSec;
     if (timerfd_settime(mEpollFd, 0, &its, nullptr) == -1) {
         SPR_LOGE("timerfd_settime fail! (%s)\n", strerror(errno));
         return -1;
     }
 
     mTimerRun = true;
-    SPR_LOGD("Start system timer (%d)!\n", intervalInMilliSec);
+    SPR_LOGD("Start system timer (%d)!\n", intervalInMSec);
     return 0;
 }
 

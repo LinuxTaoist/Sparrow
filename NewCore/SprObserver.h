@@ -51,8 +51,15 @@ public:
      */
     int32_t Initialize();
 
+    /**
+     * @brief Initialize framework used by framework module
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t InitFramework();
+
      /**
-     * @brief Initialize function for derived class called in Initialize
+     * @brief Initialize business used by business module
      *
      * @return 0 on success, or -1 if an error occurred
      */
@@ -90,7 +97,7 @@ public:
      */
     virtual int32_t NotifyAllObserver(SprMsg& msg);
 
-private:
+protected:
     /**
      * @brief Dump common versions for current module
      * @return 0

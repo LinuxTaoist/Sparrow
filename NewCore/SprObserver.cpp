@@ -39,7 +39,6 @@ SprObserver::SprObserver(ModuleIDType id, const string& name, EProxyType proxyTy
 
 SprObserver::~SprObserver()
 {
-    mMsgMediatorPtr->UnregisterObserver(*this);
     SPR_LOGD("Exit Module: %s\n", mModuleName.c_str());
 }
 
@@ -53,7 +52,14 @@ int32_t SprObserver::Initialize()
     }
 
     DumpCommonVersion();
-    return mMsgMediatorPtr->RegisterObserver(*this);
+    InitFramework();     // Init framework module
+    Init();              // Init business module
+    return 0;
+}
+
+int32_t SprObserver::InitFramework()
+{
+    return 0;
 }
 
 int32_t SprObserver::Init()
@@ -64,16 +70,14 @@ int32_t SprObserver::Init()
 int32_t SprObserver::NotifyObserver(SprMsg& msg)
 {
     msg.SetFrom(mModuleID);
-    mMsgMediatorPtr->NotifyObserver(msg);
-    return 0;
+    return mMsgMediatorPtr->NotifyObserver(msg);
 }
 
 int32_t SprObserver::NotifyObserver(ModuleIDType id, SprMsg& msg)
 {
     msg.SetFrom(mModuleID);
     msg.SetTo(id);
-    mMsgMediatorPtr->NotifyObserver(msg);
-    return 0;
+    return mMsgMediatorPtr->NotifyObserver(msg);
 }
 
 int32_t SprObserver::NotifyAllObserver(SprMsg& msg)
@@ -82,8 +86,7 @@ int32_t SprObserver::NotifyAllObserver(SprMsg& msg)
     // to MODULE_NONE, refer to SprMediator::NotifyAllObserver.
     msg.SetFrom(mModuleID);
     msg.SetTo(MODULE_NONE);
-    mMsgMediatorPtr->NotifyAllObserver(msg);
-    return 0;
+    return mMsgMediatorPtr->NotifyAllObserver(msg);
 }
 
 int32_t SprObserver::DumpCommonVersion()

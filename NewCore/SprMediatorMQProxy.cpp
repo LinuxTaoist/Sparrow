@@ -68,31 +68,6 @@ int SprMediatorMQProxy::ConnectMediator()
     return 0;
 }
 
-int SprMediatorMQProxy::RegisterObserver(const SprObserver& observer)
-{
-    SprMsg msg(observer.GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_REGISTER_REQUEST);
-    msg.SetBoolValue(true);
-    // msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
-    msg.SetU16Value((uint16_t)observer.GetModuleId());
-    // msg.SetString(observer.GetMqDevName());
-
-    SendMsg(msg);
-    SPR_LOGD("Register observer: [0x%x]\n", observer.GetModuleId());
-    return 0;
-}
-
-int SprMediatorMQProxy::UnregisterObserver(const SprObserver& observer)
-{
-    SprMsg msg(observer.GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_UNREGISTER_REQUEST);
-    // msg.SetU32Value((uint32_t)PROXY_TYPE_MQ);
-    msg.SetU16Value((uint16_t)observer.GetModuleId());
-    // msg.SetString(observer.GetMqDevName());
-
-    SendMsg(msg);
-    SPR_LOGD("Unregister observer: [0x%x]\n", observer.GetModuleId());
-    return 0;
-}
-
 int SprMediatorMQProxy::SendMsg(const SprMsg& msg)
 {
     std::string datas;

@@ -52,6 +52,13 @@ set_target_properties       (sample_tcp_client PROPERTIES OUTPUT_NAME "sample_tc
 target_link_libraries       (sample_tcp_client c epollevent pthread)
 add_dependencies            (sample_tcp_client LibEpollEvent)
 
+## Bin sampleMQueue
+set(SRC_BIN_STCMQUEUE       SampleMQueue.cc)
+add_executable              (sample_mqueue ${SRC_BIN_STCMQUEUE})
+set_target_properties       (sample_mqueue PROPERTIES OUTPUT_NAME "sample_mqueue")
+target_link_libraries       (sample_mqueue c epollevent pthread)
+add_dependencies            (sample_mqueue LibEpollEvent)
+
 ## Bin property_get
 set(SRC_BIN_PROPERTY_GET     GetProperty.cc)
 add_executable              (property_get ${SRC_BIN_PROPERTY_GET})

@@ -135,7 +135,7 @@ static int FormatLog(std::string& log, const char* level, const char* tag, const
 
     oss << timestamp;
     oss << " " << std::right << std::setw(PID_PRINT_WIDTH_LIMIT) << pid;
-    oss << " " << std::right << std::setw(TAG_PRINT_WIDTH_LIMIT) << tag;
+    oss << " " << std::left << std::setw(TAG_PRINT_WIDTH_LIMIT) << tag;
     oss << " " << level;
     oss << ": " << buffer;
 

@@ -33,6 +33,32 @@ SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string&
 
 SprObserverWithMQueue::~SprObserverWithMQueue()
 {
+    UnRegisterFromMediator();
+}
+
+int32_t SprObserverWithMQueue::InitFramework()
+{
+    SPR_LOGD("Initlize MQueue framework!\n");
+    return RegisterFromMediator();
+}
+
+int32_t SprObserverWithMQueue::RegisterFromMediator()
+{
+    SprMsg msg(GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_REGISTER_REQUEST);
+    msg.SetBoolValue(true);
+    msg.SetU32Value((uint32_t)MEDIATOR_PROXY_MQUEUE);
+    msg.SetU16Value((uint16_t)GetModuleId());
+    msg.SetString(GetMQDevName());
+    return NotifyObserver(msg);
+}
+
+int32_t SprObserverWithMQueue::UnRegisterFromMediator()
+{
+    SprMsg msg(GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_UNREGISTER_REQUEST);
+    msg.SetU32Value((uint32_t)MEDIATOR_PROXY_MQUEUE);
+    msg.SetU16Value((uint16_t)GetModuleId());
+    msg.SetString(GetMQDevName());
+    return NotifyObserver(msg);
 }
 
 int32_t SprObserverWithMQueue::SendMsg(SprMsg& msg)
@@ -71,16 +97,17 @@ int SprObserverWithMQueue::MsgRespondSystemExitRsp(const SprMsg& msg)
 
 int SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
 {
-    SPR_LOGD("Register Successfully!\n");
+    // 注册成功，连接状态为true
     mConnected = msg.GetU8Value();
+    SPR_LOGD("Register Successfully! mConnected = %d\n", mConnected);
     return 0;
 }
 
 int SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
 {
-    // 注销成功，连接状态为false
-    SPR_LOGD("Unregister Successfully!\n");
+
     mConnected = !msg.GetU8Value();
+    SPR_LOGD("Unregister Successfully! mConnected = %d\n", mConnected);
     return 0;
 }
 

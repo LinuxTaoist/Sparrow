@@ -37,7 +37,7 @@ public:
     virtual int32_t Recv(std::string& msg, uint32_t& prio);
     virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
-    std::string GetMQName() const { return mDevName; }
+    std::string GetMQDevName() const { return mDevName; }
     long GetMQMaxMsg() const { return mMaxMsg; }
 
 protected:

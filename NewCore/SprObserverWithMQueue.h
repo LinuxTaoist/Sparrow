@@ -37,6 +37,13 @@ public:
     virtual ~SprObserverWithMQueue();
 
     /**
+     * @brief Initialize function for derived class called in Initialize
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t InitFramework() override;
+
+    /**
      * @brief  Process message from message queue received
      *
      * @param msg
@@ -56,6 +63,20 @@ public:
     virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 protected:
+    /**
+     * @brief Register self infomation from mediator module
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t RegisterFromMediator();
+
+    /**
+     * @brief Unregister self infomation from mediator module
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t UnRegisterFromMediator();
+
     /**
      * @brief SendMsg
      *

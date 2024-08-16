@@ -44,22 +44,6 @@ public:
     int ConnectMediator() override;
 
     /**
-     * @brief Register observer to SprMediator
-     *
-     * @param observer
-     * @return 0 on success, or -1 if an error occurred
-     */
-    int RegisterObserver(const SprObserver& observer) override;
-
-    /**
-     * @brief Unregister observer to SprMediator
-     *
-     * @param observer
-     * @return 0 on success, or -1 if an error occurred
-     */
-    int UnregisterObserver(const SprObserver& observer) override;
-
-    /**
      * @brief send message to other module
      *
      * @param msg

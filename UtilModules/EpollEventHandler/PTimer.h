@@ -30,7 +30,7 @@ public:
     virtual ~PTimer();
 
     int32_t InitTimer();
-    int32_t StartTimer(uint32_t intervalInMilliSec);
+    int32_t StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec = 0);
     int32_t StopTimer();
     int32_t DestoryTimer();
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
