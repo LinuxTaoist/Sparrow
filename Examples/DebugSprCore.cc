@@ -177,7 +177,7 @@ int main(int argc, const char *argv[])
                 case '8':
                 {
                     SprMsg msg( MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
-                    theDebug.NotifyAllObserver(msg);
+                    theDebug.NotifyObserver(msg);
                     break;
                 }
 

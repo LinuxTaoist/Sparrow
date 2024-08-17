@@ -78,7 +78,19 @@ private:
      */
     int InitSystemTimer();
 
+    /**
+     * @brief  Process message from message queue received
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
     int ProcessMsg(const SprMsg& msg) override;
+
+    /**
+     * @brief  Dump current time
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
     int PrintRealTime();
 
     // --------------------------------------------------------------------------------------------

@@ -79,6 +79,11 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
 
 void EpollEventHandler::DelPoll(IEpollEvent* p)
 {
+    if (p == nullptr) {
+        SPR_LOGE("p is null\n");
+        return ;
+    }
+
     int ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEpollFd(), nullptr);
     if (ret != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));

@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprObserverWithTimerFd.cpp
+ *  @file       : SprObserverWithSocket.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,40 +16,32 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <iomanip>
+#include <sstream>
 #include "SprLog.h"
 #include "SprEpollSchedule.h"
-#include "SprObserverWithTimerFd.h"
+#include "SprObserverWithSocket.h"
 
-#define SPR_LOGD(fmt, args...)  LOGD("SprObsTmrFd", "[%s] " fmt, ##args)
-#define SPR_LOGW(fmt, args...)  LOGW("SprObsTmrFd", "[%s] " fmt, ##args)
-#define SPR_LOGE(fmt, args...)  LOGE("SprObsTmrFd", "[%s] " fmt, ##args)
+#define SPR_LOGD(fmt, args...)  LOGD("SprObsSocket", "[%s] " fmt, ##args)
+#define SPR_LOGW(fmt, args...)  LOGW("SprObsSocket", "[%s] " fmt, ##args)
+#define SPR_LOGE(fmt, args...)  LOGE("SprObsSocket", "[%s] " fmt, ##args)
 
-SprObserverWithTimerFd::SprObserverWithTimerFd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType)
-    : SprObserver(id, name, proxyType)
+SprObserverWithSocket::SprObserverWithSocket(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType,
+    int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg)
+    : SprObserver(id, name, proxyType), PSocket(domain, type, protocol, cb, arg)
 {
 }
 
-SprObserverWithTimerFd::~SprObserverWithTimerFd()
+SprObserverWithSocket::~SprObserverWithSocket()
 {
-    SPR_LOGD("DelPoll timerfd observer! fd = %d\n", GetEpollFd());
+    SPR_LOGD("DelPoll socket observer! fd = %d\n", GetEpollFd());
     SprEpollSchedule::GetInstance()->DelPoll(this);
 }
 
-int32_t SprObserverWithTimerFd::InitFramework()
+int32_t SprObserverWithSocket::InitFramework()
 {
-    SPR_LOGD("AddPoll timerfd observer! fd = %d\n", GetEpollFd());
+    // SPR_LOGD("AddPoll socket observer! fd = %d\n", GetEpollFd());
     SprEpollSchedule::GetInstance()->AddPoll(this);
     return 0;
 }
-
-void* SprObserverWithTimerFd::EpollEvent(int fd, EpollType eType, void* arg)
-{
-    if (fd != GetEpollFd()) {
-        return nullptr;
-    }
-
-    ProcessTimerEvent();
-    return nullptr;
-}
-
-

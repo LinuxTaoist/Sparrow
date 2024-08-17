@@ -38,7 +38,7 @@ public:
      * @param[in] size the size of epoll
      * @return Instance of SprEpollSchedule
      */
-    static SprEpollSchedule* GetInstance(uint32_t size = 0);
+    static SprEpollSchedule* GetInstance(uint32_t size = 0, bool enableCoroutine = true);
 
     /**
      * @brief Handle epoll event
@@ -53,9 +53,10 @@ private:
      *
      * @param[in] size the size of epoll
      */
-    explicit SprEpollSchedule(uint32_t size = 0);
+    explicit SprEpollSchedule(uint32_t size = 0, bool enableCoroutine = true);
 
 private:
+    bool mEnableCoroutine;
     LibgoAdapter::CoPool mCoPool;
 };
 

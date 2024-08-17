@@ -31,34 +31,41 @@
 
 const uint32_t EPOLL_FD_NUM = 10;
 
-SprEpollSchedule::SprEpollSchedule(uint32_t size) : EpollEventHandler(size)
+SprEpollSchedule::SprEpollSchedule(uint32_t size, bool enableCoroutine) : EpollEventHandler(size), mEnableCoroutine(enableCoroutine)
 {
-    mCoPool.InitCoroutinePool(1024);
-    mCoPool.Start(10, 128);
+    if (enableCoroutine) {
+        mCoPool.InitCoroutinePool(1024);
+        mCoPool.Start(10, 128);
+    }
+
+    SPR_LOGD("%s coroutine schedule!\n", enableCoroutine ? "Enable" : "Disable");
 }
 
 SprEpollSchedule::~SprEpollSchedule()
 {
 }
 
-SprEpollSchedule* SprEpollSchedule::GetInstance(uint32_t size)
+SprEpollSchedule* SprEpollSchedule::GetInstance(uint32_t size, bool enableCoroutine)
 {
-    static SprEpollSchedule instance(size);
+    // dx_debug
+    // static SprEpollSchedule instance(size, enableCoroutine);
+    static SprEpollSchedule instance(size, false);
     return &instance;
 }
 
 void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)
 {
-    // 触发回调处理器
-    // using GoPoolCb = co::AsyncCoroutinePool::CallbackPoint;
-    // std::shared_ptr<GoPoolCb> cbp(new GoPoolCb);
-    // mCoPool.AddCallbackPoint(cbp.get());
+    if (mEnableCoroutine) {
+        // 触发回调处理器
+        // using GoPoolCb = co::AsyncCoroutinePool::CallbackPoint;
+        // std::shared_ptr<GoPoolCb> cbp(new GoPoolCb);
+        // mCoPool.AddCallbackPoint(cbp.get());
 
-    // 投递任务至协程，没有回调
-    SPR_LOGD("dx_debug: Post Task --- \n");
-    mCoPool.Post([&] {
-        SPR_LOGD("dx_debug: Post \n");
+        // 投递任务至协程，没有回调
+        mCoPool.Post([&] {
+            EpollEventHandler::HandleEpollEvent(event);
+        }, nullptr);
+    } else {
         EpollEventHandler::HandleEpollEvent(event);
-    }, nullptr);
-
+    }
 }

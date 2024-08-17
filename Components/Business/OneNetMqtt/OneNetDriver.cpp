@@ -16,13 +16,15 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include <errno.h>
 #include <string.h>
 #include <sys/socket.h>
 #include "SprLog.h"
 #include "OneNetDriver.h"
-#include "EpollEventHandler.h"
+#include "SprEpollSchedule.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -32,8 +34,11 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("OneNetDrv", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetDrv", fmt, ##args)
 
-const std::string ONENET_MQTT_HOST  = "183.230.40.39";
+const std::string ONENET_MQTT_HOST  = "192.168.0.104";
 const int ONENET_MQTT_PORT          = 1883;
+
+// const std::string ONENET_MQTT_HOST  = "183.230.40.96";
+// const int ONENET_MQTT_PORT          = 1883;
 
 vector <StateTransition <   EOneNetDrvLev1State,
                             EOneNetDrvLev2State,
@@ -138,8 +143,22 @@ int32_t OneNetDriver::Init()
 
 void OneNetDriver::SetLev1State(EOneNetDrvLev1State state)
 {
-    SPR_LOGD("Lev1 state changed: %d -> %d\n", mCurLev1State, state);
+    SPR_LOGD("Lev1 state changed: %s -> %s\n", GetLev1StateString(mCurLev1State), GetLev1StateString(state));
     mCurLev1State = state;
+}
+
+const char* OneNetDriver::GetLev1StateString(EOneNetDrvLev1State state)
+{
+    #ifdef ENUM_OR_STRING
+    #undef ENUM_OR_STRING
+    #endif
+    #define ENUM_OR_STRING(x) #x
+
+    static std::vector<std::string> Lev1Strings = {
+        ONENET_DRV_LEV1_MACROS
+    };
+
+    return (Lev1Strings.size() > state) ? Lev1Strings[state].c_str() : "UNDEFINED";
 }
 
 EOneNetDrvLev1State OneNetDriver::GetLev1State()
@@ -153,38 +172,105 @@ void OneNetDriver::SetLev2State(EOneNetDrvLev2State state)
     mCurLev2State = state;
 }
 
+const char* OneNetDriver::GetLev2StateString(EOneNetDrvLev2State state)
+{
+    #ifdef ENUM_OR_STRING
+    #undef ENUM_OR_STRING
+    #endif
+    #define ENUM_OR_STRING(x) #x
+
+    static std::vector<std::string> Lev2Strings = {
+        ONENET_DRV_LEV2_MACROS
+    };
+
+    return (Lev2Strings.size() > state) ? Lev2Strings[state].c_str() : "UNDEFINED";
+}
+
 EOneNetDrvLev2State OneNetDriver::GetLev2State()
 {
     return mCurLev2State;
 }
 
+int32_t OneNetDriver::DumpSocketBytes(const std::string& bytes)
+{
+    const int32_t BYTES_PER_LINE = 16; // Number of bytes per line in the dump.
+    int32_t length = bytes.length();
+
+    for (int32_t i = 0; i < length; i += BYTES_PER_LINE) {
+        std::stringstream posBytes, hexBytes, ascallBytes;
+        int32_t startByte = i;
+        int32_t endByte = std::min(startByte + BYTES_PER_LINE, length);
+
+        // address bytes
+        posBytes << std::hex << std::setw(8) << std::setfill('0') << startByte << "  ";
+
+        ascallBytes << " |";
+        hexBytes << std::hex << std::setfill('0');
+        for (int32_t j = 0; j < BYTES_PER_LINE; ++j) {
+            if (startByte + j < endByte) {
+                hexBytes << std::setw(2) << static_cast<int>(bytes[startByte + j]) << " ";
+                ascallBytes << static_cast<char>(bytes[startByte + j]);
+            } else {
+                hexBytes << "   ";
+            }
+        }
+        ascallBytes << "|";
+
+        SPR_LOGD("%s%s%s\n", posBytes.str().c_str(), hexBytes.str().c_str(), ascallBytes.str().c_str());
+    }
+
+    return 0;
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_SOCKET_CONNECT
+ *
+ * @param[in] msg
+ * @return none
+ */
 void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
 {
-    auto pEpoll = EpollEventHandler::GetInstance();
-    mSocketPtr = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int sock, void *arg) {
-        PSocket* pClient = (PSocket*)arg;
-        if (pClient == nullptr) {
+    SetLev1State(LEV1_SOCKET_CONNECTING);
+
+    if (!mOneSocketPtr) {
+        delete mOneSocketPtr;
+        mOneSocketPtr = nullptr;
+    }
+
+    mOneSocketPtr = new (std::nothrow) SprObserverWithSocket(
+        MODULE_ONENET_SOCKET, "OneSock", MEDIATOR_PROXY_MQUEUE,
+        AF_INET, SOCK_STREAM, 0,[&](int sock, void *arg)
+    {
+
+        PSocket* pSocket = reinterpret_cast<PSocket*>(arg);
+        if (pSocket == nullptr) {
             SPR_LOGE("PSocket is nullptr\n");
             return;
         }
 
         std::string rBuf;
-        int rc = pClient->Read(sock, rBuf);
+        int rc = pSocket->Read(sock, rBuf);
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
+            DumpSocketBytes(rBuf);
 
             std::lock_guard<std::mutex> lock(mSockMutex);
             mSockBuffer += rBuf;
         } else {
-            pEpoll->DelPoll(pClient);
             SPR_LOGD("## CLOSE [%d]\n", sock);
 
             std::lock_guard<std::mutex> lock(mSockMutex);
-            pClient->Close();
+            pSocket->Close();
+
+            // Send to self socket disconnect passive
+            SprMsg tmpMsg(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_PASSIVE);
+            SendMsg(tmpMsg);
         }
     });
 
-    int32_t rc = mSocketPtr->AsTcpClient(true, mOneNetHost, mOneNetPort);
+    mOneSocketPtr->InitFramework();
+
+    int32_t rc = mOneSocketPtr->AsTcpClient(true, mOneNetHost, mOneNetPort);
     if (rc < 0) {
         SPR_LOGE("Failed build OneNet client! (%s)\n", strerror(errno));
         SetLev1State(LEV1_SOCKET_DISCONNECTED);
@@ -192,8 +278,9 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         return;
     }
 
+    SetLev1State(LEV1_SOCKET_CONNECTED);
+    SetLev2State(LEV2_ONENET_DISCONNECTED);
     SPR_LOGI("Connect host (%s:%d) successfully!\n", mOneNetHost.c_str(), mOneNetPort);
-    pEpoll->AddPoll(mSocketPtr.get());
 }
 
 /**
@@ -204,8 +291,8 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
  */
 void OneNetDriver::MsgRespondSocketDisconnectActive(const SprMsg& msg)
 {
-    SPR_LOGD("Recv msg id (%s), lev1: %d, lev2: %d\n", GetSigName(msg.GetMsgId()), mCurLev1State, mCurLev2State);
-    mSocketPtr = nullptr;  // Smart pointer, self-destruct and close socket
+    // close socket on client side
+    mOneSocketPtr->Close();  // Smart pointer, self-destruct and close socket
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
 }
@@ -218,7 +305,8 @@ void OneNetDriver::MsgRespondSocketDisconnectActive(const SprMsg& msg)
  */
 void OneNetDriver::MsgRespondSocketDisconnectPassive(const SprMsg& msg)
 {
-    mSocketPtr = nullptr;   // Smart pointer, self-destruct and close socket
+    // close socket on client side
+    mOneSocketPtr->Close();
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
 
@@ -229,19 +317,20 @@ void OneNetDriver::MsgRespondSocketDisconnectPassive(const SprMsg& msg)
 
 void OneNetDriver::MsgRespondUnexpectedState(const SprMsg& msg)
 {
-    SPR_LOGW("Unexpected state: msg = %s on %d %d\n",
-                GetSigName(msg.GetMsgId()), mCurLev1State, mCurLev2State);
+    SPR_LOGW("Unexpected state: msg = %s on %s : %s\n",
+                GetSigName(msg.GetMsgId()), GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 }
 
 void OneNetDriver::MsgRespondUnexpectedMsg(const SprMsg& msg)
 {
-    SPR_LOGW("Unexpected msg: msg = %s on %d %d\n",
-                GetSigName(msg.GetMsgId()), mCurLev1State, mCurLev2State);
+    SPR_LOGW("Unexpected msg: msg = %s on %s : %s\n",
+                GetSigName(msg.GetMsgId()), GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 }
 
 int32_t OneNetDriver::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Recv msg: %s on Lev1 %d Lev2 %d\n", GetSigName(msg.GetMsgId()), mCurLev1State, mCurLev2State);
+    SPR_LOGD("Recv msg: %s on <%s:%s>\n", GetSigName(msg.GetMsgId()),
+        GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
         [this, &msg](const StateTransitionType& entry) {
@@ -256,5 +345,3 @@ int32_t OneNetDriver::ProcessMsg(const SprMsg& msg)
 
     return 0;
 }
-
-

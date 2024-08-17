@@ -22,22 +22,33 @@
 #include <string>
 #include "SprObserverWithMQueue.h"
 
+#ifdef ENUM_OR_STRING
+#undef ENUM_OR_STRING
+#endif
+#define ENUM_OR_STRING(x) x
+
 // 一级状态:
+#define ONENET_MGR_LEV1_MACROS                      \
+    ENUM_OR_STRING(LEV1_ONENET_MGR_ANY),            \
+    ENUM_OR_STRING(LEV1_ONENET_MGR_IDLE),           \
+    ENUM_OR_STRING(LEV1_ONENET_MGR_CONNECTING),     \
+    ENUM_OR_STRING(LEV1_ONENET_MGR_CONNECTED),      \
+    ENUM_OR_STRING(LEV1_ONENET_MGR_DISCONNECTED),   \
+    ENUM_OR_STRING(LEV1_ONENET_MGR_BUTT),
+
 enum EOneNetMgrLev1State
 {
-    LEV1_ONENET_MGR_ANY         = 0x00,
-    LEV1_ONENET_MGR_IDLE,
-    LEV1_ONENET_MGR_CONNECTING,
-    LEV1_ONENET_MGR_CONNECTED,
-    LEV1_ONENET_MGR_DISCONNECTED,
-    LEV1_ONENET_MGR_BUTT
+    ONENET_MGR_LEV1_MACROS
 };
 
 //二级状态:
+#define ONENET_MGR_LEV2_MACROS                      \
+    ENUM_OR_STRING(LEV2_ONENET_MGR_ANY),            \
+    ENUM_OR_STRING(LEV2_ONENET_MGR_BUTT)
+
 enum EOneNetMgrLev2State
 {
-    LEV2_ONENET_MGR_ANY         = 0x00,
-    LEV2_ONENET_MGR_BUTT
+    ONENET_MGR_LEV2_MACROS
 };
 
 class OneNetManager : public SprObserverWithMQueue
@@ -46,19 +57,22 @@ public:
     ~OneNetManager();
     static OneNetManager* GetInstance(ModuleIDType id, const std::string& name);
 
-    int32_t Init() override;
     int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
     explicit OneNetManager(ModuleIDType id, const std::string& name);
 
+    int32_t Init() override;
+
     /* 更新一级状态 */
     void SetLev1State(EOneNetMgrLev1State state);
     EOneNetMgrLev1State GetLev1State();
+    const char* GetLev1StateString(EOneNetMgrLev1State state);
 
     /* 更新二级状态 */
     void SetLev2State(EOneNetMgrLev2State state);
     EOneNetMgrLev2State GetLev2State();
+    const char* GetLev2StateString(EOneNetMgrLev2State state);
 
     /* 消息响应函数 */
     void MsgRespondMqttConnect(const SprMsg& msg);

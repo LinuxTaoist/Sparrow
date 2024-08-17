@@ -59,7 +59,7 @@ private:
      /* 更新一级状态 */
     void SetLev1State(EPowerLev1State state);
     EPowerLev1State GetLev1State() { return mCurLev1State; }
-    std::string GetLev1String(EPowerLev1State lev1);
+    std::string GetLev1String(EPowerLev1State state);
 
     /* 更新二级状态 */
     void SetLev2State(EPowerLev2State state) { mCurLev2State = state; }

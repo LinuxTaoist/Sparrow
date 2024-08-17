@@ -102,7 +102,7 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-std::string PowerManager::GetLev1String(EPowerLev1State lev1)
+std::string PowerManager::GetLev1String(EPowerLev1State state)
 {
     #ifdef ENUM_OR_STRING
     #undef ENUM_OR_STRING
@@ -113,7 +113,7 @@ std::string PowerManager::GetLev1String(EPowerLev1State lev1)
         POWER_LEV1_MACROS
     };
 
-    return (Lev1Strings.size() > lev1) ? Lev1Strings[lev1] : "UNDEFINED";
+    return (Lev1Strings.size() > state) ? Lev1Strings[state] : "UNDEFINED";
 }
 
 void PowerManager::SetLev1State(EPowerLev1State state)

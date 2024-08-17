@@ -35,7 +35,7 @@ vector <StateTransition <   EOneNetMgrLev1State,
 OneNetManager::mStateTable =
 {
     // =============================================================
-    // All States for SIG_ID_ONENET_DRV_SOCKET_CONNECT
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
       SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK,
@@ -106,7 +106,7 @@ int32_t OneNetManager::Init()
 void OneNetManager::SetLev1State(EOneNetMgrLev1State state)
 {
     mCurLev1State = state;
-    SPR_LOGD("Lev2 state changed: %d -> %d\n", mCurLev1State, state);
+    SPR_LOGD("Lev1 state changed: %s -> %s\n", GetLev1StateString(mCurLev1State), GetLev1StateString(state));
 }
 
 EOneNetMgrLev1State OneNetManager::GetLev1State()
@@ -114,15 +114,43 @@ EOneNetMgrLev1State OneNetManager::GetLev1State()
     return mCurLev1State;
 }
 
+const char* OneNetManager::GetLev1StateString(EOneNetMgrLev1State state)
+{
+    #ifdef ENUM_OR_STRING
+    #undef ENUM_OR_STRING
+    #endif
+    #define ENUM_OR_STRING(x) #x
+
+    static std::vector<std::string> Lev2Strings = {
+        ONENET_MGR_LEV1_MACROS
+    };
+
+    return (Lev2Strings.size() > state) ? Lev2Strings[state].c_str() : "UNDEFINED";
+}
+
 void OneNetManager::SetLev2State(EOneNetMgrLev2State state)
 {
     mCurLev2State = state;
-    SPR_LOGD("Lev2 state changed: %d -> %d\n", mCurLev2State, state);
+    SPR_LOGD("Lev2 state changed: %s -> %s\n", GetLev2StateString(mCurLev2State), GetLev2StateString(state));
 }
 
 EOneNetMgrLev2State OneNetManager::GetLev2State()
 {
     return mCurLev2State;
+}
+
+const char* OneNetManager::GetLev2StateString(EOneNetMgrLev2State state)
+{
+    #ifdef ENUM_OR_STRING
+    #undef ENUM_OR_STRING
+    #endif
+    #define ENUM_OR_STRING(x) #x
+
+    static std::vector<std::string> Lev2Strings = {
+        ONENET_MGR_LEV2_MACROS
+    };
+
+    return (Lev2Strings.size() > state) ? Lev2Strings[state].c_str() : "UNDEFINED";
 }
 
 /**
@@ -138,7 +166,6 @@ void OneNetManager::MsgRespondMqttConnect(const SprMsg& msg)
 
 void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 {
-    SPR_LOGD("Lev1 state changed: %d -> %d\n", mCurLev1State, LEV1_ONENET_MGR_CONNECTED);
     SetLev1State(LEV1_ONENET_MGR_CONNECTED);
 }
 
@@ -150,7 +177,6 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondMqttDisconnect(const SprMsg& msg)
 {
-    SPR_LOGD("Lev1 state changed: %d -> %d\n", mCurLev1State, LEV1_ONENET_MGR_DISCONNECTED);
     SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
 }
 
@@ -162,7 +188,8 @@ void OneNetManager::MsgRespondMqttDisconnect(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondUnexpectedState(const SprMsg& msg)
 {
-
+    SPR_LOGW("Unexpected msg: msg = %s on <%s : %s>\n",
+        GetSigName(msg.GetMsgId()), GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 }
 
 /**
@@ -173,12 +200,14 @@ void OneNetManager::MsgRespondUnexpectedState(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
 {
-
+    SPR_LOGW("Unexpected state: msg = %s on <%s : %s>\n",
+        GetSigName(msg.GetMsgId()), GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 }
 
 int32_t OneNetManager::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Recv msg: %s on Lev1 %d Lev2 %d\n", GetSigName(msg.GetMsgId()), mCurLev1State, mCurLev2State);
+    SPR_LOGD("Recv msg: %s on <%s : %s>\n", GetSigName(msg.GetMsgId()),
+              GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
         [this, &msg](const StateTransitionType& entry) {

@@ -55,7 +55,7 @@ int main(int argc, const char *argv[])
         }
     });
 
-    tcpClient->AsTcpClient(true, "127.0.0.1", 8080);
+    tcpClient->AsTcpClient(true, "192.168.0.104", 1883);
     pEpoll->AddPoll(tcpClient.get());
 
     std::thread wThread([&]{

@@ -122,6 +122,14 @@ std::string VectorToString(const std::vector<T>& vec)
     return str;
 }
 
+/**
+ * @brief Dump socket bytes for debug
+ *
+ * @param bytes socket bytes
+ * @return 0 on success, or -1 if an error occurred
+ */
+int DumpBytesAscall(const std::string& bytes, std::string& out);
+
 }; // namespace GeneralConversions
 
 #endif // __GENERAL_CONVERSIONS_H__
