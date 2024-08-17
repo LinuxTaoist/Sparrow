@@ -45,7 +45,7 @@ public:
      *
      * @param[in] pEvent Instance of epoll event
      */
-    virtual void HandleEpollEvent(IEpollEvent& event) override;
+     virtual void HandleEpollEvent(IEpollEvent& event) override;
 
 private:
     /**

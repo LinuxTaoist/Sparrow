@@ -100,11 +100,6 @@ OneNetManager* OneNetManager::GetInstance(ModuleIDType id, const std::string& na
 int32_t OneNetManager::Init()
 {
     SPR_LOGD("OneNetManager Init\n");
-
-    // debug
-    SprMsg msg(SIG_ID_ONENET_DRV_SOCKET_CONNECT);
-    int ret = NotifyObserver(MODULE_ONENET_DRIVER, msg);
-    SPR_LOGD("NotifyObserver ret %d\n", ret);
     return 0;
 }
 

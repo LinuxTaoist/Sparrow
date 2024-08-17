@@ -58,8 +58,8 @@ int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
     struct itimerspec its;
     its.it_value.tv_sec = delayInMSec / 1000;
     its.it_value.tv_nsec = (delayInMSec % 1000) * 1000000;
-    its.it_interval.tv_sec = intervalInMSec;
-    its.it_interval.tv_nsec = intervalInMSec;
+    its.it_interval.tv_sec = intervalInMSec / 1000;
+    its.it_interval.tv_nsec = (intervalInMSec % 1000) * 1000000;
     if (timerfd_settime(mEpollFd, 0, &its, nullptr) == -1) {
         SPR_LOGE("timerfd_settime fail! (%s)\n", strerror(errno));
         return -1;
@@ -79,7 +79,7 @@ int32_t PTimer::StopTimer()
     its.it_interval.tv_nsec = 0;
 
     if (timerfd_settime(mEpollFd, 0, &its, nullptr) == -1) {
-        SPR_LOGE("timerfd_settime fail! (%s)\n", strerror(errno));
+        SPR_LOGE("timerfd_settime fail! fd = %d (%s)\n", mEpollFd, strerror(errno));
         return -1;
     }
 
@@ -113,6 +113,7 @@ void* PTimer::EpollEvent(int fd, EpollType eType, void* arg)
     }
 
     if (mCb) {
+        arg = arg ? arg : this;
         mCb(fd, exp, arg);
     }
 

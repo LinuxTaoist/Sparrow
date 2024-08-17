@@ -32,7 +32,7 @@
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
             std::function<void(int, std::string, void*)>cb,
             void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mCb(cb)
+    : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mCb(cb)
 {
     mDevName = "/" + name + "_" + GetRandomString(8);
     mMaxMsg = maxmsg;
@@ -46,7 +46,6 @@ PMsgQueue::~PMsgQueue()
         mq_close(mEpollFd);
         mq_unlink(mDevName.c_str());
         mDevName = "";
-        SPR_LOGD("Mqueue %s fd = %d close\n", mDevName.c_str(), mEpollFd);
     }
 }
 
@@ -72,23 +71,20 @@ void PMsgQueue::OpenMsgQueue()
     }
 
     mq_unlink(mDevName.c_str());
-
-    struct mq_attr mqAttr;
+    struct mq_attr mqAttr;   // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_maxmsg = 10;
-    mqAttr.mq_msgsize = mMaxMsg;
+    mqAttr.mq_msgsize = 1025;
     mqAttr.mq_flags = 0;
     mqAttr.mq_curmsgs = 0;
     mqAttr.__pad[0] = 0;
     mqAttr.__pad[1] = 0;
     mqAttr.__pad[2] = 0;
     mqAttr.__pad[3] = 0;
-    mEpollFd = (int)mq_open(mDevName.c_str(), O_CREAT | O_RDWR | O_NONBLOCK, 0666, &mqAttr);
+    mEpollFd = (int)mq_open(mDevName.c_str(), O_CREAT | O_RDWR | O_NONBLOCK | O_EXCL, 0666, &mqAttr);
     if (mEpollFd < 0) {
         SPR_LOGE("mq_open %s failed! (%s)\n", mDevName.c_str(), strerror(errno));
         return;
     }
-
-    SPR_LOGD("mq_open success! name = %s, fd = %d\n", mDevName.c_str(), mEpollFd);
 }
 
 int32_t PMsgQueue::Clear()
@@ -120,7 +116,7 @@ int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
     mq_attr mqAttr;
     mq_getattr(mEpollFd, &mqAttr);
 
-    char buf[mqAttr.mq_msgsize];
+    char buf[1025] = {0};
     int32_t len = mq_receive(mEpollFd, buf, mqAttr.mq_msgsize, &prio);
     if (len <= 0) {
         SPR_LOGE("mq_receive failed! (%s)\n", strerror(errno));
@@ -140,6 +136,7 @@ void* PMsgQueue::EpollEvent(int fd, EpollType eType, void* arg)
     }
 
     if (mCb) {
+        arg = arg ? arg : this;
         mCb(fd, msg, arg);
     }
 

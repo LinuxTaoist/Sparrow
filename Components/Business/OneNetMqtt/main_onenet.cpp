@@ -35,7 +35,6 @@ int main(int argc, const char *argv[])
 {
     OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneDrv")->Initialize();
     OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneMgr")->Initialize();
-
     SprEpollSchedule::GetInstance()->EpollLoop(true);
     return 0;
 }

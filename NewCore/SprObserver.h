@@ -52,20 +52,6 @@ public:
     int32_t Initialize();
 
     /**
-     * @brief Initialize framework used by framework module
-     *
-     * @return 0 on success, or -1 if an error occurred
-     */
-    virtual int32_t InitFramework();
-
-     /**
-     * @brief Initialize business used by business module
-     *
-     * @return 0 on success, or -1 if an error occurred
-     */
-    virtual int32_t Init();
-
-    /**
      * @brief Get the module id
      *
      * @return Module id
@@ -99,10 +85,24 @@ public:
 
 protected:
     /**
+     * @brief Initializes the framework module with overrides from derived framework modules
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t InitFramework();
+
+     /**
+     * @brief Initializes the business module with overrides from derived business modules
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t Init();
+
+    /**
      * @brief Dump common versions for current module
      * @return 0
      *
-     * Used for verifying the consistency of definitions across each component.
+     * Used for verifying the consistency of definitions across each component
      */
     int32_t DumpCommonVersion();
 

@@ -26,7 +26,7 @@
 class PMsgQueue : public IEpollEvent
 {
 public:
-    PMsgQueue(const std::string& name, long maxmsg = 1025,
+    explicit PMsgQueue(const std::string& name, long maxmsg,
               std::function<void(int, std::string, void*)>cb = nullptr,
               void* arg = nullptr);
 

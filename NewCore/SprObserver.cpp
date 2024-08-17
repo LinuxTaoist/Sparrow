@@ -91,7 +91,9 @@ int32_t SprObserver::NotifyAllObserver(SprMsg& msg)
 
 int32_t SprObserver::DumpCommonVersion()
 {
-    SPR_LOGD("- Dump common version: %s / %s / %s \n",
-                COMMON_TYPE_DEFS_VERSION, COMMON_MACROS_VERSION, CORE_TYPE_DEFS_VERSION);
+    SPR_LOGD("- Dump common header version\n");
+    SPR_LOGD("- CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
+    SPR_LOGD("- CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
+    SPR_LOGD("- CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
     return 0;
 }

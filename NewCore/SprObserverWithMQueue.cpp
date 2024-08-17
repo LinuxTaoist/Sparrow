@@ -19,6 +19,7 @@
 #include "SprLog.h"
 #include "PMsgQueue.h"
 #include "SprObserverWithMQueue.h"
+#include "SprEpollSchedule.h"
 
 using namespace InternalDefs;
 
@@ -26,19 +27,23 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...)  LOGW("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
 #define SPR_LOGE(fmt, args...)  LOGE("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
 
+#define MSG_SIZE_MAX  1025
+
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
-    : SprObserver(id, name, proxyType), PMsgQueue(name), mConnected(false)
+    : SprObserver(id, name, proxyType), PMsgQueue(name, MSG_SIZE_MAX), mConnected(false)
 {
 }
 
 SprObserverWithMQueue::~SprObserverWithMQueue()
 {
     UnRegisterFromMediator();
+    SprEpollSchedule::GetInstance()->DelPoll(this);
 }
 
 int32_t SprObserverWithMQueue::InitFramework()
 {
     SPR_LOGD("Initlize MQueue framework!\n");
+    SprEpollSchedule::GetInstance()->AddPoll(this);
     return RegisterFromMediator();
 }
 

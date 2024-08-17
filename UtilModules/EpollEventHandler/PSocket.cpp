@@ -455,10 +455,7 @@ void* PSocket::EpollEvent(int fd, EpollType eType, void* arg)
     }
 
     if (mCb) {
-        if (!arg) {
-            arg = this;
-        }
-
+        arg = arg ? arg : this;
         mCb(fd, arg);
     }
 

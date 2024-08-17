@@ -33,6 +33,8 @@ const uint32_t EPOLL_FD_NUM = 10;
 
 SprEpollSchedule::SprEpollSchedule(uint32_t size) : EpollEventHandler(size)
 {
+    mCoPool.InitCoroutinePool(1024);
+    mCoPool.Start(10, 128);
 }
 
 SprEpollSchedule::~SprEpollSchedule()
@@ -53,7 +55,9 @@ void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)
     // mCoPool.AddCallbackPoint(cbp.get());
 
     // 投递任务至协程，没有回调
+    SPR_LOGD("dx_debug: Post Task --- \n");
     mCoPool.Post([&] {
+        SPR_LOGD("dx_debug: Post \n");
         EpollEventHandler::HandleEpollEvent(event);
     }, nullptr);
 

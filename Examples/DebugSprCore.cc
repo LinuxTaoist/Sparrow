@@ -74,6 +74,7 @@ static void usage()
             "5: AddTimer ( 0, 0s, 20ms)\n"
             "6: PowerOn\n"
             "7: PowerOff\n"
+            "8: OneNetDrv socket connect\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -170,6 +171,13 @@ int main(int argc, const char *argv[])
                 {
                     pPowerM->PowerOff();
                     SprObserver::MainExit();
+                    break;
+                }
+
+                case '8':
+                {
+                    SprMsg msg( MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
+                    theDebug.NotifyAllObserver(msg);
                     break;
                 }
 

@@ -28,26 +28,24 @@ using namespace std;
 
 int main(int argc, const char *argv[])
 {
-    // auto pMQueue = make_shared<PMsgQueue>("MQTest", [](int fd, string msg, void* arg) {
-    //     SPR_LOGD("fd = %d, msg = %s\n", fd, msg.c_str());
-    // });
+    auto pMQueue = make_shared<PMsgQueue>("MQTest", 1025, [](int fd, string msg, void* arg) {
+        SPR_LOGD("fd = %d, msg = %s\n", fd, msg.c_str());
+    });
 
-    shared_ptr<PTimer> pTimer = make_shared<PTimer>([/*pMQueue*/](int fd, uint64_t time, void* arg) {
+    shared_ptr<PTimer> pTimer = make_shared<PTimer>([&pMQueue](int fd, uint64_t time, void* arg) {
         static int cnt = 0;
-        // auto p = (PTimer*)arg;
+        auto p = (PTimer*)arg;
         SPR_LOGD("fd = %d, time = %lu cnt = %d\n", fd, time, cnt++);
 
-        // pMQueue->Send("Hello World!");
-        // if (cnt > 10 && p != nullptr) {
-        //     p->StopTimer();
-        // } else if (cnt < 10 && p != nullptr) {
-        //     p->StartTimer(1000);
-        // }
-    }, pTimer.get());
+        pMQueue->Send("Hello World!");
+        if (cnt > 10 && p != nullptr) {
+            p->StopTimer();
+        }
+    });
 
-    // EpollEventHandler::GetInstance()->AddPoll(pMQueue.get());
+    EpollEventHandler::GetInstance()->AddPoll(pMQueue.get());
     EpollEventHandler::GetInstance()->AddPoll(pTimer.get());
-    pTimer->StartTimer(1000, 3000);
+    pTimer->StartTimer(1000, 1000);
     EpollEventHandler::GetInstance()->EpollLoop(true);
     return 0;
 }

@@ -27,15 +27,13 @@
 using namespace std;
 using namespace InternalDefs;
 
+#define SPR_LOGI(fmt, args...) LOGI("OneNetDrv", fmt, ##args)
 #define SPR_LOGD(fmt, args...) LOGD("OneNetDrv", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("OneNetDrv", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetDrv", fmt, ##args)
 
-const std::string ONENET_MQTT_HOST  = "169.254.133.39";
-const int ONENET_MQTT_PORT          = 9102;
-
-// const std::string ONENET_MQTT_HOST  = "183.230.40.39";
-// const int ONENET_MQTT_PORT        = 1883;
+const std::string ONENET_MQTT_HOST  = "183.230.40.39";
+const int ONENET_MQTT_PORT          = 1883;
 
 vector <StateTransition <   EOneNetDrvLev1State,
                             EOneNetDrvLev2State,
@@ -191,8 +189,10 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         SPR_LOGE("Failed build OneNet client! (%s)\n", strerror(errno));
         SetLev1State(LEV1_SOCKET_DISCONNECTED);
         SetLev2State(LEV2_ONENET_DISCONNECTED);
+        return;
     }
 
+    SPR_LOGI("Connect host (%s:%d) successfully!\n", mOneNetHost.c_str(), mOneNetPort);
     pEpoll->AddPoll(mSocketPtr.get());
 }
 
