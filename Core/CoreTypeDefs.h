@@ -28,7 +28,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CoreTypeDefs.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1001"
+#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1002"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for core commponents
@@ -60,7 +60,9 @@ enum ESprModuleID
     MODULE_SYSTEM_TIMER,
     MODULE_POWERM,
     MODULE_ONENET_MANAGER,
+    MODULE_ONENET_DEV01,
     MODULE_ONENET_DRIVER,
+    MODULE_ONENET_SOCKET,
     MODULE_DEBUG,
     MODULE_DEBUG_WATCH,
     MODULE_MAX,

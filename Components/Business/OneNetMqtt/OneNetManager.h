@@ -19,7 +19,10 @@
 #ifndef __ONENET_MANAGER_H__
 #define __ONENET_MANAGER_H__
 
+#include <map>
 #include <string>
+#include <memory>
+#include "OneNetDevice.h"
 #include "SprObserverWithMQueue.h"
 
 #ifdef ENUM_OR_STRING
@@ -51,6 +54,17 @@ enum EOneNetMgrLev2State
     ONENET_MGR_LEV2_MACROS
 };
 
+struct OneNetDevInfo
+{
+    std::string expirationTime;
+    std::string oneDevName;
+    std::string oneProductID;
+    std::string oneKey;
+    std::string oneToken;
+
+    void Clear();
+};
+
 class OneNetManager : public SprObserverWithMQueue
 {
 public:
@@ -61,8 +75,13 @@ public:
 
 private:
     explicit OneNetManager(ModuleIDType id, const std::string& name);
-
     int32_t Init() override;
+
+    /* 初始化OneNet设备 */
+    int32_t InitOneNetDevices(const OneNetDevInfo& devInfo);
+
+    /* 加载OneNet设备配置文件 */
+    int32_t LoadOneNetDevicesCfgFile(const std::string& cfgPath, std::vector<OneNetDevInfo> &devices);
 
     /* 更新一级状态 */
     void SetLev1State(EOneNetMgrLev1State state);
@@ -91,7 +110,7 @@ private:
     static std::vector<StateTransitionType> mStateTable;
     EOneNetMgrLev1State mCurLev1State;
     EOneNetMgrLev2State mCurLev2State;
+    std::map<std::string, std::shared_ptr<OneNetDevice>> mOneDeviceMap;
 };
-
 
 #endif // __ONENET_MANAGER_H__

@@ -16,8 +16,11 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <fstream>
+#include <sstream>
 #include <algorithm>
 #include "SprLog.h"
+#include "CoreTypeDefs.h"
 #include "OneNetManager.h"
 
 using namespace std;
@@ -26,6 +29,18 @@ using namespace InternalDefs;
 #define SPR_LOGD(fmt, args...) LOGD("OneNetMgr", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("OneNetMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetMgr", fmt, ##args)
+
+#define ONENET_DEVICE_NUM_LIMIT     5
+#define ONENET_DEVICES_CFG_PATH     "OneNetDevices.conf"
+
+void OneNetDevInfo::Clear()
+{
+    expirationTime.clear();
+    oneDevName.clear();
+    oneProductID.clear();
+    oneKey.clear();
+    oneToken.clear();
+}
 
 vector <StateTransition <   EOneNetMgrLev1State,
                             EOneNetMgrLev2State,
@@ -100,6 +115,78 @@ OneNetManager* OneNetManager::GetInstance(ModuleIDType id, const std::string& na
 int32_t OneNetManager::Init()
 {
     SPR_LOGD("OneNetManager Init\n");
+    std::vector<OneNetDevInfo> devices;
+    int32_t ret = LoadOneNetDevicesCfgFile(ONENET_DEVICES_CFG_PATH, devices);
+    if (ret != 0) {
+        SPR_LOGE("Load %s failed\n", ONENET_DEVICES_CFG_PATH);
+        return -1;
+    }
+
+    for (int32_t i = 0; i < (int32_t)devices.size(); i++) {
+        string productID = devices[i].oneProductID;
+        string devName = devices[i].oneDevName;
+        string moduleName = productID + devName;
+
+        auto pDevice = std::make_shared<OneNetDevice>(InternalDefs::ESprModuleID(MODULE_ONENET_DEV01 + i), moduleName);
+        pDevice->SetExpirationTime(atoi(devices[i].expirationTime.c_str()));
+        pDevice->SetDevName(devName);
+        pDevice->SetProjectID(productID);
+        pDevice->SetKey(devices[i].oneKey);
+        pDevice->SetToken(devices[i].oneToken);
+        pDevice->Initialize();
+        mOneDeviceMap[productID + devName] = std::move(pDevice);
+    }
+
+    return 0;
+}
+
+int32_t OneNetManager::InitOneNetDevices(const OneNetDevInfo& devInfo)
+{
+    return 0;
+}
+
+int32_t OneNetManager::LoadOneNetDevicesCfgFile(const std::string& cfgPath, std::vector<OneNetDevInfo>& devices)
+{
+    std::ifstream configFile(cfgPath);
+    if (!configFile.is_open()) {
+        SPR_LOGE("Open %s failed\n", cfgPath.c_str());
+        return 0;
+    }
+
+    std::string line;
+    OneNetDevInfo currentDevice;
+    bool parsing = false;
+
+    while (getline(configFile, line)) {
+        // Check for start of a new device section
+        if (line.find("[Device_") == 0) {
+            if (parsing) {
+                devices.push_back(currentDevice);
+                currentDevice = OneNetDevInfo();
+            }
+            parsing = true;
+            continue;
+        }
+
+        if (parsing && !line.empty() && line.front() != '[') {
+            size_t equalPos = line.find('=');
+            if (equalPos != std::string::npos) {
+                std::string key = line.substr(0, equalPos);
+                std::string value = line.substr(equalPos + 1);
+
+                if (key == "ExpirationTime")    currentDevice.expirationTime = value;
+                else if (key == "OneDevName")   currentDevice.oneDevName = value;
+                else if (key == "OneProductID") currentDevice.oneProductID = value;
+                else if (key == "OneKey")       currentDevice.oneKey = value;
+                else if (key == "OneToken")     currentDevice.oneToken = value;
+            }
+        }
+    }
+
+    if (parsing) {
+        devices.push_back(currentDevice);
+    }
+
     return 0;
 }
 

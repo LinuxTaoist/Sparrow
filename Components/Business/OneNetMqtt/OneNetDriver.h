@@ -65,8 +65,6 @@ public:
 private:
     explicit OneNetDriver(ModuleIDType id, const std::string& name);
 
-    // static void SocketEventCb(int, void*);
-
     /**
      * @brief Init business
      *
