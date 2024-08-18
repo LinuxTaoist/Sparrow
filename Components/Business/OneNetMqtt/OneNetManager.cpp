@@ -105,6 +105,10 @@ int32_t OneNetManager::Init()
 
 void OneNetManager::SetLev1State(EOneNetMgrLev1State state)
 {
+    if (mCurLev1State == state) {
+        return;
+    }
+
     mCurLev1State = state;
     SPR_LOGD("Lev1 state changed: %s -> %s\n", GetLev1StateString(mCurLev1State), GetLev1StateString(state));
 }
@@ -130,6 +134,10 @@ const char* OneNetManager::GetLev1StateString(EOneNetMgrLev1State state)
 
 void OneNetManager::SetLev2State(EOneNetMgrLev2State state)
 {
+    if (mCurLev2State == state) {
+        return;
+    }
+
     mCurLev2State = state;
     SPR_LOGD("Lev2 state changed: %s -> %s\n", GetLev2StateString(mCurLev2State), GetLev2StateString(state));
 }

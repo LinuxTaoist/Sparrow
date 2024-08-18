@@ -81,11 +81,13 @@ protected:
      * @brief SendMsg
      *
      * @param[in] msg
+     * @param[in] msgId message id
      * @return 0 on success, or -1 if an error occurred
      *
      * Send message to self module
      */
     int32_t SendMsg(SprMsg& msg);
+    int32_t SendMsg(uint32_t msgId);
 
     /**
      * @brief RecvMsg

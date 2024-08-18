@@ -89,6 +89,26 @@ int32_t SprObserver::NotifyAllObserver(SprMsg& msg)
     return mMsgMediatorPtr->NotifyAllObserver(msg);
 }
 
+int32_t SprObserver::StartTimer(int32_t delayInMSec, int32_t intervalInMSec, uint32_t msgId, uint32_t repeatTimes)
+{
+    STimerInfo timeInfo = {mModuleID, msgId, repeatTimes, delayInMSec, intervalInMSec};
+    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
+
+    SprMsg msg(MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
+    msg.SetDatas(pInfo, sizeof(STimerInfo));
+    return NotifyObserver(msg);
+}
+
+int32_t SprObserver::StopTimer(uint32_t msgId)
+{
+    STimerInfo timeInfo = {mModuleID, msgId, 0, 0, 0};
+    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
+
+    SprMsg msg(MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
+    msg.SetDatas(pInfo, sizeof(STimerInfo));
+    return NotifyObserver(msg);
+}
+
 int32_t SprObserver::DumpCommonVersion()
 {
     SPR_LOGD("- Dump common header version\n");

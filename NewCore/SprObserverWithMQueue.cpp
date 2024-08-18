@@ -81,6 +81,12 @@ int32_t SprObserverWithMQueue::SendMsg(SprMsg& msg)
     return ret;
 }
 
+int32_t SprObserverWithMQueue::SendMsg(uint32_t msgId)
+{
+    SprMsg msg(msgId);
+    return SendMsg(msg);
+}
+
 int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
 {
     uint32_t prio = 0;
