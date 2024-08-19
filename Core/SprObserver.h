@@ -16,14 +16,11 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SPR_OBSERVER_H__
-#define __SPR_OBSERVER_H__
+#ifndef __SPR_NEW_OBSERVER_H__
+#define __SPR_NEW_OBSERVER_H__
 
-#include <set>
-#include <vector>
 #include <memory>
 #include <string>
-#include "SprMsg.h"
 #include "SprSigId.h"
 #include "CoreTypeDefs.h"
 #include "SprMediatorProxy.h"
@@ -33,97 +30,106 @@ using ModuleIDType = InternalDefs::ESprModuleID;
 class SprObserver
 {
 public:
-    SprObserver(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr, bool monitored = true);
+    /**
+     * @brief  Construct/Destruct
+     *
+     * @param id Module id
+     * @param name Module name
+     * @param proxyType mediator proxy type
+     */
+    SprObserver(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType);
     virtual ~SprObserver();
-    SprObserver(const SprObserver&) = delete;
-    SprObserver& operator=(SprObserver&) = delete;
-    SprObserver(SprObserver&&) = delete;
-    SprObserver& operator=(SprObserver&&) = delete;
 
-    int GetMqHandle() const { return mMqHandle; }
+    /**
+     * @brief Initialize observer
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t Initialize() final;
+
+    /**
+     * @brief Get the module id
+     *
+     * @return Module id
+     */
     ModuleIDType GetModuleId() const { return mModuleID; }
+
+    /**
+     * @brief Get the module name
+     *
+     * @return Module name
+     */
     std::string GetModuleName() const { return mModuleName; }
-    std::string GetMqDevName() const { return mMqDevName; }
-
-    bool IsMonitored() const;
-    virtual int NotifyObserver(SprMsg& msg);
-    virtual int NotifyObserver(ModuleIDType id, SprMsg& msg);
-    virtual int NotifyAllObserver(SprMsg& msg);
-    virtual int HandleEvent(int fd);
-    virtual int ProcessMsg(const SprMsg& msg) = 0;
-
-    int  AbstractProcessMsg(const SprMsg& msg);
 
     /**
-     * @brief  AddPoll
-     * @param[in] listenType    listen type in epoll
-     * @param[in] fd listen handler in epoll
-     * @return 0 on success, or -1 if an error occurred
+     * @brief  Notify msg to other module
      *
-     * Use this function to add custom listening events to Epoll
+     * @param id module id
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
      */
-    int AddPoll(int fd, uint8_t type);
-    int HandlePollEvent(int fd, uint8_t ipcType);
+    virtual int32_t NotifyObserver(SprMsg& msg);
+    virtual int32_t NotifyObserver(ModuleIDType id, SprMsg& msg);
 
     /**
-     * @brief SendMsg
+     * @brief  Notify msg to all modules
      *
-     * @param[in] msg
+     * @param msg
      * @return 0 on success, or -1 if an error occurred
-     *
-     * Send message to self message queue
      */
-    int SendMsg(SprMsg& msg);
+    virtual int32_t NotifyAllObserver(SprMsg& msg);
 
     /**
-     * @brief RecvMsg
+     * @brief Starts a timer with a message ID.
      *
-     * @param[out] msg
-     * @return 0 on success, or -1 if an error occurred
-     *
-     * Receive message from message queue
+     * @param delayInMSec The delay time in milliseconds before the first trigger.
+     *                     A value of 0 indicates that the timer triggers immediately.
+     * @param intervalInMSec The interval time in milliseconds between subsequent triggers.
+     * @param msgId The message ID associated with the timer.
+     * @param repeatTimes The times of the timer repeat trigger.
+     *                    0 for an long-term timer,
+     *                    others for repeat times.
+     * @return 0 on success, or -1 if an error occurred.
      */
-    int RecvMsg(SprMsg& msg);
+    int32_t RegisterTimer(int32_t delayInMSec, int32_t intervalInMSec, uint32_t msgId, uint32_t repeatTimes = 1);
 
     /**
-     * @brief  MainLoop
-     * @return 0 on success, or -1 if an error occurred
+     * @brief Stops a timer identified by a message ID.
+     *
+     * @param msgId The message ID of the timer to stop.
+     * @return 0 on success, or -1 if an error occurred.
      */
-    static int MainLoop();
+    int32_t UnregisterTimer(uint32_t msgId);
 
+
+protected:
     /**
-     * @brief  MainExit
+     * @brief Initializes the framework module with overrides from derived framework modules
+     *
      * @return 0 on success, or -1 if an error occurred
      */
-    static int MainExit();
+    virtual int32_t InitFramework();
 
-private:
-    int MakeMQ();
+     /**
+     * @brief Initializes the business module with overrides from derived business modules
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t Init();
 
     /**
      * @brief Dump common versions for current module
      * @return 0
      *
-     * Used for verifying the consistency of definitions across each component.
+     * Used for verifying the consistency of definitions across each component
      */
-    int DumpCommonVersion();
+    int32_t DumpCommonVersion();
 
-    // --------------------------------------------------------------------------------------------
-    // - Message handle functions
-    // --------------------------------------------------------------------------------------------
-    int MsgRespondSystemExitRsp(const SprMsg& msg);
-    int MsgRespondRegisterRsp(const SprMsg& msg);
-    int MsgRespondUnregisterRsp(const SprMsg& msg);
-
-private:
-    bool mConnected;
-    bool mListenMQ;
-    int  mMqHandle;
+protected:
+    InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;
     std::string mModuleName;
-    std::string mMqDevName;
-    std::set<int> mPollFds;
-    std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr;
+    SprMediatorProxy* mMsgMediatorPtr;
 };
 
 #endif

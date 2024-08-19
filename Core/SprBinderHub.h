@@ -22,6 +22,7 @@
 #include <thread>
 #include <string>
 #include <memory>
+#include <stdint.h>
 #include "Parcel.h"
 
 class SprBinderHub
@@ -30,8 +31,8 @@ public:
     SprBinderHub(const std::string& srvName);
     virtual ~SprBinderHub();
 
-    bool InitializeHub();
-    bool DestoryHub();
+    int32_t InitializeHub();
+    int32_t DestoryHub();
 
     static void BinderLoop(void* pData);
     virtual void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd) = 0;

@@ -29,7 +29,6 @@
 PTimer::PTimer(std::function<void(int, uint64_t, void*)> cb, void *arg)
     : IEpollEvent(-1, EPOLL_TYPE_TIMERFD, arg), mCb(cb)
 {
-    mTimerRun = false;
     InitTimer();
 }
 
@@ -50,11 +49,6 @@ int32_t PTimer::InitTimer()
 }
 int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
 {
-    if (mTimerRun) {
-        SPR_LOGW("System timer is running!\n");
-        return 0;
-    }
-
     struct itimerspec its;
     its.it_value.tv_sec = delayInMSec / 1000;
     its.it_value.tv_nsec = (delayInMSec % 1000) * 1000000;
@@ -65,8 +59,7 @@ int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
         return -1;
     }
 
-    mTimerRun = true;
-    SPR_LOGD("Start system timer (%d)!\n", intervalInMSec);
+    // SPR_LOGD("Start system timer (%d %d)!\n", delayInMSec, intervalInMSec);
     return 0;
 }
 
@@ -83,7 +76,6 @@ int32_t PTimer::StopTimer()
         return -1;
     }
 
-    mTimerRun = false;
     SPR_LOGD("Stop system timer!\n");
     return 0;
 }

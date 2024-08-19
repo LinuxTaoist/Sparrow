@@ -24,10 +24,8 @@
 #define SPR_LOGW(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("SprBinderHub", fmt, ##args)
 
-SprBinderHub::SprBinderHub(const std::string& srvName)
+SprBinderHub::SprBinderHub(const std::string& srvName) : mRun(false), mSrvName(srvName)
 {
-    mRun = true;
-    mSrvName = srvName;
 }
 
 SprBinderHub::~SprBinderHub()
@@ -35,19 +33,20 @@ SprBinderHub::~SprBinderHub()
     DestoryHub();
 }
 
-bool SprBinderHub::InitializeHub()
+int32_t SprBinderHub::InitializeHub()
 {
-    bool ret = false;
+    int32_t ret = -1;
 
     if (!mBindThread.joinable()) {
+        mRun = true;
         mBindThread = std::thread(BinderLoop, this);
-        ret = true;
+        ret = 0;
     }
 
     return ret;
 }
 
-bool SprBinderHub::DestoryHub()
+int32_t SprBinderHub::DestoryHub()
 {
     mRun = false;
     if (mBindThread.joinable())
@@ -56,7 +55,7 @@ bool SprBinderHub::DestoryHub()
     }
 
     SPR_LOGE("Destory %s binderHub!\n", mSrvName.c_str());
-    return true;
+    return 0;
 }
 
 void SprBinderHub::BinderLoop(void* pData)

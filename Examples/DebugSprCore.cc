@@ -25,8 +25,8 @@
 #include <string.h>
 #include "GeneralConversions.h"
 #include "GeneralUtils.h"
-#include "SprObserver.h"
-#include "SprMediatorIpcProxy.h"
+#include "SprEpollSchedule.h"
+#include "SprObserverWithMQueue.h"
 #include "PowerManagerInterface.h"
 
 using namespace std;
@@ -37,11 +37,10 @@ using namespace InternalDefs;
 #define SPR_LOGD(fmt, args...) printf("%d DebugCore D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d DebugCore E: " fmt, __LINE__, ##args)
 
-class DebugCore : public SprObserver
+class DebugCore : public SprObserverWithMQueue
 {
 public:
-    DebugCore(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
-        : SprObserver(id, name, mMsgMediatorPtr)
+    DebugCore(ModuleIDType id, const std::string& name) : SprObserverWithMQueue(id, name)
     {
     }
 
@@ -83,7 +82,8 @@ static void usage()
 int main(int argc, const char *argv[])
 {
     PowerManagerInterface* pPowerM = PowerManagerInterface::GetInstance();
-    DebugCore theDebug(MODULE_DEBUG, "Debug", make_shared<SprMediatorIpcProxy>());
+    DebugCore theDebug(MODULE_DEBUG, "Debug");
+    theDebug.Initialize();
 
     char val = 0;
     bool run = true;
@@ -170,7 +170,7 @@ int main(int argc, const char *argv[])
                 case '7':
                 {
                     pPowerM->PowerOff();
-                    SprObserver::MainExit();
+                    SprEpollSchedule::GetInstance()->ExitLoop();
                     break;
                 }
 
@@ -194,7 +194,7 @@ int main(int argc, const char *argv[])
         } while(run);
     });
 
-    SprObserver::MainLoop();
+    SprEpollSchedule::GetInstance()->EpollLoop(true);
 
     val = 'q';
     int ret = write(STDIN_FILENO, &val, 1);

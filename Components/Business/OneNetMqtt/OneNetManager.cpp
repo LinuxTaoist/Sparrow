@@ -26,6 +26,7 @@
 using namespace std;
 using namespace InternalDefs;
 
+#define SPR_LOGI(fmt, args...) LOGI("OneNetMgr", fmt, ##args)
 #define SPR_LOGD(fmt, args...) LOGD("OneNetMgr", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGW("OneNetMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetMgr", fmt, ##args)
@@ -142,18 +143,19 @@ int32_t OneNetManager::InitOneNetDevices(const std::vector<OneNetDevInfo>& devic
 {
     // 初始化OneNet设备模块, 支持最大个数参考ONENET_DEVICE_NUM_LIMIT
     for (int32_t i = 0; i < (int32_t)devices.size() && i < ONENET_DEVICE_NUM_LIMIT; i++) {
+        ModuleIDType id = ModuleIDType(MODULE_ONENET_DEV01 + i);
         string productID = devices[i].oneProductID;
         string devName = devices[i].oneDevName;
         string moduleName = productID + "_" + devName;
 
-        auto pDevice = std::make_shared<OneNetDevice>(InternalDefs::ESprModuleID(MODULE_ONENET_DEV01 + i), moduleName);
+        auto pDevice = std::make_shared<OneNetDevice>(id, moduleName);
         pDevice->SetExpirationTime(atoi(devices[i].expirationTime.c_str()));
-        pDevice->SetDevName(devName);
-        pDevice->SetProjectID(productID);
+        pDevice->SetProjectID(devices[i].oneProductID);
+        pDevice->SetDevName(devices[i].oneDevName);
         pDevice->SetKey(devices[i].oneKey);
         pDevice->SetToken(devices[i].oneToken);
         pDevice->Initialize();
-        mOneDeviceMap[moduleName] = std::move(pDevice);
+        mOneDeviceMap[moduleName] = pDevice;
         SPR_LOGD("Init OneNet device[%d]: product/{%s}/device/{%s}\n", i, productID.c_str(), devName.c_str());
     }
     return 0;
@@ -172,7 +174,6 @@ int32_t OneNetManager::LoadOneNetDevicesCfgFile(const std::string& cfgPath, std:
     bool parsing = false;
 
     while (getline(configFile, line)) {
-        // Check for start of a new device section
         if (line.find("[Device_") == 0) {
             if (parsing) {
                 devices.push_back(currentDevice);
@@ -182,12 +183,14 @@ int32_t OneNetManager::LoadOneNetDevicesCfgFile(const std::string& cfgPath, std:
             continue;
         }
 
+        // SPR_LOGD("line: %s\n", line.c_str());
         if (parsing && !line.empty() && line.front() != '[') {
             size_t equalPos = line.find('=');
             if (equalPos != std::string::npos) {
                 std::string key = line.substr(0, equalPos);
                 std::string value = line.substr(equalPos + 1);
 
+                // SPR_LOGD("key: %s, value: %s\n", key.c_str(), value.c_str());
                 if (key == "ExpirationTime")    currentDevice.expirationTime = value;
                 else if (key == "OneDevName")   currentDevice.oneDevName = value;
                 else if (key == "OneProductID") currentDevice.oneProductID = value;

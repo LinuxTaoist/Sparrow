@@ -23,7 +23,6 @@
 #include "SprLog.h"
 #include "GeneralConversions.h"
 #include "SprObserver.h"
-#include "SprMediatorIpcProxy.h"
 
 using namespace std;
 using namespace InternalDefs;

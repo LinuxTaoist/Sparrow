@@ -36,7 +36,6 @@ public:
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
-    bool mTimerRun;
     std::function<void(int, uint64_t, void*)> mCb;
 };
 
