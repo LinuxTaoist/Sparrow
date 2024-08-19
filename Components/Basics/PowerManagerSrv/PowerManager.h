@@ -20,9 +20,9 @@
 #define __POWER_MANAGER_H__
 
 #include <vector>
-#include "SprObserver.h"
+#include "SprObserverWithMQueue.h"
 
-#define POWER_LEV1_MACROS \
+#define POWER_LEV1_MACROS               \
     ENUM_OR_STRING(LEV1_POWER_ANY),     \
     ENUM_OR_STRING(LEV1_POWER_INIT),    \
     ENUM_OR_STRING(LEV1_POWER_ACTIVE),  \
@@ -47,7 +47,7 @@ enum EPowerLev2State
     LEV2_POWER_ANY      = 0x00
 };
 
-class PowerManager : public SprObserver
+class PowerManager : public SprObserverWithMQueue
 {
 public:
     PowerManager(ModuleIDType id, const std::string& name);

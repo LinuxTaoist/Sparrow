@@ -31,13 +31,13 @@ SprObserverWithTimerFd::SprObserverWithTimerFd(ModuleIDType id, const std::strin
 
 SprObserverWithTimerFd::~SprObserverWithTimerFd()
 {
-    SPR_LOGD("DelPoll timerfd observer! fd = %d\n", GetEpollFd());
+    // SPR_LOGD("DelPoll timerfd observer! fd = %d\n", GetEpollFd());
     SprEpollSchedule::GetInstance()->DelPoll(this);
 }
 
 int32_t SprObserverWithTimerFd::InitFramework()
 {
-    SPR_LOGD("AddPoll timerfd observer! fd = %d\n", GetEpollFd());
+    // SPR_LOGD("AddPoll timerfd observer! fd = %d\n", GetEpollFd());
     SprEpollSchedule::GetInstance()->AddPoll(this);
     return 0;
 }

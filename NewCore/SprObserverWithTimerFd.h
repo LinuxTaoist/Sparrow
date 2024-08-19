@@ -32,7 +32,7 @@ public:
      * @param name module name
      * @param proxyType message proxy type
      */
-    SprObserverWithTimerFd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType);
+    SprObserverWithTimerFd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
     virtual ~SprObserverWithTimerFd();
 
     /**

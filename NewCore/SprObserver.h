@@ -95,7 +95,7 @@ public:
      *                    others for repeat times.
      * @return 0 on success, or -1 if an error occurred.
      */
-    int32_t StartTimer(int32_t delayInMSec, int32_t intervalInMSec, uint32_t msgId, uint32_t repeatTimes = 1);
+    int32_t RegisterTimer(int32_t delayInMSec, int32_t intervalInMSec, uint32_t msgId, uint32_t repeatTimes = 1);
 
     /**
      * @brief Stops a timer identified by a message ID.
@@ -103,7 +103,7 @@ public:
      * @param msgId The message ID of the timer to stop.
      * @return 0 on success, or -1 if an error occurred.
      */
-    int32_t StopTimer(uint32_t msgId);
+    int32_t UnregisterTimer(uint32_t msgId);
 
 
 protected:

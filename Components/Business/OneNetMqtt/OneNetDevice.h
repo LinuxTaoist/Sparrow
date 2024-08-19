@@ -54,7 +54,7 @@ public:
     int32_t DumpDeviceInfomation();
 
     /**
-     * @brief Set/Get device information
+     * @brief Set/Get device information for OneNet
      * @return device information
      */
     void SetExpirationTime(int32_t expirationTime) { mExpirationTime = expirationTime; }
@@ -75,6 +75,13 @@ private:
      * @return 0 on success, or -1 if an error occurred
      */
     int32_t VerifyDeviceDetails();
+
+    /**
+     * @brief message handle function
+     *
+     * @param msg
+     */
+    void MsgRespondOneNetMgrDeviceConnect(const SprMsg& msg);
 
 private:
     int32_t mExpirationTime;        // Token过期时间

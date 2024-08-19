@@ -89,7 +89,7 @@ int32_t SprObserver::NotifyAllObserver(SprMsg& msg)
     return mMsgMediatorPtr->NotifyAllObserver(msg);
 }
 
-int32_t SprObserver::StartTimer(int32_t delayInMSec, int32_t intervalInMSec, uint32_t msgId, uint32_t repeatTimes)
+int32_t SprObserver::RegisterTimer(int32_t delayInMSec, int32_t intervalInMSec, uint32_t msgId, uint32_t repeatTimes)
 {
     STimerInfo timeInfo = {mModuleID, msgId, repeatTimes, delayInMSec, intervalInMSec};
     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
@@ -99,7 +99,7 @@ int32_t SprObserver::StartTimer(int32_t delayInMSec, int32_t intervalInMSec, uin
     return NotifyObserver(msg);
 }
 
-int32_t SprObserver::StopTimer(uint32_t msgId)
+int32_t SprObserver::UnregisterTimer(uint32_t msgId)
 {
     STimerInfo timeInfo = {mModuleID, msgId, 0, 0, 0};
     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));

@@ -24,6 +24,7 @@
 #include "CommonMacros.h"
 #include "DebugModule.h"
 #include "DebugModuleHub.h"
+#include "SprEpollSchedule.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -51,7 +52,7 @@ int main(int argc, const char *argv[])
             case SIGPIPE:   // 管道破裂
             case SIGALRM:   // 定时器信号
             case SIGTERM:   // 请求进程终止, 清理并退出
-                SprObserver::MainExit();
+                SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
 
             case SIGUSR1:   // 用户自定义信号1
@@ -62,6 +63,6 @@ int main(int argc, const char *argv[])
     });
 
     theDebugModuleHub.InitializeHub();
-    SprObserver::MainLoop();
+    SprEpollSchedule::GetInstance()->EpollLoop(true);
     return 0;
 }

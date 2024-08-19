@@ -44,6 +44,18 @@ public:
     virtual int32_t InitFramework() override;
 
     /**
+     * @brief SendMsg
+     *
+     * @param[in] msg
+     * @param[in] msgId message id
+     * @return 0 on success, or -1 if an error occurred
+     *
+     * Send message to self module
+     */
+    int32_t SendMsg(SprMsg& msg);
+    int32_t SendMsg(uint32_t msgId);
+
+    /**
      * @brief  Process message from message queue received
      *
      * @param msg
@@ -76,18 +88,6 @@ protected:
      * @return 0 on success, or -1 if an error occurred
      */
     int32_t UnRegisterFromMediator();
-
-    /**
-     * @brief SendMsg
-     *
-     * @param[in] msg
-     * @param[in] msgId message id
-     * @return 0 on success, or -1 if an error occurred
-     *
-     * Send message to self module
-     */
-    int32_t SendMsg(SprMsg& msg);
-    int32_t SendMsg(uint32_t msgId);
 
     /**
      * @brief RecvMsg

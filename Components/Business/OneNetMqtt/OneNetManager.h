@@ -30,21 +30,21 @@
 #endif
 #define ENUM_OR_STRING(x) x
 
-// 一级状态:
+// 一级状态
 #define ONENET_MGR_LEV1_MACROS                      \
     ENUM_OR_STRING(LEV1_ONENET_MGR_ANY),            \
     ENUM_OR_STRING(LEV1_ONENET_MGR_IDLE),           \
     ENUM_OR_STRING(LEV1_ONENET_MGR_CONNECTING),     \
     ENUM_OR_STRING(LEV1_ONENET_MGR_CONNECTED),      \
     ENUM_OR_STRING(LEV1_ONENET_MGR_DISCONNECTED),   \
-    ENUM_OR_STRING(LEV1_ONENET_MGR_BUTT),
+    ENUM_OR_STRING(LEV1_ONENET_MGR_BUTT)
 
 enum EOneNetMgrLev1State
 {
     ONENET_MGR_LEV1_MACROS
 };
 
-//二级状态:
+// 二级状态
 #define ONENET_MGR_LEV2_MACROS                      \
     ENUM_OR_STRING(LEV2_ONENET_MGR_ANY),            \
     ENUM_OR_STRING(LEV2_ONENET_MGR_BUTT)
@@ -78,10 +78,10 @@ private:
     int32_t Init() override;
 
     /* 初始化OneNet设备 */
-    int32_t InitOneNetDevices(const OneNetDevInfo& devInfo);
+    int32_t InitOneNetDevices(const std::vector<OneNetDevInfo>& devices);
 
     /* 加载OneNet设备配置文件 */
-    int32_t LoadOneNetDevicesCfgFile(const std::string& cfgPath, std::vector<OneNetDevInfo> &devices);
+    int32_t LoadOneNetDevicesCfgFile(const std::string& cfgPath, std::vector<OneNetDevInfo>& devices);
 
     /* 更新一级状态 */
     void SetLev1State(EOneNetMgrLev1State state);
@@ -93,8 +93,11 @@ private:
     EOneNetMgrLev2State GetLev2State();
     const char* GetLev2StateString(EOneNetMgrLev2State state);
 
+    /* 通知消息到指定OneNetDevice */
+    void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
+
     /* 消息响应函数 */
-    void MsgRespondMqttConnect(const SprMsg& msg);
+    void MsgRespondDeviceConnect(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
     void MsgRespondMqttDisconnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);

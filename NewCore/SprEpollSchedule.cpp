@@ -31,7 +31,7 @@
 
 const uint32_t EPOLL_FD_NUM = 10;
 
-SprEpollSchedule::SprEpollSchedule(uint32_t size, bool enableCoroutine) : EpollEventHandler(size), mEnableCoroutine(enableCoroutine)
+SprEpollSchedule::SprEpollSchedule(uint32_t size, bool enableCoroutine) : EpollEventHandler(size), mEnableCoroutine(false)
 {
     if (enableCoroutine) {
         mCoPool.InitCoroutinePool(1024);

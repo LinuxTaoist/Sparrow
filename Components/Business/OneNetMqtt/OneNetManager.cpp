@@ -50,6 +50,19 @@ vector <StateTransition <   EOneNetMgrLev1State,
 OneNetManager::mStateTable =
 {
     // =============================================================
+    // All States for SIG_ID_ONENET_MGR_DEVICE_CONNECT
+    // ============================================================
+    { LEV1_ONENET_MGR_DISCONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondDeviceConnect
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // All States for SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
@@ -122,10 +135,16 @@ int32_t OneNetManager::Init()
         return -1;
     }
 
-    for (int32_t i = 0; i < (int32_t)devices.size(); i++) {
+    return InitOneNetDevices(devices);
+}
+
+int32_t OneNetManager::InitOneNetDevices(const std::vector<OneNetDevInfo>& devices)
+{
+    // 初始化OneNet设备模块, 支持最大个数参考ONENET_DEVICE_NUM_LIMIT
+    for (int32_t i = 0; i < (int32_t)devices.size() && i < ONENET_DEVICE_NUM_LIMIT; i++) {
         string productID = devices[i].oneProductID;
         string devName = devices[i].oneDevName;
-        string moduleName = productID + devName;
+        string moduleName = productID + "_" + devName;
 
         auto pDevice = std::make_shared<OneNetDevice>(InternalDefs::ESprModuleID(MODULE_ONENET_DEV01 + i), moduleName);
         pDevice->SetExpirationTime(atoi(devices[i].expirationTime.c_str()));
@@ -134,14 +153,9 @@ int32_t OneNetManager::Init()
         pDevice->SetKey(devices[i].oneKey);
         pDevice->SetToken(devices[i].oneToken);
         pDevice->Initialize();
-        mOneDeviceMap[productID + devName] = std::move(pDevice);
+        mOneDeviceMap[moduleName] = std::move(pDevice);
+        SPR_LOGD("Init OneNet device[%d]: product/{%s}/device/{%s}\n", i, productID.c_str(), devName.c_str());
     }
-
-    return 0;
-}
-
-int32_t OneNetManager::InitOneNetDevices(const OneNetDevInfo& devInfo)
-{
     return 0;
 }
 
@@ -248,17 +262,38 @@ const char* OneNetManager::GetLev2StateString(EOneNetMgrLev2State state)
     return (Lev2Strings.size() > state) ? Lev2Strings[state].c_str() : "UNDEFINED";
 }
 
+void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg)
+{
+    auto it = mOneDeviceMap.find(devModule);
+    if (it == mOneDeviceMap.end()) {
+        SPR_LOGW("Invalid device module: %s!\n", devModule.c_str());
+        return;
+    }
+
+    it->second->SendMsg(msg.GetMsgId());
+    SPR_LOGD("Notify module device: %s, msg: %s\n", devModule.c_str(), GetSigName(msg.GetMsgId()));
+}
+
 /**
- * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT
+ * @brief Process SIG_ID_ONENET_MGR_DEVICE_CONNECT
  *
  * @param[in] msg
  * @return none
  */
-void OneNetManager::MsgRespondMqttConnect(const SprMsg& msg)
+void OneNetManager::MsgRespondDeviceConnect(const SprMsg& msg)
 {
+    SetLev1State(LEV1_ONENET_MGR_CONNECTING);
 
+    // 指定设备连接OneNet
+    std::string devModule = msg.GetString();
+    NotifyMsgToOneNetDevice(devModule, msg);
 }
 
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
+ *
+ * @param msg
+ */
 void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 {
     SetLev1State(LEV1_ONENET_MGR_CONNECTED);

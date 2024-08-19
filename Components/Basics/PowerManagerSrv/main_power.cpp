@@ -16,7 +16,6 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <memory>
 #include <stdio.h>
 #include <signal.h>
 #include "SprLog.h"
@@ -24,6 +23,7 @@
 #include "CommonMacros.h"
 #include "PowerManager.h"
 #include "PowerManagerHub.h"
+#include "SprEpollSchedule.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -33,6 +33,7 @@ using namespace InternalDefs;
 int main(int argc, const char *argv[])
 {
     PowerManager thePowerManager(MODULE_POWERM, "PowerM");
+    thePowerManager.Initialize();
     PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
 
     GeneralUtils::InitSignalHandler([](int signum) {
@@ -51,7 +52,7 @@ int main(int argc, const char *argv[])
             case SIGPIPE:   // 管道破裂
             case SIGALRM:   // 定时器信号
             case SIGTERM:   // 请求进程终止, 清理并退出
-                SprObserver::MainExit();
+                SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
 
             case SIGUSR1:   // 用户自定义信号1
@@ -62,6 +63,6 @@ int main(int argc, const char *argv[])
     });
 
     thePowerManagerHub.InitializeHub();
-    SprObserver::MainLoop();
+    SprEpollSchedule::GetInstance()->EpollLoop(true);
     return 0;
 }

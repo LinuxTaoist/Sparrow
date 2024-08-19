@@ -16,8 +16,6 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <memory>
-#include <stdio.h>
 #include <signal.h>
 #include "SprLog.h"
 #include "CommonMacros.h"

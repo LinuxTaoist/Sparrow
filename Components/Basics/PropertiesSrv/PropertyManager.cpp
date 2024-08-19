@@ -29,7 +29,6 @@
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "PropertyManager.h"
-#include "SprMediatorIpcProxy.h"
 
 #define SYSTEM_PROP_PATH        "system.prop"
 #define DEFAULT_PROP_PATH       "default.prop"

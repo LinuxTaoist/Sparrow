@@ -95,7 +95,7 @@ int32_t PTimer::DestoryTimer()
         mEpollFd = -1;
     }
 
-    SPR_LOGD("Destory system timer!");
+    SPR_LOGD("Destory system timer!\n");
     return 0;
 }
 

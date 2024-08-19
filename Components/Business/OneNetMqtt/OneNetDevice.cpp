@@ -21,10 +21,12 @@
 #include "SprLog.h"
 #include "OneNetDevice.h"
 
-#define SPR_LOGI(fmt, args...) LOGI("OneNetDev", fmt, ##args)
-#define SPR_LOGD(fmt, args...) LOGD("OneNetDev", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("OneNetDev", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("OneNetDev", fmt, ##args)
+using namespace InternalDefs;
+
+#define SPR_LOGI(fmt, args...) LOGI("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGD(fmt, args...) LOGD("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGW(fmt, args...) LOGW("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGE(fmt, args...) LOGE("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
 
 #define ONENET_DEVICE_CFG_PATH "OneNetDevices.conf"
 
@@ -46,7 +48,7 @@ int32_t OneNetDevice::Init()
 int32_t OneNetDevice::DumpDeviceInfomation()
 {
     SPR_LOGI("------------------ Dump OneNet Device Information ------------------\n");
-    SPR_LOGI("- ExpirationTime  : %d\n", mExpirationTime);
+    SPR_LOGI("- OneExpTime      : %d\n", mExpirationTime);
     SPR_LOGI("- OneDevName      : %s\n", mOneDevName.c_str());
     SPR_LOGI("- OneProductID    : %s\n", mOneProductID.c_str());
     SPR_LOGI("- OneKey          : %s\n", mOneKey.c_str());
@@ -81,7 +83,32 @@ int32_t OneNetDevice::VerifyDeviceDetails()
     return 0;
 }
 
+/**
+ * @brief Process SIG_ID_ONENET_MGR_DEVICE_CONNECT
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDevice::MsgRespondOneNetMgrDeviceConnect(const SprMsg& msg)
+{
+
+}
+
 int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
 {
+    SPR_LOGD("Recv msg: %s\n", GetSigName(msg.GetMsgId()));
+    switch (msg.GetMsgId())
+    {
+        case SIG_ID_ONENET_MGR_DEVICE_CONNECT:
+        {
+            MsgRespondOneNetMgrDeviceConnect(msg);
+            break;
+        }
+
+        default:
+        {
+            break;
+        }
+    }
     return 0;
 }

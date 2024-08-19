@@ -19,8 +19,8 @@
 #include <signal.h>
 #include "SprLog.h"
 #include "SprSystem.h"
-#include "SprObserver.h"
 #include "GeneralUtils.h"
+#include "SprEpollSchedule.h"
 
 #define SPR_LOGI(fmt, args...) LOGI("MainSparrow", fmt, ##args)
 
@@ -43,7 +43,7 @@ int main(int argc, const char *argv[])
             case SIGALRM:   // 定时器信号
             case SIGUSR1:   // 用户自定义信号1
             case SIGTERM:   // 请求进程终止, 清理并退出
-                SprObserver::MainExit();
+                SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
 
             case SIGUSR2:   // 用户自定义信号2
@@ -53,7 +53,6 @@ int main(int argc, const char *argv[])
     });
 
     SprSystem::GetInstance()->Init();
-    SprObserver::MainLoop();
-
+    SprEpollSchedule::GetInstance()->EpollLoop(true);
     return 0;
 }

@@ -400,7 +400,7 @@ void OneNetDriver::MsgRespondSocketReconnect(const SprMsg& msg)
     const int32_t internalInMSec = 5000;  // 5 seconds
     if (!mEnableReconTimer) {
         SPR_LOGD("Start reconnect timer. internalInMSec = %d\n", internalInMSec);
-        StartTimer(internalInMSec, internalInMSec, SIG_ID_ONENET_DRV_SOCKET_RECONNECT_TIMER_EVENT, 0);
+        RegisterTimer(internalInMSec, internalInMSec, SIG_ID_ONENET_DRV_SOCKET_RECONNECT_TIMER_EVENT, 0);
         mEnableReconTimer = true;
     }
 }
@@ -419,7 +419,7 @@ void OneNetDriver::MsgRespondSocketReconnectTimerEvent(const SprMsg& msg)
         SPR_LOGD("Already connected, stop reconnect timer. en = %d\n", mEnableReconTimer);
 
         if (mEnableReconTimer) {
-            StopTimer(SIG_ID_ONENET_DRV_SOCKET_RECONNECT_TIMER_EVENT);
+            UnregisterTimer(SIG_ID_ONENET_DRV_SOCKET_RECONNECT_TIMER_EVENT);
             mEnableReconTimer = false;
         }
         return;
