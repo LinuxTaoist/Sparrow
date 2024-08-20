@@ -183,7 +183,6 @@ int32_t MqttMsgBase::EncodeRemainingLength(std::string& bytes)
 {
     int32_t len = 0;
     uint64_t x = mVariableHeader.length() + mPayload.length();
-    SPR_LOGD("--- dx_debug EncodeRemainingLength %ld: %x \n", x, x);
     do {
         uint8_t encodedByte = (uint8_t)(x % 128);
         x /= 128;
@@ -192,7 +191,6 @@ int32_t MqttMsgBase::EncodeRemainingLength(std::string& bytes)
         }
 
         bytes.push_back(encodedByte & 0xFF);
-        SPR_LOGD("dx_debug[%d]: %d, %x, %x \n", len, encodedByte, encodedByte, (encodedByte & 0xFF));
         len++;
     } while (x > 0);
 
@@ -225,21 +223,9 @@ int32_t MqttMsgBase::EncodeFixedHeader(std::string& bytes)
         return tfLen;
     }
 
-    SPR_LOGD("dx_debug:  dump 1 ------- \n");
-    for (auto& b : bytes)
-    {
-        SPR_LOGD("dx_debug: %02X \n", b);
-    }
-
     int rLen = EncodeRemainingLength(bytes);
     if (rLen < 0) {
         return rLen;
-    }
-
-    SPR_LOGD("dx_debug:  dump 2 ------- \n");
-    for (auto& c : bytes)
-    {
-        SPR_LOGD("dx_debug: %02X \n", c);
     }
 
     return 1 + rLen;

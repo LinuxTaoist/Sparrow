@@ -288,14 +288,14 @@ EOneNetDrvLev2State OneNetDriver::GetLev2State()
 
 int32_t OneNetDriver::DumpSocketBytes(const std::string& tag, const std::string& bytes)
 {
-    std::stringstream ss;
-    ss << std::hex << std::setfill('0');
+    std::stringstream hexBytes;
+    hexBytes << std::hex << std::setfill('0');
 
     for (const auto& it : bytes) {
-        ss << std::setw(2) << static_cast<int>(it) << " ";
+        hexBytes << std::setw(2) << uint32_t((uint8_t)(it)) << " ";
     }
 
-    SPR_LOGD("[%s] %s\n", tag.c_str(), ss.str().c_str());
+    SPR_LOGD("[%s] %s\n", tag.c_str(), hexBytes.str().c_str());
     return 0;
 }
 
@@ -316,14 +316,17 @@ int32_t OneNetDriver::DumpSocketBytesWithAscall(const std::string& bytes)
         hexBytes << std::hex << std::setfill('0');
         for (int32_t j = 0; j < BYTES_PER_LINE; ++j) {
             if (startByte + j < endByte) {
-                hexBytes << std::setw(2) << static_cast<int>(bytes[startByte + j]) << " ";
-                ascallBytes << static_cast<char>(bytes[startByte + j]);
+                hexBytes << std::setw(2) << uint32_t(uint8_t(bytes[startByte + j])) << " ";
+
+                char ch = bytes[startByte + j];
+                char chAscall = (ch >= 32 && ch <= 126) ? ch : '.';
+                ascallBytes << chAscall;
             } else {
                 hexBytes << "   ";
             }
         }
-        ascallBytes << "|";
 
+        ascallBytes << "|";
         SPR_LOGD("%s%s%s\n", posBytes.str().c_str(), hexBytes.str().c_str(), ascallBytes.str().c_str());
     }
 
@@ -545,8 +548,7 @@ int32_t OneNetDriver::SendMqttConnect(const std::string& payload)
     conMsg.SetPayload(payload);
 
     std::string bytes;
-    int32_t len = conMsg.Encode(bytes);
-    SPR_LOGD("dx_debug: mqtt connect msg len = %d %d\n", len, bytes.size());
+    conMsg.Encode(bytes);
     return SendMqttBytes(bytes);
 }
 
@@ -619,7 +621,6 @@ int32_t OneNetDriver::SendMqttDisconnect()
 int32_t OneNetDriver::SendMqttBytes(const std::string& bytes)
 {
     // dump mqtt bytes for debug
-    // DumpSocketBytes("SEND", bytes);
     DumpSocketBytesWithAscall(bytes);
     return 0;
 }
