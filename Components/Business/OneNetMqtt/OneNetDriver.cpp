@@ -544,7 +544,7 @@ int32_t OneNetDriver::SendMqttConnect(const std::string& payload)
 {
     std::string protocol = "MQTT";
     uint16_t keepalive = 60;
-    MqttConnect conMsg(protocol, 0x04, 0x00, keepalive);
+    MqttConnect conMsg(protocol, 0x04, 0xC2, keepalive);
     conMsg.SetPayload(payload);
 
     std::string bytes;

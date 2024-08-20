@@ -176,7 +176,7 @@ int main(int argc, const char *argv[])
                 case '9':
                 {
                     SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_DEVICE_CONNECT);
-                    msg.SetString("MQTT-DEV01");
+                    msg.SetString("MQTT-OneJson01");
                     theDebug.NotifyObserver(msg);
                     break;
                 }

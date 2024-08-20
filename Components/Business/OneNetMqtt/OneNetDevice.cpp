@@ -91,13 +91,20 @@ int32_t OneNetDevice::VerifyDeviceDetails()
  */
 void OneNetDevice::MsgRespondOneNetMgrDeviceConnect(const SprMsg& msg)
 {
-    int32_t devNameLen = mOneDevName.length();
-    int32_t productIdLen = mOneProductID.length();
-    int32_t tokenLen = mOneToken.length();
+    int16_t devNameLen = mOneDevName.length();
+    int16_t productIdLen = mOneProductID.length();
+    int16_t tokenLen = mOneToken.length();
 
-    std::string  payload = std::to_string(devNameLen)   + mOneDevName
-                         + std::to_string(productIdLen) + mOneProductID
-                         + std::to_string(tokenLen)     + mOneToken;
+    std::string payload;
+    payload.push_back((devNameLen >> 8) & 0xFF);
+    payload.push_back(devNameLen & 0xFF);
+    payload.append(mOneDevName);
+    payload.push_back((productIdLen >> 8) & 0xFF);
+    payload.push_back(productIdLen & 0xFF);
+    payload.append(mOneProductID);
+    payload.push_back((tokenLen >> 8) & 0xFF);
+    payload.push_back(tokenLen & 0xFF);
+    payload.append(mOneToken);
 
     SprMsg conMsg(SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT);
     conMsg.SetString(payload);
