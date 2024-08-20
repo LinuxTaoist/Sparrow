@@ -23,10 +23,10 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
-#define SPR_LOGD(fmt, args...) LOGD("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
-#define SPR_LOGW(fmt, args...) LOGW("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
-#define SPR_LOGE(fmt, args...) LOGE("OneDev[%s]", fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGI(fmt, args...) LOGI("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGD(fmt, args...) LOGD("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGW(fmt, args...) LOGW("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGE(fmt, args...) LOGE("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
 
 #define ONENET_DEVICE_CFG_PATH "OneNetDevices.conf"
 
