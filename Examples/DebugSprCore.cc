@@ -74,6 +74,7 @@ static void usage()
             "6: PowerOn\n"
             "7: PowerOff\n"
             "8: OneNetDrv socket connect\n"
+            "9: OneNetDev mqtt connect\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -101,7 +102,6 @@ int main(int argc, const char *argv[])
                     theDebug.NotifyAllObserver(msg);
                     break;
                 }
-
                 case '1':
                 {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 1000, 3000};
@@ -113,7 +113,6 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-
                 case '2':
                 {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 0, 0};
@@ -124,7 +123,6 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-
                 case '3':
                 {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 10, 0, 2000};
@@ -136,7 +134,6 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-
                 case '4':
                 {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 0, 0, 0};
@@ -148,7 +145,6 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-
                 case '5':
                 {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST, 0, 0, 20};
@@ -160,27 +156,30 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-
                 case '6':
                 {
                     pPowerM->PowerOn();
                     break;
                 }
-
                 case '7':
                 {
                     pPowerM->PowerOff();
                     SprEpollSchedule::GetInstance()->ExitLoop();
                     break;
                 }
-
                 case '8':
                 {
                     SprMsg msg( MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
                     theDebug.NotifyObserver(msg);
                     break;
                 }
-
+                case '9':
+                {
+                    SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_DEVICE_CONNECT);
+                    msg.SetString("MQTT-DEV01");
+                    theDebug.NotifyObserver(msg);
+                    break;
+                }
                 case 'q':
                 {
                     run = false;

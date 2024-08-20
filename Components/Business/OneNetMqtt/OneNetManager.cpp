@@ -53,6 +53,11 @@ OneNetManager::mStateTable =
     // =============================================================
     // All States for SIG_ID_ONENET_MGR_DEVICE_CONNECT
     // ============================================================
+    { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondDeviceConnect
+    },
+
     { LEV1_ONENET_MGR_DISCONNECTED, LEV2_ONENET_MGR_ANY,
       SIG_ID_ONENET_MGR_DEVICE_CONNECT,
       &OneNetManager::MsgRespondDeviceConnect
@@ -146,7 +151,7 @@ int32_t OneNetManager::InitOneNetDevices(const std::vector<OneNetDevInfo>& devic
         ModuleIDType id = ModuleIDType(MODULE_ONENET_DEV01 + i);
         string productID = devices[i].oneProductID;
         string devName = devices[i].oneDevName;
-        string moduleName = productID + "_" + devName;
+        string moduleName = devName;
 
         auto pDevice = std::make_shared<OneNetDevice>(id, moduleName);
         pDevice->SetExpirationTime(atoi(devices[i].expirationTime.c_str()));

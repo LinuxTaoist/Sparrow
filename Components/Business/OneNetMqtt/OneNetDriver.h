@@ -23,9 +23,9 @@
 #include <string>
 #include <memory>
 #include "PSocket.h"
+#include "MqttProtocol.h"
 #include "SprObserverWithSocket.h"
 #include "SprObserverWithMQueue.h"
-
 
 #define ONENET_DRV_LEV1_MACROS                      \
     ENUM_OR_STRING(LEV1_SOCKET_ANY),                \
@@ -98,7 +98,8 @@ private:
      * @param bytes socket bytes
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int32_t DumpSocketBytes(const std::string& bytes);
+    virtual int32_t DumpSocketBytes(const std::string& tag, const std::string& bytes);
+    virtual int32_t DumpSocketBytesWithAscall(const std::string& bytes);
 
     /**
      * @brief message handle function
@@ -112,8 +113,35 @@ private:
     void MsgRespondSocketReconnectTimerEvent(const SprMsg& msg);
     void MsgRespondSocketDisconnectActive(const SprMsg& msg);
     void MsgRespondSocketDisconnectPassive(const SprMsg& msg);
+    void MsgRespondMqttMsgConnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
+
+    /**
+     * @brief Send mqtt cmd bytes
+     */
+    int32_t SendMqttConnect(const std::string& payload);    // 3.1 CONNECT
+    int32_t SendMqttConnack();                              // 3.2 CONNACK
+    int32_t SendMqttPublish(uint16_t cmd);                  // 3.3 PUBLISH
+    int32_t SendMqttPubAck(uint16_t cmd);                   // 3.4 PUBACK
+    int32_t SendMqttPubRec(uint16_t cmd);                   // 3.5 PUBREC
+    int32_t SendMqttPubRel(uint16_t cmd);                   // 3.6 PUBREL
+    int32_t SendMqttPubComp(uint16_t cmd);                  // 3.7 PUBCOMP
+    int32_t SendMqttSubscribe(uint16_t cmd);                // 3.8 SUBSCRIBE
+    int32_t SendMqttSubAck(uint16_t cmd);                   // 3.9 SUBACK
+    int32_t SendMqttUnsubscribe(uint16_t cmd);              // 3.10 UNSUBSCRIBE
+    int32_t SendMqttUnsubAck(uint16_t cmd);                 // 3.11 UNSUBACK
+    int32_t SendMqttPingReq();                              // 3.12 PINGREQ
+    int32_t SendMqttPingResp();                             // 3.13 PINGRESP
+    int32_t SendMqttDisconnect();                           // 3.14 DISCONNECT
+
+    /**
+     * @brief Send mqtt bytes to remote server
+     *
+     * @param bytes
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t SendMqttBytes(const std::string& bytes);
 
 private:
     bool mEnableReconTimer;

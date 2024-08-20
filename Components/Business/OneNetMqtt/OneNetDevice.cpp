@@ -41,11 +41,11 @@ OneNetDevice::~OneNetDevice()
 
 int32_t OneNetDevice::Init()
 {
-    DumpDeviceInfomation();
+    DumpDeviceInformation();
     return VerifyDeviceDetails();
 }
 
-int32_t OneNetDevice::DumpDeviceInfomation()
+int32_t OneNetDevice::DumpDeviceInformation()
 {
     SPR_LOGI("------------------ Dump OneNet Device Information ------------------\n");
     SPR_LOGI("- OneExpTime      : %d\n", mExpirationTime);
@@ -91,7 +91,17 @@ int32_t OneNetDevice::VerifyDeviceDetails()
  */
 void OneNetDevice::MsgRespondOneNetMgrDeviceConnect(const SprMsg& msg)
 {
+    int32_t devNameLen = mOneDevName.length();
+    int32_t productIdLen = mOneProductID.length();
+    int32_t tokenLen = mOneToken.length();
 
+    std::string  payload = std::to_string(devNameLen)   + mOneDevName
+                         + std::to_string(productIdLen) + mOneProductID
+                         + std::to_string(tokenLen)     + mOneToken;
+
+    SprMsg conMsg(SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT);
+    conMsg.SetString(payload);
+    NotifyObserver(MODULE_ONENET_DRIVER, conMsg);
 }
 
 int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)

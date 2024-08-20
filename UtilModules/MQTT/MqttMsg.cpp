@@ -16,19 +16,25 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include "SprLog.h"
 #include "MqttMsg.h"
 
-MqttMsgBase::MqttMsgBase() : mFixedHeader(0, 0), mRemainingLength(0)
+#define SPR_LOGI(fmt, args...) LOGI("MqttMsgBase", fmt, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("MqttMsgBase", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("MqttMsgBase", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("MqttMsgBase", fmt, ##args)
+
+MqttMsgBase::MqttMsgBase() : mFixedHeader(0, 0)
 {
 }
 
 MqttMsgBase::MqttMsgBase(uint8_t type, uint8_t flags)
-    : mFixedHeader(type, flags), mRemainingLength(0)
+    : mFixedHeader(type, flags)
 {
 }
 
 MqttMsgBase::MqttMsgBase(const std::string& bytes)
-    : mFixedHeader(0, 0), mRemainingLength(0)
+    : mFixedHeader(0, 0)
 {
     Decode(bytes);
 }
@@ -36,7 +42,6 @@ MqttMsgBase::MqttMsgBase(const std::string& bytes)
 MqttMsgBase::MqttMsgBase(const MqttMsgBase& msg)
     : mFixedHeader(msg.mFixedHeader.type, msg.mFixedHeader.flags),
       mVariableHeader(msg.mVariableHeader),
-      mRemainingLength(msg.mRemainingLength),
       mPayload(msg.mPayload)
 {
 }
@@ -48,7 +53,6 @@ MqttMsgBase& MqttMsgBase::operator=(const MqttMsgBase& msg)
         mFixedHeader = msg.mFixedHeader;
         mVariableHeader = msg.mVariableHeader;
         mPayload = msg.mPayload;
-        mRemainingLength = msg.mRemainingLength;
     }
     return *this;
 }
@@ -56,8 +60,7 @@ MqttMsgBase& MqttMsgBase::operator=(const MqttMsgBase& msg)
 MqttMsgBase::MqttMsgBase(MqttMsgBase&& msg)
     : mFixedHeader(std::move(msg.mFixedHeader)),
       mVariableHeader(std::move(msg.mVariableHeader)),
-      mPayload(std::move(msg.mPayload)),
-      mRemainingLength(msg.mRemainingLength)
+      mPayload(std::move(msg.mPayload))
 {
 }
 
@@ -68,7 +71,6 @@ MqttMsgBase& MqttMsgBase::operator=(MqttMsgBase&& msg)
         mFixedHeader = std::move(msg.mFixedHeader);
         mVariableHeader = std::move(msg.mVariableHeader);
         mPayload = std::move(msg.mPayload);
-        mRemainingLength = msg.mRemainingLength;
     }
     return *this;
 }
@@ -132,6 +134,7 @@ int32_t MqttMsgBase::Decode(const std::string& bytes)
         return payLen;
     }
 
+    SPR_LOGD("fixLen = %d, varLen = %d, payLen = %d\n", fixLen, varLen, payLen);
     return fixLen + varLen + payLen;
 }
 
@@ -173,23 +176,24 @@ int32_t MqttMsgBase::DecodeRemainingLength(const std::string& bytes)
         }
     }
 
-    mRemainingLength = value;
     return len;
 }
 
 int32_t MqttMsgBase::EncodeRemainingLength(std::string& bytes)
 {
     int32_t len = 0;
-    uint64_t x = mRemainingLength;
+    uint64_t x = mVariableHeader.length() + mPayload.length();
+    SPR_LOGD("--- dx_debug EncodeRemainingLength %ld: %x \n", x, x);
     do {
-        uint8_t encodedByte = static_cast<uint8_t>(x % 128);
+        uint8_t encodedByte = (uint8_t)(x % 128);
         x /= 128;
         if (x > 0) {
-            encodedByte |= 128;
+            encodedByte |= 0x80;
         }
 
+        bytes.push_back(encodedByte & 0xFF);
+        SPR_LOGD("dx_debug[%d]: %d, %x, %x \n", len, encodedByte, encodedByte, (encodedByte & 0xFF));
         len++;
-        bytes.push_back(encodedByte);
     } while (x > 0);
 
     return len;
@@ -198,12 +202,12 @@ int32_t MqttMsgBase::EncodeRemainingLength(std::string& bytes)
 int32_t MqttMsgBase::DecodeFixedHeader(const std::string& bytes)
 {
     uint8_t byte = 0;
-    int32_t tfLen = DecodeUintT(bytes, byte);
+    int32_t tfLen = DecodeIntegerFromBytes(byte, bytes);
     if (tfLen < 0) {
         return tfLen;
     }
 
-    int32_t rLen = DecodeRemainingLength(bytes.substr(fLen));
+    int32_t rLen = DecodeRemainingLength(bytes.substr(tfLen));
     if (rLen < 0) {
         return rLen;
     }
@@ -216,14 +220,26 @@ int32_t MqttMsgBase::DecodeFixedHeader(const std::string& bytes)
 int32_t MqttMsgBase::EncodeFixedHeader(std::string& bytes)
 {
     uint8_t byte = mFixedHeader.type << 4 | mFixedHeader.flags;
-    int tfLen = EncodeUintT(byte, bytes);
+    int tfLen = EncodeIntegerToBytes(byte, bytes);
     if (tfLen < 0) {
         return tfLen;
+    }
+
+    SPR_LOGD("dx_debug:  dump 1 ------- \n");
+    for (auto& b : bytes)
+    {
+        SPR_LOGD("dx_debug: %02X \n", b);
     }
 
     int rLen = EncodeRemainingLength(bytes);
     if (rLen < 0) {
         return rLen;
+    }
+
+    SPR_LOGD("dx_debug:  dump 2 ------- \n");
+    for (auto& c : bytes)
+    {
+        SPR_LOGD("dx_debug: %02X \n", c);
     }
 
     return 1 + rLen;
@@ -232,7 +248,7 @@ int32_t MqttMsgBase::EncodeFixedHeader(std::string& bytes)
 int32_t MqttMsgBase::DecodeVariableHeader(const std::string& data)
 {
     uint16_t conLen = 0;    // Decode MSB(8) & LSB(8)
-    uint32_t lLen = DecodeUintT(data, conLen);
+    int32_t lLen = DecodeIntegerFromBytes(conLen, data);
     if (lLen < 0) {
         return lLen;
     }
@@ -257,6 +273,26 @@ int32_t MqttMsgBase::EncodePayload(std::string& data)
 {
     data.append(mPayload);
     return mPayload.length();
+}
+
+int32_t MqttMsgBase::DecodeU8BytesFromBytes(std::string& value, const std::string& bytes, int32_t len)
+{
+    if (len == -1) {
+        len = bytes.length();
+    }
+
+    value.assign(bytes.begin(), bytes.begin() + len);
+    return len;
+}
+
+int32_t MqttMsgBase::EncodeU8BytesToBytes(const std::string& data, std::string& bytes, int32_t len)
+{
+    if (len == -1) {
+        len = data.length();
+    }
+
+    bytes.append(data.begin(), data.begin() + len);
+    return len;
 }
 
 std::string MqttMsgBase::GetConnectRspCodeStr(uint8_t code)

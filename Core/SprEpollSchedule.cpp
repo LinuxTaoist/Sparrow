@@ -31,7 +31,7 @@
 
 const uint32_t EPOLL_FD_NUM = 10;
 
-SprEpollSchedule::SprEpollSchedule(uint32_t size, bool enableCoroutine) : EpollEventHandler(size), mEnableCoroutine(false)
+SprEpollSchedule::SprEpollSchedule(uint32_t size, bool enableCoroutine) : EpollEventHandler(size), mEnableCoroutine(enableCoroutine)
 {
     if (enableCoroutine) {
         mCoPool.InitCoroutinePool(1024);
@@ -47,9 +47,7 @@ SprEpollSchedule::~SprEpollSchedule()
 
 SprEpollSchedule* SprEpollSchedule::GetInstance(uint32_t size, bool enableCoroutine)
 {
-    // dx_debug
-    // static SprEpollSchedule instance(size, enableCoroutine);
-    static SprEpollSchedule instance(size, false);
+    static SprEpollSchedule instance(size, enableCoroutine);
     return &instance;
 }
 

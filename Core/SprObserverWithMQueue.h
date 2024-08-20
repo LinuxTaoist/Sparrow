@@ -76,14 +76,14 @@ public:
 
 protected:
     /**
-     * @brief Register self infomation from mediator module
+     * @brief Register self information from mediator module
      *
      * @return 0 on success, or -1 if an error occurred
      */
     int32_t RegisterFromMediator();
 
     /**
-     * @brief Unregister self infomation from mediator module
+     * @brief Unregister self information from mediator module
      *
      * @return 0 on success, or -1 if an error occurred
      */

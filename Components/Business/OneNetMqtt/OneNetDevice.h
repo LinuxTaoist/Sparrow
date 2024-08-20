@@ -51,7 +51,7 @@ public:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    int32_t DumpDeviceInfomation();
+    int32_t DumpDeviceInformation();
 
     /**
      * @brief Set/Get device information for OneNet

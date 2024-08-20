@@ -6,13 +6,13 @@
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2023/12/21
+ *  @date       : 2024/08/20
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/21 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/08/20 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
@@ -21,6 +21,7 @@
 
 #include <string>
 #include <vector>
+#include <stdint.h>
 
 enum MQTT_MSG_TYPE
 {
@@ -71,12 +72,11 @@ public:
      */
     MqttMsgBase();
     MqttMsgBase(const std::string& bytes);
-    MqttMsgBase(uint8_t type, uint8_t flags);
+    MqttMsgBase(uint8_t type, uint8_t flags = 0);
     MqttMsgBase(const MqttMsgBase& msg);
     MqttMsgBase& operator=(const MqttMsgBase& msg);
     MqttMsgBase(MqttMsgBase&& msg);
     MqttMsgBase& operator=(MqttMsgBase&& msg);
-    MqttMsgBase(uint8_t type, uint8_t flags = 0);
     virtual ~MqttMsgBase();
 
     /**
@@ -169,39 +169,39 @@ protected:
     // --------------------------------------------------------------------------------------------
     // Encode/Decode common type functions
     // --------------------------------------------------------------------------------------------
+    int32_t DecodeU8BytesFromBytes(std::string& data, const std::string& bytes, int32_t len = -1);
     template <typename T>
-    int32_t DecodeUintT(const std::string& bytes, T& data)
+    int32_t DecodeIntegerFromBytes(T& data, const std::string& bytes)
     {
-        int32_t len = sizeof(T);
+        size_t len = sizeof(T);
         if (len > bytes.size())
         {
             return -1;
         }
 
         data = 0;
-        for (size_t i = 0; i < valueSize; i++) {
+        for (size_t i = 0; i < len; i++) {
             data <<= 8;
-            data |= static_cast<uint8_t>(str[i]);
+            data |= static_cast<uint8_t>(bytes[i]);
         }
 
         return len;
     }
 
+    int32_t EncodeU8BytesToBytes(const std::string& data, std::string& bytes, int32_t len = -1);
     template <typename T>
-    int32_t EncodeUintT(const T& data, std::string& bytes)
+    int32_t EncodeIntegerToBytes(const T& data, std::string& bytes)
     {
-        int32_t len = sizeof(T);
-        bytes.resize(len);
-
-        for (int32_t i = len - 1; i >= 0; i--) {
-            bytes[i] = static_cast<uint8_t>(data);
-            data >>= 8;
+        size_t len = sizeof(T);
+        for (size_t i = 0; i < len; i++) {
+            char ch = static_cast<char>((data >> ((len - 1 - i) * 8)) & 0xFF);
+            bytes.push_back(ch);
         }
 
         return len;
     }
 
-private:
+protected:
     struct FixHeader
     {
         uint8_t     type  : 4;
@@ -211,7 +211,6 @@ private:
     } mFixedHeader;                 // Fixed Header in MQTT protocol
     std::string mVariableHeader;    // Variable Header in MQTT protocol
     std::string mPayload;           // Payload in MQTT protocol
-    uint64_t    mRemainingLength;   // Value of mFixedHeader.remainingLength
 };
 
 #endif // __MQTT_MSG_H__
