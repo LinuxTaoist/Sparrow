@@ -51,20 +51,20 @@ vector <StateTransition <   EOneNetMgrLev1State,
 OneNetManager::mStateTable =
 {
     // =============================================================
-    // All States for SIG_ID_ONENET_MGR_DEVICE_CONNECT
+    // All States for SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
     // ============================================================
     { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_MGR_DEVICE_CONNECT,
-      &OneNetManager::MsgRespondDeviceConnect
+      SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondActiveDeviceConnect
     },
 
     { LEV1_ONENET_MGR_DISCONNECTED, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_MGR_DEVICE_CONNECT,
-      &OneNetManager::MsgRespondDeviceConnect
+      SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondActiveDeviceConnect
     },
 
     { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_MGR_DEVICE_CONNECT,
+      SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT,
       &OneNetManager::MsgRespondUnexpectedState
     },
 
@@ -283,17 +283,18 @@ void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const 
 }
 
 /**
- * @brief Process SIG_ID_ONENET_MGR_DEVICE_CONNECT
+ * @brief Process SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
  *
  * @param[in] msg
  * @return none
  */
-void OneNetManager::MsgRespondDeviceConnect(const SprMsg& msg)
+void OneNetManager::MsgRespondActiveDeviceConnect(const SprMsg& msg)
 {
     SetLev1State(LEV1_ONENET_MGR_CONNECTING);
 
-    // 指定设备连接OneNet
+    // 激活指定设备连接OneNet，记录当前活动设备
     std::string devModule = msg.GetString();
+    mCurActiveDevice = devModule;
     NotifyMsgToOneNetDevice(devModule, msg);
 }
 
@@ -304,7 +305,14 @@ void OneNetManager::MsgRespondDeviceConnect(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 {
-    SetLev1State(LEV1_ONENET_MGR_CONNECTED);
+    bool isConnected = (msg.GetU8Value() == MQTT_CONNECT_ACCEPTED);
+    EOneNetMgrLev1State state = isConnected ? LEV1_ONENET_MGR_CONNECTED : LEV1_ONENET_MGR_DISCONNECTED;
+
+    SetLev1State(state);
+    SprMsg conMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
+    conMsg.SetBoolValue(isConnected);
+    NotifyMsgToOneNetDevice(mCurActiveDevice, msg);
+    SPR_LOGD("OneNet return connect code: %d\n", msg.GetU8Value());
 }
 
 /**

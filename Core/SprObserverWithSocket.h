@@ -36,7 +36,12 @@ public:
      * @param protocol socket protocol
      * @param cb callback function
      * @param arg callback function argument
+     *
+     * When creating module, used the construct with parameters id and name,
+     * and call InitFramework() in Initialize() to initialize socket framework,
+     * otherwise, used construct without parameters id and name.
      */
+    SprObserverWithSocket(int sock, std::function<void(int, void*)> cb = nullptr, void* arg = nullptr);
     SprObserverWithSocket(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType,
         int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg = nullptr);
 

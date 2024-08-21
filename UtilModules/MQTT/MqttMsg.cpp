@@ -280,17 +280,3 @@ int32_t MqttMsgBase::EncodeU8BytesToBytes(const std::string& data, std::string& 
     bytes.append(data.begin(), data.begin() + len);
     return len;
 }
-
-std::string MqttMsgBase::GetConnectRspCodeStr(uint8_t code)
-{
-    #ifdef ENUM_OR_STRING
-    #undef ENUM_OR_STRING
-    #endif
-    #define ENUM_OR_STRING(x) #x
-
-    static std::vector<std::string> rspCode = {
-        MQTT_RSP_CONNECT_MACROS
-    };
-
-    return rspCode[code];
-}

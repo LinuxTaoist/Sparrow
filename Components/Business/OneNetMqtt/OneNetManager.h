@@ -54,6 +54,17 @@ enum EOneNetMgrLev2State
     ONENET_MGR_LEV2_MACROS
 };
 
+enum EMqttConnackCode
+{
+    MQTT_CONNECT_ACCEPTED = 0,
+    MQTT_CONNECT_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION,
+    MQTT_CONNECT_REFUSED_IDENTIFIER_REJECTED,
+    MQTT_CONNECT_REFUSED_SERVER_UNAVAILABLE,
+    MQTT_CONNECT_REFUSED_BAD_USERNAME_OR_PASSWORD,
+    MQTT_CONNECT_REFUSED_NOT_AUTHORIZED,
+    MQTT_CONNECT_BUTT
+};
+
 struct OneNetDevInfo
 {
     std::string expirationTime;
@@ -97,7 +108,7 @@ private:
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
     /* 消息响应函数 */
-    void MsgRespondDeviceConnect(const SprMsg& msg);
+    void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
     void MsgRespondMqttDisconnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
@@ -113,6 +124,7 @@ private:
     static std::vector<StateTransitionType> mStateTable;
     EOneNetMgrLev1State mCurLev1State;
     EOneNetMgrLev2State mCurLev2State;
+    std::string mCurActiveDevice;
     std::map<std::string, std::shared_ptr<OneNetDevice>> mOneDeviceMap;
 };
 

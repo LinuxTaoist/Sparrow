@@ -23,6 +23,13 @@
 #include <vector>
 #include <stdint.h>
 
+#define CHECK_RESULT(expr) do { \
+    int32_t _ret = (expr);      \
+    if (_ret == -1) {           \
+        return _ret;            \
+    }                           \
+} while(0)
+
 enum MQTT_MSG_TYPE
 {
     MQTT_MSG_CONNECT        = 1,
@@ -40,25 +47,6 @@ enum MQTT_MSG_TYPE
     MQTT_MSG_PINGRESP       = 13,
     MQTT_MSG_DISCONNECT     = 14,
     MQTT_MSG_BUTT,
-};
-
-#define MQTT_RSP_CONNECT_MACROS                                             \
-    ENUM_OR_STRING(MQTT_CONNECT_ACCEPTED),                                  \
-    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_UNACCEPTABLE_PROTOCOL_VERSION),     \
-    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_IDENTIFIER_REJECTED),               \
-    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_SERVER_UNAVAILABLE),                \
-    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_BAD_USERNAME_OR_PASSWORD),          \
-    ENUM_OR_STRING(MQTT_CONNECT_REFUSED_NOT_AUTHORIZED),                    \
-    ENUM_OR_STRING(MQTT_CONNECT_BUTT)
-
-#ifdef ENUM_OR_STRING
-#undef ENUM_OR_STRING
-#endif
-#define ENUM_OR_STRING(x) x
-
-enum MQTT_RSP_CONNECT_CODE
-{
-    MQTT_RSP_CONNECT_MACROS
 };
 
 class MqttMsgBase
@@ -158,12 +146,13 @@ protected:
     // Encode/Decode MQTT protocol functions
     // --------------------------------------------------------------------------------------------
     virtual int32_t DecodeRemainingLength(const std::string& bytes);
-    virtual int32_t EncodeRemainingLength(std::string& bytes);
     virtual int32_t DecodeFixedHeader(const std::string& bytes);
-    virtual int32_t EncodeFixedHeader(std::string& bytes);
     virtual int32_t DecodeVariableHeader(const std::string& bytes);
-    virtual int32_t EncodeVariableHeader(std::string& bytes);
     virtual int32_t DecodePayload(const std::string& bytes);
+
+    virtual int32_t EncodeRemainingLength(std::string& bytes);
+    virtual int32_t EncodeFixedHeader(std::string& bytes);
+    virtual int32_t EncodeVariableHeader(std::string& bytes);
     virtual int32_t EncodePayload(std::string& bytes);
 
     // --------------------------------------------------------------------------------------------

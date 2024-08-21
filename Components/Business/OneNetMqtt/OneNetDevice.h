@@ -68,6 +68,8 @@ public:
     std::string GetKey() { return mOneKey; }
     std::string GetToken() { return mOneToken; }
 
+    bool GetConnectStatus() { return mConnectStatus; }
+
 private:
     /**
      * @brief Verify device information
@@ -81,7 +83,8 @@ private:
      *
      * @param msg
      */
-    void MsgRespondOneNetMgrDeviceConnect(const SprMsg& msg);
+    void MsgRespondActiveDeviceConnect(const SprMsg& msg);
+    void MsgRespondSetConnectStatus(const SprMsg& msg);
 
 private:
     int32_t mExpirationTime;        // Token过期时间
@@ -89,6 +92,8 @@ private:
     std::string mOneProductID;      // 产品ID
     std::string mOneKey;            // 设备密钥
     std::string mOneToken;          // 设备Token
+
+    bool mConnectStatus;            // 设备连接状态
 };
 
 

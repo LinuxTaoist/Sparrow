@@ -24,6 +24,7 @@
 #include <sys/socket.h>
 #include "SprLog.h"
 #include "OneNetDriver.h"
+#include "OneNetCommon.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;
@@ -177,18 +178,41 @@ OneNetDriver::mStateTable =
     // =============================================================
     // All States for SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT
     // =============================================================
-    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_IDLE,
+    { LEV1_SOCKET_ANY, LEV2_ONENET_IDLE,
       SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT,
       &OneNetDriver::MsgRespondMqttMsgConnect
     },
 
-    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_DISCONNECTED,
+    { LEV1_SOCKET_ANY, LEV2_ONENET_CONNECTING,
+      SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT,
+      &OneNetDriver::MsgRespondMqttMsgConnect
+    },
+
+    { LEV1_SOCKET_ANY, LEV2_ONENET_DISCONNECTED,
       SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT,
       &OneNetDriver::MsgRespondMqttMsgConnect
     },
 
     { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
       SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT,
+      &OneNetDriver::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
+    // =============================================================
+    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_CONNECTING,
+      SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK,
+      &OneNetDriver::MsgRespondMqttMsgConnack
+    },
+
+    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_DISCONNECTED,
+      SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK,
+      &OneNetDriver::MsgRespondMqttMsgConnack
+    },
+
+    { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK,
       &OneNetDriver::MsgRespondUnexpectedState
     },
 
@@ -210,6 +234,9 @@ OneNetDriver::OneNetDriver(ModuleIDType id, const std::string& name)
     mOneNetPort = ONENET_MQTT_PORT;
     mCurLev1State = LEV1_SOCKET_IDLE;
     mCurLev2State = LEV2_ONENET_IDLE;
+    mOneSocketPtr = nullptr;
+    mSendPIPEPtr = nullptr;
+    mRecvPIPEPtr = nullptr;
 }
 
 OneNetDriver::~OneNetDriver()
@@ -225,7 +252,53 @@ OneNetDriver* OneNetDriver::GetInstance(ModuleIDType id, const std::string& name
 int32_t OneNetDriver::Init()
 {
     SPR_LOGD("OneNetDriver Init\n");
+    InitUnixPIPE();
     return 0;
+}
+
+int32_t OneNetDriver::InitUnixPIPE()
+{
+    SPR_LOGD("Init Unix PIPE\n");
+    int32_t pipe[2];
+    int32_t ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe);
+    if (ret == -1) {
+        SPR_LOGE("socketpair failed: %s\n", strerror(errno));
+        return -1;
+    }
+
+    // 将待发的mqtt字节流通过mSendPIPEPtr写入管道pipe[1]中缓存
+    mSendPIPEPtr = mSendPIPEPtr ? mSendPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[1]);
+    CHECK_POINTER_VALIDITY(mSendPIPEPtr, -1);
+    mSendPIPEPtr->AsUnixStreamClient();
+    // mSendPIPEPtr->InitFramework();
+
+    // 读取管道pipe[0]中缓存的mqtt字节流
+    mRecvPIPEPtr = mRecvPIPEPtr ? mRecvPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[0], [&](int sock, void *arg) {
+        PSocket* pUnixPIPE0 = reinterpret_cast<PSocket*>(arg);
+        CHECK_POINTER_VALIDITY_NONRET(pUnixPIPE0);
+        CHECK_POINTER_VALIDITY_NONRET(mOneSocketPtr);
+
+        std::string rBuf;
+        int32_t len = pUnixPIPE0->Read(sock, rBuf);
+        if (len < 0) {
+            SPR_LOGE("Read unix pipe0 failed! %s\n", strerror(errno));
+            return;
+        }
+
+        // 读取出管道缓存mqtt字节流，通过socket发送到OneNet
+        len = mOneSocketPtr->Write(mOneSocketPtr->GetEpollFd(), rBuf);
+        if (len < 0) {
+            SPR_LOGE("Write socket failed! %s\n", strerror(errno));
+            return;
+        }
+
+        // SPR_LOGD("Write %d bytes to socket\n", len);
+    });
+
+    CHECK_POINTER_VALIDITY(mRecvPIPEPtr, -1);
+    mRecvPIPEPtr->AsUnixStreamClient();
+    mRecvPIPEPtr->InitFramework();
+    return ret;
 }
 
 void OneNetDriver::SetLev1State(EOneNetDrvLev1State state)
@@ -362,13 +435,8 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
             DumpSocketBytesWithAscall(rBuf);
-
-            std::lock_guard<std::mutex> lock(mSockMutex);
-            mSockBuffer += rBuf;
         } else {
             SPR_LOGD("## CLOSE [%d]\n", sock);
-
-            std::lock_guard<std::mutex> lock(mSockMutex);
             pSocket->Close();
 
             // Send to self socket disconnect passive
@@ -379,7 +447,8 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
 
     // Update state to connecting
     SetLev1State(LEV1_SOCKET_CONNECTING);
-    mOneSocketPtr->InitFramework();
+
+    CHECK_POINTER_VALIDITY_NONRET(mOneSocketPtr);
     int32_t rc = mOneSocketPtr->AsTcpClient(true, mOneNetHost, mOneNetPort);
     if (rc < 0) {
         SPR_LOGE("Failed build OneNet client! (%s)\n", strerror(errno));
@@ -388,6 +457,7 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         return;
     }
 
+    mOneSocketPtr->InitFramework();
     SprMsg conMsg(SIG_ID_ONENET_DRV_SOCKET_CONNECT_SUCCESS);
     SendMsg(conMsg);
     SPR_LOGI("Connect host (%s:%d) successfully!\n", mOneNetHost.c_str(), mOneNetPort);
@@ -403,6 +473,12 @@ void OneNetDriver::MsgRespondSocketConnectSuccess(const SprMsg& msg)
 {
     SetLev1State(LEV1_SOCKET_CONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
+
+    // TODO:
+    if (mCurLev2State == LEV2_ONENET_CONNECTING) {
+        SPR_LOGI("Socket connected, please resend connect with device infomation!\n");
+
+    }
 
     SPR_LOGI("Connect OneNet socket successfully!\n");
 }
@@ -509,11 +585,32 @@ void OneNetDriver::MsgRespondSocketDisconnectPassive(const SprMsg& msg)
  */
 void OneNetDriver::MsgRespondMqttMsgConnect(const SprMsg& msg)
 {
+    if (mCurLev1State != LEV1_SOCKET_CONNECTED) {
+        SPR_LOGW("Socket not ready, try connect...\n");
+        SetLev2State(LEV2_ONENET_CONNECTING);
+        SendMsg(SIG_ID_ONENET_DRV_SOCKET_CONNECT);
+        return;
+    }
+
     std::string payload = msg.GetString();
     int32_t ret = SendMqttConnect(payload);
     if (ret < 0) {
         SPR_LOGE("Send mqtt connect msg failed\n");
     }
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDriver::MsgRespondMqttMsgConnack(const SprMsg& msg)
+{
+    SetLev2State(LEV2_ONENET_CONNECTED);
+
+    SprMsg copyMsg(msg);
+    NotifyObserver(MODULE_ONENET_MANAGER, copyMsg);
 }
 
 /**
@@ -622,8 +719,138 @@ int32_t OneNetDriver::SendMqttBytes(const std::string& bytes)
 {
     // dump mqtt bytes for debug
     DumpSocketBytesWithAscall(bytes);
+
+    if (!mSendPIPEPtr) {
+        SPR_LOGE("Send PIPE is null\n");
+        return -1;
+    }
+
+    int32_t len = mSendPIPEPtr->Write(mSendPIPEPtr->GetEpollFd(), bytes);
+    if (len < 0) {
+        SPR_LOGE("Send PIPE failed! (%s)\n", strerror(errno));
+    }
+
+    // SPR_LOGD("PIPE %d Send %d bytes\n", mSendPIPEPtr->GetEpollFd(), len);
+    return len;
+}
+
+int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
+{
+    if (bytes.size() < 2) {
+        SPR_LOGE("Invalid mqtt bytes\n");
+        return -1;
+    }
+
+    int ret = -1;
+    uint8_t msgId = (bytes[0] & 0xF0) >> 4;
+    switch (msgId) {
+        case MQTT_MSG_CONNECT:
+        {
+            ret = HandleMqttConnect(bytes);
+            break;
+        }
+        case MQTT_MSG_CONNACK:
+        {
+            ret = HandleMqttConnack(bytes);
+            break;
+        }
+        case MQTT_MSG_PUBLISH:
+        {
+            ret = HandleMqttPublish(bytes);
+            break;
+        }
+        case MQTT_MSG_PUBACK:
+        {
+            ret = HandleMqttPubAck(bytes);
+            break;
+        }
+        default:
+        {
+            SPR_LOGE("Invalid mqtt msgId %d\n", msgId);
+            break;
+        }
+    }
+
+    return ret;
+}
+
+int32_t OneNetDriver::HandleMqttConnect(const std::string& bytes)
+{
     return 0;
 }
+
+int32_t OneNetDriver::HandleMqttConnack(const std::string& bytes)
+{
+    MqttConnack mqttCmd;
+    int ret = mqttCmd.Decode(bytes);
+    CHECK_ONENET_RET_VALIDITY(ret);
+
+    SprMsg msg(SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK);
+    msg.SetU8Value(mqttCmd.GetReturnCode());
+    SendMsg(msg);
+    return ret;
+}
+
+int32_t OneNetDriver::HandleMqttPublish(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttPubAck(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttPubRec(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttPubRel(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttPubComp(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttSubscribe(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttSubAck(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttUnsubscribe(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttUnsubAck(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttPingReq(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttPingResp(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t OneNetDriver::HandleMqttDisconnect(const std::string& bytes)
+{
+    return 0;
+}
+
 
 int32_t OneNetDriver::ProcessMsg(const SprMsg& msg)
 {

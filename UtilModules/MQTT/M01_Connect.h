@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : MqttConnect.h
+ *  @file       : M01_Connect.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,18 +16,11 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __MQTT_CONNECT_H__
-#define __MQTT_CONNECT_H__
+#ifndef __M01_CONNECT_H__
+#define __M01_CONNECT_H__
 
 #include <string>
 #include "MqttMsg.h"
-
-#define CHECK_RESULT(expr) do { \
-    int32_t _ret = (expr);      \
-    if (_ret == -1) {           \
-        return _ret;            \
-    }                           \
-} while(0)
 
 // 3.1 CONNECT – 连接服务端
 class MqttConnect : public MqttMsgBase
@@ -51,4 +44,4 @@ private:
     uint16_t mKeepAlive;            // 2 BYTE  保持连接时间
 };
 
-#endif // __MQTT_CONNECT_H__
+#endif // __M01_CONNECT_H__

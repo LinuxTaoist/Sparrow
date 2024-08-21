@@ -31,7 +31,7 @@ using namespace InternalDefs;
 #define ONENET_DEVICE_CFG_PATH "OneNetDevices.conf"
 
 OneNetDevice::OneNetDevice(ModuleIDType id, const std::string& name)
-    : SprObserverWithMQueue(id, name), mExpirationTime(0)
+    : SprObserverWithMQueue(id, name), mExpirationTime(0), mConnectStatus(false)
 {
 }
 
@@ -84,12 +84,12 @@ int32_t OneNetDevice::VerifyDeviceDetails()
 }
 
 /**
- * @brief Process SIG_ID_ONENET_MGR_DEVICE_CONNECT
+ * @brief Process SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
  *
  * @param[in] msg
  * @return none
  */
-void OneNetDevice::MsgRespondOneNetMgrDeviceConnect(const SprMsg& msg)
+void OneNetDevice::MsgRespondActiveDeviceConnect(const SprMsg& msg)
 {
     int16_t devNameLen = mOneDevName.length();
     int16_t productIdLen = mOneProductID.length();
@@ -111,14 +111,32 @@ void OneNetDevice::MsgRespondOneNetMgrDeviceConnect(const SprMsg& msg)
     NotifyObserver(MODULE_ONENET_DRIVER, conMsg);
 }
 
+/**
+ * @brief Process SIG_ID_ONENET_MGR_SET_CONNECT_STATUS
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDevice::MsgRespondSetConnectStatus(const SprMsg& msg)
+{
+    bool status = msg.GetBoolValue();
+    mConnectStatus = status;
+    SPR_LOGD("Connect status: %s\n", status ? "true" : "false");
+}
+
 int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
 {
     SPR_LOGD("Recv msg: %s\n", GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
-        case SIG_ID_ONENET_MGR_DEVICE_CONNECT:
+        case SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT:
         {
-            MsgRespondOneNetMgrDeviceConnect(msg);
+            MsgRespondActiveDeviceConnect(msg);
+            break;
+        }
+
+        case SIG_ID_ONENET_MGR_SET_CONNECT_STATUS:
+        {
             break;
         }
 

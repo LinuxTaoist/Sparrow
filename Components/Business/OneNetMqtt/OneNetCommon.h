@@ -19,5 +19,25 @@
 #ifndef __ONENET_COMMON_H__
 #define __ONENET_COMMON_H__
 
+#define CHECK_ONENET_RET_VALIDITY(expr) do {    \
+    int32_t _ret = (expr);                      \
+    if (_ret == -1) {                           \
+        return _ret;                            \
+    }                                           \
+} while(0)
+
+#define CHECK_POINTER_VALIDITY_NONRET(p) do {                   \
+    if ((p) == nullptr) {                                       \
+        SPR_LOGE("INVALID POINTER: %p is nullptr!\n", (p));     \
+        return ;                                                \
+    }                                                           \
+} while(0)
+
+#define CHECK_POINTER_VALIDITY(p, __err) do {                   \
+    if ((p) == nullptr) {                                       \
+        SPR_LOGE("INVALID POINTER: %p is nullptr!\n", (p));     \
+        return __err;                                           \
+    }                                                           \
+} while(0)
 
 #endif // __ONENET_COMMON_H__
