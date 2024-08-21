@@ -109,12 +109,15 @@ private:
 
     /* 消息响应函数 */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
+    void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
     void MsgRespondMqttDisconnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
+    uint32_t mReConnectReqCnt;
+    uint32_t mReConnectRspCnt;
     using StateTransitionType =
     InternalDefs::StateTransition<  EOneNetMgrLev1State,
                                     EOneNetMgrLev2State,

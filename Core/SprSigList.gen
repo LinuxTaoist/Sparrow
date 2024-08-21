@@ -59,7 +59,8 @@ ENUM_OR_STRING(SIG_ID_POWER_SLEEP),                             \
 //-----------------------------------------------------------------------------
 // ONENET_MANAGER
 //-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT),               \
+ENUM_OR_STRING(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT),        \
+ENUM_OR_STRING(SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT),  \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS),           \
 
 //-----------------------------------------------------------------------------

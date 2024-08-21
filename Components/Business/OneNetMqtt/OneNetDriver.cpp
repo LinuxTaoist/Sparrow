@@ -435,6 +435,7 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
             DumpSocketBytesWithAscall(rBuf);
+            DispatchMqttBytes(rBuf);
         } else {
             SPR_LOGD("## CLOSE [%d]\n", sock);
             pSocket->Close();
@@ -472,12 +473,11 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
 void OneNetDriver::MsgRespondSocketConnectSuccess(const SprMsg& msg)
 {
     SetLev1State(LEV1_SOCKET_CONNECTED);
-    SetLev2State(LEV2_ONENET_DISCONNECTED);
 
-    // TODO:
     if (mCurLev2State == LEV2_ONENET_CONNECTING) {
         SPR_LOGI("Socket connected, please resend connect with device infomation!\n");
-
+        SprMsg reConMsg(SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT);
+        NotifyObserver(MODULE_ONENET_MANAGER, reConMsg);
     }
 
     SPR_LOGI("Connect OneNet socket successfully!\n");
@@ -567,10 +567,10 @@ void OneNetDriver::MsgRespondSocketDisconnectPassive(const SprMsg& msg)
         NotifyObserver(msg1);
     }
 
-    // close socket on client side
+    // close socket on client side, reconnect socket and OneNet
     mOneSocketPtr->Close();
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
-    SetLev2State(LEV2_ONENET_DISCONNECTED);
+    SetLev2State(LEV2_ONENET_CONNECTING);
 
     // reconnect socket
     SprMsg msg2(SIG_ID_ONENET_DRV_SOCKET_RECONNECT);
@@ -607,10 +607,14 @@ void OneNetDriver::MsgRespondMqttMsgConnect(const SprMsg& msg)
  */
 void OneNetDriver::MsgRespondMqttMsgConnack(const SprMsg& msg)
 {
-    SetLev2State(LEV2_ONENET_CONNECTED);
+    uint8_t conResult =  msg.GetU8Value();
+    if (conResult == 0) {
+        SetLev2State(LEV2_ONENET_CONNECTED);
+    }
 
     SprMsg copyMsg(msg);
     NotifyObserver(MODULE_ONENET_MANAGER, copyMsg);
+    SPR_LOGD("Connect OneNet result = %d\n", conResult);
 }
 
 /**

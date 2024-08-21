@@ -212,7 +212,7 @@ int32_t MqttMsgBase::DecodeFixedHeader(const std::string& bytes)
 
     mFixedHeader.type = byte >> 4;
     mFixedHeader.flags = byte & 0x0F;
-    return 0;
+    return tfLen + rLen;
 }
 
 int32_t MqttMsgBase::EncodeFixedHeader(std::string& bytes)

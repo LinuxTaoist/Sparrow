@@ -69,6 +69,29 @@ OneNetManager::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT
+    // ============================================================
+    { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondReactiveCurDeviceConnect
+    },
+
+    { LEV1_ONENET_MGR_DISCONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondReactiveCurDeviceConnect
+    },
+
+    { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondReactiveCurDeviceConnect
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // All States for SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
@@ -117,6 +140,8 @@ OneNetManager::mStateTable =
 OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
   : SprObserverWithMQueue(id, name)
 {
+    mReConnectReqCnt = 0;
+    mReConnectRspCnt = 0;
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
     mCurLev2State = LEV2_ONENET_MGR_ANY;
 }
@@ -278,7 +303,8 @@ void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const 
         return;
     }
 
-    it->second->SendMsg(msg.GetMsgId());
+    SprMsg copyMsg(msg);
+    it->second->SendMsg(copyMsg);
     SPR_LOGD("Notify module device: %s, msg: %s\n", devModule.c_str(), GetSigName(msg.GetMsgId()));
 }
 
@@ -299,6 +325,21 @@ void OneNetManager::MsgRespondActiveDeviceConnect(const SprMsg& msg)
 }
 
 /**
+ * @brief Process SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetManager::MsgRespondReactiveCurDeviceConnect(const SprMsg& msg)
+{
+    mReConnectReqCnt++;
+    SetLev1State(LEV1_ONENET_MGR_CONNECTING);
+
+    SprMsg conMsg(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+    NotifyMsgToOneNetDevice(mCurActiveDevice, conMsg);
+}
+
+/**
  * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
  *
  * @param msg
@@ -307,12 +348,13 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 {
     bool isConnected = (msg.GetU8Value() == MQTT_CONNECT_ACCEPTED);
     EOneNetMgrLev1State state = isConnected ? LEV1_ONENET_MGR_CONNECTED : LEV1_ONENET_MGR_DISCONNECTED;
+    mReConnectRspCnt++;
 
     SetLev1State(state);
     SprMsg conMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
     conMsg.SetBoolValue(isConnected);
-    NotifyMsgToOneNetDevice(mCurActiveDevice, msg);
-    SPR_LOGD("OneNet return connect code: %d\n", msg.GetU8Value());
+    NotifyMsgToOneNetDevice(mCurActiveDevice, conMsg);
+    SPR_LOGD("OneNet return connect code: %d (%d %d)\n", msg.GetU8Value(), mReConnectReqCnt, mReConnectRspCnt);
 }
 
 /**

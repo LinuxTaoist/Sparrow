@@ -137,6 +137,7 @@ int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
 
         case SIG_ID_ONENET_MGR_SET_CONNECT_STATUS:
         {
+            MsgRespondSetConnectStatus(msg);
             break;
         }
 
