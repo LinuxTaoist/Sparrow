@@ -75,6 +75,7 @@ static void usage()
             "7: PowerOff\n"
             "8: OneNetDrv socket connect\n"
             "9: OneNetDev mqtt connect\n"
+            "a: Active MQTT-DEV01\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -177,6 +178,13 @@ int main(int argc, const char *argv[])
                 {
                     SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("MQTT-OneJson01");
+                    theDebug.NotifyObserver(msg);
+                    break;
+                }
+                case 'a':
+                {
+                    SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                    msg.SetString("MQTT-DEV01");
                     theDebug.NotifyObserver(msg);
                     break;
                 }
