@@ -190,7 +190,7 @@ int32_t MqttMsgBase::DecodeRemainingLength(const std::string& bytes)
 int32_t MqttMsgBase::EncodeRemainingLength(std::string& bytes)
 {
     int32_t len = 0;
-    uint64_t x = mVariableHeader.length() + mPayload.length();
+    uint64_t x = mVariableHeader.size() + mPayload.size();
     do {
         uint8_t encodedByte = (uint8_t)(x % 128);
         x /= 128;
@@ -236,6 +236,7 @@ int32_t MqttMsgBase::EncodeFixedHeader(std::string& bytes)
         return rLen;
     }
 
+    SPR_LOGD("vLen = %d, pLen = %d\n", mVariableHeader.size(), mPayload.size());
     return 1 + rLen;
 }
 

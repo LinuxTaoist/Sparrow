@@ -69,69 +69,28 @@ public:
     virtual ~MqttMsgBase();
 
     /**
-     * @brief Set the Fixed Header object
+     * @brief Set/Get the body bytes of the MQTT message
      *
      * @param[in] type The type of the MQTT message
      * @param[in] flags The flags of the MQTT message
+     * @param[in] variableHeader The variable header of the MQTT message
+     * @param[in] payload The payload of the MQTT message
      * @return length on success, or -1 if an error occurred
      */
     virtual int32_t SetFixedHeader(uint8_t type, uint8_t flags);
-
-    /**
-     * @brief Get the Fixed Header object
-     *
-     * @param[out] type The type of the MQTT message
-     * @param[out] flags The flags of the MQTT message
-     * @return length on success, or -1 if an error occurred
-     */
     virtual int32_t GetFixedHeader(uint8_t& type, uint8_t& flags);
-
-    /**
-     * @brief Set the Variable Header object
-     *
-     * @param[in] variableHeader The Variable Header object
-     * @return length on success, or -1 if an error occurred
-     */
     virtual int32_t SetVariableHeader(const std::string& variableHeader);
-
-    /**
-     * @brief Get the Variable Header object
-     *
-     * @param[out] variableHeader The Variable Header object
-     * @return length on success, or -1 if an error occurred
-     */
     virtual int32_t GetVariableHeader(std::string& variableHeader);
-
-    /**
-     * @brief Set the Payload object
-     *
-     * @param[in] payload The Payload object
-     * @return length on success, or -1 if an error occurred
-     */
     virtual int32_t SetPayload(const std::string& payload);
-
-    /**
-     * @brief Get the Payload object
-     *
-     * @param payload The Payload object
-     * @return length on success, or -1 if an error occurred
-     */
     virtual int32_t GetPayload(std::string& payload);
 
     /**
-     * @brief Decode the MQTT message from a string
+     * @brief Decode/Encode the MQTT message from/to bytes
      *
      * @param[in] bytes The string to decode
      * @return length on success, or -1 if an error occurred
      */
     virtual int32_t Decode(const std::string& bytes);
-
-    /**
-     * @brief Encode the MQTT message to a string
-     *
-     * @param[in] bytes The string to store the encoded message
-     * @return length on success, or -1 if an error occurred
-     */
     virtual int32_t Encode(std::string& bytes);
 
 protected:

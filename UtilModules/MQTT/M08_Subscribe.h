@@ -29,10 +29,6 @@ public:
 
     uint16_t GetPacketIdentifier() { return mPacketIdentifier; }
 
-protected:
-    int32_t EncodeVariableHeader(std::string& bytes) override;
-    int32_t EncodePayload(std::string& bytes) override;
-
 private:
     uint16_t mPacketIdentifier;
 };

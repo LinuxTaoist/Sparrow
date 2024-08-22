@@ -31,11 +31,9 @@ using namespace InternalDefs;
 #define ONENET_DEVICE_CFG_PATH          "OneNetDevices.conf"
 #define DEFAULT_KEEP_ALIVE_INTERVAL     60  // 60s
 
-// 订阅全部物模型相关主题：$sys/{pid}/{device-name}/thing/#
-#define TEMPLATE_TOPIC_THING_ALL    "$sys/{%s}/{%s}/thing/%s"
-
-// 订阅数据流模式下的命令下发：$sys/{pid}/{device-name}/cmd/#
-#define TEMPLATE_TOPIC_CMD          "$sys/{%s}/{%s}/cmd/%s"
+#define TEMPLATE_TOPIC_THING_ALL            "$sys/%s/%s/thing/%s"
+#define TEMPLATE_TOPIC_THING_POST_REPLY     "$sys/%s/%s/thing/property/%s"
+#define TEMPLATE_TOPIC_CMD                  "$sys/%s/%s/cmd/%s"
 
 OneNetDevice::OneNetDevice(ModuleIDType id, const std::string& name)
     : SprObserverWithMQueue(id, name), mExpirationTime(0), mConnectStatus(false)
@@ -97,12 +95,13 @@ int32_t OneNetDevice::VerifyDeviceDetails()
 int32_t OneNetDevice::InitTopicList()
 {
     char topicThingAll[128] = {0};
-    snprintf(topicThingAll, sizeof(topicThingAll), TEMPLATE_TOPIC_THING_ALL, mOneProductID.c_str(), mOneDevName.c_str(), "#");
+    snprintf(topicThingAll, sizeof(topicThingAll), TEMPLATE_TOPIC_THING_POST_REPLY, mOneProductID.c_str(), mOneDevName.c_str(), "post/reply");
     mAllTopics.push_back(topicThingAll);
+    SPR_LOGI("Add topic: %s\n", topicThingAll);
 
-    char topicCmd[128] = {0};
-    snprintf(topicCmd, sizeof(topicCmd), TEMPLATE_TOPIC_CMD, mOneProductID.c_str(), mOneDevName.c_str(), "#");
-    mAllTopics.push_back(topicCmd);
+    // char topicCmd[128] = {0};
+    // snprintf(topicCmd, sizeof(topicCmd), TEMPLATE_TOPIC_CMD, mOneProductID.c_str(), mOneDevName.c_str(), "#");
+    // mAllTopics.push_back(topicCmd);
     return 0;
 }
 
@@ -190,6 +189,16 @@ void OneNetDevice::MsgRespondSetConnectStatus(const SprMsg& msg)
  *
  * @param[in] msg
  * @return none
+ * tips：主题订阅支持通配符“+”（单层）和“#”（多层），实现同时订阅多个主题消息，例如：
+ *  1、订阅全部物模型相关主题：$sys/{pid}/{device-name}/thing/#
+ *  2、订阅物模型属性类相关主题：$sys/{pid}/{device-name}/thing/property/#
+ *  3、订阅物模型服务调用类相关主题：
+ *     $sys/{pid}/{device-name}/thing/service/#
+ *     或者同时订阅$sys/{pid}/{device-name}/thing/service/+/invoke、$sys/{pid}/{device-name}/thing/service/+/invoke_reply
+ *  4、订阅数据流模式下的命令下发：
+ *     $sys/{pid}/{device-name}/cmd/#
+ *     或者同时订阅$sys/{pid}/{device-name}/cmd/request/+、$sys/{pid}/{device-name}/cmd/response/+/accepted、$sys/{pid}/{device-name}/cmd/response/+/rejected
+ *     订阅全部物模型相关主题：$sys/{pid}/{device-name}/thing/#
  */
 void OneNetDevice::MsgRespondSubscribeTopic(const SprMsg& msg)
 {

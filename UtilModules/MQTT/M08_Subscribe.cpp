@@ -19,24 +19,17 @@
 #include "M08_Subscribe.h"
 
 MqttSubscribe::MqttSubscribe(uint16_t identifier, const std::string& topic)
-    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2, topic), mPacketIdentifier(identifier)
+    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mPacketIdentifier(identifier)
 {
+    mVariableHeader.push_back((identifier >> 8) & 0xFF);
+    mVariableHeader.push_back(identifier & 0xFF);
+    uint16_t topicLength = (uint16_t)topic.length();
+    mPayload.push_back((topicLength >> 8) & 0xFF);
+    mPayload.push_back(topicLength & 0xFF);
+    mPayload += topic;
+    mPayload.push_back(0x00); // QoS level
 }
 
 MqttSubscribe::~MqttSubscribe()
 {
-}
-
-int32_t MqttSubscribe::EncodeVariableHeader(std::string& bytes)
-{
-    return EncodeIntegerToBytes(mPacketIdentifier, bytes);
-}
-
-int32_t MqttSubscribe::EncodePayload(std::string& bytes)
-{
-    uint16_t topicLength = (uint16_t)mPayload.length();
-    bytes.push_back((topicLength >> 8) & 0xFF);
-    bytes.push_back(topicLength & 0xFF);
-    bytes += mPayload;
-    return 2 + topicLength;
 }
