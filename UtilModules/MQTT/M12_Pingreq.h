@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : MqttProtocol.h
+ *  @file       : M12_Pingreq.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,8 +16,17 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "M01_Connect.h"
-#include "M02_Connack.h"
-#include "M08_Subscribe.h"
-#include "M12_Pingreq.h"
-#include "M13_Pingresp.h"
+#ifndef __M12_PINGREQ_H__
+#define __M12_PINGREQ_H__
+
+#include "MqttMsg.h"
+
+// 3.12 PINGREQ – 心跳请求
+class MqttPingreq : public MqttMsgBase
+{
+public:
+    MqttPingreq();
+    ~MqttPingreq();
+};
+
+#endif // __M12_PINGREQ_H__

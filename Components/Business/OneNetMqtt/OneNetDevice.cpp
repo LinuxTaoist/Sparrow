@@ -28,11 +28,20 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
 
-#define ONENET_DEVICE_CFG_PATH "OneNetDevices.conf"
+#define ONENET_DEVICE_CFG_PATH          "OneNetDevices.conf"
+#define DEFAULT_KEEP_ALIVE_INTERVAL     60  // 60s
+
+// 订阅全部物模型相关主题：$sys/{pid}/{device-name}/thing/#
+#define TEMPLATE_TOPIC_THING_ALL    "$sys/{%s}/{%s}/thing/%s"
+
+// 订阅数据流模式下的命令下发：$sys/{pid}/{device-name}/cmd/#
+#define TEMPLATE_TOPIC_CMD          "$sys/{%s}/{%s}/cmd/%s"
 
 OneNetDevice::OneNetDevice(ModuleIDType id, const std::string& name)
     : SprObserverWithMQueue(id, name), mExpirationTime(0), mConnectStatus(false)
 {
+    mCurSubscribeIdx = 0;
+    mKeepAliveIntervalInSec = DEFAULT_KEEP_ALIVE_INTERVAL;
 }
 
 OneNetDevice::~OneNetDevice()
@@ -42,7 +51,9 @@ OneNetDevice::~OneNetDevice()
 int32_t OneNetDevice::Init()
 {
     DumpDeviceInformation();
-    return VerifyDeviceDetails();
+    VerifyDeviceDetails();
+    InitTopicList();
+    return 0;
 }
 
 int32_t OneNetDevice::DumpDeviceInformation()
@@ -83,6 +94,50 @@ int32_t OneNetDevice::VerifyDeviceDetails()
     return 0;
 }
 
+int32_t OneNetDevice::InitTopicList()
+{
+    char topicThingAll[128] = {0};
+    snprintf(topicThingAll, sizeof(topicThingAll), TEMPLATE_TOPIC_THING_ALL, mOneProductID.c_str(), mOneDevName.c_str(), "#");
+    mAllTopics.push_back(topicThingAll);
+
+    char topicCmd[128] = {0};
+    snprintf(topicCmd, sizeof(topicCmd), TEMPLATE_TOPIC_CMD, mOneProductID.c_str(), mOneDevName.c_str(), "#");
+    mAllTopics.push_back(topicCmd);
+    return 0;
+}
+
+int16_t OneNetDevice::GetUnusedIdentity()
+{
+    int16_t identity = 1;
+    if (mUsedIdentities.empty()) {
+        mUsedIdentities.insert(identity);
+        return identity;
+    }
+
+    if (*(--mUsedIdentities.end()) == (uint16_t)mUsedIdentities.size()) {
+        identity = (uint16_t)(mUsedIdentities.size() + 1);
+        mUsedIdentities.insert(identity);
+        return identity;
+    }
+
+    for (uint16_t i = 1; i < (uint16_t)mUsedIdentities.size(); i++) {
+        if (mUsedIdentities.find(i) == mUsedIdentities.end()) {
+            identity = i;
+            mUsedIdentities.insert(identity);
+            return identity;
+        }
+    }
+
+    return identity;
+}
+
+void OneNetDevice::StartSubscribeTopic()
+{
+    mCurSubscribeIdx = 0;
+    SprMsg msg(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC);
+    SendMsg(msg);
+}
+
 /**
  * @brief Process SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
  *
@@ -107,6 +162,7 @@ void OneNetDevice::MsgRespondActiveDeviceConnect(const SprMsg& msg)
     payload.append(mOneToken);
 
     SprMsg conMsg(SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT);
+    conMsg.SetU32Value(mKeepAliveIntervalInSec);
     conMsg.SetString(payload);
     NotifyObserver(MODULE_ONENET_DRIVER, conMsg);
 }
@@ -122,6 +178,43 @@ void OneNetDevice::MsgRespondSetConnectStatus(const SprMsg& msg)
     bool status = msg.GetBoolValue();
     mConnectStatus = status;
     SPR_LOGD("Connect status: %s\n", status ? "true" : "false");
+
+    if (status) {
+        SPR_LOGD("Device is ready, start send subscribe topics\n");
+        StartSubscribeTopic();
+    }
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDevice::MsgRespondSubscribeTopic(const SprMsg& msg)
+{
+    if (mCurSubscribeIdx >= (int32_t)mAllTopics.size()) {
+        SPR_LOGD("All topics are subscribed\n");
+        return;
+    }
+
+    SprMsg tmpMsg(SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE);
+    tmpMsg.SetU16Value(GetUnusedIdentity());
+    tmpMsg.SetString(mAllTopics[mCurSubscribeIdx]);
+    NotifyObserver(MODULE_ONENET_DRIVER, tmpMsg);
+    mCurSubscribeIdx++;
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_MGR_PING_TIMER_EVENT
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDevice::MsgRespondPingTimerEvent(const SprMsg& msg)
+{
+    SprMsg pingMsg(SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ);
+    NotifyObserver(MODULE_ONENET_DRIVER, pingMsg);
 }
 
 int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
@@ -134,13 +227,21 @@ int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
             MsgRespondActiveDeviceConnect(msg);
             break;
         }
-
         case SIG_ID_ONENET_MGR_SET_CONNECT_STATUS:
         {
             MsgRespondSetConnectStatus(msg);
             break;
         }
-
+        case SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC:
+        {
+            MsgRespondSubscribeTopic(msg);
+            break;
+        }
+        case SIG_ID_ONENET_MGR_PING_TIMER_EVENT:
+        {
+            MsgRespondPingTimerEvent(msg);
+            break;
+        }
         default:
         {
             break;

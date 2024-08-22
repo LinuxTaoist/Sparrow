@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : MqttProtocol.h
+ *  @file       : M13_Pingresq.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,8 +16,17 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "M01_Connect.h"
-#include "M02_Connack.h"
-#include "M08_Subscribe.h"
-#include "M12_Pingreq.h"
-#include "M13_Pingresp.h"
+#ifndef __M13_PINGRESP_H__
+#define __M13_PINGRESP_H__
+
+#include "MqttMsg.h"
+
+// 3.13 PINGRESP – 心跳响应
+class MqttPingresq : public MqttMsgBase
+{
+public:
+    MqttPingresq();
+    ~MqttPingresq();
+};
+
+#endif // __M13_PINGRESP_H__

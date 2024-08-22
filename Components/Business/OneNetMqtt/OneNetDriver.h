@@ -119,20 +119,22 @@ private:
     void MsgRespondSocketDisconnectPassive(const SprMsg& msg);
     void MsgRespondMqttMsgConnect(const SprMsg& msg);
     void MsgRespondMqttMsgConnack(const SprMsg& msg);
+    void MsgRespondMqttMsgPingreq(const SprMsg& msg);
+    void MsgRespondMqttMsgPingresq(const SprMsg& msg);
+    void MsgRespondMqttMsgSubscribe(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
     /**
      * @brief Send mqtt cmd bytes
      */
-    int32_t SendMqttConnect(const std::string& payload);        // 3.1 CONNECT
-    int32_t SendMqttConnack();                                  // 3.2 CONNACK
+    int32_t SendMqttConnect(int32_t keepAliveInSec, const std::string& payload); // 3.1 CONNECT
     int32_t SendMqttPublish(uint16_t cmd);                      // 3.3 PUBLISH
     int32_t SendMqttPubAck(uint16_t cmd);                       // 3.4 PUBACK
     int32_t SendMqttPubRec(uint16_t cmd);                       // 3.5 PUBREC
     int32_t SendMqttPubRel(uint16_t cmd);                       // 3.6 PUBREL
     int32_t SendMqttPubComp(uint16_t cmd);                      // 3.7 PUBCOMP
-    int32_t SendMqttSubscribe(uint16_t cmd);                    // 3.8 SUBSCRIBE
+    int32_t SendMqttSubscribe(uint16_t identifier, std::string& topics);        // 3.8 SUBSCRIBE
     int32_t SendMqttSubAck(uint16_t cmd);                       // 3.9 SUBACK
     int32_t SendMqttUnsubscribe(uint16_t cmd);                  // 3.10 UNSUBSCRIBE
     int32_t SendMqttUnsubAck(uint16_t cmd);                     // 3.11 UNSUBACK
@@ -141,7 +143,6 @@ private:
     int32_t SendMqttDisconnect();                               // 3.14 DISCONNECT
 
     int32_t DispatchMqttBytes(const std::string& bytes);
-    int32_t HandleMqttConnect(const std::string& bytes);        // 3.1 CONNECT
     int32_t HandleMqttConnack(const std::string& bytes);        // 3.2 CONNACK
     int32_t HandleMqttPublish(const std::string& bytes);        // 3.3 PUBLISH
     int32_t HandleMqttPubAck(const std::string& bytes);         // 3.4 PUBACK

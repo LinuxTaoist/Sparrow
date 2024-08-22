@@ -217,6 +217,45 @@ OneNetDriver::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE
+    // =============================================================
+    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_CONNECTED,
+      SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE,
+      &OneNetDriver::MsgRespondMqttMsgSubscribe
+    },
+
+    { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE,
+      &OneNetDriver::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ
+    // =============================================================
+    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ,
+      &OneNetDriver::MsgRespondMqttMsgPingreq
+    },
+
+    { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ,
+      &OneNetDriver::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP
+    // =============================================================
+    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_CONNECTED,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP,
+      &OneNetDriver::MsgRespondMqttMsgPingresq
+    },
+
+    { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP,
+      &OneNetDriver::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // Default case for handling unexpected messages,
     // mandatory to denote end of message table.
     // =============================================================
@@ -592,8 +631,9 @@ void OneNetDriver::MsgRespondMqttMsgConnect(const SprMsg& msg)
         return;
     }
 
+    int32_t keepAlive = msg.GetU32Value();
     std::string payload = msg.GetString();
-    int32_t ret = SendMqttConnect(payload);
+    int32_t ret = SendMqttConnect(keepAlive, payload);
     if (ret < 0) {
         SPR_LOGE("Send mqtt connect msg failed\n");
     }
@@ -615,6 +655,47 @@ void OneNetDriver::MsgRespondMqttMsgConnack(const SprMsg& msg)
     SprMsg copyMsg(msg);
     NotifyObserver(MODULE_ONENET_MANAGER, copyMsg);
     SPR_LOGD("Connect OneNet result = %d\n", conResult);
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDriver::MsgRespondMqttMsgPingreq(const SprMsg& msg)
+{
+    int32_t ret = SendMqttPingReq();
+    if (ret < 0) {
+        SPR_LOGE("Send mqtt pingreq msg failed\n");
+    }
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDriver::MsgRespondMqttMsgPingresq(const SprMsg& msg)
+{
+    SPR_LOGD("Recv mqtt ping response!\n");
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDriver::MsgRespondMqttMsgSubscribe(const SprMsg& msg)
+{
+    uint16_t identifer = msg.GetU16Value();
+    std::string payload = msg.GetString();
+    int32_t ret = SendMqttSubscribe(identifer, payload);
+    if (ret < 0) {
+        SPR_LOGE("send subscribe failed\n");
+    }
 }
 
 /**
@@ -641,22 +722,16 @@ void OneNetDriver::MsgRespondUnexpectedMsg(const SprMsg& msg)
                 GetSigName(msg.GetMsgId()), GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 }
 
-int32_t OneNetDriver::SendMqttConnect(const std::string& payload)
+int32_t OneNetDriver::SendMqttConnect(int32_t keepAliveInSec, const std::string& payload)
 {
     std::string protocol = "MQTT";
-    uint16_t keepalive = 60;
+    uint16_t keepalive = keepAliveInSec;
     MqttConnect conMsg(protocol, 0x04, 0xC2, keepalive);
     conMsg.SetPayload(payload);
 
     std::string bytes;
     conMsg.Encode(bytes);
     return SendMqttBytes(bytes);
-}
-
-int32_t OneNetDriver::SendMqttConnack()
-{
-
-    return 0;
 }
 
 int32_t OneNetDriver::SendMqttPublish(uint16_t cmd)
@@ -684,9 +759,13 @@ int32_t OneNetDriver::SendMqttPubComp(uint16_t cmd)
     return 0;
 }
 
-int32_t OneNetDriver::SendMqttSubscribe(uint16_t cmd)
+int32_t OneNetDriver::SendMqttSubscribe(uint16_t identifier, std::string& topics)
 {
-    return 0;
+    SPR_LOGD("Send mqtt subscribe!\n");
+    MqttSubscribe mqttMsg(identifier, topics);
+    std::string bytes;
+    mqttMsg.Encode(bytes);
+    return SendMqttBytes(bytes);
 }
 
 int32_t OneNetDriver::SendMqttSubAck(uint16_t cmd)
@@ -706,7 +785,11 @@ int32_t OneNetDriver::SendMqttUnsubAck(uint16_t cmd)
 
 int32_t OneNetDriver::SendMqttPingReq()
 {
-    return 0;
+    SPR_LOGD("Send mqtt ping request!\n");
+    MqttPingreq pingreqMsg;
+    std::string bytes;
+    pingreqMsg.Encode(bytes);
+    return SendMqttBytes(bytes);
 }
 
 int32_t OneNetDriver::SendMqttPingResp()
@@ -748,11 +831,6 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
     int ret = -1;
     uint8_t msgId = (bytes[0] & 0xF0) >> 4;
     switch (msgId) {
-        case MQTT_MSG_CONNECT:
-        {
-            ret = HandleMqttConnect(bytes);
-            break;
-        }
         case MQTT_MSG_CONNACK:
         {
             ret = HandleMqttConnack(bytes);
@@ -768,6 +846,11 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
             ret = HandleMqttPubAck(bytes);
             break;
         }
+        case MQTT_MSG_PINGRESP:
+        {
+            ret = HandleMqttPingResp(bytes);
+            break;
+        }
         default:
         {
             SPR_LOGE("Invalid mqtt msgId %d\n", msgId);
@@ -776,11 +859,6 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
     }
 
     return ret;
-}
-
-int32_t OneNetDriver::HandleMqttConnect(const std::string& bytes)
-{
-    return 0;
 }
 
 int32_t OneNetDriver::HandleMqttConnack(const std::string& bytes)
@@ -847,7 +925,13 @@ int32_t OneNetDriver::HandleMqttPingReq(const std::string& bytes)
 
 int32_t OneNetDriver::HandleMqttPingResp(const std::string& bytes)
 {
-    return 0;
+    MqttPingresq mqttCmd;
+    int ret = mqttCmd.Decode(bytes);
+    CHECK_ONENET_RET_VALIDITY(ret);
+
+    SprMsg msg(SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP);
+    ret = SendMsg(msg);
+    return ret;
 }
 
 int32_t OneNetDriver::HandleMqttDisconnect(const std::string& bytes)

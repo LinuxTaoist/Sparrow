@@ -104,6 +104,9 @@ private:
     EOneNetMgrLev2State GetLev2State();
     const char* GetLev2StateString(EOneNetMgrLev2State state);
 
+    /* 启动OneNet心跳 */
+    void StartTimerToPingOneNet(int32_t intervalInMSec);
+
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
@@ -111,11 +114,13 @@ private:
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
+    void MsgRespondMqttPingTimerEvent(const SprMsg& msg);
     void MsgRespondMqttDisconnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
+    bool mEnablePingTimer;
     uint32_t mReConnectReqCnt;
     uint32_t mReConnectRspCnt;
     using StateTransitionType =

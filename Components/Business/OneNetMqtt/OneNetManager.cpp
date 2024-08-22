@@ -31,8 +31,9 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("OneNetMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetMgr", fmt, ##args)
 
-#define ONENET_DEVICE_NUM_LIMIT     5
-#define ONENET_DEVICES_CFG_PATH     "OneNetDevices.conf"
+#define DEFAULT_PING_TIMER_INTERVAL     60  // sec
+#define ONENET_DEVICE_NUM_LIMIT         5
+#define ONENET_DEVICES_CFG_PATH         "OneNetDevices.conf"
 
 void OneNetDevInfo::Clear()
 {
@@ -110,6 +111,30 @@ OneNetManager::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_MGR_PING_TIMER_EVENT
+    // =============================================================
+    { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_PING_TIMER_EVENT,
+      &OneNetManager::MsgRespondMqttPingTimerEvent
+    },
+
+    { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_PING_TIMER_EVENT,
+      &OneNetManager::MsgRespondMqttPingTimerEvent
+    },
+
+    { LEV1_ONENET_MGR_DISCONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_PING_TIMER_EVENT,
+      &OneNetManager::MsgRespondMqttPingTimerEvent
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
+
+
+    // =============================================================
     // All States for SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
@@ -140,10 +165,13 @@ OneNetManager::mStateTable =
 OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
   : SprObserverWithMQueue(id, name)
 {
+    mEnablePingTimer = false;
     mReConnectReqCnt = 0;
     mReConnectRspCnt = 0;
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
     mCurLev2State = LEV2_ONENET_MGR_ANY;
+
+    // mOneDeviceMap.insert(, );
 }
 
 OneNetManager::~OneNetManager()
@@ -295,6 +323,18 @@ const char* OneNetManager::GetLev2StateString(EOneNetMgrLev2State state)
     return (Lev2Strings.size() > state) ? Lev2Strings[state].c_str() : "UNDEFINED";
 }
 
+void OneNetManager::StartTimerToPingOneNet(int32_t intervalInMSec)
+{
+    if (mEnablePingTimer) {
+        SPR_LOGD("Ping timer is already enabled!\n");
+        return;
+    }
+
+    SPR_LOGD("Enable ping timer, interval: %dms\n", intervalInMSec);
+    mEnablePingTimer = true;
+    RegisterTimer(0, intervalInMSec, SIG_ID_ONENET_MGR_PING_TIMER_EVENT, 0);
+}
+
 void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg)
 {
     auto it = mOneDeviceMap.find(devModule);
@@ -354,7 +394,33 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
     SprMsg conMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
     conMsg.SetBoolValue(isConnected);
     NotifyMsgToOneNetDevice(mCurActiveDevice, conMsg);
-    SPR_LOGD("OneNet return connect code: %d (%d %d)\n", msg.GetU8Value(), mReConnectReqCnt, mReConnectRspCnt);
+
+    int32_t keepAliveInSec = mOneDeviceMap[mCurActiveDevice]->GetKeepAliveIntervalInSec();
+    if (keepAliveInSec <= 0) {
+        SPR_LOGW("Invaild keep alive interval: %d, set default: %d", keepAliveInSec, DEFAULT_PING_TIMER_INTERVAL);
+        keepAliveInSec = DEFAULT_PING_TIMER_INTERVAL;
+    }
+
+    StartTimerToPingOneNet(keepAliveInSec * 1000);
+    SPR_LOGD("OneNet return connect code: %d, start ping timer: %ds (%d %d)\n",
+        msg.GetU8Value(), keepAliveInSec, mReConnectReqCnt, mReConnectRspCnt);
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_MGR_PING_TIMER_EVENT
+ *
+ * @param msg
+ */
+void OneNetManager::MsgRespondMqttPingTimerEvent(const SprMsg& msg)
+{
+    if (mCurLev1State != LEV1_ONENET_MGR_CONNECTED) {
+        SPR_LOGD("Device not connect, stop ping timer\n");
+        mEnablePingTimer = false;
+        UnregisterTimer(SIG_ID_ONENET_MGR_PING_TIMER_EVENT);
+        return;
+    }
+
+    NotifyMsgToOneNetDevice(mCurActiveDevice, msg);
 }
 
 /**

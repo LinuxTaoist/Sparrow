@@ -69,7 +69,7 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
         SPR_LOGW("Disable status!\n");
     }
 
-    SPR_LOGD("[0x%x -> 0x%x] msg.GetMsgId() = %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
+    // SPR_LOGD("[0x%x -> 0x%x] msg.GetMsgId() = %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
         case SIG_ID_TIMER_START_SYSTEM_TIMER:
@@ -77,45 +77,31 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
             MsgRespondStartSystemTimer(msg);
             break;
         }
-
         case SIG_ID_TIMER_STOP_SYSTEM_TIMER:
         {
             MsgRespondStopSystemTimer(msg);
             break;
         }
-
-        case SIG_ID_TIMER_ADD_ONCE_TIMER:
-        {
-            break;
-        }
-
-        case SIG_ID_TIMER_ADD_REPEAT_TIMER:
-        break;
-
         case SIG_ID_TIMER_ADD_CUSTOM_TIMER:
         {
             MsgRespondAddTimer(msg);
             break;
         }
-
         case SIG_ID_TIMER_DEL_TIMER:
         {
             MsgRespondDelTimer(msg);
             break;
         }
-
         case SIG_ID_SYSTEM_TIMER_NOTIFY:
         {
             MsgRespondSystemTimerNotify(msg);
             break;
         }
-
         case SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT:
         {
             MsgRespondClearTimersForExitComponent(msg);
             break;
         }
-
         default:
             break;
     }

@@ -62,6 +62,12 @@ ENUM_OR_STRING(SIG_ID_POWER_SLEEP),                             \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT),        \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT),  \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS),           \
+ENUM_OR_STRING(SIG_ID_ONENET_MGR_PING_TIMER_EVENT),             \
+
+//-----------------------------------------------------------------------------
+// ONENET_DEVICE
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC),              \
 
 //-----------------------------------------------------------------------------
 // ONENET_DRIVER

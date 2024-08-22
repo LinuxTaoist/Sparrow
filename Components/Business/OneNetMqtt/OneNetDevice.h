@@ -19,6 +19,7 @@
 #ifndef __ONENET_DEVICE_H__
 #define __ONENET_DEVICE_H__
 
+#include <set>
 #include <string>
 #include "SprObserverWithMQueue.h"
 
@@ -68,7 +69,9 @@ public:
     std::string GetKey() { return mOneKey; }
     std::string GetToken() { return mOneToken; }
 
+    int32_t InitTopicList();
     bool GetConnectStatus() { return mConnectStatus; }
+    int32_t GetKeepAliveIntervalInSec() { return mKeepAliveIntervalInSec; }
 
 private:
     /**
@@ -78,6 +81,9 @@ private:
      */
     int32_t VerifyDeviceDetails();
 
+    int16_t GetUnusedIdentity();
+    void StartSubscribeTopic();
+
     /**
      * @brief message handle function
      *
@@ -85,15 +91,23 @@ private:
      */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondSetConnectStatus(const SprMsg& msg);
+    void MsgRespondSubscribeTopic(const SprMsg& msg);
+    void MsgRespondPingTimerEvent(const SprMsg& msg);
+
 
 private:
-    int32_t mExpirationTime;        // Token过期时间
-    std::string mOneDevName;        // 设备名称/ID
-    std::string mOneProductID;      // 产品ID
-    std::string mOneKey;            // 设备密钥
-    std::string mOneToken;          // 设备Token
+    int32_t mCurSubscribeIdx;   // 记录订阅主题索引
+    int32_t mExpirationTime;    // Token过期时间
+    std::string mOneDevName;    // 设备名称/ID
+    std::string mOneProductID;  // 产品ID
+    std::string mOneKey;        // 设备密钥
+    std::string mOneToken;      // 设备Token
 
-    bool mConnectStatus;            // 设备连接状态
+    bool mConnectStatus;                    // 设备连接状态
+    int32_t mKeepAliveIntervalInSec;        // 设备保活时间间隔
+    std::set<uint16_t> mUsedIdentities;     // 已使用的identity列表
+    std::vector<std::string> mAllTopics;    // 全部订阅主题列表, key：topicID
+    std::map<uint16_t, std::string> mEnTopicMap;    // 已订阅主题列表, key：topicID
 };
 
 

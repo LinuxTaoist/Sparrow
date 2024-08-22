@@ -315,7 +315,7 @@ int SprMediator::EpollLoop()
 
 int SprMediator::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("[0x%x -> 0x%x] msg: %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
+    // SPR_LOGD("[0x%x -> 0x%x] msg: %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId())
     {
         case SIG_ID_PROXY_REGISTER_REQUEST:

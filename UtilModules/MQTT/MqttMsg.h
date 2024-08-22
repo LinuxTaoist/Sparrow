@@ -61,6 +61,7 @@ public:
     MqttMsgBase();
     MqttMsgBase(const std::string& bytes);
     MqttMsgBase(uint8_t type, uint8_t flags = 0);
+    MqttMsgBase(uint8_t type, uint8_t flags, const std::string& payload);
     MqttMsgBase(const MqttMsgBase& msg);
     MqttMsgBase& operator=(const MqttMsgBase& msg);
     MqttMsgBase(MqttMsgBase&& msg);
@@ -134,14 +135,6 @@ public:
     virtual int32_t Encode(std::string& bytes);
 
 protected:
-    /**
-     * @brief Get string of the connect rsponse code
-     *
-     * @param code  connect response code
-     * @return the string of the connect response code
-     */
-    std::string GetConnectRspCodeStr(uint8_t code);
-
     // --------------------------------------------------------------------------------------------
     // Encode/Decode MQTT protocol functions
     // --------------------------------------------------------------------------------------------
@@ -200,6 +193,7 @@ protected:
     } mFixedHeader;                 // Fixed Header in MQTT protocol
     std::string mVariableHeader;    // Variable Header in MQTT protocol
     std::string mPayload;           // Payload in MQTT protocol
+    uint64_t mRemainLenValue;
 };
 
 #endif // __MQTT_MSG_H__
