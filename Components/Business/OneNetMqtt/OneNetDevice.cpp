@@ -18,6 +18,7 @@
  */
 #include <fstream>
 #include <sstream>
+#include <algorithm>
 #include "SprLog.h"
 #include "OneNetDevice.h"
 
@@ -31,14 +32,12 @@ using namespace InternalDefs;
 #define ONENET_DEVICE_CFG_PATH          "OneNetDevices.conf"
 #define DEFAULT_KEEP_ALIVE_INTERVAL     60  // 60s
 
-#define TEMPLATE_TOPIC_THING_ALL            "$sys/%s/%s/thing/%s"
-#define TEMPLATE_TOPIC_THING_POST_REPLY     "$sys/%s/%s/thing/property/%s"
-#define TEMPLATE_TOPIC_CMD                  "$sys/%s/%s/cmd/%s"
+#define TEMPLATE_TOPIC_THING            "$sys/%s/%s/thing/%s"
+#define TEMPLATE_TOPIC_CMD              "$sys/%s/%s/cmd/%s"
 
 OneNetDevice::OneNetDevice(ModuleIDType id, const std::string& name)
     : SprObserverWithMQueue(id, name), mExpirationTime(0), mConnectStatus(false)
 {
-    mCurSubscribeIdx = 0;
     mKeepAliveIntervalInSec = DEFAULT_KEEP_ALIVE_INTERVAL;
 }
 
@@ -95,13 +94,19 @@ int32_t OneNetDevice::VerifyDeviceDetails()
 int32_t OneNetDevice::InitTopicList()
 {
     char topicThingAll[128] = {0};
-    snprintf(topicThingAll, sizeof(topicThingAll), TEMPLATE_TOPIC_THING_POST_REPLY, mOneProductID.c_str(), mOneDevName.c_str(), "post/reply");
-    mAllTopics.push_back(topicThingAll);
-    SPR_LOGI("Add topic: %s\n", topicThingAll);
+    char topicCmd[128] = {0};
 
-    // char topicCmd[128] = {0};
-    // snprintf(topicCmd, sizeof(topicCmd), TEMPLATE_TOPIC_CMD, mOneProductID.c_str(), mOneDevName.c_str(), "#");
-    // mAllTopics.push_back(topicCmd);
+    // $sys/{pid}/{device-name}/thing/property/#
+    // $sys/{pid}/{device-name}/cmd/#
+    snprintf(topicThingAll, sizeof(topicThingAll), TEMPLATE_TOPIC_THING, mOneProductID.c_str(), mOneDevName.c_str(), "post/reply");
+    snprintf(topicCmd, sizeof(topicCmd), TEMPLATE_TOPIC_CMD, mOneProductID.c_str(), mOneDevName.c_str(), "#");
+    mAllTopicMap[topicThingAll] = {TOPIC_STATUS_IDLE, 0, topicThingAll};
+    mAllTopicMap[topicCmd] = {TOPIC_STATUS_IDLE, 0, topicCmd};
+
+    for (const auto &topic : mAllTopicMap) {
+        SPR_LOGI("OneNet Topic: [%s]\n", topic.first.c_str());
+    }
+
     return 0;
 }
 
@@ -132,7 +137,6 @@ int16_t OneNetDevice::GetUnusedIdentity()
 
 void OneNetDevice::StartSubscribeTopic()
 {
-    mCurSubscribeIdx = 0;
     SprMsg msg(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC);
     SendMsg(msg);
 }
@@ -175,9 +179,9 @@ void OneNetDevice::MsgRespondActiveDeviceConnect(const SprMsg& msg)
 void OneNetDevice::MsgRespondSetConnectStatus(const SprMsg& msg)
 {
     bool status = msg.GetBoolValue();
-    mConnectStatus = status;
-    SPR_LOGD("Connect status: %s\n", status ? "true" : "false");
 
+    SPR_LOGD("Connect status: %s\n", status ? "true" : "false");
+    mConnectStatus = status;
     if (status) {
         SPR_LOGD("Device is ready, start send subscribe topics\n");
         StartSubscribeTopic();
@@ -189,6 +193,7 @@ void OneNetDevice::MsgRespondSetConnectStatus(const SprMsg& msg)
  *
  * @param[in] msg
  * @return none
+ *
  * tips：主题订阅支持通配符“+”（单层）和“#”（多层），实现同时订阅多个主题消息，例如：
  *  1、订阅全部物模型相关主题：$sys/{pid}/{device-name}/thing/#
  *  2、订阅物模型属性类相关主题：$sys/{pid}/{device-name}/thing/property/#
@@ -202,16 +207,52 @@ void OneNetDevice::MsgRespondSetConnectStatus(const SprMsg& msg)
  */
 void OneNetDevice::MsgRespondSubscribeTopic(const SprMsg& msg)
 {
-    if (mCurSubscribeIdx >= (int32_t)mAllTopics.size()) {
+    std::string tmpTopic;
+    auto topicIt = std::find_if(mAllTopicMap.begin(), mAllTopicMap.end(),
+        [](const std::pair<std::string, OneNetTopic>& topic) {
+        return topic.second.status == TOPIC_STATUS_IDLE;
+    });
+
+    if (topicIt == mAllTopicMap.end()) {
         SPR_LOGD("All topics are subscribed\n");
         return;
     }
 
+    uint16_t identity = GetUnusedIdentity();
+    tmpTopic = topicIt->second.topic;
+    topicIt->second.status = TOPIC_STATUS_WAIT_ACK;
+    topicIt->second.identifier = identity;
+    mCurTopic = tmpTopic;
+    SPR_LOGD("subscribe topic: %s\n", tmpTopic.c_str());
+
     SprMsg tmpMsg(SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE);
-    tmpMsg.SetU16Value(GetUnusedIdentity());
-    tmpMsg.SetString(mAllTopics[mCurSubscribeIdx]);
+    tmpMsg.SetU16Value(identity);
+    tmpMsg.SetString(tmpTopic);
     NotifyObserver(MODULE_ONENET_DRIVER, tmpMsg);
-    mCurSubscribeIdx++;
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDevice::MsgRespondSubscribeTopicAck(const SprMsg& msg)
+{
+    uint8_t retCode = msg.GetU8Value();
+    uint16_t identity = msg.GetU16Value();
+    auto topicIt = std::find_if(mAllTopicMap.begin(), mAllTopicMap.end(),
+        [identity](const std::pair<std::string, OneNetTopic>& topic) {
+        return topic.second.identifier == identity;
+    });
+
+    if (topicIt != mAllTopicMap.end()) {
+        topicIt->second.status = (retCode != 0x80) ? TOPIC_STATUS_SUBSCRIBED_SUCCESS : TOPIC_STATUS_SUBSCRIBING_FAIL;
+    }
+
+    SPR_LOGD("Recv subscribe topic [%s] ack, id: %02X ret: %02X \n", mCurTopic.c_str(), identity, retCode);
+    SprMsg tMsg(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC);
+    SendMsg(tMsg);
 }
 
 /**
@@ -224,6 +265,21 @@ void OneNetDevice::MsgRespondPingTimerEvent(const SprMsg& msg)
 {
     SprMsg pingMsg(SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ);
     NotifyObserver(MODULE_ONENET_DRIVER, pingMsg);
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDevice::MsgRespondDataReportTimerEvent(const SprMsg& msg)
+{
+    std::string bodyJson = "";
+
+    SprMsg tMsg(SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH);
+    tMsg.SetString(bodyJson);
+    NotifyObserver(MODULE_ONENET_DRIVER, tMsg);
 }
 
 int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
@@ -246,9 +302,19 @@ int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
             MsgRespondSubscribeTopic(msg);
             break;
         }
+        case SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK:
+        {
+            MsgRespondSubscribeTopicAck(msg);
+            break;
+        }
         case SIG_ID_ONENET_MGR_PING_TIMER_EVENT:
         {
             MsgRespondPingTimerEvent(msg);
+            break;
+        }
+        case SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT:
+        {
+            MsgRespondDataReportTimerEvent(msg);
             break;
         }
         default:

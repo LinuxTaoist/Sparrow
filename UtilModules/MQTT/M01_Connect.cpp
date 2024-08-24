@@ -26,44 +26,15 @@ MqttConnect::MqttConnect(std::string& protocolName, uint8_t version, uint8_t fla
     mProtocolVersion = version;
     mConnectFlags = flags;
     mKeepAlive = keepalive;
+
+    mVariableHeader.clear();
+    EncodeIntegerToBytes(mProtocolNameLength, mVariableHeader);
+    EncodeU8BytesToBytes(mProtocolName, mVariableHeader);
+    EncodeIntegerToBytes(mProtocolVersion, mVariableHeader);
+    EncodeIntegerToBytes(mConnectFlags, mVariableHeader);
+    EncodeIntegerToBytes(mKeepAlive, mVariableHeader);
 }
 
 MqttConnect::~MqttConnect()
 {
-}
-
-int32_t MqttConnect::Encode(std::string& bytes)
-{
-    // 1. mFixedHeader filled in Construct
-    // 2. mVariableHeader filled in Encode of derived class, such as MqttConnect
-    // 3. mPayload filled in SetPayload by caller
-    mVariableHeader.clear();
-    CHECK_RESULT(EncodeIntegerToBytes(mProtocolNameLength, mVariableHeader));
-    CHECK_RESULT(EncodeU8BytesToBytes(mProtocolName, mVariableHeader));
-    CHECK_RESULT(EncodeIntegerToBytes(mProtocolVersion, mVariableHeader));
-    CHECK_RESULT(EncodeIntegerToBytes(mConnectFlags, mVariableHeader));
-    CHECK_RESULT(EncodeIntegerToBytes(mKeepAlive, mVariableHeader));
-
-    return MqttMsgBase::Encode(bytes);
-}
-
-void MqttConnect::SetProtocolName(const std::string &name)
-{
-    mProtocolNameLength = name.length();
-    mProtocolName = name;
-}
-
-void MqttConnect::SetProtocolVersion(uint8_t version)
-{
-    mProtocolVersion = version;
-}
-
-void MqttConnect::SetConnectFlags(uint8_t flags)
-{
-    mConnectFlags = flags;
-}
-
-void MqttConnect::SetKeepAlive(uint16_t keepalive)
-{
-    mKeepAlive = keepalive;
 }

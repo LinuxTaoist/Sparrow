@@ -23,6 +23,23 @@
 #include <string>
 #include "SprObserverWithMQueue.h"
 
+enum ETopicStatus
+{
+    TOPIC_STATUS_IDLE = 0,
+    TOPIC_STATUS_WAIT_ACK,
+    TOPIC_STATUS_SUBSCRIBED_SUCCESS,
+    TOPIC_STATUS_SUBSCRIBING_FAIL,
+    TOPIC_STATUS_UNSUBSCRIBED,
+    TOPIC_STATUS_BUTT
+};
+
+struct OneNetTopic
+{
+    ETopicStatus status;
+    uint16_t identifier;
+    std::string topic;
+};
+
 class OneNetDevice : public SprObserverWithMQueue
 {
 public:
@@ -92,11 +109,11 @@ private:
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondSetConnectStatus(const SprMsg& msg);
     void MsgRespondSubscribeTopic(const SprMsg& msg);
+    void MsgRespondSubscribeTopicAck(const SprMsg& msg);
     void MsgRespondPingTimerEvent(const SprMsg& msg);
-
+    void MsgRespondDataReportTimerEvent(const SprMsg& msg);
 
 private:
-    int32_t mCurSubscribeIdx;   // 记录订阅主题索引
     int32_t mExpirationTime;    // Token过期时间
     std::string mOneDevName;    // 设备名称/ID
     std::string mOneProductID;  // 产品ID
@@ -105,10 +122,9 @@ private:
 
     bool mConnectStatus;                    // 设备连接状态
     int32_t mKeepAliveIntervalInSec;        // 设备保活时间间隔
+    std::string mCurTopic;                  // 当前正在订阅的主题
     std::set<uint16_t> mUsedIdentities;     // 已使用的identity列表
-    std::vector<std::string> mAllTopics;    // 全部订阅主题列表, key：topicID
-    std::map<uint16_t, std::string> mEnTopicMap;    // 已订阅主题列表, key：topicID
+    std::map<std::string, OneNetTopic> mAllTopicMap;    // 订阅主题列表, key：topicID
 };
-
 
 #endif // __ONENET_DEVICE_H__

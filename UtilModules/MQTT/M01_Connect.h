@@ -29,11 +29,11 @@ public:
     MqttConnect(std::string& protocolName, uint8_t version, uint8_t flags, uint16_t keepalive);
     ~MqttConnect();
 
-    int32_t Encode(std::string& bytes) override;
-    void SetProtocolName(const std::string &name);
-    void SetProtocolVersion(uint8_t version);
-    void SetConnectFlags(uint8_t flags);
-    void SetKeepAlive(uint16_t keepalive);
+    uint16_t GetProtocolNameLength() { return mProtocolNameLength; };
+    std::string GetProtocolName() { return mProtocolName; };
+    uint8_t GetProtocolVersion() { return mProtocolVersion; };
+    uint8_t GetConnectFlags() { return mConnectFlags; };
+    uint16_t GetKeepAlive() { return mKeepAlive; };
 
 private:
                                     // 可变包头

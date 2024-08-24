@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : M08_Subscribe.cpp
+ *  @file       : M09_Suback.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,22 +16,26 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "M08_Subscribe.h"
+#ifndef __M09_SUBACK_H__
+#define __M09_SUBACK_H__
 
-MqttSubscribe::MqttSubscribe(uint16_t identifier, const std::string& topic)
-    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mIdentifier(identifier)
+#include "MqttMsg.h"
+
+class Suback : public MqttMsgBase
 {
-    // Encode the variable header
-    EncodeIntegerToBytes(identifier, mVariableHeader);
+public:
+    Suback();
+    ~Suback();
 
-    // Encode the payload
-    uint8_t qos = 0x00;
-    uint16_t topicLength = (uint16_t)topic.length();
-    EncodeIntegerToBytes(topicLength, mPayload);
-    EncodeU8BytesToBytes(topic, mPayload);
-    EncodeIntegerToBytes(qos, mPayload);
-}
+    int32_t DecodeVariableHeader(const std::string& bytes) override;
+    int32_t DecodePayload(const std::string& bytes) override;
 
-MqttSubscribe::~MqttSubscribe()
-{
-}
+    uint16_t GetPacketIdentifier() { return mIdentifier; }
+    uint8_t GetReturnCode() { return mReturnCode; }
+
+private:
+    uint16_t mIdentifier;   // 2 BYTE   报文标识符
+    uint8_t mReturnCode;    // 1 BYTE   返回码
+};
+
+#endif // __M09_SUBACK_H__

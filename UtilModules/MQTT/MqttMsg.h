@@ -30,7 +30,7 @@
     }                           \
 } while(0)
 
-enum MQTT_MSG_TYPE
+enum EMqttMsgType
 {
     MQTT_MSG_CONNECT        = 1,
     MQTT_MSG_CONNACK        = 2,
@@ -47,6 +47,14 @@ enum MQTT_MSG_TYPE
     MQTT_MSG_PINGRESP       = 13,
     MQTT_MSG_DISCONNECT     = 14,
     MQTT_MSG_BUTT,
+};
+
+enum EMqttSubackResult
+{
+    MQTT_SUBACK_SUCCESS = 0x00,
+    MQTT_SUBACK_QOS0    = 0x01,
+    MQTT_SUBACK_QOS1    = 0x02,
+    MQTT_SUBACK_FAILURE = 0x80,
 };
 
 class MqttMsgBase

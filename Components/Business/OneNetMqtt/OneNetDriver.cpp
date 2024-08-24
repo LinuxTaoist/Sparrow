@@ -217,6 +217,19 @@ OneNetDriver::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH
+    // =============================================================
+    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_CONNECTED,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH,
+      &OneNetDriver::MsgRespondMqttMsgPublish
+    },
+
+    { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH,
+      &OneNetDriver::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // All States for SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE
     // =============================================================
     { LEV1_SOCKET_CONNECTED, LEV2_ONENET_CONNECTED,
@@ -473,7 +486,7 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         int rc = pSocket->Read(sock, rBuf);
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
-            DumpSocketBytesWithAscall(rBuf);
+            DumpSocketBytes("RECV", rBuf);
             DispatchMqttBytes(rBuf);
         } else {
             SPR_LOGD("## CLOSE [%d]\n", sock);
@@ -657,6 +670,11 @@ void OneNetDriver::MsgRespondMqttMsgConnack(const SprMsg& msg)
     SPR_LOGD("Connect OneNet result = %d\n", conResult);
 }
 
+void OneNetDriver::MsgRespondMqttMsgPublish(const SprMsg& msg)
+{
+
+}
+
 /**
  * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ
  *
@@ -805,7 +823,7 @@ int32_t OneNetDriver::SendMqttDisconnect()
 int32_t OneNetDriver::SendMqttBytes(const std::string& bytes)
 {
     // dump mqtt bytes for debug
-    DumpSocketBytesWithAscall(bytes);
+    DumpSocketBytes("SEND", bytes);
 
     if (!mSendPIPEPtr) {
         SPR_LOGE("Send PIPE is null\n");
@@ -836,14 +854,14 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
             ret = HandleMqttConnack(bytes);
             break;
         }
-        case MQTT_MSG_PUBLISH:
-        {
-            ret = HandleMqttPublish(bytes);
-            break;
-        }
         case MQTT_MSG_PUBACK:
         {
             ret = HandleMqttPubAck(bytes);
+            break;
+        }
+        case MQTT_MSG_SUBACK:
+        {
+            ret = HandleMqttSubAck(bytes);
             break;
         }
         case MQTT_MSG_PINGRESP:
@@ -905,6 +923,14 @@ int32_t OneNetDriver::HandleMqttSubscribe(const std::string& bytes)
 
 int32_t OneNetDriver::HandleMqttSubAck(const std::string& bytes)
 {
+    Suback mqttCmd;
+    int ret = mqttCmd.Decode(bytes);
+    CHECK_ONENET_RET_VALIDITY(ret);
+
+    SprMsg msg(SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK);
+    msg.SetU8Value(mqttCmd.GetReturnCode());
+    msg.SetU16Value(mqttCmd.GetPacketIdentifier());
+    NotifyObserver(MODULE_ONENET_MANAGER, msg);
     return 0;
 }
 

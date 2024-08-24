@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : M08_Subscribe.cpp
+ *  @file       : M03_Publish.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,22 +16,3 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "M08_Subscribe.h"
-
-MqttSubscribe::MqttSubscribe(uint16_t identifier, const std::string& topic)
-    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mIdentifier(identifier)
-{
-    // Encode the variable header
-    EncodeIntegerToBytes(identifier, mVariableHeader);
-
-    // Encode the payload
-    uint8_t qos = 0x00;
-    uint16_t topicLength = (uint16_t)topic.length();
-    EncodeIntegerToBytes(topicLength, mPayload);
-    EncodeU8BytesToBytes(topic, mPayload);
-    EncodeIntegerToBytes(qos, mPayload);
-}
-
-MqttSubscribe::~MqttSubscribe()
-{
-}

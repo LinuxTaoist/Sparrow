@@ -27,10 +27,10 @@ public:
     MqttSubscribe(uint16_t identifier, const std::string& topic);
     ~MqttSubscribe();
 
-    uint16_t GetPacketIdentifier() { return mPacketIdentifier; }
+    uint16_t GetPacketIdentifier() { return mIdentifier; }
 
 private:
-    uint16_t mPacketIdentifier;
+    uint16_t mIdentifier;
 };
 
 #endif // __M08_SUBSCRIBE_H__

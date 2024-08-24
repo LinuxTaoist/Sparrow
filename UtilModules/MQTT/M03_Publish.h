@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : M08_Subscribe.cpp
+ *  @file       : M03_Publish.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,22 +16,27 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include "M08_Subscribe.h"
+#ifndef __M03_PUBLISH_H__
+#define __M03_PUBLISH_H__
 
-MqttSubscribe::MqttSubscribe(uint16_t identifier, const std::string& topic)
-    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mIdentifier(identifier)
+#include "MqttMsg.h"
+
+class MqttPublish : public MqttMsgBase
 {
-    // Encode the variable header
-    EncodeIntegerToBytes(identifier, mVariableHeader);
+public:
+    MqttPublish();
+    ~MqttPublish();
 
-    // Encode the payload
-    uint8_t qos = 0x00;
-    uint16_t topicLength = (uint16_t)topic.length();
-    EncodeIntegerToBytes(topicLength, mPayload);
-    EncodeU8BytesToBytes(topic, mPayload);
-    EncodeIntegerToBytes(qos, mPayload);
-}
+    void SetTopic(const char *topic);
+    void SetPayload(const char *payload);
+    void SetQos(uint8_t qos);
+    void SetRetain(bool retain);
 
-MqttSubscribe::~MqttSubscribe()
-{
-}
+    void SetTopic(const char *topic, uint16_t topic_len);
+    void SetPayload(const char *payload, uint16_t payload_len);
+
+private:
+    std::string mTopic;
+};
+
+#endif // __M03_PUBLISH_H__

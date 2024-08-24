@@ -107,6 +107,9 @@ private:
     /* 启动OneNet心跳 */
     void StartTimerToPingOneNet(int32_t intervalInMSec);
 
+    /* 启动数据上报定时器 */
+    void StartTimerToReportData(int32_t intervalInMSec);
+
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
@@ -114,13 +117,16 @@ private:
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
+    void MsgRespondMqttSubAck(const SprMsg& msg);
     void MsgRespondMqttPingTimerEvent(const SprMsg& msg);
+    void MsgRespondMqttReportTimerEvent(const SprMsg& msg);
     void MsgRespondMqttDisconnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
     bool mEnablePingTimer;
+    bool mEnableReportTimer;
     uint32_t mReConnectReqCnt;
     uint32_t mReConnectRspCnt;
     using StateTransitionType =

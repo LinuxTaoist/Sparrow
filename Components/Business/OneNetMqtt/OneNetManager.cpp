@@ -31,6 +31,7 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("OneNetMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetMgr", fmt, ##args)
 
+#define DEFAULT_DATA_REPORT_INTERVAL    180  // sec
 #define DEFAULT_PING_TIMER_INTERVAL     60  // sec
 #define ONENET_DEVICE_NUM_LIMIT         5
 #define ONENET_DEVICES_CFG_PATH         "OneNetDevices.conf"
@@ -111,6 +112,19 @@ OneNetManager::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK
+    // =============================================================
+    { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK,
+      &OneNetManager::MsgRespondMqttSubAck
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // All States for SIG_ID_ONENET_MGR_PING_TIMER_EVENT
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
@@ -133,6 +147,28 @@ OneNetManager::mStateTable =
       &OneNetManager::MsgRespondUnexpectedState
     },
 
+    // =============================================================
+    // All States for SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT
+    // =============================================================
+    { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT,
+      &OneNetManager::MsgRespondMqttReportTimerEvent
+    },
+
+    { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT,
+      &OneNetManager::MsgRespondMqttReportTimerEvent
+    },
+
+    { LEV1_ONENET_MGR_DISCONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT,
+      &OneNetManager::MsgRespondMqttReportTimerEvent
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
 
     // =============================================================
     // All States for SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT
@@ -166,6 +202,7 @@ OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
   : SprObserverWithMQueue(id, name)
 {
     mEnablePingTimer = false;
+    mEnableReportTimer = false;
     mReConnectReqCnt = 0;
     mReConnectRspCnt = 0;
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
@@ -335,6 +372,18 @@ void OneNetManager::StartTimerToPingOneNet(int32_t intervalInMSec)
     RegisterTimer(0, intervalInMSec, SIG_ID_ONENET_MGR_PING_TIMER_EVENT, 0);
 }
 
+void OneNetManager::StartTimerToReportData(int32_t intervalInMSec)
+{
+    if (mEnableReportTimer) {
+        SPR_LOGD("Report timer is already enabled!\n");
+        return;
+    }
+
+    SPR_LOGD("Enable report timer, interval: %dms\n", intervalInMSec);
+    mEnableReportTimer = true;
+    RegisterTimer(0, intervalInMSec, SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT, 0);
+}
+
 void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg)
 {
     auto it = mOneDeviceMap.find(devModule);
@@ -401,9 +450,21 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
         keepAliveInSec = DEFAULT_PING_TIMER_INTERVAL;
     }
 
+    // 注册ping定时器，数据上报定时器
     StartTimerToPingOneNet(keepAliveInSec * 1000);
-    SPR_LOGD("OneNet return connect code: %d, start ping timer: %ds (%d %d)\n",
-        msg.GetU8Value(), keepAliveInSec, mReConnectReqCnt, mReConnectRspCnt);
+    StartTimerToReportData(DEFAULT_DATA_REPORT_INTERVAL);
+    SPR_LOGD("OneNet return connect code: %d, start ping timer: %ds, report timer: %ds (%d %d)\n",
+        msg.GetU8Value(), keepAliveInSec, DEFAULT_DATA_REPORT_INTERVAL, mReConnectReqCnt, mReConnectRspCnt);
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK
+ *
+ * @param msg
+ */
+void OneNetManager::MsgRespondMqttSubAck(const SprMsg& msg)
+{
+    NotifyMsgToOneNetDevice(mCurActiveDevice, msg);
 }
 
 /**
@@ -417,6 +478,23 @@ void OneNetManager::MsgRespondMqttPingTimerEvent(const SprMsg& msg)
         SPR_LOGD("Device not connect, stop ping timer\n");
         mEnablePingTimer = false;
         UnregisterTimer(SIG_ID_ONENET_MGR_PING_TIMER_EVENT);
+        return;
+    }
+
+    NotifyMsgToOneNetDevice(mCurActiveDevice, msg);
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT
+ *
+ * @param msg
+ */
+void OneNetManager::MsgRespondMqttReportTimerEvent(const SprMsg& msg)
+{
+    if (mCurLev1State != LEV1_ONENET_MGR_CONNECTED) {
+        SPR_LOGD("Device not connect, stop report timer\n");
+        mEnableReportTimer = false;
+        UnregisterTimer(SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT);
         return;
     }
 

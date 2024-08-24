@@ -119,6 +119,7 @@ private:
     void MsgRespondSocketDisconnectPassive(const SprMsg& msg);
     void MsgRespondMqttMsgConnect(const SprMsg& msg);
     void MsgRespondMqttMsgConnack(const SprMsg& msg);
+    void MsgRespondMqttMsgPublish(const SprMsg& msg);
     void MsgRespondMqttMsgPingreq(const SprMsg& msg);
     void MsgRespondMqttMsgPingresq(const SprMsg& msg);
     void MsgRespondMqttMsgSubscribe(const SprMsg& msg);
