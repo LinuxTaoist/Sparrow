@@ -129,8 +129,8 @@ private:
     /**
      * @brief Send mqtt cmd bytes
      */
-    int32_t SendMqttConnect(int32_t keepAliveInSec, const std::string& payload); // 3.1 CONNECT
-    int32_t SendMqttPublish(uint16_t cmd);                      // 3.3 PUBLISH
+    int32_t SendMqttConnect(int32_t keepAliveInSec, const std::string& payload);            // 3.1 CONNECT
+    int32_t SendMqttPublish(uint8_t flags, uint16_t identifier, std::string& topic, std::string& payload); // 3.3 PUBLISH
     int32_t SendMqttPubAck(uint16_t cmd);                       // 3.4 PUBACK
     int32_t SendMqttPubRec(uint16_t cmd);                       // 3.5 PUBREC
     int32_t SendMqttPubRel(uint16_t cmd);                       // 3.6 PUBREL

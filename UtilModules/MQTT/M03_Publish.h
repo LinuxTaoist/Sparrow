@@ -24,19 +24,8 @@
 class MqttPublish : public MqttMsgBase
 {
 public:
-    MqttPublish();
+    MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload);
     ~MqttPublish();
-
-    void SetTopic(const char *topic);
-    void SetPayload(const char *payload);
-    void SetQos(uint8_t qos);
-    void SetRetain(bool retain);
-
-    void SetTopic(const char *topic, uint16_t topic_len);
-    void SetPayload(const char *payload, uint16_t payload_len);
-
-private:
-    std::string mTopic;
 };
 
 #endif // __M03_PUBLISH_H__

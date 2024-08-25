@@ -16,10 +16,14 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <memory>
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <string.h>
 #include "SprLog.h"
+#include "cJSON.h"
+#include "OneNetCommon.h"
 #include "OneNetDevice.h"
 
 using namespace InternalDefs;
@@ -34,6 +38,7 @@ using namespace InternalDefs;
 
 #define TEMPLATE_TOPIC_THING            "$sys/%s/%s/thing/%s"
 #define TEMPLATE_TOPIC_CMD              "$sys/%s/%s/cmd/%s"
+#define TEMPLATE_TOPIC_THING_POST       "$sys/%s/%s/thing/property/post"
 
 OneNetDevice::OneNetDevice(ModuleIDType id, const std::string& name)
     : SprObserverWithMQueue(id, name), mExpirationTime(0), mConnectStatus(false)
@@ -98,7 +103,7 @@ int32_t OneNetDevice::InitTopicList()
 
     // $sys/{pid}/{device-name}/thing/property/#
     // $sys/{pid}/{device-name}/cmd/#
-    snprintf(topicThingAll, sizeof(topicThingAll), TEMPLATE_TOPIC_THING, mOneProductID.c_str(), mOneDevName.c_str(), "post/reply");
+    snprintf(topicThingAll, sizeof(topicThingAll), TEMPLATE_TOPIC_THING, mOneProductID.c_str(), mOneDevName.c_str(), "property/post/reply");
     snprintf(topicCmd, sizeof(topicCmd), TEMPLATE_TOPIC_CMD, mOneProductID.c_str(), mOneDevName.c_str(), "#");
     mAllTopicMap[topicThingAll] = {TOPIC_STATUS_IDLE, 0, topicThingAll};
     mAllTopicMap[topicCmd] = {TOPIC_STATUS_IDLE, 0, topicCmd};
@@ -139,6 +144,24 @@ void OneNetDevice::StartSubscribeTopic()
 {
     SprMsg msg(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC);
     SendMsg(msg);
+}
+
+std::string OneNetDevice::PreparePublishPayloadJson()
+{
+    std::string payload;
+    static int32_t id = 0;
+    static int32_t value = 0;
+
+    cJSON* root = cJSON_CreateObject();
+    cJSON_AddStringToObject(root, "id", std::to_string(++id).c_str());
+    cJSON_AddStringToObject(root, "version", "1.0");
+    cJSON* params = cJSON_AddObjectToObject(root, "params");
+    cJSON* power = cJSON_AddObjectToObject(params, "Power");
+    cJSON_AddNumberToObject(power, "value", ++value);
+    payload = cJSON_Print(root);
+    cJSON_Delete(root);
+
+    return payload;
 }
 
 /**
@@ -275,10 +298,19 @@ void OneNetDevice::MsgRespondPingTimerEvent(const SprMsg& msg)
  */
 void OneNetDevice::MsgRespondDataReportTimerEvent(const SprMsg& msg)
 {
-    std::string bodyJson = "";
+    char topicThingPost[100] = {0};
+    std::string bodyJson = PreparePublishPayloadJson();
+    uint16_t identity = GetUnusedIdentity();
+    snprintf(topicThingPost, sizeof(topicThingPost), TEMPLATE_TOPIC_THING_POST, mOneProductID.c_str(), mOneDevName.c_str());
+
+    auto pParam = std::make_shared<SOneNetPublishParam>();
+    pParam->flags = 0;
+    pParam->identifier = identity;
+    strncpy(pParam->topic, topicThingPost, sizeof(pParam->topic) - 1);
+    strncpy(pParam->payload, (char*)bodyJson.c_str(), sizeof(pParam->payload) - 1);
 
     SprMsg tMsg(SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH);
-    tMsg.SetString(bodyJson);
+    tMsg.SetDatas(pParam, sizeof(SOneNetPublishParam));
     NotifyObserver(MODULE_ONENET_DRIVER, tMsg);
 }
 

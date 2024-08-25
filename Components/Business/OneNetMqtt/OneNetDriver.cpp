@@ -486,7 +486,7 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         int rc = pSocket->Read(sock, rBuf);
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
-            DumpSocketBytes("RECV", rBuf);
+            DumpSocketBytesWithAscall(rBuf);
             DispatchMqttBytes(rBuf);
         } else {
             SPR_LOGD("## CLOSE [%d]\n", sock);
@@ -660,7 +660,7 @@ void OneNetDriver::MsgRespondMqttMsgConnect(const SprMsg& msg)
  */
 void OneNetDriver::MsgRespondMqttMsgConnack(const SprMsg& msg)
 {
-    uint8_t conResult =  msg.GetU8Value();
+    uint8_t conResult = msg.GetU8Value();
     if (conResult == 0) {
         SetLev2State(LEV2_ONENET_CONNECTED);
     }
@@ -670,9 +670,23 @@ void OneNetDriver::MsgRespondMqttMsgConnack(const SprMsg& msg)
     SPR_LOGD("Connect OneNet result = %d\n", conResult);
 }
 
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH
+ *
+ * @param[in] msg
+ * @return none
+ */
 void OneNetDriver::MsgRespondMqttMsgPublish(const SprMsg& msg)
 {
+    std::shared_ptr<SOneNetPublishParam> pParam = msg.GetDatas<SOneNetPublishParam>();
+    std::string topic = pParam->topic;
+    std::string payload = pParam->payload;
+    int32_t ret = SendMqttPublish(pParam->flags, pParam->identifier, topic, payload);
+    if (ret < 0) {
+        SPR_LOGE("Send mqtt pingreq msg failed\n");
+    }
 
+    SPR_LOGD("Send publish msg, 0x%x topic = %s, payload = %s\n", pParam->identifier, pParam->topic, pParam->payload);
 }
 
 /**
@@ -752,9 +766,12 @@ int32_t OneNetDriver::SendMqttConnect(int32_t keepAliveInSec, const std::string&
     return SendMqttBytes(bytes);
 }
 
-int32_t OneNetDriver::SendMqttPublish(uint16_t cmd)
+int32_t OneNetDriver::SendMqttPublish(uint8_t flags, uint16_t identifier, std::string& topic, std::string& payload)
 {
-    return 0;
+    MqttPublish mqttMsg(flags, identifier, topic, payload);
+    std::string bytes;
+    mqttMsg.Encode(bytes);
+    return SendMqttBytes(bytes);
 }
 
 int32_t OneNetDriver::SendMqttPubAck(uint16_t cmd)
@@ -823,7 +840,7 @@ int32_t OneNetDriver::SendMqttDisconnect()
 int32_t OneNetDriver::SendMqttBytes(const std::string& bytes)
 {
     // dump mqtt bytes for debug
-    DumpSocketBytes("SEND", bytes);
+    DumpSocketBytesWithAscall(bytes);
 
     if (!mSendPIPEPtr) {
         SPR_LOGE("Send PIPE is null\n");

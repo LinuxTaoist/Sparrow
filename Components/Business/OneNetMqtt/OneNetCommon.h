@@ -40,4 +40,12 @@
     }                                                           \
 } while(0)
 
+struct SOneNetPublishParam
+{
+    uint8_t     flags;
+    uint16_t    identifier;
+    char        topic[128];
+    char        payload[512];
+};
+
 #endif // __ONENET_COMMON_H__

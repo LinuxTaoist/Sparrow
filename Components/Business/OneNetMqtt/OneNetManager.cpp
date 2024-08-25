@@ -31,8 +31,8 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("OneNetMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetMgr", fmt, ##args)
 
-#define DEFAULT_DATA_REPORT_INTERVAL    180  // sec
-#define DEFAULT_PING_TIMER_INTERVAL     60  // sec
+#define DEFAULT_DATA_REPORT_INTERVAL    160   // sec
+#define DEFAULT_PING_TIMER_INTERVAL     60    // sec
 #define ONENET_DEVICE_NUM_LIMIT         5
 #define ONENET_DEVICES_CFG_PATH         "OneNetDevices.conf"
 
@@ -452,7 +452,7 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 
     // 注册ping定时器，数据上报定时器
     StartTimerToPingOneNet(keepAliveInSec * 1000);
-    StartTimerToReportData(DEFAULT_DATA_REPORT_INTERVAL);
+    StartTimerToReportData(DEFAULT_DATA_REPORT_INTERVAL * 1000);
     SPR_LOGD("OneNet return connect code: %d, start ping timer: %ds, report timer: %ds (%d %d)\n",
         msg.GetU8Value(), keepAliveInSec, DEFAULT_DATA_REPORT_INTERVAL, mReConnectReqCnt, mReConnectRspCnt);
 }

@@ -16,3 +16,22 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include "M03_Publish.h"
+
+MqttPublish::MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload)
+    : MqttMsgBase(MQTT_MSG_PUBLISH, flags)
+{
+    // Encode variable header
+    uint16_t topicLen = topic.length();
+    EncodeIntegerToBytes(topicLen, mVariableHeader);
+    EncodeU8BytesToBytes(topic, mVariableHeader);
+    EncodeU8BytesToBytes(payload, mVariableHeader);
+    EncodeIntegerToBytes(identifier, mVariableHeader);
+
+    // Encode payload
+    EncodeU8BytesToBytes(payload, mPayload);
+}
+
+MqttPublish::~MqttPublish()
+{
+}

@@ -100,6 +100,7 @@ private:
 
     int16_t GetUnusedIdentity();
     void StartSubscribeTopic();
+    std::string PreparePublishPayloadJson();
 
     /**
      * @brief message handle function
