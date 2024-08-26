@@ -27,9 +27,9 @@ MqttSubscribe::MqttSubscribe(uint16_t identifier, const std::string& topic)
     // Encode the payload
     uint8_t qos = 0x00;
     uint16_t topicLength = (uint16_t)topic.length();
-    EncodeIntegerToBytes(topicLength, mPayload);
-    EncodeU8BytesToBytes(topic, mPayload);
-    EncodeIntegerToBytes(qos, mPayload);
+    EncodeIntegerToBytes(topicLength,   mPayload);
+    EncodeU8BytesToBytes(topic,         mPayload);
+    EncodeIntegerToBytes(qos,           mPayload);
 }
 
 MqttSubscribe::~MqttSubscribe()

@@ -49,6 +49,9 @@ enum EMqttMsgType
     MQTT_MSG_BUTT,
 };
 
+#define MQTT_MSG_FLAG_QOS_MASK  0x06
+#define MQTT_MSG_FLAG_QOS_SHIFT 1
+
 enum EMqttSubackResult
 {
     MQTT_SUBACK_SUCCESS = 0x00,

@@ -304,7 +304,7 @@ void OneNetDevice::MsgRespondDataReportTimerEvent(const SprMsg& msg)
     snprintf(topicThingPost, sizeof(topicThingPost), TEMPLATE_TOPIC_THING_POST, mOneProductID.c_str(), mOneDevName.c_str());
 
     auto pParam = std::make_shared<SOneNetPublishParam>();
-    pParam->flags = 0;
+    pParam->flags = 0x00;
     pParam->identifier = identity;
     strncpy(pParam->topic, topicThingPost, sizeof(pParam->topic) - 1);
     strncpy(pParam->payload, (char*)bodyJson.c_str(), sizeof(pParam->payload) - 1);

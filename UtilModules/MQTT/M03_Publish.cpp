@@ -23,10 +23,13 @@ MqttPublish::MqttPublish(uint8_t flags, uint16_t identifier, const std::string& 
 {
     // Encode variable header
     uint16_t topicLen = topic.length();
-    EncodeIntegerToBytes(topicLen, mVariableHeader);
-    EncodeU8BytesToBytes(topic, mVariableHeader);
-    EncodeU8BytesToBytes(payload, mVariableHeader);
-    EncodeIntegerToBytes(identifier, mVariableHeader);
+    EncodeIntegerToBytes(topicLen,      mVariableHeader);
+    EncodeU8BytesToBytes(topic,         mVariableHeader);
+
+    uint8_t qosLevel = (flags & MQTT_MSG_FLAG_QOS_MASK) >> MQTT_MSG_FLAG_QOS_SHIFT;
+    if (qosLevel == MQTT_SUBACK_QOS0 || qosLevel == MQTT_SUBACK_QOS1) {
+        EncodeIntegerToBytes(identifier,    mVariableHeader);
+    }
 
     // Encode payload
     EncodeU8BytesToBytes(payload, mPayload);
