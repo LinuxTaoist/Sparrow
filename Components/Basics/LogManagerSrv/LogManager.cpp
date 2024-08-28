@@ -43,7 +43,7 @@ using namespace GeneralUtils;
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_FRAME_LEN_LIMIT     1024
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
-#define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
+#define DEFAULT_BASE_LOG_FILE_NAME  "sprlog.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
 #define LOG_CONFIGURE_FILE_PATH     "sprlog.conf"
 
@@ -156,6 +156,7 @@ void LogManager::LoadAttrFileCapacityLimit(const std::string& value)
 void LogManager::LoadAttrFileName(const std::string& value)
 {
     mLogFileName = value;
+    mCurrentLogFile = value;
 }
 
 void LogManager::LoadAttrFilePath(const std::string& value)
