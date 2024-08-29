@@ -21,6 +21,8 @@
 #include <sstream>
 #include <algorithm>
 #include <string.h>
+#include <sys/statvfs.h>
+#include <sys/sysinfo.h>
 #include "SprLog.h"
 #include "cJSON.h"
 #include "OneNetCommon.h"
@@ -150,19 +152,216 @@ std::string OneNetDevice::PreparePublishPayloadJson()
 {
     std::string payload;
     static int32_t id = 0;
-    static int32_t value = 0;
+    BatteryStatus batteryStatus = {"Battery_Status", "percent", 0.0, "voltage", 0};
+    GetBatteryStatus(batteryStatus);
+    float cpuUsage = 0.0;
+    GetCPUUsage(cpuUsage);
+    int32_t diskUsage = 0;
+    GetDiskUsage(diskUsage);
+    int32_t memoryUsage = 0;
+    GetMemoryUsage(memoryUsage);
+    std::string modelName;
+    GetModelName(modelName);
+    int32_t launchtime = 0;
+    GetLaunchTime(launchtime);
+    SystemInfo sysInfo = {"system_infomation", "version", "", "Description", ""};
+    GetSystemInfo(sysInfo);
 
     cJSON* root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "id", std::to_string(++id).c_str());
     cJSON_AddStringToObject(root, "version", "1.0");
-    cJSON* params = cJSON_AddObjectToObject(root, "params");
-    cJSON* power = cJSON_AddObjectToObject(params, "Power");
-    cJSON_AddNumberToObject(power, "value", ++value);
-    payload = cJSON_Print(root);
     cJSON_Delete(root);
-
     return payload;
 }
+
+int32_t OneNetDevice::GetBatteryStatus(BatteryStatus& batteryStatus)
+{
+    batteryStatus.percent = 0.0;
+    batteryStatus.voltage = 0;
+    return 0;
+}
+
+int32_t OneNetDevice::GetCPUUsage(float& cpuUsage)
+{
+    // 读取 /proc/stat 文件以获取 CPU 使用情况
+    std::ifstream statFile("/proc/stat");
+    if (!statFile.is_open()) {
+        return -1;
+    }
+
+    std::string line;
+    std::getline(statFile, line); // 读取第一行，包含 CPU 信息
+
+    std::istringstream iss(line);
+    std::string token;
+    iss >> token; // Skip "cpu"
+
+    std::vector<long> values;
+
+    while (iss >> token) {
+        values.push_back(std::stol(token, nullptr, 10));
+    }
+
+    if (values.size() < 5) {
+        return -1;
+    }
+
+    long total = 0;
+    for (size_t i = 0; i < values.size(); ++i) {
+        total += values[i];
+    }
+
+    long idle = values[3];
+    long nonIdle = total - idle;
+
+    // 计算 CPU 使用率
+    if (total > 0) {
+        cpuUsage = (nonIdle * 100.0f) / total;
+    } else {
+        cpuUsage = 0.0f;
+    }
+
+    return 0;
+}
+
+int32_t OneNetDevice::GetDiskUsage(int32_t& diskUsage)
+{
+    // 读取 /proc/mounts 文件以获取挂载点信息
+    std::ifstream mountsFile("/proc/mounts");
+    if (!mountsFile.is_open()) {
+        return -1;
+    }
+
+    std::string line;
+    std::vector<std::string> mountPoints;
+
+    while (std::getline(mountsFile, line)) {
+        std::istringstream iss(line);
+        std::string device, mountPoint;
+        iss >> device >> mountPoint;
+        if (mountPoint != "/") {
+            continue;
+        }
+        mountPoints.push_back(mountPoint);
+    }
+
+    if (mountPoints.empty()) {
+        return -1;
+    }
+
+    struct statvfs fs;
+    if (statvfs(mountPoints.front().c_str(), &fs) == -1) {
+        return -1;
+    }
+
+    long total = fs.f_blocks * fs.f_bsize;
+    long free = fs.f_bfree * fs.f_bsize;
+    long used = total - free;
+
+    if (total > 0) {
+        diskUsage = (used * 100) / total;
+    } else {
+        diskUsage = 0;
+    }
+
+    return 0;
+}
+
+int32_t OneNetDevice::GetMemoryUsage(int32_t& memoryUsage)
+{
+    // 读取 /proc/meminfo 文件以获取内存使用情况
+    std::ifstream memInfoFile("/proc/meminfo");
+    if (!memInfoFile.is_open()) {
+        return -1;
+    }
+
+    std::string line;
+    long totalMem = 0;
+    long freeMem = 0;
+
+    while (std::getline(memInfoFile, line)) {
+        if (line.find("MemTotal:") != std::string::npos) {
+            std::istringstream iss(line);
+            std::string token;
+            iss >> token; // Skip "MemTotal:"
+            iss >> token; // Read the value
+            totalMem = std::stol(token);
+            break;
+        } else if (line.find("MemFree:") != std::string::npos) {
+            std::istringstream iss(line);
+            std::string token;
+            iss >> token; // Skip "MemFree:"
+            iss >> token; // Read the value
+            freeMem = std::stol(token);
+        }
+    }
+
+    if (totalMem == 0 || freeMem == 0) {
+        return -1;
+    }
+
+    // 计算内存使用量（单位：MB）
+    memoryUsage = (totalMem - freeMem) / 1024;
+    return 0;
+}
+
+int32_t OneNetDevice::GetModelName(std::string& model)
+{
+    // 读取 /etc/issue 文件以获取设备型号
+    std::ifstream modelFile("/etc/issue");
+    if (!modelFile.is_open()) {
+        return -1;
+    }
+
+    std::getline(modelFile, model);
+
+    // 清理可能的换行符
+    model.erase(std::remove(model.begin(), model.end(), '\n'), model.end());
+    return 0;
+}
+
+int32_t OneNetDevice::GetLaunchTime(int32_t& launchTime)
+{
+    struct sysinfo info;
+    if (sysinfo(&info) != 0) {
+        return -1;
+    }
+
+    // 计算启动时间（单位：秒）
+    launchTime = info.uptime;
+    return 0;
+}
+
+int32_t OneNetDevice::GetSystemInfo(SystemInfo& systemInfo)
+{
+    // 读取 /etc/os-release 文件以获取发行版信息
+    std::string line;
+    std::ifstream osReleaseFile("/etc/os-release");
+    if (!osReleaseFile.is_open()) {
+        return -1;
+    }
+
+    std::getline(osReleaseFile, line);
+    while (std::getline(osReleaseFile, line)) {
+        if (line.find("PRETTY_NAME=") != std::string::npos) {
+            std::istringstream iss(line);
+            std::string token;
+            iss >> token; // Skip "PRETTY_NAME="
+            std::getline(iss, token, '"'); // Read the first quoted string
+            std::getline(iss, token, '"'); // Read the second quoted string
+            systemInfo.description = token;
+        } else if (line.find("VERSION_ID=") != std::string::npos) {
+            std::istringstream iss(line);
+            std::string token;
+            iss >> token; // Skip "VERSION_ID="
+            std::getline(iss, token, '"'); // Read the quoted string
+            systemInfo.version = token;
+        }
+    }
+
+    return 0;
+}
+
 
 /**
  * @brief Process SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT

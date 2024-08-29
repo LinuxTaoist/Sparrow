@@ -40,6 +40,24 @@ struct OneNetTopic
     std::string topic;
 };
 
+struct BatteryStatus
+{
+    std::string identifier;
+    std::string perIdentifier;
+    float percent;
+    std::string vltIdentifier;
+    int32_t voltage;
+};
+
+struct SystemInfo
+{
+    std::string identifier;
+    std::string verIdentifier;
+    std::string version;
+    std::string descIdentifier;
+    std::string description;
+};
+
 class OneNetDevice : public SprObserverWithMQueue
 {
 public:
@@ -89,6 +107,18 @@ public:
     int32_t InitTopicList();
     bool GetConnectStatus() { return mConnectStatus; }
     int32_t GetKeepAliveIntervalInSec() { return mKeepAliveIntervalInSec; }
+
+    /**
+     * @brief Get device attribute
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t GetBatteryStatus(BatteryStatus& batteryStatus);
+    int32_t GetCPUUsage(float& cpuUsage);
+    int32_t GetDiskUsage(int32_t& diskUsage);
+    int32_t GetMemoryUsage(int32_t& memoryUsage);
+    int32_t GetModelName(std::string& model);
+    int32_t GetLaunchTime(int32_t& launchTime);
+    int32_t GetSystemInfo(SystemInfo& systemInfo);
 
 private:
     /**
