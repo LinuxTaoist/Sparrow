@@ -31,7 +31,7 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("OneNetMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("OneNetMgr", fmt, ##args)
 
-#define DEFAULT_DATA_REPORT_INTERVAL    160   // sec
+#define DEFAULT_DATA_REPORT_INTERVAL    10   // sec
 #define DEFAULT_PING_TIMER_INTERVAL     60    // sec
 #define ONENET_DEVICE_NUM_LIMIT         5
 #define ONENET_DEVICES_CFG_PATH         "OneNetDevices.conf"

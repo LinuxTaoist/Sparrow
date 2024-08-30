@@ -164,13 +164,33 @@ std::string OneNetDevice::PreparePublishPayloadJson()
     GetModelName(modelName);
     int32_t launchtime = 0;
     GetLaunchTime(launchtime);
-    SystemInfo sysInfo = {"system_infomation", "version", "", "Description", ""};
+    SystemInfo sysInfo = {"system_infomation", "version", "Unkown", "Description", "Unkown"};
     GetSystemInfo(sysInfo);
 
     cJSON* root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "id", std::to_string(++id).c_str());
-    cJSON_AddStringToObject(root, "version", "1.0");
-    cJSON_Delete(root);
+    cJSON_AddNumberToObject(root, "Cpu_Usage", cpuUsage);
+    cJSON_AddNumberToObject(root, "Disk_Usage", diskUsage);
+    cJSON_AddNumberToObject(root, "Memory_Usage", memoryUsage);
+    // cJSON_AddStringToObject(root, "Model", modelName.c_str());
+    cJSON_AddNumberToObject(root, "System_Uptime", launchtime);
+
+    // Add SystemInfo as a sub-object
+    cJSON* systemInfoObj = cJSON_CreateObject();
+    cJSON_AddStringToObject(systemInfoObj, "version", sysInfo.version.c_str());
+    cJSON_AddStringToObject(systemInfoObj, "Description", sysInfo.description.c_str());
+    cJSON_AddItemToObject(root, sysInfo.identifier.c_str(), systemInfoObj);
+
+    // Convert the cJSON object to a string
+    char* jsonString = cJSON_PrintUnformatted(root);
+    if (jsonString != nullptr) {
+        payload = jsonString;
+        free(jsonString); // Don't forget to free the allocated memory
+        cJSON_Delete(root); // Delete the cJSON object
+        return payload;
+    }
+
+    cJSON_Delete(root); // Delete the cJSON object even if conversion fails
     return payload;
 }
 
@@ -349,13 +369,13 @@ int32_t OneNetDevice::GetSystemInfo(SystemInfo& systemInfo)
             iss >> token; // Skip "PRETTY_NAME="
             std::getline(iss, token, '"'); // Read the first quoted string
             std::getline(iss, token, '"'); // Read the second quoted string
-            systemInfo.description = token;
+            systemInfo.description = token.empty() ? "Unknown" : token;
         } else if (line.find("VERSION_ID=") != std::string::npos) {
             std::istringstream iss(line);
             std::string token;
             iss >> token; // Skip "VERSION_ID="
             std::getline(iss, token, '"'); // Read the quoted string
-            systemInfo.version = token;
+            systemInfo.version = token.empty() ? "Unknown" : token;
         }
     }
 
