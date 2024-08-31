@@ -152,6 +152,8 @@ std::string OneNetDevice::PreparePublishPayloadJson()
 {
     std::string payload;
     static int32_t id = 0;
+
+    // 获取设备状态信息
     BatteryStatus batteryStatus = {"Battery_Status", "percent", 0.0, "voltage", 0};
     GetBatteryStatus(batteryStatus);
     float cpuUsage = 0.0;
@@ -167,30 +169,62 @@ std::string OneNetDevice::PreparePublishPayloadJson()
     SystemInfo sysInfo = {"system_infomation", "version", "Unkown", "Description", "Unkown"};
     GetSystemInfo(sysInfo);
 
+    // 创建 JSON 对象
     cJSON* root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "id", std::to_string(++id).c_str());
-    cJSON_AddNumberToObject(root, "Cpu_Usage", cpuUsage);
-    cJSON_AddNumberToObject(root, "Disk_Usage", diskUsage);
-    cJSON_AddNumberToObject(root, "Memory_Usage", memoryUsage);
-    // cJSON_AddStringToObject(root, "Model", modelName.c_str());
-    cJSON_AddNumberToObject(root, "System_Uptime", launchtime);
+    cJSON_AddStringToObject(root, "version", "1.0");
 
-    // Add SystemInfo as a sub-object
-    cJSON* systemInfoObj = cJSON_CreateObject();
-    cJSON_AddStringToObject(systemInfoObj, "version", sysInfo.version.c_str());
-    cJSON_AddStringToObject(systemInfoObj, "Description", sysInfo.description.c_str());
-    cJSON_AddItemToObject(root, sysInfo.identifier.c_str(), systemInfoObj);
+    // 创建 params 节点
+    cJSON* paramsNode = cJSON_CreateObject();
+    cJSON_AddItemToObject(root, "params", paramsNode);
 
-    // Convert the cJSON object to a string
+    // 添加 Cpu_Usage 子节点
+    cJSON* cpuUsageNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(cpuUsageNode, "value", cpuUsage);
+    cJSON_AddItemToObject(paramsNode, "CPU_Usage", cpuUsageNode);
+
+    // 添加 Disk_Usage 子节点
+    cJSON* diskUsageNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(diskUsageNode, "value", diskUsage);
+    cJSON_AddItemToObject(paramsNode, "Disk_Usage", diskUsageNode);
+
+    // 添加 Memory_Usage 子节点
+    cJSON* memoryUsageNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(memoryUsageNode, "value", memoryUsage);
+    cJSON_AddItemToObject(paramsNode, "Memory_Usage", memoryUsageNode);
+
+    // 添加 Model 子节点
+    cJSON* modelNode = cJSON_CreateObject();
+    cJSON_AddStringToObject(modelNode, "value", modelName.c_str());
+    cJSON_AddItemToObject(paramsNode, "Model", modelNode);
+
+    // 添加 System_Uptime 子节点
+    cJSON* systemUptimeNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(systemUptimeNode, "value", launchtime); // 这里的值是硬编码的
+    cJSON_AddItemToObject(paramsNode, "System_Uptime", systemUptimeNode);
+
+    // 添加 System_Info 子节点
+    cJSON* systemInfoNode = cJSON_CreateObject();
+    cJSON* versionNode = cJSON_CreateObject();
+    cJSON_AddStringToObject(versionNode, "value", sysInfo.version.c_str());
+    cJSON_AddItemToObject(systemInfoNode, "version", versionNode);
+
+    cJSON* descriptionNode = cJSON_CreateObject();
+    cJSON_AddStringToObject(descriptionNode, "value", sysInfo.description.c_str());
+    cJSON_AddItemToObject(systemInfoNode, "Description", descriptionNode);
+
+    cJSON_AddItemToObject(paramsNode, "System_Info", systemInfoNode);
+
+    // 将 cJSON 对象转换为字符串
     char* jsonString = cJSON_PrintUnformatted(root);
     if (jsonString != nullptr) {
         payload = jsonString;
-        free(jsonString); // Don't forget to free the allocated memory
-        cJSON_Delete(root); // Delete the cJSON object
+        free(jsonString); // 释放分配的内存
+        cJSON_Delete(root); // 删除 cJSON 对象
         return payload;
     }
 
-    cJSON_Delete(root); // Delete the cJSON object even if conversion fails
+    cJSON_Delete(root); // 即使转换失败也要删除 cJSON 对象
     return payload;
 }
 
@@ -236,11 +270,12 @@ int32_t OneNetDevice::GetCPUUsage(float& cpuUsage)
 
     // 计算 CPU 使用率
     if (total > 0) {
-        cpuUsage = (nonIdle * 100.0f) / total;
+        cpuUsage = ((int32_t)(nonIdle * 10000 / total)) / 10000;
     } else {
-        cpuUsage = 0.0f;
+        cpuUsage = 0.00f;
     }
 
+    SPR_LOGD("idle: %ld, nonIdle: %ld, total: %ld, cpuUsage: %.2f%%\n", idle, nonIdle, total, cpuUsage * 100);
     return 0;
 }
 
