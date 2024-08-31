@@ -20,6 +20,7 @@
 #include <fstream>
 #include <sstream>
 #include <algorithm>
+#include <math.h>
 #include <string.h>
 #include <sys/statvfs.h>
 #include <sys/sysinfo.h>
@@ -200,20 +201,16 @@ std::string OneNetDevice::PreparePublishPayloadJson()
 
     // 添加 System_Uptime 子节点
     cJSON* systemUptimeNode = cJSON_CreateObject();
-    cJSON_AddNumberToObject(systemUptimeNode, "value", launchtime); // 这里的值是硬编码的
+    cJSON_AddNumberToObject(systemUptimeNode, "value", launchtime);
     cJSON_AddItemToObject(paramsNode, "System_Uptime", systemUptimeNode);
 
     // 添加 System_Info 子节点
     cJSON* systemInfoNode = cJSON_CreateObject();
-    cJSON* versionNode = cJSON_CreateObject();
-    cJSON_AddStringToObject(versionNode, "value", sysInfo.version.c_str());
-    cJSON_AddItemToObject(systemInfoNode, "version", versionNode);
-
-    cJSON* descriptionNode = cJSON_CreateObject();
-    cJSON_AddStringToObject(descriptionNode, "value", sysInfo.description.c_str());
-    cJSON_AddItemToObject(systemInfoNode, "Description", descriptionNode);
-
-    cJSON_AddItemToObject(paramsNode, "System_Info", systemInfoNode);
+    cJSON* valueNode = cJSON_CreateObject();
+    cJSON_AddStringToObject(valueNode, sysInfo.descIdentifier.c_str(), sysInfo.description.c_str());
+    cJSON_AddStringToObject(valueNode, sysInfo.verIdentifier.c_str(), sysInfo.version.c_str());
+    cJSON_AddItemToObject(systemInfoNode, "value", valueNode);
+    cJSON_AddItemToObject(paramsNode, sysInfo.identifier.c_str(), systemInfoNode);
 
     // 将 cJSON 对象转换为字符串
     char* jsonString = cJSON_PrintUnformatted(root);
@@ -270,12 +267,12 @@ int32_t OneNetDevice::GetCPUUsage(float& cpuUsage)
 
     // 计算 CPU 使用率
     if (total > 0) {
-        cpuUsage = ((int32_t)(nonIdle * 10000 / total)) / 10000;
+        cpuUsage = (nonIdle * 1.0f) / total;
     } else {
         cpuUsage = 0.00f;
     }
 
-    SPR_LOGD("idle: %ld, nonIdle: %ld, total: %ld, cpuUsage: %.2f%%\n", idle, nonIdle, total, cpuUsage * 100);
+    SPR_LOGD("idle: %ld, nonIdle: %ld, total: %ld, cpuUsage: %f%\n", idle, nonIdle, total, cpuUsage);
     return 0;
 }
 
