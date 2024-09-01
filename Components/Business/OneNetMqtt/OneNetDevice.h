@@ -108,17 +108,6 @@ public:
     bool GetConnectStatus() { return mConnectStatus; }
     int32_t GetKeepAliveIntervalInSec() { return mKeepAliveIntervalInSec; }
 
-    /**
-     * @brief Get device attribute
-     * @return 0 on success, or -1 if an error occurred
-     */
-    int32_t GetBatteryStatus(BatteryStatus& batteryStatus);
-    int32_t GetCPUUsage(float& cpuUsage);
-    int32_t GetDiskUsage(int32_t& diskUsage);
-    int32_t GetMemoryUsage(int32_t& memoryUsage);
-    int32_t GetModelName(std::string& model);
-    int32_t GetLaunchTime(int32_t& launchTime);
-    int32_t GetSystemInfo(SystemInfo& systemInfo);
 
 private:
     /**
@@ -130,6 +119,25 @@ private:
 
     int16_t GetUnusedIdentity();
     void StartSubscribeTopic();
+
+    /**
+     * @brief Get device attribute
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t GetCPUUsage(float& cpuUsage);
+    int32_t GetDiskUsage(int32_t& diskUsage);
+    int32_t GetMemoryUsage(int32_t& memoryUsage);
+    int32_t GetModelName(std::string& model);
+    int32_t GetLaunchTime(int32_t& launchTime);
+    int32_t GetBatteryStatus(BatteryStatus& batteryStatus);
+    int32_t GetSystemInfo(SystemInfo& systemInfo);
+    int32_t AddCPUUsageJsonNode(void* pNode);
+    int32_t AddDiskUsageJsonNode(void* pNode);
+    int32_t AddMemoryUsageJsonNode(void* pNode);
+    int32_t AddModelNameJsonNode(void* pNode);
+    int32_t AddLaunchTimeJsonNode(void* pNode);
+    int32_t AddBatteryStatusJsonNode(void* pNode);
+    int32_t AddSystemInfoJsonNode(void* pNode);
     std::string PreparePublishPayloadJson();
 
     /**

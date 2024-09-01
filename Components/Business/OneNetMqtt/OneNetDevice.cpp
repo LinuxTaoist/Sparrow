@@ -149,70 +149,143 @@ void OneNetDevice::StartSubscribeTopic()
     SendMsg(msg);
 }
 
-std::string OneNetDevice::PreparePublishPayloadJson()
+int32_t OneNetDevice::AddCPUUsageJsonNode(void* pNode)
 {
-    std::string payload;
-    static int32_t id = 0;
+    cJSON* pParamNode = (cJSON*)pNode;
+    if (pParamNode == nullptr) {
+        SPR_LOGE("pParamNode is nullptr!\n");
+        return -1;
+    }
 
-    // 获取设备状态信息
-    BatteryStatus batteryStatus = {"Battery_Status", "percent", 0.0, "voltage", 0};
-    GetBatteryStatus(batteryStatus);
     float cpuUsage = 0.0;
     GetCPUUsage(cpuUsage);
+    cJSON* pCpuNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(pCpuNode, "value", cpuUsage);
+    cJSON_AddItemToObject(pParamNode, "CPU_Usage", pCpuNode);
+    return 0;
+}
+
+int32_t OneNetDevice::AddDiskUsageJsonNode(void* pNode)
+{
+    cJSON* pParamNode = (cJSON*)pNode;
+    if (pParamNode == nullptr) {
+        SPR_LOGE("pParamNode is nullptr!\n");
+        return -1;
+    }
+
     int32_t diskUsage = 0;
     GetDiskUsage(diskUsage);
+    cJSON* pDiskNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(pDiskNode, "value", diskUsage);
+    cJSON_AddItemToObject(pParamNode, "Disk_Usage", pDiskNode);
+    return 0;
+}
+
+int32_t OneNetDevice::AddMemoryUsageJsonNode(void* pNode)
+{
+    cJSON* pParamNode = (cJSON*)pNode;
+    if (pParamNode == nullptr) {
+        SPR_LOGE("pParamNode is nullptr!\n");
+        return -1;
+    }
+
     int32_t memoryUsage = 0;
     GetMemoryUsage(memoryUsage);
+    cJSON* pMemoryNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(pMemoryNode, "value", memoryUsage);
+    cJSON_AddItemToObject(pParamNode, "Memory_Usage", pMemoryNode);
+    return 0;
+}
+
+int32_t OneNetDevice::AddModelNameJsonNode(void* pNode)
+{
+    cJSON* pParamNode = (cJSON*)pNode;
+    if (pParamNode == nullptr) {
+        SPR_LOGE("pParamNode is nullptr!\n");
+        return -1;
+    }
+
     std::string modelName;
     GetModelName(modelName);
+    cJSON* pModelNode = cJSON_CreateObject();
+    cJSON_AddStringToObject(pModelNode, "value", modelName.c_str());
+    cJSON_AddItemToObject(pParamNode, "Model", pModelNode);
+    return 0;
+}
+
+int32_t OneNetDevice::AddLaunchTimeJsonNode(void* pNode)
+{
+    cJSON* pParamNode = (cJSON*)pNode;
+    if (pParamNode == nullptr) {
+        SPR_LOGE("pParamNode is nullptr!\n");
+        return -1;
+    }
+
     int32_t launchtime = 0;
     GetLaunchTime(launchtime);
+    cJSON* pLaunchNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(pLaunchNode, "value", launchtime);
+    cJSON_AddItemToObject(pParamNode, "Launch_Time", pLaunchNode);
+    return 0;
+}
+
+int32_t OneNetDevice::AddBatteryStatusJsonNode(void* pNode)
+{
+    cJSON* pParamNode = (cJSON*)pNode;
+    if (pParamNode == nullptr) {
+        SPR_LOGE("pParamNode is nullptr!\n");
+        return -1;
+    }
+
+    BatteryStatus batteryStatus = {"Battery_Status", "Percent", 0.0, "Voltage", 0};
+    GetBatteryStatus(batteryStatus);
+    cJSON* pBatNode = cJSON_CreateObject();
+    cJSON* pValueNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(pValueNode, batteryStatus.perIdentifier.c_str(), batteryStatus.percent);
+    cJSON_AddNumberToObject(pValueNode, batteryStatus.vltIdentifier.c_str(), batteryStatus.voltage);
+    cJSON_AddItemToObject(pBatNode, "value", pValueNode);
+    cJSON_AddItemToObject(pParamNode, batteryStatus.identifier.c_str(), pBatNode);
+    return 0;
+}
+
+int32_t OneNetDevice::AddSystemInfoJsonNode(void* pNode)
+{
+    cJSON* pParamNode = (cJSON*)pNode;
+    if (pParamNode == nullptr) {
+        SPR_LOGE("pParamNode is nullptr!\n");
+        return -1;
+    }
+
     SystemInfo sysInfo = {"system_infomation", "version", "Unkown", "Description", "Unkown"};
     GetSystemInfo(sysInfo);
-
-    // 创建 JSON 对象
+    cJSON* pSysNode = cJSON_CreateObject();
+    cJSON* pValueNode = cJSON_CreateObject();
+    cJSON_AddStringToObject(pValueNode, sysInfo.descIdentifier.c_str(), sysInfo.description.c_str());
+    cJSON_AddStringToObject(pValueNode, sysInfo.verIdentifier.c_str(), sysInfo.version.c_str());
+    cJSON_AddItemToObject(pSysNode, "value", pValueNode);
+    cJSON_AddItemToObject(pParamNode, sysInfo.identifier.c_str(), pSysNode);
+    return 0;
+}
+std::string OneNetDevice::PreparePublishPayloadJson()
+{
+    // payload 格式
+    static int32_t id = 0;
     cJSON* root = cJSON_CreateObject();
     cJSON_AddStringToObject(root, "id", std::to_string(++id).c_str());
     cJSON_AddStringToObject(root, "version", "1.0");
-
-    // 创建 params 节点
     cJSON* paramsNode = cJSON_CreateObject();
     cJSON_AddItemToObject(root, "params", paramsNode);
 
-    // 添加 Cpu_Usage 子节点
-    cJSON* cpuUsageNode = cJSON_CreateObject();
-    cJSON_AddNumberToObject(cpuUsageNode, "value", cpuUsage);
-    cJSON_AddItemToObject(paramsNode, "CPU_Usage", cpuUsageNode);
-
-    // 添加 Disk_Usage 子节点
-    cJSON* diskUsageNode = cJSON_CreateObject();
-    cJSON_AddNumberToObject(diskUsageNode, "value", diskUsage);
-    cJSON_AddItemToObject(paramsNode, "Disk_Usage", diskUsageNode);
-
-    // 添加 Memory_Usage 子节点
-    cJSON* memoryUsageNode = cJSON_CreateObject();
-    cJSON_AddNumberToObject(memoryUsageNode, "value", memoryUsage);
-    cJSON_AddItemToObject(paramsNode, "Memory_Usage", memoryUsageNode);
-
-    // 添加 Model 子节点
-    cJSON* modelNode = cJSON_CreateObject();
-    cJSON_AddStringToObject(modelNode, "value", modelName.c_str());
-    cJSON_AddItemToObject(paramsNode, "Model", modelNode);
-
-    // 添加 System_Uptime 子节点
-    cJSON* systemUptimeNode = cJSON_CreateObject();
-    cJSON_AddNumberToObject(systemUptimeNode, "value", launchtime);
-    cJSON_AddItemToObject(paramsNode, "System_Uptime", systemUptimeNode);
-
-    // 添加 System_Info 子节点
-    cJSON* systemInfoNode = cJSON_CreateObject();
-    cJSON* valueNode = cJSON_CreateObject();
-    cJSON_AddStringToObject(valueNode, sysInfo.descIdentifier.c_str(), sysInfo.description.c_str());
-    cJSON_AddStringToObject(valueNode, sysInfo.verIdentifier.c_str(), sysInfo.version.c_str());
-    cJSON_AddItemToObject(systemInfoNode, "value", valueNode);
-    cJSON_AddItemToObject(paramsNode, sysInfo.identifier.c_str(), systemInfoNode);
+    AddBatteryStatusJsonNode(paramsNode);   // 添加电池状态
+    AddCPUUsageJsonNode(paramsNode);        // 添加 CPU 使用率
+    AddDiskUsageJsonNode(paramsNode);       // 添加磁盘使用率
+    AddMemoryUsageJsonNode(paramsNode);     // 添加内存使用率
+    AddModelNameJsonNode(paramsNode);       // 添加设备型号
+    AddLaunchTimeJsonNode(paramsNode);      // 添加启动时间
+    AddSystemInfoJsonNode(paramsNode);      // 添加系统信息
 
     // 将 cJSON 对象转换为字符串
+    std::string payload;
     char* jsonString = cJSON_PrintUnformatted(root);
     if (jsonString != nullptr) {
         payload = jsonString;
@@ -223,13 +296,6 @@ std::string OneNetDevice::PreparePublishPayloadJson()
 
     cJSON_Delete(root); // 即使转换失败也要删除 cJSON 对象
     return payload;
-}
-
-int32_t OneNetDevice::GetBatteryStatus(BatteryStatus& batteryStatus)
-{
-    batteryStatus.percent = 0.0;
-    batteryStatus.voltage = 0;
-    return 0;
 }
 
 int32_t OneNetDevice::GetCPUUsage(float& cpuUsage)
@@ -267,7 +333,7 @@ int32_t OneNetDevice::GetCPUUsage(float& cpuUsage)
 
     // 计算 CPU 使用率
     if (total > 0) {
-        cpuUsage = (nonIdle * 1.0f) / total;
+        cpuUsage = (nonIdle * 1.0f) / total * 100.0f;
     } else {
         cpuUsage = 0.00f;
     }
@@ -278,82 +344,57 @@ int32_t OneNetDevice::GetCPUUsage(float& cpuUsage)
 
 int32_t OneNetDevice::GetDiskUsage(int32_t& diskUsage)
 {
-    // 读取 /proc/mounts 文件以获取挂载点信息
-    std::ifstream mountsFile("/proc/mounts");
-    if (!mountsFile.is_open()) {
-        return -1;
-    }
-
-    std::string line;
-    std::vector<std::string> mountPoints;
-
-    while (std::getline(mountsFile, line)) {
-        std::istringstream iss(line);
-        std::string device, mountPoint;
-        iss >> device >> mountPoint;
-        if (mountPoint != "/") {
-            continue;
-        }
-        mountPoints.push_back(mountPoint);
-    }
-
-    if (mountPoints.empty()) {
-        return -1;
-    }
-
-    struct statvfs fs;
-    if (statvfs(mountPoints.front().c_str(), &fs) == -1) {
-        return -1;
-    }
-
-    long total = fs.f_blocks * fs.f_bsize;
-    long free = fs.f_bfree * fs.f_bsize;
-    long used = total - free;
-
-    if (total > 0) {
-        diskUsage = (used * 100) / total;
-    } else {
+    struct statvfs fsinfo;
+    if (statvfs("/", &fsinfo) == -1) {
+        SPR_LOGE("statvfs failed!\n");
         diskUsage = 0;
+        return -1;
     }
 
-    return 0;
+    // Calculate total capacity in MB
+    diskUsage = static_cast<int32_t>((fsinfo.f_blocks * fsinfo.f_bsize) / (1024 * 1024));
+    SPR_LOGD("Disk Usage: %d MB\n", diskUsage);
+    return 0; // Return success
 }
 
 int32_t OneNetDevice::GetMemoryUsage(int32_t& memoryUsage)
 {
-    // 读取 /proc/meminfo 文件以获取内存使用情况
-    std::ifstream memInfoFile("/proc/meminfo");
-    if (!memInfoFile.is_open()) {
-        return -1;
+    std::ifstream meminfo("/proc/meminfo");
+    if (!meminfo.is_open()) {
+        SPR_LOGE("Open /proc/meminfo failed! (%s)\n", strerror(errno));
+        return false;
     }
 
     std::string line;
-    long totalMem = 0;
-    long freeMem = 0;
+    uint64_t memTotal = 0;
+    uint64_t memFree = 0;
+    uint64_t buffers = 0;
+    uint64_t cached = 0;
 
-    while (std::getline(memInfoFile, line)) {
-        if (line.find("MemTotal:") != std::string::npos) {
-            std::istringstream iss(line);
-            std::string token;
-            iss >> token; // Skip "MemTotal:"
-            iss >> token; // Read the value
-            totalMem = std::stol(token);
-            break;
-        } else if (line.find("MemFree:") != std::string::npos) {
-            std::istringstream iss(line);
-            std::string token;
-            iss >> token; // Skip "MemFree:"
-            iss >> token; // Read the value
-            freeMem = std::stol(token);
+    // Read each line and parse it
+    while (std::getline(meminfo, line)) {
+        std::istringstream iss(line);
+        std::string key;
+        iss >> key;
+
+        if (key == "MemTotal:") {
+            iss >> memTotal;
+        } else if (key == "MemFree:") {
+            iss >> memFree;
+        } else if (key == "Buffers:") {
+            iss >> buffers;
+        } else if (key == "Cached:") {
+            iss >> cached;
         }
     }
 
-    if (totalMem == 0 || freeMem == 0) {
-        return -1;
-    }
+    // Calculate used memory: Total - (Free + Buffers + Cached)
+    // Note that this calculation gives an estimate of the memory that is not available for applications.
+    uint64_t usedMemory = memTotal - (memFree + buffers + cached);
+    memoryUsage = static_cast<int32_t>(usedMemory / 1024); // MB
+    meminfo.close();
+    SPR_LOGD("total: %llu kB, free: %llu kB, buffers: %llu kB, cached: %llu kB, used: %llu kB\n", memTotal, memFree, buffers, cached, usedMemory);
 
-    // 计算内存使用量（单位：MB）
-    memoryUsage = (totalMem - freeMem) / 1024;
     return 0;
 }
 
@@ -381,6 +422,13 @@ int32_t OneNetDevice::GetLaunchTime(int32_t& launchTime)
 
     // 计算启动时间（单位：秒）
     launchTime = info.uptime;
+    return 0;
+}
+
+int32_t OneNetDevice::GetBatteryStatus(BatteryStatus& batteryStatus)
+{
+    batteryStatus.percent = 0.0;
+    batteryStatus.voltage = 0;
     return 0;
 }
 
