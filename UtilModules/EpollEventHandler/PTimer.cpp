@@ -91,6 +91,26 @@ int32_t PTimer::DestoryTimer()
     return 0;
 }
 
+ssize_t PTimer::Read(int fd, std::string& bytes)
+{
+    uint64_t exp;
+    ssize_t rc = read(fd, &exp, sizeof(exp));
+    if (rc != sizeof(uint64_t)) {
+        SPR_LOGE("read fail! (%s)\n", strerror(errno));
+        return rc;
+    }
+
+    bytes.push_back(exp & 0xFF);
+    bytes.push_back((exp >> 8 ) & 0xFF);
+    bytes.push_back((exp >> 16) & 0xFF);
+    bytes.push_back((exp >> 24) & 0xFF);
+    bytes.push_back((exp >> 32) & 0xFF);
+    bytes.push_back((exp >> 40) & 0xFF);
+    bytes.push_back((exp >> 48) & 0xFF);
+    bytes.push_back((exp >> 56) & 0xFF);
+    return rc;
+}
+
 void* PTimer::EpollEvent(int fd, EpollType eType, void* arg)
 {
     if (fd != mEpollFd) {

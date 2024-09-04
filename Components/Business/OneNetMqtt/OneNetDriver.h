@@ -37,6 +37,7 @@ enum EOneNetDrvLev1State
 {
     ONENET_DRV_LEV1_MACROS
 };
+
 #define ONENET_DRV_LEV2_MACROS                      \
     ENUM_OR_STRING(LEV2_ONENET_ANY),                \
     ENUM_OR_STRING(LEV2_ONENET_IDLE),               \

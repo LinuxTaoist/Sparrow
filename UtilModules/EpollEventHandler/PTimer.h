@@ -33,6 +33,7 @@ public:
     int32_t StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec = 0);
     int32_t StopTimer();
     int32_t DestoryTimer();
+    ssize_t Read(int fd, std::string& bytes) override;
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:

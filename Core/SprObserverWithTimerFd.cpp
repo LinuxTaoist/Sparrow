@@ -45,9 +45,12 @@ int32_t SprObserverWithTimerFd::InitFramework()
 void* SprObserverWithTimerFd::EpollEvent(int fd, EpollType eType, void* arg)
 {
     if (fd != GetEpollFd()) {
+        SPR_LOGW("fd is not timerfd!\n");
         return nullptr;
     }
 
+    std::string bytes;
+    Read(fd, bytes);
     ProcessTimerEvent();
     return nullptr;
 }
