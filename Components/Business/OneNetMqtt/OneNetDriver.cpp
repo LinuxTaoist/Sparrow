@@ -471,11 +471,8 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         mOneSocketPtr = nullptr;
     }
 
-    mOneSocketPtr = new (std::nothrow) SprObserverWithSocket(
-        MODULE_ONENET_SOCKET, "OneSock", MEDIATOR_PROXY_MQUEUE,
-        AF_INET, SOCK_STREAM, 0,[&](int sock, void *arg)
+    mOneSocketPtr = new (std::nothrow) SprObserverWithSocket(AF_INET, SOCK_STREAM, 0,[&](int sock, void *arg)
     {
-
         PSocket* pSocket = reinterpret_cast<PSocket*>(arg);
         if (pSocket == nullptr) {
             SPR_LOGE("PSocket is nullptr\n");

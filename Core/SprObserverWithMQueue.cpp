@@ -100,13 +100,13 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
     return msg.Decode(bytes);
 }
 
-int SprObserverWithMQueue::MsgRespondSystemExitRsp(const SprMsg& msg)
+int32_t SprObserverWithMQueue::MsgRespondSystemExitRsp(const SprMsg& msg)
 {
     SPR_LOGD("System Exit!\n");
     return 0;
 }
 
-int SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
+int32_t SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
 {
     // 注册成功，连接状态为true
     mConnected = msg.GetU8Value();
@@ -114,7 +114,7 @@ int SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
     return 0;
 }
 
-int SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
+int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
 {
 
     mConnected = !msg.GetU8Value();
@@ -122,19 +122,8 @@ int SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
     return 0;
 }
 
-void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
+int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
 {
-    if (fd != GetEpollFd()) {
-        SPR_LOGW("fd is not match!\n");
-        return nullptr;
-    }
-
-    SprMsg msg;
-    if (RecvMsg(msg) < 0) {
-        SPR_LOGE("RecvMsg failed!\n");
-        return nullptr;
-    }
-
     switch (msg.GetMsgId())
     {
         case SIG_ID_PROXY_REGISTER_RESPONSE:
@@ -159,6 +148,23 @@ void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
         }
     }
 
+    return 0;
+}
+
+void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
+{
+    if (fd != GetEpollFd()) {
+        SPR_LOGW("fd is not match!\n");
+        return nullptr;
+    }
+
+    SprMsg msg;
+    if (RecvMsg(msg) < 0) {
+        SPR_LOGE("RecvMsg failed!\n");
+        return nullptr;
+    }
+
+    DispatchSprMsg(msg);
     return nullptr;
 }
 

@@ -90,6 +90,14 @@ protected:
     int32_t UnRegisterFromMediator();
 
     /**
+     * @brief Dispatch messages from message queue
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t DispatchSprMsg(const SprMsg& msg);
+
+    /**
      * @brief RecvMsg
      *
      * @param[out] msg

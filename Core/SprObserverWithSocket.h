@@ -42,6 +42,7 @@ public:
      * otherwise, used construct without parameters id and name.
      */
     SprObserverWithSocket(int sock, std::function<void(int, void*)> cb = nullptr, void* arg = nullptr);
+    SprObserverWithSocket(int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg = nullptr);
     SprObserverWithSocket(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType,
         int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg = nullptr);
 
