@@ -69,7 +69,7 @@ bool ServiceManager::IsExeAliveByProc(int32_t pid)
         return false;
     }
 
-    // /proc/pid/ 为目录则当前进程正常
+    // /proc/pid/ 目录存在则当前进程正常
     if (S_ISDIR(fileStat.st_mode)) {
         return true;
     }
@@ -102,13 +102,9 @@ int32_t ServiceManager::StopAllSubExes()
     // 子进程退出顺序与启动顺序相反
     for (auto rit = mPidMap.rbegin(); rit != mPidMap.rend(); ++rit) {
         kill(rit->first, MAIN_EXIT_SIGNUM);
-        SPR_LOGI("kill %d to %d: %s\n", MAIN_EXIT_SIGNUM, rit->first, rit->second.first.c_str());
-    }
+        SPR_LOGI("KILL %d TO %d: %s\n", MAIN_EXIT_SIGNUM, rit->first, rit->second.first.c_str());
 
-    // 等待所有子进程退出
-    for (auto rit = mPidMap.rbegin(); rit != mPidMap.rend(); ++rit) {
         int status = 0;
-        SPR_LOGI("WAIT PID: %d, PATH: %s\n", rit->first, rit->second.first.c_str());
         waitpid(rit->first, &status, 0);
         SPR_LOGI("EXIT PID: %d, STATUS: %d, PATH: %s\n", rit->first, status, rit->second.first.c_str());
     }
