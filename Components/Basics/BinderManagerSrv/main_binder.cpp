@@ -17,10 +17,29 @@
  *
  */
 #include <stdio.h>
+#include <signal.h>
+#include "GeneralUtils.h"
+#include "CoreTypeDefs.h"
 #include "BinderManager.h"
+
+using namespace GeneralUtils;
+
+#define SPR_LOGI(fmt, args...) printf("%s %4d MainBinder I: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
 
 int main(int argc, const char *argv[])
 {
-    BinderManager::GetInstance()->HandleMsgLoop();
+    InitSignalHandler([](int signum) {
+	    SPR_LOGI("Receive signal: %d!\n", signum);
+        switch (signum) {
+            case MAIN_EXIT_SIGNUM:
+                BinderManager::StopWork();
+                break;
+            default:
+                break;
+        }
+    });
+
+    BinderManager::GetInstance()->StartWork();
+    SPR_LOGI("Main Exit!\n");
     return 0;
 }

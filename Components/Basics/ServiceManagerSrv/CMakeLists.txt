@@ -1,6 +1,7 @@
 # Bin servicemanagersrv
 include_directories     (${PROJECT_PATH}/Util)
 include_directories     (${PROJECT_PATH}/3rdAdapter)
+include_directories     (${PROJECT_PATH}/Core)
 
 aux_source_directory        (${PROJECT_PATH}/Util                                   SRC_SRVICE_MANAGER_PATH)
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/ServiceManagerSrv    SRC_SRVICE_MANAGER_PATH)

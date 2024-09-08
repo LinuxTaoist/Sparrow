@@ -31,32 +31,30 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include "GeneralUtils.h"
+#include "CoreTypeDefs.h"
 #include "ServiceManager.h"
 
 using namespace std;
+using namespace GeneralUtils;
 
-#define SPR_LOGD(fmt, args...) printf("%-4d ServiceM D: " fmt, __LINE__, ##args)
-#define SPR_LOGI(fmt, args...) printf("%-4d ServiceM I: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%-4d ServiceM W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%-4d ServiceM E: " fmt, __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %4d SrvMgr I: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %4d SrvMgr D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %4d SrvMgr W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %4d SrvMgr E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
 
 const char PROC_PATH[] = "/proc";
 const char ENV_ROOT_PATH[] = "/tmp/";
 const char INIT_CONFIGURE_PATH[] = "init.conf";
 
-ServiceManager::ServiceManager() : mRunning(false)
-{
+bool ServiceManager::mRunning = false;
 
+ServiceManager::ServiceManager()
+{
 }
 
 ServiceManager::~ServiceManager()
 {
     StopWork();
-}
-
-int32_t ServiceManager::Init()
-{
-    return StartWork();
 }
 
 bool ServiceManager::IsExeAliveByProc(int32_t pid)
@@ -81,37 +79,47 @@ bool ServiceManager::IsExeAliveByProc(int32_t pid)
 
 int32_t ServiceManager::StartWork()
 {
-    if (mThread.joinable()) {
-        SPR_LOGW("thread is running!");
-        return 0;
+    StartAllExesFromConfigure(INIT_CONFIGURE_PATH);
+    mRunning = true;
+    while(mRunning) {
+        int pid = 0, status = 0;
+        while( (pid = waitpid(-1, &status, WNOHANG)) > 0) {
+            if (!IsExeAliveByProc(pid) && mPidMap.count(pid)) {
+                StartExe(mPidMap[pid].first.c_str());
+            }
+        }
+
+        sleep(1);
     }
 
-    StartAllExesFromConfigure(INIT_CONFIGURE_PATH);
+    StopAllSubExes();
+    SPR_LOGI("Service manager loop exit!\n");
+    return 0;
+}
 
-    mRunning = true;
-    mThread = thread([&]() {
-        while(mRunning) {
-            int pid = 0, status = 0;
-            while( (pid = waitpid(-1, &status, WNOHANG)) > 0) {
-                if (!IsExeAliveByProc(pid) && mPidMap.count(pid)) {
-                    StartExe(mPidMap[pid].first.c_str());
-                }
-            }
+int32_t ServiceManager::StopAllSubExes()
+{
+    // 子进程退出顺序与启动顺序相反
+    for (auto rit = mPidMap.rbegin(); rit != mPidMap.rend(); ++rit) {
+        kill(rit->first, MAIN_EXIT_SIGNUM);
+        SPR_LOGI("kill %d to %d: %s\n", MAIN_EXIT_SIGNUM, rit->first, rit->second.first.c_str());
+    }
 
-            sleep(1);
-        }
-    });
+    // 等待所有子进程退出
+    for (auto rit = mPidMap.rbegin(); rit != mPidMap.rend(); ++rit) {
+        int status = 0;
+        SPR_LOGI("WAIT PID: %d, PATH: %s\n", rit->first, rit->second.first.c_str());
+        waitpid(rit->first, &status, 0);
+        SPR_LOGI("EXIT PID: %d, STATUS: %d, PATH: %s\n", rit->first, status, rit->second.first.c_str());
+    }
 
     return 0;
 }
 
 int32_t ServiceManager::StopWork()
 {
-    if (mThread.joinable()) {
-        mRunning = false;
-        mThread.join();
-    }
-
+    mRunning = false;
+    SPR_LOGI("Stop work!\n");
     return 0;
 }
 

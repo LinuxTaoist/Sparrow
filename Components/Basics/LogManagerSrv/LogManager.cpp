@@ -36,9 +36,10 @@ using namespace std;
 using namespace GeneralUtils;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %4d LOGM D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %4d LOGM W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %4d LOGM E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %4d LOGM   D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %4d LOGM   I: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %4d LOGM   W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %4d LOGM   E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
 
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_FRAME_LEN_LIMIT     1024
@@ -49,11 +50,11 @@ using namespace GeneralUtils;
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
+bool LogManager::mRunning = true;
 uint8_t LogManager::mLogLevelLimit = LOG_LEVEL_BUTT;
 
 LogManager::LogManager()
 {
-    mRunning            = true;
     mOutputMode         = LOG_OUTPUT_FILE;
     mLogFrameLength     = DEFAULT_FRAME_LEN_LIMIT;
     mLogFileNum         = DEFAULT_LOG_FILE_NUM_LIMIT;
@@ -100,6 +101,13 @@ int LogManager::EnvReady(const std::string& srvName)
         close(fd);
     }
 
+    return 0;
+}
+
+int LogManager::StopWork()
+{
+    mRunning = false;
+    SPR_LOGD("Stop Work!\n");
     return 0;
 }
 

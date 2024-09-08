@@ -32,11 +32,11 @@ public:
     ~BinderManager();
 
     static BinderManager* GetInstance();
-    int32_t HandleMsgLoop();
+    int32_t StartWork();
+    static int32_t StopWork();
 
 private:
     BinderManager();
-
     int32_t EnvReady(const std::string& srvName);
     int32_t BMsgRespondAddService();
     int32_t BMsgRespondRemoveService();
@@ -45,6 +45,7 @@ private:
 private:
     using HandleFunction = int32_t (BinderManager::*)(void);
 
+    static bool mRunning;
     std::map<std::string, BinderInfo> mBinderMap;
     std::map<int32_t, HandleFunction> mHandleFuncs;
 };

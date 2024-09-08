@@ -20,6 +20,7 @@
 #include "SprLog.h"
 #include "SprSystem.h"
 #include "GeneralUtils.h"
+#include "CoreTypeDefs.h"
 #include "SprEpollSchedule.h"
 
 #define SPR_LOGI(fmt, args...) LOGI("MainSparrow", fmt, ##args)
@@ -30,23 +31,9 @@ int main(int argc, const char *argv[])
 	    SPR_LOGI("Receive signal: %d!\n", signum);
 
         switch (signum) {
-            case SIGHUP:    // 终端挂断
-            case SIGINT:    // 用户中断（Ctrl+C）
-            case SIGQUIT:   // 退出，带core dump，调试用
-            case SIGILL:    // 非法指令, 实际中可能需要更详细的错误处理或日志记录
-            case SIGTRAP:   // 调试陷阱
-            case SIGABRT:   // 应用异常中止
-            case SIGBUS:    // 总线错误
-            case SIGFPE:    // 浮点错误
-            case SIGSEGV:   // 段错误, 这些通常表示严重错误，记录日志后可能需要退出
-            case SIGPIPE:   // 管道破裂
-            case SIGALRM:   // 定时器信号
-            case SIGUSR1:   // 用户自定义信号1
-            case SIGTERM:   // 请求进程终止, 清理并退出
+            case MAIN_EXIT_SIGNUM:
                 SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
-
-            case SIGUSR2:   // 用户自定义信号2
             default:
                 break;
         }
@@ -54,5 +41,6 @@ int main(int argc, const char *argv[])
 
     SprSystem::GetInstance()->Init();
     SprEpollSchedule::GetInstance()->EpollLoop(true);
+    SPR_LOGI("Main exit!\n");
     return 0;
 }

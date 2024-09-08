@@ -35,9 +35,10 @@
 // --------------------------------------------------------------------------------------------------------------------
 #define     MEDIATOR_MSG_QUEUE          "/SprMdrQ_20231126"          // mqueue
 #define     MEDIATOR_UNIX_DGRAM_PATH    "/tmp/SprMdrU_20231126"      // unix socket
+#define     MAIN_EXIT_SIGNUM            SIGUSR1
 #define     MEDIATOR_INET_PORT          1126
 #define     MSG_BUF_MAX_LENGTH          1024
-#define     MODULE_ID_OFFSET            24
+#define     MODULE_ID_OFFSET              24
 
 namespace InternalDefs {
 
@@ -71,6 +72,7 @@ enum ESprModuleID
     MODULE_ONENET_UNIX_PIPE1,
     MODULE_DEBUG,
     MODULE_DEBUG_WATCH,
+    MODULE_GENERAL,
     MODULE_MAX,
 };
 
@@ -110,6 +112,13 @@ enum EDebugMBinderCmd
     DEBUG_CMD_ENABLE_REMOTE_SHELL,
     DEBUG_CMD_DISABLE_REMOTE_SHELL,
     DEBUG_MSG_BUTT
+};
+
+enum EGeneralBinderCmd
+{
+    GENERAL_CMD_BEGIN = MODULE_GENERAL << MODULE_ID_OFFSET | 1,
+    GENERAL_CMD_EXE_EXIT,
+    GENERAL_CMD_BUTT
 };
 
 enum EModuleBootPriority

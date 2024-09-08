@@ -29,6 +29,7 @@
 using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("BinderM", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGD("BinderM", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGD("BinderM", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("BinderM", fmt, ##args)
 
@@ -36,6 +37,8 @@ using namespace InternalDefs;
 
 Parcel reqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
 Parcel rspParcel("BinderM",  KEY_BINDER_MANAGER,  true);
+
+bool BinderManager::mRunning = false;
 
 BinderManager::BinderManager()
 {
@@ -118,9 +121,10 @@ int32_t BinderManager::BMsgRespondGetService()
     return ret;
 }
 
-int32_t BinderManager::HandleMsgLoop()
+int32_t BinderManager::StartWork()
 {
-    while (true)
+    mRunning = true;
+    while (mRunning)
     {
         int cmd = 0;
         reqParcel.Wait();
@@ -135,5 +139,17 @@ int32_t BinderManager::HandleMsgLoop()
         }
     }
 
+    SPR_LOGI("Exit work loop!\n");
+    return 0;
+}
+
+int32_t BinderManager::StopWork()
+{
+    mRunning = false;
+
+    // Signal to unblock the reqParcel.Wait() call
+    reqParcel.WriteInt(0);
+    reqParcel.Post();
+    SPR_LOGI("Stop work!\n");
     return 0;
 }
