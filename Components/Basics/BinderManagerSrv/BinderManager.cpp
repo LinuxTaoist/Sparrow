@@ -23,6 +23,7 @@
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
+#include "CoreTypeDefs.h"
 #include "BindCommon.h"
 #include "BinderManager.h"
 
@@ -130,6 +131,11 @@ int32_t BinderManager::StartWork()
         reqParcel.Wait();
         reqParcel.ReadInt(cmd);
 
+        if (cmd == GENERAL_CMD_EXE_EXIT) {
+            mRunning = false;
+            break;
+        }
+
         auto handler = mHandleFuncs.find(cmd);
         if (handler != mHandleFuncs.end()) {
             HandleFunction handleFunc = handler->second;
@@ -145,10 +151,8 @@ int32_t BinderManager::StartWork()
 
 int32_t BinderManager::StopWork()
 {
-    mRunning = false;
-
     // Signal to unblock the reqParcel.Wait() call
-    reqParcel.WriteInt(0);
+    reqParcel.WriteInt(GENERAL_CMD_EXE_EXIT);
     reqParcel.Post();
     SPR_LOGI("Stop work!\n");
     return 0;
