@@ -147,6 +147,7 @@ int32_t MqttMsgBase::Decode(const std::string& bytes)
 
 int32_t MqttMsgBase::Encode(std::string& bytes)
 {
+    bytes.clear();
     int32_t fixLen = EncodeFixedHeader(bytes);
     if (fixLen < 0) {
         return fixLen;
