@@ -38,3 +38,13 @@ MqttPublish::MqttPublish(uint8_t flags, uint16_t identifier, const std::string& 
 MqttPublish::~MqttPublish()
 {
 }
+
+int32_t MqttPublish::DecodeVariableHeader(const std::string& bytes)
+{
+    return 0;
+}
+
+int32_t MqttPublish::EncodeVariableHeader(std::string& bytes)
+{
+    return 0;
+}

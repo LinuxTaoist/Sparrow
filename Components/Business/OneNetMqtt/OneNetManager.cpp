@@ -431,7 +431,7 @@ void OneNetManager::MsgRespondReactiveCurDeviceConnect(const SprMsg& msg)
 /**
  * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
  *
- * @param msg
+ * @param[in] msg
  */
 void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 {
@@ -460,7 +460,7 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 /**
  * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK
  *
- * @param msg
+ * @param[in] msg
  */
 void OneNetManager::MsgRespondMqttSubAck(const SprMsg& msg)
 {
@@ -470,7 +470,7 @@ void OneNetManager::MsgRespondMqttSubAck(const SprMsg& msg)
 /**
  * @brief Process SIG_ID_ONENET_MGR_PING_TIMER_EVENT
  *
- * @param msg
+ * @param[in] msg
  */
 void OneNetManager::MsgRespondMqttPingTimerEvent(const SprMsg& msg)
 {
@@ -487,7 +487,7 @@ void OneNetManager::MsgRespondMqttPingTimerEvent(const SprMsg& msg)
 /**
  * @brief Process SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT
  *
- * @param msg
+ * @param[in] msg
  */
 void OneNetManager::MsgRespondMqttReportTimerEvent(const SprMsg& msg)
 {

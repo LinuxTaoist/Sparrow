@@ -25,7 +25,7 @@ class Suback : public MqttMsgBase
 {
 public:
     Suback();
-    ~Suback();
+    virtual ~Suback();
 
     int32_t DecodeVariableHeader(const std::string& bytes) override;
     int32_t DecodePayload(const std::string& bytes) override;

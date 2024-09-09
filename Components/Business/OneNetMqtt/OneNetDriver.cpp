@@ -322,7 +322,6 @@ int32_t OneNetDriver::InitUnixPIPE()
     mSendPIPEPtr = mSendPIPEPtr ? mSendPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[1]);
     CHECK_POINTER_VALIDITY(mSendPIPEPtr, -1);
     mSendPIPEPtr->AsUnixStreamClient();
-    // mSendPIPEPtr->InitFramework();
 
     // 读取管道pipe[0]中缓存的mqtt字节流
     mRecvPIPEPtr = mRecvPIPEPtr ? mRecvPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[0], [&](int sock, void *arg) {
@@ -482,7 +481,7 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         std::string rBuf;
         int rc = pSocket->Read(sock, rBuf);
         if (rc > 0) {
-            SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
+            SPR_LOGD("## RECV [%d]> %d\n", sock, rBuf.size());
             DumpSocketBytesWithAscall(rBuf);
             DispatchMqttBytes(rBuf);
         } else {
@@ -866,6 +865,11 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
         case MQTT_MSG_CONNACK:
         {
             ret = HandleMqttConnack(bytes);
+            break;
+        }
+        case MQTT_MSG_PUBLISH:
+        {
+            ret = HandleMqttPublish(bytes);
             break;
         }
         case MQTT_MSG_PUBACK:

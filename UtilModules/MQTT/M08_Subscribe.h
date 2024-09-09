@@ -25,7 +25,7 @@ class MqttSubscribe : public MqttMsgBase
 {
 public:
     MqttSubscribe(uint16_t identifier, const std::string& topic);
-    ~MqttSubscribe();
+    virtual ~MqttSubscribe();
 
     uint16_t GetPacketIdentifier() { return mIdentifier; }
 

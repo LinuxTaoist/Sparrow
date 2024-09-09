@@ -17,6 +17,7 @@
  *
  */
 #include <signal.h>
+#include <unistd.h>
 #include "SprLog.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"

@@ -25,7 +25,11 @@ class MqttPublish : public MqttMsgBase
 {
 public:
     MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload);
-    ~MqttPublish();
+    virtual ~MqttPublish();
+
+protected:
+    int32_t DecodeVariableHeader(const std::string& bytes) override;
+    int32_t EncodeVariableHeader(std::string& bytes) override;
 };
 
 #endif // __M03_PUBLISH_H__

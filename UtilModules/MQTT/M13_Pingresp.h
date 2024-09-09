@@ -26,7 +26,7 @@ class MqttPingresq : public MqttMsgBase
 {
 public:
     MqttPingresq();
-    ~MqttPingresq();
+    virtual ~MqttPingresq();
 };
 
 #endif // __M13_PINGRESP_H__
