@@ -34,12 +34,10 @@ MqttConnack::~MqttConnack()
 
 int32_t MqttConnack::DecodeVariableHeader(const std::string& bytes)
 {
-    int len1 = DecodeIntegerFromBytes(mConnAckStatus, bytes);
-    CHECK_RESULT(len1);
-    int len2 = DecodeIntegerFromBytes(mReturnCode, bytes.substr(len1));
-    CHECK_RESULT(len2);
-
-    return len1 + len2;
+    int32_t len = 0;
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mConnAckStatus, bytes), len);
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mReturnCode, bytes.substr(len)), len);
+    return len;
 }
 
 int32_t MqttConnack::GetConnAckStatus() const

@@ -18,6 +18,11 @@
  */
 #include "M03_Publish.h"
 
+MqttPublish::MqttPublish()
+    : MqttMsgBase(MQTT_MSG_PUBLISH)
+{
+}
+
 MqttPublish::MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload)
     : MqttMsgBase(MQTT_MSG_PUBLISH, flags)
 {

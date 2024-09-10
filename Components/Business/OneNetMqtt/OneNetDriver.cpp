@@ -269,6 +269,19 @@ OneNetDriver::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT
+    // =============================================================
+    { LEV1_SOCKET_CONNECTED, LEV2_ONENET_CONNECTED,
+      SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT,
+      &OneNetDriver::MsgRespondMqttMsgDisconnect
+    },
+
+    { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT,
+      &OneNetDriver::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // Default case for handling unexpected messages,
     // mandatory to denote end of message table.
     // =============================================================
@@ -686,6 +699,22 @@ void OneNetDriver::MsgRespondMqttMsgPublish(const SprMsg& msg)
 }
 
 /**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDriver::MsgRespondMqttMsgSubscribe(const SprMsg& msg)
+{
+    uint16_t identifer = msg.GetU16Value();
+    std::string payload = msg.GetString();
+    int32_t ret = SendMqttSubscribe(identifer, payload);
+    if (ret < 0) {
+        SPR_LOGE("send subscribe failed\n");
+    }
+}
+
+/**
  * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ
  *
  * @param[in] msg
@@ -711,18 +740,16 @@ void OneNetDriver::MsgRespondMqttMsgPingresq(const SprMsg& msg)
 }
 
 /**
- * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT
  *
  * @param[in] msg
  * @return none
  */
-void OneNetDriver::MsgRespondMqttMsgSubscribe(const SprMsg& msg)
+void OneNetDriver::MsgRespondMqttMsgDisconnect(const SprMsg& msg)
 {
-    uint16_t identifer = msg.GetU16Value();
-    std::string payload = msg.GetString();
-    int32_t ret = SendMqttSubscribe(identifer, payload);
+    int32_t ret = SendMqttDisconnect();
     if (ret < 0) {
-        SPR_LOGE("send subscribe failed\n");
+        SPR_LOGE("Send mqtt disconnect msg failed\n");
     }
 }
 
@@ -830,7 +857,10 @@ int32_t OneNetDriver::SendMqttPingResp()
 
 int32_t OneNetDriver::SendMqttDisconnect()
 {
-    return 0;
+    MqttDisconnect disconMsg;
+    std::string bytes;
+    disconMsg.Encode(bytes);
+    return SendMqttBytes(bytes);
 }
 
 int32_t OneNetDriver::SendMqttBytes(const std::string& bytes)

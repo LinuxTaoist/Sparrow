@@ -121,9 +121,10 @@ private:
     void MsgRespondMqttMsgConnect(const SprMsg& msg);
     void MsgRespondMqttMsgConnack(const SprMsg& msg);
     void MsgRespondMqttMsgPublish(const SprMsg& msg);
+    void MsgRespondMqttMsgSubscribe(const SprMsg& msg);
     void MsgRespondMqttMsgPingreq(const SprMsg& msg);
     void MsgRespondMqttMsgPingresq(const SprMsg& msg);
-    void MsgRespondMqttMsgSubscribe(const SprMsg& msg);
+    void MsgRespondMqttMsgDisconnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 

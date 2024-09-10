@@ -24,8 +24,9 @@
 #include <stdint.h>
 
 #define CHECK_RESULT(expr) do { \
-    if ((expr) == -1) {         \
-        return -1;            \
+    int32_t __ret = (expr);     \
+    if (__ret == -1) {          \
+        return -1;              \
     }                           \
 } while(0)
 

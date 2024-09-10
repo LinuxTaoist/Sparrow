@@ -28,15 +28,15 @@ Suback::~Suback()
 
 int32_t Suback::DecodeVariableHeader(const std::string& bytes)
 {
-    int len = DecodeIntegerFromBytes(mIdentifier, bytes);
-    CHECK_RESULT(len);
+    int32_t len = 0;
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mIdentifier, bytes), len);
     return len;
 }
 
 int32_t Suback::DecodePayload(const std::string& bytes)
 {
-    int len = DecodeIntegerFromBytes(mReturnCode, bytes);
-    CHECK_RESULT(len);
+    int32_t len = 0;
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mReturnCode, bytes), len);
     return len;
 }
 
