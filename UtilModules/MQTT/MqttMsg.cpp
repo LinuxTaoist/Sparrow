@@ -124,46 +124,22 @@ int32_t MqttMsgBase::GetPayload(std::string& payload)
 
 int32_t MqttMsgBase::Decode(const std::string& bytes)
 {
-    int32_t fixLen = DecodeFixedHeader(bytes);
-    if (fixLen < 0) {
-        SPR_LOGE("DecodeFixedHeader failed!");
-        return fixLen;
-    }
-
-    int varLen = DecodeVariableHeader(bytes.substr(fixLen));
-    if (varLen < 0) {
-        SPR_LOGE("DecodeVariableHeader failed!");
-        return varLen;
-    }
-
-    int32_t payLen = DecodePayload(bytes.substr(fixLen + varLen));
-    if (payLen < 0) {
-        return payLen;
-    }
-
-    SPR_LOGD("fLen = %d, rLen = %d, vLen = %d, pLen = %d\n", fixLen, mRemainLenValue, varLen, payLen);
-    return fixLen + varLen + payLen;
+    int32_t len = 0;
+    CHECK_ADD_RESULT(DecodeFixedHeader(bytes), len);
+    CHECK_ADD_RESULT(DecodeVariableHeader(bytes.substr(len)), len);
+    CHECK_ADD_RESULT(DecodePayload(bytes.substr(len)), len);
+    SPR_LOGD("Decode len = %d\n", len);
+    return len;
 }
 
 int32_t MqttMsgBase::Encode(std::string& bytes)
 {
+    int32_t len = 0;
     bytes.clear();
-    int32_t fixLen = EncodeFixedHeader(bytes);
-    if (fixLen < 0) {
-        return fixLen;
-    }
-
-    int varLen = EncodeVariableHeader(bytes);
-    if (varLen < 0) {
-        return varLen;
-    }
-
-    int32_t payLen = EncodePayload(bytes);
-    if (payLen < 0) {
-        return payLen;
-    }
-
-    return fixLen + varLen + payLen;
+    CHECK_ADD_RESULT(EncodeFixedHeader(bytes), len);
+    CHECK_ADD_RESULT(EncodeVariableHeader(bytes), len);
+    CHECK_ADD_RESULT(EncodePayload(bytes), len);
+    return len;
 }
 
 int32_t MqttMsgBase::DecodeRemainingLength(const std::string& bytes)

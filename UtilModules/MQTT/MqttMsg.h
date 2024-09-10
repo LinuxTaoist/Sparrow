@@ -30,10 +30,11 @@
 } while(0)
 
 #define CHECK_ADD_RESULT(expr, ret) do { \
-    if ((expr) == -1) {         \
+    int32_t __ret = (expr);     \
+    if (__ret == -1) {          \
         return -1;              \
     } else {                    \
-        ret += expr;            \
+        ret += __ret;           \
     }                           \
 } while(0)
 

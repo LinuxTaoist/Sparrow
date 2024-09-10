@@ -28,8 +28,8 @@ public:
     virtual ~MqttPublish();
 
 protected:
-    int32_t DecodeVariableHeader(const std::string& bytes) override;
-    int32_t EncodeVariableHeader(std::string& bytes) override;
+    // int32_t DecodeVariableHeader(const std::string& bytes) override;
+    // int32_t EncodeVariableHeader(std::string& bytes) override;
 };
 
 #endif // __M03_PUBLISH_H__
