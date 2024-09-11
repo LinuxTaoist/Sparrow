@@ -44,10 +44,14 @@ MqttPublish::~MqttPublish()
 {
 }
 
-// int32_t MqttPublish::DecodeVariableHeader(const std::string& bytes)
-// {
-//     return 0;
-// }
+int32_t MqttPublish::DecodeVariableHeader(const std::string& bytes)
+{
+    int32_t len = 0;
+    uint16_t topicLen = 0;
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(topicLen, bytes), len);
+    CHECK_ADD_RESULT(DecodeU8BytesFromBytes(mTopic, bytes.substr(len), topicLen), len);
+    return len;
+}
 
 // int32_t MqttPublish::EncodeVariableHeader(std::string& bytes)
 // {

@@ -28,9 +28,14 @@ public:
     MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload);
     virtual ~MqttPublish();
 
+    std::string GetTopic() const { return mTopic; }
+
 protected:
-    // int32_t DecodeVariableHeader(const std::string& bytes) override;
+    int32_t DecodeVariableHeader(const std::string& bytes) override;
     // int32_t EncodeVariableHeader(std::string& bytes) override;
+
+private:
+    std::string mTopic;
 };
 
 #endif // __M03_PUBLISH_H__

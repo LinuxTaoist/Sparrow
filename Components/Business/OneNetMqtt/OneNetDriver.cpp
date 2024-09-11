@@ -889,7 +889,7 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
         return -1;
     }
 
-    int ret = -1;
+    int32_t ret = -1;
     uint8_t msgId = (bytes[0] & 0xF0) >> 4;
     switch (msgId) {
         case MQTT_MSG_CONNACK:
@@ -930,7 +930,7 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
 int32_t OneNetDriver::HandleMqttConnack(const std::string& bytes)
 {
     MqttConnack mqttCmd;
-    int ret = mqttCmd.Decode(bytes);
+    int32_t ret = mqttCmd.Decode(bytes);
     CHECK_ONENET_RET_VALIDITY(ret);
 
     SprMsg msg(SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK);
@@ -941,6 +941,21 @@ int32_t OneNetDriver::HandleMqttConnack(const std::string& bytes)
 
 int32_t OneNetDriver::HandleMqttPublish(const std::string& bytes)
 {
+    MqttPublish mqttCmd;
+    int32_t ret = mqttCmd.Decode(bytes);
+    CHECK_ONENET_RET_VALIDITY(ret);
+
+    std::string payload, topic;
+    mqttCmd.GetPayload(payload);
+    topic = mqttCmd.GetTopic();
+
+    SOneNetPublishParam publishParam {};
+    strncpy(publishParam.topic, topic.c_str(), sizeof(publishParam.topic) - 1);
+    strncpy(publishParam.payload, payload.c_str(), sizeof(publishParam.payload) - 1);
+    publishParam.topic[sizeof(publishParam.topic) - 1] = '\0';
+    publishParam.payload[sizeof(publishParam.payload) - 1] = '\0';
+
+    SPR_LOGD("Recv mqtt publish! topic: %s payload: %s\n", topic.c_str(), payload.c_str());
     return 0;
 }
 
@@ -972,7 +987,7 @@ int32_t OneNetDriver::HandleMqttSubscribe(const std::string& bytes)
 int32_t OneNetDriver::HandleMqttSubAck(const std::string& bytes)
 {
     Suback mqttCmd;
-    int ret = mqttCmd.Decode(bytes);
+    int32_t ret = mqttCmd.Decode(bytes);
     CHECK_ONENET_RET_VALIDITY(ret);
 
     SprMsg msg(SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK);
@@ -1000,7 +1015,7 @@ int32_t OneNetDriver::HandleMqttPingReq(const std::string& bytes)
 int32_t OneNetDriver::HandleMqttPingResp(const std::string& bytes)
 {
     MqttPingresq mqttCmd;
-    int ret = mqttCmd.Decode(bytes);
+    int32_t ret = mqttCmd.Decode(bytes);
     CHECK_ONENET_RET_VALIDITY(ret);
 
     SprMsg msg(SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP);
