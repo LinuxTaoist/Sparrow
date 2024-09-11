@@ -35,6 +35,10 @@ public:
     uint8_t GetConnectFlags() { return mConnectFlags; };
     uint16_t GetKeepAlive() { return mKeepAlive; };
 
+protected:
+    int32_t DecodeVariableHeader(const std::string& bytes) override;
+    int32_t EncodeVariableHeader(std::string& bytes) override;
+
 private:
                                     // 可变包头
     uint16_t mProtocolNameLength;   // 2 BYTE  协议名长度

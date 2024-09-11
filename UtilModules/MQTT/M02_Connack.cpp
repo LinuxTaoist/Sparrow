@@ -32,14 +32,6 @@ MqttConnack::~MqttConnack()
 {
 }
 
-int32_t MqttConnack::DecodeVariableHeader(const std::string& bytes)
-{
-    int32_t len = 0;
-    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mConnAckStatus, bytes), len);
-    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mReturnCode, bytes.substr(len)), len);
-    return len;
-}
-
 int32_t MqttConnack::GetConnAckStatus() const
 {
     return mConnAckStatus;
@@ -48,4 +40,12 @@ int32_t MqttConnack::GetConnAckStatus() const
 int32_t MqttConnack::GetReturnCode() const
 {
     return mReturnCode;
+}
+
+int32_t MqttConnack::DecodeVariableHeader(const std::string& bytes)
+{
+    int32_t len = 0;
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mConnAckStatus, bytes), len);
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mReturnCode, bytes.substr(len)), len);
+    return len;
 }

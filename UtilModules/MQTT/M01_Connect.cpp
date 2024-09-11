@@ -26,15 +26,36 @@ MqttConnect::MqttConnect(std::string& protocolName, uint8_t version, uint8_t fla
     mProtocolVersion = version;
     mConnectFlags = flags;
     mKeepAlive = keepalive;
-
-    mVariableHeader.clear();
-    EncodeIntegerToBytes(mProtocolNameLength, mVariableHeader);
-    EncodeU8BytesToBytes(mProtocolName, mVariableHeader);
-    EncodeIntegerToBytes(mProtocolVersion, mVariableHeader);
-    EncodeIntegerToBytes(mConnectFlags, mVariableHeader);
-    EncodeIntegerToBytes(mKeepAlive, mVariableHeader);
 }
 
 MqttConnect::~MqttConnect()
 {
+}
+
+int32_t MqttConnect::DecodeVariableHeader(const std::string& bytes)
+{
+    int32_t len = 0;
+
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mProtocolNameLength, bytes), len);
+    CHECK_ADD_RESULT(DecodeU8BytesFromBytes(mProtocolName, bytes.substr(len), mProtocolNameLength), len);
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mProtocolVersion, bytes.substr(len)), len);
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mConnectFlags, bytes.substr(len)), len);
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mKeepAlive, bytes.substr(len)), len);
+
+    return len;
+}
+
+int32_t MqttConnect::EncodeVariableHeader(std::string& bytes)
+{
+    int32_t len = 0;
+
+    mVariableHeader.clear();
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mProtocolNameLength, mVariableHeader), len);
+    CHECK_ADD_RESULT(EncodeU8BytesToBytes(mProtocolName, mVariableHeader), len);
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mProtocolVersion, mVariableHeader), len);
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mConnectFlags, mVariableHeader), len);
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mKeepAlive, mVariableHeader), len);
+
+    bytes += mVariableHeader;
+    return len;
 }

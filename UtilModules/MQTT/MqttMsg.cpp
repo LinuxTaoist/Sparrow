@@ -135,10 +135,13 @@ int32_t MqttMsgBase::Decode(const std::string& bytes)
 int32_t MqttMsgBase::Encode(std::string& bytes)
 {
     int32_t len = 0;
-    bytes.clear();
-    CHECK_ADD_RESULT(EncodeFixedHeader(bytes), len);
-    CHECK_ADD_RESULT(EncodeVariableHeader(bytes), len);
-    CHECK_ADD_RESULT(EncodePayload(bytes), len);
+    std::string bodyBytes;
+    CHECK_ADD_RESULT(EncodeVariableHeader(bodyBytes), len);
+    CHECK_ADD_RESULT(EncodePayload(bodyBytes), len);
+
+    std::string fixBytes;
+    CHECK_ADD_RESULT(EncodeFixedHeader(fixBytes), len);
+    bytes = fixBytes + bodyBytes;
     return len;
 }
 
