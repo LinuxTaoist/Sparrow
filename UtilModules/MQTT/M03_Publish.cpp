@@ -24,20 +24,8 @@ MqttPublish::MqttPublish()
 }
 
 MqttPublish::MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload)
-    : MqttMsgBase(MQTT_MSG_PUBLISH, flags)
+    : MqttMsgBase(MQTT_MSG_PUBLISH, flags, payload), mIdentifier(identifier), mTopic(topic)
 {
-    // Encode variable header
-    uint16_t topicLen = topic.length();
-    EncodeIntegerToBytes(topicLen,      mVariableHeader);
-    EncodeU8BytesToBytes(topic,         mVariableHeader);
-
-    uint8_t qosLevel = (flags & MQTT_MSG_FLAG_QOS_MASK) >> MQTT_MSG_FLAG_QOS_SHIFT;
-    if (qosLevel == MQTT_SUBACK_QOS0 || qosLevel == MQTT_SUBACK_QOS1) {
-        EncodeIntegerToBytes(identifier,    mVariableHeader);
-    }
-
-    // Encode payload
-    EncodeU8BytesToBytes(payload, mPayload);
 }
 
 MqttPublish::~MqttPublish()
@@ -53,7 +41,19 @@ int32_t MqttPublish::DecodeVariableHeader(const std::string& bytes)
     return len;
 }
 
-// int32_t MqttPublish::EncodeVariableHeader(std::string& bytes)
-// {
-//     return 0;
-// }
+int32_t MqttPublish::EncodeVariableHeader(std::string& bytes)
+{
+    int32_t len = 0;
+    uint16_t topicLen = mTopic.length();
+
+    mVariableHeader.clear();
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(topicLen, mVariableHeader), len);
+    CHECK_ADD_RESULT(EncodeU8BytesToBytes(mTopic, mVariableHeader), len);
+    uint8_t qosLevel = (mFixedHeader.flags & MQTT_MSG_FLAG_QOS_MASK) >> MQTT_MSG_FLAG_QOS_SHIFT;
+    if (qosLevel == MQTT_SUBACK_QOS0 || qosLevel == MQTT_SUBACK_QOS1) {
+        CHECK_ADD_RESULT(EncodeIntegerToBytes(mIdentifier, mVariableHeader), len);
+    }
+
+    bytes += mVariableHeader;
+    return len;
+}

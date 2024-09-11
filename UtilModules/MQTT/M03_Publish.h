@@ -32,9 +32,10 @@ public:
 
 protected:
     int32_t DecodeVariableHeader(const std::string& bytes) override;
-    // int32_t EncodeVariableHeader(std::string& bytes) override;
+    int32_t EncodeVariableHeader(std::string& bytes) override;
 
 private:
+    uint16_t mIdentifier;
     std::string mTopic;
 };
 
