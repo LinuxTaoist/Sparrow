@@ -33,6 +33,7 @@ public:
 
 protected:
     int32_t DecodeVariableHeader(const std::string& bytes) override;
+    int32_t EncodeVariableHeader(std::string& bytes) override;
 
 private:
     uint8_t mConnAckStatus;         // 1 BYTE   连接确认标志

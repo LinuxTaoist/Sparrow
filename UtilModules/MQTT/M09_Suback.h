@@ -29,6 +29,8 @@ public:
 
     int32_t DecodeVariableHeader(const std::string& bytes) override;
     int32_t DecodePayload(const std::string& bytes) override;
+    int32_t EncodeVariableHeader(std::string& bytes) override;
+    int32_t EncodePayload(std::string& bytes) override;
 
     uint16_t GetPacketIdentifier() { return mIdentifier; }
     uint8_t GetReturnCode() { return mReturnCode; }

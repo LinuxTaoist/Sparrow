@@ -19,19 +19,56 @@
 #include "M08_Subscribe.h"
 
 MqttSubscribe::MqttSubscribe(uint16_t identifier, const std::string& topic)
-    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mIdentifier(identifier)
+    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mIdentifier(identifier), mTopic(topic)
 {
-    // Encode the variable header
-    EncodeIntegerToBytes(identifier, mVariableHeader);
-
-    // Encode the payload
-    uint8_t qos = 0x00;
-    uint16_t topicLength = (uint16_t)topic.length();
-    EncodeIntegerToBytes(topicLength,   mPayload);
-    EncodeU8BytesToBytes(topic,         mPayload);
-    EncodeIntegerToBytes(qos,           mPayload);
 }
 
 MqttSubscribe::~MqttSubscribe()
 {
+}
+
+int32_t MqttSubscribe::DecodeVariableHeader(const std::string& bytes)
+{
+    int len = 0;
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(mIdentifier, bytes), len);
+    return len;
+}
+
+int32_t MqttSubscribe::DecodePayload(const std::string& bytes)
+{
+    int8_t qos = 0;
+    int32_t len = 0;
+    uint16_t topicLength = 0;
+
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(topicLength, bytes), len);
+    CHECK_ADD_RESULT(DecodeU8BytesFromBytes(mTopic, bytes.substr(len), topicLength), len);
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(qos, bytes.substr(len)), len);
+
+    return len;
+}
+
+int32_t MqttSubscribe::EncodeVariableHeader(std::string& bytes)
+{
+    int32_t len = 0;
+
+    mVariableHeader.clear();
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mIdentifier, mVariableHeader), len);
+    bytes += mVariableHeader;
+
+    return len;
+}
+
+int32_t MqttSubscribe::EncodePayload(std::string& bytes)
+{
+    uint8_t qos = 0;
+    int32_t len = 0;
+
+    mPayload.clear();
+    uint16_t topicLength = (uint16_t)mTopic.length();
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(topicLength, mPayload), len);
+    CHECK_ADD_RESULT(EncodeU8BytesToBytes(mTopic, mPayload), len);
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(qos, mPayload), len);
+    bytes += mPayload;
+
+    return len;
 }

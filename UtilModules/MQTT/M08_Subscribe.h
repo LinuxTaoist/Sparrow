@@ -29,8 +29,15 @@ public:
 
     uint16_t GetPacketIdentifier() { return mIdentifier; }
 
+protected:
+    int32_t DecodeVariableHeader(const std::string& bytes) override;
+    int32_t DecodePayload(const std::string& bytes) override;
+    int32_t EncodeVariableHeader(std::string& bytes) override;
+    int32_t EncodePayload(std::string& bytes) override;
+
 private:
     uint16_t mIdentifier;
+    std::string mTopic;
 };
 
 #endif // __M08_SUBSCRIBE_H__

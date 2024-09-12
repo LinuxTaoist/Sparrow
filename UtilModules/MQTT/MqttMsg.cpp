@@ -125,10 +125,12 @@ int32_t MqttMsgBase::GetPayload(std::string& payload)
 int32_t MqttMsgBase::Decode(const std::string& bytes)
 {
     int32_t len = 0;
+
     CHECK_ADD_RESULT(DecodeFixedHeader(bytes), len);
     CHECK_ADD_RESULT(DecodeVariableHeader(bytes.substr(len)), len);
     CHECK_ADD_RESULT(DecodePayload(bytes.substr(len)), len);
     SPR_LOGD("Decode len = %d\n", len);
+
     return len;
 }
 
@@ -150,6 +152,7 @@ int32_t MqttMsgBase::DecodeRemainingLength(const std::string& bytes)
     int32_t len = 0;
     uint64_t value = 0;
     uint64_t multiplier = 1;
+
     for (auto byte : bytes) {
         len++;
         value += (byte & 127) * multiplier;
@@ -171,6 +174,7 @@ int32_t MqttMsgBase::EncodeRemainingLength(std::string& bytes)
 {
     int32_t len = 0;
     uint64_t x = mVariableHeader.size() + mPayload.size();
+
     do {
         uint8_t encodedByte = (uint8_t)(x % 128);
         x /= 128;
@@ -188,36 +192,25 @@ int32_t MqttMsgBase::EncodeRemainingLength(std::string& bytes)
 int32_t MqttMsgBase::DecodeFixedHeader(const std::string& bytes)
 {
     uint8_t byte = 0;
-    int32_t tfLen = DecodeIntegerFromBytes(byte, bytes);
-    if (tfLen < 0) {
-        return tfLen;
-    }
+    int32_t len = 0;
 
-    int32_t rLen = DecodeRemainingLength(bytes.substr(tfLen));
-    if (rLen < 0) {
-        return rLen;
-    }
-
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(byte, bytes), len);
+    CHECK_ADD_RESULT(DecodeRemainingLength(bytes.substr(len)), len);
     mFixedHeader.type = byte >> 4;
     mFixedHeader.flags = byte & 0x0F;
-    return tfLen + rLen;
+
+    return len;
 }
 
 int32_t MqttMsgBase::EncodeFixedHeader(std::string& bytes)
 {
+    int32_t len = 0;
     uint8_t byte = mFixedHeader.type << 4 | mFixedHeader.flags;
-    int tfLen = EncodeIntegerToBytes(byte, bytes);
-    if (tfLen < 0) {
-        return tfLen;
-    }
 
-    int rLen = EncodeRemainingLength(bytes);
-    if (rLen < 0) {
-        return rLen;
-    }
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(byte, bytes), len);
+    CHECK_ADD_RESULT(EncodeRemainingLength(bytes), len);
 
-    SPR_LOGD("vLen = %d, pLen = %d\n", mVariableHeader.size(), mPayload.size());
-    return 1 + rLen;
+    return len;
 }
 
 int32_t MqttMsgBase::DecodeVariableHeader(const std::string& data)
@@ -226,14 +219,12 @@ int32_t MqttMsgBase::DecodeVariableHeader(const std::string& data)
         return 0;
     }
 
+    int32_t len = 0;
     uint16_t conLen = 0;    // Decode MSB(8) & LSB(8)
-    int32_t lLen = DecodeIntegerFromBytes(conLen, data);
-    if (lLen < 0) {
-        return lLen;
-    }
 
+    CHECK_ADD_RESULT(DecodeIntegerFromBytes(conLen, data), len);
     mVariableHeader = data.substr(conLen + 2, conLen);
-    return 2 + conLen;
+    return len + conLen;
 }
 
 int32_t MqttMsgBase::EncodeVariableHeader(std::string& bytes)

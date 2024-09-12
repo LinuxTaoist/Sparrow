@@ -40,3 +40,22 @@ int32_t Suback::DecodePayload(const std::string& bytes)
     return len;
 }
 
+int32_t Suback::EncodeVariableHeader(std::string& bytes) {
+    int32_t len = 0;
+
+    mVariableHeader.clear();
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mIdentifier, mVariableHeader), len);
+    bytes += mVariableHeader;
+
+    return len;
+}
+
+int32_t Suback::EncodePayload(std::string& bytes)  {
+    int32_t len = 0;
+
+    mPayload.clear();
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mReturnCode, mPayload), len);
+    bytes += mPayload;
+
+    return len;
+}

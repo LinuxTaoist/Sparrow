@@ -49,3 +49,15 @@ int32_t MqttConnack::DecodeVariableHeader(const std::string& bytes)
     CHECK_ADD_RESULT(DecodeIntegerFromBytes(mReturnCode, bytes.substr(len)), len);
     return len;
 }
+
+int32_t MqttConnack::EncodeVariableHeader(std::string& bytes)
+{
+    int32_t len = 0;
+
+    mVariableHeader.clear();
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mConnAckStatus, mVariableHeader), len);
+    CHECK_ADD_RESULT(EncodeIntegerToBytes(mReturnCode, mVariableHeader), len);
+
+    bytes += mVariableHeader;
+    return len;
+}
