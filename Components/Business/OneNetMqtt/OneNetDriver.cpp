@@ -751,6 +751,11 @@ void OneNetDriver::MsgRespondMqttMsgDisconnect(const SprMsg& msg)
     if (ret < 0) {
         SPR_LOGE("Send mqtt disconnect msg failed\n");
     }
+
+    if (mCurLev1State == LEV1_SOCKET_CONNECTED) {
+        SprMsg sockDisMsg(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_ACTIVE);
+        SendMsg(sockDisMsg);
+    }
 }
 
 /**
