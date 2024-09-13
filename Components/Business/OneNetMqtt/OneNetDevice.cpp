@@ -118,9 +118,9 @@ int32_t OneNetDevice::InitTopicList()
     return 0;
 }
 
-int16_t OneNetDevice::GetUnusedIdentity()
+uint16_t OneNetDevice::GetUnusedIdentity()
 {
-    int16_t identity = 1;
+    uint16_t identity = 1;
     if (mUsedIdentities.empty()) {
         mUsedIdentities.insert(identity);
         return identity;
@@ -140,6 +140,17 @@ int16_t OneNetDevice::GetUnusedIdentity()
         }
     }
 
+    return identity;
+}
+
+uint16_t OneNetDevice::ReleaseIdentity(uint16_t identity)
+{
+    if (mUsedIdentities.find(identity) == mUsedIdentities.end()) {
+        SPR_LOGW("Identity %d is not used!\n", identity);
+        return 0;
+    }
+
+    mUsedIdentities.erase(identity);
     return identity;
 }
 
@@ -573,6 +584,7 @@ void OneNetDevice::MsgRespondSubscribeTopicAck(const SprMsg& msg)
     }
 
     SPR_LOGD("Recv subscribe topic [%s] ack, id: %02X ret: %02X \n", mCurTopic.c_str(), identity, retCode);
+    ReleaseIdentity(identity);
     SprMsg tMsg(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC);
     SendMsg(tMsg);
 }

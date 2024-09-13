@@ -117,7 +117,8 @@ private:
      */
     int32_t VerifyDeviceDetails();
 
-    int16_t GetUnusedIdentity();
+    uint16_t GetUnusedIdentity();
+    uint16_t ReleaseIdentity(uint16_t identity);
     void StartSubscribeTopic();
 
     /**
