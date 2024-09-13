@@ -23,6 +23,7 @@
 #include <unistd.h>
 #include <stdio.h>
 #include <string.h>
+#include "RunningTiming.h"
 #include "GeneralConversions.h"
 #include "GeneralUtils.h"
 #include "SprEpollSchedule.h"
@@ -78,6 +79,7 @@ static void usage()
             "a: Active MQTT-DEV01\n"
             "b: Active PC_TEST_01\n"
             "c: Active PC_TEST_02\n"
+            "d: Test RunningTiming\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -202,6 +204,17 @@ int main(int argc, const char *argv[])
                     SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("PC_TEST_02");
                     theDebug.NotifyObserver(msg);
+                    break;
+                }
+                case 'd':
+                {
+                    RunningTiming timing;
+                    usleep(10000);  // 10ms
+                    SPR_LOGD("Timing 1: add 10ms %ds, %dms\n", timing.GetTotalTimeInSec(), timing.GetTotalTimeInMSec());
+                    usleep(1000000);  // 1s
+                    SPR_LOGD("Timing 2: add 1s   %ds, %dms\n", timing.GetTotalTimeInSec(), timing.GetTotalTimeInMSec());
+                    usleep(30000);  // 30ms
+                    SPR_LOGD("Timing 3: add 30ms %ds, %dms\n", timing.GetTotalTimeInSec(), timing.GetTotalTimeInMSec());
                     break;
                 }
                 case 'q':

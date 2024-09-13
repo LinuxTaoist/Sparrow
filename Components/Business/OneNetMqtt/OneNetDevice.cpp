@@ -154,6 +154,13 @@ uint16_t OneNetDevice::ReleaseIdentity(uint16_t identity)
     return identity;
 }
 
+void OneNetDevice::ResetAllTopics()
+{
+    for (auto &topic : mAllTopicMap) {
+        topic.second.status = TOPIC_STATUS_IDLE;
+    }
+}
+
 void OneNetDevice::StartSubscribeTopic()
 {
     SprMsg msg(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC);
@@ -516,8 +523,11 @@ void OneNetDevice::MsgRespondSetConnectStatus(const SprMsg& msg)
     SPR_LOGD("Connect status: %s\n", status ? "true" : "false");
     mConnectStatus = status;
     if (status) {
-        SPR_LOGD("Device is ready, start send subscribe topics\n");
+        SPR_LOGD("Device is online. Send subscribe topics\n");
         StartSubscribeTopic();
+    } else {
+        SPR_LOGD("Device is offline. Reset subscribe topics\n");
+        ResetAllTopics();
     }
 }
 

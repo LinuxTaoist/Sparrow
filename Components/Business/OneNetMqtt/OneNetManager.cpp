@@ -308,8 +308,8 @@ void OneNetManager::SetLev1State(EOneNetMgrLev1State state)
         return;
     }
 
-    mCurLev1State = state;
     SPR_LOGD("Lev1 state changed: %s -> %s\n", GetLev1StateString(mCurLev1State), GetLev1StateString(state));
+    mCurLev1State = state;
 }
 
 EOneNetMgrLev1State OneNetManager::GetLev1State()
@@ -337,8 +337,8 @@ void OneNetManager::SetLev2State(EOneNetMgrLev2State state)
         return;
     }
 
-    mCurLev2State = state;
     SPR_LOGD("Lev2 state changed: %s -> %s\n", GetLev2StateString(mCurLev2State), GetLev2StateString(state));
+    mCurLev2State = state;
 }
 
 EOneNetMgrLev2State OneNetManager::GetLev2State()
@@ -509,6 +509,9 @@ void OneNetManager::MsgRespondMqttReportTimerEvent(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondMqttDisconnect(const SprMsg& msg)
 {
+    SprMsg disMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
+    disMsg.SetBoolValue(false);
+    NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
     SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
 }
 
