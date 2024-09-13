@@ -74,7 +74,7 @@ char CustomDebugWatch::HandleInputInMenu(char input)
             int32_t intervalInMilliSec;
 
             SPR_LOG("Input timer settings: <repetitions> <delay ms> <interval ms> \n");
-            int ret = scanf("%d %d %d", &repeatTimes, &delayInMilliSec, &intervalInMilliSec);
+            int ret = scanf("%u %d %d", &repeatTimes, &delayInMilliSec, &intervalInMilliSec);
             if (ret != 3)
             {
                 SPR_LOG("Invalid input! (%s)\n", strerror(errno));

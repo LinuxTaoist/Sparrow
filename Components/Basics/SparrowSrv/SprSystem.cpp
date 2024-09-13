@@ -142,5 +142,6 @@ void SprSystem::Init()
     TTP(10, "TimerManager->Initialize()");
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
 
+    // TODO: Init other modules
     EnvReady(SRV_NAME_SPARROW);
 }

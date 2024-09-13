@@ -40,10 +40,10 @@ class PSocket : public IEpollEvent
 {
 public:
     PSocket(int domain, int type, int protocol,
-               std::function<void(int, void*)> cb, void* arg = nullptr);
+               const std::function<void(int, void*)>& cb, void* arg = nullptr);
 
     PSocket(int sock,
-               std::function<void(int, void*)> cb, void* arg = nullptr);
+               const std::function<void(int, void*)>& cb, void* arg = nullptr);
 
     virtual ~PSocket();
 

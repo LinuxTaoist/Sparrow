@@ -28,14 +28,14 @@
 class SprBinderHub
 {
 public:
-    SprBinderHub(const std::string& srvName);
+    explicit SprBinderHub(const std::string& srvName);
     virtual ~SprBinderHub();
 
     int32_t InitializeHub();
 
     static int32_t DestoryHub();
     static void BinderLoop(void* pData);
-    virtual void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd) = 0;
+    virtual void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) = 0;
 
 private:
     static bool mRun;

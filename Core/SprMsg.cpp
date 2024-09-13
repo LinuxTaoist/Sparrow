@@ -195,7 +195,7 @@ int8_t SprMsg::Encode(std::string & enDatas) const
             ESprMsgType type = static_cast<ESprMsgType>(i);
             auto it = mEnFuncs.find(type);
             if (it != mEnFuncs.end()) {
-                ((SprMsg*)this->*(it->second))(enDatas);
+                (const_cast<SprMsg*>(this)->*(it->second))(enDatas);
             }
             else {
                 SPR_LOGW("Not find type: 0x%x! \n", (uint32_t)type);

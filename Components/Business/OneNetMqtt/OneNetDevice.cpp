@@ -31,10 +31,10 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
-#define SPR_LOGD(fmt, args...) LOGD("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
-#define SPR_LOGW(fmt, args...) LOGW("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
-#define SPR_LOGE(fmt, args...) LOGE("OneDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGI(fmt, args...) LOGI("OneNetDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGD(fmt, args...) LOGD("OneNetDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGW(fmt, args...) LOGW("OneNetDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
+#define SPR_LOGE(fmt, args...) LOGE("OneNetDev", "[%s] " fmt, mOneDevName.c_str(), ##args)
 
 #define ONENET_DEVICE_CFG_PATH          "OneNetDevices.conf"
 #define DEFAULT_KEEP_ALIVE_INTERVAL     60  // 60s

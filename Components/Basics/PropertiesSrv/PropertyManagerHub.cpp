@@ -34,7 +34,7 @@ PropertyManagerHub::~PropertyManagerHub()
 {
 }
 
-void PropertyManagerHub::handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd)
+void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
     switch (cmd)
     {

@@ -29,12 +29,12 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...)  LOGW("SprObsSocket", "[%s] " fmt, ##args)
 #define SPR_LOGE(fmt, args...)  LOGE("SprObsSocket", "[%s] " fmt, ##args)
 
-SprObserverWithSocket::SprObserverWithSocket(int sock, std::function<void(int, void*)> cb, void* arg)
+SprObserverWithSocket::SprObserverWithSocket(int sock, const std::function<void(int, void*)>& cb, void* arg)
     : SprObserver(MODULE_NONE, "", IPC_TYPE_BUTT), PSocket(sock, cb, arg)
 {
 }
 
-SprObserverWithSocket::SprObserverWithSocket(int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg)
+SprObserverWithSocket::SprObserverWithSocket(int domain, int type, int protocol, const std::function<void(int, void*)>& cb, void* arg)
     : SprObserver(MODULE_NONE, "", IPC_TYPE_BUTT), PSocket(domain, type, protocol, cb, arg)
 {
 }

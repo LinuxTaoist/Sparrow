@@ -24,6 +24,9 @@ class SprTimer
 public:
     SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec);
     SprTimer(const SprTimer& timer);
+    SprTimer& operator = (const SprTimer& timer);
+    SprTimer(SprTimer&& timer);
+    SprTimer& operator = (SprTimer&& timer);
     ~SprTimer();
 
     bool operator < (const SprTimer& t) const;

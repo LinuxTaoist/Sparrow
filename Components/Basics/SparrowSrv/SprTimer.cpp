@@ -46,6 +46,40 @@ SprTimer::SprTimer(const SprTimer& timer)
     mRepeatCount = timer.mRepeatCount;
 }
 
+SprTimer& SprTimer::operator = (const SprTimer& timer)
+{
+    if (this != &timer) {
+        mModuleId = timer.mModuleId;
+        mMsgId = timer.mMsgId;
+        mIntervalInMilliSec = timer.mIntervalInMilliSec;
+        mExpired = timer.mExpired;
+        mRepeatTimes = timer.mRepeatTimes;
+        mRepeatCount = timer.mRepeatCount;
+    }
+    return *this;
+}
+
+SprTimer::SprTimer(SprTimer&& timer)
+{
+    mModuleId = timer.mModuleId;
+    mMsgId = timer.mMsgId;
+    mIntervalInMilliSec = timer.mIntervalInMilliSec;
+    mExpired = timer.mExpired;
+    mRepeatTimes = timer.mRepeatTimes;
+    mRepeatCount = timer.mRepeatCount;
+}
+
+SprTimer& SprTimer::operator = (SprTimer&& timer)
+{
+    mModuleId = timer.mModuleId;
+    mMsgId = timer.mMsgId;
+    mIntervalInMilliSec = timer.mIntervalInMilliSec;
+    mExpired = timer.mExpired;
+    mRepeatTimes = timer.mRepeatTimes;
+    mRepeatCount = timer.mRepeatCount;
+    return *this;
+}
+
 SprTimer::~SprTimer()
 {
 }

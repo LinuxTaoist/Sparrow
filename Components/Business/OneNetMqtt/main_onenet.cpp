@@ -35,11 +35,10 @@ int main(int argc, const char *argv[])
     GeneralUtils::InitSignalHandler([](int signum) {
 	    SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
-            case MAIN_EXIT_SIGNUM:   // 用户自定义信号1
+            case MAIN_EXIT_SIGNUM:
                 SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
 
-            case SIGUSR2:   // 用户自定义信号2
             default:
                 break;
         }

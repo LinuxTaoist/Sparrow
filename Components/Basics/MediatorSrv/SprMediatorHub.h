@@ -29,7 +29,7 @@ public:
     SprMediatorHub(const std::string& srvName, SprMediator* mediator);
     virtual ~SprMediatorHub();
 
-    void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd) override;
+    void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) override;
 
 private:
     SprMediator* mSprMediator;

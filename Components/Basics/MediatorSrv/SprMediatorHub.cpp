@@ -34,7 +34,7 @@ SprMediatorHub::~SprMediatorHub()
 {
 }
 
-void SprMediatorHub::handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd)
+void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
     switch(cmd)
     {
