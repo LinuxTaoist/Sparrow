@@ -32,7 +32,7 @@ OUTPUT_FILENAME="StaticScan_${DATE}_${SEQUENCE_NUMBER}.xml"
 CPPCHECK_OPTS="--std=c++11 --enable=all --suppress=unusedFunction --suppress=useInitializationList --error-exitcode=1 --xml --xml-version=2 --output-file=../StaticScans/${OUTPUT_FILENAME}"
 
 # 指定待检查的源代码及头文件目录列表
-SOURCE_DIRS="../3rdAdapter/ ../Components/Basics/ ../Core/ ../Debug/ ../Examples/ ../Hardware/ ../PublicAPIs/ ../Util/"
+SOURCE_DIRS="../3rdAdapter/ ../Components/ ../Core/ ../Debug/ ../Examples/ ../Hardware/ ../PublicAPIs/ ../Util/"
 
 # 执行Cppcheck静态代码检查，包括源文件和对应的头文件
 cppcheck $CPPCHECK_OPTS $SOURCE_DIRS

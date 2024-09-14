@@ -40,7 +40,7 @@ SprObserverWithSocket::SprObserverWithSocket(int domain, int type, int protocol,
 }
 
 SprObserverWithSocket::SprObserverWithSocket(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType,
-    int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg)
+    int domain, int type, int protocol, const std::function<void(int, void*)>& cb, void* arg)
     : SprObserver(id, name, proxyType), PSocket(domain, type, protocol, cb, arg)
 {
 }

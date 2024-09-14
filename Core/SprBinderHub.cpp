@@ -68,7 +68,7 @@ int32_t SprBinderHub::DestoryHub()
 
 void SprBinderHub::BinderLoop(void* pData)
 {
-    SprBinderHub* mSelf = (SprBinderHub*)pData;
+    SprBinderHub* mSelf = reinterpret_cast<SprBinderHub*>(pData);
     bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSelf->mSrvName, pReqParcel, pRspParcel);
     if (!rs) {
         SPR_LOGE("Binder init failed!\n");

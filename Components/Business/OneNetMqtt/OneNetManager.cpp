@@ -269,7 +269,7 @@ int32_t OneNetManager::LoadOneNetDevicesCfgFile(const std::string& cfgPath, std:
     bool parsing = false;
 
     while (getline(configFile, line)) {
-        if (line.find("[Device_") == 0) {
+        if (line.find("[Device_") != string::npos) {
             if (parsing) {
                 devices.push_back(currentDevice);
                 currentDevice = OneNetDevInfo();
