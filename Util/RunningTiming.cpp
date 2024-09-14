@@ -16,9 +16,9 @@
  *  1. Declare a RunningTiming object where needed:
  *      RunningTiming timer;
  *  3. Get the total elapsed time in seconds:
- *      double totalTimeInSeconds = timer.GetTotalTimeInSec();
+ *      double totalTimeInSeconds = timer.GetElapsedTimeInSec();
  *  4. Get the total elapsed time in milliseconds:
- *      double totalTimeInMilliseconds = timer.GetTotalTimeInMSec();
+ *      double totalTimeInMilliseconds = timer.GetElapsedTimeInMSec();
  *
  *  Usage:
  *  To measure the execution time of a code block, you need to call the Start method
@@ -69,13 +69,13 @@ void RunningTiming::Stop()
     mStopTimeInMSec = tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 
-int RunningTiming::GetTotalTimeInSec()
+int RunningTiming::GetElapsedTimeInSec()
 {
     Stop();
     return (mStopTimeInMSec - mStartTimeInMSec) / 1000;
 }
 
-int RunningTiming::GetTotalTimeInMSec() {
+int RunningTiming::GetElapsedTimeInMSec() {
     Stop();
     return mStopTimeInMSec - mStartTimeInMSec;
 }

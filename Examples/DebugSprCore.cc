@@ -210,11 +210,11 @@ int main(int argc, const char *argv[])
                 {
                     RunningTiming timing;
                     usleep(10000);  // 10ms
-                    SPR_LOGD("Timing 1: add 10ms %ds, %dms\n", timing.GetTotalTimeInSec(), timing.GetTotalTimeInMSec());
+                    SPR_LOGD("Timing 1: add 10ms %ds, %dms\n", timing.GetElapsedTimeInSec(), timing.GetElapsedTimeInMSec());
                     usleep(1000000);  // 1s
-                    SPR_LOGD("Timing 2: add 1s   %ds, %dms\n", timing.GetTotalTimeInSec(), timing.GetTotalTimeInMSec());
+                    SPR_LOGD("Timing 2: add 1s   %ds, %dms\n", timing.GetElapsedTimeInSec(), timing.GetElapsedTimeInMSec());
                     usleep(30000);  // 30ms
-                    SPR_LOGD("Timing 3: add 30ms %ds, %dms\n", timing.GetTotalTimeInSec(), timing.GetTotalTimeInMSec());
+                    SPR_LOGD("Timing 3: add 30ms %ds, %dms\n", timing.GetElapsedTimeInSec(), timing.GetElapsedTimeInMSec());
                     break;
                 }
                 case 'q':
