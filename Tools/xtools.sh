@@ -42,6 +42,9 @@ display_completion_details() {
     echo ""
 }
 
+# root path
+root_path=$(pwd)/..
+
 # cmd env
 show_env() {
     # 显示当前环境变量
@@ -63,6 +66,19 @@ config_commit_template() {
     echo ""
     echo -e "${PURPLE}git config --global commit.template ${template_path} ${NC}"
     git config --global commit.template ${template_path}
+}
+
+create_platform() {
+    platform="$1"
+    echo -e "${PURPLE}========================  Create platform ${platform}  =========================${NC}"
+    echo -e "${PURPLE}= touch Build/${platform}/${platform}_complie_options.cmake ${NC}"
+    mkdir -p ${root_path}/Build/${platform}
+    touch ${root_path}/Build/${platform}/${platform}_complie_options.cmake
+
+    echo -e "${PURPLE}= touch ProjectConfigs/Vendor/${platform}/vendor.prop ${NC}"
+    mkdir -p ${root_path}/ProjectConfigs/Vendor/${platform}
+    touch ${root_path}/ProjectConfigs/Vendor/${platform}/vendor.prop
+    echo "ro.vendor=${platform}" > ${root_path}/ProjectConfigs/Vendor/${platform}/vendor.prop
 }
 
 # cmd build-all
@@ -119,12 +135,13 @@ usage() {
     echo -e "${LPURPLE}================================================================================${NC}"
     echo -e ""
     echo -e "${PURPLE}Usage:${NC}"
-    echo -e "${PURPLE}  $0 env              查看当前环境${NC}"
-    echo -e "${PURPLE}  $0 commit-template  配置commit模板${NC}"
-    echo -e "${PURPLE}  $0 build-all        编译整个项目${NC}"
-    echo -e "${PURPLE}  $0 build-3rd        编译依赖的第三方库${NC}"
-    echo -e "${PURPLE}  $0 staticscan       执行静态代码扫描${NC}"
-    echo -e "${PURPLE}  $0 help             显示此帮助信息${NC}"
+    echo -e "${PURPLE}  $0 env                  查看当前环境${NC}"
+    echo -e "${PURPLE}  $0 commit-template      配置commit模板${NC}"
+    echo -e "${PURPLE}  $0 platform <name>      适配新平台${NC}"
+    echo -e "${PURPLE}  $0 build-all            编译整个项目${NC}"
+    echo -e "${PURPLE}  $0 build-3rd            编译依赖的第三方库${NC}"
+    echo -e "${PURPLE}  $0 staticscan           执行静态代码扫描${NC}"
+    echo -e "${PURPLE}  $0 help                 显示此帮助信息${NC}"
     echo -e ""
     echo -e "${PURPLE}================================================================================${NC}"
 }
@@ -143,6 +160,9 @@ main() {
             ;;
         commit-template)
             config_commit_template
+            ;;
+        platform)
+            create_platform "$2"
             ;;
         build-all)
             ;;
