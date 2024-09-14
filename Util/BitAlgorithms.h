@@ -32,7 +32,7 @@ namespace BitAlgorithms {
  */
 template <typename T>
 T GetValueInRange(T value, int startBit, int endBit) {
-    T mask = (1ULL << (endBit + 1)) - 1;
+    T mask = ((endBit + 1) < 64) ? (1ULL << (endBit + 1)) - 1 : 0xFFFFFFFFFFFFFFFF;
     T valueInRange = (value & mask) >> startBit;
     return valueInRange;
 }
