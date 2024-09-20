@@ -9,6 +9,7 @@ set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## 包含配置文件
 include(${PROJECT_PATH}/version.cmake)
+include(${PROJECT_PATH}/Build/${PROJECT_PLATFORM}/${PROJECT_PLATFORM}_compile_options.cmake)
 
 ## 设置全局位置无关代码标志
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)

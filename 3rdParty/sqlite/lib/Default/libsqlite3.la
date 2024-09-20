@@ -17,7 +17,7 @@ old_library='libsqlite3.a'
 inherited_linker_flags=''
 
 # Libraries that this one depends upon.
-dependency_libs=' -lm'
+dependency_libs=' -lz -lm -ldl -lpthread'
 
 # Names of additional weak libraries provided by this library
 weak_library_names=''
@@ -38,4 +38,4 @@ dlopen=''
 dlpreopen=''
 
 # Directory that this library needs to be installed in:
-libdir='/home/dx/hdd1/Gitee/Sparrow/3rdParty/sqlite/sqlite-autoconf-3450300/Release/lib'
+libdir='/mnt/wsl/hdd1/gitee/Sparrow/3rdParty/sqlite/sqlite-autoconf-3450300/release/lib'

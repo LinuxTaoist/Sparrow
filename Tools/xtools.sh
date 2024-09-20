@@ -27,6 +27,9 @@ NC='\033[0m'
 # Capture start time
 start_time=$(date +%s)
 
+## project path
+project_path=$(pwd)/..
+
 # Delimiter
 delimiter="================================================================================"
 
@@ -84,12 +87,10 @@ create_platform() {
 # cmd build-all
 build_project() {
     echo -e "${GREEN}开始编译项目...${NC}"
-    make clean && make
-    if [ $? -eq 0 ]; then
-        echo -e "${GREEN}编译成功！${NC}"
-    else
-        echo -e "${RED}编译失败，请检查错误日志！${NC}"
-    fi
+    tools_path=$(pwd)
+    build_3rdparty
+    cd ${tools_path}/../Build/
+    ./general_build.sh
 }
 
 ## cmd build_3rd
@@ -102,6 +103,22 @@ build_3rdparty() {
     echo -e "${PURPLE}= 开始编译3rdParty.... ${NC}"
     cd ${tools_path}/../3rdParty/sqlite/
     ./build.sh
+}
+
+## cmd new-platform
+new_platform() {
+    echo -e "${GREEN}开始搭建新项目...${NC}"
+    platform_name="$1"
+    cd ${project_path}
+    echo -e "${GREEN}touch ${project_path}/Build/${platform_name}/${platform_name}_build.sh ${NC}"
+    mkdir -p ${project_path}/Build/${platform_name}
+    touch ${project_path}/Build/${platform_name}/${platform_name}_compile_options.cmake
+    touch ${project_path}/Build/${platform_name}_build.sh
+
+    echo -e "${GREEN}touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop ${NC}"
+    mkdir -p ${project_path}/ProjectConfigs/Vendor/${platform_name}
+    touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
+    echo "ro.vendor=${platform_name}" > ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
 }
 
 # cmd static_scan
@@ -135,13 +152,13 @@ usage() {
     echo -e "${LPURPLE}================================================================================${NC}"
     echo -e ""
     echo -e "${PURPLE}Usage:${NC}"
-    echo -e "${PURPLE}  $0 env                  查看当前环境${NC}"
-    echo -e "${PURPLE}  $0 commit-template      配置commit模板${NC}"
-    echo -e "${PURPLE}  $0 platform <name>      适配新平台${NC}"
-    echo -e "${PURPLE}  $0 build-all            编译整个项目${NC}"
-    echo -e "${PURPLE}  $0 build-3rd            编译依赖的第三方库${NC}"
-    echo -e "${PURPLE}  $0 staticscan           执行静态代码扫描${NC}"
-    echo -e "${PURPLE}  $0 help                 显示此帮助信息${NC}"
+    echo -e "${PURPLE}  $0 env                      查看当前环境${NC}"
+    echo -e "${PURPLE}  $0 commit-template          配置commit模板${NC}"
+    echo -e "${PURPLE}  $0 build-all                编译整个项目${NC}"
+    echo -e "${PURPLE}  $0 build-3rd                编译依赖的第三方库${NC}"
+    echo -e "${PURPLE}  $0 new-platform <platform>  创建新项目${NC}"
+    echo -e "${PURPLE}  $0 staticscan               执行静态代码扫描${NC}"
+    echo -e "${PURPLE}  $0 help                     显示此帮助信息${NC}"
     echo -e ""
     echo -e "${PURPLE}================================================================================${NC}"
 }
@@ -165,14 +182,16 @@ main() {
             create_platform "$2"
             ;;
         build-all)
-            ;;
+            build_project;;
         build-3rd)
             build_3rdparty
             ;;
+        new-platform)
+            new_platform "$2";;
         staticscan)
             static_scan
             ;;
-        help)
+        help|?)
             usage
             ;;
         *)
