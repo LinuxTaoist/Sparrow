@@ -22,7 +22,6 @@
 #include <map>
 #include <memory>
 #include "EpollEventHandler.h"
-#include "LibgoAdapter.h"
 
 class SprEpollSchedule : public EpollEventHandler
 {
@@ -57,7 +56,6 @@ private:
 
 private:
     bool mEnableCoroutine;
-    LibgoAdapter::CoPool mCoPool;
 };
 
 #endif // __SPR_EPOLL_SCHEDULE_H__

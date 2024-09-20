@@ -29,12 +29,12 @@ target_link_libraries       (debug_binder c sprbinder)
 add_dependencies            (debug_binder LibBinder)
 
 ## Bin sampleSqlite
-set(SRC_BIN_SAMPLESQLITE    SampleSqlite.cc)
-add_executable              (sample_sqlite ${SRC_BIN_SAMPLESQLITE})
-target_include_directories  (sample_sqlite PRIVATE ${PROJECT_PATH}/3rdParty/sqlite/include)
-set_target_properties       (sample_sqlite PROPERTIES OUTPUT_NAME "sample_sqlite")
-target_link_libraries       (sample_sqlite c 3rdadapter sqlite3 pthread dl)
-add_dependencies            (sample_sqlite Lib3rdAdapter)
+# set(SRC_BIN_SAMPLESQLITE    SampleSqlite.cc)
+# add_executable              (sample_sqlite ${SRC_BIN_SAMPLESQLITE})
+# target_include_directories  (sample_sqlite PRIVATE ${PROJECT_PATH}/3rdParty/sqlite/include)
+# set_target_properties       (sample_sqlite PROPERTIES OUTPUT_NAME "sample_sqlite")
+# target_link_libraries       (sample_sqlite c 3rdadapter sqlite3 pthread dl)
+# add_dependencies            (sample_sqlite Lib3rdAdapter)
 
 ## Bin sampleTcpServer
 set(SRC_BIN_STCPSERVER      SampleTcpServer.cc)

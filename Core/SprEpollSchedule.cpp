@@ -22,7 +22,7 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include "SprLog.h"
-#include "LibgoAdapter.h"
+// #include "LibgoAdapter.h"
 #include "SprEpollSchedule.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprEpollSch", fmt, ##args)
@@ -33,10 +33,10 @@ const uint32_t EPOLL_FD_NUM = 10;
 
 SprEpollSchedule::SprEpollSchedule(uint32_t size, bool enableCoroutine) : EpollEventHandler(size), mEnableCoroutine(enableCoroutine)
 {
-    if (enableCoroutine) {
-        mCoPool.InitCoroutinePool(1024);
-        mCoPool.Start(10, 128);
-    }
+    // if (enableCoroutine) {
+    //     mCoPool.InitCoroutinePool(1024);
+    //     mCoPool.Start(10, 128);
+    // }
 
     SPR_LOGD("%s coroutine schedule!\n", enableCoroutine ? "Enable" : "Disable");
 }
@@ -59,10 +59,11 @@ void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)
         // std::shared_ptr<GoPoolCb> cbp(new GoPoolCb);
         // mCoPool.AddCallbackPoint(cbp.get());
 
-        // 投递任务至协程，没有回调
-        mCoPool.Post([&] {
-            EpollEventHandler::HandleEpollEvent(event);
-        }, nullptr);
+        // // 投递任务至协程，没有回调
+        // mCoPool.Post([&] {
+        //     EpollEventHandler::HandleEpollEvent(event);
+        // }, nullptr);
+        SPR_LOGW("Not support coroutine!\n");
     } else {
         EpollEventHandler::HandleEpollEvent(event);
     }

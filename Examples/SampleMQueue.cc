@@ -17,6 +17,7 @@
  *
  */
 #include <memory>
+#include <inttypes.h>
 #include "PTimer.h"
 #include "PMsgQueue.h"
 #include "EpollEventHandler.h"
@@ -35,7 +36,7 @@ int main(int argc, const char *argv[])
     shared_ptr<PTimer> pTimer = make_shared<PTimer>([&pMQueue](int fd, uint64_t time, void* arg) {
         static int cnt = 0;
         auto p = (PTimer*)arg;
-        SPR_LOGD("fd = %d, time = %lu cnt = %d\n", fd, time, cnt++);
+        SPR_LOGD("fd = %d, time = %" PRIu64 " cnt = %d\n", fd, time, cnt++);
 
         pMQueue->Send("Hello World!");
         if (cnt > 10 && p != nullptr) {
