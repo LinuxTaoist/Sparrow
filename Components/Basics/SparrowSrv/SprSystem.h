@@ -21,6 +21,8 @@
 #define __SPR_SYSTEM_H__
 
 #include <string>
+#include <vector>
+#include "CommonTypeDefs.h"
 
 class SprSystem
 {
@@ -43,7 +45,13 @@ private:
     void InitEnv();
     void InitMsgQueueLimit();
     void LoadReleaseInformation();
+    void LoadPlugins();
+    void ReleasePlugins();
     int EnvReady(const std::string& srvName);
+
+private:
+    std::vector<void*> mPluginHandles;
+    std::vector<PluginEntryFunc> mPluginEntries;
 };
 
 #endif // __SPR_SYSTEM_H__

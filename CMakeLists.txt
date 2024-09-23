@@ -9,13 +9,10 @@ set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
 ## 包含配置文件
 include(${PROJECT_PATH}/version.cmake)
-include(${PROJECT_PATH}/Build/${PROJECT_PLATFORM}/${PROJECT_PLATFORM}_compile_options.cmake)
+include(${PROJECT_PATH}/Build/options/${PROJECT_PLATFORM}/${PROJECT_PLATFORM}_compile_options.cmake)
 
 ## 设置全局位置无关代码标志
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-
-# 设置链接选项
-set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
 
 ## 保存输出路径
 set(OUTPUT_PATH             ${PROJECT_PATH}/Release)
@@ -34,10 +31,8 @@ endif()
 set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
 
 set(CMAKE_CXX_STANDARD  11)
-# set(CMAKE_C_COMPILER    "/usr/bin/gcc")
-# set(CMAKE_CXX_COMPILER  "/usr/bin/g++")
 set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -Wall -g3")
-set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3 -O0 -fpermissive")
+set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3")
 
 ## 工程信息
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")

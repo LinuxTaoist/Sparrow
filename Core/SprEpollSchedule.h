@@ -51,6 +51,7 @@ private:
      * @brief Construct
      *
      * @param[in] size the size of epoll
+     * @param[in] enableCoroutine enable coroutine
      */
     explicit SprEpollSchedule(uint32_t size = 0, bool enableCoroutine = true);
 

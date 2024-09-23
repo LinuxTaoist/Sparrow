@@ -121,7 +121,6 @@ void EpollEventHandler::EpollLoop(bool bRun)
 
             HandleEpollEvent(*p);
         }
-
     }
 
     SPR_LOGD("EpollLoop exit\n");

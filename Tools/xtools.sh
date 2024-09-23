@@ -71,19 +71,6 @@ config_commit_template() {
     git config --global commit.template ${template_path}
 }
 
-create_platform() {
-    platform="$1"
-    echo -e "${PURPLE}========================  Create platform ${platform}  =========================${NC}"
-    echo -e "${PURPLE}= touch Build/${platform}/${platform}_complie_options.cmake ${NC}"
-    mkdir -p ${root_path}/Build/${platform}
-    touch ${root_path}/Build/${platform}/${platform}_complie_options.cmake
-
-    echo -e "${PURPLE}= touch ProjectConfigs/Vendor/${platform}/vendor.prop ${NC}"
-    mkdir -p ${root_path}/ProjectConfigs/Vendor/${platform}
-    touch ${root_path}/ProjectConfigs/Vendor/${platform}/vendor.prop
-    echo "ro.vendor=${platform}" > ${root_path}/ProjectConfigs/Vendor/${platform}/vendor.prop
-}
-
 # cmd build-all
 build_project() {
     echo -e "${GREEN}开始编译项目...${NC}"
@@ -111,8 +98,8 @@ new_platform() {
     platform_name="$1"
     cd ${project_path}
     echo -e "${GREEN}touch ${project_path}/Build/${platform_name}/${platform_name}_build.sh ${NC}"
-    mkdir -p ${project_path}/Build/${platform_name}
-    touch ${project_path}/Build/${platform_name}/${platform_name}_compile_options.cmake
+    mkdir -p ${project_path}/Build/options/${platform_name}
+    touch ${project_path}/Build/options/${platform_name}/${platform_name}_compile_options.cmake
     touch ${project_path}/Build/${platform_name}_build.sh
 
     echo -e "${GREEN}touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop ${NC}"
@@ -177,9 +164,6 @@ main() {
             ;;
         commit-template)
             config_commit_template
-            ;;
-        platform)
-            create_platform "$2"
             ;;
         build-all)
             build_project;;

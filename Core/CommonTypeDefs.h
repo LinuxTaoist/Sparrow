@@ -21,6 +21,7 @@
 #ifndef __COMMON_TYPE_DEFS_H__
 #define __COMMON_TYPE_DEFS_H__
 
+#include <string>
 #include <stdint.h>
 #include <mqueue.h>
 
@@ -29,6 +30,17 @@
 // --------------------------------------------------------------------------------------------------------------------
 #define COMMON_TYPE_DEFS_VERSION   "COMMON_TYPE_DEFS_VERSION_N1001"
 
+// --------------------------------------------------------------------------------------------------------------------
+// - Common defines for Plugin
+// --------------------------------------------------------------------------------------------------------------------
+#define PLUGIN_LIBRARY_FILE_PREFIX      "libplugin"
+#define PLUGIN_LIBRARY_PATH             "../Lib/"
+#define PLUGIN_LIBRARY_ENTRY_FUNC       "PluginEntry"
+typedef void(*PluginEntryFunc) (int32_t index, std::string& desc);
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Common defines for MQ
+// --------------------------------------------------------------------------------------------------------------------
 struct SMQStatus
 {
     int         handle;
