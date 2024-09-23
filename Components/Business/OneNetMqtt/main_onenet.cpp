@@ -27,26 +27,36 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("MainOneNet", fmt, ##args)
-#define SPR_LOGD(fmt, args...) LOGD("MainOneNet", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("EntryOneNet", fmt, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("EntryOneNet", fmt, ##args)
 
-int main(int argc, const char *argv[])
+// int main(int argc, const char *argv[])
+// {
+//     GeneralUtils::InitSignalHandler([](int signum) {
+// 	    SPR_LOGI("Receive signal: %d!\n", signum);
+//         switch (signum) {
+//             case MAIN_EXIT_SIGNUM:
+//                 SprEpollSchedule::GetInstance()->ExitLoop();
+//                 break;
+
+//             default:
+//                 break;
+//         }
+//     });
+
+//     OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneDrv")->Initialize();
+//     OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneMgr")->Initialize();
+//     SprEpollSchedule::GetInstance()->EpollLoop(true);
+//     SPR_LOGI("Main exit!\n");
+//     return 0;
+// }
+
+// The entry of OneNet business plugin
+extern "C" void PluginEntry(int32_t& index, std::string& desc)
 {
-    GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
-        switch (signum) {
-            case MAIN_EXIT_SIGNUM:
-                SprEpollSchedule::GetInstance()->ExitLoop();
-                break;
-
-            default:
-                break;
-        }
-    });
-
+    index += 1;
+    desc = "OneNet Business Plugin";
     OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneDrv")->Initialize();
     OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneMgr")->Initialize();
-    SprEpollSchedule::GetInstance()->EpollLoop(true);
-    SPR_LOGI("Main exit!\n");
-    return 0;
+    SPR_LOGD("PluginEntry: index = %d, desc = %s\n", index, desc.c_str());
 }

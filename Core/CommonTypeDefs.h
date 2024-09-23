@@ -34,9 +34,9 @@
 // - Common defines for Plugin
 // --------------------------------------------------------------------------------------------------------------------
 #define PLUGIN_LIBRARY_FILE_PREFIX      "libplugin"
-#define PLUGIN_LIBRARY_PATH             "../Lib/"
+#define PLUGIN_LIBRARY_PATH             "/mnt/wsl/hdd1/gitee/Sparrow/Release/Lib"
 #define PLUGIN_LIBRARY_ENTRY_FUNC       "PluginEntry"
-typedef void(*PluginEntryFunc) (int32_t index, std::string& desc);
+typedef void(*PluginEntryFunc) (int32_t& index, std::string& desc);
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common defines for MQ

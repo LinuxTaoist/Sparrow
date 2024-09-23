@@ -123,14 +123,14 @@ void SprSystem::LoadReleaseInformation()
 
 void SprSystem::LoadPlugins()
 {
-    DIR *dir = opendir(PLUGIN_LIBRARY_PATH);
+    DIR* dir = opendir(PLUGIN_LIBRARY_PATH);
     if (dir == nullptr) {
         SPR_LOGE("Open %s fail! (%s)\n", PLUGIN_LIBRARY_PATH, strerror(errno));
         return;
     }
 
     // loop: find all plugins library files in PLUGIN_LIBRARY_PATH
-    struct dirent *entry;
+    struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
         if (strncmp(entry->d_name, PLUGIN_LIBRARY_FILE_PREFIX, strlen(PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
             continue;
@@ -184,6 +184,7 @@ void SprSystem::Init()
     SPR_LOGD("=============================================\n");
 
     InitEnv();
+    LoadPlugins();
 
     TTP(9, "systemTimerPtr->Initialize()");
     shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
@@ -194,9 +195,9 @@ void SprSystem::Init()
 
     // Init other modules
     for (auto& mPluginEntry : mPluginEntries) {
-        static int pluginIndex = 0;
+        int32_t pluginIndex = 0;
         std::string plugInDesc;
-        mPluginEntry(pluginIndex++, plugInDesc);
+        mPluginEntry(pluginIndex, plugInDesc);
     }
 
     EnvReady(SRV_NAME_SPARROW);
