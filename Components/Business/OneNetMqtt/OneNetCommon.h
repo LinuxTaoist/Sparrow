@@ -26,16 +26,16 @@
     }                                           \
 } while(0)
 
-#define CHECK_POINTER_VALIDITY_NONRET(p) do {                   \
+#define CHECK_ONENET_POINTER_NONRET(p) do {                     \
     if ((p) == nullptr) {                                       \
-        SPR_LOGE("INVALID POINTER: %p is nullptr!\n", (p));     \
+        SPR_LOGE("INVALID POINTER: %s nullptr!\n", (#p));       \
         return ;                                                \
     }                                                           \
 } while(0)
 
-#define CHECK_POINTER_VALIDITY(p, __err) do {                   \
+#define CHECK_ONENET_POINTER(p, __err) do {                     \
     if ((p) == nullptr) {                                       \
-        SPR_LOGE("INVALID POINTER: %p is nullptr!\n", (p));     \
+        SPR_LOGE("INVALID POINTER: %s is nullptr!\n", (#p));    \
         return __err;                                           \
     }                                                           \
 } while(0)

@@ -333,14 +333,14 @@ int32_t OneNetDriver::InitUnixPIPE()
 
     // 将待发的mqtt字节流通过mSendPIPEPtr写入管道pipe[1]中缓存
     mSendPIPEPtr = mSendPIPEPtr ? mSendPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[1]);
-    CHECK_POINTER_VALIDITY(mSendPIPEPtr, -1);
+    CHECK_ONENET_POINTER(mSendPIPEPtr, -1);
     mSendPIPEPtr->AsUnixStreamClient();
 
     // 读取管道pipe[0]中缓存的mqtt字节流
     mRecvPIPEPtr = mRecvPIPEPtr ? mRecvPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[0], [&](int sock, void *arg) {
         PSocket* pUnixPIPE0 = reinterpret_cast<PSocket*>(arg);
-        CHECK_POINTER_VALIDITY_NONRET(pUnixPIPE0);
-        CHECK_POINTER_VALIDITY_NONRET(mOneSocketPtr);
+        CHECK_ONENET_POINTER_NONRET(pUnixPIPE0);
+        CHECK_ONENET_POINTER_NONRET(mOneSocketPtr);
 
         std::string rBuf;
         int32_t len = pUnixPIPE0->Read(sock, rBuf);
@@ -359,7 +359,7 @@ int32_t OneNetDriver::InitUnixPIPE()
         // SPR_LOGD("Write %d bytes to socket\n", len);
     });
 
-    CHECK_POINTER_VALIDITY(mRecvPIPEPtr, -1);
+    CHECK_ONENET_POINTER(mRecvPIPEPtr, -1);
     mRecvPIPEPtr->AsUnixStreamClient();
     mRecvPIPEPtr->InitFramework();
     return ret;
@@ -510,7 +510,7 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
     // Update state to connecting
     SetLev1State(LEV1_SOCKET_CONNECTING);
 
-    CHECK_POINTER_VALIDITY_NONRET(mOneSocketPtr);
+    CHECK_ONENET_POINTER_NONRET(mOneSocketPtr);
     int32_t rc = mOneSocketPtr->AsTcpClient(true, mOneNetHost, mOneNetPort);
     if (rc < 0) {
         SPR_LOGE("Failed build OneNet client! (%s)\n", strerror(errno));

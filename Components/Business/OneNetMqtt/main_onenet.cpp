@@ -18,6 +18,7 @@
  */
 #include <signal.h>
 #include "SprLog.h"
+#include "SprContext.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "OneNetManager.h"
@@ -30,11 +31,12 @@ using namespace InternalDefs;
 #define SPR_LOGD(fmt, args...) LOGD("EntryOneNet", fmt, ##args)
 
 // The entry of OneNet business plugin
-extern "C" void PluginEntry(int32_t& index, std::string& desc)
+extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& ctx)
 {
-    index += 1;
-    desc = "OneNet Business Plugin";
-    OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneDrv")->Initialize();
-    OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneMgr")->Initialize();
-    SPR_LOGD("PluginEntry: index = %d, desc = %s\n", index, desc.c_str());
+    auto pOneDrv = OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneDrv");
+    auto pOneMgr = OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneMgr");
+
+    observers[MODULE_ONENET_DRIVER] = pOneDrv;
+    observers[MODULE_ONENET_MANAGER] = pOneMgr;
+    SPR_LOGD("Load plug-in OneNet modules\n");
 }

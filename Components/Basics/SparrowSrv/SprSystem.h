@@ -20,8 +20,10 @@
 #ifndef __SPR_SYSTEM_H__
 #define __SPR_SYSTEM_H__
 
-#include <string>
+#include <map>
 #include <vector>
+#include <string>
+#include "SprObserver.h"
 #include "CommonTypeDefs.h"
 
 class SprSystem
@@ -52,6 +54,7 @@ private:
 private:
     std::vector<void*> mPluginHandles;
     std::vector<PluginEntryFunc> mPluginEntries;
+    std::map<int, SprObserver*> mModules;
 };
 
 #endif // __SPR_SYSTEM_H__

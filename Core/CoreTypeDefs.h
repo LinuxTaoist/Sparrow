@@ -22,6 +22,7 @@
 #ifndef __CORE_TYPE_DEFS_H__
 #define __CORE_TYPE_DEFS_H__
 
+#include <map>
 #include <string>
 #include <stdint.h>
 
@@ -29,6 +30,17 @@
 // - Common macros for CoreTypeDefs.h version
 // --------------------------------------------------------------------------------------------------------------------
 #define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1002"
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Common defines for Plugin
+// --------------------------------------------------------------------------------------------------------------------
+#define DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX      "libplugin"
+#define DEFAULT_PLUGIN_LIBRARY_PATH             "/mnt/wsl/hdd1/gitee/Sparrow/Release/Lib"
+#define DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC       "PluginEntry"
+
+class SprObserver;  // forward declaration
+class SprContext;   // forward declaration
+typedef void(*PluginEntryFunc) (std::map<int, SprObserver*>& modules, SprContext& ctx);
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for core commponents

@@ -27,6 +27,7 @@
 #include <string.h>
 #include <sys/resource.h>
 #include "SprLog.h"
+#include "SprContext.h"
 #include "CommonMacros.h"
 #include "SprSystem.h"
 #include "SprTimeTrace.h"
@@ -123,16 +124,16 @@ void SprSystem::LoadReleaseInformation()
 
 void SprSystem::LoadPlugins()
 {
-    DIR* dir = opendir(PLUGIN_LIBRARY_PATH);
+    DIR* dir = opendir(DEFAULT_PLUGIN_LIBRARY_PATH);
     if (dir == nullptr) {
-        SPR_LOGE("Open %s fail! (%s)\n", PLUGIN_LIBRARY_PATH, strerror(errno));
+        SPR_LOGE("Open %s fail! (%s)\n", DEFAULT_PLUGIN_LIBRARY_PATH, strerror(errno));
         return;
     }
 
-    // loop: find all plugins library files in PLUGIN_LIBRARY_PATH
+    // loop: find all plugins library files in DEFAULT_PLUGIN_LIBRARY_PATH
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (strncmp(entry->d_name, PLUGIN_LIBRARY_FILE_PREFIX, strlen(PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
+        if (strncmp(entry->d_name, DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
             continue;
         }
 
@@ -142,9 +143,9 @@ void SprSystem::LoadPlugins()
             continue;
         }
 
-        auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, PLUGIN_LIBRARY_ENTRY_FUNC);
+        auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC);
         if (!pEntry) {
-            SPR_LOGE("Find %s fail in %s! (%s)\n", PLUGIN_LIBRARY_ENTRY_FUNC, entry->d_name, dlerror() ? dlerror() : "unknown error");
+            SPR_LOGE("Find %s fail in %s! (%s)\n", DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC, entry->d_name, dlerror() ? dlerror() : "unknown error");
             dlclose(pDlHandler);
             continue;
         }
@@ -184,7 +185,7 @@ void SprSystem::Init()
     SPR_LOGD("=============================================\n");
 
     InitEnv();
-    LoadPlugins();
+    LoadPlugins();  // load plugin libraries
 
     TTP(9, "systemTimerPtr->Initialize()");
     shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
@@ -193,11 +194,15 @@ void SprSystem::Init()
     TTP(10, "TimerManager->Initialize()");
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
 
-    // Init other modules
+    // excute plugin entry function
+    SprContext ctx;
     for (auto& mPluginEntry : mPluginEntries) {
-        int32_t pluginIndex = 0;
-        std::string plugInDesc;
-        mPluginEntry(pluginIndex, plugInDesc);
+        mPluginEntry(mModules, ctx);
+    }
+
+    // excute plug module initialize function
+    for (auto& module : mModules) {
+        module.second->Initialize();
     }
 
     EnvReady(SRV_NAME_SPARROW);
