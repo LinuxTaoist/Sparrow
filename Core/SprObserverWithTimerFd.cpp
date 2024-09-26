@@ -31,7 +31,6 @@ SprObserverWithTimerfd::SprObserverWithTimerfd(ModuleIDType id, const std::strin
 
 SprObserverWithTimerfd::~SprObserverWithTimerfd()
 {
-    // SPR_LOGD("DelPoll timerfd observer! fd = %d\n", GetEpollFd());
     SprEpollSchedule::GetInstance()->DelPoll(this);
 }
 

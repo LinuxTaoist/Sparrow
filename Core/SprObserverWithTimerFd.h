@@ -26,7 +26,7 @@ class SprObserverWithTimerfd : public SprObserver, public PTimer
 {
 public:
     /**
-     * @brief  Construct / Destruct
+     * @brief  Construct/Destruct
      *
      * @param id module id
      * @param name module name
