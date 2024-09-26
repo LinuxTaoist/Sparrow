@@ -21,10 +21,10 @@
 #ifndef __SPR_SYSTEM_TIMER_H__
 #define __SPR_SYSTEM_TIMER_H__
 
-#include "SprObserverWithTimerFd.h"
+#include "SprObserverWithTimerfd.h"
 #include "CoreTypeDefs.h"
 
-class SprSystemTimer : public SprObserverWithTimerFd
+class SprSystemTimer : public SprObserverWithTimerfd
 {
 public:
     explicit SprSystemTimer(ModuleIDType id, const std::string& name);

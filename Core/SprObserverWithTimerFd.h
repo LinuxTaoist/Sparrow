@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprObserverWithTimerFd.h
+ *  @file       : SprObserverWithTimerfd.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -22,7 +22,7 @@
 #include "PTimer.h"
 #include "SprObserver.h"
 
-class SprObserverWithTimerFd : public SprObserver, public PTimer
+class SprObserverWithTimerfd : public SprObserver, public PTimer
 {
 public:
     /**
@@ -32,8 +32,8 @@ public:
      * @param name module name
      * @param proxyType message proxy type
      */
-    SprObserverWithTimerFd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
-    virtual ~SprObserverWithTimerFd();
+    SprObserverWithTimerfd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
+    virtual ~SprObserverWithTimerfd();
 
     /**
      * @brief Initialize function for derived class called in Initialize

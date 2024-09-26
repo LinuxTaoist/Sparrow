@@ -33,7 +33,7 @@ using namespace InternalDefs;
 #define SPR_LOGE(fmt, args...) LOGE("SysTimer", fmt, ##args)
 
 SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name)
-    : SprObserverWithTimerFd(id, name)
+    : SprObserverWithTimerfd(id, name)
 {
 }
 
