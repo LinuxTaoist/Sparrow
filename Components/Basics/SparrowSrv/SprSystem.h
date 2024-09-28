@@ -49,6 +49,7 @@ private:
     void LoadReleaseInformation();
     void LoadPlugins();
     void ReleasePlugins();
+    void GetDefaultLibraryPath(std::string& path);
     int EnvReady(const std::string& srvName);
 
 private:

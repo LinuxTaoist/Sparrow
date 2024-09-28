@@ -96,6 +96,7 @@ void SprSystem::LoadReleaseInformation()
     std::string buildType       = BUILD_TYPE;
     std::string buildHost       = BUILD_HOST;
     std::string buildPlatform   = BUILD_PLATFORM;
+    std::string moduleConfig    = MODULE_CONFIG_VERSION;
 
     std::string releaseInfo;
     releaseInfo += "System Version : " + projectInfo + "\n";
@@ -107,7 +108,7 @@ void SprSystem::LoadReleaseInformation()
     releaseInfo += "Build Type     : " + buildType + "\n";
     releaseInfo += "Build Host     : " + buildHost + "\n";
     releaseInfo += "Build Platform : " + buildPlatform + "\n";
-
+    releaseInfo += "Module Config  : " + moduleConfig + "\n";
 
     std::ofstream file(LOCAL_PATH_VERSION);
     if (file)
@@ -122,15 +123,32 @@ void SprSystem::LoadReleaseInformation()
     }
 }
 
-void SprSystem::LoadPlugins()
+void SprSystem::GetDefaultLibraryPath(std::string& path)
 {
-    DIR* dir = opendir(DEFAULT_PLUGIN_LIBRARY_PATH);
-    if (dir == nullptr) {
-        SPR_LOGE("Open %s fail! (%s)\n", DEFAULT_PLUGIN_LIBRARY_PATH, strerror(errno));
+    char curPath[100] = {};
+    if (getcwd(curPath, sizeof(curPath)) == nullptr) {
+        SPR_LOGE("Get current path fail! (%s)\n", strerror(errno));
         return;
     }
 
-    // loop: find all plugins library files in DEFAULT_PLUGIN_LIBRARY_PATH
+    path = curPath + std::string("/../Lib");
+}
+
+void SprSystem::LoadPlugins()
+{
+    std::string path = DEFAULT_PLUGIN_LIBRARY_PATH;
+    if (access(DEFAULT_PLUGIN_LIBRARY_PATH, F_OK) == -1) {
+        GetDefaultLibraryPath(path);
+        SPR_LOGW("%s not exist, changed path %s\n", DEFAULT_PLUGIN_LIBRARY_PATH, path.c_str());
+    }
+
+    DIR* dir = opendir(path.c_str());
+    if (dir == nullptr) {
+        SPR_LOGE("Open %s fail! (%s)\n", path, strerror(errno));
+        return;
+    }
+
+    // loop: find all plugins library files in path
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
         if (strncmp(entry->d_name, DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
@@ -152,7 +170,7 @@ void SprSystem::LoadPlugins()
 
         mPluginHandles.push_back(pDlHandler);
         mPluginEntries.push_back(pEntry);
-        SPR_LOGD("Load plugin %s success\n", entry->d_name);
+        SPR_LOGD("Load plugin %s success!\n", entry->d_name);
     }
 
     closedir(dir);

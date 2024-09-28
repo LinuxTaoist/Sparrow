@@ -1,3 +1,5 @@
 # 业务模块 Components/Business
+set(MODULE_CONFIG_VERSION "DEFAULT_MCONFIG_1001")
+
 set(BUSINESS_MODULES "")
 list(APPEND BUSINESS_MODULES OneNetMqtt)
