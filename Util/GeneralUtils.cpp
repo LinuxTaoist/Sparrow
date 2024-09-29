@@ -25,9 +25,9 @@
 
 namespace GeneralUtils {
 
-int RandomDecimalDigits(int digits)
+int GetRandomInteger(int width)
 {
-    int maxValue = pow(10, digits) - 1;
+    int maxValue = pow(10, width) - 1;
     std::random_device rd;
     std::mt19937 generator(rd());
     std::uniform_int_distribution<> distribution(0, maxValue);
@@ -46,14 +46,15 @@ int InitSignalHandler(void (*signalHandler)(int))
     sigaction(SIGHUP,    &signal_action, NULL);    // 终端挂断，重载配置或终止
     sigaction(SIGINT,    &signal_action, NULL);    // 用户中断（Ctrl+C）
     // sigaction(SIGQUIT,   &signal_action, NULL);    // 退出，带core dump，调试用
-    // sigaction(SIGILL,    &signal_action, NULL);    // 非法指令
+    sigaction(SIGILL,    &signal_action, NULL);    // 非法指令
     // sigaction(SIGTRAP,   &signal_action, NULL);    // 调试陷阱
+    sigaction(SIGKILL,   &signal_action, NULL);    // 请求进程终止
     // sigaction(SIGABRT,   &signal_action, NULL);    // 应用异常中止（abort函数）
     // sigaction(SIGBUS,    &signal_action, NULL);    // 总线错误，内存访问对齐问题
-    // sigaction(SIGFPE,    &signal_action, NULL);    // 浮点错误，如除以0
-    // sigaction(SIGUSR1,   &signal_action, NULL);    // 用户自定义信号1
+    sigaction(SIGFPE,    &signal_action, NULL);    // 浮点错误，如除以0
+    sigaction(SIGUSR1,   &signal_action, NULL);    // 用户自定义信号1
     // sigaction(SIGSEGV,   &signal_action, NULL);    // 段错误，非法内存访问
-    // sigaction(SIGUSR2,   &signal_action, NULL);    // 用户自定义信号2
+    sigaction(SIGUSR2,   &signal_action, NULL);    // 用户自定义信号2
     // sigaction(SIGPIPE,   &signal_action, NULL);    // 管道破裂，写入无读取端的管道
     // sigaction(SIGALRM,   &signal_action, NULL);    // 定时器信号
     sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
@@ -109,14 +110,14 @@ int SystemCmd(std::string& out, const char* format, ...)
     return (exitCode == 0) ? 0 : -1;
 }
 
-std::string RandomString(int len)
+std::string GetRandomString(int width)
 {
     std::string strRandom;
     const std::string seedStr = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
     std::uniform_int_distribution<int> distribution(0, seedStr.size() - 1);
 
-    for (int i = 0; i < len; i++) {
+    for (int i = 0; i < width; i++) {
         int randomValue = distribution(generator);
         strRandom += seedStr[randomValue];
     }
@@ -155,15 +156,15 @@ std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimite
 int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out)
 {
     int count = 0;
+    size_t pos = 0;
 
-    for(size_t i = 0; i < str.size(); ++i) {
-        if(str[i] == targetChar) {
-            ++count;
-            if(count == index && i + 1 < str.size()) {
-                out = str[i + 1];;
-                return 0;
-            }
+    while ((pos = str.find(targetChar, pos)) != std::string::npos) {
+        ++count;
+        if (count == index && pos + 1 < str.size()) {
+            out = str[pos + 1];
+            return 0;
         }
+        pos++;
     }
 
     return -1;
@@ -172,15 +173,15 @@ int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, ch
 int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out)
 {
     int count = 0;
+    size_t pos = 0;
 
-    for(size_t i = 0; i < str.size(); ++i) {
-        if(str[i] == targetChar) {
-            ++count;
-            if(count == index && i - 1 < str.size() && (int)i - 1 >= 0) {
-                out = str[i - 1];;
-                return 0;
-            }
+    while ((pos = str.find(targetChar, pos)) != std::string::npos) {
+        ++count;
+        if (count == index && pos > 0) {
+            out = str[pos - 1];
+            return 0;
         }
+        pos++;
     }
 
     return -1;

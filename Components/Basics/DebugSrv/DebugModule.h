@@ -21,12 +21,12 @@
 
 #include "SprLog.h"
 #include "RemoteShell.h"
-#include "SprObserver.h"
+#include "SprObserverWithMQueue.h"
 
-class DebugModule : public SprObserver
+class DebugModule : public SprObserverWithMQueue
 {
 public:
-    DebugModule(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
+    DebugModule(ModuleIDType id, const std::string& name);
     ~DebugModule();
 
     int  ProcessMsg(const SprMsg& msg) override;

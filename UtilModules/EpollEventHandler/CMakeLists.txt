@@ -1,5 +1,4 @@
 ## Build epollevent.so
-
 aux_source_directory    (${CMAKE_CURRENT_SOURCE_DIR}    SRC_EPOLL_EVENT_PATH)
 
 add_library             (LibEpollEvent SHARED ${SRC_EPOLL_EVENT_PATH})

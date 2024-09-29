@@ -99,7 +99,7 @@ int Parcel::WriteInt(int value)
         return ret;
     }
 
-    uint8_t* data = (uint8_t*)&netValue;
+    uint8_t* data = reinterpret_cast<uint8_t*>(&netValue);
     ret = mRingBuffer->write(data, len);
     return ret;
 }
@@ -117,7 +117,9 @@ int Parcel::ReadInt(int& value)
     uint8_t data[sizeof(int)];
     ret = mRingBuffer->read(data, len);
     if (ret == 0) {
-        value = ntohl(*reinterpret_cast<int*>(data));
+        int temp;
+        memcpy(&temp, data, sizeof(int));
+        value = ntohl(temp);
     }
 
     return ret;

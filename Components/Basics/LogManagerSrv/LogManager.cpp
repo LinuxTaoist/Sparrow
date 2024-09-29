@@ -36,24 +36,25 @@ using namespace std;
 using namespace GeneralUtils;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %4d LOGM D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %4d LOGM W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %4d LOGM E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %4d LOGM   D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %4d LOGM   I: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %4d LOGM   W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %4d LOGM   E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
 
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_FRAME_LEN_LIMIT     1024
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
-#define DEFAULT_BASE_LOG_FILE_NAME  "sparrow.log"
+#define DEFAULT_BASE_LOG_FILE_NAME  "sprlog.log"
 #define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
 #define LOG_CONFIGURE_FILE_PATH     "sprlog.conf"
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
+bool LogManager::mRunning = true;
 uint8_t LogManager::mLogLevelLimit = LOG_LEVEL_BUTT;
 
 LogManager::LogManager()
 {
-    mRunning            = true;
     mOutputMode         = LOG_OUTPUT_FILE;
     mLogFrameLength     = DEFAULT_FRAME_LEN_LIMIT;
     mLogFileNum         = DEFAULT_LOG_FILE_NUM_LIMIT;
@@ -103,14 +104,21 @@ int LogManager::EnvReady(const std::string& srvName)
     return 0;
 }
 
+int LogManager::StopWork()
+{
+    mRunning = false;
+    SPR_LOGD("Stop Work!\n");
+    return 0;
+}
+
 int LogManager::DumpLogAttrs()
 {
     SPR_LOGD("------------------------- Dump Log Attrs -------------------------\n");
     SPR_LOGD("- mOutputMode         = %d\n", mOutputMode);
     SPR_LOGD("- mLogLevelLimit      = %d\n", mLogLevelLimit);
-    SPR_LOGD("- mLogFrameLength     = %dB\n", mLogFrameLength);
-    SPR_LOGD("- mLogFileNum         = %d\n", mLogFileNum);
-    SPR_LOGD("- mLogFileCapacity    = %dM\n", mLogFileCapacity / (1024 * 1024));
+    SPR_LOGD("- mLogFrameLength     = %uB\n", mLogFrameLength);
+    SPR_LOGD("- mLogFileNum         = %u\n", mLogFileNum);
+    SPR_LOGD("- mLogFileCapacity    = %uM\n", mLogFileCapacity / (1024 * 1024));
     SPR_LOGD("- mLogFileName        = %s\n", mLogFileName.c_str());
     SPR_LOGD("- mLogsFilePath       = %s\n", mLogsFilePath.c_str());
     SPR_LOGD("- mCurrentLogFile     = %s\n", mCurrentLogFile.c_str());
@@ -156,6 +164,7 @@ void LogManager::LoadAttrFileCapacityLimit(const std::string& value)
 void LogManager::LoadAttrFileName(const std::string& value)
 {
     mLogFileName = value;
+    mCurrentLogFile = value;
 }
 
 void LogManager::LoadAttrFilePath(const std::string& value)
@@ -190,7 +199,7 @@ int LogManager::LoadLogCfgFile(const std::string& cfgPath)
             std::string key = keyValue.substr(0, delimiter);
             std::string value = keyValue.substr(delimiter + 1);
             if (mLoadAttrMap.count(key) != 0) {
-                ((LogManager*)this->*(mLoadAttrMap[key]))(value);
+                (reinterpret_cast<LogManager*>(this)->*(mLoadAttrMap[key]))(value);
             }
         }
     }
@@ -321,7 +330,7 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
         std::string currentFile(entry->d_name);
 
         // Check if the file name starts with the given prefix
-        if (currentFile.find(fileNamePrefix) == 0) {
+        if (currentFile.find(fileNamePrefix) != string::npos) {
             matchingFiles.insert(mLogsFilePath + '/' + currentFile);
         }
     }

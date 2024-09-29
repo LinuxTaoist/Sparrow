@@ -20,9 +20,9 @@
 #define __POWER_MANAGER_H__
 
 #include <vector>
-#include "SprObserver.h"
+#include "SprObserverWithMQueue.h"
 
-#define POWER_LEV1_MACROS \
+#define POWER_LEV1_MACROS               \
     ENUM_OR_STRING(LEV1_POWER_ANY),     \
     ENUM_OR_STRING(LEV1_POWER_INIT),    \
     ENUM_OR_STRING(LEV1_POWER_ACTIVE),  \
@@ -47,19 +47,10 @@ enum EPowerLev2State
     LEV2_POWER_ANY      = 0x00
 };
 
-template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
-struct StateTransition
-{
-    Lev1State   lev1State;
-    Lev2State   lev2State;
-    SignalType	sigId;
-    void (ClassName::*callback)(const MsgType& msg);
-};
-
-class PowerManager : public SprObserver
+class PowerManager : public SprObserverWithMQueue
 {
 public:
-    PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr);
+    PowerManager(ModuleIDType id, const std::string& name);
     virtual ~PowerManager();
 
     int ProcessMsg(const SprMsg& msg) override;
@@ -68,7 +59,7 @@ private:
      /* 更新一级状态 */
     void SetLev1State(EPowerLev1State state);
     EPowerLev1State GetLev1State() { return mCurLev1State; }
-    std::string GetLev1String(EPowerLev1State lev1);
+    std::string GetLev1String(EPowerLev1State state);
 
     /* 更新二级状态 */
     void SetLev2State(EPowerLev2State state) { mCurLev2State = state; }
@@ -88,11 +79,12 @@ private:
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
-    static std::vector< StateTransition <EPowerLev1State,
-                        EPowerLev2State,
-                        InternalDefs::ESprSigId,
-                        PowerManager,
-                        SprMsg> > mStateTable;
+    using StateTransitionType = InternalDefs::StateTransition<EPowerLev1State,
+                                                EPowerLev2State,
+                                                InternalDefs::ESprSigId,
+                                                PowerManager,
+                                                SprMsg>;
+    static std::vector<StateTransitionType> mStateTable;
 
     EPowerLev1State mCurLev1State;
     EPowerLev2State mCurLev2State;

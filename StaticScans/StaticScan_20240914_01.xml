@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="1.82"/>
+    <errors>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Basics/PowerManagerSrv/PowerManager.cpp" line="112"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Basics/PowerManagerSrv/PowerManager.h" line="41"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Business/OneNetMqtt/OneNetDriver.cpp" line="415"/>
+        </error>
+        <error id="stlIfStrFind" severity="performance" msg="Inefficient usage of string::find() in condition; string::compare() would be faster." verbose="Either inefficient or wrong usage of string::find(). string::compare() will be faster if string::find&apos;s result is compared with 0, because it will not scan the whole string. If your intention is to check that there are no findings in the string, you should compare with std::string::npos." cwe="597">
+            <location file="../Components/Business/OneNetMqtt/OneNetManager.cpp" line="272"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Business/OneNetMqtt/OneNetManager.cpp" line="357"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Business/OneNetMqtt/OneNetManager.h" line="44"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Business/OneNetMqtt/OneNetManager.h" line="54"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Business/OneNetMqtt/OneNetDriver.h" line="38"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Components/Business/OneNetMqtt/OneNetDriver.h" line="52"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="1"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="5"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="14"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="20"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="32"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="42"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="47"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="52"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="62"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="71"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="76"/>
+        </error>
+        <error id="ConfigurationNotChecked" severity="information" msg="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly." verbose="Skipping configuration &apos;ENUM_OR_STRING&apos; since the value of &apos;ENUM_OR_STRING&apos; is unknown. Use -D if you want to check it. You can use -U to skip it explicitly.">
+            <location file="../Core/SprSigList.gen" line="98"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 14 configurations. Use --force to check all configurations." verbose="The checking of the file will be interrupted because there are too many #ifdef configurations. Checking of all #ifdef configurations can be forced by --force command line option or from GUI preferences. However that may increase the checking time." cwe="398">
+            <location file="../Util/cJSON.c" line="0"/>
+        </error>
+        <error id="uselessAssignmentPtrArg" severity="warning" msg="Assignment of function parameter has no effect outside the function. Did you forget dereferencing it?" verbose="Assignment of function parameter has no effect outside the function. Did you forget dereferencing it?" cwe="398">
+            <location file="../Util/cJSON.c" line="3142"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="783" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="784" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="789" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="798" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="813" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="819" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="820" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="890" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="891" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;buffer!=NULL&apos; is redundant or there is possible null pointer dereference: buffer." verbose="Either the condition &apos;buffer!=NULL&apos; is redundant or there is possible null pointer dereference: buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1064" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1059" info="Assuming that condition &apos;buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1459" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1463" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1465" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1471" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1482" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1480" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1619" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1625" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1623" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1625" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1630" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1632" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1640" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1638" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="../Util/cJSON.c" line="1676" info="Null pointer dereference"/>
+            <location file="../Util/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="wrongmathcall" severity="warning" msg="Passing value -1.0 to sqrt() leads to implementation-defined result." verbose="Passing value -1.0 to sqrt() leads to implementation-defined result." cwe="758">
+            <location file="../Util/cJSON.c" line="113"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Cppcheck cannot find all the include files (use --check-config for details)" verbose="Cppcheck cannot find all the include files. Cppcheck can check the code without the include files found. But the results will probably be more accurate if all the include files are found. Please check your project&apos;s include directories and add all of them as include directories for Cppcheck. To see what files Cppcheck cannot find use --check-config."/>
+    </errors>
+</results>

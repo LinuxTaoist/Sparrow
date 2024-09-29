@@ -30,7 +30,7 @@
 #define SPR_LOGD(fmt, args...) printf("%4d PSocket D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PSocket E: " fmt, __LINE__, ##args)
 
-PSocket::PSocket(int domain, int type, int protocol, std::function<void(int, void*)> cb, void* arg)
+PSocket::PSocket(int domain, int type, int protocol, const std::function<void(int, void*)>& cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb)
 {
     mEnable = true;
@@ -52,7 +52,7 @@ PSocket::PSocket(int domain, int type, int protocol, std::function<void(int, voi
     mSockType = PSOCKET_TYPE_IDLE;
 }
 
-PSocket::PSocket(int sock, std::function<void(int, void*)> cb, void* arg)
+PSocket::PSocket(int sock, const std::function<void(int, void*)>& cb, void* arg)
     : IEpollEvent(sock, EPOLL_TYPE_SOCKET, arg), mCb(cb)
 {
     mEnable = true;
@@ -455,10 +455,7 @@ void* PSocket::EpollEvent(int fd, EpollType eType, void* arg)
     }
 
     if (mCb) {
-        if (!arg) {
-            arg = this;
-        }
-
+        arg = arg ? arg : this;
         mCb(fd, arg);
     }
 

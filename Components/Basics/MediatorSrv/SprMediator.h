@@ -42,15 +42,16 @@ public:
     static SprMediator* GetInstance();
     int Init();
     int EpollLoop();
+    static int StopWork();
+
+    int GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
 
 private:
     explicit SprMediator(int size);
     int EnvReady(const std::string& srvName);
     int MakeMQ(const std::string& name);
-    int StartBinderThread();
     int PrepareInternalPort();
     int DestroyInternalPort();
-    int GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
     int LoadMQStaticInfo(int handle, const std::string& devName);
     int LoadMQDynamicInfo(int handle, const SprMsg& msg);
     // int SendMsg(const SprMsg& msg);
@@ -61,18 +62,14 @@ private:
     int ProcessMsg(const SprMsg& msg);
 
     /* 消息响应函数 */
-    int MsgResponseRegister(const SprMsg& msg);
-    int MsgResponseUnregister(const SprMsg& msg);
-
-    /* Binder 线程处理函数 */
-    static void BinderLoop(SprMediator* self);
+    int MsgRespondRegister(const SprMsg& msg);
+    int MsgRespondUnregister(const SprMsg& msg);
 
 private:
+    static bool mEpollRunning;
     int mHandler;
     int mEpollHandler;
-    bool mBinderRunning;
     std::string mMqDevName;
-    std::thread mBinderThread;
     std::map<int, SMQStatus> mMQStatusMap;  // handle, mq status
     std::map<InternalDefs::ESprModuleID, SModuleInfo> mModuleMap;
 };

@@ -21,74 +21,42 @@
 
 #include <map>
 #include <memory>
-#include "SprMsg.h"
-#include "SprObserver.h"
-#include "LibgoAdapter.h"
+#include "EpollEventHandler.h"
 
-class SprEpollSchedule
+class SprEpollSchedule : public EpollEventHandler
 {
 public:
-    using SprMsgHandler = void (*)(void *);
+    /**
+     * @brief Destrcuct
+     */
+    virtual ~SprEpollSchedule();
 
     /**
-     * @brief Destroy the Spr Epoll Schedule object
+     * @brief Get single instance
      *
+     * @param[in] size the size of epoll
+     * @return Instance of SprEpollSchedule
      */
-    ~SprEpollSchedule();
+    static SprEpollSchedule* GetInstance(uint32_t size = 0, bool enableCoroutine = false);
 
     /**
-     * @brief Get the Instance object
-     * @return SprEpollSchedule*
+     * @brief Handle epoll event
      *
+     * @param[in] pEvent Instance of epoll event
      */
-    static SprEpollSchedule* GetInstance();
-
-    /**
-     * @brief Init
-     *
-     */
-    void Init();
-
-    /**
-     * @brief Exit
-     *
-     */
-    void Exit();
-
-    /**
-     * @brief AddPoll
-     * @param[in] observer
-     * @return
-     *
-     */
-    int AddPoll(int fd, uint8_t ipcType, SprObserver* observer);
-
-    /**
-     * @brief DelPoll
-     * @param[in] observer
-     *
-     */
-    void DelPoll(int fd);
-
-    /**
-     * @brief EpollLoop
-     *
-     */
-    void EpollLoop();
+     virtual void HandleEpollEvent(IEpollEvent& event) override;
 
 private:
     /**
-     * @brief Construct a new Spr Epoll Schedule object
-     * @param[in] size
+     * @brief Construct
      *
+     * @param[in] size the size of epoll
+     * @param[in] enableCoroutine enable coroutine
      */
-    explicit SprEpollSchedule(uint32_t size);
+    explicit SprEpollSchedule(uint32_t size = 0, bool enableCoroutine = true);
 
 private:
-    bool mRun;
-    int mEpollHandle;
-    std::map<int, std::pair<int, SprObserver*>> mPollMap;   // fd, ipc type, sprobserver
-    LibgoAdapter::CoPool mCoPool;
+    bool mEnableCoroutine;
 };
 
 #endif // __SPR_EPOLL_SCHEDULE_H__

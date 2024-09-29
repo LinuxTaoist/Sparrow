@@ -26,13 +26,31 @@
 class SprMediatorInterface
 {
 public:
+    /**
+     * @brief  Destructor
+     */
     ~SprMediatorInterface();
+
+    /**
+     * @brief  Get the instance
+     *
+     * @return  Single instance
+     */
     static SprMediatorInterface* GetInstance();
 
+    /**
+     * @brief  Get the all message queue of all modules
+     *
+     * @param mqAttrVec  Message queue attribute vector
+     * @return  0 if success, -1 if failed
+     */
     int GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec);
 
 private:
-    bool mEnable;
+    /**
+     * @brief Constructor
+     *
+     */
     SprMediatorInterface();
 };
 

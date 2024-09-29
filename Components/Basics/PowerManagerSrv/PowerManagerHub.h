@@ -27,9 +27,9 @@ class PowerManagerHub : public SprBinderHub
 {
 public:
     PowerManagerHub(const std::string& srvName, PowerManager* powerManager);
-    ~PowerManagerHub();
+    virtual ~PowerManagerHub();
 
-    void handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd);
+    void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) override;
 
 private:
     PowerManager* mPowerManager;

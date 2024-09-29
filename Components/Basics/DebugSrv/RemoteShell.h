@@ -39,7 +39,6 @@ private:
     bool mEnable;
     std::thread mRcvThread;
     std::shared_ptr<PSocket> mTcpSrvPtr;
-    std::shared_ptr<EpollEventHandler> mEpollPtr;
 };
 
 #endif // __REMOTE_SHELL_H__

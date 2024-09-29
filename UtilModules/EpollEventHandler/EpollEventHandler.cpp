@@ -23,7 +23,7 @@
 #include <sys/epoll.h>
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) printf("%4d EpollEvent D: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) // printf("%4d EpollEvent D: " fmt, __LINE__, ##args)
 #define SPR_LOGW(fmt, args...) printf("%4d EpollEvent W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d EpollEvent E: " fmt, __LINE__, ##args)
 
@@ -45,21 +45,22 @@ EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
 
 EpollEventHandler::~EpollEventHandler()
 {
-    mRun = false;
-    if (mHandle != -1)
-    {
-        close(mHandle);
-        mHandle = -1;
-    }
+    ExitLoop();
+}
+
+EpollEventHandler* EpollEventHandler::GetInstance(int size, int blockTimeOut)
+{
+    static EpollEventHandler instance(size, blockTimeOut);
+    return &instance;
 }
 
 void EpollEventHandler::AddPoll(IEpollEvent* p)
 {
     //EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
     //EPOLLOUT：表示对应的文件描述符可以写；
-    //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的。
+    //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的，默认水平触发。
     struct epoll_event ep;
-    ep.events = EPOLLIN;
+    ep.events = EPOLLET | EPOLLIN;
     ep.data.ptr = p;
 
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
@@ -67,17 +68,22 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
     int fd = p->GetEpollFd();
     int ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
-    if (ret != 0) {
+    if (ret == -1) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
         return ;
     }
 
-    mEpollMap.insert(std::make_pair(fd, p));
+    mEpollMap[fd] = p;
     SPR_LOGD("Add epoll fd %d\n", fd);
 }
 
 void EpollEventHandler::DelPoll(IEpollEvent* p)
 {
+    if (p == nullptr) {
+        SPR_LOGE("p is null\n");
+        return ;
+    }
+
     int ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEpollFd(), nullptr);
     if (ret != 0) {
         SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
@@ -87,10 +93,14 @@ void EpollEventHandler::DelPoll(IEpollEvent* p)
     SPR_LOGD("Delete epoll fd %d\n", p->GetEpollFd());
 }
 
+void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
+{
+    event.EpollEvent(event.GetEpollFd(), event.GetEpollType(), event.GetArgs());
+}
+
 void EpollEventHandler::EpollLoop(bool bRun)
 {
     struct epoll_event ep[32];
-
     mRun = bRun;
     while(mRun) {
         if (!mRun) {
@@ -109,9 +119,19 @@ void EpollEventHandler::EpollLoop(bool bRun)
                 continue;
             }
 
-            p->EpollEvent(p->GetEpollFd(), p->GetEpollType(), p->GetArgs());
+            HandleEpollEvent(*p);
         }
     }
 
     SPR_LOGD("EpollLoop exit\n");
+}
+
+void EpollEventHandler::ExitLoop()
+{
+    mRun = false;
+    if (mHandle != -1)
+    {
+        close(mHandle);
+        mHandle = -1;
+    }
 }

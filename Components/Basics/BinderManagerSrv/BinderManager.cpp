@@ -23,25 +23,38 @@
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
+#include "CoreTypeDefs.h"
 #include "BindCommon.h"
 #include "BinderManager.h"
 
 using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("BinderM", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGD("BinderM", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGD("BinderM", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("BinderM", fmt, ##args)
 
 #define INT_KEY_LENGTH  5
 
-Parcel reqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
-Parcel rspParcel("BinderM",  KEY_BINDER_MANAGER,  true);
+Parcel* pReqParcel = nullptr;
+Parcel* pRspParcel = nullptr;
+
+bool BinderManager::mRunning = false;
 
 BinderManager::BinderManager()
 {
-    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BinderManager::MsgResponseAddService));
-    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::MsgResponseRemoveService));
-    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BinderManager::MsgResponseGetService));
+    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BinderManager::BMsgRespondAddService));
+    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::BMsgRespondRemoveService));
+    mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BinderManager::BMsgRespondGetService));
+
+    pReqParcel = new (std::nothrow) Parcel("IBinderM", KEY_IBINDER_MANAGER, false);
+    pRspParcel = new (std::nothrow) Parcel("BinderM",  KEY_BINDER_MANAGER,  true);
+
+    if (pReqParcel == nullptr || pRspParcel == nullptr) {
+        SPR_LOGE("Create parcel failed! \n");
+        exit(EXIT_FAILURE);
+    }
+
     EnvReady(SRV_NAME_BINDER);
 }
 
@@ -66,40 +79,40 @@ int32_t BinderManager::EnvReady(const std::string& srvName)
     return 0;
 }
 
-int32_t BinderManager::MsgResponseAddService()
+int32_t BinderManager::BMsgRespondAddService()
 {
     std::string name;
-    int32_t key = GeneralUtils::RandomDecimalDigits(INT_KEY_LENGTH);
-    reqParcel.ReadString(name);
+    int32_t key = GeneralUtils::GetRandomInteger(INT_KEY_LENGTH);
+    pReqParcel->ReadString(name);
 
     mBinderMap[name] = BinderInfo(key, name);
 
-    rspParcel.WriteInt(key);
-    rspParcel.WriteInt(0);
-    rspParcel.Post();
+    pRspParcel->WriteInt(key);
+    pRspParcel->WriteInt(0);
+    pRspParcel->Post();
     SPR_LOGD("Add service info(%d, %s) \n", key, name.c_str());
     return 0;
 }
 
-int32_t BinderManager::MsgResponseRemoveService()
+int32_t BinderManager::BMsgRespondRemoveService()
 {
     std::string name;
-    reqParcel.ReadString(name);
+    pReqParcel->ReadString(name);
     mBinderMap.erase(name);
 
-    rspParcel.WriteInt(0);
-    rspParcel.Post();
+    pRspParcel->WriteInt(0);
+    pRspParcel->Post();
     SPR_LOGD("Remove service %s \n", name.c_str());
     return 0;
 }
 
-int32_t BinderManager::MsgResponseGetService()
+int32_t BinderManager::BMsgRespondGetService()
 {
     int32_t ret = 0;
     int32_t key = 0;
     std::string name;
     std::string shmName;
-    reqParcel.ReadString(name);
+    pReqParcel->ReadString(name);
 
     auto it = mBinderMap.find(name);
     if (it != mBinderMap.end()) {
@@ -110,21 +123,27 @@ int32_t BinderManager::MsgResponseGetService()
         SPR_LOGE("Service %s not exist!\n", name.c_str());
     }
 
-    rspParcel.WriteString(shmName);
-    rspParcel.WriteInt(key);
-    rspParcel.WriteInt(ret);
-    rspParcel.Post();
+    pRspParcel->WriteString(shmName);
+    pRspParcel->WriteInt(key);
+    pRspParcel->WriteInt(ret);
+    pRspParcel->Post();
 
     return ret;
 }
 
-int32_t BinderManager::HandleMsgLoop()
+int32_t BinderManager::StartWork()
 {
-    while (true)
+    mRunning = true;
+    while (mRunning)
     {
         int cmd = 0;
-        reqParcel.Wait();
-        reqParcel.ReadInt(cmd);
+        pReqParcel->Wait();
+        pReqParcel->ReadInt(cmd);
+
+        if (cmd == GENERAL_CMD_EXE_EXIT) {
+            mRunning = false;
+            break;
+        }
 
         auto handler = mHandleFuncs.find(cmd);
         if (handler != mHandleFuncs.end()) {
@@ -135,5 +154,15 @@ int32_t BinderManager::HandleMsgLoop()
         }
     }
 
+    SPR_LOGI("Exit work loop!\n");
+    return 0;
+}
+
+int32_t BinderManager::StopWork()
+{
+    // Signal to unblock the pReqParcel->Wait() call
+    pReqParcel->WriteInt(GENERAL_CMD_EXE_EXIT);
+    pReqParcel->Post();
+    SPR_LOGI("Stop work!\n");
     return 0;
 }

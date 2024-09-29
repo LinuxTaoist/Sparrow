@@ -46,7 +46,7 @@ int Server()
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-    BindInterface::GetInstance()->InitializeServiceBinder(SERVICE_NAME, pReqParcel, pRspParcel);
+    BindInterface::GetInstance()->InitializeServiceBinder("SERVICE_NAME", pReqParcel, pRspParcel);
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
         SPR_LOGE("GetParcel failed\n");
         return -1;

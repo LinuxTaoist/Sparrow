@@ -1,6 +1,6 @@
 # Package Information for pkg-config
 
-prefix=/home/dx/hdd1/Gitee/Sparrow/3rdParty/sqlite/sqlite-autoconf-3450300/Release
+prefix=/mnt/wsl/hdd1/gitee/Sparrow/3rdParty/sqlite/sqlite-autoconf-3450300/release
 exec_prefix=${prefix}
 libdir=${exec_prefix}/lib
 includedir=${prefix}/include
@@ -9,5 +9,5 @@ Name: SQLite
 Description: SQL database engine
 Version: 3.45.3
 Libs: -L${libdir} -lsqlite3
-Libs.private: -lm 
+Libs.private: -lz -lm -ldl -lpthread 
 Cflags: -I${includedir}

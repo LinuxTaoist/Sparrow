@@ -30,7 +30,7 @@ using namespace std;
 #define SPR_LOGE(fmt, args...) printf("%4d TcpServer E: " fmt, __LINE__, ##args)
 int main(int argc, const char *argv[])
 {
-    auto pEpoll = make_shared<EpollEventHandler>();
+    auto pEpoll = EpollEventHandler::GetInstance();
 
     std::list<std::shared_ptr<PSocket>> clients;
     auto tcpServer = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int cli, void *arg) {

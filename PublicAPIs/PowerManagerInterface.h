@@ -22,17 +22,37 @@
 class PowerManagerInterface
 {
 public:
+    /**
+     * @brief  Destructor
+     */
     ~PowerManagerInterface();
 
+    /**
+     * @brief Get the Instance object
+     *
+     * @return  Single instance of PowerManagerInterface
+     */
     static PowerManagerInterface* GetInstance();
+
+    /**
+     * @brief  Trigger power on
+     *
+     * @return  0 if success, -1 if failed
+     */
     int PowerOn();
+
+    /**
+     * @brief  Trigger power off
+     *
+     * @return  0 if success, -1 if failed
+     */
     int PowerOff();
 
 private:
+    /**
+     * @brief Constructor
+     */
     PowerManagerInterface();
-
-private:
-    bool mEnable;
 };
 
 #endif // __POWER_MANAGER_INTERFACE_H__

@@ -29,7 +29,6 @@
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "PropertyManager.h"
-#include "SprMediatorIpcProxy.h"
 
 #define SYSTEM_PROP_PATH        "system.prop"
 #define DEFAULT_PROP_PATH       "default.prop"
@@ -101,7 +100,7 @@ int PropertyManager::GetProperties()
 
 int PropertyManager::Init()
 {
-    mSharedMemoryPtr = std::make_unique<SharedBinaryTree>(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE);
+    mSharedMemoryPtr = std::unique_ptr<SharedBinaryTree>(new SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
 
     // load default property
     LoadPropertiesFromFile(DEFAULT_PROP_PATH);

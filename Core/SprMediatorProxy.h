@@ -25,6 +25,9 @@ class SprObserver;
 class SprMediatorProxy
 {
 public:
+    /**
+     * @brief Construct/Destruct
+     */
     SprMediatorProxy() {}
     virtual ~SprMediatorProxy() {}
     SprMediatorProxy(const SprMediatorProxy&) = delete;
@@ -32,11 +35,27 @@ public:
     SprMediatorProxy(SprMediatorProxy&&) = delete;
     SprMediatorProxy& operator=(SprMediatorProxy&&) = delete;
 
+    /**
+     * @brief Connect to SprMediator
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
     virtual int ConnectMediator() = 0;
-    virtual int RegisterObserver(const SprObserver& observer) = 0;
-    virtual int UnregisterObserver(const SprObserver& observer) = 0;
-    virtual int SendMsg(const SprMsg& msg) = 0;
+
+    /**
+     * @brief send message to other module
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
     virtual int NotifyObserver(const SprMsg& msg) = 0;
+
+    /**
+     * @brief send message to all module
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
     virtual int NotifyAllObserver(const SprMsg& msg) = 0;
 };
 

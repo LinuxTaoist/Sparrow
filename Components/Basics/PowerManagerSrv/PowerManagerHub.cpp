@@ -32,10 +32,9 @@ PowerManagerHub::PowerManagerHub(const std::string& srvName, PowerManager* power
 
 PowerManagerHub::~PowerManagerHub()
 {
-
 }
 
-void PowerManagerHub::handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_ptr<Parcel> pRspParcel, int cmd)
+void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
     switch(cmd)
     {
@@ -66,4 +65,3 @@ void PowerManagerHub::handleCmd(std::shared_ptr<Parcel> pReqParcel, std::shared_
         }
     }
 }
-

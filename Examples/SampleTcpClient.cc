@@ -34,7 +34,7 @@ using namespace std;
 int main(int argc, const char *argv[])
 {
     std::mutex epFdMutex;
-    auto pEpoll = make_shared<EpollEventHandler>();
+    auto pEpoll = EpollEventHandler::GetInstance();
     auto tcpClient = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int sock, void *arg) {
         PSocket* pCliObj = (PSocket*)arg;
         if (pCliObj == nullptr) {
@@ -55,7 +55,7 @@ int main(int argc, const char *argv[])
         }
     });
 
-    tcpClient->AsTcpClient(true, "127.0.0.1", 8080);
+    tcpClient->AsTcpClient(true, "192.168.0.104", 1883);
     pEpoll->AddPoll(tcpClient.get());
 
     std::thread wThread([&]{

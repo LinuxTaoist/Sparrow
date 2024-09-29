@@ -46,6 +46,7 @@ public:
     SprMsg(const SprMsg& srcMsg);
     explicit SprMsg(uint32_t msgId);
     SprMsg(uint32_t to, uint32_t msgId);
+    SprMsg(uint32_t to, const SprMsg& srcMsg);
     SprMsg(uint32_t from, uint32_t to, uint32_t msgId);
     explicit SprMsg(std::string datas);
     SprMsg& operator=(const SprMsg &srcMsg); // Assignment Operator

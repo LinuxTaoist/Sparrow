@@ -24,7 +24,6 @@
 
 #include <set>
 #include <map>
-#include <queue>
 #include <string>
 #include <fstream>
 #include <sstream>
@@ -53,7 +52,7 @@ public:
     LogManager();
     virtual ~LogManager();
     int MainLoop();
-
+    static int StopWork();
     static void SetLogLevel(LogLevel level) { mLogLevelLimit = level; }
     static int  GetLogLevel() { return mLogLevelLimit; }
 
@@ -76,7 +75,7 @@ private:
     void LoadAttrFilePath(const std::string& value);
 
 private:
-    bool            mRunning;
+    static bool     mRunning;
     uint8_t         mOutputMode;        // defined with "logging.output"
     uint32_t        mLogFrameLength;    // defined with "logging.frame_length"
     uint32_t        mLogFileNum;        // defined with "logging.file_num"

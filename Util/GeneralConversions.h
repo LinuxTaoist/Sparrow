@@ -26,54 +26,110 @@
 #include <stdint.h>
 
 namespace GeneralConversions {
-    template <typename T>
-    int stringToInt(T& value, const std::string& str)
-    {
-        if (str.size() < sizeof(T)) {
-            return -1;
-        }
 
-        value = 0;
-        for (size_t i = 0; i < sizeof(T); i++) {
-            value <<= 8;
-            value |= static_cast<unsigned char>(str[i]);
-        }
-
-        return 0;
+/**
+ * @brief  String to integer
+ *
+ * @param value  output integer
+ * @param str  input string
+ * @return  0 if success, -1 if failed
+ */
+template <typename T>
+int StringToInteger(T& value, const std::string& str)
+{
+    size_t valueSize = sizeof(T);
+    if (str.size() < valueSize) {
+        return -1;
     }
 
-    template<typename T>
-    int intToString(const T& value, std::string& str)
-    {
-        size_t valueSize = sizeof(T);
-
-        for (size_t i = 0; i < valueSize; i++) {
-            char ch = static_cast<char>((value >> ((valueSize - 1 - i) * 8)) & 0xFF);
-            str.push_back(ch);
-        }
-
-        return 0;
+    value = 0;
+    for (size_t i = 0; i < valueSize; i++) {
+        value <<= 8;
+        value |= static_cast<unsigned char>(str[i]);
     }
 
-    template<typename T>
-    std::string vectorToHexString(const std::vector<T>& vec)
-    {
-        std::stringstream ss;
-        ss << std::hex << std::setfill('0');
+    return valueSize;
+}
 
-        for (const auto& it : vec) {
-            ss << std::setw(sizeof(T) * 2) << static_cast<int>(it) << " ";
-        }
+/**
+ * @brief  Integer to string
+ *
+ * @param value  input integer
+ * @param str  output string
+ * @return  0 if success, -1 if failed
+ */
+template<typename T>
+int IntegerToString(const T& value, std::string& str)
+{
+    size_t valueSize = sizeof(T);
 
-        return ss.str();
+    for (size_t i = 0; i < valueSize; i++) {
+        char ch = static_cast<char>((value >> ((valueSize - 1 - i) * 8)) & 0xFF);
+        str.push_back(ch);
     }
 
-    template<typename T>
-    std::string vectorToString(const std::vector<T>& vec)
-    {
-        std::string str(vec.begin(), vec.end());
-        return str;
+    return valueSize;
+}
+
+/**
+ * @brief Vector to hex string without space
+ *
+ * @param vec  input vector
+ * @return  The string converted without space
+ */
+template<typename T>
+std::string VectorToHexString(const std::vector<T>& vec)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+
+    for (const auto& it : vec) {
+        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it);
     }
-};
+
+    return ss.str();
+}
+
+/**
+ * @brief Vector to hex string with space
+ *
+ * @param vec  input vector
+ * @return  The string converted with space
+ */
+template<typename T>
+std::string VectorToHexStringWithSpace(const std::vector<T>& vec)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+
+    for (const auto& it : vec) {
+        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it) << " ";
+    }
+
+    return ss.str();
+}
+
+/**
+ * @brief  Vector to string
+ *
+ * @param vec  input vector
+ * @return  The string converted
+ */
+template<typename T>
+std::string VectorToString(const std::vector<T>& vec)
+{
+    std::string str(vec.begin(), vec.end());
+    return str;
+}
+
+/**
+ * @brief Dump socket bytes for debug
+ *
+ * @param bytes socket bytes
+ * @return 0 on success, or -1 if an error occurred
+ */
+int DumpBytesAscall(const std::string& bytes, std::string& out);
+
+}; // namespace GeneralConversions
 
 #endif // __GENERAL_CONVERSIONS_H__

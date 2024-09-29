@@ -16,8 +16,6 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <list>
-#include <memory>
 #include <stdlib.h>
 #include <unistd.h>
 #include <arpa/inet.h>
@@ -36,8 +34,8 @@ using namespace InternalDefs;
 
 #define BUFFER_SIZE 1024
 
-DebugModule::DebugModule(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
-           : SprObserver(id, name, mMsgMediatorPtr)
+DebugModule::DebugModule(ModuleIDType id, const std::string& name)
+           : SprObserverWithMQueue(id, name)
 {
 }
 

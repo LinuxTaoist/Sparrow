@@ -18,56 +18,59 @@
  */
 #include "SprLog.h"
 #include "SprBinderHub.h"
+#include "CoreTypeDefs.h"
 #include "BindInterface.h"
+
+using namespace InternalDefs;
 
 #define SPR_LOGD(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("SprBinderHub", fmt, ##args)
 
-SprBinderHub::SprBinderHub(const std::string& srvName)
+static std::shared_ptr<Parcel> pReqParcel = nullptr;
+static std::shared_ptr<Parcel> pRspParcel = nullptr;
+
+bool SprBinderHub::mRun = false;
+
+SprBinderHub::SprBinderHub(const std::string& srvName) : mSrvName(srvName)
 {
-    mRun = true;
-    mSrvName = srvName;
 }
 
 SprBinderHub::~SprBinderHub()
 {
     DestoryHub();
+    if (mBindThread.joinable()) {
+        mBindThread.join();
+    }
 }
 
-bool SprBinderHub::InitializeHub()
+int32_t SprBinderHub::InitializeHub()
 {
-    bool ret = false;
-
+    int32_t ret = -1;
     if (!mBindThread.joinable()) {
+        mRun = true;
         mBindThread = std::thread(BinderLoop, this);
-        ret = true;
+        ret = 0;
     }
 
     return ret;
 }
 
-bool SprBinderHub::DestoryHub()
+int32_t SprBinderHub::DestoryHub()
 {
-    mRun = false;
-    if (mBindThread.joinable())
-    {
-        mBindThread.join();
+    if (mRun) {
+        mRun = false;
+        pReqParcel->WriteInt(GENERAL_CMD_EXE_EXIT);
+        pReqParcel->Post();
     }
-
-    SPR_LOGE("Destory %s binderHub!\n", mSrvName.c_str());
-    return true;
+    return 0;
 }
 
 void SprBinderHub::BinderLoop(void* pData)
 {
-    SprBinderHub* mSelf = (SprBinderHub*)pData;
-    std::shared_ptr<Parcel> pReqParcel;
-    std::shared_ptr<Parcel> pRspParcel;
-
+    SprBinderHub* mSelf = reinterpret_cast<SprBinderHub*>(pData);
     bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSelf->mSrvName, pReqParcel, pRspParcel);
-    if (!rs)
-    {
+    if (!rs) {
         SPR_LOGE("Binder init failed!\n");
         return;
     }
@@ -77,15 +80,19 @@ void SprBinderHub::BinderLoop(void* pData)
         int cmd = 0;
         pReqParcel->Wait();
         int ret = pReqParcel->ReadInt(cmd);
-        if (ret != 0)
-        {
+        if (ret != 0) {
             SPR_LOGE("ReadInt failed!\n");
             continue;
         }
 
+        if (cmd == GENERAL_CMD_EXE_EXIT) {
+            mRun = false;
+            SPR_LOGD("Binder loop exit!\n");
+            break;
+        }
+
         mSelf->handleCmd(pReqParcel, pRspParcel, cmd);
-    } while(mSelf->mRun);
+    } while(mRun);
 
     SPR_LOGD("Exit %s binder loop!\n", mSelf->mSrvName.c_str());
 }
-

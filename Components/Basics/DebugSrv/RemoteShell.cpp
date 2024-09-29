@@ -53,7 +53,7 @@ int RemoteShell::Init()
 
     SPR_LOGD("Enter remote shell Init!\n");
     std::list<std::shared_ptr<PSocket>> clients;
-    mEpollPtr = std::make_shared<EpollEventHandler>(0, 5000);
+    auto pEpoll = EpollEventHandler::GetInstance();
     mTcpSrvPtr = std::make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int cli, void* arg) {
         PSocket* pSrvObj = (PSocket*)arg;
         if (pSrvObj == nullptr) {
@@ -98,20 +98,20 @@ int RemoteShell::Init()
             }
 
             if (rc <= 0) {
-                clients.remove_if([sock, this, pCliObj](std::shared_ptr<PSocket>& v) {
-                    this->mEpollPtr->DelPoll(pCliObj);
+                clients.remove_if([sock, this, pCliObj, pEpoll](std::shared_ptr<PSocket>& v) {
+                    pEpoll->DelPoll(pCliObj);
                     return (v->GetEpollFd() == sock);
                 });
             }
         });
 
         tcpClient->AsTcpClient();
-        mEpollPtr->AddPoll(tcpClient.get());
+        pEpoll->AddPoll(tcpClient.get());
         clients.push_back(tcpClient);
     });
 
     if (!mRcvThread.joinable()) {
-        mRcvThread = std::thread([](RemoteShell* mySelf) {
+        mRcvThread = std::thread([&](RemoteShell* mySelf) {
             if (mySelf == nullptr) {
                 SPR_LOGE("mySelf is nullptr!\n");
                 return;
@@ -119,8 +119,8 @@ int RemoteShell::Init()
 
             SPR_LOGD("Enter remote shell thread...\n");
             mySelf->mTcpSrvPtr->AsTcpServer(8080, 5);
-            mySelf->mEpollPtr->AddPoll(mySelf->mTcpSrvPtr.get());
-            mySelf->mEpollPtr->EpollLoop(true);
+            pEpoll->AddPoll(mySelf->mTcpSrvPtr.get());
+            pEpoll->EpollLoop(true);
         }, this);
     }
 
@@ -138,9 +138,8 @@ int RemoteShell::DeInit()
 
     SPR_LOGD("Enter remote shell DeInit!\n");
     if (mRcvThread.joinable()) {
-        mEpollPtr->DelPoll(mTcpSrvPtr.get());
+        EpollEventHandler::GetInstance()->DelPoll(mTcpSrvPtr.get());
         mTcpSrvPtr->Close();
-        mEpollPtr = nullptr;
         mRcvThread.join();
     }
 

@@ -18,7 +18,6 @@
  */
 #include <stdio.h>
 #include <signal.h>
-#include "SprObserver.h"
 #include "GeneralUtils.h"
 #include "MainMenu.h"
 
@@ -42,7 +41,6 @@ int main(int argc, const char *argv[])
             case SIGPIPE:   // 管道破裂
             case SIGALRM:   // 定时器信号
             case SIGTERM:   // 请求进程终止, 清理并退出
-                SprObserver::MainExit();
                 break;
 
             case SIGUSR1:   // 用户自定义信号1

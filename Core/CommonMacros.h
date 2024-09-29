@@ -65,6 +65,10 @@
     #define BUILD_PLATFORM  "Unknown"
 #endif
 
+#ifndef MODULE_CONFIG_VERSION
+    #define MODULE_CONFIG_VERSION   "Unknown"
+#endif
+
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for service and client
 // --------------------------------------------------------------------------------------------------------------------

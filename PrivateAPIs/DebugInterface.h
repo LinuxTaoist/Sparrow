@@ -36,9 +36,6 @@ public:
 
 private:
     DebugInterface();
-
-private:
-    bool mEnable;
 };
 
 #endif // __DEBUG_INTERFACE_H__

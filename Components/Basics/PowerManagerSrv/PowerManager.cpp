@@ -71,8 +71,8 @@ PowerManager::mStateTable =
     }
 };
 
-PowerManager::PowerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprMediatorProxy> mMsgMediatorPtr)
-            : SprObserver(id, name, mMsgMediatorPtr)
+PowerManager::PowerManager(ModuleIDType id, const std::string& name)
+            : SprObserverWithMQueue(id, name)
 {
     SetLev1State(LEV1_POWER_INIT);
     SetLev2State(LEV2_POWER_ANY);
@@ -88,7 +88,7 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     SPR_LOGD("Recv msg: %s on %s\n", GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
 
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
-        [this, &msg](const auto& entry) {
+        [this, &msg](const StateTransitionType& entry) {
             return ((entry.lev1State  == mCurLev1State  || entry.lev1State  == LEV1_POWER_ANY) &&
                     (entry.lev2State  == mCurLev2State  || entry.lev2State  == LEV2_POWER_ANY) &&
                     (entry.sigId      == msg.GetMsgId() || entry.sigId      == SIG_ID_ANY) );
@@ -101,7 +101,7 @@ int PowerManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-std::string PowerManager::GetLev1String(EPowerLev1State lev1)
+std::string PowerManager::GetLev1String(EPowerLev1State state)
 {
     #ifdef ENUM_OR_STRING
     #undef ENUM_OR_STRING
@@ -112,7 +112,7 @@ std::string PowerManager::GetLev1String(EPowerLev1State lev1)
         POWER_LEV1_MACROS
     };
 
-    return (Lev1Strings.size() > lev1) ? Lev1Strings[lev1] : "UNDEFINED";
+    return (Lev1Strings.size() > state) ? Lev1Strings[state] : "UNDEFINED";
 }
 
 void PowerManager::SetLev1State(EPowerLev1State state)
