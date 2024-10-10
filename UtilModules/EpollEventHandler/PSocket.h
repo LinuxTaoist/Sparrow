@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __GENERAL_SOCKET_H__
-#define __GENERAL_SOCKET_H__
+#ifndef __PSOCKET_H__
+#define __PSOCKET_H__
 
 #include <string>
 #include <functional>
