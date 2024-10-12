@@ -1,0 +1,56 @@
+/**
+ *---------------------------------------------------------------------------------------------------------------------
+ *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
+ *
+ *  @file       : LoginManager.h
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
+ *  @date       : 2024/10/13
+ *
+ *
+ *  Change History:
+ *  <Date>     | <Version> | <Author>       | <Description>
+ *---------------------------------------------------------------------------------------------------------------------
+ *  2024/10/13 | 1.0.0.1   | Xiang.D        | Create file
+ *---------------------------------------------------------------------------------------------------------------------
+ *
+ */
+#ifndef __LOGIN_MANAGER_H__
+#define __LOGIN_MANAGER_H__
+
+#include <list>
+#include <memory>
+#include <sys/types.h>
+#include <PPipe.h>
+#include <PSocket.h>
+
+class LoginManager
+{
+public:
+    LoginManager();
+    ~LoginManager();
+    static LoginManager* GetInstance();
+
+    int Init();
+    int BuildConnectAsTcpServer(short port);
+    int ConnectLoop();
+
+private:
+    int SetStdioCloexec();
+    int ListenPipeEvent(int pipeFd);
+    // int Login(const char* username, const char* password);
+    // int Logout();
+
+private:
+    bool mIsLogin;
+    pid_t mCurPid;
+    pid_t mShellPid;
+    int mInPipe[2];
+    int mOutPipe[2];
+    std::shared_ptr<PPipe> mPipePtr;
+    std::shared_ptr<PSocket> mTcpSrvPtr;
+    std::list<std::shared_ptr<PSocket>> mTcpClients;
+};
+
+#endif // __LOGIN_MANAGER_H__

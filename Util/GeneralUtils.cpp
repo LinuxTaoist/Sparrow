@@ -79,29 +79,25 @@ int SystemCmd(std::string& out, const char* format, ...)
     va_start(vlist, format);
 
     char* fmt = nullptr;
-    if (vasprintf(&fmt, format, vlist) == -1)
-    {
+    if (vasprintf(&fmt, format, vlist) == -1) {
         va_end(vlist);
         return -1;
     }
 
     va_end(vlist);
-    if (fmt == nullptr)
-    {
+    if (fmt == nullptr) {
         return -1;
     }
 
     FILE *fp = popen(fmt, "r");
-    if (fp == nullptr)
-    {
+    if (fp == nullptr) {
         free(fmt);
         return -1;
     }
 
     out.clear();
     char buffer[256] = {0};
-    while (fgets(buffer, sizeof(buffer), fp) != nullptr)
-    {
+    while (fgets(buffer, sizeof(buffer), fp) != nullptr) {
         out.append(buffer);
     }
 
