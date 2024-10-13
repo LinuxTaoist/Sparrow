@@ -22,6 +22,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include "SprLog.h"
+#include "GeneralUtils.h"
 #include "ShellEnv.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("RShellEnv", fmt, ##args)
@@ -29,48 +30,48 @@
 
 ShellEnv::ShellEnv(int inFd, int outFd, int errFd)
 {
-    mInFd = inFd;
-    mOutFd = outFd;
-    mErrFd = errFd;
-    mStdin = dup(STDIN_FILENO);
-    mStdout = dup(STDOUT_FILENO);
-    mStderr = dup(STDERR_FILENO);
-    dup2(inFd, STDIN_FILENO);
-    dup2(outFd, STDOUT_FILENO);
-    dup2(errFd, STDERR_FILENO);
-    // close(mInFd);
-    // close(mOutFd);
-    // close(mErrFd);
+    // mInFd = inFd;
+    // mOutFd = outFd;
+    // mErrFd = errFd;
+    // mStdin = dup(STDIN_FILENO);
+    // mStdout = dup(STDOUT_FILENO);
+    // mStderr = dup(STDERR_FILENO);
+    // dup2(inFd, STDIN_FILENO);
+    // dup2(outFd, STDOUT_FILENO);
+    // dup2(errFd, STDERR_FILENO);
 }
 
 ShellEnv::~ShellEnv()
 {
-    dup2(mStdin, STDIN_FILENO);
-    dup2(mStdout, STDOUT_FILENO);
-    dup2(mStderr, STDERR_FILENO);
-    close(mInFd);
-    close(mOutFd);
-    close(mErrFd);
+    // dup2(mStdin, STDIN_FILENO);
+    // dup2(mStdout, STDOUT_FILENO);
+    // dup2(mStderr, STDERR_FILENO);
+    // close(mInFd);
+    // close(mOutFd);
+    // close(mErrFd);
     SPR_LOGD("Exit shell environment");
 }
 
-void ShellEnv::Init()
+int ShellEnv::Execute(const std::string& cmd)
 {
-    SPR_LOGD("Enter shell environment, pid = %d std = %d %d %d", getpid(), mInFd, mOutFd, mErrFd);
-    execlp("bash", "bash", "-i", nullptr);
-    exit(EXIT_FAILURE);
+    size_t pos = cmd.find(' ');
+    std::string cmdName = cmd.substr(0, pos);
+    std::vector<std::string> tmpArgs = GeneralUtils::Split(cmd, ' ');
+    char* args[tmpArgs.size() + 1];
+    args[tmpArgs.size()] = nullptr;
+    for (size_t i = 0; i < tmpArgs.size(); i++) {
+        args[i] = const_cast<char*>(tmpArgs[i].c_str());
+    }
 
-    // while(1) {
-    //     char cmd[100] = {0};
-    //     int size = read(mInFd, cmd, sizeof(cmd));
-    //     if (size == -1) {
-    //         SPR_LOGE("Read %d cmd failed, %s", mInFd, strerror(errno));
-    //     }
-    //     SPR_LOGD("Read cmd: %s, %d", cmd, size);
-    //     // size = write(mOutFd, "ack", 3);
-    //     // if (size == -1) {
-    //     //     SPR_LOGE("Write %d cmd failed, %s", mOutFd, strerror(errno));
-    //     // }
-    //     sleep(1);
-    // }
+    pid_t pid = fork();
+    if (pid == 0) {
+        int rc = execvp(cmdName.c_str(), args);
+        if (rc < 0) {
+            SPR_LOGE("execlp failed: %s\n", strerror(errno));
+        }
+    } else {
+        SPR_LOGD("ppid = %d, cpid = %d cmd: %s\n", getpid(), pid, cmd.c_str());
+    }
+
+    return pid;
 }

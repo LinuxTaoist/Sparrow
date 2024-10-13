@@ -19,6 +19,7 @@
 #include <random>
 #include <chrono>
 #include <random>
+#include <sstream>
 #include <stdarg.h>
 #include <signal.h>
 #include "GeneralUtils.h"
@@ -136,6 +137,16 @@ std::string GetCurTimeStr()
             localTime->tm_hour, localTime->tm_min, localTime->tm_sec, milliseconds);
 
     return std::string(buffer);
+}
+
+std::vector<std::string> Split(const std::string& str, char delimiter) {
+    std::vector<std::string> tokens;
+    std::stringstream ss(str);
+    std::string token;
+    while (std::getline(ss, token, delimiter)) {
+        tokens.push_back(token);
+    }
+    return tokens;
 }
 
 std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter)

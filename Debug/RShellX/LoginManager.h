@@ -21,6 +21,7 @@
 
 #include <list>
 #include <memory>
+#include <string>
 #include <sys/types.h>
 #include <PPipe.h>
 #include <PSocket.h>
@@ -37,15 +38,19 @@ public:
     int ConnectLoop();
 
 private:
-    int SetStdioCloexec();
+    int RegisterSignal();
     int ListenPipeEvent(int pipeFd);
+    int ExecuteCmd(std::string& cmdBytes);
     // int Login(const char* username, const char* password);
     // int Logout();
 
 private:
     bool mIsLogin;
     pid_t mCurPid;
-    pid_t mShellPid;
+    static pid_t mShellPid;
+    int mStdin;
+    int mStdout;
+    int mStderr;
     int mInPipe[2];
     int mOutPipe[2];
     std::shared_ptr<PPipe> mPipePtr;

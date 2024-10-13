@@ -37,11 +37,15 @@ using namespace std;
 #define SPR_LOGD(fmt, args...) LOGD("RShellLoginM", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("RShellLoginM", fmt, ##args)
 
+pid_t LoginManager::mShellPid = -1;
+
 LoginManager::LoginManager()
 {
     mIsLogin = false;
     mCurPid = getpid();
-    mShellPid = -1;
+    mStdin = dup(STDIN_FILENO);
+    mStdout = dup(STDOUT_FILENO);
+    mStderr = dup(STDERR_FILENO);
     int rc1 = pipe(mInPipe);
     if (rc1 != 0) {
         SPR_LOGE("pipe error: %s", strerror(errno));
@@ -58,6 +62,9 @@ LoginManager::~LoginManager()
         kill(mShellPid, SIGKILL);
         mShellPid = -1;
     }
+    dup2(mStdin, STDIN_FILENO);
+    dup2(mStdout, STDOUT_FILENO);
+    dup2(mStderr, STDERR_FILENO);
     close(mInPipe[0]);
     close(mInPipe[1]);
     close(mOutPipe[0]);
@@ -68,20 +75,6 @@ LoginManager* LoginManager::GetInstance()
 {
     static LoginManager instance;
     return &instance;
-}
-
-int LoginManager::SetStdioCloexec()
-{
-    // Set FD_CLOEXEC flag on standard file descriptors (0, 1, 2) to prevent
-    // inheritance by child processes.
-    // for (int fd = 0; fd <= 2; fd++) {
-    //     int flags = fcntl(fd, F_GETFD);
-    //     if (flags == -1) {
-    //         continue;
-    //     }
-    //     fcntl(fd, F_SETFD, flags | FD_CLOEXEC);
-    // }
-    return 0;
 }
 
 int LoginManager::ListenPipeEvent(int pipeFd)
@@ -104,19 +97,63 @@ int LoginManager::ListenPipeEvent(int pipeFd)
     return 0;
 }
 
+int LoginManager::RegisterSignal()
+{
+    signal(SIGCHLD, [](int) {
+        pid_t pid;
+        int status;
+        while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+            mShellPid = -1;
+            SPR_LOGD("Shell [%d] exit!\n", pid);
+        }
+    });
+    return 0;
+}
+
 int LoginManager::Init()
 {
-    SetStdioCloexec();
+    RegisterSignal();
     ListenPipeEvent(mOutPipe[0]);
+    return 0;
+}
 
-    // fork a child process to run shell
-    mShellPid = fork();
-    SPR_LOGD("fork shellPid = %d\n", mShellPid);
-    if (mShellPid == 0) {
-        ShellEnv shellEnv(mInPipe[0], mOutPipe[1], mOutPipe[1]);
-        shellEnv.Init();
+int LoginManager::ExecuteCmd(string& cmdBytes)
+{
+    cmdBytes.erase(std::find_if(cmdBytes.rbegin(), cmdBytes.rend(), [](unsigned char ch) {
+        return ch != '\r' && ch != '\n';
+    }).base(), cmdBytes.end());
+
+    if (cmdBytes == "Quit" || cmdBytes == "Ctrl C" || cmdBytes == "Ctrl Q") {
+        if (mShellPid == -1 || mShellPid == 0) {
+            SPR_LOGD("shell not running");
+            return 0;
+        }
+
+        SPR_LOGD("# EXIT shell %d\n", mShellPid);
+        kill(mShellPid, SIGKILL);
+        mShellPid = -1;
+        return 0;
+    } else if (cmdBytes == "Quit All") {
+        SPR_LOGD("# EXIT all\n");
+        if (mShellPid > 0) {
+            kill(mShellPid, SIGKILL);
+        }
+        exit(EXIT_SUCCESS);
+        return 0;
     }
 
+    // 上一个命令未执行完，输入作为参数传入上一个命令
+    if (mShellPid > 0) {
+        SPR_LOGD("Last shell %d is running, send [%s] as parameter\n", mShellPid, cmdBytes.c_str());
+        // int rc = write(mInPipe[1], cmdBytes.c_str(), cmdBytes.size());
+        // if (rc > 0) {
+        //     SPR_LOGD("# SEND [%d]> %s\n", mInPipe[1], cmdBytes.c_str());
+        // }
+        return 0;
+    }
+
+    ShellEnv shellEnv(mInPipe[0], mOutPipe[1], mOutPipe[1]);
+    mShellPid = shellEnv.Execute(cmdBytes);
     return 0;
 }
 
@@ -137,10 +174,6 @@ int LoginManager::BuildConnectAsTcpServer(short port)
                 return;
             }
 
-            // Mimics the input display format of a remote terminal session.
-            // Example:
-            // # pwd
-            // /tmp/Release/Bin
             std::string rBuf;
             int rc = pCliObj->Read(sock, rBuf);
             if (rc <= 0) {
@@ -151,39 +184,16 @@ int LoginManager::BuildConnectAsTcpServer(short port)
                 return;
             }
 
-            SPR_LOGD("# RECV [%d]> %s\n", sock, rBuf.c_str());
-            std::string tmpCmd = rBuf;
-            tmpCmd.erase(std::find_if(tmpCmd.rbegin(), tmpCmd.rend(), [](unsigned char ch) {
-                return ch != '\r' && ch != '\n';
-            }).base(), tmpCmd.end());
-
-            if (tmpCmd == "exit" || tmpCmd == "Ctrl C" || tmpCmd == "Ctrl Q") {
-                if (mShellPid == -1) {
-                    SPR_LOGD("shell not running");
-                    return;
-                }
-
-                SPR_LOGD("# EXIT shell %d\n", mShellPid);
-                kill(mShellPid, SIGKILL);
-                wait(nullptr);
-                mShellPid = -1;
-            } else if (tmpCmd == "exit all") {
-                SPR_LOGD("# EXIT all shell\n");
-                kill(mShellPid, SIGKILL);
-                wait(nullptr);
-                exit(EXIT_SUCCESS);
-            } else {
-                SPR_LOGD("# PIPE [%d]> %s\n", mInPipe[1], tmpCmd.c_str());
-                int wsize = write(mInPipe[1], rBuf.c_str(), rBuf.size());
-                if (wsize == -1) {
-                    SPR_LOGE("write error: %s\n", strerror(errno));
-                }
-            }
+            // SPR_LOGD("# RECV [%d]> %s shellpid = %d\n", sock, rBuf.c_str(), mShellPid);
+            ExecuteCmd(rBuf);
         });
 
         tcpClient->AsTcpClient();
         pEpoll->AddPoll(tcpClient.get());
         mTcpClients.push_back(tcpClient);
+        dup2(mTcpSrvPtr->GetEpollFd(), STDIN_FILENO);
+        dup2(tcpClient->GetEpollFd(), STDOUT_FILENO);
+        dup2(tcpClient->GetEpollFd(), STDERR_FILENO);
     });
 
     mTcpSrvPtr->AsTcpServer(port, 5);

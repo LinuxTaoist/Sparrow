@@ -19,13 +19,15 @@
 #ifndef __SHELL_ENVIRONMET_H__
 #define __SHELL_ENVIRONMET_H__
 
+#include <string>
+
 class ShellEnv
 {
 public:
     explicit ShellEnv(int inFd, int outFd, int errFd);
     ~ShellEnv();
 
-    void Init();
+    int Execute(const std::string& cmd);
 
 private:
     int mInFd;
