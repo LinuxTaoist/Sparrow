@@ -125,16 +125,16 @@ int LoginManager::ExecuteCmd(string& cmdBytes)
 
     if (cmdBytes == "Quit" || cmdBytes == "Ctrl C" || cmdBytes == "Ctrl Q") {
         if (mShellPid == -1 || mShellPid == 0) {
-            SPR_LOGD("shell not running");
+            SPR_LOGD("Shell not running!\n");
             return 0;
         }
 
-        SPR_LOGD("# EXIT shell %d\n", mShellPid);
+        SPR_LOGD("Exit shell %d\n", mShellPid);
         kill(mShellPid, SIGKILL);
         mShellPid = -1;
         return 0;
-    } else if (cmdBytes == "Quit All") {
-        SPR_LOGD("# EXIT all\n");
+    } else if (cmdBytes == "Quit all") {
+        SPR_LOGD("Exit all\n");
         if (mShellPid > 0) {
             kill(mShellPid, SIGKILL);
         }

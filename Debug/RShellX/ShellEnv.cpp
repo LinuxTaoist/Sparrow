@@ -69,6 +69,7 @@ int ShellEnv::Execute(const std::string& cmd)
         if (rc < 0) {
             SPR_LOGE("execlp failed: %s\n", strerror(errno));
         }
+        _exit(EXIT_FAILURE);
     } else {
         SPR_LOGD("ppid = %d, cpid = %d cmd: %s\n", getpid(), pid, cmd.c_str());
     }
