@@ -117,6 +117,49 @@ int LoginManager::Init()
     return 0;
 }
 
+int LoginManager::Usage()
+{
+    WriteStdin("----------------  rShellx  -----------------\n");
+    WriteStdin("Usage:\n");
+    WriteStdin("Quit    : exit current shell fork\n");
+    WriteStdin("Quit all: exit rshellx\n");
+    WriteStdin("Help    : show help\n");
+     WriteStdin("-------------------------------------------\n");
+    return 0;
+}
+
+int LoginManager::ExitShell()
+{
+    if (mShellPid == -1 || mShellPid == 0) {
+        SPR_LOGD("Shell not running!\n");
+        return 0;
+    }
+
+    SPR_LOGD("Exit shell %d\n", mShellPid);
+    kill(mShellPid, SIGKILL);
+    mShellPid = -1;
+    return 0;
+}
+
+int LoginManager::ExitAll()
+{
+    SPR_LOGD("Exit all\n");
+    if (mShellPid > 0) {
+        kill(mShellPid, SIGKILL);
+    }
+    exit(EXIT_SUCCESS);
+    return 0;
+}
+
+int LoginManager::WriteStdin(const std::string& buf)
+{
+    int rc = write(STDOUT_FILENO, buf.c_str(), buf.size());
+    if (rc < 0) {
+        SPR_LOGE("Write stdin failed! %s", strerror(errno));
+    }
+    return 0;
+}
+
 int LoginManager::ExecuteCmd(string& cmdBytes)
 {
     cmdBytes.erase(std::find_if(cmdBytes.rbegin(), cmdBytes.rend(), [](unsigned char ch) {
@@ -124,22 +167,11 @@ int LoginManager::ExecuteCmd(string& cmdBytes)
     }).base(), cmdBytes.end());
 
     if (cmdBytes == "Quit" || cmdBytes == "Ctrl C" || cmdBytes == "Ctrl Q") {
-        if (mShellPid == -1 || mShellPid == 0) {
-            SPR_LOGD("Shell not running!\n");
-            return 0;
-        }
-
-        SPR_LOGD("Exit shell %d\n", mShellPid);
-        kill(mShellPid, SIGKILL);
-        mShellPid = -1;
-        return 0;
+        return ExitShell();
     } else if (cmdBytes == "Quit all") {
-        SPR_LOGD("Exit all\n");
-        if (mShellPid > 0) {
-            kill(mShellPid, SIGKILL);
-        }
-        exit(EXIT_SUCCESS);
-        return 0;
+        return ExitAll();
+    } else if (cmdBytes == "Help" || cmdBytes == "help" || cmdBytes == "?") {
+        return Usage();
     }
 
     // 上一个命令未执行完，输入作为参数传入上一个命令

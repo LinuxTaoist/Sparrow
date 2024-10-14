@@ -38,6 +38,10 @@ public:
     int ConnectLoop();
 
 private:
+    int Usage();
+    int ExitShell();
+    int ExitAll();
+    int WriteStdin(const std::string& buf);
     int RegisterSignal();
     int ListenPipeEvent(int pipeFd);
     int ExecuteCmd(std::string& cmdBytes);
