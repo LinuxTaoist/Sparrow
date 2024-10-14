@@ -119,12 +119,12 @@ int LoginManager::Init()
 
 int LoginManager::Usage()
 {
-    WriteStdin("----------------  rShellx  -----------------\n");
+    WriteStdin("-----------------  RShellX  -----------------\n");
     WriteStdin("Usage:\n");
     WriteStdin("Quit    : exit current shell fork\n");
-    WriteStdin("Quit all: exit rshellx\n");
+    WriteStdin("Quit all: exit RShellX\n");
     WriteStdin("Help    : show help\n");
-     WriteStdin("-------------------------------------------\n");
+    WriteStdin("---------------------------------------------\n");
     return 0;
 }
 
@@ -226,6 +226,11 @@ int LoginManager::BuildConnectAsTcpServer(short port)
         dup2(mTcpSrvPtr->GetEpollFd(), STDIN_FILENO);
         dup2(tcpClient->GetEpollFd(), STDOUT_FILENO);
         dup2(tcpClient->GetEpollFd(), STDERR_FILENO);
+
+        const string welcomes = "Welcome to RShellX! >_<\n";
+        if (write(STDOUT_FILENO, welcomes.c_str(), welcomes.size()) < 0) {
+            SPR_LOGE("# Write welcome failed! %s", strerror(errno));
+        }
     });
 
     mTcpSrvPtr->AsTcpServer(port, 5);
