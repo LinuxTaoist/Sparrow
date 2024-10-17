@@ -23,7 +23,10 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <memory>
+#include "PFile.h"
 #include "SprObserver.h"
+#include "SprDirWatch.h"
 #include "CommonTypeDefs.h"
 
 class SprSystem
@@ -45,6 +48,7 @@ public:
 private:
     SprSystem();
     void InitEnv();
+    void InitWatchDir();
     void InitMsgQueueLimit();
     void LoadReleaseInformation();
     void LoadPlugins();
@@ -53,6 +57,9 @@ private:
     int EnvReady(const std::string& srvName);
 
 private:
+    int mInotifyFd;
+    SprDirWatch mDirWatch;
+    std::shared_ptr<PFile> mFilePtr;
     std::vector<void*> mPluginHandles;
     std::vector<PluginEntryFunc> mPluginEntries;
     std::map<int, SprObserver*> mModules;

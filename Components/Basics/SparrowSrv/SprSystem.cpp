@@ -34,6 +34,7 @@
 #include "CoreTypeDefs.h"
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
+#include "EpollEventHandler.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -47,6 +48,7 @@ using namespace InternalDefs;
 
 SprSystem::SprSystem()
 {
+    mInotifyFd = -1;
 }
 
 SprSystem::~SprSystem()
@@ -67,6 +69,48 @@ void SprSystem::InitEnv()
 
     // write release information
     LoadReleaseInformation();
+}
+
+void SprSystem::InitWatchDir()
+{
+    mInotifyFd = mDirWatch.GetInotifyFd();
+    std::string path = DEFAULT_PLUGIN_LIBRARY_PATH;
+    if (access(DEFAULT_PLUGIN_LIBRARY_PATH, F_OK) == -1) {
+        GetDefaultLibraryPath(path);
+        SPR_LOGW("%s not exist, changed path %s\n", DEFAULT_PLUGIN_LIBRARY_PATH, path.c_str());
+    }
+
+    mDirWatch.AddDirWatch(path.c_str());
+    mFilePtr = std::make_shared<PFile>(mInotifyFd, [&](int fd, void *arg) {
+        const int size = 100;
+        char buffer[size];
+        ssize_t numRead = read(fd, buffer, size);
+        if (numRead == -1) {
+            SPR_LOGE("read %d failed! (%s)\n", fd, strerror(errno));
+            return;
+        }
+
+        int offset = 0;
+        while (offset < numRead) {
+            struct inotify_event* pEvent = reinterpret_cast<struct inotify_event*>(&buffer[offset]);
+            if (!pEvent) {
+                SPR_LOGE("pEvent is nullptr!\n");
+                return;
+            }
+
+            if (pEvent->len > 0) {
+                if (pEvent->mask & IN_CREATE) {
+                    SPR_LOGD("File %s is created\n", pEvent->name);
+                }
+                if (pEvent->mask & IN_DELETE) {
+                    SPR_LOGD("File %s is deleted\n", pEvent->name);
+                }
+            }
+            offset += sizeof(struct inotify_event) + pEvent->len;
+        }
+    });
+
+    EpollEventHandler::GetInstance()->AddPoll(mFilePtr.get());
 }
 
 void SprSystem::InitMsgQueueLimit()
@@ -111,14 +155,11 @@ void SprSystem::LoadReleaseInformation()
     releaseInfo += "Module Config  : " + moduleConfig + "\n";
 
     std::ofstream file(LOCAL_PATH_VERSION);
-    if (file)
-    {
+    if (file) {
         SPR_LOGD("Load system version information to %s\n", LOCAL_PATH_VERSION);
         file << releaseInfo;
         file.close();
-    }
-    else
-    {
+    } else {
         SPR_LOGE("Open %s fail!\n", LOCAL_PATH_VERSION);
     }
 }
@@ -204,6 +245,7 @@ void SprSystem::Init()
 
     InitEnv();
     LoadPlugins();  // load plugin libraries
+    InitWatchDir();
 
     TTP(9, "systemTimerPtr->Initialize()");
     shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");

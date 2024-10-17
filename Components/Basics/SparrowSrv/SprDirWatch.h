@@ -2,35 +2,42 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : PPipe.h
+ *  @file       : SprSystem.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/10/10
+ *  @date       : 2024/10/17
  *
+ *  System initialization file
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/10 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/10/17 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __PPIPE_H__
-#define __PPIPE_H__
+#ifndef __SPR_DIR_WATCH_H__
+#define __SPR_DIR_WATCH_H__
 
+#include <set>
 #include <string>
-#include <functional>
-#include "IEpollEvent.h"
+#include <sys/inotify.h>
 
-class PPipe : public IEpollEvent
+class SprDirWatch
 {
 public:
-    PPipe(int fd, std::function<void(int, std::string, void*)> cb = nullptr, void *arg = nullptr);
-    virtual ~PPipe();
-    void* EpollEvent(int fd, EpollType eType, void* arg) override;
+    SprDirWatch();
+    ~SprDirWatch();
+
+    int GetInotifyFd() const { return mInotifyFd; }
+    int AddDirWatch(const std::string& path);
+    int RemoveDirWatch(int fd);
 
 private:
-    std::function<void(int, std::string, void*)> mCb;
+    int mInotifyFd;
+    std::set<int> mWatchFds;
 };
-#endif // __PPIPE_H__
+
+#endif // __SPR_DIR_WATCH_H__
+
