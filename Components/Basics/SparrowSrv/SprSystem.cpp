@@ -49,6 +49,7 @@ using namespace InternalDefs;
 SprSystem::SprSystem()
 {
     mInotifyFd = -1;
+    mDefaultLibPath = GetDefaultLibraryPath();
 }
 
 SprSystem::~SprSystem()
@@ -74,13 +75,7 @@ void SprSystem::InitEnv()
 void SprSystem::InitWatchDir()
 {
     mInotifyFd = mDirWatch.GetInotifyFd();
-    std::string path = DEFAULT_PLUGIN_LIBRARY_PATH;
-    if (access(DEFAULT_PLUGIN_LIBRARY_PATH, F_OK) == -1) {
-        GetDefaultLibraryPath(path);
-        SPR_LOGW("%s not exist, changed path %s\n", DEFAULT_PLUGIN_LIBRARY_PATH, path.c_str());
-    }
-
-    mDirWatch.AddDirWatch(path.c_str());
+    mDirWatch.AddDirWatch(mDefaultLibPath.c_str());
     mFilePtr = std::make_shared<PFile>(mInotifyFd, [&](int fd, void *arg) {
         const int size = 100;
         char buffer[size];
@@ -164,28 +159,32 @@ void SprSystem::LoadReleaseInformation()
     }
 }
 
-void SprSystem::GetDefaultLibraryPath(std::string& path)
-{
-    char curPath[100] = {};
-    if (getcwd(curPath, sizeof(curPath)) == nullptr) {
-        SPR_LOGE("Get current path fail! (%s)\n", strerror(errno));
-        return;
-    }
-
-    path = curPath + std::string("/../Lib");
-}
-
-void SprSystem::LoadPlugins()
+std::string SprSystem::GetDefaultLibraryPath()
 {
     std::string path = DEFAULT_PLUGIN_LIBRARY_PATH;
     if (access(DEFAULT_PLUGIN_LIBRARY_PATH, F_OK) == -1) {
-        GetDefaultLibraryPath(path);
         SPR_LOGW("%s not exist, changed path %s\n", DEFAULT_PLUGIN_LIBRARY_PATH, path.c_str());
+        char curPath[100] = {};
+        if (getcwd(curPath, sizeof(curPath)) == nullptr) {
+            SPR_LOGE("Get current path fail! (%s)\n", strerror(errno));
+            return "";
+        }
+        path = curPath + std::string("/../Lib");
     }
 
-    DIR* dir = opendir(path.c_str());
+    return path;
+}
+
+void SprSystem::LoadPlugin(const std::string& path)
+{
+
+}
+
+void SprSystem::LoadAllPlugins()
+{
+    DIR* dir = opendir(mDefaultLibPath.c_str());
     if (dir == nullptr) {
-        SPR_LOGE("Open %s fail! (%s)\n", path, strerror(errno));
+        SPR_LOGE("Open %s fail! (%s)\n", mDefaultLibPath.c_str(), strerror(errno));
         return;
     }
 
@@ -244,7 +243,7 @@ void SprSystem::Init()
     SPR_LOGD("=============================================\n");
 
     InitEnv();
-    LoadPlugins();  // load plugin libraries
+    LoadAllPlugins();  // load plugin libraries
     InitWatchDir();
 
     TTP(9, "systemTimerPtr->Initialize()");

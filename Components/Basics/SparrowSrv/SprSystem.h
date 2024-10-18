@@ -51,14 +51,16 @@ private:
     void InitWatchDir();
     void InitMsgQueueLimit();
     void LoadReleaseInformation();
-    void LoadPlugins();
+    void LoadPlugin(const std::string& path);
+    void LoadAllPlugins();
     void ReleasePlugins();
-    void GetDefaultLibraryPath(std::string& path);
+    std::string GetDefaultLibraryPath();
     int EnvReady(const std::string& srvName);
 
 private:
     int mInotifyFd;
     SprDirWatch mDirWatch;
+    std::string mDefaultLibPath;
     std::shared_ptr<PFile> mFilePtr;
     std::vector<void*> mPluginHandles;
     std::vector<PluginEntryFunc> mPluginEntries;
