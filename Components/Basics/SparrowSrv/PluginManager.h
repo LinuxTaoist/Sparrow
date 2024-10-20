@@ -24,6 +24,7 @@
 #include <string>
 #include <memory>
 #include "PFile.h"
+#include "SprContext.h"
 #include "SprDirWatch.h"
 
 class PluginManager
@@ -33,19 +34,23 @@ public:
     ~PluginManager();
 
     void Init();
-    void PluginHotInsert(const std::string& path);
-    void PluginHotRemove(const std::string& path);
 
 private:
+    void InitWatchDir();
     void LoadPlugin(const std::string& path);
+    void UnloadPlugin(const std::string& path);
     void LoadAllPlugins();
+    void UnloadAllPlugins();
+    std::string GetDefaultLibraryPath();
 
 private:
     int mInotifyFd;
+    SprContext mContext;
     SprDirWatch mDirWatch;
     std::string mDefaultLibPath;
     std::shared_ptr<PFile> mFilePtr;
     std::map<std::string, void*> mPluginHandles;
+    std::map<int, SprObserver*> mPluginModules;
 };
 
 #endif // __PLUGIN_MANAGER_H__

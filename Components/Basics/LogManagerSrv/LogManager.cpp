@@ -35,11 +35,10 @@
 using namespace std;
 using namespace GeneralUtils;
 
-#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %4d LOGM   D: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGI(fmt, args...) printf("%s %4d LOGM   I: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %4d LOGM   W: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %4d LOGM   E: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %6d %12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %6d %12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
 
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_FRAME_LEN_LIMIT     1024

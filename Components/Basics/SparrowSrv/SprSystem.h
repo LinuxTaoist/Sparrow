@@ -25,7 +25,7 @@
 #include <memory>
 #include "PFile.h"
 #include "SprObserver.h"
-#include "SprDirWatch.h"
+#include "PluginManager.h"
 #include "CommonTypeDefs.h"
 
 class SprSystem
@@ -47,23 +47,13 @@ public:
 private:
     SprSystem();
     void InitEnv();
-    void InitWatchDir();
     void InitMsgQueueLimit();
     void LoadReleaseInformation();
-    void LoadPlugin(const std::string& path);
-    void UnloadPlugin(const std::string& path);
-    void LoadAllPlugins();
-    void ReleasePlugins();
-    std::string GetDefaultLibraryPath();
     int EnvReady(const std::string& srvName);
 
 private:
-    int mInotifyFd;
-    SprDirWatch mDirWatch;
-    std::string mDefaultLibPath;
-    std::shared_ptr<PFile> mFilePtr;
-    std::vector<void*> mPluginHandles;
-    std::map<int, SprObserver*> mModules;
+    PluginManager mPluginMgr;
+    // std::map<int, SprObserver*> mModules;
 };
 
 #endif // __SPR_SYSTEM_H__

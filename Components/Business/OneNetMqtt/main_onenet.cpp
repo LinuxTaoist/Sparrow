@@ -36,6 +36,8 @@ extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& 
     auto pOneDrv = new OneNetDriver(MODULE_ONENET_DRIVER, "OneDrv");
     auto pOneMgr = new OneNetManager(MODULE_ONENET_MANAGER, "OneMgr");
 
+    pOneDrv->Initialize();
+    pOneMgr->Initialize();
     observers[MODULE_ONENET_DRIVER] = pOneDrv;
     observers[MODULE_ONENET_MANAGER] = pOneMgr;
     SPR_LOGD("Load plug-in OneNet modules\n");

@@ -42,6 +42,7 @@
 class SprObserver;  // forward declaration
 class SprContext;   // forward declaration
 typedef void(*PluginEntryFunc) (std::map<int, SprObserver*>& modules, SprContext& ctx);
+typedef void(*PluginExitFunc) (std::map<int, SprObserver*>& modules, SprContext& ctx);
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for core commponents

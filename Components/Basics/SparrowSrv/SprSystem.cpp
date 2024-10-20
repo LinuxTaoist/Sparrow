@@ -47,13 +47,10 @@ using namespace InternalDefs;
 
 SprSystem::SprSystem()
 {
-    mInotifyFd = -1;
-    mDefaultLibPath = GetDefaultLibraryPath();
 }
 
 SprSystem::~SprSystem()
 {
-    ReleasePlugins();
 }
 
 SprSystem* SprSystem::GetInstance()
@@ -69,42 +66,6 @@ void SprSystem::InitEnv()
 
     // write release information
     LoadReleaseInformation();
-}
-
-void SprSystem::InitWatchDir()
-{
-    mInotifyFd = mDirWatch.GetInotifyFd();
-    mDirWatch.AddDirWatch(mDefaultLibPath.c_str());
-    mFilePtr = std::make_shared<PFile>(mInotifyFd, [&](int fd, void *arg) {
-        const int size = 100;
-        char buffer[size];
-        ssize_t numRead = read(fd, buffer, size);
-        if (numRead == -1) {
-            SPR_LOGE("read %d failed! (%s)\n", fd, strerror(errno));
-            return;
-        }
-
-        int offset = 0;
-        while (offset < numRead) {
-            struct inotify_event* pEvent = reinterpret_cast<struct inotify_event*>(&buffer[offset]);
-            if (!pEvent) {
-                SPR_LOGE("pEvent is nullptr!\n");
-                return;
-            }
-
-            if (pEvent->len > 0) {
-                if (pEvent->mask & IN_CREATE) {
-                    SPR_LOGD("File %s is created\n", pEvent->name);
-                }
-                if (pEvent->mask & IN_DELETE) {
-                    SPR_LOGD("File %s is deleted\n", pEvent->name);
-                }
-            }
-            offset += sizeof(struct inotify_event) + pEvent->len;
-        }
-    });
-
-    EpollEventHandler::GetInstance()->AddPoll(mFilePtr.get());
 }
 
 void SprSystem::InitMsgQueueLimit()
@@ -158,93 +119,6 @@ void SprSystem::LoadReleaseInformation()
     }
 }
 
-std::string SprSystem::GetDefaultLibraryPath()
-{
-    std::string path = DEFAULT_PLUGIN_LIBRARY_PATH;
-    if (access(DEFAULT_PLUGIN_LIBRARY_PATH, F_OK) == -1) {
-        SPR_LOGW("%s not exist, changed path %s\n", DEFAULT_PLUGIN_LIBRARY_PATH, path.c_str());
-        char curPath[100] = {};
-        if (getcwd(curPath, sizeof(curPath)) == nullptr) {
-            SPR_LOGE("Get current path fail! (%s)\n", strerror(errno));
-            return "";
-        }
-        path = curPath + std::string("/../Lib");
-    }
-
-    return path;
-}
-
-void SprSystem::LoadPlugin(const std::string& path)
-{
-    if (strncmp(path.c_str(), DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
-        return;
-    }
-
-    void* pDlHandler = dlopen(path.c_str(), RTLD_NOW);
-    if (!pDlHandler) {
-        SPR_LOGE("Load plugin %s fail! (%s)\n", path.c_str(), dlerror() ? dlerror() : "unknown error");
-        return;
-    }
-
-    auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC);
-    if (!pEntry) {
-        SPR_LOGE("Find %s fail in %s! (%s)\n", DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC, path.c_str(), dlerror() ? dlerror() : "unknown error");
-        dlclose(pDlHandler);
-        return;
-    }
-
-    mPluginHandles.push_back(pDlHandler);
-    SPR_LOGD("Load plugin %s success!\n", path.c_str());
-}
-
-void SprSystem::UnloadPlugin(const std::string& path) {
-    if (strncmp(path.c_str(), DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
-        return;
-    }
-
-    void* pDlHandler = dlopen(path.c_str(), RTLD_NOW);
-    if (!pDlHandler) {
-        SPR_LOGE("Load plugin %s fail! (%s)\n", path.c_str(), dlerror() ? dlerror() : "unknown error");
-        return;
-    }
-
-    auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, DEFAULT_PLUGIN_LIBRARY_EXIT_FUNC);
-    if (!pEntry) {
-        SPR_LOGE("Find %s fail in %s! (%s)\n", DEFAULT_PLUGIN_LIBRARY_EXIT_FUNC, path.c_str(), dlerror() ? dlerror() : "unknown error");
-        dlclose(pDlHandler);
-        return;
-    }
-
-    mPluginHandles.erase(std::remove(mPluginHandles.begin(), mPluginHandles.end(), pDlHandler), mPluginHandles.end());
-    SPR_LOGD("Unload plugin %s success!\n", path.c_str());
-}
-
-void SprSystem::LoadAllPlugins()
-{
-    DIR* dir = opendir(mDefaultLibPath.c_str());
-    if (dir == nullptr) {
-        SPR_LOGE("Open %s fail! (%s)\n", mDefaultLibPath.c_str(), strerror(errno));
-        return;
-    }
-
-    // loop: find all plugins library files in path
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
-        LoadPlugin(entry->d_name);
-    }
-
-    closedir(dir);
-}
-
-void SprSystem::ReleasePlugins()
-{
-    for (auto& mPluginHandle : mPluginHandles) {
-        dlclose(mPluginHandle);
-    }
-
-    mPluginHandles.clear();
-}
-
 int SprSystem::EnvReady(const std::string& srvName)
 {
     std::string node = "/tmp/" + srvName;
@@ -263,7 +137,6 @@ void SprSystem::Init()
     SPR_LOGD("=============================================\n");
 
     InitEnv();
-    InitWatchDir();
 
     TTP(9, "systemTimerPtr->Initialize()");
     shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
@@ -272,17 +145,7 @@ void SprSystem::Init()
     TTP(10, "TimerManager->Initialize()");
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
 
-    LoadAllPlugins();  // load plugin libraries
-    // // excute plugin entry function
-    // SprContext ctx;
-    // for (auto& mPluginEntry : mPluginEntries) {
-    //     mPluginEntry(mModules, ctx);
-    // }
-
-    // // excute plug module initialize function
-    // for (auto& module : mModules) {
-    //     module.second->Initialize();
-    // }
-
+    SprContext ctx;
+    mPluginMgr.Init();
     EnvReady(SRV_NAME_SPARROW);
 }

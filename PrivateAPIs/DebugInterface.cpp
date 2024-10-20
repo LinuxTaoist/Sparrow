@@ -17,16 +17,21 @@
  *
  */
 #include <stdio.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
+#include "GeneralUtils.h"
 #include "BindInterface.h"
 #include "DebugInterface.h"
 
 using namespace InternalDefs;
+using namespace GeneralUtils;
 
-#define SPR_LOGD(fmt, args...) printf("%d IDebug D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%d IDebug W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d IDebug E: " fmt, __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IDebug", __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %6d %12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IDebug", __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %6d %12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IDebug", __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IDebug", __LINE__, ##args)
 
 static bool mEnable;
 std::shared_ptr<Parcel> pReqParcel = nullptr;
