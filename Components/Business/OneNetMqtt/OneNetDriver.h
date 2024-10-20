@@ -168,6 +168,7 @@ private:
 
 private:
     bool mEnableReconTimer;
+    int32_t mUnixPipeFd[2];
     std::string mSockBuffer;
     std::string mOneNetHost;
     uint16_t    mOneNetPort;

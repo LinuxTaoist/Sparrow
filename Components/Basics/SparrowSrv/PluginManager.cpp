@@ -33,7 +33,6 @@ using namespace InternalDefs;
 
 PluginManager::PluginManager()
 {
-    mInotifyFd = -1;
 }
 
 PluginManager::~PluginManager()
@@ -50,9 +49,8 @@ void PluginManager::Init()
 
 void PluginManager::InitWatchDir()
 {
-    mInotifyFd = mDirWatch.GetInotifyFd();
     mDirWatch.AddDirWatch(mDefaultLibPath.c_str());
-    mFilePtr = std::make_shared<PFile>(mInotifyFd, [&](int fd, void *arg) {
+    mFilePtr = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void *arg) {
         const int size = 100;
         char buffer[size];
         ssize_t numRead = read(fd, buffer, size);

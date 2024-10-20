@@ -44,7 +44,6 @@ private:
     std::string GetDefaultLibraryPath();
 
 private:
-    int mInotifyFd;
     SprContext mContext;
     SprDirWatch mDirWatch;
     std::string mDefaultLibPath;
