@@ -8,7 +8,6 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
  *
- *  System initialization file
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
@@ -52,6 +51,7 @@ private:
     void InitMsgQueueLimit();
     void LoadReleaseInformation();
     void LoadPlugin(const std::string& path);
+    void UnloadPlugin(const std::string& path);
     void LoadAllPlugins();
     void ReleasePlugins();
     std::string GetDefaultLibraryPath();
@@ -63,7 +63,6 @@ private:
     std::string mDefaultLibPath;
     std::shared_ptr<PFile> mFilePtr;
     std::vector<void*> mPluginHandles;
-    std::vector<PluginEntryFunc> mPluginEntries;
     std::map<int, SprObserver*> mModules;
 };
 

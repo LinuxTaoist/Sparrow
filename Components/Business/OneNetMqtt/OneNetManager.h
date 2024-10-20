@@ -79,13 +79,12 @@ struct OneNetDevInfo
 class OneNetManager : public SprObserverWithMQueue
 {
 public:
+    explicit OneNetManager(ModuleIDType id, const std::string& name);
     ~OneNetManager();
-    static OneNetManager* GetInstance(ModuleIDType id, const std::string& name);
 
     int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
-    explicit OneNetManager(ModuleIDType id, const std::string& name);
     int32_t Init() override;
 
     /* 初始化OneNet设备 */

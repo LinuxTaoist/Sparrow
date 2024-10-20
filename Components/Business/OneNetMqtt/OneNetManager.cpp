@@ -215,12 +215,6 @@ OneNetManager::~OneNetManager()
 {
 }
 
-OneNetManager* OneNetManager::GetInstance(ModuleIDType id, const std::string& name)
-{
-    static OneNetManager instance(id, name);
-    return &instance;
-}
-
 int32_t OneNetManager::Init()
 {
     SPR_LOGD("OneNetManager Init\n");

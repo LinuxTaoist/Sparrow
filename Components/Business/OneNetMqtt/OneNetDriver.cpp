@@ -308,12 +308,6 @@ OneNetDriver::~OneNetDriver()
 {
 }
 
-OneNetDriver* OneNetDriver::GetInstance(ModuleIDType id, const std::string& name)
-{
-    static OneNetDriver instance(id, name);
-    return &instance;
-}
-
 int32_t OneNetDriver::Init()
 {
     SPR_LOGD("OneNetDriver Init\n");

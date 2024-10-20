@@ -8,7 +8,6 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
  *
- *  System initialization file
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
@@ -177,7 +176,47 @@ std::string SprSystem::GetDefaultLibraryPath()
 
 void SprSystem::LoadPlugin(const std::string& path)
 {
+    if (strncmp(path.c_str(), DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
+        return;
+    }
 
+    void* pDlHandler = dlopen(path.c_str(), RTLD_NOW);
+    if (!pDlHandler) {
+        SPR_LOGE("Load plugin %s fail! (%s)\n", path.c_str(), dlerror() ? dlerror() : "unknown error");
+        return;
+    }
+
+    auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC);
+    if (!pEntry) {
+        SPR_LOGE("Find %s fail in %s! (%s)\n", DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC, path.c_str(), dlerror() ? dlerror() : "unknown error");
+        dlclose(pDlHandler);
+        return;
+    }
+
+    mPluginHandles.push_back(pDlHandler);
+    SPR_LOGD("Load plugin %s success!\n", path.c_str());
+}
+
+void SprSystem::UnloadPlugin(const std::string& path) {
+    if (strncmp(path.c_str(), DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
+        return;
+    }
+
+    void* pDlHandler = dlopen(path.c_str(), RTLD_NOW);
+    if (!pDlHandler) {
+        SPR_LOGE("Load plugin %s fail! (%s)\n", path.c_str(), dlerror() ? dlerror() : "unknown error");
+        return;
+    }
+
+    auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, DEFAULT_PLUGIN_LIBRARY_EXIT_FUNC);
+    if (!pEntry) {
+        SPR_LOGE("Find %s fail in %s! (%s)\n", DEFAULT_PLUGIN_LIBRARY_EXIT_FUNC, path.c_str(), dlerror() ? dlerror() : "unknown error");
+        dlclose(pDlHandler);
+        return;
+    }
+
+    mPluginHandles.erase(std::remove(mPluginHandles.begin(), mPluginHandles.end(), pDlHandler), mPluginHandles.end());
+    SPR_LOGD("Unload plugin %s success!\n", path.c_str());
 }
 
 void SprSystem::LoadAllPlugins()
@@ -191,26 +230,7 @@ void SprSystem::LoadAllPlugins()
     // loop: find all plugins library files in path
     struct dirent* entry;
     while ((entry = readdir(dir)) != NULL) {
-        if (strncmp(entry->d_name, DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
-            continue;
-        }
-
-        void* pDlHandler = dlopen(entry->d_name, RTLD_NOW);
-        if (!pDlHandler) {
-            SPR_LOGE("Load plugin %s fail! (%s)\n", entry->d_name, dlerror() ? dlerror() : "unknown error");
-            continue;
-        }
-
-        auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC);
-        if (!pEntry) {
-            SPR_LOGE("Find %s fail in %s! (%s)\n", DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC, entry->d_name, dlerror() ? dlerror() : "unknown error");
-            dlclose(pDlHandler);
-            continue;
-        }
-
-        mPluginHandles.push_back(pDlHandler);
-        mPluginEntries.push_back(pEntry);
-        SPR_LOGD("Load plugin %s success!\n", entry->d_name);
+        LoadPlugin(entry->d_name);
     }
 
     closedir(dir);
@@ -243,7 +263,6 @@ void SprSystem::Init()
     SPR_LOGD("=============================================\n");
 
     InitEnv();
-    LoadAllPlugins();  // load plugin libraries
     InitWatchDir();
 
     TTP(9, "systemTimerPtr->Initialize()");
@@ -253,16 +272,17 @@ void SprSystem::Init()
     TTP(10, "TimerManager->Initialize()");
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
 
-    // excute plugin entry function
-    SprContext ctx;
-    for (auto& mPluginEntry : mPluginEntries) {
-        mPluginEntry(mModules, ctx);
-    }
+    LoadAllPlugins();  // load plugin libraries
+    // // excute plugin entry function
+    // SprContext ctx;
+    // for (auto& mPluginEntry : mPluginEntries) {
+    //     mPluginEntry(mModules, ctx);
+    // }
 
-    // excute plug module initialize function
-    for (auto& module : mModules) {
-        module.second->Initialize();
-    }
+    // // excute plug module initialize function
+    // for (auto& module : mModules) {
+    //     module.second->Initialize();
+    // }
 
     EnvReady(SRV_NAME_SPARROW);
 }
