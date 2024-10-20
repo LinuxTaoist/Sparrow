@@ -49,7 +49,14 @@ void PluginManager::Init()
 
 void PluginManager::InitWatchDir()
 {
-    mDirWatch.AddDirWatch(mDefaultLibPath.c_str());
+    // Add a watch on the specified directory. The events to monitor include:
+    // - IN_CLOSE_WRITE: Triggered when a file is closed after being written.
+    // - IN_DELETE: Triggered when a file or directory is deleted.
+    // - IN_MOVED_TO: Triggered when a file or directory is moved to the specified directory.
+    // - IN_MOVED_FROM: Triggered when a file or directory is moved from the specified directory.
+    // Note: IN_CREATE is not used because it triggers immediately when a file is created,
+    // which may result in attempting to process the file before it is fully written and closed.
+    mDirWatch.AddDirWatch(mDefaultLibPath.c_str(), IN_CLOSE_WRITE | IN_MOVED_TO | IN_MOVED_FROM | IN_DELETE);
     mFilePtr = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void *arg) {
         const int size = 100;
         char buffer[size];
@@ -68,11 +75,11 @@ void PluginManager::InitWatchDir()
             }
 
             if (pEvent->len > 0) {
-                if (pEvent->mask & IN_CREATE) {
+                if (pEvent->mask & IN_CLOSE_WRITE || pEvent->mask & IN_MOVED_TO) {
                     SPR_LOGD("File %s is created\n", pEvent->name);
                     LoadPlugin(pEvent->name);
                 }
-                if (pEvent->mask & IN_DELETE) {
+                if (pEvent->mask & IN_DELETE || pEvent->mask & IN_MOVED_FROM) {
                     SPR_LOGD("File %s is deleted\n", pEvent->name);
                     UnloadPlugin(pEvent->name);
                 }

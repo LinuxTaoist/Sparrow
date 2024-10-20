@@ -31,7 +31,7 @@ public:
     ~SprDirWatch();
 
     int GetInotifyFd() const { return mInotifyFd; }
-    int AddDirWatch(const std::string& path);
+    int AddDirWatch(const std::string& path, uint32_t mask);
     int RemoveDirWatch(int fd);
 
 private:

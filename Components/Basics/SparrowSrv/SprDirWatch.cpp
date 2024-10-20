@@ -43,13 +43,14 @@ SprDirWatch::~SprDirWatch()
     close(mInotifyFd);
 }
 
-int SprDirWatch::AddDirWatch(const std::string& path)
+int SprDirWatch::AddDirWatch(const std::string& path, uint32_t mask)
 {
-    int wd = inotify_add_watch(mInotifyFd, path.c_str(), IN_CREATE | IN_DELETE);
+    int wd = inotify_add_watch(mInotifyFd, path.c_str(), mask);
     if (wd == -1) {
         SPR_LOGE("Add watch %s failed! (%s)\n", path.c_str(), strerror(errno));
         return -1;
     }
+
     SPR_LOGD("Add watch %s success! wd = %d\n", path.c_str(), wd);
     mWatchFds.insert(wd);
     return wd;
