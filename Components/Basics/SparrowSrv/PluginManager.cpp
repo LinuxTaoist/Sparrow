@@ -113,6 +113,11 @@ void PluginManager::LoadPlugin(const std::string& path)
         return;
     }
 
+    if (mPluginHandles.find(path) != mPluginHandles.end() && mPluginHandles[path]) {
+        SPR_LOGW("Plugin %s already loaded!\n", path.c_str());
+        return;
+    }
+
     void* pDlHandler = dlopen(path.c_str(), RTLD_NOW);
     if (!pDlHandler) {
         SPR_LOGE("Load plugin %s fail! (%s)\n", path.c_str(), dlerror());

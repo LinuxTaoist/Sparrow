@@ -33,6 +33,16 @@ using namespace InternalDefs;
 // The entry of OneNet business plugin
 extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& ctx)
 {
+    if (observers.find(MODULE_ONENET_DRIVER) != observers.end() && observers[MODULE_ONENET_DRIVER]) {
+        SPR_LOGD("OneNet driver module has been loaded!\n");
+        return;
+    }
+
+    if (observers.find(MODULE_ONENET_MANAGER) != observers.end() && observers[MODULE_ONENET_MANAGER]) {
+        SPR_LOGD("OneNet manager module has been loaded!\n");
+        return;
+    }
+
     auto pOneDrv = new OneNetDriver(MODULE_ONENET_DRIVER, "OneDrv");
     auto pOneMgr = new OneNetManager(MODULE_ONENET_MANAGER, "OneMgr");
 
