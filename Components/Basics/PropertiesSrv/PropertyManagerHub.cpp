@@ -36,10 +36,8 @@ PropertyManagerHub::~PropertyManagerHub()
 
 void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
-    switch (cmd)
-    {
-        case PROPERTY_CMD_SET_PROPERTY:
-        {
+    switch (cmd) {
+        case PROPERTY_CMD_SET_PROPERTY: {
             std::string key;
             std::string value;
             pReqParcel->ReadString(key);
@@ -50,9 +48,7 @@ void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, co
             pRspParcel->Post();
             break;
         }
-
-        case PROPERTY_CMD_GET_PROPERTY:
-        {
+        case PROPERTY_CMD_GET_PROPERTY: {
             std::string key;
             std::string value;
             std::string defaultValue;
@@ -65,17 +61,13 @@ void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, co
             pRspParcel->Post();
             break;
         }
-
-        case PROPERTY_CMD_GET_PROPERTIES:
-        {
+        case PROPERTY_CMD_GET_PROPERTIES: {
             mPropertyManager->GetProperties();
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
         }
-
-        default:
-        {
+        default: {
             SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
             break;
         }

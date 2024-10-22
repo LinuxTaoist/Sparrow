@@ -134,8 +134,7 @@ int32_t BinderManager::BMsgRespondGetService()
 int32_t BinderManager::StartWork()
 {
     mRunning = true;
-    while (mRunning)
-    {
+    while (mRunning) {
         int cmd = 0;
         pReqParcel->Wait();
         pReqParcel->ReadInt(cmd);

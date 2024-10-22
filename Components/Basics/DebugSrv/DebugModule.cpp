@@ -41,38 +41,28 @@ DebugModule::DebugModule(ModuleIDType id, const std::string& name)
 
 DebugModule::~DebugModule()
 {
-
 }
 
 int DebugModule::ProcessMsg(const SprMsg& msg)
 {
-    switch(msg.GetMsgId())
-    {
-        case SIG_ID_DEBUG_ENABLE_REMOTE_SHELL:
-        {
+    switch(msg.GetMsgId()) {
+        case SIG_ID_DEBUG_ENABLE_REMOTE_SHELL: {
             MsgRespondEnableRemoteShell(msg);
             break;
         }
-
-        case SIG_ID_DEBUG_DISABLE_REMOTE_SHELL:
-        {
+        case SIG_ID_DEBUG_DISABLE_REMOTE_SHELL: {
             MsgRespondDisableRemoteShell(msg);
             break;
         }
-
         case SIG_ID_TIMER_ADD_CUSTOM_TIMER:
-        case SIG_ID_TIMER_DEL_TIMER:
-        {
+        case SIG_ID_TIMER_DEL_TIMER: {
             MsgRespondDispatchTimerMsg(msg);
             break;
         }
-
-        case SIG_ID_DEBUG_NOTIFY_ALL:
-        {
+        case SIG_ID_DEBUG_NOTIFY_ALL: {
             MsgRespondBroadcastMsg(msg);
             break;
         }
-
         default:
             SPR_LOGD("msg id: %s\n", GetSigName(msg.GetMsgId()));
             break;

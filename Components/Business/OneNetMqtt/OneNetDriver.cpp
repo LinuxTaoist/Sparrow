@@ -489,8 +489,7 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
         mOneSocketPtr = nullptr;
     }
 
-    mOneSocketPtr = new (std::nothrow) SprObserverWithSocket(AF_INET, SOCK_STREAM, 0,[&](int sock, void *arg)
-    {
+    mOneSocketPtr = new (std::nothrow) SprObserverWithSocket(AF_INET, SOCK_STREAM, 0,[&](int sock, void *arg) {
         PSocket* pSocket = reinterpret_cast<PSocket*>(arg);
         if (pSocket == nullptr) {
             SPR_LOGE("PSocket is nullptr\n");
@@ -903,33 +902,27 @@ int32_t OneNetDriver::DispatchMqttBytes(const std::string& bytes)
     int32_t ret = -1;
     uint8_t msgId = (bytes[0] & 0xF0) >> 4;
     switch (msgId) {
-        case MQTT_MSG_CONNACK:
-        {
+        case MQTT_MSG_CONNACK: {
             ret = HandleMqttConnack(bytes);
             break;
         }
-        case MQTT_MSG_PUBLISH:
-        {
+        case MQTT_MSG_PUBLISH: {
             ret = HandleMqttPublish(bytes);
             break;
         }
-        case MQTT_MSG_PUBACK:
-        {
+        case MQTT_MSG_PUBACK: {
             ret = HandleMqttPubAck(bytes);
             break;
         }
-        case MQTT_MSG_SUBACK:
-        {
+        case MQTT_MSG_SUBACK: {
             ret = HandleMqttSubAck(bytes);
             break;
         }
-        case MQTT_MSG_PINGRESP:
-        {
+        case MQTT_MSG_PINGRESP: {
             ret = HandleMqttPingResp(bytes);
             break;
         }
-        default:
-        {
+        default: {
             SPR_LOGE("Invalid mqtt msgId %d\n", msgId);
             break;
         }

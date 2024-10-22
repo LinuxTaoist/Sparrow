@@ -36,10 +36,8 @@ PowerManagerHub::~PowerManagerHub()
 
 void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
-    switch(cmd)
-    {
-        case POWERM_CMD_POWER_ON:
-        {
+    switch(cmd) {
+        case POWERM_CMD_POWER_ON: {
             SprMsg msg(SIG_ID_POWER_ON);
             mPowerManager->SendMsg(msg);
 
@@ -47,9 +45,7 @@ void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const
             pRspParcel->Post();
             break;
         }
-
-        case POWERM_CMD_POWER_OFF:
-        {
+        case POWERM_CMD_POWER_OFF: {
             SprMsg msg(SIG_ID_POWER_OFF);
             mPowerManager->SendMsg(msg);
 
@@ -57,9 +53,7 @@ void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const
             pRspParcel->Post();
             break;
         }
-
-        default:
-        {
+        default: {
             SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
             break;
         }

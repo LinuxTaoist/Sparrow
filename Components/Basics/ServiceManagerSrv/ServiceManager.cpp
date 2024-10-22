@@ -124,16 +124,14 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
     int32_t startedCount = 0;
     std::ifstream configFile(cfgPath);
 
-    if (!configFile.is_open())
-    {
+    if (!configFile.is_open()) {
         SPR_LOGE("Open %s failed! (%s)\n", cfgPath.c_str(), strerror(errno));
         return -1;
     }
 
     std::string line;
     std::string lastExeName;
-    while (std::getline(configFile, line))
-    {
+    while (std::getline(configFile, line)) {
         line = line.substr(line.find_first_not_of(" \t"));
         if (line.empty() || line[0] == '#') {
             continue;
@@ -159,13 +157,10 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
         }
 
         ClearExeEnvNode(line);
-        if (StartExe(line) == 0)
-        {
+        if (StartExe(line) == 0) {
             startedCount++;
             lastExeName = line;
-        }
-        else
-        {
+        } else {
             SPR_LOGE("Failed to start exe: %s", line.c_str());
         }
     }
@@ -187,8 +182,7 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
         execl(exePath.c_str(), exePath.c_str(), nullptr);
     } else {                        // parent
         std::string srvName = GeneralUtils::GetSubstringAfterLastDelimiter(exePath, '/').c_str();
-        if (srvName.empty())
-        {
+        if (srvName.empty()) {
             srvName = exePath;
         }
 

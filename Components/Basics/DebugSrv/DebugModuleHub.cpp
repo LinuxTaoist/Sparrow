@@ -41,28 +41,22 @@ DebugModuleHub::~DebugModuleHub()
 
 void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
-    switch(cmd)
-    {
-        case DEBUG_CMD_ENABLE_REMOTE_PORT:
-        {
+    switch(cmd) {
+        case DEBUG_CMD_ENABLE_REMOTE_PORT: {
             SprMsg msg(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL);
             mDebugModulePtr->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
         }
-
-        case DEBUG_CMD_DISABLE_REMOTE_PORT:
-        {
+        case DEBUG_CMD_DISABLE_REMOTE_PORT: {
             SprMsg msg(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL);
             mDebugModulePtr->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
         }
-
-        case DEBUG_CMD_TEST_ADD_1S_TIMER:
-        {
+        case DEBUG_CMD_TEST_ADD_1S_TIMER: {
             STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_1S, 0, 0, 1000};
             auto pInfo = make_shared<STimerInfo>(timeInfo);
             SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
@@ -73,9 +67,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             pRspParcel->Post();
             break;
         }
-
-        case DEBUG_CMD_TEST_DEL_1S_TIMER:
-        {
+        case DEBUG_CMD_TEST_DEL_1S_TIMER: {
             STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_1S, 0, 0, 0};
             auto pInfo = make_shared<STimerInfo>(timeInfo);
             SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_TIMER);
@@ -86,9 +78,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             pRspParcel->Post();
             break;
         }
-
-        case DEBUG_CMD_TEST_ADD_CUSTOM_TIMER:
-        {
+        case DEBUG_CMD_TEST_ADD_CUSTOM_TIMER: {
             int32_t repeatTimes;
             int32_t delayInMilliSec;
             int32_t intervalInMilliSec;
@@ -108,9 +98,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             pRspParcel->Post();
             break;
         }
-
-        case DEBUG_CMD_TEST_DEL_CUSTOM_TIMER:
-        {
+        case DEBUG_CMD_TEST_DEL_CUSTOM_TIMER: {
             STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST, 0, 0, 0};
             auto pInfo = make_shared<STimerInfo>(timeInfo);
             SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_TIMER);
@@ -121,27 +109,21 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             pRspParcel->Post();
             break;
         }
-
-        case DEBUG_CMD_ENABLE_REMOTE_SHELL:
-        {
+        case DEBUG_CMD_ENABLE_REMOTE_SHELL: {
             SprMsg msg(MODULE_DEBUG, SIG_ID_DEBUG_ENABLE_REMOTE_SHELL);
             mDebugModulePtr->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
         }
-
-        case DEBUG_CMD_DISABLE_REMOTE_SHELL:
-        {
+        case DEBUG_CMD_DISABLE_REMOTE_SHELL: {
             SprMsg msg(MODULE_DEBUG, SIG_ID_DEBUG_DISABLE_REMOTE_SHELL);
             mDebugModulePtr->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
         }
-
-        default:
-        {
+        default: {
             SPR_LOGW("Unknown cmd: 0x%x\n", cmd);
             break;
         }

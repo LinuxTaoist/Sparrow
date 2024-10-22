@@ -638,40 +638,32 @@ void OneNetDevice::MsgRespondDataReportTimerEvent(const SprMsg& msg)
 int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
 {
     SPR_LOGD("Recv msg: %s\n", GetSigName(msg.GetMsgId()));
-    switch (msg.GetMsgId())
-    {
-        case SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT:
-        {
+    switch (msg.GetMsgId()) {
+        case SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT: {
             MsgRespondActiveDeviceConnect(msg);
             break;
         }
-        case SIG_ID_ONENET_MGR_SET_CONNECT_STATUS:
-        {
+        case SIG_ID_ONENET_MGR_SET_CONNECT_STATUS: {
             MsgRespondSetConnectStatus(msg);
             break;
         }
-        case SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC:
-        {
+        case SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC: {
             MsgRespondSubscribeTopic(msg);
             break;
         }
-        case SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK:
-        {
+        case SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK: {
             MsgRespondSubscribeTopicAck(msg);
             break;
         }
-        case SIG_ID_ONENET_MGR_PING_TIMER_EVENT:
-        {
+        case SIG_ID_ONENET_MGR_PING_TIMER_EVENT: {
             MsgRespondPingTimerEvent(msg);
             break;
         }
-        case SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT:
-        {
+        case SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT: {
             MsgRespondDataReportTimerEvent(msg);
             break;
         }
-        default:
-        {
+        default: {
             break;
         }
     }

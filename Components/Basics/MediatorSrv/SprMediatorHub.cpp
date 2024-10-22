@@ -36,10 +36,8 @@ SprMediatorHub::~SprMediatorHub()
 
 void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
-    switch(cmd)
-    {
-        case PROXY_CMD_GET_ALL_MQ_ATTRS:
-        {
+    switch(cmd) {
+        case PROXY_CMD_GET_ALL_MQ_ATTRS: {
             std::vector<SMQStatus> tmpMQAttrs;
             int ret = mSprMediator->GetAllMQStatus(tmpMQAttrs);
             pRspParcel->WriteInt(ret);
@@ -50,8 +48,7 @@ void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             pRspParcel->Post();
             break;
         }
-        default:
-        {
+        default: {
             SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
             break;
         }

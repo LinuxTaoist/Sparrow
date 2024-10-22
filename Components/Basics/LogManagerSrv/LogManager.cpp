@@ -71,8 +71,7 @@ LogManager::LogManager()
     mLoadAttrMap.insert(std::make_pair("logging.frame_length",  &LogManager::LoadAttrFrameLengthLimit));
 
     LoadLogCfgFile(LOG_CONFIGURE_FILE_PATH);
-    if (access(mLogsFilePath.c_str(), F_OK) != 0)
-    {
+    if (access(mLogsFilePath.c_str(), F_OK) != 0) {
         int ret = mkdir(mLogsFilePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
             SPR_LOGE("mkdir %s failed! (%s)\n", mLogsFilePath.c_str(), strerror(errno));
@@ -174,8 +173,7 @@ void LogManager::LoadAttrFilePath(const std::string& value)
 int LogManager::LoadLogCfgFile(const std::string& cfgPath)
 {
     std::ifstream file(cfgPath);
-    if (!file)
-    {
+    if (!file) {
         SPR_LOGE("Open %s fail! \n", cfgPath.c_str());
         return -1;
     }
@@ -183,18 +181,15 @@ int LogManager::LoadLogCfgFile(const std::string& cfgPath)
     SPR_LOGD("Load %s\n", cfgPath.c_str());
     std::string line;
     std::string buffer;
-    while (std::getline(file, buffer))
-    {
+    while (std::getline(file, buffer)) {
         line += buffer + "\n";
     }
 
     std::istringstream iss(line);
     std::string keyValue;
-    while (std::getline(iss, keyValue, '\n'))
-    {
+    while (std::getline(iss, keyValue, '\n')) {
         size_t delimiter = keyValue.find('=');
-        if (delimiter != std::string::npos)
-        {
+        if (delimiter != std::string::npos) {
             std::string key = keyValue.substr(0, delimiter);
             std::string value = keyValue.substr(delimiter + 1);
             if (mLoadAttrMap.count(key) != 0) {
@@ -208,8 +203,7 @@ int LogManager::LoadLogCfgFile(const std::string& cfgPath)
 
 int LogManager::UpdateSuffixOfAllFiles()
 {
-    while (mLogFilePaths.size() >= mLogFileNum)
-    {
+    while (mLogFilePaths.size() >= mLogFileNum) {
         auto it = mLogFilePaths.end();
         --it;
         int ret = remove(it->c_str());
@@ -345,8 +339,7 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
 
 int LogManager::MainLoop()
 {
-    while (mRunning)
-    {
+    while (mRunning) {
         if (pLogMCacheMem->AvailData() < 10) {
             usleep(10000);
             continue;

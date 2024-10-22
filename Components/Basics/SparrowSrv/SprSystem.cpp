@@ -76,8 +76,7 @@ void SprSystem::InitMsgQueueLimit()
     // Also ulimit -n has no influence on this issue.
     struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
     int ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
-    if (ret == 0)
-    {
+    if (ret == 0) {
         rlim.rlim_cur = RLIM_INFINITY;  // soft limit
         rlim.rlim_max = RLIM_INFINITY;  // hard limit
         setrlimit(RLIMIT_MSGQUEUE, &rlim);
