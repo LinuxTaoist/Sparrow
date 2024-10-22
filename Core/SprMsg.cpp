@@ -69,12 +69,10 @@ SprMsg::SprMsg(std::string datas)
 
 SprMsg& SprMsg::operator=(const SprMsg &srcMsg)
 {
-    if (this == &srcMsg)
-    {
+    if (this == &srcMsg) {
         // do nothing
     }
-    else
-    {
+    else {
         CopyMsg(srcMsg);
     }
 
@@ -162,10 +160,8 @@ int8_t SprMsg::Decode(std::string& deDatas)
     DecodeTo(deDatas);
     DecodeMsgId(deDatas);
     DecodeTag(deDatas);
-    for (auto i = (int)ESprMsgType::MSG_TYPE_MIN; i < (int)ESprMsgType::MSG_TYPE_MAX; i++)
-    {
-        if (mTag & (1 << i))
-        {
+    for (auto i = (int)ESprMsgType::MSG_TYPE_MIN; i < (int)ESprMsgType::MSG_TYPE_MAX; i++) {
+        if (mTag & (1 << i)) {
             ESprMsgType type = static_cast<ESprMsgType>(i);
             auto it = mDeFuncs.find(type);
 
@@ -188,10 +184,8 @@ int8_t SprMsg::Encode(std::string & enDatas) const
     EncodeTo(enDatas);
     EncodeMsgId(enDatas);
     EncodeTag(enDatas);
-    for (uint32_t i = (uint32_t)ESprMsgType::MSG_TYPE_MIN; i < (uint32_t)ESprMsgType::MSG_TYPE_MAX; i++)
-    {
-        if (mTag & (1 << i))
-        {
+    for (uint32_t i = (uint32_t)ESprMsgType::MSG_TYPE_MIN; i < (uint32_t)ESprMsgType::MSG_TYPE_MAX; i++) {
+        if (mTag & (1 << i)) {
             ESprMsgType type = static_cast<ESprMsgType>(i);
             auto it = mEnFuncs.find(type);
             if (it != mEnFuncs.end()) {
@@ -266,22 +260,22 @@ void SprMsg::SetU32Vec(const std::vector<uint32_t>& vec)
 }
 void SprMsg::EncodeFrom(std::string& enDatas) const
 {
-    GeneralConversions::IntegerToString(mFrom, enDatas);
+    GeneralConversions::ToString(mFrom, enDatas);
 }
 
 void SprMsg::EncodeTo(std::string& enDatas) const
 {
-    GeneralConversions::IntegerToString(mTo, enDatas);
+    GeneralConversions::ToString(mTo, enDatas);
 }
 
 void SprMsg::EncodeMsgId(std::string& enDatas) const
 {
-    GeneralConversions::IntegerToString(mMsgId, enDatas);
+    GeneralConversions::ToString(mMsgId, enDatas);
 }
 
 void SprMsg::EncodeTag(std::string& enDatas) const
 {
-    GeneralConversions::IntegerToString(mTag, enDatas);
+    GeneralConversions::ToString(mTag, enDatas);
 }
 
 void SprMsg::EncodeBoolValue(std::string& enDatas)
@@ -333,8 +327,7 @@ void SprMsg::EncodeU32Vec(std::string& enDatas)
     enDatas.push_back(0xFF & (mU32VecLength >> 8));
     enDatas.push_back(0xFF & mU32VecLength);
 
-    for (uint32_t i = 0; i < (uint32_t)mU32Vec.size(); i++)
-    {
+    for (uint32_t i = 0; i < (uint32_t)mU32Vec.size(); i++) {
         uint32_t value = mU32Vec[i];
         enDatas.push_back(0xFF & (value >> 24));
         enDatas.push_back(0xFF & (value >> 16));
@@ -354,8 +347,7 @@ void SprMsg::EncodeDatas(std::string& enDatas)
 
 void SprMsg::DecodeFrom(std::string& deDatas)
 {
-    if (GeneralConversions::StringToInteger(mFrom, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mFrom) == -1) {
         SPR_LOGE("Decode from Fail!\n");
         return;
     }
@@ -365,8 +357,7 @@ void SprMsg::DecodeFrom(std::string& deDatas)
 
 void SprMsg::DecodeTo(std::string& deDatas)
 {
-    if (GeneralConversions::StringToInteger(mTo, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mTo) == -1) {
         SPR_LOGE("Decode to Fail!\n");
         return;
     }
@@ -376,8 +367,7 @@ void SprMsg::DecodeTo(std::string& deDatas)
 
 void SprMsg::DecodeMsgId(std::string& deDatas)
 {
-    if (GeneralConversions::StringToInteger(mMsgId, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mMsgId) == -1) {
         SPR_LOGE("Decode msgId Fail!\n");
         return;
     }
@@ -387,8 +377,7 @@ void SprMsg::DecodeMsgId(std::string& deDatas)
 
 void SprMsg::DecodeTag(std::string& deDatas)
 {
-    if (GeneralConversions::StringToInteger(mTag, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mTag) == -1) {
         SPR_LOGE("Decode tag Fail!\n");
         return;
     }
@@ -398,8 +387,7 @@ void SprMsg::DecodeTag(std::string& deDatas)
 
 void SprMsg::DecodeBoolValue(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mBoolValue))
-    {
+    if (deDatas.size() < sizeof(mBoolValue)) {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
@@ -410,8 +398,7 @@ void SprMsg::DecodeBoolValue(std::string& deDatas)
 
 void SprMsg::DecodeU8Value(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mU8Value))
-    {
+    if (deDatas.size() < sizeof(mU8Value)) {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
@@ -422,8 +409,7 @@ void SprMsg::DecodeU8Value(std::string& deDatas)
 
 void SprMsg::DecodeU16Value(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mU16Value))
-    {
+    if (deDatas.size() < sizeof(mU16Value)) {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
@@ -434,15 +420,13 @@ void SprMsg::DecodeU16Value(std::string& deDatas)
 
 void SprMsg::DecodeU32Value(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mU32Value))
-    {
+    if (deDatas.size() < sizeof(mU32Value)) {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
 
     uint32_t value = 0;
-    for (int i = 0; i < (int)sizeof(mU32Value); i++)
-    {
+    for (int i = 0; i < (int)sizeof(mU32Value); i++) {
         value <<= 8;
         value |= deDatas[i];
     }
@@ -452,14 +436,12 @@ void SprMsg::DecodeU32Value(std::string& deDatas)
 
 void SprMsg::DecodeString(std::string& deDatas)
 {
-    if (GeneralConversions::StringToInteger(mStringLength, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mStringLength) == -1) {
         SPR_LOGE("Decode string length Fail!\n");
         return;
     }
 
-    if (deDatas.size() < sizeof(mStringLength) + mStringLength)
-    {
+    if (deDatas.size() < sizeof(mStringLength) + mStringLength) {
         SPR_LOGE("deDatas is invalid! size = %zu, length = %zu\n", deDatas.size(), sizeof(mStringLength) + mStringLength);
         return;
     }
@@ -470,14 +452,12 @@ void SprMsg::DecodeString(std::string& deDatas)
 
 void SprMsg::DecodeU8Vec(std::string& deDatas)
 {
-    if (GeneralConversions::StringToInteger(mU8VecLength, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mU8VecLength) == -1) {
         SPR_LOGE("Decode vector size Fail!\n");
         return;
     }
 
-    if (deDatas.size() < sizeof(mU8VecLength) + mU8VecLength)
-    {
+    if (deDatas.size() < sizeof(mU8VecLength) + mU8VecLength) {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
@@ -488,23 +468,19 @@ void SprMsg::DecodeU8Vec(std::string& deDatas)
 
 void SprMsg::DecodeU32Vec(std::string& deDatas)
 {
-    if (GeneralConversions::StringToInteger(mU32VecLength, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mU32VecLength) == -1) {
         SPR_LOGE("Decode vector size Fail!\n");
         return;
     }
 
-    if (deDatas.size() < sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t))
-    {
+    if (deDatas.size() < sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t)) {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
 
-    for (uint32_t i = 0; i < mU32VecLength; i++)
-    {
+    for (uint32_t i = 0; i < mU32VecLength; i++) {
         uint32_t value = 0;
-        for (uint32_t j = 0; j < sizeof(uint32_t); j++)
-        {
+        for (uint32_t j = 0; j < sizeof(uint32_t); j++) {
             value <<= 8;
             value |= deDatas[sizeof(mU32VecLength) + i * sizeof(uint32_t) + j];
         }
@@ -516,14 +492,12 @@ void SprMsg::DecodeU32Vec(std::string& deDatas)
 
 void SprMsg::DecodeDatas(std::string& deDatas)
 {
-    if (deDatas.size() < sizeof(mDataSize))
-    {
+    if (deDatas.size() < sizeof(mDataSize)) {
         SPR_LOGE("deDatas is invalid!\n");
         return;
     }
 
-    if (GeneralConversions::StringToInteger(mDataSize, deDatas) == -1)
-    {
+    if (GeneralConversions::ToInteger(deDatas, mDataSize) == -1) {
         SPR_LOGE("Decode vector size Fail!\n");
         return;
     }

@@ -25,9 +25,9 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...)  LOGD("SprObsSocket", "[%s] " fmt, ##args)
-#define SPR_LOGW(fmt, args...)  LOGW("SprObsSocket", "[%s] " fmt, ##args)
-#define SPR_LOGE(fmt, args...)  LOGE("SprObsSocket", "[%s] " fmt, ##args)
+#define SPR_LOGD(fmt, args...)  LOGD("SprObsSocket", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define SPR_LOGW(fmt, args...)  LOGW("SprObsSocket", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define SPR_LOGE(fmt, args...)  LOGE("SprObsSocket", "[%s] " fmt, mModuleName.c_str(), ##args)
 
 SprObserverWithSocket::SprObserverWithSocket(int sock, const std::function<void(int, void*)>& cb, void* arg)
     : SprObserver(MODULE_NONE, "", IPC_TYPE_BUTT), PSocket(sock, cb, arg)

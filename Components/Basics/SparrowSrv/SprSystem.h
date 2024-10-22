@@ -8,7 +8,6 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
  *
- *  System initialization file
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
@@ -23,7 +22,10 @@
 #include <map>
 #include <vector>
 #include <string>
+#include <memory>
+#include "PFile.h"
 #include "SprObserver.h"
+#include "PluginManager.h"
 #include "CommonTypeDefs.h"
 
 class SprSystem
@@ -47,15 +49,11 @@ private:
     void InitEnv();
     void InitMsgQueueLimit();
     void LoadReleaseInformation();
-    void LoadPlugins();
-    void ReleasePlugins();
-    void GetDefaultLibraryPath(std::string& path);
     int EnvReady(const std::string& srvName);
 
 private:
-    std::vector<void*> mPluginHandles;
-    std::vector<PluginEntryFunc> mPluginEntries;
-    std::map<int, SprObserver*> mModules;
+    PluginManager mPluginMgr;
+    // std::map<int, SprObserver*> mModules;
 };
 
 #endif // __SPR_SYSTEM_H__

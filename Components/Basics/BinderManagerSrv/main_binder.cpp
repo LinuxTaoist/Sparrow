@@ -18,13 +18,15 @@
  */
 #include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "BinderManager.h"
 
 using namespace GeneralUtils;
 
-#define SPR_LOGI(fmt, args...) printf("%s %4d MainBinder I: " fmt, GetCurTimeStr().c_str(), __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainBinder", __LINE__, ##args)
 
 int main(int argc, const char *argv[])
 {

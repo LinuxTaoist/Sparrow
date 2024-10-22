@@ -55,14 +55,12 @@ enum EOneNetDrvLev2State
 class OneNetDriver : public SprObserverWithMQueue
 {
 public:
+    explicit OneNetDriver(ModuleIDType id, const std::string& name);
     ~OneNetDriver();
-    static OneNetDriver* GetInstance(ModuleIDType id, const std::string& name);
 
     int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
-    explicit OneNetDriver(ModuleIDType id, const std::string& name);
-
     /**
      * @brief Init business
      *
@@ -170,6 +168,7 @@ private:
 
 private:
     bool mEnableReconTimer;
+    int32_t mUnixPipeFd[2];
     std::string mSockBuffer;
     std::string mOneNetHost;
     uint16_t    mOneNetPort;

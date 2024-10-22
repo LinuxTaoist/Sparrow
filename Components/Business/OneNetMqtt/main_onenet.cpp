@@ -33,10 +33,42 @@ using namespace InternalDefs;
 // The entry of OneNet business plugin
 extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& ctx)
 {
-    auto pOneDrv = OneNetDriver::GetInstance(MODULE_ONENET_DRIVER, "OneDrv");
-    auto pOneMgr = OneNetManager::GetInstance(MODULE_ONENET_MANAGER, "OneMgr");
+    if (observers.find(MODULE_ONENET_DRIVER) != observers.end() && observers[MODULE_ONENET_DRIVER]) {
+        SPR_LOGD("OneNet driver module has been loaded!\n");
+        return;
+    }
 
+    if (observers.find(MODULE_ONENET_MANAGER) != observers.end() && observers[MODULE_ONENET_MANAGER]) {
+        SPR_LOGD("OneNet manager module has been loaded!\n");
+        return;
+    }
+
+    auto pOneDrv = new OneNetDriver(MODULE_ONENET_DRIVER, "OneDrv");
+    auto pOneMgr = new OneNetManager(MODULE_ONENET_MANAGER, "OneMgr");
+
+    pOneDrv->Initialize();
+    pOneMgr->Initialize();
     observers[MODULE_ONENET_DRIVER] = pOneDrv;
     observers[MODULE_ONENET_MANAGER] = pOneMgr;
     SPR_LOGD("Load plug-in OneNet modules\n");
+}
+
+// The exit of OneNet business plugin
+extern "C" void PluginExit(std::map<int, SprObserver*>& observers, SprContext& ctx)
+{
+    auto it = observers.find(MODULE_ONENET_DRIVER);
+    if (it != observers.end() && it->second) {
+        delete it->second;
+        it->second = nullptr;
+        observers.erase(it);
+    }
+
+    it = observers.find(MODULE_ONENET_MANAGER);
+    if (it != observers.end() && it->second) {
+        delete it->second;
+        it->second = nullptr;
+        observers.erase(it);
+    }
+
+    SPR_LOGD("Unload plug-in OneNet modules\n");
 }

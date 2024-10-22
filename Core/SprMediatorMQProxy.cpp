@@ -40,8 +40,7 @@ SprMediatorMQProxy::SprMediatorMQProxy()
 
 SprMediatorMQProxy::~SprMediatorMQProxy()
 {
-    if (mMdtFd != -1)
-    {
+    if (mMdtFd != -1) {
         mq_close(mMdtFd);
         mMdtFd = -1;
     }

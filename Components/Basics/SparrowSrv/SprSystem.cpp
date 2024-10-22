@@ -8,7 +8,6 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
  *
- *  System initialization file
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
@@ -34,6 +33,7 @@
 #include "CoreTypeDefs.h"
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
+#include "EpollEventHandler.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -51,7 +51,6 @@ SprSystem::SprSystem()
 
 SprSystem::~SprSystem()
 {
-    ReleasePlugins();
 }
 
 SprSystem* SprSystem::GetInstance()
@@ -111,78 +110,13 @@ void SprSystem::LoadReleaseInformation()
     releaseInfo += "Module Config  : " + moduleConfig + "\n";
 
     std::ofstream file(LOCAL_PATH_VERSION);
-    if (file)
-    {
+    if (file) {
         SPR_LOGD("Load system version information to %s\n", LOCAL_PATH_VERSION);
         file << releaseInfo;
         file.close();
-    }
-    else
-    {
+    } else {
         SPR_LOGE("Open %s fail!\n", LOCAL_PATH_VERSION);
     }
-}
-
-void SprSystem::GetDefaultLibraryPath(std::string& path)
-{
-    char curPath[100] = {};
-    if (getcwd(curPath, sizeof(curPath)) == nullptr) {
-        SPR_LOGE("Get current path fail! (%s)\n", strerror(errno));
-        return;
-    }
-
-    path = curPath + std::string("/../Lib");
-}
-
-void SprSystem::LoadPlugins()
-{
-    std::string path = DEFAULT_PLUGIN_LIBRARY_PATH;
-    if (access(DEFAULT_PLUGIN_LIBRARY_PATH, F_OK) == -1) {
-        GetDefaultLibraryPath(path);
-        SPR_LOGW("%s not exist, changed path %s\n", DEFAULT_PLUGIN_LIBRARY_PATH, path.c_str());
-    }
-
-    DIR* dir = opendir(path.c_str());
-    if (dir == nullptr) {
-        SPR_LOGE("Open %s fail! (%s)\n", path, strerror(errno));
-        return;
-    }
-
-    // loop: find all plugins library files in path
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != NULL) {
-        if (strncmp(entry->d_name, DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
-            continue;
-        }
-
-        void* pDlHandler = dlopen(entry->d_name, RTLD_NOW);
-        if (!pDlHandler) {
-            SPR_LOGE("Load plugin %s fail! (%s)\n", entry->d_name, dlerror() ? dlerror() : "unknown error");
-            continue;
-        }
-
-        auto pEntry = (PluginEntryFunc)dlsym(pDlHandler, DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC);
-        if (!pEntry) {
-            SPR_LOGE("Find %s fail in %s! (%s)\n", DEFAULT_PLUGIN_LIBRARY_ENTRY_FUNC, entry->d_name, dlerror() ? dlerror() : "unknown error");
-            dlclose(pDlHandler);
-            continue;
-        }
-
-        mPluginHandles.push_back(pDlHandler);
-        mPluginEntries.push_back(pEntry);
-        SPR_LOGD("Load plugin %s success!\n", entry->d_name);
-    }
-
-    closedir(dir);
-}
-
-void SprSystem::ReleasePlugins()
-{
-    for (auto& mPluginHandle : mPluginHandles) {
-        dlclose(mPluginHandle);
-    }
-
-    mPluginHandles.clear();
 }
 
 int SprSystem::EnvReady(const std::string& srvName)
@@ -203,7 +137,6 @@ void SprSystem::Init()
     SPR_LOGD("=============================================\n");
 
     InitEnv();
-    LoadPlugins();  // load plugin libraries
 
     TTP(9, "systemTimerPtr->Initialize()");
     shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
@@ -212,16 +145,7 @@ void SprSystem::Init()
     TTP(10, "TimerManager->Initialize()");
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
 
-    // excute plugin entry function
     SprContext ctx;
-    for (auto& mPluginEntry : mPluginEntries) {
-        mPluginEntry(mModules, ctx);
-    }
-
-    // excute plug module initialize function
-    for (auto& module : mModules) {
-        module.second->Initialize();
-    }
-
+    mPluginMgr.Init();
     EnvReady(SRV_NAME_SPARROW);
 }

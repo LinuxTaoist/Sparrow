@@ -20,6 +20,7 @@
 #define __GENERAL_UTILS_H__
 
 #include <string>
+#include <vector>
 
 namespace GeneralUtils {
 
@@ -99,6 +100,16 @@ int GetRandomInteger(int width);
  * @return  random string
  */
 std::string GetRandomString(int width);
+
+
+/**
+ * @brief  Split a string into tokens using the specified delimiter
+ *
+ * @param str  The input string to be split
+ * @param delimiter  The character used as the delimiter
+ * @return  A vector of strings containing the tokens
+ */
+std::vector<std::string> Split(const std::string& str, char delimiter);
 
 /**
  * @brief Get the Substring After Last delimiter object

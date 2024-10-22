@@ -20,6 +20,7 @@
 #include <iomanip>
 #include <algorithm>
 #include <errno.h>
+#include <unistd.h>
 #include <string.h>
 #include <sys/socket.h>
 #include "SprLog.h"
@@ -295,6 +296,8 @@ OneNetDriver::OneNetDriver(ModuleIDType id, const std::string& name)
              : SprObserverWithMQueue(id, name)
 {
     mEnableReconTimer = false;
+    mUnixPipeFd[0] = -1;
+    mUnixPipeFd[1] = -1;
     mOneNetHost = ONENET_MQTT_HOST;
     mOneNetPort = ONENET_MQTT_PORT;
     mCurLev1State = LEV1_SOCKET_IDLE;
@@ -306,12 +309,15 @@ OneNetDriver::OneNetDriver(ModuleIDType id, const std::string& name)
 
 OneNetDriver::~OneNetDriver()
 {
-}
+    if (mUnixPipeFd[0] != -1) {
+        close(mUnixPipeFd[0]);
+        mUnixPipeFd[0] = -1;
+    }
 
-OneNetDriver* OneNetDriver::GetInstance(ModuleIDType id, const std::string& name)
-{
-    static OneNetDriver instance(id, name);
-    return &instance;
+    if (mUnixPipeFd[1] != -1) {
+        close(mUnixPipeFd[1]);
+        mUnixPipeFd[1] = -1;
+    }
 }
 
 int32_t OneNetDriver::Init()
@@ -324,20 +330,19 @@ int32_t OneNetDriver::Init()
 int32_t OneNetDriver::InitUnixPIPE()
 {
     SPR_LOGD("Init Unix PIPE\n");
-    int32_t pipe[2];
-    int32_t ret = socketpair(AF_UNIX, SOCK_STREAM, 0, pipe);
+    int32_t ret = socketpair(AF_UNIX, SOCK_STREAM, 0, mUnixPipeFd);
     if (ret == -1) {
         SPR_LOGE("socketpair failed: %s\n", strerror(errno));
         return -1;
     }
 
     // 将待发的mqtt字节流通过mSendPIPEPtr写入管道pipe[1]中缓存
-    mSendPIPEPtr = mSendPIPEPtr ? mSendPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[1]);
+    mSendPIPEPtr = mSendPIPEPtr ? mSendPIPEPtr : new (std::nothrow) SprObserverWithSocket(mUnixPipeFd[1]);
     CHECK_ONENET_POINTER(mSendPIPEPtr, -1);
     mSendPIPEPtr->AsUnixStreamClient();
 
     // 读取管道pipe[0]中缓存的mqtt字节流
-    mRecvPIPEPtr = mRecvPIPEPtr ? mRecvPIPEPtr : new (std::nothrow) SprObserverWithSocket(pipe[0], [&](int sock, void *arg) {
+    mRecvPIPEPtr = mRecvPIPEPtr ? mRecvPIPEPtr : new (std::nothrow) SprObserverWithSocket(mUnixPipeFd[0], [&](int sock, void *arg) {
         PSocket* pUnixPIPE0 = reinterpret_cast<PSocket*>(arg);
         CHECK_ONENET_POINTER_NONRET(pUnixPIPE0);
         CHECK_ONENET_POINTER_NONRET(mOneSocketPtr);
@@ -362,6 +367,7 @@ int32_t OneNetDriver::InitUnixPIPE()
     CHECK_ONENET_POINTER(mRecvPIPEPtr, -1);
     mRecvPIPEPtr->AsUnixStreamClient();
     mRecvPIPEPtr->InitFramework();
+    SPR_LOGD("dx_debug: fd = %d %d %d \n", mUnixPipeFd[0], mUnixPipeFd[1], mRecvPIPEPtr->GetEpollFd());
     return ret;
 }
 

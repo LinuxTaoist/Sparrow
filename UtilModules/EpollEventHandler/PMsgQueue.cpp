@@ -22,12 +22,15 @@
 #include <errno.h>
 #include <mqueue.h>
 #include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include <sys/resource.h>
 #include "PMsgQueue.h"
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) printf("%4d PMsgQueue D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d PMsgQueue E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%6d PMsgQueue D: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
+#define SPR_LOGW(fmt, args...) // printf("%6d PMsgQueue W: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
+#define SPR_LOGE(fmt, args...) printf("%6d PMsgQueue E: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
 
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
             std::function<void(int, std::string, void*)>cb,
@@ -119,8 +122,13 @@ int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
     char buf[1025] = {0};
     int32_t len = mq_receive(mEpollFd, buf, mqAttr.mq_msgsize, &prio);
     if (len <= 0) {
-        SPR_LOGE("mq_receive failed! (%s)\n", strerror(errno));
-        return -1;
+        if (errno == EAGAIN || errno == EWOULDBLOCK) {
+            SPR_LOGW("mq_receive EAGAIN (%s)\n", strerror(errno));
+            return 0;
+        } else {
+            SPR_LOGE("mq_receive failed! (%s)\n", strerror(errno));
+            return -1;
+        }
     }
 
     msg.assign(buf, len);

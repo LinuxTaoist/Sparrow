@@ -47,6 +47,7 @@ int32_t PTimer::InitTimer()
 
     return mEpollFd;
 }
+
 int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
 {
     struct itimerspec its;

@@ -363,14 +363,11 @@ int SprMediator::MsgRespondUnregister(const SprMsg& msg)
     if (it != mModuleMap.end()) {
         if (it->second.handle != -1) {
             mq_close(it->second.handle);
+            mMQStatusMap.erase(it->second.handle);
             it->second.handle = -1;
             SPR_LOGD("Close mq %s \n", it->second.name.c_str());
         }
-
         mModuleMap.erase(moduleId);
-        if (mMQStatusMap.count(it->second.handle) > 0) {
-            mMQStatusMap.erase(it->second.handle);
-        }
     } else {
         SPR_LOGW("Not exist module id: %x\n", moduleId);
     }

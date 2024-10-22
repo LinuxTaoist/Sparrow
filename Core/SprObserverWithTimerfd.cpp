@@ -20,9 +20,9 @@
 #include "SprEpollSchedule.h"
 #include "SprObserverWithTimerfd.h"
 
-#define SPR_LOGD(fmt, args...)  LOGD("SprObsTmrFd", "[%s] " fmt, ##args)
-#define SPR_LOGW(fmt, args...)  LOGW("SprObsTmrFd", "[%s] " fmt, ##args)
-#define SPR_LOGE(fmt, args...)  LOGE("SprObsTmrFd", "[%s] " fmt, ##args)
+#define SPR_LOGD(fmt, args...)  LOGD("SprObsTmrFd", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define SPR_LOGW(fmt, args...)  LOGW("SprObsTmrFd", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define SPR_LOGE(fmt, args...)  LOGE("SprObsTmrFd", "[%s] " fmt, mModuleName.c_str(), ##args)
 
 SprObserverWithTimerfd::SprObserverWithTimerfd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType)
     : SprObserver(id, name, proxyType)

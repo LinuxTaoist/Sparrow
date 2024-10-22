@@ -18,15 +18,18 @@
  */
 #include <stdio.h>
 #include <signal.h>
+#include <unistd.h>
+#include <sys/types.h>
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "LogManager.h"
 
-#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGI(fmt, args...) printf("%s %4d MainLog I: " fmt, GeneralUtils::GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %4d MainLog D: " fmt, GeneralUtils::GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %4d MainLog W: " fmt, GeneralUtils::GetCurTimeStr().c_str(), __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %4d MainLog E: " fmt, GeneralUtils::GetCurTimeStr().c_str(), __LINE__, ##args)
+using namespace GeneralUtils;
+
+#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainLog", __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %6d %12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainLog", __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %6d %12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainLog", __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainLog", __LINE__, ##args)
 
 int main(int argc, const char *argv[])
 {

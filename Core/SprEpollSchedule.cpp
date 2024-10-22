@@ -45,10 +45,11 @@ SprEpollSchedule::~SprEpollSchedule()
 {
 }
 
-SprEpollSchedule* SprEpollSchedule::GetInstance(uint32_t size, bool enableCoroutine)
+EpollEventHandler* SprEpollSchedule::GetInstance(uint32_t size, bool enableCoroutine)
 {
-    static SprEpollSchedule instance(size, enableCoroutine);
-    return &instance;
+    // static SprEpollSchedule instance(size, enableCoroutine);
+    // return &instance;
+    return EpollEventHandler::GetInstance(size);
 }
 
 void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)
