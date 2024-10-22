@@ -26,7 +26,7 @@
 class PFile : public IEpollEvent
 {
 public:
-    PFile(int fd, std::function<void(int, void*)> cb = nullptr, void *arg = nullptr);
+    PFile(int fd, std::function<void(int, void*)> cb = nullptr, void* arg = nullptr);
     virtual ~PFile();
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 

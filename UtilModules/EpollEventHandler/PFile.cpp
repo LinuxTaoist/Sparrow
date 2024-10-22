@@ -21,7 +21,7 @@
 #define SPR_LOGD(fmt, args...) printf("%4d PFile D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PFile E: " fmt, __LINE__, ##args)
 
-PFile::PFile(int fd, std::function<void(int, void*)> cb, void *arg)
+PFile::PFile(int fd, std::function<void(int, void*)> cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_FILE, arg), mCb(cb)
 {
 }

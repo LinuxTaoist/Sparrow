@@ -16,14 +16,14 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <stdio.h>
 #include <stdlib.h>
-#include "SprLog.h"
 #include "LoginManager.h"
 
 using namespace std;
 
-#define SPR_LOGD(fmt, args...) LOGD("RShellMain", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("RShellMain", fmt, ##args)
+#define SPR_LOGD(fmt, args...) printf(fmt, ##args)
+#define SPR_LOGE(fmt, args...) printf(fmt, ##args)
 
 int main(int argc, const char *argv[])
 {

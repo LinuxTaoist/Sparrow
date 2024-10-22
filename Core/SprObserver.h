@@ -101,7 +101,6 @@ public:
      */
     int32_t UnregisterTimer(uint32_t msgId);
 
-
 protected:
     /**
      * @brief Initializes the framework module with overrides from derived framework modules

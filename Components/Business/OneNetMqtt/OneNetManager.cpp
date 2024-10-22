@@ -207,8 +207,6 @@ OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
     mReConnectRspCnt = 0;
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
     mCurLev2State = LEV2_ONENET_MGR_ANY;
-
-    // mOneDeviceMap.insert(, );
 }
 
 OneNetManager::~OneNetManager()

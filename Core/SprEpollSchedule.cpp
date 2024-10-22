@@ -47,8 +47,6 @@ SprEpollSchedule::~SprEpollSchedule()
 
 EpollEventHandler* SprEpollSchedule::GetInstance(uint32_t size, bool enableCoroutine)
 {
-    // static SprEpollSchedule instance(size, enableCoroutine);
-    // return &instance;
     return EpollEventHandler::GetInstance(size);
 }
 
