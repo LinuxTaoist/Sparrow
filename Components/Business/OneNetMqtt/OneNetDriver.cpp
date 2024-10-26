@@ -355,13 +355,19 @@ int32_t OneNetDriver::InitUnixPIPE()
         }
 
         // 读取出管道缓存mqtt字节流，通过socket发送到OneNet
+        SPR_LOGD("## SEND [%d]> %d\n", sock, rBuf.size());
+        DumpSocketBytesWithAscall(rBuf);
         len = mOneSocketPtr->Write(mOneSocketPtr->GetEpollFd(), rBuf);
         if (len < 0) {
             SPR_LOGE("Write socket failed! %s\n", strerror(errno));
-            return;
         }
 
-        // SPR_LOGD("Write %d bytes to socket\n", len);
+        // 主动断开时，先发送断开消息，再关闭socket
+        if (mCurLev1State == LEV1_SOCKET_DISCONNECTED &&
+            mCurLev2State == LEV2_ONENET_DISCONNECTED) {
+            mOneSocketPtr->Close();
+            SPR_LOGD("Close socket\n");
+        }
     });
 
     CHECK_ONENET_POINTER(mRecvPIPEPtr, -1);
@@ -613,8 +619,8 @@ void OneNetDriver::MsgRespondSocketReconnectTimerEvent(const SprMsg& msg)
  */
 void OneNetDriver::MsgRespondSocketDisconnectActive(const SprMsg& msg)
 {
-    // close socket on client side
-    mOneSocketPtr->Close();  // Smart pointer, self-destruct and close socket
+    // close socket after send disconnect msg
+    // mOneSocketPtr->Close();  // Smart pointer, self-destruct and close socket
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
 }
@@ -867,6 +873,7 @@ int32_t OneNetDriver::SendMqttPingResp()
 
 int32_t OneNetDriver::SendMqttDisconnect()
 {
+    SPR_LOGD("Send mqtt disconnect!\n");
     MqttDisconnect disconMsg;
     std::string bytes;
     disconMsg.Encode(bytes);
@@ -875,9 +882,6 @@ int32_t OneNetDriver::SendMqttDisconnect()
 
 int32_t OneNetDriver::SendMqttBytes(const std::string& bytes)
 {
-    // dump mqtt bytes for debug
-    DumpSocketBytesWithAscall(bytes);
-
     if (!mSendPIPEPtr) {
         SPR_LOGE("Send PIPE is null\n");
         return -1;

@@ -511,6 +511,20 @@ void OneNetDevice::MsgRespondActiveDeviceConnect(const SprMsg& msg)
 }
 
 /**
+ * @brief Process SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetDevice::MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg)
+{
+    SPR_LOGD("Deactive device. Reset subscribe topics\n");
+    ResetAllTopics();
+    SprMsg disconMsg(SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT);
+    NotifyObserver(MODULE_ONENET_DRIVER, disconMsg);
+}
+
+/**
  * @brief Process SIG_ID_ONENET_MGR_SET_CONNECT_STATUS
  *
  * @param[in] msg
@@ -641,6 +655,10 @@ int32_t OneNetDevice::ProcessMsg(const SprMsg& msg)
     switch (msg.GetMsgId()) {
         case SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT: {
             MsgRespondActiveDeviceConnect(msg);
+            break;
+        }
+        case SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT: {
+            MsgRespondDeactiveDeviceDisconnect(msg);
             break;
         }
         case SIG_ID_ONENET_MGR_SET_CONNECT_STATUS: {

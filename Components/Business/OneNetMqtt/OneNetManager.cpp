@@ -94,6 +94,19 @@ OneNetManager::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT
+    // ============================================================
+    { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT,
+      &OneNetManager::MsgRespondDeactiveDeviceDisconnect
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // All States for SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
@@ -207,6 +220,7 @@ OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
     mReConnectRspCnt = 0;
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
     mCurLev2State = LEV2_ONENET_MGR_ANY;
+    mDebugFileNode = nullptr;
 }
 
 OneNetManager::~OneNetManager()
@@ -223,7 +237,34 @@ int32_t OneNetManager::Init()
         return -1;
     }
 
-    return InitOneNetDevices(devices);
+    InitDebugDetails();
+    InitOneNetDevices(devices);
+    return 0;
+}
+
+// E.g. echo "debug" > /tmp/debug_onenet
+int32_t OneNetManager::InitDebugDetails()
+{
+    mDebugCmdMap.insert(std::make_pair("help",            std::make_pair("debug cmd lists", &OneNetManager::DebugUsage)));
+    mDebugCmdMap.insert(std::make_pair("enable_dump_log", std::make_pair("enable dump log", &OneNetManager::DebugEnableDumpLog)));
+    mDebugCmdMap.insert(std::make_pair("active_device",   std::make_pair("active device",   &OneNetManager::DebugActiveDevice)));
+    mDebugCmdMap.insert(std::make_pair("deactive_device", std::make_pair("deactive device", &OneNetManager::DebugDeactiveDevice)));
+
+    mDebugFileNode = std::make_shared<PPipe>("/tmp/debug_onenet", [&](int fd, std::string bytes, void* arg) {
+        bytes.erase(std::find_if(bytes.rbegin(), bytes.rend(), [](unsigned char ch) {
+        return ch != '\r' && ch != '\n';
+        }).base(), bytes.end());
+
+        SPR_LOGD("Recv Cmd: %s\n", bytes.c_str());
+        if (mDebugCmdMap.find(bytes) != mDebugCmdMap.end()) {
+            mDebugCmdMap[bytes].second;
+        } else {
+            SPR_LOGE("Unknown cmd: %s\n", bytes.c_str());
+        }
+    }, this);
+
+    mDebugFileNode->AddPoll();
+    return 0;
 }
 
 int32_t OneNetManager::InitOneNetDevices(const std::vector<OneNetDevInfo>& devices)
@@ -389,6 +430,33 @@ void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const 
     SPR_LOGD("Notify module device: %s, msg: %s\n", devModule.c_str(), GetSigName(msg.GetMsgId()));
 }
 
+void OneNetManager::DebugUsage(void* args)
+{
+    SPR_LOGD("============================== Debug Cmd Lists ==============================");
+    SPR_LOGD(" Debug Usage: echo \"CMD\" > /tmp/debug_onenet\n");
+    SPR_LOGD("\n");
+    SPR_LOGD("    CMD Lists:\n");
+    for (auto it = mDebugCmdMap.begin(); it != mDebugCmdMap.end(); it++) {
+        SPR_LOGD("    %s: %s\n", it->first.c_str(), it->second.first.c_str());
+    }
+    SPR_LOGD("=============================================================================\n");
+}
+
+void OneNetManager::DebugEnableDumpLog(void* args)
+{
+    SPR_LOGD("Debug Enable Dump Log\n");
+}
+
+void OneNetManager::DebugActiveDevice(void* args)
+{
+    SPR_LOGD("Debug Active Device\n");
+}
+
+void OneNetManager::DebugDeactiveDevice(void* args)
+{
+    SPR_LOGD("Debug Deactive Device\n");
+}
+
 /**
  * @brief Process SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
  *
@@ -418,6 +486,19 @@ void OneNetManager::MsgRespondReactiveCurDeviceConnect(const SprMsg& msg)
 
     SprMsg conMsg(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
     NotifyMsgToOneNetDevice(mCurActiveDevice, conMsg);
+}
+
+/**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_DEACTIVE_DEVICE_DISCONNECT
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetManager::MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg)
+{
+    SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
+    SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
+    NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
 }
 
 /**
@@ -501,10 +582,10 @@ void OneNetManager::MsgRespondMqttReportTimerEvent(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondMqttDisconnect(const SprMsg& msg)
 {
+    SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
     SprMsg disMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
     disMsg.SetBoolValue(false);
     NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
-    SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
 }
 
 /**

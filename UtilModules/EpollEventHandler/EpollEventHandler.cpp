@@ -69,7 +69,7 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     int fd = p->GetEpollFd();
     int ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret == -1) {
-        SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
+        SPR_LOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
         return ;
     }
 

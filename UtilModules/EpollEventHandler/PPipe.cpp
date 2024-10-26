@@ -16,18 +16,65 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <errno.h>
+#include <string.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #include "PPipe.h"
+#include "EpollEventHandler.h"
 
 #define SPR_LOGD(fmt, args...) printf("%4d PPipe D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PPipe E: " fmt, __LINE__, ##args)
 
 PPipe::PPipe(int fd, std::function<void(int, std::string, void*)> cb, void *arg)
-    : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mCb(cb)
+    : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mAddPoll(false), mFifoFd(-1), mCb(cb)
 {
+    int flags = fcntl(mEpollFd, F_GETFL, 0);
+    fcntl(mEpollFd, F_SETFL, flags | O_NONBLOCK);
+}
+
+PPipe::PPipe(const std::string& fileName, std::function<void(int, std::string, void*)> cb, void* arg)
+    : IEpollEvent(-1, EPOLL_TYPE_PIPE, arg), mAddPoll(false), mCb(cb)
+{
+    unlink(fileName.c_str());
+    if (mkfifo(fileName.c_str(), 0666) == -1) {
+        SPR_LOGE("mkfifo %s fail! (%s)\n", fileName.c_str(), strerror(errno));
+        return;
+    }
+
+    mFifoFd = open(fileName.c_str(), O_RDWR | O_NONBLOCK);
+    if (mFifoFd == -1) {
+        SPR_LOGE("open %s fail! (%s)\n", fileName.c_str(), strerror(errno));
+        return;
+    }
+
+    mEpollFd = mFifoFd;
 }
 
 PPipe::~PPipe()
 {
+    if (mAddPoll) {
+        DelPoll();
+    }
+
+    if (mFifoFd >= 0) {
+        close(mFifoFd);
+        mFifoFd = -1;
+        mEpollFd = -1;
+    }
+}
+
+void PPipe::AddPoll()
+{
+    mAddPoll = true;
+    EpollEventHandler::GetInstance()->AddPoll(this);
+}
+
+void PPipe::DelPoll()
+{
+    mAddPoll = false;
+    EpollEventHandler::GetInstance()->DelPoll(this);
 }
 
 void* PPipe::EpollEvent(int fd, EpollType eType, void* arg)

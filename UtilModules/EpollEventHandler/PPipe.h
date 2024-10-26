@@ -21,16 +21,23 @@
 
 #include <string>
 #include <functional>
+#include <fcntl.h>
 #include "IEpollEvent.h"
 
 class PPipe : public IEpollEvent
 {
 public:
     PPipe(int fd, std::function<void(int, std::string, void*)> cb = nullptr, void *arg = nullptr);
+    PPipe(const std::string& fileName, std::function<void(int, std::string, void*)> cb = nullptr, void* arg = nullptr);
     virtual ~PPipe();
+
+    void AddPoll();
+    void DelPoll();
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
+    bool mAddPoll;
+    int mFifoFd;
     std::function<void(int, std::string, void*)> mCb;
 };
 #endif // __PPIPE_H__

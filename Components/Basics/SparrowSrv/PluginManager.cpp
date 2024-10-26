@@ -31,6 +31,8 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("PlugMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("PlugMgr", fmt, ##args)
 
+#define ENABLE_HOT_PLUG 1
+
 PluginManager::PluginManager()
 {
 }
@@ -44,7 +46,10 @@ void PluginManager::Init()
 {
     mDefaultLibPath = GetDefaultLibraryPath();
     LoadAllPlugins();
+
+#if ENABLE_HOT_PLUG
     InitWatchDir();
+#endif
 }
 
 void PluginManager::InitWatchDir()
@@ -113,7 +118,7 @@ void PluginManager::LoadPlugin(const std::string& path)
         return;
     }
 
-    if (mPluginHandles.find(path) != mPluginHandles.end() && mPluginHandles[path]) {
+    if (mPluginHandles.find(path) != mPluginHandles.end()) {
         SPR_LOGW("Plugin %s already loaded!\n", path.c_str());
         return;
     }
@@ -141,7 +146,12 @@ void PluginManager::UnloadPlugin(const std::string& path) {
         return;
     }
 
-    void* pDlHandler = dlopen(path.c_str(), RTLD_NOW);
+    if (mPluginHandles.find(path) == mPluginHandles.end()) {
+        SPR_LOGW("Plugin %s not loaded!\n", path.c_str());
+        return;
+    }
+
+    void* pDlHandler = mPluginHandles[path];
     if (!pDlHandler) {
         SPR_LOGE("Load plugin %s fail! (%s)\n", path.c_str(), dlerror());
         return;

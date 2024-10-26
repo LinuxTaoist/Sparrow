@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SPR_NEW_OBSERVER_H__
-#define __SPR_NEW_OBSERVER_H__
+#ifndef __SPR_OBSERVER_H__
+#define __SPR_OBSERVER_H__
 
 #include <memory>
 #include <string>
@@ -131,4 +131,4 @@ protected:
     SprMediatorProxy* mMsgMediatorPtr;
 };
 
-#endif
+#endif  // __SPR_OBSERVER_H__

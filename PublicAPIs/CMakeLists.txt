@@ -19,3 +19,11 @@ set_target_properties(LibPropertyAPI PROPERTIES OUTPUT_NAME "propertyapi")
 set_target_properties(LibPropertyAPI PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(LibPropertyAPI stdc++ rt dl sprbinder)
 add_dependencies     (LibPropertyAPI LibBinder)
+
+## Build libonenetapi.so
+set (SRC_ONENET_API_PATH  ${PROJECT_PATH}/PublicAPIs/OneNetInterface.cpp)
+add_library          (LibOneNetAPI SHARED ${SRC_ONENET_API_PATH})
+set_target_properties(LibOneNetAPI PROPERTIES OUTPUT_NAME "onenetapi")
+set_target_properties(LibOneNetAPI PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(LibOneNetAPI stdc++ rt dl sprbinder)
+add_dependencies     (LibOneNetAPI LibBinder)

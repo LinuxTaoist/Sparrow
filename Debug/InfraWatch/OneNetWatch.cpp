@@ -2,66 +2,64 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : MainMenu.cpp
+ *  @file       : OneNetWatch.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/04/23
+ *  @date       : 2024/10/24
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/23 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/10/24 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <stdio.h>
 #include "InfraCommon.h"
-#include "ManagersWatch.h"
-#include "MediatorWatch.h"
-#include "CustomDebugWatch.h"
-#include "MainMenu.h"
-
-using namespace InfraWatch;
+#include "OneNetInterface.h"
+#include "OneNetWatch.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-MainMenu theMainMenu;
+OneNetWatch theOneNetWatch;
 
-char MainMenu::MenuEntry()
+char OneNetWatch::MenuEntry()
 {
-    ClearScreen();
-
-    SPR_LOG("==================================  MAIN MENU  ==================================\n"
+    InfraWatch::ClearScreen();
+    SPR_LOG("============================   Manager's  Entrance   ============================\n"
             "\n"
-            "    1. Display All Message Queues \n"
-            "    2. Manager's Entrance \n"
-            "    3. Custom Debug Options \n"
+            "    1. Active PC_TEST_01 \n"
+            "    2. Active PC_TEST_02 \n"
+            "    3. Deactive device   \n"
             "\n"
-            "    [Q] Quit\n"
+            "    [Q] Quit \n"
             "\n"
             "=================================================================================\n");
 
-    char input = WaitUserInputWithoutEnter();
-    HandleInputInMenu(input);
+    bool ready = OneNetInterface::GetInstance()->IsReady();
+    if (!ready) {
+        SPR_LOG(" [!] OneNetMqtt binder connection failed! Please try again or exit.\n");
+    }
 
+    char input = InfraWatch::WaitUserInputWithoutEnter();
+    HandleInputInMenu(input);
     return input;
 }
 
-char MainMenu::HandleInputInMenu(char input)
+char OneNetWatch::HandleInputInMenu(char input)
 {
     switch(input) {
         case '1': {
-            CONTINUE_ON_NONQUIT(theMediatorWatch.MenuEntry);
+            OneNetInterface::GetInstance()->ActiveDevice("PC_TEST_01");
             break;
         }
         case '2': {
-            CONTINUE_ON_NONQUIT(theManagersWatch.MenuEntry);
+            OneNetInterface::GetInstance()->ActiveDevice("PC_TEST_02");
             break;
         }
         case '3': {
-            CONTINUE_ON_NONQUIT(theCustomDebugWatch.MenuEntry);
+            OneNetInterface::GetInstance()->DeactiveDevice();
             break;
         }
         case 'q': {
@@ -71,11 +69,5 @@ char MainMenu::HandleInputInMenu(char input)
             break;
     }
 
-    return 0;
-}
-
-int MainMenu::MenuLoop()
-{
-    CONTINUE_ON_NONQUIT(MenuEntry);
     return 0;
 }

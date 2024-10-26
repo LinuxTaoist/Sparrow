@@ -59,4 +59,4 @@ public:
     virtual int NotifyAllObserver(const SprMsg& msg) = 0;
 };
 
-#endif
+#endif  // __SPR_MEDIATOR_PROXY_H__

@@ -148,6 +148,7 @@ private:
      * @param msg
      */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
+    void MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg);
     void MsgRespondSetConnectStatus(const SprMsg& msg);
     void MsgRespondSubscribeTopic(const SprMsg& msg);
     void MsgRespondSubscribeTopicAck(const SprMsg& msg);

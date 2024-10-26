@@ -150,4 +150,4 @@ private:
     std::map<ESprMsgType, CodecFunction> mDeFuncs;
 };
 
-#endif
+#endif // __SPR_MSG_H__

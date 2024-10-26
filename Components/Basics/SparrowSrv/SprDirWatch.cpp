@@ -58,6 +58,7 @@ int SprDirWatch::AddDirWatch(const std::string& path, uint32_t mask)
 
 int SprDirWatch::RemoveDirWatch(int wd)
 {
+    SPR_LOGD("Remove watch %d\n", wd);
     if (inotify_rm_watch(mInotifyFd, wd) == -1) {
         SPR_LOGE("Remove watch %d failed! (%s)\n", wd, strerror(errno));
     }

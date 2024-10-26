@@ -23,12 +23,15 @@
 #include "GeneralUtils.h"
 #include "OneNetManager.h"
 #include "OneNetDriver.h"
+#include "OneNetHub.h"
 #include "SprEpollSchedule.h"
 
 using namespace InternalDefs;
 
 #define SPR_LOGI(fmt, args...) LOGI("EntryOneNet", fmt, ##args)
 #define SPR_LOGD(fmt, args...) LOGD("EntryOneNet", fmt, ##args)
+
+OneNetHub* gOneNetHubPtr = nullptr;
 
 // The entry of OneNet business plugin
 extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& ctx)
@@ -43,11 +46,13 @@ extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& 
         return;
     }
 
-    auto pOneDrv = new OneNetDriver(MODULE_ONENET_DRIVER, "OneDrv");
-    auto pOneMgr = new OneNetManager(MODULE_ONENET_MANAGER, "OneMgr");
+    auto pOneDrv = new (std::nothrow) OneNetDriver(MODULE_ONENET_DRIVER, "OneDrv");
+    auto pOneMgr = new (std::nothrow) OneNetManager(MODULE_ONENET_MANAGER, "OneMgr");
+    gOneNetHubPtr = new (std::nothrow) OneNetHub("OneNetMqtt", pOneMgr);
 
     pOneDrv->Initialize();
     pOneMgr->Initialize();
+    gOneNetHubPtr->InitializeHub();
     observers[MODULE_ONENET_DRIVER] = pOneDrv;
     observers[MODULE_ONENET_MANAGER] = pOneMgr;
     SPR_LOGD("Load plug-in OneNet modules\n");
@@ -56,6 +61,11 @@ extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& 
 // The exit of OneNet business plugin
 extern "C" void PluginExit(std::map<int, SprObserver*>& observers, SprContext& ctx)
 {
+    if (gOneNetHubPtr) {
+        delete gOneNetHubPtr;
+        gOneNetHubPtr = nullptr;
+    }
+
     auto it = observers.find(MODULE_ONENET_DRIVER);
     if (it != observers.end() && it->second) {
         delete it->second;
