@@ -477,7 +477,7 @@ void OneNetManager::DebugActiveDevice(const std::string& args)
     std::vector<std::string> argVec = GeneralUtils::Split(args, ' ');
     if (argVec.size() != 2) {
         SPR_LOGD("Invalid args: %s\n", args.c_str());
-        SPR_LOGE("Usage: echo active <device_name> > /tmp/debug_onenet\n");
+        SPR_LOGE("Usage: echo active {device_name} > /tmp/debug_onenet\n");
         return;
     }
 
