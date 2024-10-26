@@ -117,10 +117,11 @@ private:
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
     /* 调试函数 */
-    void DebugUsage(void* args);
-    void DebugEnableDumpLog(void* args);
-    void DebugActiveDevice(void* args);
-    void DebugDeactiveDevice(void* args);
+    void DebugUsage(const std::string& args);
+    void DebugEnableDumpLog(const std::string& args);
+    void DebugDeviceList(const std::string& args);
+    void DebugActiveDevice(const std::string& args);
+    void DebugDeactiveDevice(const std::string& args);
 
     /* 消息响应函数 */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
@@ -135,6 +136,7 @@ private:
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
 private:
+    bool mDebugEnable;
     bool mEnablePingTimer;
     bool mEnableReportTimer;
     uint32_t mReConnectReqCnt;
@@ -152,7 +154,7 @@ private:
     std::shared_ptr<PPipe> mDebugFileNode;
     std::map<std::string, std::shared_ptr<OneNetDevice>> mOneDeviceMap;
 
-    using DebugCmdFunc = void (OneNetManager::*)(void*);
+    using DebugCmdFunc = void (OneNetManager::*)(const std::string&);
     std::map<std::string, std::pair<std::string, DebugCmdFunc>> mDebugCmdMap;
 };
 

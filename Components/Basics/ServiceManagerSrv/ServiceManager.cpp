@@ -23,6 +23,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
@@ -177,6 +178,10 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
         SPR_LOGE("fork failed. errno = %d (%s).\n", errno, strerror(errno));
     } else if (pid == 0) {          // child
         static int startCount = 0;
+
+        for (int fd = sysconf(_SC_OPEN_MAX); fd > 2; fd--) {
+            close(fd);
+        }
 
         SPR_LOGD("execl %s (%d).\n", exePath.c_str(), ++startCount);
         execl(exePath.c_str(), exePath.c_str(), nullptr);

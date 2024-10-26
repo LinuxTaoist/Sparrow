@@ -165,6 +165,7 @@ void PluginManager::UnloadPlugin(const std::string& path) {
     }
 
     pExit(mPluginModules, mContext);
+    dlclose(pDlHandler);
     int num = mPluginHandles.erase(path);
     SPR_LOGD("Unload plugin %s %s!\n", path.c_str(), num > 0 ? "success" : "fail");
 }
