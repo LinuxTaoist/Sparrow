@@ -123,6 +123,7 @@ private:
     void MsgRespondMqttMsgPingreq(const SprMsg& msg);
     void MsgRespondMqttMsgPingresq(const SprMsg& msg);
     void MsgRespondMqttMsgDisconnect(const SprMsg& msg);
+    void MsgRespondDebugEnable(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
@@ -167,6 +168,7 @@ private:
     int32_t SendMqttBytes(const std::string& bytes);
 
 private:
+    bool mDebugEnable;
     bool mEnableReconTimer;
     int32_t mUnixPipeFd[2];
     std::string mSockBuffer;

@@ -259,7 +259,7 @@ int32_t OneNetManager::InitDebugDetails()
         return ch != '\r' && ch != '\n';
         }).base(), bytes.end());
 
-        SPR_LOGD("dx_debug cmd: %s\n", bytes.c_str());
+        SPR_LOGD("Recv bytes: %s\n", bytes.c_str());
         bool found = false;
         for (const auto& pair : mDebugCmdMap) {
             std::string cmd = pair.first;
@@ -453,13 +453,16 @@ void OneNetManager::DebugUsage(const std::string& args)
         SPR_LOGD("|   %d. %-20s | %-45s |\n", ++i, it->first.c_str(), it->second.first.c_str());
     }
     SPR_LOGD("+---------------------------------------------------------------------------+");
-    SPR_LOGD("|   E.g. echo active_device > /tmp/debug_onenet                             |");
+    SPR_LOGD("|   E.g. echo help > /tmp/debug_onenet                                      |");
     SPR_LOGD("-----------------------------------------------------------------------------");
 }
 
 void OneNetManager::DebugEnableDumpLog(const std::string& args)
 {
     mDebugEnable = !mDebugEnable;
+    SprMsg msg(SIG_ID_ONENET_MGR_DEBUG_ENABLE);
+    msg.SetBoolValue(mDebugEnable);
+    NotifyAllObserver(msg);
     SPR_LOGD("mDebugEnable = %d\n", mDebugEnable);
 }
 

@@ -283,6 +283,14 @@ OneNetDriver::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_MGR_DEBUG_ENABLE
+    // =============================================================
+    { LEV1_SOCKET_ANY, LEV2_ONENET_ANY,
+      SIG_ID_ONENET_MGR_DEBUG_ENABLE,
+      &OneNetDriver::MsgRespondDebugEnable
+    },
+
+    // =============================================================
     // Default case for handling unexpected messages,
     // mandatory to denote end of message table.
     // =============================================================
@@ -295,6 +303,7 @@ OneNetDriver::mStateTable =
 OneNetDriver::OneNetDriver(ModuleIDType id, const std::string& name)
              : SprObserverWithMQueue(id, name)
 {
+    mDebugEnable = false;
     mEnableReconTimer = false;
     mUnixPipeFd[0] = -1;
     mUnixPipeFd[1] = -1;
@@ -373,7 +382,6 @@ int32_t OneNetDriver::InitUnixPIPE()
     CHECK_ONENET_POINTER(mRecvPIPEPtr, -1);
     mRecvPIPEPtr->AsUnixStreamClient();
     mRecvPIPEPtr->InitFramework();
-    SPR_LOGD("dx_debug: fd = %d %d %d \n", mUnixPipeFd[0], mUnixPipeFd[1], mRecvPIPEPtr->GetEpollFd());
     return ret;
 }
 
@@ -437,6 +445,10 @@ EOneNetDrvLev2State OneNetDriver::GetLev2State()
 
 int32_t OneNetDriver::DumpSocketBytes(const std::string& tag, const std::string& bytes)
 {
+    if (!mDebugEnable) {
+        return 0;
+    }
+
     std::stringstream hexBytes;
     hexBytes << std::hex << std::setfill('0');
 
@@ -450,6 +462,10 @@ int32_t OneNetDriver::DumpSocketBytes(const std::string& tag, const std::string&
 
 int32_t OneNetDriver::DumpSocketBytesWithAscall(const std::string& bytes)
 {
+    if (!mDebugEnable) {
+        return 0;
+    }
+
     const int32_t BYTES_PER_LINE = 16; // Number of bytes per line in the dump.
     int32_t length = bytes.length();
 
@@ -767,6 +783,12 @@ void OneNetDriver::MsgRespondMqttMsgDisconnect(const SprMsg& msg)
         SprMsg sockDisMsg(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_ACTIVE);
         SendMsg(sockDisMsg);
     }
+}
+
+void OneNetDriver::MsgRespondDebugEnable(const SprMsg& msg)
+{
+    mDebugEnable = msg.GetBoolValue();
+    SPR_LOGD("mDebugEnable = %d\n", mDebugEnable);
 }
 
 /**
