@@ -26,8 +26,7 @@
 
 int main(int argc, const char *argv[])
 {
-    if (argc != 3)
-    {
+    if (argc != 3) {
         SPR_LOGE("Usage:%s <property name> <property value>", argv[0]);
         return -1;
     }

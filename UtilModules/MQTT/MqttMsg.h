@@ -135,8 +135,7 @@ protected:
     int32_t DecodeIntegerFromBytes(T& data, const std::string& bytes)
     {
         size_t len = sizeof(T);
-        if (len > bytes.size())
-        {
+        if (len > bytes.size()) {
             return -1;
         }
 

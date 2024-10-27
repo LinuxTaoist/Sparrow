@@ -38,19 +38,15 @@ SprMediatorFactory* SprMediatorFactory::GetInstance()
 SprMediatorProxy* SprMediatorFactory::GetMediatorProxy(InternalDefs::EProxyType type)
 {
     SprMediatorProxy* pProxy = nullptr;
-    switch (type)
-    {
-        case MEDIATOR_PROXY_MQUEUE:
-        {
+    switch (type) {
+        case MEDIATOR_PROXY_MQUEUE: {
             pProxy = SprMediatorMQProxy::GetInstance();
             break;
         }
-        case MEDIATOR_PROXY_SOCKET:
-        {
+        case MEDIATOR_PROXY_SOCKET: {
             break;
         }
-        default:
-        {
+        default: {
             break;
         }
     }

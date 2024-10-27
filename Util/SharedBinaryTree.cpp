@@ -105,8 +105,7 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
 {
     sem_wait(&mSemaphore);
 
-    if (key.size() >= KEY_SIZE ||  value.size() >= VALUE_SIZE)
-    {
+    if (key.size() >= KEY_SIZE ||  value.size() >= VALUE_SIZE) {
         SPR_LOGW("Lenght out of limit! Limit length: %d %d\n", KEY_SIZE, VALUE_SIZE);
     }
 
@@ -132,8 +131,7 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
 
     // 更新共享内存使用大小
     mCurUsedSize += sizeof(Node);
-    if (mCurUsedSize > mSize)
-    {
+    if (mCurUsedSize > mSize) {
         SPR_LOGE("Resource ou of limit! mCurUsedSize = %zu, mSize = %zu\n", mCurUsedSize, mSize);
         sem_post(&mSemaphore);
         return -1;
@@ -202,8 +200,7 @@ void SharedBinaryTree::GetAllKeyValues(std::map<std::string, std::string>& keyVa
 
 void SharedBinaryTree::GetKeyValue(Node* pNode, std::map<std::string, std::string>& keyValueMap)
 {
-    if (pNode != nullptr)
-    {
+    if (pNode != nullptr) {
         GetKeyValue(pNode->left, keyValueMap);
         GetKeyValue(pNode->right, keyValueMap);
         keyValueMap[pNode->key] = pNode->value;

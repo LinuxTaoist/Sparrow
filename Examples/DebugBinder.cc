@@ -56,18 +56,14 @@ int Server()
         int cmd = 0;
         pReqParcel->Wait();
         pReqParcel->ReadInt(cmd);
-        switch(cmd)
-        {
-            case CMD_TEST:
-            {
+        switch(cmd) {
+            case CMD_TEST: {
                 SPR_LOGD("CMD_TEST\n");
                 pRspParcel->WriteInt(0);
                 pRspParcel->Post();
                 break;
             }
-
-            case CMD_SUM:
-            {
+            case CMD_SUM: {
                 SPR_LOGD("CMD_SUM\n");
                 int a = 0, b = 0;
                 pReqParcel->ReadInt(a);
@@ -79,32 +75,25 @@ int Server()
                 pRspParcel->Post();
                 break;
             }
-
-            case CMD_VEC:
-            {
+            case CMD_VEC: {
                 std::vector<int> vec = {1, 2, 3, 4, 5};
                 pRspParcel->WriteVector(vec);
                 pRspParcel->WriteInt(0);
                 pRspParcel->Post();
                 break;
             }
-
-            case CMD_CUST_VEC:
-            {
+            case CMD_CUST_VEC: {
                 std::vector<STestData> vec = {{1,1}, {2,2}, {3,4}};
                 pRspParcel->WriteVector(vec);
                 pRspParcel->WriteInt(0);
                 pRspParcel->Post();
                 break;
             }
-
-            default:
-            {
+            default: {
                 SPR_LOGE("Unknown cmd: %d\n", cmd);
                 break;
             }
         }
-
     } while(1);
 
     return 0;
@@ -141,14 +130,11 @@ int Client()
     SPR_LOGD("Client start\n");
     usage();
 
-    do
-    {
+    do {
         SPR_LOGD("Input: \n");
         std::cin >> in;
-        switch (in)
-        {
-            case '0':
-            {
+        switch (in) {
+            case '0': {
                 pReqParcel->WriteInt(CMD_TEST);
                 pReqParcel->Post();
 
@@ -158,9 +144,7 @@ int Client()
                 SPR_LOGD("ret: %d\n", ret);
                 break;
             }
-
-            case '1':
-            {
+            case '1': {
                 pReqParcel->WriteInt(CMD_SUM);
                 pReqParcel->WriteInt(10);
                 pReqParcel->WriteInt(20);
@@ -173,9 +157,7 @@ int Client()
                 SPR_LOGD("sum = %d, ret = %d\n", sum, ret);
                 break;
             }
-
-            case '2':
-            {
+            case '2': {
                 pReqParcel->WriteInt(CMD_VEC);
                 pReqParcel->Post();
 
@@ -189,9 +171,7 @@ int Client()
                 }
                 break;
             }
-
-            case '3':
-            {
+            case '3': {
                 pReqParcel->WriteInt(CMD_CUST_VEC);
                 pReqParcel->Post();
 
@@ -205,14 +185,12 @@ int Client()
                 }
                 break;
             }
-
             case 'h':
                 usage();
                 break;
 
             case 'q':
                 break;
-
             default:
                 break;
         }

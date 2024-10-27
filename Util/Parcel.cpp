@@ -35,8 +35,7 @@ const int SHM_MAX_SIZE  = 10 * 1024;    // 10KB
 Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master), mShmKey(key), mShmPath(path)
 {
     mRingBuffer = new (std::nothrow)SharedRingBuffer(std::string(SHM_ROOT_PATH) + path, SHM_MAX_SIZE);
-    if (mRingBuffer == nullptr)
-    {
+    if (mRingBuffer == nullptr) {
         SPR_LOGE("mRingBuffer is nullptr!\n");
     }
 
@@ -179,8 +178,7 @@ int Parcel::ReadData(void* data, int& size)
 int Parcel::Wait()
 {
     while (!mRingBuffer->IsReadable())  {
-        if (sem_wait(mSem) != 0)
-        {
+        if (sem_wait(mSem) != 0) {
             SPR_LOGE("sem_wait failed! (%s)\n", strerror(errno));
         }
     }
@@ -190,8 +188,7 @@ int Parcel::Wait()
 
 int Parcel::Post()
 {
-    if (sem_post(mSem) != 0)
-    {
+    if (sem_post(mSem) != 0) {
         SPR_LOGE("sem_post failed! (%s)\n", strerror(errno));
     }
 

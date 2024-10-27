@@ -37,10 +37,8 @@ int main(int argc, const char *argv[])
     do {
         SPR_LOGD("Input: ");
         std::cin >> val;
-        switch(val)
-        {
-            case '0':   // debug SprMsg
-            {
+        switch(val) {
+            case '0': {  // debug SprMsg
                 SprMsg theEnMsg((uint32_t)SIG_ID_DEBUG_MSG_SERIAL);
                 theEnMsg.SetBoolValue(false);
                 theEnMsg.SetFrom(0x01);

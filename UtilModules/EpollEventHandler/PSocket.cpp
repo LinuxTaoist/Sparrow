@@ -35,8 +35,7 @@ PSocket::PSocket(int domain, int type, int protocol, const std::function<void(in
 {
     mEnable = true;
     mEpollFd = socket(domain, type, protocol);
-    if (mEpollFd == -1)
-    {
+    if (mEpollFd == -1) {
         mEnable = false;
         SPR_LOGE("socket failed! (%s)\n", strerror(errno));
     }
@@ -410,8 +409,7 @@ ERROR:
 void* PSocket::EpollEvent(int fd, EpollType eType, void* arg)
 {
     switch (mSockType) {
-        case PSOCKET_TYPE_TCP_SERVER:
-        {
+        case PSOCKET_TYPE_TCP_SERVER: {
             struct sockaddr_in client;
             socklen_t len = (socklen_t)sizeof(client);
             int sock = accept(fd, (struct sockaddr *)&client, &len);
@@ -423,9 +421,7 @@ void* PSocket::EpollEvent(int fd, EpollType eType, void* arg)
             fd = sock;
             break;
         }
-
-        case PSOCKET_TYPE_UN_STREAM_SERVER:
-        {
+        case PSOCKET_TYPE_UN_STREAM_SERVER: {
             struct sockaddr_un client;
             socklen_t len = (socklen_t)sizeof(client);
             int sock = accept(fd, (struct sockaddr *)&client, &len);
@@ -437,17 +433,14 @@ void* PSocket::EpollEvent(int fd, EpollType eType, void* arg)
             fd = sock;
             break;
         }
-
         case PSOCKET_TYPE_TCP_CLIENT:
         case PSOCKET_TYPE_UDP_SERVER:
         case PSOCKET_TYPE_UDP_CLIENT:
         case PSOCKET_TYPE_UN_STREAM_CLIENT:
         case PSOCKET_TYPE_UN_DGRAM_SERVER:
-        case PSOCKET_TYPE_UN_DGRAM_CLIENT:
-        {
+        case PSOCKET_TYPE_UN_DGRAM_CLIENT: {
             break;
         }
-
         case PSOCKET_TYPE_IDLE:
         default:
             SPR_LOGD("No this option %d! \n", mSockType);

@@ -125,8 +125,7 @@ int SharedRingBuffer::write(const void* data, int32_t len)
     int ret = -1;
     int retry = RETRY_TIMES;
 
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -160,8 +159,7 @@ int SharedRingBuffer::read(void* data, int32_t len)
     int ret = -1;
     int retry = RETRY_TIMES;
 
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -191,8 +189,7 @@ int SharedRingBuffer::read(void* data, int32_t len)
 
 int32_t SharedRingBuffer::AvailSpace() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -202,8 +199,7 @@ int32_t SharedRingBuffer::AvailSpace() const noexcept
 
 int32_t SharedRingBuffer::AvailData() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -233,8 +229,7 @@ int32_t SharedRingBuffer::AvailData() const noexcept
 
 bool SharedRingBuffer::IsReadable() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return false;
     }
@@ -244,8 +239,7 @@ bool SharedRingBuffer::IsReadable() const noexcept
 
 bool SharedRingBuffer::IsWriteable() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return false;
     }
@@ -255,14 +249,12 @@ bool SharedRingBuffer::IsWriteable() const noexcept
 
 void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return;
     }
 
-    if (pos == nullptr)
-    {
+    if (pos == nullptr) {
         SPR_LOGE("pos is nullptr!\n");
         return;
     }
@@ -274,8 +266,7 @@ void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const no
 
 void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return;
     }
@@ -292,8 +283,7 @@ void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
 
 void SharedRingBuffer::DumpErrorInfo()
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return ;
     }

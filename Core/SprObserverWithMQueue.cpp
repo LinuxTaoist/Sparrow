@@ -124,25 +124,20 @@ int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
 
 int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
 {
-    switch (msg.GetMsgId())
-    {
-        case SIG_ID_PROXY_REGISTER_RESPONSE:
-        {
+    switch (msg.GetMsgId()) {
+        case SIG_ID_PROXY_REGISTER_RESPONSE: {
             MsgRespondRegisterRsp(msg);
             break;
         }
-        case SIG_ID_PROXY_UNREGISTER_RESPONSE:
-        {
+        case SIG_ID_PROXY_UNREGISTER_RESPONSE: {
             MsgRespondUnregisterRsp(msg);
             break;
         }
-        case SIG_ID_SYSTEM_EXIT:
-        {
+        case SIG_ID_SYSTEM_EXIT: {
             MsgRespondSystemExitRsp(msg);
             break;
         }
-        default:
-        {
+        default: {
             ProcessMsg(msg);
             break;
         }

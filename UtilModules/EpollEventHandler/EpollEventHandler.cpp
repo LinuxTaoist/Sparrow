@@ -129,8 +129,7 @@ void EpollEventHandler::EpollLoop(bool bRun)
 void EpollEventHandler::ExitLoop()
 {
     mRun = false;
-    if (mHandle != -1)
-    {
+    if (mHandle != -1) {
         close(mHandle);
         mHandle = -1;
     }

@@ -53,8 +53,7 @@ MqttMsgBase::MqttMsgBase(const MqttMsgBase& msg)
 
 MqttMsgBase& MqttMsgBase::operator=(const MqttMsgBase& msg)
 {
-    if (this != &msg)
-    {
+    if (this != &msg) {
         mFixedHeader = msg.mFixedHeader;
         mVariableHeader = msg.mVariableHeader;
         mPayload = msg.mPayload;
@@ -71,8 +70,7 @@ MqttMsgBase::MqttMsgBase(MqttMsgBase&& msg)
 
 MqttMsgBase& MqttMsgBase::operator=(MqttMsgBase&& msg)
 {
-    if (this != &msg)
-    {
+    if (this != &msg) {
         mFixedHeader = std::move(msg.mFixedHeader);
         mVariableHeader = std::move(msg.mVariableHeader);
         mPayload = std::move(msg.mPayload);
@@ -125,12 +123,9 @@ int32_t MqttMsgBase::GetPayload(std::string& payload)
 int32_t MqttMsgBase::Decode(const std::string& bytes)
 {
     int32_t len = 0;
-
     CHECK_ADD_RESULT(DecodeFixedHeader(bytes), len);
     CHECK_ADD_RESULT(DecodeVariableHeader(bytes.substr(len)), len);
     CHECK_ADD_RESULT(DecodePayload(bytes.substr(len)), len);
-    SPR_LOGD("Decode len = %d\n", len);
-
     return len;
 }
 

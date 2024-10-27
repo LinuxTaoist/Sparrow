@@ -51,8 +51,7 @@ public:
 
     int ProcessMsg(const SprMsg& msg)
     {
-        switch(msg.GetMsgId())
-        {
+        switch(msg.GetMsgId()) {
             default:
                 SPR_LOGD("msg id: %s %s\n", GetSigName(msg.GetMsgId()), GetCurTimeStr().c_str());
                 break;
@@ -99,16 +98,13 @@ int main(int argc, const char *argv[])
             SPR_LOGD("Input: \n");
             val = fgetc(stdin);
             getchar();
-            switch(val)
-            {
-                case '0':
-                {
+            switch(val) {
+                case '0': {
                     SprMsg msg(SIG_ID_DEBUG_NOTIFY_ALL);
                     theDebug.NotifyAllObserver(msg);
                     break;
                 }
-                case '1':
-                {
+                case '1': {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 1000, 3000};
                     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
@@ -118,8 +114,7 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-                case '2':
-                {
+                case '2': {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 0, 0};
                     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
@@ -128,8 +123,7 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-                case '3':
-                {
+                case '3': {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 10, 0, 2000};
                     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
@@ -139,8 +133,7 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-                case '4':
-                {
+                case '4': {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 0, 0, 0};
                     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
@@ -150,8 +143,7 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-                case '5':
-                {
+                case '5': {
                     STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST, 0, 0, 20};
                     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
@@ -161,53 +153,45 @@ int main(int argc, const char *argv[])
 
                     break;
                 }
-                case '6':
-                {
+                case '6': {
                     pPowerM->PowerOn();
                     break;
                 }
-                case '7':
-                {
+                case '7': {
                     pPowerM->PowerOff();
                     SprEpollSchedule::GetInstance()->ExitLoop();
                     break;
                 }
-                case '8':
-                {
+                case '8': {
                     SprMsg msg( MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
                     theDebug.NotifyObserver(msg);
                     break;
                 }
-                case '9':
-                {
+                case '9': {
                     SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("MQTT-OneJson01");
                     theDebug.NotifyObserver(msg);
                     break;
                 }
-                case 'a':
-                {
+                case 'a': {
                     SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("MQTT-DEV01");
                     theDebug.NotifyObserver(msg);
                     break;
                 }
-                case 'b':
-                {
+                case 'b': {
                     SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("PC_TEST_01");
                     theDebug.NotifyObserver(msg);
                     break;
                 }
-                case 'c':
-                {
+                case 'c': {
                     SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("PC_TEST_02");
                     theDebug.NotifyObserver(msg);
                     break;
                 }
-                case 'd':
-                {
+                case 'd': {
                     RunningTiming timing;
                     usleep(10000);  // 10ms
                     SPR_LOGD("Timing 1: add 10ms %ds, %dms\n", timing.GetElapsedTimeInSec(), timing.GetElapsedTimeInMSec());
@@ -217,8 +201,7 @@ int main(int argc, const char *argv[])
                     SPR_LOGD("Timing 3: add 30ms %ds, %dms\n", timing.GetElapsedTimeInSec(), timing.GetElapsedTimeInMSec());
                     break;
                 }
-                case 'q':
-                {
+                case 'q': {
                     run = false;
                     break;
                 }
