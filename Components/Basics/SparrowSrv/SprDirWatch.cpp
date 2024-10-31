@@ -38,7 +38,7 @@ SprDirWatch::SprDirWatch()
 SprDirWatch::~SprDirWatch()
 {
     for (int wd : mWatchFds) {
-        RemoveDirWatch(wd);
+        DelDirWatch(wd);
     }
     close(mInotifyFd);
 }
@@ -56,11 +56,11 @@ int SprDirWatch::AddDirWatch(const std::string& path, uint32_t mask)
     return wd;
 }
 
-int SprDirWatch::RemoveDirWatch(int wd)
+int SprDirWatch::DelDirWatch(int wd)
 {
-    SPR_LOGD("Remove watch %d\n", wd);
+    SPR_LOGD("Delete watch %d\n", wd);
     if (inotify_rm_watch(mInotifyFd, wd) == -1) {
-        SPR_LOGE("Remove watch %d failed! (%s)\n", wd, strerror(errno));
+        SPR_LOGE("Delete watch %d failed! (%s)\n", wd, strerror(errno));
     }
 
     mWatchFds.erase(wd);
