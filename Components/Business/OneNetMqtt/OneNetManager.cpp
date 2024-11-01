@@ -248,7 +248,7 @@ int32_t OneNetManager::Init()
 int32_t OneNetManager::InitDebugDetails()
 {
     mDebugCmdMap.insert(std::make_pair("help",            std::make_pair("debug cmd lists",     &OneNetManager::DebugUsage)));
-    mDebugCmdMap.insert(std::make_pair("enable_dump_log", std::make_pair("dump log on-off",     &OneNetManager::DebugEnableDumpLog)));
+    mDebugCmdMap.insert(std::make_pair("debug",           std::make_pair("dump log on-off",     &OneNetManager::DebugEnableDumpLog)));
     mDebugCmdMap.insert(std::make_pair("device_list",     std::make_pair("show device list",    &OneNetManager::DebugDeviceList)));
     mDebugCmdMap.insert(std::make_pair("active",          std::make_pair("active device",       &OneNetManager::DebugActiveDevice)));
     mDebugCmdMap.insert(std::make_pair("deactive",        std::make_pair("deactive device",     &OneNetManager::DebugDeactiveDevice)));

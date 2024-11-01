@@ -22,6 +22,7 @@
 #include <sstream>
 #include <stdarg.h>
 #include <signal.h>
+#include <string.h>
 #include "GeneralUtils.h"
 
 namespace GeneralUtils {
@@ -192,6 +193,28 @@ int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, c
     }
 
     return -1;
+}
+
+void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen)
+{
+    if (srcMem == nullptr || tarMem == nullptr || tLen <= 0 || sLen <= 0 || sLen < tLen) {
+        return nullptr;
+    }
+
+    const char *pSrc = (const char*)srcMem;
+    const char *pEnd = (const char*)srcMem + sLen - tLen;
+    while(pSrc <= pEnd) {
+        if (pSrc == nullptr || pEnd == nullptr) {
+            return nullptr;
+        }
+
+        if (memcmp(pSrc, tarMem, tLen) == 0) {
+            return (void*)pSrc;
+        }
+        ++pSrc;
+    }
+
+    return nullptr;
 }
 
 }; // namespace GeneralUtils

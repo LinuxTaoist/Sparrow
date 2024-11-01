@@ -142,6 +142,17 @@ int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, ch
  */
 int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out);
 
+/**
+ * @brief  Find the memory address of the target memory in the source memory
+ *
+ * @param srcMem  The source memory to search in
+ * @param sLen  The length of the source memory
+ * @param tarMem  The target memory to find
+ * @param tLen  The length of the target memory
+ * @return  A address pointer of the source memory, or nullptr if not found
+ */
+void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen);
+
 }; // namespace GeneralUtils
 
 #endif // __GENERAL_UTILS_H__
