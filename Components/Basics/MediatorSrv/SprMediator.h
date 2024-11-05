@@ -45,6 +45,7 @@ public:
     static int StopWork();
 
     int GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
+    std::string GetSignalName(int sig);
 
 private:
     explicit SprMediator(int size);

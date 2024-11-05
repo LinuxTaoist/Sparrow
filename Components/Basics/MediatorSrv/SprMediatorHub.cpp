@@ -48,6 +48,15 @@ void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             pRspParcel->Post();
             break;
         }
+        case PROXY_CMD_GET_SIGNAL_NAME: {
+            int id = 0;
+            pReqParcel->ReadInt(id);
+
+            std::string signalName = mSprMediator->GetSignalName(id);
+            pRspParcel->WriteString(signalName);
+            pRspParcel->Post();
+            break;
+        }
         default: {
             SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
             break;

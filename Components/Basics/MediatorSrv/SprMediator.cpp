@@ -169,6 +169,12 @@ int SprMediator::GetAllMQStatus(std::vector<SMQStatus> &mqInfoList)
     return 0;
 }
 
+std::string SprMediator::GetSignalName(int sig)
+{
+    std::string name = GetSigName(sig);
+    return name;
+}
+
 int SprMediator::LoadMQStaticInfo(int handle, const std::string& devName)
 {
     SMQStatus tmpMQStatus = {};

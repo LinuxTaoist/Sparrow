@@ -75,3 +75,20 @@ int SprMediatorInterface::GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec)
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
+
+std::string SprMediatorInterface::GetSigalName(int sig)
+{
+    if (!mEnable) {
+        SPR_LOGE("Property is disable!\n");
+        return "";
+    }
+
+    pReqParcel->WriteInt(PROXY_CMD_GET_SIGNAL_NAME);
+    pReqParcel->WriteInt(sig);
+    pReqParcel->Post();
+
+    std::string name;
+    pRspParcel->Wait();
+    pRspParcel->ReadString(name);
+    return name;
+}

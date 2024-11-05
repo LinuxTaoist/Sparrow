@@ -28,7 +28,7 @@ namespace InfraWatch {
 void ClearScreen();
 char WaitUserInputUntilEnter();
 char WaitUserInputWithoutEnter();
-
+int  ReadIntFromUserInput(int& input);
 };
 
 #endif // __INFRA_COMMON_H__

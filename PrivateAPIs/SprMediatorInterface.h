@@ -46,6 +46,14 @@ public:
      */
     int GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec);
 
+    /**
+     * @brief Get the signal name
+     *
+     * @param sig  sig
+     * @return the signal name of the sig
+     */
+    std::string GetSigalName(int sig);
+
 private:
     /**
      * @brief Constructor

@@ -28,7 +28,9 @@ public:
     char MenuEntry();
 
 private:
-    char HandleInputInMenu(char input);
+    char ShowMQStatus();
+    char ShowFieldDetails();
+    char ShowSignalName();
 };
 
 extern MediatorWatch theMediatorWatch;
