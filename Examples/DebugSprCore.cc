@@ -79,6 +79,7 @@ static void usage()
             "b: Active PC_TEST_01\n"
             "c: Active PC_TEST_02\n"
             "d: Test RunningTiming\n"
+            "e: Test sync ntp time\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -186,7 +187,7 @@ int main(int argc, const char *argv[])
                     break;
                 }
                 case 'c': {
-                    SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("PC_TEST_02");
                     theDebug.NotifyObserver(msg);
                     break;
@@ -199,6 +200,11 @@ int main(int argc, const char *argv[])
                     SPR_LOGD("Timing 2: add 1s   %ds, %dms\n", timing.GetElapsedTimeInSec(), timing.GetElapsedTimeInMSec());
                     usleep(30000);  // 30ms
                     SPR_LOGD("Timing 3: add 30ms %ds, %dms\n", timing.GetElapsedTimeInSec(), timing.GetElapsedTimeInMSec());
+                    break;
+                }
+                case 'e': {
+                    SprMsg msg(MODULE_TIMEM, SIG_ID_TIMEM_NTP_SYNC);
+                    theDebug.NotifyObserver(msg);
                     break;
                 }
                 case 'q': {

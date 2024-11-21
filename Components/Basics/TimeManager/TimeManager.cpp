@@ -29,7 +29,7 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("TimeMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("TimeMgr", fmt, ##args)
 
-#define DEFAULT_NTP_ADDR    "ntp.tencen.com"
+#define DEFAULT_NTP_ADDR    "ntp1.tencent.com"
 #define DEFAULT_NTP_PORT    123
 
 TimeManager::TimeManager(ModuleIDType id, const std::string& name)
@@ -37,6 +37,9 @@ TimeManager::TimeManager(ModuleIDType id, const std::string& name)
 {
     mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
     mCurTimeSource = TIME_SOURCE_TYPE_BUTT;
+    mNtpCliPtr = make_shared<NtpClient>(DEFAULT_NTP_ADDR, DEFAULT_NTP_PORT, [&](double time) {
+        SPR_LOGD("Receive ntp time: %f", time);
+    });
 }
 
 TimeManager::~TimeManager()
@@ -56,14 +59,14 @@ int32_t TimeManager::InitDebugDetails()
 
 int32_t TimeManager::RequestNtpTime()
 {
-    int ret = 0;
-    std::string addr = DEFAULT_NTP_ADDR;
-    uint16_t port = DEFAULT_NTP_PORT;
-    mNtpCliPtr = make_shared<NtpClient>(addr, port, [&](double time) {
-        SPR_LOGD("NTP time: %f", time);
-    });
+    if (!mNtpCliPtr) {
+        SPR_LOGE("Ntp client is nullptr!");
+        return -1;
+    }
 
-    ret = mNtpCliPtr->SendTimeRequest();
+    SPR_LOGD("Start request ntp time");
+    int ret = mNtpCliPtr->SendTimeRequest();
+    SPR_LOGD("Request ntp time ret = %d\n", ret);
     return ret;
 }
 

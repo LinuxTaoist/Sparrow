@@ -25,6 +25,7 @@
 #include <sys/un.h>
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
+#include <netdb.h>
 #include "PSocket.h"
 
 #define SPR_LOGD(fmt, args...) printf("%4d PSocket D: " fmt, __LINE__, ##args)
@@ -110,6 +111,37 @@ ERROR:
     return -1;
 }
 
+std::string PSocket::ResolveHostToIp(const std::string& input) {
+    struct addrinfo hints, *res;
+    char ipstr[INET6_ADDRSTRLEN];
+    int status;
+
+    memset(&hints, 0, sizeof(hints));
+    hints.ai_family = AF_UNSPEC;
+    hints.ai_socktype = SOCK_STREAM;
+    if ((status = getaddrinfo(input.c_str(), nullptr, &hints, &res)) != 0) {
+        if (input.find('.') != std::string::npos || input.find(':') != std::string::npos) {
+            return input;
+        } else {
+            SPR_LOGE("getaddrinfo error: %s\n", gai_strerror(status));
+            return "";
+        }
+    }
+
+    void* addr;
+    if (res->ai_family == AF_INET) {    // IPv4
+        struct sockaddr_in* ipv4 = (struct sockaddr_in*)res->ai_addr;
+        addr = &(ipv4->sin_addr);
+    } else {                            // IPv6
+        struct sockaddr_in6* ipv6 = (struct sockaddr_in6*)res->ai_addr;
+        addr = &(ipv6->sin6_addr);
+    }
+
+    inet_ntop(res->ai_family, addr, ipstr, sizeof(ipstr));
+    freeaddrinfo(res);
+    return std::string(ipstr);
+}
+
 int PSocket::AsTcpClient(bool con, const std::string& srvAddr, short srvPort, int rcvLen, int sndLen)
 {
     if (!mEnable || mSockType != PSOCKET_TYPE_IDLE) {
@@ -120,6 +152,12 @@ int PSocket::AsTcpClient(bool con, const std::string& srvAddr, short srvPort, in
     int flags, op;
     struct linger so_linger;
     struct sockaddr_in server;
+
+    std::string ip = ResolveHostToIp(srvAddr);
+    if (ip.empty()) {
+        SPR_LOGE("Resolve %s failed!\n", srvAddr.c_str());
+        goto ERROR;
+    }
 
     op = rcvLen;
     if (setsockopt(mEpollFd, SOL_SOCKET, SO_RCVBUF, &op, sizeof(op)) < 0) {
@@ -148,11 +186,11 @@ int PSocket::AsTcpClient(bool con, const std::string& srvAddr, short srvPort, in
 
     if (con) {
         server.sin_family = AF_INET;
-        server.sin_addr.s_addr = inet_addr(srvAddr.c_str());
+        server.sin_addr.s_addr = inet_addr(ip.c_str());
         server.sin_port = htons(srvPort);
         // Linux TCP repeat connect directly return EISCONN.
         if (connect(mEpollFd, (struct sockaddr*)&server, sizeof(server)) < 0 && errno != EISCONN) {
-            SPR_LOGE("connect failed! (%s)\n", strerror(errno));
+            SPR_LOGE("connect %s failed! (%s)\n", ip.c_str(), strerror(errno));
             goto ERROR;
         }
     }

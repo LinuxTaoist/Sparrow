@@ -69,6 +69,9 @@ public:
     virtual void*   EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
+    std::string ResolveHostToIp(const std::string& input);
+
+private:
     bool            mEnable;
     PSocketType     mSockType;
     std::function<void(int, void*)> mCb;

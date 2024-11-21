@@ -42,9 +42,6 @@ using namespace std;
 #define NTP_MIN_LEN        48
 #define JAN_1970   0x83aa7e80
 
-#define NTP_SERVER_PORT   123
-#define NTP_SERVER_ADDR "119.28.183.184"
-
 #define NTP_CONV_FRAC32(x) (uint64_t)((x) * ((uint64_t)1 << 32))
 #define NTP_REVE_FRAC32(x) ((double)((double)(x) / ((uint64_t)1 << 32)))
 #define NTP_CONV_FRAC16(x) (uint32_t)((x) * ((uint32_t)1 << 16))
@@ -92,6 +89,7 @@ struct NtpHdr
 NtpClient::NtpClient(const std::string addr, uint16_t port, const std::function<void(double)>& cb)
     : mIsReady(false), mPort(port), mAddr(addr), mCb(cb)
 {
+    InitNtpClient();
 }
 
 NtpClient::~NtpClient()
@@ -101,12 +99,23 @@ NtpClient::~NtpClient()
 int32_t NtpClient::SendTimeRequest()
 {
     int ret = -1;
-    if (!mIsReady || !mNtpCliPtr) {
-        InitNtpClient();
+    if (!mNtpCliPtr) {
+        SPR_LOGE("mNtpCliPtr is nullptr\n");
+        return ret;
+    }
+
+    if (!mIsReady) {
+        SPR_LOGD("Creating tcp client %s:%d\n", mAddr.c_str(), mPort);
+        ret = mNtpCliPtr->AsTcpClient(true, mAddr.c_str(), mPort);
+        if (ret == -1) {
+            SPR_LOGE("As tcp client %s:%d failed!\n", mAddr.c_str(), mPort);
+            return ret;
+        }
     }
 
     struct NtpHdr ntp;
     struct timeval tv;
+    mIsReady = true;
     ntp.ntpLi = NTP_LI;
     ntp.ntpVn = NTP_VERSION_NUM;
     ntp.ntpMode = NTP_MODE_CLIENT;
@@ -130,7 +139,6 @@ int32_t NtpClient::SendTimeRequest()
 
 int32_t NtpClient::InitNtpClient()
 {
-    int32_t ret = 0;
     mNtpCliPtr = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int sock, void *arg) {
         PSocket* pCliObj = (PSocket*)arg;
         if (pCliObj == nullptr) {
@@ -144,7 +152,7 @@ int32_t NtpClient::InitNtpClient()
             SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
             HandleNtpBytes(rBuf);
         } else {
-            SPR_LOGD("## CLOSE [%d]\n", sock);
+            SPR_LOGD("# CLOSE [%d]\n", sock);
         }
 
         // Only once read
@@ -153,11 +161,7 @@ int32_t NtpClient::InitNtpClient()
         pCliObj->Close();
     });
 
-    ret = mNtpCliPtr->AsTcpClient(true, mAddr.c_str(), mPort);
-    if (ret != -1) {
-        mIsReady = true;
-    }
-    return ret;
+    return mNtpCliPtr ? 0 : -1;
 }
 
 double NtpClient::GetOffset(void* ntp, void* local)
