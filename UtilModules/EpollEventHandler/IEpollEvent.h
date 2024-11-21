@@ -33,6 +33,8 @@ public:
     virtual ~IEpollEvent() = default;
     virtual ssize_t Write(int fd, const std::string& bytes);
     virtual ssize_t Read(int fd, std::string& bytes);
+    virtual void    AddToPoll();
+    virtual void    DelFromPoll();
     virtual void*   EpollEvent(int fd, EpollType eType, void* arg) = 0;
 
     int         GetEpollFd()        { return mEpollFd; }

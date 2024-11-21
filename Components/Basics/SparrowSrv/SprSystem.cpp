@@ -31,6 +31,7 @@
 #include "SprSystem.h"
 #include "SprTimeTrace.h"
 #include "CoreTypeDefs.h"
+#include "TimeManager.h"
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
 #include "EpollEventHandler.h"
@@ -136,6 +137,9 @@ void SprSystem::Init()
     SPR_LOGD("=============================================\n");
 
     InitEnv();
+
+    TTP(8, "TimeManager->Initialize()");
+    TimeManager::GetInstance(MODULE_TIMEM, "TimeM")->Initialize();
 
     TTP(9, "systemTimerPtr->Initialize()");
     shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");

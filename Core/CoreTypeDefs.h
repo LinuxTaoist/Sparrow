@@ -71,6 +71,7 @@ enum ESprModuleID
     MODULE_PROPERTYM,
     MODULE_CONFIG,
     MODULE_LOGM,
+    MODULE_TIMEM,
     MODULE_TIMERM,
     MODULE_SYSTEM_TIMER,
     MODULE_POWERM,
@@ -152,6 +153,13 @@ enum EModuleBootPriority
     BOOT_PRIORITY_MEDIUM        = 3,    // used for main business services
     BOOT_PRIORITY_MEDIUM_LOW    = 4,    // used for ancillary services, not need to start immediately.
     BOOT_PRIORITY_LOWEST        = 5     // used for optional services
+};
+
+enum TimeSourceType
+{
+    TIME_SOURCE_TYPE_NTP = 0,
+    TIME_SOURCE_TYPE_GNSS,
+    TIME_SOURCE_TYPE_BUTT
 };
 
 typedef struct

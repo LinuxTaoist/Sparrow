@@ -31,7 +31,7 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("PlugMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("PlugMgr", fmt, ##args)
 
-#define ENABLE_HOT_PLUG 1
+#define ENABLE_HOT_PLUG 0
 
 PluginManager::PluginManager()
 {

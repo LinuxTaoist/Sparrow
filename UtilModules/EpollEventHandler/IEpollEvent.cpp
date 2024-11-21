@@ -19,6 +19,7 @@
 #include <vector>
 #include <unistd.h>
 #include "IEpollEvent.h"
+#include "EpollEventHandler.h"
 
 ssize_t IEpollEvent::Write(int fd, const std::string& bytes)
 {
@@ -84,4 +85,14 @@ ssize_t IEpollEvent::Read(int fd, std::string& bytes)
     }
 
     return totalBytesRead; // 成功读取的字节数
+}
+
+void IEpollEvent::AddToPoll()
+{
+    EpollEventHandler::GetInstance()->AddPoll(this);
+}
+
+void IEpollEvent::DelFromPoll()
+{
+    EpollEventHandler::GetInstance()->DelPoll(this);
 }
