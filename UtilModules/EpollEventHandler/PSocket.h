@@ -66,10 +66,8 @@ public:
     int AsUnixDgramServer(const std::string& serverName);
     int AsUnixDgramClient(const std::string& serverName);
 
-    virtual void*   EpollEvent(int fd, EpollType eType, void* arg) override;
-
-private:
     std::string ResolveHostToIp(const std::string& input);
+    virtual void*   EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
     bool            mEnable;

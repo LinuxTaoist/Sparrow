@@ -250,10 +250,6 @@ int PSocket::AsUdpClient(const std::string& srvAddr, short srvPort, int sndLen)
 
     int flags, op;
     struct linger so_linger;
-
-    flags = fcntl(mEpollFd, F_GETFL, 0);
-    fcntl(mEpollFd, F_SETFL, flags | O_NONBLOCK);
-
     struct sockaddr_in server;
     server.sin_family = AF_INET;
     server.sin_addr.s_addr = inet_addr(srvAddr.c_str());
@@ -277,6 +273,9 @@ int PSocket::AsUdpClient(const std::string& srvAddr, short srvPort, int sndLen)
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         goto ERROR;
     }
+
+    flags = fcntl(mEpollFd, F_GETFL, 0);
+    fcntl(mEpollFd, F_SETFL, flags | O_NONBLOCK);
 
     mSockType = PSOCKET_TYPE_UDP_CLIENT;
     return 0;
