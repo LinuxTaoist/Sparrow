@@ -275,7 +275,7 @@ int32_t OneNetManager::InitDebugDetails()
         }
     }, this);
 
-    mDebugFileNode->AddPoll();
+    mDebugFileNode->AddToPoll();
     return 0;
 }
 

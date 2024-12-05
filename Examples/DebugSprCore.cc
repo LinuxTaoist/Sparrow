@@ -219,7 +219,7 @@ int main(int argc, const char *argv[])
         } while(run);
     });
 
-    SprEpollSchedule::GetInstance()->EpollLoop(true);
+    SprEpollSchedule::GetInstance()->EpollLoop();
 
     val = 'q';
     int ret = write(STDIN_FILENO, &val, 1);

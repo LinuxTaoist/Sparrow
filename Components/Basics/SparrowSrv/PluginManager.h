@@ -34,6 +34,7 @@ public:
     ~PluginManager();
 
     void Init();
+    void SetHotPlugEnable(bool enable) { mHotPlugEnable = enable; }
 
 private:
     void InitWatchDir();
@@ -44,6 +45,7 @@ private:
     std::string GetDefaultLibraryPath();
 
 private:
+    bool mHotPlugEnable;
     SprContext mContext;
     SprDirWatch mDirWatch;
     std::string mDefaultLibPath;

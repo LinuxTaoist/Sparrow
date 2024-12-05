@@ -19,7 +19,6 @@
 #include "SprLog.h"
 #include "PMsgQueue.h"
 #include "SprObserverWithMQueue.h"
-#include "SprEpollSchedule.h"
 
 using namespace InternalDefs;
 
@@ -37,13 +36,13 @@ SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string&
 SprObserverWithMQueue::~SprObserverWithMQueue()
 {
     UnRegisterFromMediator();
-    SprEpollSchedule::GetInstance()->DelPoll(this);
+    DelFromPoll();
 }
 
 int32_t SprObserverWithMQueue::InitFramework()
 {
     SPR_LOGD("Initlize MQueue framework!\n");
-    SprEpollSchedule::GetInstance()->AddPoll(this);
+    AddToPoll();
     return RegisterFromMediator();
 }
 
@@ -148,7 +147,7 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
 
 void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
 {
-    if (fd != GetEpollFd()) {
+    if (fd != GetEvtFd()) {
         SPR_LOGW("fd is not match!\n");
         return nullptr;
     }

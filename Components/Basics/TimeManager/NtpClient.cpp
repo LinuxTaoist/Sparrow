@@ -50,25 +50,23 @@ int32_t NtpClient::SendTimeRequest()
     }
 
     if (!mIsReady) {
-        string IPAddress = mNtpCliPtr->ResolveHostToIp(mAddr);
-        if (IPAddress.empty()) {
-            SPR_LOGE("ResolveHostToIp %s failed!\n", mAddr.c_str());
-            return ret;
-        }
+        // string IPAddress = mNtpCliPtr->ResolveHostToIp(mAddr);
+        // if (IPAddress.empty()) {
+        //     SPR_LOGE("ResolveHostToIp %s failed!\n", mAddr.c_str());
+        //     return ret;
+        // }
 
         SPR_LOGD("Creating UDP %s:%d\n", mAddr.c_str(), mPort);
-        ret = mNtpCliPtr->AsUdpClient(IPAddress.c_str(), mPort);
+        ret = mNtpCliPtr->AsUdp(mPort);
         if (ret == -1) {
-            SPR_LOGE("As UDP %s:%d failed!\n", IPAddress.c_str(), mPort);
+            SPR_LOGE("As UDP %d failed!\n", mPort);
             return ret;
         }
-
-        mNtpCliPtr->AddToPoll();
     }
 
     if (mNtpCliPtr) {
         std::string bytes;
-        ret = mNtpCliPtr->Write(mNtpCliPtr->GetEpollFd(), bytes);
+        ret = mNtpCliPtr->Write(bytes, mAddr, mPort);
     }
 
     return ret;
@@ -76,15 +74,16 @@ int32_t NtpClient::SendTimeRequest()
 
 int32_t NtpClient::InitNtpClient()
 {
-    mNtpCliPtr = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int sock, void *arg) {
-        PSocket* pCliObj = (PSocket*)arg;
+    mNtpCliPtr = make_shared<PUdp>([&](int sock, void *arg) {
+        PUdp* pCliObj = (PUdp*)arg;
         if (pCliObj == nullptr) {
-            SPR_LOGE("PSocket is nullptr\n");
+            SPR_LOGE("pCliObj is nullptr\n");
             return;
         }
 
-        std::string rBuf;
-        int rc = pCliObj->Read(sock, rBuf);
+        uint16_t port;
+        std::string addr, rBuf;
+        int rc = pCliObj->Read(rBuf, addr, port);
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %d\n", sock, rBuf.size());
             HandleNtpBytes(rBuf);
@@ -94,7 +93,6 @@ int32_t NtpClient::InitNtpClient()
 
         // Only once read
         mIsReady = false;
-        pCliObj->DelFromPoll();
         pCliObj->Close();
     });
 

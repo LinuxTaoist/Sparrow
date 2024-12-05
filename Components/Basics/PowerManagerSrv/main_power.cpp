@@ -49,7 +49,7 @@ int main(int argc, const char *argv[])
     });
 
     thePowerManagerHub.InitializeHub();
-    SprEpollSchedule::GetInstance()->EpollLoop(true);
+    SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;
 }

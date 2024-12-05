@@ -20,8 +20,8 @@
 #define __ONENET_DRIVER_H__
 
 #include <string>
+#include "PSocket.h"
 #include "MqttProtocol.h"
-#include "SprObserverWithSocket.h"
 #include "SprObserverWithMQueue.h"
 
 #define ONENET_DRV_LEV1_MACROS                      \
@@ -176,9 +176,9 @@ private:
     uint16_t    mOneNetPort;
     EOneNetDrvLev1State mCurLev1State;
     EOneNetDrvLev2State mCurLev2State;
-    SprObserverWithSocket* mOneSocketPtr;
-    SprObserverWithSocket* mSendPIPEPtr; // unix pipe for send mqtt bytes
-    SprObserverWithSocket* mRecvPIPEPtr; // unix pipe for recv mqtt bytes
+    PTcpClient* mOneClientPtr;
+    PUnixStreamClient* mSendPIPEPtr; // unix pipe for send mqtt bytes
+    PUnixStreamClient* mRecvPIPEPtr; // unix pipe for recv mqtt bytes
 
     using StateTransitionType = InternalDefs::StateTransition<EOneNetDrvLev1State,
                                                 EOneNetDrvLev2State,

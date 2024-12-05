@@ -22,7 +22,6 @@
 #include <unistd.h>
 #include "SprLog.h"
 #include "CoreTypeDefs.h"
-#include "EpollEventHandler.h"
 #include "PluginManager.h"
 
 using namespace InternalDefs;
@@ -31,9 +30,9 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("PlugMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("PlugMgr", fmt, ##args)
 
-#define ENABLE_HOT_PLUG 0
+#define DEFAULT_HOT_PLUG_ENABLE true
 
-PluginManager::PluginManager()
+PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE)
 {
 }
 
@@ -46,10 +45,7 @@ void PluginManager::Init()
 {
     mDefaultLibPath = GetDefaultLibraryPath();
     LoadAllPlugins();
-
-#if ENABLE_HOT_PLUG
     InitWatchDir();
-#endif
 }
 
 void PluginManager::InitWatchDir()
@@ -64,10 +60,16 @@ void PluginManager::InitWatchDir()
     mDirWatch.AddDirWatch(mDefaultLibPath.c_str(), IN_CLOSE_WRITE | IN_MOVED_TO | IN_MOVED_FROM | IN_DELETE);
     mFilePtr = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void *arg) {
         const int size = 100;
-        char buffer[size];
+        char buffer[size] = {0};
         ssize_t numRead = read(fd, buffer, size);
         if (numRead == -1) {
             SPR_LOGE("read %d failed! (%s)\n", fd, strerror(errno));
+            return;
+        }
+
+        PluginManager* pMySelf = reinterpret_cast<PluginManager*>(arg);
+        if (pMySelf && !pMySelf->mHotPlugEnable) {
+            SPR_LOGD("Hot plug disabled, ignore event\n");
             return;
         }
 
@@ -91,9 +93,9 @@ void PluginManager::InitWatchDir()
             }
             offset += sizeof(struct inotify_event) + pEvent->len;
         }
-    });
+    }, this);
 
-    EpollEventHandler::GetInstance()->AddPoll(mFilePtr.get());
+    mFilePtr->AddToPoll();
 }
 
 std::string PluginManager::GetDefaultLibraryPath()

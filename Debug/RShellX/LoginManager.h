@@ -58,8 +58,8 @@ private:
     int mInPipe[2];
     int mOutPipe[2];
     std::shared_ptr<PPipe> mPipePtr;
-    std::shared_ptr<PSocket> mTcpSrvPtr;
-    std::list<std::shared_ptr<PSocket>> mTcpClients;
+    std::shared_ptr<PTcpServer> mTcpSrvPtr;
+    std::list<std::shared_ptr<PTcpClient>> mTcpClients;
 };
 
 #endif // __LOGIN_MANAGER_H__

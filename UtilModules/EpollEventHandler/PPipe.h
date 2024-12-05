@@ -31,12 +31,9 @@ public:
     PPipe(const std::string& fileName, std::function<void(int, std::string, void*)> cb = nullptr, void* arg = nullptr);
     virtual ~PPipe();
 
-    void AddPoll();
-    void DelPoll();
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
-    bool mAddPoll;
     int mFifoFd;
     std::function<void(int, std::string, void*)> mCb;
 };

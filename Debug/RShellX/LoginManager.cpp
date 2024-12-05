@@ -93,7 +93,8 @@ int LoginManager::ListenPipeEvent(int pipeFd)
         //     SPR_LOGE("# SEND failed!\n");
         // }
     });
-    EpollEventHandler::GetInstance()->AddPoll(mPipePtr.get());
+
+    mPipePtr->AddToPoll();
     return 0;
 }
 
@@ -192,26 +193,26 @@ int LoginManager::ExecuteCmd(string& cmdBytes)
 int LoginManager::BuildConnectAsTcpServer(short port)
 {
     auto pEpoll = EpollEventHandler::GetInstance();
-    mTcpSrvPtr = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int cli, void *arg) {
-        PSocket* pSrvObj = (PSocket*)arg;
+    mTcpSrvPtr = make_shared<PTcpServer>([&](int cli, void *arg) {
+        PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
-            SPR_LOGE("PSocket is nullptr\n");
+            SPR_LOGE("pSrvObj is nullptr\n");
             return;
         }
 
-        auto tcpClient = make_shared<PSocket>(cli, [&](int sock, void *arg) {
-            PSocket* pCliObj = (PSocket*)arg;
+        auto tcpClient = make_shared<PTcpClient>(cli, [&](int sock, void *arg) {
+            PTcpClient* pCliObj = (PTcpClient*)arg;
             if (pCliObj == nullptr) {
-                SPR_LOGE("PSocket is nullptr\n");
+                SPR_LOGE("pCliObj is nullptr\n");
                 return;
             }
 
             std::string rBuf;
             int rc = pCliObj->Read(sock, rBuf);
             if (rc <= 0) {
-                mTcpClients.remove_if([sock, pEpoll, pCliObj](shared_ptr<PSocket>& v) {
+                mTcpClients.remove_if([sock, pEpoll, pCliObj](shared_ptr<PTcpClient>& v) {
                     pEpoll->DelPoll(pCliObj);
-                    return (v->GetEpollFd() == sock);
+                    return (v->GetEvtFd() == sock);
                 });
                 return;
             }
@@ -221,11 +222,10 @@ int LoginManager::BuildConnectAsTcpServer(short port)
         });
 
         tcpClient->AsTcpClient();
-        pEpoll->AddPoll(tcpClient.get());
         mTcpClients.push_back(tcpClient);
-        dup2(mTcpSrvPtr->GetEpollFd(), STDIN_FILENO);
-        dup2(tcpClient->GetEpollFd(), STDOUT_FILENO);
-        dup2(tcpClient->GetEpollFd(), STDERR_FILENO);
+        dup2(mTcpSrvPtr->GetEvtFd(), STDIN_FILENO);
+        dup2(tcpClient->GetEvtFd(), STDOUT_FILENO);
+        dup2(tcpClient->GetEvtFd(), STDERR_FILENO);
 
         const string welcomes = "Welcome to RShellX! >_<\n";
         if (write(STDOUT_FILENO, welcomes.c_str(), welcomes.size()) < 0) {
@@ -234,12 +234,11 @@ int LoginManager::BuildConnectAsTcpServer(short port)
     });
 
     mTcpSrvPtr->AsTcpServer(port, 5);
-    pEpoll->AddPoll(mTcpSrvPtr.get());
     return 0;
 }
 
 int LoginManager::ConnectLoop()
 {
-    EpollEventHandler::GetInstance()->EpollLoop(true);
+    EpollEventHandler::GetInstance()->EpollLoop();
     return 0;
 }

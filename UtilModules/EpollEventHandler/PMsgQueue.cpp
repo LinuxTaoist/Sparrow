@@ -44,9 +44,9 @@ PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
 
 PMsgQueue::~PMsgQueue()
 {
-    if (!mDevName.empty() && mEpollFd > 0) {
+    if (!mDevName.empty() && mEvtFd > 0) {
         Clear();
-        mq_close(mEpollFd);
+        mq_close(mEvtFd);
         mq_unlink(mDevName.c_str());
         mDevName = "";
     }
@@ -83,8 +83,8 @@ void PMsgQueue::OpenMsgQueue()
     mqAttr.__pad[1] = 0;
     mqAttr.__pad[2] = 0;
     mqAttr.__pad[3] = 0;
-    mEpollFd = (int)mq_open(mDevName.c_str(), O_CREAT | O_RDWR | O_NONBLOCK | O_EXCL, 0666, &mqAttr);
-    if (mEpollFd < 0) {
+    mEvtFd = (int)mq_open(mDevName.c_str(), O_CREAT | O_RDWR | O_NONBLOCK | O_EXCL, 0666, &mqAttr);
+    if (mEvtFd < 0) {
         SPR_LOGE("mq_open %s failed! (%s)\n", mDevName.c_str(), strerror(errno));
         return;
     }
@@ -105,7 +105,7 @@ int32_t PMsgQueue::Clear()
 
 int32_t PMsgQueue::Send(const std::string& msg, uint32_t prio)
 {
-    int32_t ret = mq_send(mEpollFd, msg.c_str(), msg.size(), prio);
+    int32_t ret = mq_send(mEvtFd, msg.c_str(), msg.size(), prio);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
         return -1;
@@ -117,10 +117,10 @@ int32_t PMsgQueue::Send(const std::string& msg, uint32_t prio)
 int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
 {
     mq_attr mqAttr;
-    mq_getattr(mEpollFd, &mqAttr);
+    mq_getattr(mEvtFd, &mqAttr);
 
     char buf[1025] = {0};
-    int32_t len = mq_receive(mEpollFd, buf, mqAttr.mq_msgsize, &prio);
+    int32_t len = mq_receive(mEvtFd, buf, mqAttr.mq_msgsize, &prio);
     if (len <= 0) {
         if (errno == EAGAIN || errno == EWOULDBLOCK) {
             SPR_LOGW("mq_receive EAGAIN (%s)\n", strerror(errno));

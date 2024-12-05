@@ -28,14 +28,14 @@
 #define SPR_LOGE(fmt, args...) printf("%4d PPipe E: " fmt, __LINE__, ##args)
 
 PPipe::PPipe(int fd, std::function<void(int, std::string, void*)> cb, void *arg)
-    : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mAddPoll(false), mFifoFd(-1), mCb(cb)
+    : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mFifoFd(-1), mCb(cb)
 {
-    int flags = fcntl(mEpollFd, F_GETFL, 0);
-    fcntl(mEpollFd, F_SETFL, flags | O_NONBLOCK);
+    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 }
 
 PPipe::PPipe(const std::string& fileName, std::function<void(int, std::string, void*)> cb, void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_PIPE, arg), mAddPoll(false), mCb(cb)
+    : IEpollEvent(-1, EPOLL_TYPE_PIPE, arg), mCb(cb)
 {
     unlink(fileName.c_str());
     if (mkfifo(fileName.c_str(), 0666) == -1) {
@@ -49,37 +49,21 @@ PPipe::PPipe(const std::string& fileName, std::function<void(int, std::string, v
         return;
     }
 
-    mEpollFd = mFifoFd;
+    mEvtFd = mFifoFd;
 }
 
 PPipe::~PPipe()
 {
-    if (mAddPoll) {
-        DelPoll();
-    }
-
     if (mFifoFd >= 0) {
         close(mFifoFd);
         mFifoFd = -1;
-        mEpollFd = -1;
+        mEvtFd = -1;
     }
-}
-
-void PPipe::AddPoll()
-{
-    mAddPoll = true;
-    EpollEventHandler::GetInstance()->AddPoll(this);
-}
-
-void PPipe::DelPoll()
-{
-    mAddPoll = false;
-    EpollEventHandler::GetInstance()->DelPoll(this);
 }
 
 void* PPipe::EpollEvent(int fd, EpollType eType, void* arg)
 {
-    if (fd != mEpollFd) {
+    if (fd != mEvtFd) {
         SPR_LOGE("Invalid fd (%d)!\n", fd);
     }
 
