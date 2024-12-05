@@ -49,7 +49,7 @@ private:
     SprContext mContext;
     SprDirWatch mDirWatch;
     std::string mDefaultLibPath;
-    std::shared_ptr<PFile> mFilePtr;
+    std::shared_ptr<PFile> mpFile;
     std::map<std::string, void*> mPluginHandles;
     std::map<int, SprObserver*> mPluginModules;
 };
