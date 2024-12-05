@@ -311,9 +311,6 @@ OneNetDriver::OneNetDriver(ModuleIDType id, const std::string& name)
     mOneNetPort = ONENET_MQTT_PORT;
     mCurLev1State = LEV1_SOCKET_IDLE;
     mCurLev2State = LEV2_ONENET_IDLE;
-    mpOneClient = nullptr;
-    mpSendPIPE = nullptr;
-    mpRecvPIPE = nullptr;
 }
 
 OneNetDriver::~OneNetDriver()
@@ -332,6 +329,7 @@ OneNetDriver::~OneNetDriver()
 int32_t OneNetDriver::Init()
 {
     SPR_LOGD("OneNetDriver Init\n");
+    InitOneNetClient();
     InitUnixPIPE();
     return 0;
 }
@@ -382,6 +380,34 @@ int32_t OneNetDriver::InitUnixPIPE()
     CHECK_ONENET_POINTER(mpRecvPIPE, -1);
     mpRecvPIPE->AsUnixStreamClient();
     return ret;
+}
+
+int32_t OneNetDriver::InitOneNetClient()
+{
+    mpOneClient = std::make_shared<PTcpClient>([&](int sock, void *arg) {
+        PTcpClient* pTcpClient = reinterpret_cast<PTcpClient*>(arg);
+        if (pTcpClient == nullptr) {
+            SPR_LOGE("pTcpClient is nullptr\n");
+            return;
+        }
+
+        std::string rBuf;
+        int rc = pTcpClient->Read(sock, rBuf);
+        if (rc > 0) {
+            SPR_LOGD("## RECV [%d]> %d\n", sock, rBuf.size());
+            DumpSocketBytesWithAscall(rBuf);
+            DispatchMqttBytes(rBuf);
+        } else {
+            SPR_LOGD("## CLOSE [%d]\n", sock);
+            pTcpClient->Close();
+
+            // Send to self socket disconnect passive
+            SprMsg tmpMsg(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_PASSIVE);
+            SendMsg(tmpMsg);
+        }
+    });
+
+    return 0;
 }
 
 void OneNetDriver::SetLev1State(EOneNetDrvLev1State state)
@@ -505,38 +531,10 @@ int32_t OneNetDriver::DumpSocketBytesWithAscall(const std::string& bytes)
  */
 void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
 {
-    if (!mpOneClient) {
-        delete mpOneClient;
-        mpOneClient = nullptr;
-    }
-
-    mpOneClient = new (std::nothrow) PTcpClient([&](int sock, void *arg) {
-        PTcpClient* pTcpClient = reinterpret_cast<PTcpClient*>(arg);
-        if (pTcpClient == nullptr) {
-            SPR_LOGE("pTcpClient is nullptr\n");
-            return;
-        }
-
-        std::string rBuf;
-        int rc = pTcpClient->Read(sock, rBuf);
-        if (rc > 0) {
-            SPR_LOGD("## RECV [%d]> %d\n", sock, rBuf.size());
-            DumpSocketBytesWithAscall(rBuf);
-            DispatchMqttBytes(rBuf);
-        } else {
-            SPR_LOGD("## CLOSE [%d]\n", sock);
-            pTcpClient->Close();
-
-            // Send to self socket disconnect passive
-            SprMsg tmpMsg(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_PASSIVE);
-            SendMsg(tmpMsg);
-        }
-    });
-
     // Update state to connecting
+    CHECK_ONENET_POINTER_NONRET(mpOneClient);
     SetLev1State(LEV1_SOCKET_CONNECTING);
 
-    CHECK_ONENET_POINTER_NONRET(mpOneClient);
     int32_t rc = mpOneClient->AsTcpClient(true, mOneNetHost, mOneNetPort);
     if (rc < 0) {
         SPR_LOGE("Failed build OneNet client! (%s)\n", strerror(errno));
@@ -634,7 +632,7 @@ void OneNetDriver::MsgRespondSocketReconnectTimerEvent(const SprMsg& msg)
 void OneNetDriver::MsgRespondSocketDisconnectActive(const SprMsg& msg)
 {
     // close socket after send disconnect msg
-    // mpOneClient->Close();  // Smart pointer, self-destruct and close socket
+    // mpOneClient->Close();
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
 }
