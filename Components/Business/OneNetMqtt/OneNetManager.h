@@ -151,7 +151,7 @@ private:
     EOneNetMgrLev1State mCurLev1State;
     EOneNetMgrLev2State mCurLev2State;
     std::string mCurActiveDevice;
-    std::shared_ptr<PPipe> mDebugFileNode;
+    std::shared_ptr<PPipe> mpDebugFileNode;
     std::map<std::string, std::shared_ptr<OneNetDevice>> mOneDeviceMap;
 
     using DebugCmdFunc = void (OneNetManager::*)(const std::string&);

@@ -30,7 +30,6 @@ SprObserverWithTimerfd::SprObserverWithTimerfd(ModuleIDType id, const std::strin
 
 SprObserverWithTimerfd::~SprObserverWithTimerfd()
 {
-    DelFromPoll();
 }
 
 int32_t SprObserverWithTimerfd::InitFramework()
