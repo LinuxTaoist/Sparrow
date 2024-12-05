@@ -54,11 +54,8 @@ PPipe::PPipe(const std::string& fileName, std::function<void(int, std::string, v
 
 PPipe::~PPipe()
 {
-    if (mFifoFd >= 0) {
-        close(mFifoFd);
-        mFifoFd = -1;
-        mEvtFd = -1;
-    }
+    Close();
+    mFifoFd = -1;
 }
 
 void* PPipe::EpollEvent(int fd, EpollType eType, void* arg)
