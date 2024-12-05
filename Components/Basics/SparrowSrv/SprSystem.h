@@ -53,7 +53,6 @@ private:
 
 private:
     PluginManager mPluginMgr;
-    // std::map<int, SprObserver*> mModules;
 };
 
 #endif // __SPR_SYSTEM_H__
