@@ -211,7 +211,7 @@ int LoginManager::BuildConnectAsTcpServer(short port)
             int rc = pCliObj->Read(sock, rBuf);
             if (rc <= 0) {
                 mTcpClients.remove_if([sock, pEpoll, pCliObj](shared_ptr<PTcpClient>& v) {
-                    pEpoll->DelPoll(pCliObj);
+                    pCliObj->Close();
                     return (v->GetEvtFd() == sock);
                 });
                 return;

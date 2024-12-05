@@ -222,7 +222,7 @@ OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
     mReConnectRspCnt = 0;
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
     mCurLev2State = LEV2_ONENET_MGR_ANY;
-    mDebugFileNode = nullptr;
+    mpDebugFileNode = nullptr;
 }
 
 OneNetManager::~OneNetManager()
@@ -254,7 +254,7 @@ int32_t OneNetManager::InitDebugDetails()
     mDebugCmdMap.insert(std::make_pair("deactive",        std::make_pair("deactive device",     &OneNetManager::DebugDeactiveDevice)));
 
     DebugUsage("");
-    mDebugFileNode = std::make_shared<PPipe>("/tmp/debug_onenet", [&](int fd, std::string bytes, void* arg) {
+    mpDebugFileNode = std::make_shared<PPipe>("/tmp/debug_onenet", [&](int fd, std::string bytes, void* arg) {
         bytes.erase(std::find_if(bytes.rbegin(), bytes.rend(), [](unsigned char ch) {
         return ch != '\r' && ch != '\n';
         }).base(), bytes.end());
@@ -275,7 +275,7 @@ int32_t OneNetManager::InitDebugDetails()
         }
     }, this);
 
-    mDebugFileNode->AddToPoll();
+    mpDebugFileNode->AddToPoll();
     return 0;
 }
 

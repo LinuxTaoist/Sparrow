@@ -47,9 +47,7 @@ int main(int argc, const char *argv[])
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %s\n", sock, rBuf.c_str());
         } else {
-            pEpoll->DelPoll(pCliObj);
             SPR_LOGD("## CLOSE [%d]\n", sock);
-
             std::lock_guard<std::mutex> lock(epFdMutex);
             pCliObj->Close();
         }
