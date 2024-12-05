@@ -23,7 +23,7 @@
 #include <sys/epoll.h>
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) printf("%4d EpEvtHandler D: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) // printf("%4d EpEvtHandler D: " fmt, __LINE__, ##args)
 #define SPR_LOGW(fmt, args...) printf("%4d EpEvtHandler W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d EpEvtHandler E: " fmt, __LINE__, ##args)
 

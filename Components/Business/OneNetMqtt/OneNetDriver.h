@@ -76,6 +76,13 @@ private:
     int32_t InitUnixPIPE();
 
     /**
+     * @brief Init OneNet client
+     *
+     * @return int32_t 0 on success, or -1 if an error occurred
+     */
+    int32_t InitOneNetClient();
+
+    /**
      * @brief Set/Get the level 1 state
      *
      * @param state level 1 state
@@ -176,9 +183,9 @@ private:
     uint16_t    mOneNetPort;
     EOneNetDrvLev1State mCurLev1State;
     EOneNetDrvLev2State mCurLev2State;
-    PTcpClient* mpOneClient;
+    std::shared_ptr<PTcpClient> mpOneClient;
     std::shared_ptr<PUnixStreamClient> mpSendPIPE; // unix pipe for send mqtt bytes
-    std::shared_ptr<PUnixStreamClient> mpRecvPIPE;// unix pipe for recv mqtt bytes
+    std::shared_ptr<PUnixStreamClient> mpRecvPIPE; // unix pipe for recv mqtt bytes
 
     using StateTransitionType = InternalDefs::StateTransition<EOneNetDrvLev1State,
                                                 EOneNetDrvLev2State,
