@@ -99,7 +99,7 @@ int RemoteShell::Init()
 
             if (rc <= 0) {
                 clients.remove_if([sock, this, pCliObj, pEpoll](std::shared_ptr<PTcpClient>& v) {
-                    pEpoll->DelPoll(pCliObj);
+                    pCliObj->Close();
                     return (v->GetEvtFd() == sock);
                 });
             }
@@ -136,7 +136,6 @@ int RemoteShell::DeInit()
 
     SPR_LOGD("Enter remote shell DeInit!\n");
     if (mRcvThread.joinable()) {
-        EpollEventHandler::GetInstance()->DelPoll(mpTcpSrv.get());
         mpTcpSrv->Close();
         mRcvThread.join();
     }

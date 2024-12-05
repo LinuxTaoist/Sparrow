@@ -28,11 +28,7 @@
 #define SPR_LOGE(fmt, args...) printf("%4d IEpEvt E: " fmt, __LINE__, ##args)
 
 IEpollEvent::~IEpollEvent() {
-    if (mEvtFd > 0) {
-        close(mEvtFd);
-        DelFromPoll();
-        mEvtFd = -1;
-    }
+    Close();
 }
 
 ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)

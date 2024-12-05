@@ -36,7 +36,6 @@ SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string&
 SprObserverWithMQueue::~SprObserverWithMQueue()
 {
     UnRegisterFromMediator();
-    DelFromPoll();
 }
 
 int32_t SprObserverWithMQueue::InitFramework()
