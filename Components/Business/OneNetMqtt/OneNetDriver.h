@@ -176,9 +176,9 @@ private:
     uint16_t    mOneNetPort;
     EOneNetDrvLev1State mCurLev1State;
     EOneNetDrvLev2State mCurLev2State;
-    PTcpClient* mOneClientPtr;
-    PUnixStreamClient* mSendPIPEPtr; // unix pipe for send mqtt bytes
-    PUnixStreamClient* mRecvPIPEPtr; // unix pipe for recv mqtt bytes
+    PTcpClient* mpOneClient;
+    PUnixStreamClient* mpSendPIPE; // unix pipe for send mqtt bytes
+    PUnixStreamClient* mpRecvPIPE; // unix pipe for recv mqtt bytes
 
     using StateTransitionType = InternalDefs::StateTransition<EOneNetDrvLev1State,
                                                 EOneNetDrvLev2State,

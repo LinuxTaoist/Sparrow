@@ -54,7 +54,7 @@ int RemoteShell::Init()
     SPR_LOGD("Enter remote shell Init!\n");
     std::list<std::shared_ptr<PTcpClient>> clients;
     auto pEpoll = EpollEventHandler::GetInstance();
-    mTcpSrvPtr = std::make_shared<PTcpServer>([&](int cli, void* arg) {
+    mpTcpSrv = std::make_shared<PTcpServer>([&](int cli, void* arg) {
         PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
             SPR_LOGE("pSrvObj is nullptr\n");
@@ -117,7 +117,7 @@ int RemoteShell::Init()
             }
 
             SPR_LOGD("Enter remote shell thread...\n");
-            mySelf->mTcpSrvPtr->AsTcpServer(8080, 5);
+            mySelf->mpTcpSrv->AsTcpServer(8080, 5);
             pEpoll->EpollLoop();
         }, this);
     }
@@ -136,8 +136,8 @@ int RemoteShell::DeInit()
 
     SPR_LOGD("Enter remote shell DeInit!\n");
     if (mRcvThread.joinable()) {
-        EpollEventHandler::GetInstance()->DelPoll(mTcpSrvPtr.get());
-        mTcpSrvPtr->Close();
+        EpollEventHandler::GetInstance()->DelPoll(mpTcpSrv.get());
+        mpTcpSrv->Close();
         mRcvThread.join();
     }
 

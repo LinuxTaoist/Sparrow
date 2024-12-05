@@ -35,11 +35,11 @@ using namespace InternalDefs;
 
 #define TIMER_MIN_INTERVAL_MS 100   // 100ms
 
-SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprSystemTimer> systemTimerPtr)
+SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprSystemTimer> pSystemTimer)
         : SprObserverWithMQueue(id, name)
 {
     mEnable = false;
-    mSystemTimerPtr = systemTimerPtr;
+    mpSystemTimer = pSystemTimer;
 }
 
 SprTimerManager::~SprTimerManager()
@@ -48,9 +48,9 @@ SprTimerManager::~SprTimerManager()
 }
 
 SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id,
-                    const std::string& name, shared_ptr<SprSystemTimer> systemTimerPtr)
+                    const std::string& name, shared_ptr<SprSystemTimer> pSystemTimer)
 {
-    static SprTimerManager instance(id, name, systemTimerPtr);
+    static SprTimerManager instance(id, name, pSystemTimer);
     return &instance;
 }
 
@@ -151,8 +151,8 @@ uint32_t SprTimerManager::NextExpireTimes()
 int SprTimerManager::InitSystemTimer()
 {
     // systemTimer already initialized in sprSystem.Init()
-    if (mSystemTimerPtr == nullptr) {
-        SPR_LOGE("mSystemTimerPtr is nullptr!");
+    if (mpSystemTimer == nullptr) {
+        SPR_LOGE("mpSystemTimer is nullptr!");
         return -1;
     }
 
@@ -172,13 +172,13 @@ void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
         timerIntervalInMSec += timerNode->GetIntervalInMilliSec();
     }
 
-    mSystemTimerPtr->StartTimer(timerIntervalInMSec);
+    mpSystemTimer->StartTimer(timerIntervalInMSec);
 }
 
 void SprTimerManager::MsgRespondStopSystemTimer(const SprMsg &msg)
 {
     SPR_LOGD("SIG_ID_TIMER_STOP_SYSTEM_TIMER\n");
-    mSystemTimerPtr->StopTimer();
+    mpSystemTimer->StopTimer();
 }
 
 void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)

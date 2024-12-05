@@ -141,12 +141,12 @@ void SprSystem::Init()
     TTP(8, "TimeManager->Initialize()");
     TimeManager::GetInstance(MODULE_TIMEM, "TimeM")->Initialize();
 
-    TTP(9, "systemTimerPtr->Initialize()");
-    shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
-    systemTimerPtr->Initialize();
+    TTP(9, "pSystemTimer->Initialize()");
+    shared_ptr<SprSystemTimer> pSystemTimer = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
+    pSystemTimer->Initialize();
 
     TTP(10, "TimerManager->Initialize()");
-    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
+    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", pSystemTimer)->Initialize();
 
     SprContext ctx;
     mPluginMgr.Init();

@@ -41,7 +41,7 @@ private:
     bool mIsReady;
     uint16_t mPort;
     std::string mAddr;
-    std::shared_ptr<PUdp> mNtpCliPtr;
+    std::shared_ptr<PUdp> mpNtpClient;
     std::function<void(double)> mCb;
 };
 

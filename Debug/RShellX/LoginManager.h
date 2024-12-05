@@ -57,8 +57,8 @@ private:
     int mStderr;
     int mInPipe[2];
     int mOutPipe[2];
-    std::shared_ptr<PPipe> mPipePtr;
-    std::shared_ptr<PTcpServer> mTcpSrvPtr;
+    std::shared_ptr<PPipe> mpPipe;
+    std::shared_ptr<PTcpServer> mpTcpSrv;
     std::list<std::shared_ptr<PTcpClient>> mTcpClients;
 };
 

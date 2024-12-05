@@ -89,7 +89,7 @@ private:
 
 private:
     std::string mDevName;
-    std::unique_ptr<SharedBinaryTree> mSharedMemoryPtr;
+    std::unique_ptr<SharedBinaryTree> mpSharedMemory;
 };
 
 #endif // __PROPERTY_MANAGER_H__

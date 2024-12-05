@@ -311,9 +311,9 @@ OneNetDriver::OneNetDriver(ModuleIDType id, const std::string& name)
     mOneNetPort = ONENET_MQTT_PORT;
     mCurLev1State = LEV1_SOCKET_IDLE;
     mCurLev2State = LEV2_ONENET_IDLE;
-    mOneClientPtr = nullptr;
-    mSendPIPEPtr = nullptr;
-    mRecvPIPEPtr = nullptr;
+    mpOneClient = nullptr;
+    mpSendPIPE = nullptr;
+    mpRecvPIPE = nullptr;
 }
 
 OneNetDriver::~OneNetDriver()
@@ -345,16 +345,16 @@ int32_t OneNetDriver::InitUnixPIPE()
         return -1;
     }
 
-    // 将待发的mqtt字节流通过mSendPIPEPtr写入管道pipe[1]中缓存
-    mSendPIPEPtr = mSendPIPEPtr ? mSendPIPEPtr : new (std::nothrow) PUnixStreamClient(mUnixPipeFd[1]);
-    CHECK_ONENET_POINTER(mSendPIPEPtr, -1);
-    mSendPIPEPtr->AsUnixStreamClient();
+    // 将待发的mqtt字节流通过mpSendPIPE写入管道pipe[1]中缓存
+    mpSendPIPE = mpSendPIPE ? mpSendPIPE : new (std::nothrow) PUnixStreamClient(mUnixPipeFd[1]);
+    CHECK_ONENET_POINTER(mpSendPIPE, -1);
+    mpSendPIPE->AsUnixStreamClient();
 
     // 读取管道pipe[0]中缓存的mqtt字节流
-    mRecvPIPEPtr = mRecvPIPEPtr ? mRecvPIPEPtr : new (std::nothrow) PUnixStreamClient(mUnixPipeFd[0], [&](int sock, void *arg) {
+    mpRecvPIPE = mpRecvPIPE ? mpRecvPIPE : new (std::nothrow) PUnixStreamClient(mUnixPipeFd[0], [&](int sock, void *arg) {
         PUnixStreamClient* pUnixPIPE0 = reinterpret_cast<PUnixStreamClient*>(arg);
         CHECK_ONENET_POINTER_NONRET(pUnixPIPE0);
-        CHECK_ONENET_POINTER_NONRET(mOneClientPtr);
+        CHECK_ONENET_POINTER_NONRET(mpOneClient);
 
         std::string rBuf;
         int32_t len = pUnixPIPE0->Read(sock, rBuf);
@@ -366,7 +366,7 @@ int32_t OneNetDriver::InitUnixPIPE()
         // 读取出管道缓存mqtt字节流，通过socket发送到OneNet
         SPR_LOGD("## SEND [%d]> %d\n", sock, rBuf.size());
         DumpSocketBytesWithAscall(rBuf);
-        len = mOneClientPtr->Write(mOneClientPtr->GetEvtFd(), rBuf);
+        len = mpOneClient->Write(mpOneClient->GetEvtFd(), rBuf);
         if (len < 0) {
             SPR_LOGE("Write socket failed! %s\n", strerror(errno));
         }
@@ -374,13 +374,13 @@ int32_t OneNetDriver::InitUnixPIPE()
         // 主动断开时，先发送断开消息，再关闭socket
         if (mCurLev1State == LEV1_SOCKET_DISCONNECTED &&
             mCurLev2State == LEV2_ONENET_DISCONNECTED) {
-            mOneClientPtr->Close();
+            mpOneClient->Close();
             SPR_LOGD("Close socket\n");
         }
     });
 
-    CHECK_ONENET_POINTER(mRecvPIPEPtr, -1);
-    mRecvPIPEPtr->AsUnixStreamClient();
+    CHECK_ONENET_POINTER(mpRecvPIPE, -1);
+    mpRecvPIPE->AsUnixStreamClient();
     return ret;
 }
 
@@ -505,12 +505,12 @@ int32_t OneNetDriver::DumpSocketBytesWithAscall(const std::string& bytes)
  */
 void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
 {
-    if (!mOneClientPtr) {
-        delete mOneClientPtr;
-        mOneClientPtr = nullptr;
+    if (!mpOneClient) {
+        delete mpOneClient;
+        mpOneClient = nullptr;
     }
 
-    mOneClientPtr = new (std::nothrow) PTcpClient([&](int sock, void *arg) {
+    mpOneClient = new (std::nothrow) PTcpClient([&](int sock, void *arg) {
         PTcpClient* pTcpClient = reinterpret_cast<PTcpClient*>(arg);
         if (pTcpClient == nullptr) {
             SPR_LOGE("pTcpClient is nullptr\n");
@@ -536,8 +536,8 @@ void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
     // Update state to connecting
     SetLev1State(LEV1_SOCKET_CONNECTING);
 
-    CHECK_ONENET_POINTER_NONRET(mOneClientPtr);
-    int32_t rc = mOneClientPtr->AsTcpClient(true, mOneNetHost, mOneNetPort);
+    CHECK_ONENET_POINTER_NONRET(mpOneClient);
+    int32_t rc = mpOneClient->AsTcpClient(true, mOneNetHost, mOneNetPort);
     if (rc < 0) {
         SPR_LOGE("Failed build OneNet client! (%s)\n", strerror(errno));
         SprMsg disConMsg(SIG_ID_ONENET_DRV_SOCKET_CONNECT_FAIL);
@@ -634,7 +634,7 @@ void OneNetDriver::MsgRespondSocketReconnectTimerEvent(const SprMsg& msg)
 void OneNetDriver::MsgRespondSocketDisconnectActive(const SprMsg& msg)
 {
     // close socket after send disconnect msg
-    // mOneClientPtr->Close();  // Smart pointer, self-destruct and close socket
+    // mpOneClient->Close();  // Smart pointer, self-destruct and close socket
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_DISCONNECTED);
 }
@@ -654,7 +654,7 @@ void OneNetDriver::MsgRespondSocketDisconnectPassive(const SprMsg& msg)
     }
 
     // close socket on client side, reconnect socket and OneNet
-    mOneClientPtr->Close();
+    mpOneClient->Close();
     SetLev1State(LEV1_SOCKET_DISCONNECTED);
     SetLev2State(LEV2_ONENET_CONNECTING);
 
@@ -902,17 +902,17 @@ int32_t OneNetDriver::SendMqttDisconnect()
 
 int32_t OneNetDriver::SendMqttBytes(const std::string& bytes)
 {
-    if (!mSendPIPEPtr) {
+    if (!mpSendPIPE) {
         SPR_LOGE("Send PIPE is null\n");
         return -1;
     }
 
-    int32_t len = mSendPIPEPtr->Write(mSendPIPEPtr->GetEvtFd(), bytes);
+    int32_t len = mpSendPIPE->Write(mpSendPIPE->GetEvtFd(), bytes);
     if (len < 0) {
         SPR_LOGE("Send PIPE failed! (%s)\n", strerror(errno));
     }
 
-    // SPR_LOGD("PIPE %d Send %d bytes\n", mSendPIPEPtr->GetEvtFd(), len);
+    // SPR_LOGD("PIPE %d Send %d bytes\n", mpSendPIPE->GetEvtFd(), len);
     return len;
 }
 

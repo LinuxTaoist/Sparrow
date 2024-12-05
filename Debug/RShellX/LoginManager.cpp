@@ -79,7 +79,7 @@ LoginManager* LoginManager::GetInstance()
 
 int LoginManager::ListenPipeEvent(int pipeFd)
 {
-    mPipePtr = std::make_shared<PPipe>(pipeFd, [&](int fd, std::string buf, void *arg) {
+    mpPipe = std::make_shared<PPipe>(pipeFd, [&](int fd, std::string buf, void *arg) {
         if (buf.empty()) {
             buf = "No return.";
         }
@@ -94,7 +94,7 @@ int LoginManager::ListenPipeEvent(int pipeFd)
         // }
     });
 
-    mPipePtr->AddToPoll();
+    mpPipe->AddToPoll();
     return 0;
 }
 
@@ -193,7 +193,7 @@ int LoginManager::ExecuteCmd(string& cmdBytes)
 int LoginManager::BuildConnectAsTcpServer(short port)
 {
     auto pEpoll = EpollEventHandler::GetInstance();
-    mTcpSrvPtr = make_shared<PTcpServer>([&](int cli, void *arg) {
+    mpTcpSrv = make_shared<PTcpServer>([&](int cli, void *arg) {
         PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
             SPR_LOGE("pSrvObj is nullptr\n");
@@ -223,7 +223,7 @@ int LoginManager::BuildConnectAsTcpServer(short port)
 
         tcpClient->AsTcpClient();
         mTcpClients.push_back(tcpClient);
-        dup2(mTcpSrvPtr->GetEvtFd(), STDIN_FILENO);
+        dup2(mpTcpSrv->GetEvtFd(), STDIN_FILENO);
         dup2(tcpClient->GetEvtFd(), STDOUT_FILENO);
         dup2(tcpClient->GetEvtFd(), STDERR_FILENO);
 
@@ -233,7 +233,7 @@ int LoginManager::BuildConnectAsTcpServer(short port)
         }
     });
 
-    mTcpSrvPtr->AsTcpServer(port, 5);
+    mpTcpSrv->AsTcpServer(port, 5);
     return 0;
 }
 

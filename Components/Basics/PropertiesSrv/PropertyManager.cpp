@@ -60,8 +60,8 @@ PropertyManager* PropertyManager::GetInstance()
 
 int PropertyManager::SetProperty(const std::string& key, const std::string& value)
 {
-    if (mSharedMemoryPtr == nullptr) {
-        SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
     }
 
@@ -71,12 +71,12 @@ int PropertyManager::SetProperty(const std::string& key, const std::string& valu
 int PropertyManager::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
 {
     int ret = -1;
-    if (mSharedMemoryPtr == nullptr) {
-        SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
         return ret;
     }
 
-    ret = mSharedMemoryPtr->GetValue(key, value);
+    ret = mpSharedMemory->GetValue(key, value);
     if (ret != 0) {
         value = defaultValue;
     }
@@ -86,8 +86,8 @@ int PropertyManager::GetProperty(const std::string& key, std::string& value, con
 
 int PropertyManager::GetProperties()
 {
-    if (mSharedMemoryPtr == nullptr) {
-        SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
     }
 
@@ -96,7 +96,7 @@ int PropertyManager::GetProperties()
 
 int PropertyManager::Init()
 {
-    mSharedMemoryPtr = std::unique_ptr<SharedBinaryTree>(new SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
+    mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
 
     // load default property
     LoadPropertiesFromFile(DEFAULT_PROP_PATH);
@@ -117,7 +117,7 @@ int PropertyManager::Init()
 int PropertyManager::DumpPropertyList()
 {
     std::map<std::string, std::string> keyValueMap;
-    mSharedMemoryPtr->GetAllKeyValues(keyValueMap);
+    mpSharedMemory->GetAllKeyValues(keyValueMap);
 
     for (auto& it : keyValueMap) {
         SPR_LOGD("%s=%s\n", it.first.c_str(), it.second.c_str());
@@ -184,7 +184,7 @@ int PropertyManager::LoadPersistProperty()
 
                 if (file) {
                     std::string value((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-                    mSharedMemoryPtr->SetValue(entry->d_name, value);
+                    mpSharedMemory->SetValue(entry->d_name, value);
                 } else {
                     SPR_LOGE("Open %s fail! (%s)\n", entry->d_name, strerror(errno));
                 }
@@ -205,19 +205,19 @@ int PropertyManager::HandleKeyValue(const std::string& key, const std::string& v
     int ret = -1;
     if (key.rfind("ro.", 0) == 0) {
         std::string tmpValue;
-        int rs = mSharedMemoryPtr->GetValue(key, tmpValue);
+        int rs = mpSharedMemory->GetValue(key, tmpValue);
         if (rs < 0) {
-            ret = mSharedMemoryPtr->SetValue(key, value);
+            ret = mpSharedMemory->SetValue(key, value);
         } else {
             SPR_LOGW("%s already exists, modify fail!\n", key.c_str());
         }
     } else if (key.rfind("persist.", 0) == 0) {
-        ret = mSharedMemoryPtr->SetValue(key, value);
+        ret = mpSharedMemory->SetValue(key, value);
         if (ret == 0) {
             SavePersistProperty(key, value);
         }
     } else {
-        ret = mSharedMemoryPtr->SetValue(key, value);
+        ret = mpSharedMemory->SetValue(key, value);
     }
 
     return ret;

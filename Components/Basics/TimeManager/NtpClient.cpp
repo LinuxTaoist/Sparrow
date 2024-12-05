@@ -44,29 +44,29 @@ NtpClient::~NtpClient()
 int32_t NtpClient::SendTimeRequest()
 {
     int ret = -1;
-    if (!mNtpCliPtr) {
-        SPR_LOGE("mNtpCliPtr is nullptr\n");
+    if (!mpNtpClient) {
+        SPR_LOGE("mpNtpClient is nullptr\n");
         return ret;
     }
 
     if (!mIsReady) {
-        // string IPAddress = mNtpCliPtr->ResolveHostToIp(mAddr);
+        // string IPAddress = mpNtpClient->ResolveHostToIp(mAddr);
         // if (IPAddress.empty()) {
         //     SPR_LOGE("ResolveHostToIp %s failed!\n", mAddr.c_str());
         //     return ret;
         // }
 
         SPR_LOGD("Creating UDP %s:%d\n", mAddr.c_str(), mPort);
-        ret = mNtpCliPtr->AsUdp(mPort);
+        ret = mpNtpClient->AsUdp(mPort);
         if (ret == -1) {
             SPR_LOGE("As UDP %d failed!\n", mPort);
             return ret;
         }
     }
 
-    if (mNtpCliPtr) {
+    if (mpNtpClient) {
         std::string bytes;
-        ret = mNtpCliPtr->Write(bytes, mAddr, mPort);
+        ret = mpNtpClient->Write(bytes, mAddr, mPort);
     }
 
     return ret;
@@ -74,7 +74,7 @@ int32_t NtpClient::SendTimeRequest()
 
 int32_t NtpClient::InitNtpClient()
 {
-    mNtpCliPtr = make_shared<PUdp>([&](int sock, void *arg) {
+    mpNtpClient = make_shared<PUdp>([&](int sock, void *arg) {
         PUdp* pCliObj = (PUdp*)arg;
         if (pCliObj == nullptr) {
             SPR_LOGE("pCliObj is nullptr\n");
@@ -96,7 +96,7 @@ int32_t NtpClient::InitNtpClient()
         pCliObj->Close();
     });
 
-    return mNtpCliPtr ? 0 : -1;
+    return mpNtpClient ? 0 : -1;
 }
 
 int32_t NtpClient::HandleNtpBytes(const std::string& bytes)

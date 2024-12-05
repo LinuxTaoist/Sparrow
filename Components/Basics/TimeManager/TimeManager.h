@@ -74,7 +74,7 @@ private:
 private:
     TimeSourcePriority mCurPriority;
     InternalDefs::TimeSourceType mCurTimeSource;
-    std::shared_ptr<NtpClient> mNtpCliPtr;
+    std::shared_ptr<NtpClient> mpNtpClient;
     std::map<TimeSourcePriority, InternalDefs::TimeSourceType> mTimeSourceMap;
 
     using DebugCmdFunc = void (TimeManager::*)(const std::string&);

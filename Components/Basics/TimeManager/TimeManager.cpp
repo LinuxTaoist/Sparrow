@@ -37,7 +37,7 @@ TimeManager::TimeManager(ModuleIDType id, const std::string& name)
 {
     mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
     mCurTimeSource = TIME_SOURCE_TYPE_BUTT;
-    mNtpCliPtr = make_shared<NtpClient>(DEFAULT_NTP_ADDR, DEFAULT_NTP_PORT, [&](double time) {
+    mpNtpClient = make_shared<NtpClient>(DEFAULT_NTP_ADDR, DEFAULT_NTP_PORT, [&](double time) {
         SPR_LOGD("Receive ntp time: %f", time);
     });
 }
@@ -59,13 +59,13 @@ int32_t TimeManager::InitDebugDetails()
 
 int32_t TimeManager::RequestNtpTime()
 {
-    if (!mNtpCliPtr) {
+    if (!mpNtpClient) {
         SPR_LOGE("Ntp client is nullptr!");
         return -1;
     }
 
     SPR_LOGD("Start request ntp time");
-    int ret = mNtpCliPtr->SendTimeRequest();
+    int ret = mpNtpClient->SendTimeRequest();
     SPR_LOGD("Request ntp time ret = %d\n", ret);
     return ret;
 }
