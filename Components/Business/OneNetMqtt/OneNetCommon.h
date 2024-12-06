@@ -40,12 +40,14 @@
     }                                                           \
 } while(0)
 
+#define ONENET_TOPIC_MAX_LEN 128
+#define ONENET_PAYLOAD_MAX_LEN 512
 struct SOneNetPublishParam
 {
     uint8_t     flags;
     uint16_t    identifier;
-    char        topic[128];
-    char        payload[512];
+    char        topic[ONENET_TOPIC_MAX_LEN];
+    char        payload[ONENET_PAYLOAD_MAX_LEN];
 };
 
 #endif // __ONENET_COMMON_H__
