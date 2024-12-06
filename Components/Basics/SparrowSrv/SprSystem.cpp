@@ -18,12 +18,6 @@
  */
 #include <memory>
 #include <fstream>
-#include <fcntl.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <string.h>
 #include <sys/resource.h>
 #include "SprLog.h"
 #include "SprContext.h"
@@ -32,9 +26,9 @@
 #include "SprTimeTrace.h"
 #include "CoreTypeDefs.h"
 #include "TimeManager.h"
+#include "SprDebugNode.h"
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
-#include "EpollEventHandler.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -119,17 +113,6 @@ void SprSystem::LoadReleaseInformation()
     }
 }
 
-int SprSystem::EnvReady(const std::string& srvName)
-{
-    std::string node = "/tmp/" + srvName;
-    int fd = creat(node.c_str(), 0644);
-    if (fd != -1) {
-        close(fd);
-    }
-
-    return 0;
-}
-
 void SprSystem::Init()
 {
     SPR_LOGD("=============================================\n");
@@ -150,5 +133,5 @@ void SprSystem::Init()
 
     SprContext ctx;
     mPluginMgr.Init();
-    EnvReady(SRV_NAME_SPARROW);
+    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_SPARROW);
 }

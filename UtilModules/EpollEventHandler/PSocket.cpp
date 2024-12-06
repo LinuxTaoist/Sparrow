@@ -270,6 +270,7 @@ PTcpClient::PTcpClient(int fd, const std::function<void(int, void*)>& cb, void* 
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 
@@ -280,6 +281,7 @@ PTcpClient::PTcpClient(int fd, const std::function<void(ssize_t, std::string, vo
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 
@@ -289,12 +291,14 @@ PTcpClient::PTcpClient(const std::function<void(int, void*)>& cb, void* arg)
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
         SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        SetReady(false);
     }
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 
@@ -304,12 +308,14 @@ PTcpClient::PTcpClient(const std::function<void(ssize_t, std::string, void*)>& c
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
         SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        SetReady(false);
     }
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 
@@ -603,6 +609,7 @@ PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(int, void*
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 
@@ -613,6 +620,7 @@ PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(ssize_t, s
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 
@@ -622,12 +630,14 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(int, void*)>& cb, 
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
         SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        SetReady(false);
     }
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 
@@ -637,12 +647,14 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(ssize_t, std::stri
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
         SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        SetReady(false);
     }
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
         Close();
+        SetReady(false);
     }
 }
 

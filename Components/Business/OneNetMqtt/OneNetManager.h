@@ -88,9 +88,6 @@ public:
 private:
     int32_t Init() override;
 
-    /* 初始化调试环境 */
-    int32_t InitDebugDetails();
-
     /* 初始化OneNet设备 */
     int32_t InitOneNetDevices(const std::vector<OneNetDevInfo>& devices);
 
@@ -115,6 +112,10 @@ private:
 
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
+
+    /* 初始化调试环境 */
+    void RegisterDebugFuncs();
+    void UnRegisterDebugFuncs();
 
     /* 调试函数 */
     void DebugUsage(const std::string& args);
@@ -153,9 +154,6 @@ private:
     std::string mCurActiveDevice;
     std::shared_ptr<PPipe> mpDebugFileNode;
     std::map<std::string, std::shared_ptr<OneNetDevice>> mOneDeviceMap;
-
-    using DebugCmdFunc = void (OneNetManager::*)(const std::string&);
-    std::map<std::string, std::pair<std::string, DebugCmdFunc>> mDebugCmdMap;
 };
 
 #endif // __ONENET_MANAGER_H__

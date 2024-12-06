@@ -151,6 +151,11 @@ ssize_t IEpollEvent::Read(std::string& bytes)
     return Read(mEvtFd, bytes);
 }
 
+bool IEpollEvent::IsReady()
+{
+    return mReady;
+}
+
 void IEpollEvent::Close()
 {
     if (mEvtFd == -1) {

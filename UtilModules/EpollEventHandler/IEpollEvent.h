@@ -28,7 +28,7 @@ class IEpollEvent
 {
 public:
     IEpollEvent(int fd, EpollType eType = EPOLL_TYPE_BEGIN, void* arg = nullptr)
-        : mEvtFd(fd), mEpollType(eType), mArgs(arg) {};
+        : mReady(true), mEvtFd(fd), mEpollType(eType), mArgs(arg) {};
 
     virtual ~IEpollEvent();
     virtual ssize_t Write(int fd, const char* data, size_t size);
@@ -41,6 +41,7 @@ public:
     virtual ssize_t Read(char* data, size_t size);
     virtual ssize_t Read(std::string& bytes);
 
+    virtual bool    IsReady();
     virtual void    Close();
     virtual void    AddToPoll();
     virtual void    DelFromPoll();
@@ -51,6 +52,10 @@ public:
     void*       GetArgs()       { return mArgs; }
 
 protected:
+    void        SetReady(bool ready) { mReady = ready; }
+
+protected:
+    bool        mReady;
     int         mEvtFd;
     EpollType   mEpollType;
     void*       mArgs;

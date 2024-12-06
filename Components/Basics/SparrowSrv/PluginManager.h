@@ -25,6 +25,7 @@
 #include <memory>
 #include "PFile.h"
 #include "SprContext.h"
+#include "SprObserver.h"
 #include "SprDirWatch.h"
 
 class PluginManager
@@ -42,7 +43,14 @@ private:
     void UnloadPlugin(const std::string& path);
     void LoadAllPlugins();
     void UnloadAllPlugins();
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
     std::string GetDefaultLibraryPath();
+
+    /* 调试函数 */
+    void DebugDumpPlugMInfo(const std::string& args);
+    void DebugEnableHotPlug(const std::string& args);
+    void DebugDisableHotPlug(const std::string& args);
 
 private:
     bool mHotPlugEnable;

@@ -44,17 +44,15 @@ PFile::PFile(const std::string fileName, std::function<void(int, ssize_t, std::s
     mFd = open(fileName.c_str(), flags | O_NONBLOCK, mode);
     if (mFd < 0) {
         SPR_LOGE("open %s failed! (%s)\n", fileName.c_str(), strerror(errno));
+        SetReady(false);
     }
     mEvtFd = mFd;
 }
 
 PFile::~PFile()
 {
-    if (mFd >= 0) {
-        close(mFd);
-        mFd = -1;
-        mEvtFd = -1;
-    }
+    Close();
+    mFd = -1;
 }
 
 void* PFile::EpollEvent(int fd, EpollType eType, void* arg)
