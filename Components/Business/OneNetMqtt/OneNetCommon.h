@@ -19,23 +19,23 @@
 #ifndef __ONENET_COMMON_H__
 #define __ONENET_COMMON_H__
 
-#define CHECK_ONENET_RET_VALIDITY(expr) do {    \
-    int32_t _ret = (expr);                      \
-    if (_ret == -1) {                           \
-        return _ret;                            \
-    }                                           \
+#define CHECK_ONENET_RET_VALIDITY(__expr) do {      \
+    int32_t __ret = (__expr);                       \
+    if (__ret == -1) {                              \
+        return __ret;                               \
+    }                                               \
 } while(0)
 
-#define CHECK_ONENET_POINTER_NONRET(p) do {                     \
-    if ((p) == nullptr) {                                       \
-        SPR_LOGE("INVALID POINTER: %s nullptr!\n", (#p));       \
+#define CHECK_ONENET_POINTER_NONRET(__p) do {                   \
+    if ((__p) == nullptr) {                                     \
+        SPR_LOGE("INVALID POINTER: %s nullptr!\n", (#__p));     \
         return ;                                                \
     }                                                           \
 } while(0)
 
-#define CHECK_ONENET_POINTER(p, __err) do {                     \
-    if ((p) == nullptr) {                                       \
-        SPR_LOGE("INVALID POINTER: %s is nullptr!\n", (#p));    \
+#define CHECK_ONENET_POINTER(__p, __err) do {                   \
+    if ((__p) == nullptr) {                                     \
+        SPR_LOGE("INVALID POINTER: %s is nullptr!\n", (#__p));  \
         return __err;                                           \
     }                                                           \
 } while(0)
