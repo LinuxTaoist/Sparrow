@@ -27,26 +27,26 @@
 #define SPR_LOGD(fmt, args...) printf("%4d PPipe D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PPipe E: " fmt, __LINE__, ##args)
 
-PPipe::PPipe(int fd, std::function<void(int, std::string, void*)> cb, void *arg)
+PPipe::PPipe(int fd, std::function<void(ssize_t, std::string, void*)> cb, void *arg)
     : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mFifoFd(-1), mCb(cb)
 {
     int flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 }
 
-PPipe::PPipe(const std::string& fileName, std::function<void(int, std::string, void*)> cb, void* arg)
+PPipe::PPipe(const std::string& fileName, std::function<void(ssize_t, std::string, void*)> cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_PIPE, arg), mCb(cb)
 {
     unlink(fileName.c_str());
     if (mkfifo(fileName.c_str(), 0666) == -1) {
         SPR_LOGE("mkfifo %s fail! (%s)\n", fileName.c_str(), strerror(errno));
-        return;
+        SetReady(false);
     }
 
     mFifoFd = open(fileName.c_str(), O_RDWR | O_NONBLOCK);
     if (mFifoFd == -1) {
         SPR_LOGE("open %s fail! (%s)\n", fileName.c_str(), strerror(errno));
-        return;
+        SetReady(false);
     }
 
     mEvtFd = mFifoFd;

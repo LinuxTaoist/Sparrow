@@ -27,8 +27,8 @@
 class PPipe : public IEpollEvent
 {
 public:
-    PPipe(int fd, std::function<void(int, std::string, void*)> cb = nullptr, void *arg = nullptr);
-    PPipe(const std::string& fileName, std::function<void(int, std::string, void*)> cb = nullptr, void* arg = nullptr);
+    PPipe(int fd, std::function<void(ssize_t, std::string, void*)> cb = nullptr, void *arg = nullptr);
+    PPipe(const std::string& fileName, std::function<void(ssize_t, std::string, void*)> cb = nullptr, void* arg = nullptr);
     virtual ~PPipe();
 
     void* EpollEvent(int fd, EpollType eType, void* arg) override;

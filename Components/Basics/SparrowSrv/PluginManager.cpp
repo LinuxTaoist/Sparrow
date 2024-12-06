@@ -21,6 +21,7 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "SprLog.h"
+#include "SprDebugNode.h"
 #include "CoreTypeDefs.h"
 #include "PluginManager.h"
 
@@ -31,6 +32,7 @@ using namespace InternalDefs;
 #define SPR_LOGE(fmt, args...) LOGE("PlugMgr", fmt, ##args)
 
 #define DEFAULT_HOT_PLUG_ENABLE true
+#define DEBUG_OWNER             "PluginManager"
 
 PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE)
 {
@@ -38,6 +40,7 @@ PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE)
 
 PluginManager::~PluginManager()
 {
+    UnregisterDebugFuncs();
     UnloadAllPlugins();
 }
 
@@ -46,6 +49,7 @@ void PluginManager::Init()
     mDefaultLibPath = GetDefaultLibraryPath();
     LoadAllPlugins();
     InitWatchDir();
+    RegisterDebugFuncs();
 }
 
 void PluginManager::InitWatchDir()
@@ -196,4 +200,45 @@ void PluginManager::UnloadAllPlugins()
         handle.second = nullptr;
     }
     mPluginHandles.clear();
+}
+
+void PluginManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(DEBUG_OWNER, "DumpPluginMgr",  "Dump PluginManager Info", std::bind(&PluginManager::DebugDumpPlugMInfo,  this, std::placeholders::_1));
+    p->RegisterCmd(DEBUG_OWNER, "EnableHotPlug",  "Enable hot plug",         std::bind(&PluginManager::DebugEnableHotPlug,  this, std::placeholders::_1));
+    p->RegisterCmd(DEBUG_OWNER, "DisableHotPlug", "Disable hot plug",        std::bind(&PluginManager::DebugDisableHotPlug, this, std::placeholders::_1));
+}
+
+void PluginManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->UnregisterCmd(DEBUG_OWNER);
+}
+
+void PluginManager::DebugDumpPlugMInfo(const std::string& args)
+{
+    SPR_LOGD("-------------- Dump PlugManager Info --------------\n");
+    SPR_LOGD("- mHotPlugEnable = %d\n", mHotPlugEnable);
+    SPR_LOGD("---------------------------------------------------\n");
+}
+
+void PluginManager::DebugEnableHotPlug(const std::string& args)
+{
+    mHotPlugEnable = true;
+}
+
+void PluginManager::DebugDisableHotPlug(const std::string& args)
+{
+    mHotPlugEnable = false;
 }
