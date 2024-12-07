@@ -30,6 +30,7 @@
 
 SprDebugNode::SprDebugNode() : mMaxNum(DEFAULT_CMD_MAX_SIZE)
 {
+    RegisterBuildinCmds();
 }
 
 SprDebugNode* SprDebugNode::GetInstance()
@@ -63,6 +64,18 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
 
         SPR_LOGD("Recv bytes: %s\n", bytes.c_str());
         bool found = false;
+
+        // buildin cmds
+        for (const auto& pair : mBuildinCmds) {
+            std::string cmd = pair.first;
+            if (bytes.compare(0, cmd.size(), cmd) == 0) {
+                auto& func = pair.second.second;
+                func(bytes);
+                found = true;
+            }
+        }
+
+        // user cmds
         for (const auto& ownerPair : mDebugOwners) {
             auto& cmdMap = ownerPair.second.mCmdMap;
             for (const auto& cmdPair : cmdMap) {
@@ -91,10 +104,15 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
     return 0;
 }
 
+int32_t SprDebugNode::RegisterBuildinCmds()
+{
+    mBuildinCmds["help"]          = { "Dump all cmds", std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
+    return 0;
+}
+
 int32_t SprDebugNode::RegisterCmd(const std::string& owner, const std::string& cmd, const std::string& desc, DebugCmdFunc func)
 {
     std::lock_guard<std::mutex> lock(mMutex);
-
     auto& pair = mDebugOwners[owner];
     pair.mCmdMap[cmd] = {desc, func};
     return 0;
@@ -118,31 +136,37 @@ int32_t SprDebugNode::UnregisterCmd(const std::string& owner, const std::string&
         return -1;
     }
 
-    auto& ownerPair = mDebugOwners[owner];
-    if (ownerPair.mCmdMap.find(cmd) == ownerPair.mCmdMap.end()) {
+    auto& cmdMaps = mDebugOwners[owner].mCmdMap;
+    if (cmdMaps.find(cmd) == cmdMaps.end()) {
         return -1;
     }
 
-    ownerPair.mCmdMap.erase(cmd);
+    cmdMaps.erase(cmd);
     return 0;
 }
 
 void SprDebugNode::DebugDumpAllOwners(const std::string& args)
 {
     SPR_LOGD("+---------------------------------------------------------------------------+\n");
-    SPR_LOGD("|                         Debug Cmd List                                    |\n");
+    SPR_LOGD("|                     Debug Cmd List                                        |\n");
     SPR_LOGD("+---------------------------------------------------------------------------+\n");
 
+    int32_t i = 1;
+    SPR_LOGD("| %3d. %-20s  total: %-40d|", i++, "BuidinCmds", (int)mBuildinCmds.size());
+    for (const auto& pair : mBuildinCmds) {
+        SPR_LOGD("|      %-20s: %-46s |\n", pair.first.c_str(), pair.second.first.c_str());
+    }
+
     for (const auto& ownerPair : mDebugOwners) {
-        SPR_LOGD("| %-75s t: %d|", ownerPair.first.c_str(), (int)ownerPair.second.mCmdMap.size());
+        SPR_LOGD("|%75s|", " ");
+        SPR_LOGD("| %3d. %-20s  total: %-40d|", i++, ownerPair.first.c_str(), (int)ownerPair.second.mCmdMap.size());
         for (const auto& cmdPair : ownerPair.second.mCmdMap) {
-        //     // int i = 0;
-            SPR_LOGD("|   %-10s: %-20s\n", cmdPair.first.c_str(), cmdPair.second.first.c_str());
+            SPR_LOGD("|      %-20s: %-46s |\n", cmdPair.first.c_str(), cmdPair.second.first.c_str());
         }
     }
 
     SPR_LOGD("+---------------------------------------------------------------------------+\n");
-    SPR_LOGD("|   E.g. echo help > /tmp/%-12s                                 |\n", mPipePath.c_str());
+    SPR_LOGD("|   E.g. echo help > %-22s                                 |\n", mPipePath.c_str());
     SPR_LOGD("-----------------------------------------------------------------------------\n");
 }
 
