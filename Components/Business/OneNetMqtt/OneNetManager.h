@@ -22,8 +22,8 @@
 #include <map>
 #include <string>
 #include <memory>
-#include "OneNetDevice.h"
 #include "PPipe.h"
+#include "OneNetDevice.h"
 #include "SprObserverWithMQueue.h"
 
 #ifdef ENUM_OR_STRING
@@ -113,12 +113,11 @@ private:
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
-    /* 初始化调试环境 */
+    /* 注册/注销所有调试函数 */
     void RegisterDebugFuncs();
-    void UnRegisterDebugFuncs();
+    void UnregisterDebugFuncs();
 
     /* 调试函数 */
-    void DebugUsage(const std::string& args);
     void DebugEnableDumpLog(const std::string& args);
     void DebugDeviceList(const std::string& args);
     void DebugActiveDevice(const std::string& args);
@@ -152,7 +151,6 @@ private:
     EOneNetMgrLev1State mCurLev1State;
     EOneNetMgrLev2State mCurLev2State;
     std::string mCurActiveDevice;
-    std::shared_ptr<PPipe> mpDebugFileNode;
     std::map<std::string, std::shared_ptr<OneNetDevice>> mOneDeviceMap;
 };
 

@@ -71,6 +71,7 @@ public:
      * @param func cmd func
      * @return int32_t
      */
+    int32_t RegisterBuildinCmds();
     int32_t RegisterCmd(const std::string& owner, const std::string& cmd, const std::string& desc, DebugCmdFunc func);
     int32_t UnregisterCmd(const std::string& owner);
     int32_t UnregisterCmd(const std::string& owner, const std::string& cmd);
@@ -86,7 +87,7 @@ private:
     std::mutex mMutex;
     std::string mPipePath;
     std::shared_ptr<PPipe> mpDebugNode;
-    std::map<std::string, DebugCmdFunc> mBuildinCmds;
+    std::map<std::string, std::pair<std::string, DebugCmdFunc>> mBuildinCmds; // <cmd, <desc, func>>
     std::map<std::string, DebugFuncDetail> mDebugOwners; // <owner, <cmd, <desc, func>>>
 };
 
