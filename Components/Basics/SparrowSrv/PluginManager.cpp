@@ -32,7 +32,7 @@ using namespace InternalDefs;
 #define SPR_LOGE(fmt, args...) LOGE("PlugMgr", fmt, ##args)
 
 #define DEFAULT_HOT_PLUG_ENABLE true
-#define DEBUG_OWNER             "PluginManager"
+#define OWNER_PLUGINMGR         "PluginManager"
 
 PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE)
 {
@@ -210,9 +210,9 @@ void PluginManager::RegisterDebugFuncs()
         return;
     }
 
-    p->RegisterCmd(DEBUG_OWNER, "DumpPluginMgr",  "Dump PluginManager Info", std::bind(&PluginManager::DebugDumpPlugMInfo,  this, std::placeholders::_1));
-    p->RegisterCmd(DEBUG_OWNER, "EnableHotPlug",  "Enable hot plug",         std::bind(&PluginManager::DebugEnableHotPlug,  this, std::placeholders::_1));
-    p->RegisterCmd(DEBUG_OWNER, "DisableHotPlug", "Disable hot plug",        std::bind(&PluginManager::DebugDisableHotPlug, this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_PLUGINMGR, "DumpPluginMgr",  "Dump Info",          std::bind(&PluginManager::DebugDumpPlugMInfo,  this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_PLUGINMGR, "EnableHotPlug",  "Enable hot plug",    std::bind(&PluginManager::DebugEnableHotPlug,  this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_PLUGINMGR, "DisableHotPlug", "Disable hot plug",   std::bind(&PluginManager::DebugDisableHotPlug, this, std::placeholders::_1));
 }
 
 void PluginManager::UnregisterDebugFuncs()
@@ -223,7 +223,7 @@ void PluginManager::UnregisterDebugFuncs()
         return;
     }
 
-    p->UnregisterCmd(DEBUG_OWNER);
+    p->UnregisterCmd(OWNER_PLUGINMGR);
 }
 
 void PluginManager::DebugDumpPlugMInfo(const std::string& args)
