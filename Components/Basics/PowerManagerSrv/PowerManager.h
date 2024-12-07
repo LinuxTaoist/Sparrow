@@ -53,6 +53,7 @@ public:
     PowerManager(ModuleIDType id, const std::string& name);
     virtual ~PowerManager();
 
+    int32_t Init() override;
     int ProcessMsg(const SprMsg& msg) override;
 
 private:
@@ -70,6 +71,15 @@ private:
     void PerformStandbyBusiness();
     void PerformSleepBusiness();
     void BroadcastPowerEvent(uint32_t event);
+
+    /* 注册/注销所有调试函数 */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
+    /* 调试函数 */
+    void DebugDumpCurState(const std::string& args);
+    void DebugSendPowerOn(const std::string& args);
+    void DebugSendPowerOff(const std::string& args);
 
     /* 消息响应函数 */
     void MsgRespondPowerOnWithInit(const SprMsg& msg);

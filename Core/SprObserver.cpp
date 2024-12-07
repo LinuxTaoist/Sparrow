@@ -52,8 +52,8 @@ int32_t SprObserver::Initialize()
     }
 
     DumpCommonVersion();
-    InitFramework();     // Init framework module
-    Init();              // Init business module
+    InitFramework();     // Init module's framework
+    Init();              // Init module's business
     return 0;
 }
 

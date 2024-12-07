@@ -39,9 +39,9 @@ int main(int argc, const char *argv[])
     }
 
     SPR_LOGD("Start RShellX server on port %d\n", port);
-    auto loginMgr = LoginManager::GetInstance();
-    loginMgr->Init();
-    loginMgr->BuildConnectAsTcpServer(port);
-    loginMgr->ConnectLoop();
+    LoginManager* pLoginMgr = LoginManager::GetInstance();
+    pLoginMgr->Init();
+    pLoginMgr->BuildConnectAsTcpServer(port);
+    pLoginMgr->ConnectLoop();
     return 0;
 }

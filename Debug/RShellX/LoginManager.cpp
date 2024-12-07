@@ -192,7 +192,8 @@ int LoginManager::ExecuteCmd(string& cmdBytes)
 
 int LoginManager::BuildConnectAsTcpServer(short port)
 {
-    auto pEpoll = EpollEventHandler::GetInstance();
+    EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
+
     mpTcpSrv = make_shared<PTcpServer>([&](int cli, void *arg) {
         PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
