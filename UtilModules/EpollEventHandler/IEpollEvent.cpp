@@ -106,35 +106,24 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
     return (size - nleft);
 }
 
-ssize_t IEpollEvent::Read(int fd, std::string& bytes)
-{
+ssize_t IEpollEvent::Read(int fd, std::string& bytes) {
     bytes.clear();
     ssize_t totalBytesRead = 0;
+    const size_t bufferSize = 4096;
+    std::vector<char> buffer(bufferSize);
 
     while (true) {
-        size_t additionalCapacity = 4096;
-        if (bytes.capacity() - totalBytesRead < additionalCapacity) {
-            bytes.reserve(std::min(bytes.capacity() + additionalCapacity, bytes.max_size()));
-        }
-
-        std::vector<char> tempBuffer(bytes.capacity() - totalBytesRead);
-        char* ptr = tempBuffer.data();
-
-        ssize_t nread = read(fd, ptr, tempBuffer.size());
-        if (nread < 0) {
-            if (errno == EINTR) {       // 忽略中断错误，继续读取
-                continue;
-            } else if (errno == EAGAIN || errno == EWOULDBLOCK) {   // 非阻塞I/O，没有更多数据可读，结束本次读取
-                break;
-            } else {
-                SPR_LOGE("Read %d EOF!\n", fd);
-                return -1;
+        ssize_t nread = Read(fd, buffer.data(), buffer.size());
+        if (nread <= 0) {
+            if (nread < 0) {
+                // An error occurred in the Read function
+                return nread;
             }
-        } else if (nread == 0) {        // 对端关闭连接，读取结束
+            // nread == 0, reached EOF
             break;
         }
 
-        bytes.append(ptr, nread);
+        bytes.append(buffer.data(), nread);
         totalBytesRead += nread;
     }
 
