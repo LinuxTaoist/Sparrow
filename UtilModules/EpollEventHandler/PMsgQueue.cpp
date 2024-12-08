@@ -51,10 +51,13 @@ PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
 
 PMsgQueue::~PMsgQueue()
 {
-    if (!mDevName.empty() && mEvtFd > 0) {
+    if (mEvtFd > 0) {
         Clear();
         mq_close(mEvtFd);
-        mDevName = "";
+    }
+
+    if (!mDevName.empty()) {
+        mq_unlink(mDevName.c_str());
     }
 }
 
