@@ -18,9 +18,11 @@
  */
 #include "SprLog.h"
 #include "PMsgQueue.h"
+#include "GeneralUtils.h"
 #include "SprObserverWithMQueue.h"
 
 using namespace InternalDefs;
+using namespace GeneralUtils;
 
 #define SPR_LOGD(fmt, args...)  LOGD("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
 #define SPR_LOGW(fmt, args...)  LOGW("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
@@ -29,7 +31,7 @@ using namespace InternalDefs;
 #define MSG_SIZE_MAX  1025
 
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
-    : SprObserver(id, name, proxyType), PMsgQueue(name, MSG_SIZE_MAX), mConnected(false)
+    : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), MSG_SIZE_MAX), mConnected(false)
 {
 }
 

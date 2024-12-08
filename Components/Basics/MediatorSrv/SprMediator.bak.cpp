@@ -1,0 +1,385 @@
+/**
+ *---------------------------------------------------------------------------------------------------------------------
+ *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
+ *
+ *  @file       : SprMediatorBak.cpp
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
+ *  @date       : 2023/11/25
+ *
+ *
+ *  Change History:
+ *  <Date>     | <Version> | <Author>       | <Description>
+ *---------------------------------------------------------------------------------------------------------------------
+ *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
+ *---------------------------------------------------------------------------------------------------------------------
+ *
+ */
+#include <string>
+#include <stdio.h>
+#include <errno.h>
+#include <unistd.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
+#include <sys/epoll.h>
+#include <string.h>
+#include "SprLog.h"
+#include "SprSigId.h"
+#include "CoreTypeDefs.h"
+#include "CommonMacros.h"
+#include "BindInterface.h"
+#include "SprMediator.bak.h"
+
+using namespace std;
+using namespace InternalDefs;
+
+#define SPR_LOGD(fmt, args...) LOGD("SprMediatorBak", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("SprMediatorBak", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("SprMediatorBak", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("SprMediatorBak", fmt, ##args)
+
+const uint32_t EPOLL_FD_NUM = 10;
+bool SprMediatorBak::mEpollRunning = true;
+
+SprMediatorBak::SprMediatorBak(int size)
+{
+    mHandler = -1;
+    mMqDevName = MEDIATOR_MSG_QUEUE;
+    if (size) {
+        mEpollHandler = epoll_create(size);
+    } else {
+        mEpollHandler = epoll_create1(0);
+    }
+}
+
+SprMediatorBak::~SprMediatorBak()
+{
+    DestroyInternalPort();
+    for (auto& pair : mModuleMap) {
+        if (pair.second.handle != -1) {
+            mq_close(pair.second.handle);
+            pair.second.handle = -1;
+        }
+    }
+
+    if (mEpollHandler != -1) {
+        close(mEpollHandler);
+        mEpollHandler = -1;
+    }
+
+    mModuleMap.clear();
+}
+
+SprMediatorBak* SprMediatorBak::GetInstance()
+{
+    static SprMediatorBak instance(EPOLL_FD_NUM);
+    return &instance;
+}
+
+int SprMediatorBak::Init()
+{
+    if (mEpollHandler == -1) {
+        SPR_LOGE("epoll_create failed! (%s)\n", strerror(errno));
+        return -1;
+    }
+
+    SPR_LOGD("--- Start proxy server ---\n");
+    InitInternalPort();
+    EnvReady(SRV_NAME_MEDIATOR);
+    return 0;
+}
+
+int SprMediatorBak::EnvReady(const std::string& srvName)
+{
+    std::string node = "/tmp/" + srvName;
+    int fd = creat(node.c_str(), 0644);
+    if (fd != -1) {
+        close(fd);
+    }
+
+    return 0;
+}
+
+int SprMediatorBak::StopWork()
+{
+    mEpollRunning = false;
+    SPR_LOGI("Stop work!\n");
+    return 0;
+}
+
+int SprMediatorBak::MakeMQ(const string& name)
+{
+    mq_attr mqAttr;
+    mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
+    mqAttr.mq_msgsize = 1025;
+
+    int handle = mq_open(name.c_str(), O_RDWR | O_CREAT, 0666, &mqAttr);
+    if(handle < 0) {
+        SPR_LOGE("Open %s failed. (%s)\n", name.c_str(), strerror(errno));
+    }
+
+    return handle;
+}
+
+int SprMediatorBak::InitInternalPort()
+{
+    if (mMqDevName.empty()) {
+        SPR_LOGE("mMqDevName is empty!\n");
+        return -1;
+    }
+
+    mq_unlink(mMqDevName.c_str());
+    mHandler = MakeMQ(mMqDevName);
+
+    struct epoll_event ep;
+    ep.events = EPOLLIN | EPOLLET;
+    ep.data.fd = mHandler;
+    if (epoll_ctl(mEpollHandler, EPOLL_CTL_ADD, mHandler, &ep) != 0) {
+        SPR_LOGE("epoll_ctl fail! (%s)\n", strerror(errno));
+    }
+
+    // load mq information of self
+    LoadMQStaticInfo(mHandler, mMqDevName);
+    SPR_LOGD("Open Internal Port: %s.\n", mMqDevName.c_str());
+    return 0;
+}
+
+int SprMediatorBak::DestroyInternalPort()
+{
+    if (mHandler != -1) {
+        mq_close(mHandler);
+        mHandler = -1;
+    }
+
+    if (!mMqDevName.empty()) {
+        mq_unlink(mMqDevName.c_str());
+    }
+
+    return 0;
+}
+
+int SprMediatorBak::GetAllMQStatus(std::vector<SMQStatus> &mqInfoList)
+{
+    mqInfoList.clear();
+    for (const auto& pair : mMQStatusMap) {
+        mqInfoList.push_back(pair.second);
+    }
+
+    return 0;
+}
+
+std::string SprMediatorBak::GetSignalName(int sig)
+{
+    std::string name = GetSigName(sig);
+    return name;
+}
+
+int SprMediatorBak::LoadMQStaticInfo(int handle, const std::string& devName)
+{
+    SMQStatus tmpMQStatus = {};
+
+    tmpMQStatus.handle = handle;
+    memset(tmpMQStatus.mqName, 0, sizeof(tmpMQStatus.mqName));
+    strncpy(tmpMQStatus.mqName, devName.c_str(), sizeof(tmpMQStatus.mqName) - 1);
+    mMQStatusMap[handle] = tmpMQStatus;
+
+    return 0;
+}
+
+int SprMediatorBak::LoadMQDynamicInfo(int handle, const SprMsg& msg)
+{
+    // Avoid receiving SIG_ID_PROXY_REGISTER_REQUEST and reporting errors
+    auto mqStatus = mMQStatusMap.find(handle);
+    if ( msg.GetMsgId() != SIG_ID_PROXY_REGISTER_REQUEST
+      && mqStatus == mMQStatusMap.end()) {
+        SPR_LOGE("Not exist mq handle: %d [%s]\n", handle, GetSigName(msg.GetMsgId()));
+        return -1;
+    }
+
+    // Update mqAttr
+    int ret = mq_getattr(handle, &mqStatus->second.mqAttr);
+    if (ret != 0) {
+        SPR_LOGE("mq_getattr failed! (%s)\n", strerror(errno));
+        return -1;
+    }
+
+    // Update maxCount
+    const mq_attr& attr = mqStatus->second.mqAttr;
+    if (attr.mq_curmsgs >= mqStatus->second.maxCount) {
+        mqStatus->second.maxCount = attr.mq_curmsgs + 1;
+    }
+
+    // Update maxBytes
+    if (msg.GetSize() > mqStatus->second.maxBytes) {
+        mqStatus->second.maxBytes = msg.GetSize();
+    }
+
+    // Update lastMsg, total times
+    mqStatus->second.lastMsg = msg.GetMsgId();
+    mqStatus->second.total++;
+
+    return 0;
+}
+
+int SprMediatorBak::EpollLoop()
+{
+    struct epoll_event ep[32];
+
+    do {
+        // 无事件时, epoll_wait阻塞, -1 无限等待
+        int count = epoll_wait(mEpollHandler, ep, sizeof(ep)/sizeof(ep[0]), -1);
+        if (count <= 0) {
+            SPR_LOGE("epoll_wait failed. %s\n", strerror(errno));
+            continue;
+        }
+
+        for (int i = 0; i < count; i++) {
+            int handle = ep[i].data.fd;
+            char buf[MSG_BUF_MAX_LENGTH] = {0};
+            unsigned int prio;
+            mq_attr mqAttr;
+
+            mq_getattr(handle, &mqAttr);
+            int len = mq_receive(handle, buf, mqAttr.mq_msgsize, &prio);
+            if (len <= 0) {
+                SPR_LOGE("mq_receive failed! (%s)\n", strerror(errno));
+                return -1;
+            }
+
+            string datas(buf, len);
+            SprMsg msg(datas);
+            ProcessMsg(msg);
+            LoadMQDynamicInfo(handle, msg);
+        }
+    } while(mEpollRunning);
+
+    return 0;
+}
+
+int SprMediatorBak::ProcessMsg(const SprMsg& msg)
+{
+    // SPR_LOGD("[0x%x -> 0x%x] msg: %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
+    switch (msg.GetMsgId()) {
+        case SIG_ID_PROXY_REGISTER_REQUEST:
+            MsgRespondRegister(msg);
+            break;
+
+        case SIG_ID_PROXY_UNREGISTER_REQUEST:
+            MsgRespondUnregister(msg);
+            break;
+
+        default:
+            NotifyAllObserver(msg);
+            break;
+    }
+
+    return 0;
+}
+
+// int SprMediatorBak::SendMsg(const SprMsg& msg)
+// {
+//     string datas;
+
+//     msg.Encode(datas);
+//     int ret = mq_send(mHandler, datas.c_str(), datas.size(), 0);
+//     if (ret < 0) {
+//         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
+//     }
+
+//     return 0;
+// }
+
+int SprMediatorBak::NotifyObserver(ESprModuleID id, const SprMsg& msg)
+{
+    auto it = mModuleMap.find(id);
+    if (it == mModuleMap.end()) {
+        SPR_LOGW("Not exist moduleId: 0x%x\n", id);
+        return 0;
+    }
+
+    string datas;
+    msg.Encode(datas);
+    int ret = mq_send(it->second.handle, datas.c_str(), datas.size(), 0);
+    if (ret < 0) {
+        SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
+    }
+
+    return ret;
+}
+
+int SprMediatorBak::NotifyAllObserver(const SprMsg& msg)
+{
+    for (const auto& pair : mModuleMap) {
+        // Skip modules that are unregistered, inactive, or the source of the message
+        if (pair.second.handle == -1 || !pair.second.monitored || msg.GetFrom() == pair.first) {
+            continue;
+        }
+
+        // When destination is NONE, dispatch to all modules.
+        // when destination is vaild value, dispatch to the destination
+        if (msg.GetTo() == MODULE_NONE || msg.GetTo() == pair.first) {
+            NotifyObserver(pair.first, msg);
+        }
+    }
+
+    return 0;
+}
+
+int SprMediatorBak::MsgRespondRegister(const SprMsg& msg)
+{
+    bool result = false;
+    bool monitored = msg.GetBoolValue();
+    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
+    std::string name = msg.GetString();
+
+    auto it = mModuleMap.find(moduleId);
+    if (it != mModuleMap.end()) {
+        SPR_LOGW("Already exist moduleId: 0x%x\n", moduleId);
+        if (it->second.handle != -1) {
+            mq_close(it->second.handle);
+            it->second.handle = -1;
+        }
+        mModuleMap.erase(moduleId);
+    }
+
+    int handle = MakeMQ(name);
+    if (handle != -1) {
+        result = true;
+        mModuleMap[moduleId] = { monitored, handle, name };
+        LoadMQStaticInfo(handle, name);
+        LoadMQDynamicInfo(handle,msg);
+        SPR_LOGD("Register successfully! ID: %d, NAME: %s, monitored = %d\n", (int)moduleId, name.c_str(), monitored);
+    } else {
+        SPR_LOGE("Invaild handle!\n");
+    }
+
+    SprMsg rspMsg(MODULE_PROXY, moduleId, SIG_ID_PROXY_REGISTER_RESPONSE);
+    rspMsg.SetU8Value(result);
+    NotifyObserver(moduleId, rspMsg);
+
+    return 0;
+}
+
+int SprMediatorBak::MsgRespondUnregister(const SprMsg& msg)
+{
+    ESprModuleID moduleId = static_cast<ESprModuleID>(msg.GetU16Value());
+
+    auto it = mModuleMap.find(moduleId);
+    if (it != mModuleMap.end()) {
+        if (it->second.handle != -1) {
+            mq_close(it->second.handle);
+            mMQStatusMap.erase(it->second.handle);
+            it->second.handle = -1;
+            SPR_LOGD("Close mq %s \n", it->second.name.c_str());
+        }
+        mModuleMap.erase(moduleId);
+    } else {
+        SPR_LOGW("Not exist module id: %x\n", moduleId);
+    }
+
+    SprMsg exitMsg(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT);
+    exitMsg.SetU32Value(moduleId);
+    NotifyAllObserver(exitMsg);
+    return 0;
+}
