@@ -20,19 +20,20 @@
 #define __SPR_MEDIATOR_H__
 
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
 #include <thread>
 #include <mqueue.h>
 #include "SprMsg.h"
+#include "PMsgQueue.h"
 #include "CoreTypeDefs.h"
 #include "CommonTypeDefs.h"
 
 struct SModuleInfo
 {
     bool monitored;
-    int handle;
-    std::string name;
+    std::shared_ptr<PMsgQueue> pModMQ;
 };
 
 class SprMediator
@@ -40,22 +41,16 @@ class SprMediator
 public:
     ~SprMediator();
     static SprMediator* GetInstance();
-    int Init();
-    int EpollLoop();
-    static int StopWork();
 
+    int Init();
     int GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
     std::string GetSignalName(int sig);
 
 private:
-    explicit SprMediator(int size);
-    int EnvReady(const std::string& srvName);
-    int MakeMQ(const std::string& name);
-    int PrepareInternalPort();
-    int DestroyInternalPort();
+    SprMediator();
+    int InitInternalPort();
     int LoadMQStaticInfo(int handle, const std::string& devName);
     int LoadMQDynamicInfo(int handle, const SprMsg& msg);
-    // int SendMsg(const SprMsg& msg);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);
 
@@ -67,10 +62,7 @@ private:
     int MsgRespondUnregister(const SprMsg& msg);
 
 private:
-    static bool mEpollRunning;
-    int mHandler;
-    int mEpollHandler;
-    std::string mMqDevName;
+    std::shared_ptr<PMsgQueue> mpInternalMQ;
     std::map<int, SMQStatus> mMQStatusMap;  // handle, mq status
     std::map<InternalDefs::ESprModuleID, SModuleInfo> mModuleMap;
 };

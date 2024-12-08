@@ -41,8 +41,7 @@ public:
     long GetMQMaxMsg() const { return mMaxMsg; }
 
 protected:
-    std::string GetRandomString(int32_t width);
-    void OpenMsgQueue();
+    int InitMsgQueue();
 
 private:
     long mMaxMsg;

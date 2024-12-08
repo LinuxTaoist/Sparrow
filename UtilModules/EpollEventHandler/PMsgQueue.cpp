@@ -17,7 +17,6 @@
  *
  */
 #include <iostream>
-#include <random>
 #include <stdio.h>
 #include <errno.h>
 #include <mqueue.h>
@@ -37,9 +36,17 @@ PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
             void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mCb(cb)
 {
-    mDevName = "/" + name + "_" + GetRandomString(8);
+    if (name.empty()) {
+        SetReady(false);
+        return;
+    }
+
+    mDevName = (name[0] == '/') ? name : "/" + name;
     mMaxMsg = maxmsg;
-    OpenMsgQueue();
+    int rc = InitMsgQueue();
+    if (rc == -1) {
+        SetReady(false);
+    }
 }
 
 PMsgQueue::~PMsgQueue()
@@ -47,47 +54,45 @@ PMsgQueue::~PMsgQueue()
     if (!mDevName.empty() && mEvtFd > 0) {
         Clear();
         mq_close(mEvtFd);
-        mq_unlink(mDevName.c_str());
         mDevName = "";
     }
 }
 
-std::string PMsgQueue::GetRandomString(int32_t width)
-{
-    static const char alphanum[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-    static std::mt19937 rng(std::random_device{}());
-    std::uniform_int_distribution<int> dist(0, sizeof(alphanum) - 2);
-
-    std::string str(width, 0);
-    for (auto &c : str) {
-        c = alphanum[dist(rng)];
-    }
-
-    return str;
-}
-
-void PMsgQueue::OpenMsgQueue()
+int PMsgQueue::InitMsgQueue()
 {
     if (mDevName.empty()) {
         SPR_LOGE("mDevName is empty!\n");
-        return;
+        return -1;
     }
 
-    mq_unlink(mDevName.c_str());
-    struct mq_attr mqAttr;   // cat /proc/sys/fs/mqueue/msg_max
-    mqAttr.mq_maxmsg = 10;
-    mqAttr.mq_msgsize = 1025;
-    mqAttr.mq_flags = 0;
-    mqAttr.mq_curmsgs = 0;
-    mqAttr.__pad[0] = 0;
-    mqAttr.__pad[1] = 0;
-    mqAttr.__pad[2] = 0;
-    mqAttr.__pad[3] = 0;
-    mEvtFd = (int)mq_open(mDevName.c_str(), O_CREAT | O_RDWR | O_NONBLOCK | O_EXCL, 0666, &mqAttr);
-    if (mEvtFd < 0) {
-        SPR_LOGE("mq_open %s failed! (%s)\n", mDevName.c_str(), strerror(errno));
-        return;
+    mEvtFd = mq_open(mDevName.c_str(), O_RDWR | O_NONBLOCK);
+    if (mEvtFd == (mqd_t)-1) {
+        if (errno == ENOENT) {
+            struct mq_attr mqAttr;   // cat /proc/sys/fs/mqueue/msg_max
+            mqAttr.mq_maxmsg = 10;
+            mqAttr.mq_msgsize = 1025;
+            mqAttr.mq_flags = 0;
+            mqAttr.mq_curmsgs = 0;
+            mqAttr.__pad[0] = 0;
+            mqAttr.__pad[1] = 0;
+            mqAttr.__pad[2] = 0;
+            mqAttr.__pad[3] = 0;
+            mEvtFd = (int)mq_open(mDevName.c_str(), O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL, 0666, &mqAttr);
+            if (mEvtFd == (mqd_t)-1) {
+                SPR_LOGE("mq_open %s failed! (%s)\n", mDevName.c_str(), strerror(errno));
+                return -1;
+            }
+        }
     }
+
+    std::string msg;
+    ssize_t received = 0;
+    uint32_t prio = 0;
+    while ((received = Recv(msg, prio)) > 0) {
+        SPR_LOGD("clear message from queue<%s> cnt = %ld\n", mDevName.c_str(), received);
+    }
+
+    return 0;
 }
 
 int32_t PMsgQueue::Clear()
@@ -111,7 +116,7 @@ int32_t PMsgQueue::Send(const std::string& msg, uint32_t prio)
         return -1;
     }
 
-    return 0;
+    return ret;
 }
 
 int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
@@ -132,7 +137,7 @@ int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
     }
 
     msg.assign(buf, len);
-    return 0;
+    return len;
 }
 
 void* PMsgQueue::EpollEvent(int fd, EpollType eType, void* arg)

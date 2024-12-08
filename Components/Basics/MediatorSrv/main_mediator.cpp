@@ -21,6 +21,7 @@
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "SprMediator.h"
+#include "EpollEventHandler.h"
 #include "SprMediatorHub.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprMediator", fmt, ##args)
@@ -34,19 +35,19 @@ int main(int argc, const char *argv[])
 	    SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
-                SprMediator::StopWork();
+                EpollEventHandler::GetInstance()->ExitLoop();
                 break;
             default:
                 break;
         }
     });
 
-    SprMediator *pObj = SprMediator::GetInstance();
-    SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pObj);
-    theMediatorHub.InitializeHub();
-    pObj->Init();
-    pObj->EpollLoop();
+    SprMediator *pMedObj = SprMediator::GetInstance();
+    SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pMedObj);
 
+    theMediatorHub.InitializeHub();
+    pMedObj->Init();
+    EpollEventHandler::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;
 }
