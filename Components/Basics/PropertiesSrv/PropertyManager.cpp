@@ -28,8 +28,15 @@
 #include <string.h>
 #include "SprLog.h"
 #include "CommonMacros.h"
+#include "SprDebugNode.h"
 #include "PropertyManager.h"
 
+#define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("Properties", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("Properties", fmt, ##args)
+
+#define DEBUG_MODULE_NAME       "Properties"
 #define SYSTEM_PROP_PATH        "system.prop"
 #define DEFAULT_PROP_PATH       "default.prop"
 #define VENDOR_PROP_PATH        "default.prop"
@@ -39,17 +46,13 @@
 
 #define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
 
-#define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("Properties", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("Properties", fmt, ##args)
-
 PropertyManager::PropertyManager()
 {
 }
 
 PropertyManager::~PropertyManager()
 {
+    UnregisterDebugFuncs();
 }
 
 PropertyManager* PropertyManager::GetInstance()
@@ -110,8 +113,37 @@ int PropertyManager::Init()
     // load persist properties
     LoadPersistProperty();
 
-    EnvReady(SRV_NAME_PROPERTY);
+    RegisterDebugFuncs();
+    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string("/tmp/") + SRV_NAME_PROPERTY);
     return 0;
+}
+
+void PropertyManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(DEBUG_MODULE_NAME, "DumpAllProperties", "Dump all properties",  std::bind(&PropertyManager::DebugDumpPropertyList, this, std::placeholders::_1));
+}
+
+void PropertyManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Unregister %s all debug funcs\n", DEBUG_MODULE_NAME);
+    p->UnregisterCmd(DEBUG_MODULE_NAME);
+}
+
+void PropertyManager::DebugDumpPropertyList(const std::string& args)
+{
+    DumpPropertyList();
 }
 
 int PropertyManager::DumpPropertyList()
@@ -121,17 +153,6 @@ int PropertyManager::DumpPropertyList()
 
     for (auto& it : keyValueMap) {
         SPR_LOGD("%s=%s\n", it.first.c_str(), it.second.c_str());
-    }
-
-    return 0;
-}
-
-int32_t PropertyManager::EnvReady(const std::string& srvName)
-{
-    std::string node = "/tmp/" + srvName;
-    int fd = creat(node.c_str(), 0644);
-    if (fd != -1) {
-        close(fd);
     }
 
     return 0;
