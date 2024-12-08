@@ -33,8 +33,14 @@ public:
     virtual ~PMsgQueue();
 
     virtual int32_t Clear();
+    virtual int32_t Send(int fd, const char* data, size_t size, uint32_t prio = 1);
     virtual int32_t Send(const std::string& msg, uint32_t prio = 1);
+    virtual int32_t Recv(int fd, char* data, size_t size, uint32_t& prio);
     virtual int32_t Recv(std::string& msg, uint32_t& prio);
+    virtual ssize_t Write(int fd, const char* data, size_t size) override;
+    virtual ssize_t Read(int fd, char* data, size_t size) override;
+
+    virtual void  Close() override;
     virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
     std::string GetMQDevName() const { return mDevName; }
