@@ -27,7 +27,7 @@
 #include "PMsgQueue.h"
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) printf("%6d PMsgQueue D: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
+#define SPR_LOGD(fmt, args...) // printf("%6d PMsgQueue D: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
 #define SPR_LOGW(fmt, args...) // printf("%6d PMsgQueue W: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
 #define SPR_LOGE(fmt, args...) printf("%6d PMsgQueue E: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
 
@@ -100,12 +100,11 @@ int PMsgQueue::InitMsgQueue()
 
 int32_t PMsgQueue::Clear()
 {
-    uint32_t prio = 0;
-    uint32_t msgCnt = 0;
     std::string msg;
+    uint32_t prio = 0;
 
     while (Recv(msg, prio) > 0) {
-        SPR_LOGD("clear message from queue<%s> cnt = %u\n", mDevName.c_str(), ++msgCnt);
+        SPR_LOGD("Clear queue %s, cnt = %d\n", mDevName.c_str());
     }
 
     return 0;
