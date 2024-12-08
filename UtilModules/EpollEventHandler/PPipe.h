@@ -34,7 +34,10 @@ public:
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
-    int mFifoFd;
+    bool IsExistFifo(const std::string& path);
+
+private:
+    std::string mFifoName;
     std::function<void(int, std::string, void*)> mCb;
 };
 #endif // __PPIPE_H__
