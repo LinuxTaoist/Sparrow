@@ -128,7 +128,7 @@ protected:
     InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;
     std::string mModuleName;
-    SprMediatorProxy* mMsgMediatorPtr;
+    SprMediatorProxy* mpMsgMediator;
 };
 
 #endif  // __SPR_OBSERVER_H__

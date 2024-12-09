@@ -22,8 +22,8 @@
 #include <map>
 #include <string>
 #include <memory>
-#include "OneNetDevice.h"
 #include "PPipe.h"
+#include "OneNetDevice.h"
 #include "SprObserverWithMQueue.h"
 
 #ifdef ENUM_OR_STRING
@@ -88,9 +88,6 @@ public:
 private:
     int32_t Init() override;
 
-    /* 初始化调试环境 */
-    int32_t InitDebugDetails();
-
     /* 初始化OneNet设备 */
     int32_t InitOneNetDevices(const std::vector<OneNetDevInfo>& devices);
 
@@ -116,8 +113,11 @@ private:
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
+    /* 注册/注销所有调试函数 */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
     /* 调试函数 */
-    void DebugUsage(const std::string& args);
     void DebugEnableDumpLog(const std::string& args);
     void DebugDeviceList(const std::string& args);
     void DebugActiveDevice(const std::string& args);
@@ -151,11 +151,7 @@ private:
     EOneNetMgrLev1State mCurLev1State;
     EOneNetMgrLev2State mCurLev2State;
     std::string mCurActiveDevice;
-    std::shared_ptr<PPipe> mDebugFileNode;
     std::map<std::string, std::shared_ptr<OneNetDevice>> mOneDeviceMap;
-
-    using DebugCmdFunc = void (OneNetManager::*)(const std::string&);
-    std::map<std::string, std::pair<std::string, DebugCmdFunc>> mDebugCmdMap;
 };
 
 #endif // __ONENET_MANAGER_H__

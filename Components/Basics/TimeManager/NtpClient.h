@@ -2,43 +2,47 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : RemoteShell.h
+ *  @file       : NtpClient.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/05/28
+ *  @date       : 2024/11/21
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/28 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/11/21 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __REMOTE_SHELL_H__
-#define __REMOTE_SHELL_H__
+#ifndef __NTP_CLIENT_H__
+#define __NTP_CLIENT_H__
 
 #include <memory>
-#include <thread>
+#include <string>
+#include <stdint.h>
 #include "PSocket.h"
-#include "EpollEventHandler.h"
 
-class RemoteShell
+class NtpClient
 {
 public:
-    RemoteShell();
-    ~RemoteShell();
+    NtpClient(const std::string addr, uint16_t port, const std::function<void(double)>& cb);
+    ~NtpClient();
 
-    int Init();
-    int DeInit();
-    int Enable();
-    int Disable();
+    int32_t SendTimeRequest();
 
 private:
-    bool mEnable;
-    std::thread mRcvThread;
-    std::shared_ptr<PTcpServer> mpTcpSrv;
+    int32_t InitNtpClient();
+    int32_t HandleNtpBytes(const std::string& bytes);
+    double  GetOffset(void* ntp, void* local);
+
+private:
+    bool mIsReady;
+    uint16_t mPort;
+    std::string mAddr;
+    std::shared_ptr<PUdp> mpNtpClient;
+    std::function<void(double)> mCb;
 };
 
-#endif // __REMOTE_SHELL_H__
+#endif // __NTP_CLIENT_H__

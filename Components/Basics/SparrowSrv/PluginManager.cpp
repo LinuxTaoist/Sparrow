@@ -21,8 +21,8 @@
 #include <dirent.h>
 #include <unistd.h>
 #include "SprLog.h"
+#include "SprDebugNode.h"
 #include "CoreTypeDefs.h"
-#include "EpollEventHandler.h"
 #include "PluginManager.h"
 
 using namespace InternalDefs;
@@ -31,14 +31,16 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("PlugMgr", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("PlugMgr", fmt, ##args)
 
-#define ENABLE_HOT_PLUG 1
+#define DEFAULT_HOT_PLUG_ENABLE true
+#define OWNER_PLUGINMGR         "PluginManager"
 
-PluginManager::PluginManager()
+PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE)
 {
 }
 
 PluginManager::~PluginManager()
 {
+    UnregisterDebugFuncs();
     UnloadAllPlugins();
 }
 
@@ -46,10 +48,8 @@ void PluginManager::Init()
 {
     mDefaultLibPath = GetDefaultLibraryPath();
     LoadAllPlugins();
-
-#if ENABLE_HOT_PLUG
     InitWatchDir();
-#endif
+    RegisterDebugFuncs();
 }
 
 void PluginManager::InitWatchDir()
@@ -62,12 +62,18 @@ void PluginManager::InitWatchDir()
     // Note: IN_CREATE is not used because it triggers immediately when a file is created,
     // which may result in attempting to process the file before it is fully written and closed.
     mDirWatch.AddDirWatch(mDefaultLibPath.c_str(), IN_CLOSE_WRITE | IN_MOVED_TO | IN_MOVED_FROM | IN_DELETE);
-    mFilePtr = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void *arg) {
+    mpFile = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void *arg) {
         const int size = 100;
-        char buffer[size];
+        char buffer[size] = {0};
         ssize_t numRead = read(fd, buffer, size);
         if (numRead == -1) {
             SPR_LOGE("read %d failed! (%s)\n", fd, strerror(errno));
+            return;
+        }
+
+        PluginManager* pMySelf = reinterpret_cast<PluginManager*>(arg);
+        if (pMySelf && !pMySelf->mHotPlugEnable) {
+            SPR_LOGD("Hot plug disabled, ignore event\n");
             return;
         }
 
@@ -91,9 +97,9 @@ void PluginManager::InitWatchDir()
             }
             offset += sizeof(struct inotify_event) + pEvent->len;
         }
-    });
+    }, this);
 
-    EpollEventHandler::GetInstance()->AddPoll(mFilePtr.get());
+    mpFile->AddToPoll();
 }
 
 std::string PluginManager::GetDefaultLibraryPath()
@@ -194,4 +200,45 @@ void PluginManager::UnloadAllPlugins()
         handle.second = nullptr;
     }
     mPluginHandles.clear();
+}
+
+void PluginManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(OWNER_PLUGINMGR, "DumpPluginMgr",  "Dump Info",          std::bind(&PluginManager::DebugDumpPlugMInfo,  this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_PLUGINMGR, "EnableHotPlug",  "Enable hot plug",    std::bind(&PluginManager::DebugEnableHotPlug,  this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_PLUGINMGR, "DisableHotPlug", "Disable hot plug",   std::bind(&PluginManager::DebugDisableHotPlug, this, std::placeholders::_1));
+}
+
+void PluginManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->UnregisterCmd(OWNER_PLUGINMGR);
+}
+
+void PluginManager::DebugDumpPlugMInfo(const std::string& args)
+{
+    SPR_LOGD("-------------- Dump PlugManager Info --------------\n");
+    SPR_LOGD("- mHotPlugEnable = %d\n", mHotPlugEnable);
+    SPR_LOGD("---------------------------------------------------\n");
+}
+
+void PluginManager::DebugEnableHotPlug(const std::string& args)
+{
+    mHotPlugEnable = true;
+}
+
+void PluginManager::DebugDisableHotPlug(const std::string& args)
+{
+    mHotPlugEnable = false;
 }

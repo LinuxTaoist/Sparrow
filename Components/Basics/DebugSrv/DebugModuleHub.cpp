@@ -31,7 +31,7 @@ using namespace InternalDefs;
 
 DebugModuleHub::DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule) : SprBinderHub(srvName)
 {
-    mDebugModulePtr = pDebugModule;
+    mpDebugModule = pDebugModule;
 }
 
 DebugModuleHub::~DebugModuleHub()
@@ -44,14 +44,14 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
     switch(cmd) {
         case DEBUG_CMD_ENABLE_REMOTE_PORT: {
             SprMsg msg(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL);
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
         }
         case DEBUG_CMD_DISABLE_REMOTE_PORT: {
             SprMsg msg(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL);
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
@@ -61,7 +61,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             auto pInfo = make_shared<STimerInfo>(timeInfo);
             SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
             msg.SetDatas(pInfo, sizeof(STimerInfo));
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
 
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
@@ -72,7 +72,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             auto pInfo = make_shared<STimerInfo>(timeInfo);
             SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_TIMER);
             msg.SetDatas(pInfo, sizeof(STimerInfo));
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
 
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
@@ -92,7 +92,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             auto pInfo = make_shared<STimerInfo>(timeInfo);
             SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
             msg.SetDatas(pInfo, sizeof(STimerInfo));
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
 
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
@@ -103,7 +103,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             auto pInfo = make_shared<STimerInfo>(timeInfo);
             SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_TIMER);
             msg.SetDatas(pInfo, sizeof(STimerInfo));
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
 
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
@@ -111,14 +111,14 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
         }
         case DEBUG_CMD_ENABLE_REMOTE_SHELL: {
             SprMsg msg(MODULE_DEBUG, SIG_ID_DEBUG_ENABLE_REMOTE_SHELL);
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;
         }
         case DEBUG_CMD_DISABLE_REMOTE_SHELL: {
             SprMsg msg(MODULE_DEBUG, SIG_ID_DEBUG_DISABLE_REMOTE_SHELL);
-            mDebugModulePtr->SendMsg(msg);
+            mpDebugModule->SendMsg(msg);
             pRspParcel->WriteInt(0);
             pRspParcel->Post();
             break;

@@ -26,6 +26,7 @@
 #include "CoreTypeDefs.h"
 #include "PropertyManager.h"
 #include "PropertyManagerHub.h"
+#include "EpollEventHandler.h"
 
 using namespace InternalDefs;
 
@@ -34,31 +35,25 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("MainProper", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("MainProper", fmt, ##args)
 
-static bool wait = true;
-
 int main(int argc, char * argv[])
 {
-    PropertyManager* pProperM = PropertyManager::GetInstance();
-    PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
-
     GeneralUtils::InitSignalHandler([](int signum) {
 	    SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
-                wait = false;
+                EpollEventHandler::GetInstance()->ExitLoop();
                 break;
             default:
                 break;
         }
     });
 
+    PropertyManager* pProperM = PropertyManager::GetInstance();
+    PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
     pProperM->Init();
     thePropertyManagerHub.InitializeHub();
 
-    while (wait) {
-        sleep(1);
-    }
-
+    EpollEventHandler::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;
 }

@@ -27,17 +27,17 @@
 class PPipe : public IEpollEvent
 {
 public:
-    PPipe(int fd, std::function<void(int, std::string, void*)> cb = nullptr, void *arg = nullptr);
-    PPipe(const std::string& fileName, std::function<void(int, std::string, void*)> cb = nullptr, void* arg = nullptr);
+    PPipe(int fd, std::function<void(ssize_t, std::string, void*)> cb = nullptr, void *arg = nullptr);
+    PPipe(const std::string& fileName, std::function<void(ssize_t, std::string, void*)> cb = nullptr, void* arg = nullptr);
     virtual ~PPipe();
 
-    void AddPoll();
-    void DelPoll();
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
-    bool mAddPoll;
-    int mFifoFd;
+    bool IsExistFifo(const std::string& path);
+
+private:
+    std::string mFifoName;
     std::function<void(int, std::string, void*)> mCb;
 };
 #endif // __PPIPE_H__

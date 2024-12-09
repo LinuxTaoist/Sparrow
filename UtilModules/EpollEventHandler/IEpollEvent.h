@@ -28,19 +28,35 @@ class IEpollEvent
 {
 public:
     IEpollEvent(int fd, EpollType eType = EPOLL_TYPE_BEGIN, void* arg = nullptr)
-        : mEpollFd(fd), mEpollType(eType), mArgs(arg) {};
+        : mReady(true), mEvtFd(fd), mEpollType(eType), mArgs(arg) {};
 
-    virtual ~IEpollEvent() = default;
+    virtual ~IEpollEvent();
+    virtual ssize_t Write(int fd, const char* data, size_t size);
     virtual ssize_t Write(int fd, const std::string& bytes);
+    virtual ssize_t Write(const char* data, size_t size);
+    virtual ssize_t Write(const std::string& bytes);
+
+    virtual ssize_t Read(int fd, char* data, size_t size);
     virtual ssize_t Read(int fd, std::string& bytes);
+    virtual ssize_t Read(char* data, size_t size);
+    virtual ssize_t Read(std::string& bytes);
+
+    virtual bool    IsReady();
+    virtual void    Close();
+    virtual void    AddToPoll();
+    virtual void    DelFromPoll();
     virtual void*   EpollEvent(int fd, EpollType eType, void* arg) = 0;
 
-    int         GetEpollFd()        { return mEpollFd; }
-    EpollType   GetEpollType()      { return mEpollType; }
-    void*       GetArgs()           { return mArgs; }
+    int         GetEvtFd()      { return mEvtFd; }
+    EpollType   GetEpollType()  { return mEpollType; }
+    void*       GetArgs()       { return mArgs; }
 
 protected:
-    int         mEpollFd;
+    void        SetReady(bool ready) { mReady = ready; }
+
+protected:
+    bool        mReady;
+    int         mEvtFd;
     EpollType   mEpollType;
     void*       mArgs;
 };

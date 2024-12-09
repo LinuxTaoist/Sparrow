@@ -30,20 +30,20 @@ using namespace std;
 #define SPR_LOGE(fmt, args...) printf("%4d TcpServer E: " fmt, __LINE__, ##args)
 int main(int argc, const char *argv[])
 {
-    auto pEpoll = EpollEventHandler::GetInstance();
+    EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
 
-    std::list<std::shared_ptr<PSocket>> clients;
-    auto tcpServer = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int cli, void *arg) {
-        PSocket* pSrvObj = (PSocket*)arg;
+    std::list<std::shared_ptr<PTcpClient>> clients;
+    auto tcpServer = make_shared<PTcpServer>([&](int cli, void *arg) {
+        PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
-            SPR_LOGE("PSocket is nullptr\n");
+            SPR_LOGE("pSrvObj is nullptr\n");
             return;
         }
 
-        auto tcpClient = make_shared<PSocket>(cli, [&](int sock, void *arg) {
-            PSocket* pCliObj = (PSocket*)arg;
+        auto tcpClient = make_shared<PTcpClient>(cli, [&](int sock, void *arg) {
+            PTcpClient* pCliObj = (PTcpClient*)arg;
             if (pCliObj == nullptr) {
-                SPR_LOGE("PSocket is nullptr\n");
+                SPR_LOGE("pCliObj is nullptr\n");
                 return;
             }
 
@@ -59,21 +59,18 @@ int main(int argc, const char *argv[])
             }
 
             if (rc <= 0) {
-                clients.remove_if([sock, pEpoll, pCliObj](shared_ptr<PSocket>& v) {
-                    pEpoll->DelPoll(pCliObj);
-                    return (v->GetEpollFd() == sock);
+                clients.remove_if([sock, pEpoll, pCliObj](shared_ptr<PTcpClient>& v) {
+                    pCliObj->Close();
+                    return (v->GetEvtFd() == sock);
                 });
             }
         });
 
         tcpClient->AsTcpClient();
-        pEpoll->AddPoll(tcpClient.get());
         clients.push_back(tcpClient);
     });
 
     tcpServer->AsTcpServer(8080, 5);
-    pEpoll->AddPoll(tcpServer.get());
-    pEpoll->EpollLoop(true);
-
+    pEpoll->EpollLoop();
     return 0;
 }

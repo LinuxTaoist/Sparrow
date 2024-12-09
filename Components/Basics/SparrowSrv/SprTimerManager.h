@@ -53,11 +53,10 @@ public:
      *
      * @param[in] id
      * @param[in] name
-     * @param[in] mediatorPtr
-     * @param[in] systemTimerPtr
+     * @param[in] pSystemTimer
      * @return SprTimerManager*
      */
-    static SprTimerManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> systemTimerPtr);
+    static SprTimerManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> pSystemTimer);
 
 private:
     /**
@@ -65,10 +64,9 @@ private:
      *
      * @param[in] id
      * @param[in] name
-     * @param[in] mediatorPtr
-     * @param[in] systemTimerPtr
+     * @param[in] pSystemTimer
      */
-    SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> systemTimerPtr);
+    SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> pSystemTimer);
 
     /**
      * @brief  InitSystemTimer
@@ -125,7 +123,7 @@ private:
 private:
     bool mEnable;                                       // Component init status
     std::set<SprTimer> mTimers;                         // sort by SprTimer.mExpired from smallest to largest
-    std::shared_ptr<SprSystemTimer> mSystemTimerPtr;    // SysTimer object
+    std::shared_ptr<SprSystemTimer> mpSystemTimer;      // SysTimer object
 };
 
 #endif // __TIMER_MANAGER_H__

@@ -28,8 +28,15 @@
 #include <string.h>
 #include "SprLog.h"
 #include "CommonMacros.h"
+#include "SprDebugNode.h"
 #include "PropertyManager.h"
 
+#define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("Properties", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("Properties", fmt, ##args)
+
+#define DEBUG_MODULE_NAME       "Properties"
 #define SYSTEM_PROP_PATH        "system.prop"
 #define DEFAULT_PROP_PATH       "default.prop"
 #define VENDOR_PROP_PATH        "default.prop"
@@ -39,17 +46,13 @@
 
 #define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
 
-#define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("Properties", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("Properties", fmt, ##args)
-
 PropertyManager::PropertyManager()
 {
 }
 
 PropertyManager::~PropertyManager()
 {
+    UnregisterDebugFuncs();
 }
 
 PropertyManager* PropertyManager::GetInstance()
@@ -60,8 +63,8 @@ PropertyManager* PropertyManager::GetInstance()
 
 int PropertyManager::SetProperty(const std::string& key, const std::string& value)
 {
-    if (mSharedMemoryPtr == nullptr) {
-        SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
     }
 
@@ -71,12 +74,12 @@ int PropertyManager::SetProperty(const std::string& key, const std::string& valu
 int PropertyManager::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
 {
     int ret = -1;
-    if (mSharedMemoryPtr == nullptr) {
-        SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
         return ret;
     }
 
-    ret = mSharedMemoryPtr->GetValue(key, value);
+    ret = mpSharedMemory->GetValue(key, value);
     if (ret != 0) {
         value = defaultValue;
     }
@@ -86,8 +89,8 @@ int PropertyManager::GetProperty(const std::string& key, std::string& value, con
 
 int PropertyManager::GetProperties()
 {
-    if (mSharedMemoryPtr == nullptr) {
-        SPR_LOGE("mSharedMemoryPtr is nullptr!\n");
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
     }
 
@@ -96,7 +99,7 @@ int PropertyManager::GetProperties()
 
 int PropertyManager::Init()
 {
-    mSharedMemoryPtr = std::unique_ptr<SharedBinaryTree>(new SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
+    mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
 
     // load default property
     LoadPropertiesFromFile(DEFAULT_PROP_PATH);
@@ -110,28 +113,46 @@ int PropertyManager::Init()
     // load persist properties
     LoadPersistProperty();
 
-    EnvReady(SRV_NAME_PROPERTY);
+    RegisterDebugFuncs();
+    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string("/tmp/") + SRV_NAME_PROPERTY);
     return 0;
+}
+
+void PropertyManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(DEBUG_MODULE_NAME, "DumpAllProperties", "Dump all properties",  std::bind(&PropertyManager::DebugDumpPropertyList, this, std::placeholders::_1));
+}
+
+void PropertyManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Unregister %s all debug funcs\n", DEBUG_MODULE_NAME);
+    p->UnregisterCmd(DEBUG_MODULE_NAME);
+}
+
+void PropertyManager::DebugDumpPropertyList(const std::string& args)
+{
+    DumpPropertyList();
 }
 
 int PropertyManager::DumpPropertyList()
 {
     std::map<std::string, std::string> keyValueMap;
-    mSharedMemoryPtr->GetAllKeyValues(keyValueMap);
+    mpSharedMemory->GetAllKeyValues(keyValueMap);
 
     for (auto& it : keyValueMap) {
         SPR_LOGD("%s=%s\n", it.first.c_str(), it.second.c_str());
-    }
-
-    return 0;
-}
-
-int32_t PropertyManager::EnvReady(const std::string& srvName)
-{
-    std::string node = "/tmp/" + srvName;
-    int fd = creat(node.c_str(), 0644);
-    if (fd != -1) {
-        close(fd);
     }
 
     return 0;
@@ -184,7 +205,7 @@ int PropertyManager::LoadPersistProperty()
 
                 if (file) {
                     std::string value((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-                    mSharedMemoryPtr->SetValue(entry->d_name, value);
+                    mpSharedMemory->SetValue(entry->d_name, value);
                 } else {
                     SPR_LOGE("Open %s fail! (%s)\n", entry->d_name, strerror(errno));
                 }
@@ -205,19 +226,19 @@ int PropertyManager::HandleKeyValue(const std::string& key, const std::string& v
     int ret = -1;
     if (key.rfind("ro.", 0) == 0) {
         std::string tmpValue;
-        int rs = mSharedMemoryPtr->GetValue(key, tmpValue);
+        int rs = mpSharedMemory->GetValue(key, tmpValue);
         if (rs < 0) {
-            ret = mSharedMemoryPtr->SetValue(key, value);
+            ret = mpSharedMemory->SetValue(key, value);
         } else {
             SPR_LOGW("%s already exists, modify fail!\n", key.c_str());
         }
     } else if (key.rfind("persist.", 0) == 0) {
-        ret = mSharedMemoryPtr->SetValue(key, value);
+        ret = mpSharedMemory->SetValue(key, value);
         if (ret == 0) {
             SavePersistProperty(key, value);
         }
     } else {
-        ret = mSharedMemoryPtr->SetValue(key, value);
+        ret = mpSharedMemory->SetValue(key, value);
     }
 
     return ret;

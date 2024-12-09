@@ -66,7 +66,7 @@ int main(int argc, const char *argv[])
                 SprMsg theDeMsg(enDatas);
                 vector<uint8_t> deU8Vec = theDeMsg.GetU8Vec();
                 vector<uint32_t> deU32Vec = theDeMsg.GetU32Vec();
-                std::shared_ptr<struct TestSpr> dePtr = theDeMsg.GetDatas<struct TestSpr>();
+                std::shared_ptr<struct TestSpr> pDecode = theDeMsg.GetDatas<struct TestSpr>();
 
                 SPR_LOGD("from          : 0x%x  \n", theDeMsg.GetFrom());
                 SPR_LOGD("to            : 0x%x  \n", theDeMsg.GetTo());
@@ -77,13 +77,13 @@ int main(int argc, const char *argv[])
                 SPR_LOGD("string        : %s    \n", theDeMsg.GetString().c_str());
                 SPR_LOGD("u8Vec[%ld]    : %s    \n", deU8Vec.size(), GeneralConversions::ToString(deU8Vec).c_str());
                 SPR_LOGD("u32Vec[%ld]   : %s    \n", deU32Vec.size(), GeneralConversions::ToHexStringWithSpace(deU32Vec).c_str());
-                SPR_LOGD("ptr           : %d    \n", dePtr->id);
-                SPR_LOGD("                %s    \n", dePtr->buf);
+                SPR_LOGD("ptr           : %d    \n", pDecode->id);
+                SPR_LOGD("                %s    \n", pDecode->buf);
 
                 SprMsg copyMsg(theDeMsg);
                 std::vector<uint8_t> copyU8Vec = copyMsg.GetU8Vec();
                 std::vector<uint32_t> copyU32Vec = copyMsg.GetU32Vec();
-                std::shared_ptr<struct TestSpr> copyPtr = copyMsg.GetDatas<struct TestSpr>();
+                std::shared_ptr<struct TestSpr> pCopy = copyMsg.GetDatas<struct TestSpr>();
                 SPR_LOGD("-------------------------------------------------------------\n");
                 SPR_LOGD("from          : 0x%x  \n", copyMsg.GetFrom());
                 SPR_LOGD("to            : 0x%x  \n", copyMsg.GetTo());
@@ -94,8 +94,8 @@ int main(int argc, const char *argv[])
                 SPR_LOGD("string        : %s    \n", copyMsg.GetString().c_str());
                 SPR_LOGD("u8Vec[%ld]    : %s    \n", copyU8Vec.size(), GeneralConversions::ToString(copyU8Vec).c_str());
                 SPR_LOGD("u32Vec[%ld]   : %s    \n", copyU32Vec.size(), GeneralConversions::ToHexStringWithSpace(copyU32Vec).c_str());
-                SPR_LOGD("ptr           : %d    \n", copyPtr->id);
-                SPR_LOGD("                %s    \n", copyPtr->buf);
+                SPR_LOGD("ptr           : %d    \n", pCopy->id);
+                SPR_LOGD("                %s    \n", pCopy->buf);
                 break;
             }
 

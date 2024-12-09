@@ -18,10 +18,11 @@
  */
 #include "SprLog.h"
 #include "PMsgQueue.h"
+#include "GeneralUtils.h"
 #include "SprObserverWithMQueue.h"
-#include "SprEpollSchedule.h"
 
 using namespace InternalDefs;
+using namespace GeneralUtils;
 
 #define SPR_LOGD(fmt, args...)  LOGD("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
 #define SPR_LOGW(fmt, args...)  LOGW("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
@@ -30,20 +31,19 @@ using namespace InternalDefs;
 #define MSG_SIZE_MAX  1025
 
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
-    : SprObserver(id, name, proxyType), PMsgQueue(name, MSG_SIZE_MAX), mConnected(false)
+    : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), MSG_SIZE_MAX), mConnected(false)
 {
 }
 
 SprObserverWithMQueue::~SprObserverWithMQueue()
 {
     UnRegisterFromMediator();
-    SprEpollSchedule::GetInstance()->DelPoll(this);
 }
 
 int32_t SprObserverWithMQueue::InitFramework()
 {
     SPR_LOGD("Initlize MQueue framework!\n");
-    SprEpollSchedule::GetInstance()->AddPoll(this);
+    AddToPoll();
     return RegisterFromMediator();
 }
 
@@ -148,7 +148,7 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
 
 void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
 {
-    if (fd != GetEpollFd()) {
+    if (fd != GetEvtFd()) {
         SPR_LOGW("fd is not match!\n");
         return nullptr;
     }

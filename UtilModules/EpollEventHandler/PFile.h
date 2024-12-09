@@ -32,12 +32,9 @@ public:
           void* arg = nullptr, int flags = O_RDWR | O_CREAT | O_TRUNC, mode_t mode = 0777);
 
     virtual ~PFile();
-    void AddPoll();
-    void DelPoll();
     void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:
-    bool mAddPoll;
     int mFd;    // Maintains only the file descriptor of the filename passed in the constructor
     std::function<void(int, void*)> mCb1;
     std::function<void(int, ssize_t, std::string, void*)> mCb2;

@@ -49,7 +49,7 @@ int main(int argc, const char *argv[])
     });
 
     theDebugModuleHub.InitializeHub();
-    SprEpollSchedule::GetInstance()->EpollLoop(true);
+    SprEpollSchedule::GetInstance()->EpollLoop();
 
     SPR_LOGI("Main exit!\n");
     return 0;

@@ -17,7 +17,6 @@
  *
  */
 #include "SprLog.h"
-#include "SprEpollSchedule.h"
 #include "SprObserverWithTimerfd.h"
 
 #define SPR_LOGD(fmt, args...)  LOGD("SprObsTmrFd", "[%s] " fmt, mModuleName.c_str(), ##args)
@@ -31,19 +30,17 @@ SprObserverWithTimerfd::SprObserverWithTimerfd(ModuleIDType id, const std::strin
 
 SprObserverWithTimerfd::~SprObserverWithTimerfd()
 {
-    SprEpollSchedule::GetInstance()->DelPoll(this);
 }
 
 int32_t SprObserverWithTimerfd::InitFramework()
 {
-    // SPR_LOGD("AddPoll timerfd observer! fd = %d\n", GetEpollFd());
-    SprEpollSchedule::GetInstance()->AddPoll(this);
+    AddToPoll();
     return 0;
 }
 
 void* SprObserverWithTimerfd::EpollEvent(int fd, EpollType eType, void* arg)
 {
-    if (fd != GetEpollFd()) {
+    if (fd != GetEvtFd()) {
         SPR_LOGW("fd is not timerfd!\n");
         return nullptr;
     }

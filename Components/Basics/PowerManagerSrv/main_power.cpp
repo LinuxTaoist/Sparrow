@@ -22,6 +22,7 @@
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "PowerManager.h"
+#include "SprDebugNode.h"
 #include "PowerManagerHub.h"
 #include "SprEpollSchedule.h"
 
@@ -33,8 +34,9 @@ using namespace InternalDefs;
 int main(int argc, const char *argv[])
 {
     PowerManager thePowerManager(MODULE_POWERM, "PowerM");
-    thePowerManager.Initialize();
     PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
+    thePowerManager.Initialize();
+    thePowerManagerHub.InitializeHub();
 
     GeneralUtils::InitSignalHandler([](int signum) {
 	    SPR_LOGI("Receive signal: %d!\n", signum);
@@ -48,8 +50,8 @@ int main(int argc, const char *argv[])
         }
     });
 
-    thePowerManagerHub.InitializeHub();
-    SprEpollSchedule::GetInstance()->EpollLoop(true);
+    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_POWER_MANAGER);
+    SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;
 }

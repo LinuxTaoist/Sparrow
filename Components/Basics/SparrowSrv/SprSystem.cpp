@@ -18,12 +18,6 @@
  */
 #include <memory>
 #include <fstream>
-#include <fcntl.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <string.h>
 #include <sys/resource.h>
 #include "SprLog.h"
 #include "SprContext.h"
@@ -31,9 +25,10 @@
 #include "SprSystem.h"
 #include "SprTimeTrace.h"
 #include "CoreTypeDefs.h"
+#include "TimeManager.h"
+#include "SprDebugNode.h"
 #include "SprSystemTimer.h"
 #include "SprTimerManager.h"
-#include "EpollEventHandler.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -118,17 +113,6 @@ void SprSystem::LoadReleaseInformation()
     }
 }
 
-int SprSystem::EnvReady(const std::string& srvName)
-{
-    std::string node = "/tmp/" + srvName;
-    int fd = creat(node.c_str(), 0644);
-    if (fd != -1) {
-        close(fd);
-    }
-
-    return 0;
-}
-
 void SprSystem::Init()
 {
     SPR_LOGD("=============================================\n");
@@ -137,14 +121,17 @@ void SprSystem::Init()
 
     InitEnv();
 
-    TTP(9, "systemTimerPtr->Initialize()");
-    shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
-    systemTimerPtr->Initialize();
+    TTP(8, "TimeManager->Initialize()");
+    TimeManager::GetInstance(MODULE_TIMEM, "TimeM")->Initialize();
+
+    TTP(9, "pSystemTimer->Initialize()");
+    shared_ptr<SprSystemTimer> pSystemTimer = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
+    pSystemTimer->Initialize();
 
     TTP(10, "TimerManager->Initialize()");
-    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
+    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", pSystemTimer)->Initialize();
 
     SprContext ctx;
     mPluginMgr.Init();
-    EnvReady(SRV_NAME_SPARROW);
+    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_SPARROW);
 }

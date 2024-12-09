@@ -52,19 +52,19 @@ int RemoteShell::Init()
     }
 
     SPR_LOGD("Enter remote shell Init!\n");
-    std::list<std::shared_ptr<PSocket>> clients;
+    std::list<std::shared_ptr<PTcpClient>> clients;
     auto pEpoll = EpollEventHandler::GetInstance();
-    mTcpSrvPtr = std::make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int cli, void* arg) {
-        PSocket* pSrvObj = (PSocket*)arg;
+    mpTcpSrv = std::make_shared<PTcpServer>([&](int cli, void* arg) {
+        PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
-            SPR_LOGE("PSocket is nullptr\n");
+            SPR_LOGE("pSrvObj is nullptr\n");
             return;
         }
 
-        auto tcpClient = std::make_shared<PSocket>(cli, [&](int sock, void* arg) {
-            PSocket* pCliObj = (PSocket*)arg;
+        auto tcpClient = std::make_shared<PTcpClient>(cli, [&](int sock, void* arg) {
+            PTcpClient* pCliObj = (PTcpClient*)arg;
             if (pCliObj == nullptr) {
-                SPR_LOGE("PSocket is nullptr\n");
+                SPR_LOGE("pCliObj is nullptr\n");
                 return;
             }
 
@@ -98,15 +98,14 @@ int RemoteShell::Init()
             }
 
             if (rc <= 0) {
-                clients.remove_if([sock, this, pCliObj, pEpoll](std::shared_ptr<PSocket>& v) {
-                    pEpoll->DelPoll(pCliObj);
-                    return (v->GetEpollFd() == sock);
+                clients.remove_if([sock, this, pCliObj, pEpoll](std::shared_ptr<PTcpClient>& v) {
+                    pCliObj->Close();
+                    return (v->GetEvtFd() == sock);
                 });
             }
         });
 
         tcpClient->AsTcpClient();
-        pEpoll->AddPoll(tcpClient.get());
         clients.push_back(tcpClient);
     });
 
@@ -118,9 +117,8 @@ int RemoteShell::Init()
             }
 
             SPR_LOGD("Enter remote shell thread...\n");
-            mySelf->mTcpSrvPtr->AsTcpServer(8080, 5);
-            pEpoll->AddPoll(mySelf->mTcpSrvPtr.get());
-            pEpoll->EpollLoop(true);
+            mySelf->mpTcpSrv->AsTcpServer(8080, 5);
+            pEpoll->EpollLoop();
         }, this);
     }
 
@@ -138,8 +136,7 @@ int RemoteShell::DeInit()
 
     SPR_LOGD("Enter remote shell DeInit!\n");
     if (mRcvThread.joinable()) {
-        EpollEventHandler::GetInstance()->DelPoll(mTcpSrvPtr.get());
-        mTcpSrvPtr->Close();
+        mpTcpSrv->Close();
         mRcvThread.join();
     }
 

@@ -29,22 +29,35 @@ char MediatorWatch::MenuEntry()
 {
     char bInput = 0;
     do {
-        ShowMQStatus();
-        if (bInput == 'M') {
-            ShowFieldDetails();
-        } else if (bInput == 'S') {
-            ShowSignalName();
-        } else {
-            SPR_LOG("Press 'S' to query signal\n");
-            SPR_LOG("Press 'M' to see more \n");
-        }
-
-        SPR_LOG("Press 'Q' to back \n");
+        HandleInputInMenu(bInput);
         char input = InfraWatch::WaitUserInputWithoutEnter();
         bInput = toupper(input);
     } while(bInput != 'Q');
 
     return bInput;
+}
+
+char MediatorWatch::HandleInputInMenu(char input)
+{
+    ShowMQStatus();
+    switch(input) {
+        case 'M': {
+            ShowFieldDetails();
+            break;
+        }
+        case 'S': {
+            ShowSignalName();
+            break;
+        }
+        default: {
+            SPR_LOG("Press 'S' to query signal\n");
+            SPR_LOG("Press 'M' to see more \n");
+            break;
+        }
+    }
+
+    SPR_LOG("Press 'Q' to back \n");
+    return input;
 }
 
 char MediatorWatch::ShowSignalName()
