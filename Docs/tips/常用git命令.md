@@ -58,10 +58,10 @@ git branch -r   # 查看远程分支
 git branch -avv # 查看本地和远程分支
 ```
 
-5. 删除分支：
+5. 删除/创建远程分支：
 ```shell
 git push origin --delete <branch-name> # 删除远程分支
-git branch -d <branch-name>  # 删除本地分支
+git push -u origin <branch-name>       # 推送远程分支
 ```
 
 6. 查看远程仓库地址：
