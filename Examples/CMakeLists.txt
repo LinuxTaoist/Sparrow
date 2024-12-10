@@ -74,3 +74,10 @@ target_include_directories  (property_set PRIVATE ${PROJECT_PATH}/PublicAPIs)
 set_target_properties       (property_set PROPERTIES OUTPUT_NAME "property_set")
 target_link_libraries       (property_set c propertyapi)
 add_dependencies            (property_set LibPropertyAPI)
+
+## Bin sample_http
+aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HTTP_SRV_PATH)
+set(SRC_BIN_SAMPLE_HTTP      SampleHttp.cc)
+add_executable              (sample_http ${SRC_BIN_SAMPLE_HTTP} ${SRC_HTTP_SRV_PATH})
+target_include_directories  (sample_http PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)
+set_target_properties       (sample_http PROPERTIES OUTPUT_NAME "sample_http")
