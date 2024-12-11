@@ -35,7 +35,7 @@ void HttpMsgBase::Trim(std::string& bytes)
     }).base(), bytes.end());
 }
 
-std::string HttpMsgBase::GetStatusText(int32_t status) const
+std::string HttpMsgBase::GetStatusText(int32_t status)
 {
     switch (status) {
         case HTTP_STATUS_100: return "Continue";
@@ -157,22 +157,22 @@ int32_t HttpMsgRequest::SetMsgBody(const std::string& body)
     return 0;
 }
 
-std::string HttpMsgRequest::GetMethod() const
+std::string HttpMsgRequest::GetMethod()
 {
     return mReqMethod;
 }
 
-std::string HttpMsgRequest::GetURI() const
+std::string HttpMsgRequest::GetURI()
 {
     return mReqURI;
 }
 
-std::string HttpMsgRequest::GetHttpVersion() const
+std::string HttpMsgRequest::GetHttpVersion()
 {
     return mHttpVersion;
 }
 
-std::string HttpMsgRequest::GetMsgHeader(const std::string& key) const
+std::string HttpMsgRequest::GetMsgHeader(const std::string& key)
 {
     auto it = mMsgHeaders.find(key);
     if (it != mMsgHeaders.end())
@@ -182,12 +182,12 @@ std::string HttpMsgRequest::GetMsgHeader(const std::string& key) const
     return "";
 }
 
-std::map<std::string, std::string> HttpMsgRequest::GetMsgHeaders() const
+std::map<std::string, std::string> HttpMsgRequest::GetMsgHeaders()
 {
     return mMsgHeaders;
 }
 
-std::string HttpMsgRequest::GetMsgBody() const
+std::string HttpMsgRequest::GetMsgBody()
 {
     return mMsgBody;
 }
@@ -198,20 +198,179 @@ int32_t HttpMsgRequest::Decode(const std::string& bytes)
     std::string line;
 
     if (!std::getline(stream, line)) {
-        return -1;
+        return HTTP_STATUS_400;
     }
 
     std::istringstream iss(line);
     if (!(iss >> mReqMethod >> mReqURI >> mHttpVersion)) {
-        return -1;
+        return HTTP_STATUS_400;
     }
 
     Trim(mHttpVersion);
     if (mHttpVersion != "HTTP/1.1" && mHttpVersion != "HTTP/1.0") {
-        return -1;
+        return HTTP_STATUS_505;
     }
 
     while (std::getline(stream, line) && !line.empty() && line.find_first_not_of(" \t\r\n") != std::string::npos) {
+        size_t colPos = line.find(':');
+        if (colPos == std::string::npos || colPos == 0) {
+            return HTTP_STATUS_400;
+        }
+
+        std::string key = line.substr(0, colPos);
+        std::string value = line.substr(colPos + 1);
+        Trim(value);
+        mMsgHeaders[key] = value;
+    }
+
+    if (!line.empty() && line.find_first_not_of(" \t\r\n") != std::string::npos) {
+        return HTTP_STATUS_400;
+    }
+
+    if (stream.peek() != EOF) {
+        std::ostringstream bodyStream;
+        bodyStream << stream.rdbuf();
+        mMsgBody = bodyStream.str();
+    }
+
+    return 0;
+}
+
+int32_t HttpMsgRequest::Encode(std::string& bytes)
+{
+    // HTTP Request Message Format (RFC 7230 and RFC 7231)
+    // Request        = Request-Line                          ; Section 5.1
+    //                  *( ( general-header                   ; Section 4.5
+    //                     | request-header                   ; Section 5.3
+    //                     | entity-header ) CRLF )           ; Section 7.1
+    //                  CRLF
+    //                  [ message-body ]                      ; Section 4.3
+    bytes += mReqMethod + " " + mReqURI + " " + mHttpVersion + "\r\n";
+
+    for (const auto& pair : mMsgHeaders) {
+        bytes += pair.first + ": " + pair.second + "\r\n";
+    }
+
+    bytes += "\r\n";
+    bytes += mMsgBody;
+    return 0;
+}
+
+//---------------------------------------------------------------------------------------------------------------------
+// HttpMsgResponse
+//---------------------------------------------------------------------------------------------------------------------
+HttpMsgResponse::HttpMsgResponse(const std::string& bytes)
+{
+    Decode(bytes);
+}
+
+HttpMsgResponse::HttpMsgResponse(const std::string& version, int32_t status, const std::string& body)
+    : mHttpVersion(version), mStatusCode(status), mMsgBody(body)
+{
+}
+
+HttpMsgResponse::~HttpMsgResponse()
+{
+}
+
+int32_t HttpMsgResponse::SetHttpVersion(const std::string& version)
+{
+    mHttpVersion = version;
+    return 0;
+}
+
+int32_t HttpMsgResponse::SetStatusCode(int32_t status)
+{
+    mStatusCode = status;
+    return 0;
+}
+
+int32_t HttpMsgResponse::SetHeader(const std::string& key, const std::string& value)
+{
+    mMsgHeaders[key] = value;
+    return 0;
+}
+
+int32_t HttpMsgResponse::SetMsgHeaders(const std::map<std::string, std::string>& headers)
+{
+    mMsgHeaders = headers;
+    return 0;
+}
+
+int32_t HttpMsgResponse::SetMsgBody(const std::string& body)
+{
+    mMsgBody = body;
+    return 0;
+}
+
+std::string HttpMsgResponse::GetHttpVersion()
+{
+    return mHttpVersion;
+}
+
+int32_t HttpMsgResponse::GetStatusCode()
+{
+    return mStatusCode;
+}
+
+std::string HttpMsgResponse::GetReasonPhrase()
+{
+    mReasonPhrase = GetStatusText(mStatusCode);
+    return mReasonPhrase;
+}
+
+std::string HttpMsgResponse::GetMsgHeader(const std::string& key)
+{
+    auto it = mMsgHeaders.find(key);
+    if (it != mMsgHeaders.end())
+    {
+        return it->second;
+    }
+    return "";
+}
+
+std::map<std::string, std::string> HttpMsgResponse::GetMsgHeaders()
+{
+    return mMsgHeaders;
+}
+
+std::string HttpMsgResponse::GetMsgBody()
+{
+    return mMsgBody;
+}
+
+int32_t HttpMsgResponse::Decode(const std::string& bytes)
+{
+    std::istringstream stream(bytes);
+    std::string line;
+
+    if (!std::getline(stream, line)) {
+        return -1;
+    }
+
+    std::istringstream iss(line);
+    std::string version, statusStr, reason;
+    if (!(iss >> version >> statusStr >> std::ws >> reason)) {
+        return -1;
+    }
+
+    Trim(reason);
+    mHttpVersion = version;
+    char* endptr;
+    long statusCode = std::strtol(statusStr.c_str(), &endptr, 10);
+    if (*endptr != '\0' || statusCode < HTTP_STATUS_100 || statusCode > HTTP_STATUS_BUTT) {
+        return -1;
+    }
+
+    mStatusCode = static_cast<int32_t>(statusCode);
+    mReasonPhrase = reason;
+
+    if (mHttpVersion != "HTTP/1.1" && mHttpVersion != "HTTP/1.0") {
+        return -1;
+    }
+
+    while (std::getline(stream, line) && !line.empty() &&
+           line.find_first_not_of(" \t\r\n") != std::string::npos) {
         size_t colPos = line.find(':');
         if (colPos == std::string::npos || colPos == 0) {
             return -1;
@@ -236,21 +395,24 @@ int32_t HttpMsgRequest::Decode(const std::string& bytes)
     return 0;
 }
 
-int32_t HttpMsgRequest::Encode(std::string& bytes)
+int32_t HttpMsgResponse::Encode(std::string& bytes)
 {
-    // Request        = Request-Line                          ; Section 5.1
-    //                  *( ( general-header                   ; Section 4.5
-    //                     | request-header                   ; Section 5.3
-    //                     | entity-header ) CRLF )           ; Section 7.1
-    //                  CRLF
-    //                  [ message-body ]                      ; Section 4.3
-    bytes += mReqMethod + " " + mReqURI + " " + mHttpVersion + "\r\n";
-
-    for (const auto& pair : mMsgHeaders) {
-        bytes += pair.first + ": " + pair.second + "\r\n";
+    // HTTP Response Message Format (RFC 7230 and RFC 7231)
+    //response      = Status-Line                           ; Section 6.1
+    //              *( ( general-header                     ; Section 4.5
+    //                 | response-header                    ; Section 6.2
+    //                 | entity-header ) CRLF )             ; Section 7.1
+    //              CRLF
+    //              [ message-body ]                        ; Section 7.2
+    std::ostringstream stream;
+    GetReasonPhrase();
+    stream << mHttpVersion << " " << mStatusCode << " " << mReasonPhrase << "\r\n";
+    for (const auto& header : mMsgHeaders) {
+        stream << header.first << ": " << header.second << "\r\n";
     }
 
-    bytes += "\r\n";
-    bytes += mMsgBody;
+    stream << "\r\n";
+    stream << mMsgBody;
+    bytes = stream.str();
     return 0;
 }

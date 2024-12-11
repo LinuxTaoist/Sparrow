@@ -123,11 +123,13 @@ public:
     /**
      * @brief 初始化socket
      *
+     * @add
      * @param port
      * @param backlog
+     * @param addr
      * @return int32_t
      */
-    int32_t AsTcpServer(uint16_t port, int32_t backlog);
+    int32_t AsTcpServer(uint16_t port, int32_t backlog, const std::string& addr = "");
     void*   EpollEvent(int fd, EpollType eType, void* arg) override;
 
 private:

@@ -21,7 +21,7 @@
 #define SPR_LOGD(fmt, args...) printf("%4d SampleHttp D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d SampleHttp E: " fmt, __LINE__, ##args)
 
-void TestRequestBytes()
+void TestHttpRequestBytes()
 {
     std::string bytes =
     "GET /favicon.ico HTTP/1.1\r\n"
@@ -41,6 +41,8 @@ void TestRequestBytes()
     "\r\n";
 
     HttpMsgRequest theRequest(bytes);
+    SPR_LOGD("------------------------------- Test Http Request Bytes -------------------------------\n");
+    SPR_LOGD("-- Decode:\n");
     SPR_LOGD("method : %s\n", theRequest.GetMethod().c_str());
     SPR_LOGD("uri    : %s\n", theRequest.GetURI().c_str());
     SPR_LOGD("version: %s\n", theRequest.GetHttpVersion().c_str());
@@ -55,12 +57,44 @@ void TestRequestBytes()
 
     std::string enBytes;
     theRequest.Encode(enBytes);
-    SPR_LOGD("encode : %s\n", enBytes.c_str());
+    SPR_LOGD("-- Encode : \n%s\n", enBytes.c_str());
+}
+
+void TestHttpResponseBytes()
+{
+    std::string bytes =
+    "HTTP/1.1 200 OK\r\n"
+    "Date: Tue, 12 Dec 2023 12:00:00 GMT\r\n"
+    "Server: Apache/2.4.41 (Ubuntu)\r\n"
+    "Content-Type: text/html; charset=UTF-8\r\n"
+    "Content-Length: 27\r\n"
+    "\r\n"
+    "<html><body>Hello World</body></html>";
+
+    HttpMsgResponse theResponse(bytes);
+    SPR_LOGD("------------------------------- Test Http Response Bytes ------------------------------\n");
+    SPR_LOGD("-- Decode:\n");
+    SPR_LOGD("version: %s\n", theResponse.GetHttpVersion().c_str());
+    SPR_LOGD("status : %d\n", theResponse.GetStatusCode());
+    SPR_LOGD("reason : %s\n", theResponse.GetReasonPhrase().c_str());
+    SPR_LOGD("headers:\n");
+
+    std::map<std::string, std::string> headers = theResponse.GetMsgHeaders();
+    for (const auto& header : headers) {
+        SPR_LOGD("        %s: %s\n", header.first.c_str(), header.second.c_str());
+    }
+
+    SPR_LOGD("body   : %s\n", theResponse.GetMsgBody().c_str());
+
+    std::string enBytes;
+    theResponse.Encode(enBytes);
+    SPR_LOGD("-- Encode : \n%s\n", enBytes.c_str());
 }
 
 int main(int argc, char *argv[])
 {
-    TestRequestBytes();
+    TestHttpRequestBytes();
+    TestHttpResponseBytes();
     return 0;
 }
 
