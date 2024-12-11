@@ -87,6 +87,7 @@ enum EHttpStatusCode
     HTTP_STATUS_508 = 508,  // Loop Detected (WebDAV)
     HTTP_STATUS_510 = 510,  // Not Extended
     HTTP_STATUS_511 = 511,  // Network Authentication Required
+    HTTP_STATUS_BUTT = 999
 };
 
 #endif // __HTTP_COMMON_H__
