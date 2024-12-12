@@ -329,7 +329,7 @@ OneNetDriver::~OneNetDriver()
 int32_t OneNetDriver::Init()
 {
     SPR_LOGD("OneNetDriver Init\n");
-    InitOneNetClient();
+    // InitOneNetClient();
     InitUnixPIPE();
     return 0;
 }
@@ -532,6 +532,7 @@ int32_t OneNetDriver::DumpSocketBytesWithAscall(const std::string& bytes)
 void OneNetDriver::MsgRespondSocketConnect(const SprMsg& msg)
 {
     // Update state to connecting
+    InitOneNetClient();
     CHECK_ONENET_POINTER_NONRET(mpOneClient);
     SetLev1State(LEV1_SOCKET_CONNECTING);
 
