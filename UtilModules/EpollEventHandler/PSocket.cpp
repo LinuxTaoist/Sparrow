@@ -96,13 +96,13 @@ int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_RCVBUF, &rcvLen, sizeof(rcvLen)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
 
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_SNDBUF, &sndLen, sizeof(sndLen)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -268,7 +268,7 @@ PTcpClient::PTcpClient(int fd, const std::function<void(int, void*)>& cb, void* 
 {
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -279,7 +279,7 @@ PTcpClient::PTcpClient(int fd, const std::function<void(ssize_t, std::string, vo
 {
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -296,7 +296,7 @@ PTcpClient::PTcpClient(const std::function<void(int, void*)>& cb, void* arg)
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -313,7 +313,7 @@ PTcpClient::PTcpClient(const std::function<void(ssize_t, std::string, void*)>& c
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -332,14 +332,14 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
 
     op = rcvLen;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_RCVBUF, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
 
     op = sndLen;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_SNDBUF, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -347,14 +347,14 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
     so_linger.l_onoff = 1; /* when send to sock and it close, keep time */
     so_linger.l_linger = 0; /* keep time second */
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
 
     op = 1; // disable Nagle, TCP_NODELAY is the only used IPPROTO_TCP layer.
     if (setsockopt(mEvtFd, IPPROTO_TCP, 1, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -414,7 +414,7 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -607,7 +607,7 @@ PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(int, void*
 {
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -618,7 +618,7 @@ PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(ssize_t, s
 {
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -635,7 +635,7 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(int, void*)>& cb, 
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -652,7 +652,7 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(ssize_t, std::stri
 
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt failed! (%s)\n", strerror(errno));
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
