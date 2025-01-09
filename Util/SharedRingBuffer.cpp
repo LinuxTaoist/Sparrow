@@ -57,7 +57,7 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
         mEnable = false;
     }
 
-    mRoot = static_cast<Root*>(mapMemory);
+    mRoot = reinterpret_cast<Root*>(mapMemory);
     if (mRoot == nullptr) {
         SPR_LOGE("mRoot is nullptr!\n");
         mEnable = false;
@@ -65,7 +65,7 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
 
     mDataCapacity = mMapCapacity - sizeof(Root);
     mRoot->rp = mRoot->wp;
-    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
+    mData = reinterpret_cast<uint8_t*>(mRoot) + sizeof(Root);
     if (mData == nullptr) {
         SPR_LOGE("mData is nullptr!\n");
         mEnable = false;
@@ -100,13 +100,13 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     mShmPath = path;
     mMapCapacity = fileSize;
     mDataCapacity = mMapCapacity - sizeof(Root);
-    mRoot = static_cast<Root*>(mapMemory);
+    mRoot = reinterpret_cast<Root*>(mapMemory);
     if (mRoot == nullptr) {
         SPR_LOGE("mRoot is nullptr!\n");
         mEnable = false;
     }
 
-    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
+    mData = reinterpret_cast<uint8_t*>(mapMemory) + sizeof(Root);
     if (mData == nullptr) {
         SPR_LOGE("mData is nullptr!\n");
         mEnable = false;
@@ -138,7 +138,7 @@ int SharedRingBuffer::write(const void* data, int32_t len)
         int32_t avail = AvailSpace();
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->wp, len);
-            memmove(static_cast<unsigned char*>(mData) + mRoot->wp, data, len);
+            memmove(reinterpret_cast<uint8_t*>(mData) + mRoot->wp, data, len);
             mRoot->wp = (mRoot->wp + (uint32_t)len) % mDataCapacity;
             SetRWStatus(CMD_READABLE);
             ret = 0;
@@ -170,7 +170,7 @@ int SharedRingBuffer::read(void* data, int32_t len)
         int32_t avail = AvailData();
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->rp, len);
-            memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
+            memcpy(data, reinterpret_cast<uint8_t*>(mData) + mRoot->rp, len);
             mRoot->rp = (mRoot->rp + len) % mDataCapacity;
             SetRWStatus(CMD_WRITEABLE);
             ret = 0;
@@ -221,7 +221,7 @@ int32_t SharedRingBuffer::AvailData() const noexcept
 //         return -1;
 //     }
 
-//     memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
+//     memcpy(data, reinterpret_cast<uint8_t*>(mData) + mRoot->rp, len);
 //     pos = (pos + len) % mDataCapacity;
 
 //     return 0;
