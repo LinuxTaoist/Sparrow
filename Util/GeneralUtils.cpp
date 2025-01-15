@@ -195,6 +195,19 @@ int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, c
     return -1;
 }
 
+int CountWords(const std::string& str)
+{
+    std::istringstream iss(str);
+    std::string word;
+    int count = 0;
+
+    while (iss >> word) {
+        ++count;
+    }
+
+    return count;
+}
+
 void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen)
 {
     if (srcMem == nullptr || tarMem == nullptr || tLen <= 0 || sLen <= 0 || sLen < tLen) {

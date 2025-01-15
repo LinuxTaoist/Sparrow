@@ -101,7 +101,6 @@ int GetRandomInteger(int width);
  */
 std::string GetRandomString(int width);
 
-
 /**
  * @brief  Split a string into tokens using the specified delimiter
  *
@@ -141,6 +140,14 @@ int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, ch
  * @return  0 if success, -1 if failed
  */
 int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out);
+
+/**
+ * @brief  Count the number of words in a string
+ *
+ * @param str  The input string to be counted
+ * @return int The number of words in the string
+ */
+int CountWords(const std::string& str);
 
 /**
  * @brief  Find the memory address of the target memory in the source memory
