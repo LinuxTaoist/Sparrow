@@ -171,5 +171,5 @@ int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
 
     memcpy(buffer, &len, sizeof(int32_t));
     memcpy(buffer + sizeof(int32_t), logs, len);
-    return pLogSCacheMem->write(buffer, sizeof(int32_t) + len);
+    return pLogSCacheMem->Write(buffer, sizeof(int32_t) + len);
 }

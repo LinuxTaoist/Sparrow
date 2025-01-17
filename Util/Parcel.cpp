@@ -47,7 +47,10 @@ Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master),
 
 Parcel::~Parcel()
 {
-    sem_close(mSem);
+    if (SEM_FAILED != mSem) {
+        sem_close(mSem);
+        sem_unlink((mShmPath + std::to_string(mShmKey)).c_str());
+    }
 
     if (mRingBuffer != nullptr) {
         delete mRingBuffer;
@@ -60,13 +63,13 @@ int Parcel::WriteBool(bool value)
     int ret = 0;
 
     NODE_LENGTH_T len = sizeof(value);
-    ret = mRingBuffer->write(&len, sizeof(NODE_LENGTH_T));
+    ret = mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T));
     if (ret != 0) {
         return ret;
     }
 
     uint8_t data = value ? 1 : 0;
-    ret = mRingBuffer->write(&data, len);
+    ret = mRingBuffer->Write(&data, len);
     return ret;
 }
 
@@ -75,13 +78,13 @@ int Parcel::ReadBool(bool& value)
     int ret = 0;
 
     NODE_LENGTH_T len = 0;
-    ret = mRingBuffer->read(&len, sizeof(NODE_LENGTH_T));
+    ret = mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T));
     if (ret != 0) {
         return ret;
     }
 
     uint8_t data = 0;
-    ret = mRingBuffer->read(&data, len);
+    ret = mRingBuffer->Read(&data, len);
     value = data ? true : false;
 
     return ret;
@@ -93,13 +96,13 @@ int Parcel::WriteInt(int value)
 
     int netValue = htonl(value);
     NODE_LENGTH_T len = sizeof(netValue);
-    ret = mRingBuffer->write(&len, sizeof(NODE_LENGTH_T));
+    ret = mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T));
     if (ret != 0) {
         return ret;
     }
 
     uint8_t* data = reinterpret_cast<uint8_t*>(&netValue);
-    ret = mRingBuffer->write(data, len);
+    ret = mRingBuffer->Write(data, len);
     return ret;
 }
 
@@ -108,13 +111,13 @@ int Parcel::ReadInt(int& value)
     int ret = 0;
 
     NODE_LENGTH_T len = 0;
-    ret = mRingBuffer->read(&len, sizeof(NODE_LENGTH_T));
+    ret = mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T));
     if (ret != 0 || len != sizeof(int)) {
         return ret;
     }
 
     uint8_t data[sizeof(int)];
-    ret = mRingBuffer->read(data, len);
+    ret = mRingBuffer->Read(data, len);
     if (ret == 0) {
         int temp;
         memcpy(&temp, data, sizeof(int));
@@ -127,12 +130,12 @@ int Parcel::ReadInt(int& value)
 int Parcel::WriteString(const std::string& value)
 {
     NODE_LENGTH_T len = value.length();
-    if (mRingBuffer->write(&len, sizeof(NODE_LENGTH_T)) != 0) {
-        SPR_LOGE("write string len failed!\n");
+    if (mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T)) != 0) {
+        SPR_LOGE("Write string len failed!\n");
         return -1;
     }
 
-    return mRingBuffer->write(value.c_str(), len);
+    return mRingBuffer->Write(value.c_str(), len);
 }
 
 int Parcel::ReadString(std::string& value)
@@ -140,39 +143,39 @@ int Parcel::ReadString(std::string& value)
     int ret = 0;
 
     NODE_LENGTH_T len = 0;
-    ret = mRingBuffer->read(&len, sizeof(NODE_LENGTH_T));
+    ret = mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T));
     if (ret != 0 || len == 0) {
-        SPR_LOGE("read string len failed! len = %d, ret = %d\n", len, ret);
+        SPR_LOGE("Read string len failed! len = %d, ret = %d\n", len, ret);
         return -1;
     }
 
     value.resize(len);
     char* data = const_cast<char*>(value.c_str());
-    ret = mRingBuffer->read(data, len);
+    ret = mRingBuffer->Read(data, len);
     return ret;
 }
 
 int Parcel::WriteData(void* data, int size)
 {
     NODE_LENGTH_T len = size;
-    if (mRingBuffer->write(&len, sizeof(NODE_LENGTH_T)) != 0) {
+    if (mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T)) != 0) {
         return -1;
     }
 
-    return mRingBuffer->write(data, len);
+    return mRingBuffer->Write(data, len);
 }
 
 int Parcel::ReadData(void* data, int& size)
 {
     int ret = 0;
     NODE_LENGTH_T len = 0;
-    ret = mRingBuffer->read(&len, sizeof(NODE_LENGTH_T));
+    ret = mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T));
     if (ret != 0 || len == 0) {
         return -1;
     }
 
     size = len;
-    return mRingBuffer->read(data, len);
+    return mRingBuffer->Read(data, len);
 }
 
 int Parcel::Wait()
