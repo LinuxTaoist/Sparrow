@@ -120,7 +120,7 @@ SharedRingBuffer::~SharedRingBuffer()
     munmap(mRoot, mMapCapacity);
 }
 
-int SharedRingBuffer::write(const void* data, int32_t len)
+int SharedRingBuffer::Write(const void* data, int32_t len)
 {
     int ret = -1;
     int retry = RETRY_TIMES;
@@ -154,7 +154,7 @@ int SharedRingBuffer::write(const void* data, int32_t len)
     return ret;
 }
 
-int SharedRingBuffer::read(void* data, int32_t len)
+int SharedRingBuffer::Read(void* data, int32_t len)
 {
     int ret = -1;
     int retry = RETRY_TIMES;

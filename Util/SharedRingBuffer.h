@@ -64,8 +64,8 @@ public:
 
     bool    IsReadable()    const noexcept;
     bool    IsWriteable()   const noexcept;
-    int     write(const void* data, int32_t len);
-    int     read(void* data, int32_t len);
+    int     Write(const void* data, int32_t len);
+    int     Read(void* data, int32_t len);
     // int     DumpBuffer(void* data, int32_t len) const noexcept;
 
     int32_t AvailSpace()    const noexcept;

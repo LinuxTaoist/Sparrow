@@ -346,9 +346,9 @@ int LogManager::MainLoop()
         }
 
         int32_t len = 0;
-        int ret = pLogMCacheMem->read(&len, sizeof(int32_t));
+        int ret = pLogMCacheMem->Read(&len, sizeof(int32_t));
         if (ret != 0 || len < 0 || len > DEFAULT_FRAME_LEN_LIMIT) {
-            SPR_LOGE("read memory failed! len = %d, ret = %d\n", len, ret);
+            SPR_LOGE("Read memory failed! len = %d, ret = %d\n", len, ret);
             usleep(10000);
             continue;
         }
@@ -356,9 +356,9 @@ int LogManager::MainLoop()
         std::string value;
         value.resize(len);
         char* data = const_cast<char*>(value.c_str());
-        ret = pLogMCacheMem->read(data, len);
+        ret = pLogMCacheMem->Read(data, len);
         if (ret != 0) {
-            SPR_LOGE("read failed! len = %d\n", len);
+            SPR_LOGE("Read failed! len = %d\n", len);
         }
 
         // Write the log if level less than the limit
