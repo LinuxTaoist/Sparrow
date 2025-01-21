@@ -74,3 +74,20 @@ target_include_directories  (property_set PRIVATE ${PROJECT_PATH}/PublicAPIs)
 set_target_properties       (property_set PROPERTIES OUTPUT_NAME "property_set")
 target_link_libraries       (property_set c propertyapi)
 add_dependencies            (property_set LibPropertyAPI)
+
+## Bin sample_http_bytes
+aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HTTP_SRC_PATH)
+set(SRC_BIN_HTTPBYTES        SampleHttpBytes.cc)
+add_executable              (sample_http_bytes ${SRC_BIN_HTTPBYTES} ${SRC_HTTP_SRC_PATH})
+target_include_directories  (sample_http_bytes PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)
+set_target_properties       (sample_http_bytes PROPERTIES OUTPUT_NAME "sample_http_bytes")
+
+## Bin sample_httpserver
+aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HTTP_SRC_PATH)
+set(SRC_BIN_HTTPSERVER       SampleHttpServer.cc)
+add_executable              (sample_http_server ${SRC_BIN_HTTPSERVER} ${SRC_HTTP_SRC_PATH})
+target_include_directories  (sample_tcp_server PRIVATE ${PROJECT_PATH}/UtilModules/EpollEventHandler)
+target_include_directories  (sample_http_server PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)
+set_target_properties       (sample_http_server PROPERTIES OUTPUT_NAME "sample_httpserver")
+target_link_libraries       (sample_http_server c epollevent)
+add_dependencies            (sample_http_server LibEpollEvent)

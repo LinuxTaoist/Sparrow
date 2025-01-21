@@ -208,7 +208,7 @@ PTcpServer::~PTcpServer()
     Close();
 }
 
-int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog)
+int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::string& addr)
 {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
@@ -222,7 +222,7 @@ int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog)
     struct sockaddr_in myAddr;
     bzero(&myAddr, sizeof(myAddr));
     myAddr.sin_family = AF_INET;
-    myAddr.sin_addr.s_addr = htonl(INADDR_ANY);
+    myAddr.sin_addr.s_addr = addr.empty() ? htonl(INADDR_ANY) : inet_addr(addr.c_str());
     myAddr.sin_port = htons(port);
     int ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(myAddr));
     if (ret < 0) {

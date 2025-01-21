@@ -24,29 +24,30 @@ Sparrow是一个用于嵌入式Linux中间件系统，旨在为嵌入式Linux应
 ## 目录
 
 ```c++
-Sparrow
-├── 3rdAdapter          // 第三方软件适配接口
-├── 3rdParty            // 第三方软件库
-├── Build               // 构建脚本
+Sparrow/
+├── 3rdAdapter              // 第三方软件适配接口
+├── 3rdParty                // 第三方软件库
+├── Build                   // 构建脚本
 ├── CMakeLists.txt
-├── Components          // 独立组件
-├── Core                // 核心框架
-├── Debug               // 调试工具
-├── Docs                // 文档
-├── Examples            // 示例
-├── Hardware            // 硬件适配接口
-├── LICENSE             // 许可证
-├── PrivateAPIs         // 内部公开接口
-├── ProjectConfigs      // 项目配置
-├── PublicAPIs          // 外部公开接口
+├── Components              // 独立组件
+├── Core                    // 核心框架
+├── Debug                   // 调试工具
+├── Docs                    // 文档
+├── Examples                // 示例
+├── Hardware                // 硬件适配接口
+├── LICENSE                 // 许可证
+├── PrivateAPIs             // 内部公开接口
+├── ProjectConfigs          // 项目配置
+├── PublicAPIs              // 外部公开接口
 ├── README.en.md
 ├── README.md
-├── Release             // 发布路径
-├── StaticScans         // 静态扫描修复纪录
-├── Tools               // 常用辅助脚本/可执行程序
-├── Util                // 通用工具函数
-├── UtilModules         // 通用模块库
-└── version.cmake       // 版本信息
+├── Release                 // 发布路径
+├── StaticScans             // 静态扫描修复纪录
+├── Tools                   // 常用辅助脚本/可执行程序
+├── Util                    // 通用工具函数
+├── UtilModules             // 通用模块库
+├── modules_configs.cmake   // 模块配置
+└── version.cmake           // 版本信息
 ```
 
 ## 功能介绍
@@ -62,10 +63,10 @@ Sparrow
 ### 环境
 当前项目本地开发环境如下，尽量与本环境保持一致，否则会编译报错。
 ```Shell
-C++ Standard   : 14
+C++ Standard   : 11
 G++ Version    : 11.4.0
 Gcc Version    : 11.4.0
-Build Platform : Ubuntu 22.04.2 LTS
+Build Platform : Ubuntu 18.04.6 LTS
 ```
 
 ### 编译
@@ -229,6 +230,3 @@ Github/Gitee Issue提交模板参考。
 
 ## 最后
 本项目的初心在于：既然做了这一行那就尽力做好，不断地积累不断地丰富开发技能。所谓的大佬，都是一个一个问题给“坑”出来的。敢于展示自己的代码，敢于接受别人的批评，敢于直面自己的不足，方能不断进步。
-
-另外，本项目仅是个人有限开发经验的简单体现，一定存在诸多不足。欢迎各位大佬提出宝贵意见，共同完善本项目。
-
