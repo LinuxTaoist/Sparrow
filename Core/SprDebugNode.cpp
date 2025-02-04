@@ -21,6 +21,9 @@
 #include <string.h>
 #include "SprLog.h"
 #include "SprDebugNode.h"
+#include "CoreTypeDefs.h"
+#include "CommonMacros.h"
+#include "CommonTypeDefs.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprDebugNode", fmt, ##args)
 #define SPR_LOGW(fmt, args...) LOGD("SprDebugNode", fmt, ##args)
@@ -107,6 +110,7 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
 int32_t SprDebugNode::RegisterBuildinCmds()
 {
     mBuildinCmds["help"]          = { "Dump all cmds", std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
+    mBuildinCmds["version"]       = { "Dump version", std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
     return 0;
 }
 
@@ -174,6 +178,16 @@ void SprDebugNode::DebugDumpAllOwners(const std::string& args)
     SPR_LOGD("==============================================================================\n");
     SPR_LOGD("   E.g. echo help > %-22s  \n", mPipePath.c_str());
     SPR_LOGD("==============================================================================\n");
+}
+
+void SprDebugNode::DebugDumpVersion(const std::string& args)
+{
+    SPR_LOGD("==============================================================================\n");
+    SPR_LOGD("                        Version About                                         \n");
+    SPR_LOGD("==============================================================================\n");
+    SPR_LOGD("- CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
+    SPR_LOGD("- CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
+    SPR_LOGD("- CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
 }
 
 int32_t SprDebugNode::SetMaxNum(int32_t num)

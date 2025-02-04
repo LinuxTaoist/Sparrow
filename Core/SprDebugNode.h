@@ -78,6 +78,7 @@ public:
 
     // Build in cmds
     void DebugDumpAllOwners(const std::string& args);
+    void DebugDumpVersion(const std::string& args);
 
 private:
     SprDebugNode();
