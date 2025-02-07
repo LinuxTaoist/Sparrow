@@ -44,7 +44,6 @@ SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, share
 
 SprTimerManager::~SprTimerManager()
 {
-
 }
 
 SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id,

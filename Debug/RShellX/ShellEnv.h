@@ -30,12 +30,12 @@ public:
     int Execute(const std::string& cmd);
 
 private:
-    int mInFd;
-    int mOutFd;
-    int mErrFd;
-    int mStdin;     // save stdin fd
-    int mStdout;    // save stdout fd
-    int mStderr;    // save stderr fd
+    // int mInFd;
+    // int mOutFd;
+    // int mErrFd;
+    // int mStdin;     // save stdin fd
+    // int mStdout;    // save stdout fd
+    // int mStderr;    // save stderr fd
 };
 
 #endif // __SHELL_ENVIRONMET_H__

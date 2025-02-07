@@ -88,7 +88,7 @@ public:
 private:
     bool                mMaster;
     int                 mShmKey;
-    sem_t*              mSem ;
+    sem_t*              mSem;
     std::string         mShmPath;
     SharedRingBuffer*   mRingBuffer;
 };

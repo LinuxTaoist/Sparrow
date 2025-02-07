@@ -48,8 +48,14 @@ Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master),
 Parcel::~Parcel()
 {
     if (SEM_FAILED != mSem) {
-        sem_close(mSem);
-        sem_unlink((mShmPath + std::to_string(mShmKey)).c_str());
+        if (sem_close(mSem) != 0) {
+            SPR_LOGE("sem_close failed! (%s)\n", strerror(errno));
+        }
+
+        std::string semPath = mShmPath + std::to_string(mShmKey);
+        if (sem_unlink(semPath.c_str()) != 0) {
+            SPR_LOGE("sem_unlink %s failed! (%s)\n", semPath.c_str(), strerror(errno));
+        }
     }
 
     if (mRingBuffer != nullptr) {

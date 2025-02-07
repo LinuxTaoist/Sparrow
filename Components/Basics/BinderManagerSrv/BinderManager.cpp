@@ -60,6 +60,15 @@ BinderManager::BinderManager()
 
 BinderManager::~BinderManager()
 {
+    if (pReqParcel != nullptr) {
+        delete pReqParcel;
+        pReqParcel = nullptr;
+    }
+
+    if (pRspParcel != nullptr) {
+        delete pRspParcel;
+        pRspParcel = nullptr;
+    }
 }
 
 BinderManager* BinderManager::GetInstance()

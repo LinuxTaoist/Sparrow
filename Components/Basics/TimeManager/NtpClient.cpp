@@ -31,7 +31,7 @@ using namespace std;
 #define SPR_LOGW(fmt, args...) LOGW("NtpClient", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("NtpClient", fmt, ##args)
 
-NtpClient::NtpClient(const std::string addr, uint16_t port, const std::function<void(double)>& cb)
+NtpClient::NtpClient(const std::string& addr, uint16_t port, const std::function<void(double)>& cb)
     : mIsReady(false), mPort(port), mAddr(addr), mCb(cb)
 {
     InitNtpClient();

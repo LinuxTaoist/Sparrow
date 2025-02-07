@@ -41,7 +41,7 @@ cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
 
 ## 打印工程信息
 message("======================================================================")
-message("Project        : ${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}")
+message("Project        : ${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}-${VERSION_PRELEASE}")
 message("C++ Standard   : ${CMAKE_CXX_STANDARD}")
 message("G++ Version    : ${CMAKE_CXX_COMPILER_VERSION}")
 message("Gcc Version    : ${CMAKE_C_COMPILER_VERSION}")
@@ -54,7 +54,7 @@ message("Module Config  : ${MODULE_CONFIG_VERSION}")
 message("OUTPUT_PATH    : ${OUTPUT_PATH}")
 message("======================================================================")
 
-add_definitions(-DPROJECT_INFO="${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}")
+add_definitions(-DPROJECT_INFO="${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}-${VERSION_PRELEASE}")
 add_definitions(-DCXX_STANDARD="${CMAKE_CXX_STANDARD}")
 add_definitions(-DGXX_VERSION="${CMAKE_CXX_COMPILER_VERSION}")
 add_definitions(-DGCC_VERSION="${CMAKE_C_COMPILER_VERSION}")

@@ -53,7 +53,7 @@ public:
     SprDebugNode& operator=(const SprDebugNode&) = delete;
     SprDebugNode(SprDebugNode&&) = delete;
     SprDebugNode& operator=(SprDebugNode&&) = delete;
-    ~SprDebugNode() = default;
+    virtual ~SprDebugNode() = default;
 
     static SprDebugNode* GetInstance();
     std::string GetDebugPath();

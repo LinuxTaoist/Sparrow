@@ -27,7 +27,7 @@
 class NtpClient
 {
 public:
-    NtpClient(const std::string addr, uint16_t port, const std::function<void(double)>& cb);
+    NtpClient(const std::string& addr, uint16_t port, const std::function<void(double)>& cb);
     ~NtpClient();
 
     int32_t SendTimeRequest();
