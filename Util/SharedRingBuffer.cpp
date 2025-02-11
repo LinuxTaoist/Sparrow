@@ -144,7 +144,7 @@ int SharedRingBuffer::Write(const void* data, int32_t len)
             ret = 0;
             break;
         } else {
-            SPR_LOGE("AvailSpace invalid! avail = %d\n", avail);
+            SPR_LOGE("AvailSpace invalid! avail = %d, len = %d, retry = %d\n", avail, len, retry);
             DumpErrorInfo();
             retry--;
             usleep(RETRY_INTERVAL_US);

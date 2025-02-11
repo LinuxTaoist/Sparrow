@@ -23,6 +23,7 @@
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "BindInterface.h"
+#include "CommonErrorCodes.h"
 #include "DebugInterface.h"
 
 using namespace InternalDefs;
@@ -59,17 +60,16 @@ DebugInterface* DebugInterface::GetInstance()
 
 int DebugInterface::AddTimerInOneSec()
 {
-    if (!mEnable) {
-        SPR_LOGE("DebugModule is disable!\n");
-        return -1;
-    }
+    NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
+    POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
+    POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
 
-    pReqParcel->WriteInt(DEBUG_CMD_TEST_ADD_1S_TIMER);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(DEBUG_CMD_TEST_ADD_1S_TIMER));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -77,17 +77,16 @@ int DebugInterface::AddTimerInOneSec()
 
 int DebugInterface::DelTimerInOneSec()
 {
-    if (!mEnable) {
-        SPR_LOGE("DebugModule is disable!\n");
-        return -1;
-    }
+    NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
+    POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
+    POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
 
-    pReqParcel->WriteInt(DEBUG_CMD_TEST_DEL_1S_TIMER);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(DEBUG_CMD_TEST_DEL_1S_TIMER));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -95,20 +94,19 @@ int DebugInterface::DelTimerInOneSec()
 
 int DebugInterface::AddCustomTimer(uint32_t RepeatTimes, int32_t DelayInMilliSec, int32_t IntervalInMilliSec)
 {
-    if (!mEnable) {
-        SPR_LOGE("DebugModule is disable!\n");
-        return -1;
-    }
+    NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
+    POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
+    POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
 
-    pReqParcel->WriteInt(DEBUG_CMD_TEST_ADD_CUSTOM_TIMER);
-    pReqParcel->WriteInt(RepeatTimes);
-    pReqParcel->WriteInt(DelayInMilliSec);
-    pReqParcel->WriteInt(IntervalInMilliSec);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(DEBUG_CMD_TEST_ADD_CUSTOM_TIMER));
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(RepeatTimes));
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(DelayInMilliSec));
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(IntervalInMilliSec));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -116,17 +114,16 @@ int DebugInterface::AddCustomTimer(uint32_t RepeatTimes, int32_t DelayInMilliSec
 
 int DebugInterface::DelCustomTimer()
 {
-    if (!mEnable) {
-        SPR_LOGE("DebugModule is disable!\n");
-        return -1;
-    }
+    NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
+    POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
+    POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
 
-    pReqParcel->WriteInt(DEBUG_CMD_TEST_DEL_CUSTOM_TIMER);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(DEBUG_CMD_TEST_DEL_CUSTOM_TIMER));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -134,17 +131,16 @@ int DebugInterface::DelCustomTimer()
 
 int DebugInterface::EnableRemoteShell()
 {
-    if (!mEnable) {
-        SPR_LOGE("DebugModule is disable!\n");
-        return -1;
-    }
+    NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
+    POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
+    POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
 
-    pReqParcel->WriteInt(DEBUG_CMD_ENABLE_REMOTE_SHELL);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(DEBUG_CMD_ENABLE_REMOTE_SHELL));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -152,17 +148,16 @@ int DebugInterface::EnableRemoteShell()
 
 int DebugInterface::DisableRemoteShell()
 {
-    if (!mEnable) {
-        SPR_LOGE("DebugModule is disable!\n");
-        return -1;
-    }
+    NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
+    POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
+    POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
 
-    pReqParcel->WriteInt(DEBUG_CMD_DISABLE_REMOTE_SHELL);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(DEBUG_CMD_DISABLE_REMOTE_SHELL));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;

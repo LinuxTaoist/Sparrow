@@ -17,6 +17,7 @@
  *
  */
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "OneNetHub.h"
 
@@ -39,21 +40,21 @@ void OneNetHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::
     switch(cmd) {
         case ONENET_CMD_ACTIVE_DEVICE: {
             std::string deviceName;
-            pReqParcel->ReadString(deviceName);
+            NONZERO_CHECK(pReqParcel->ReadString(deviceName));
 
             SprMsg msg(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
             msg.SetString(deviceName);
             mOneMgr->SendMsg(msg);
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case ONENET_CMD_DEACTIVE_DEVICE : {
             SprMsg msg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
             mOneMgr->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         default: {

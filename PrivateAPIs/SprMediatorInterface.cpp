@@ -19,6 +19,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
 #include "BindInterface.h"
@@ -62,14 +63,14 @@ int SprMediatorInterface::GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec)
         return -1;
     }
 
-    pReqParcel->WriteInt(PROXY_CMD_GET_ALL_MQ_ATTRS);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROXY_CMD_GET_ALL_MQ_ATTRS));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     if (ret == 0) {
-        pRspParcel->ReadVector(mqAttrVec);
+        NONZERO_CHECK_RET(pRspParcel->ReadVector(mqAttrVec));
     }
 
     SPR_LOGD("ret: %d\n", ret);
@@ -83,12 +84,12 @@ std::string SprMediatorInterface::GetSigalName(int sig)
         return "";
     }
 
-    pReqParcel->WriteInt(PROXY_CMD_GET_SIGNAL_NAME);
-    pReqParcel->WriteInt(sig);
-    pReqParcel->Post();
+    NONZERO_CHECK_ERR(pReqParcel->WriteInt(PROXY_CMD_GET_SIGNAL_NAME), "");
+    NONZERO_CHECK_ERR(pReqParcel->WriteInt(sig), "");
+    NONZERO_CHECK_ERR(pReqParcel->Post(), "");
 
     std::string name;
-    pRspParcel->Wait();
-    pRspParcel->ReadString(name);
+    NONZERO_CHECK_ERR(pRspParcel->TimedWait(), "");
+    NONZERO_CHECK_ERR(pRspParcel->ReadString(name), "");
     return name;
 }

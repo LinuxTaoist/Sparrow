@@ -17,6 +17,7 @@
  *
  */
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "PropertyManagerHub.h"
 
@@ -40,31 +41,31 @@ void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, co
         case PROPERTY_CMD_SET_PROPERTY: {
             std::string key;
             std::string value;
-            pReqParcel->ReadString(key);
-            pReqParcel->ReadString(value);
+            NONZERO_CHECK(pReqParcel->ReadString(key));
+            NONZERO_CHECK(pReqParcel->ReadString(value));
             int ret = mPropertyManager->SetProperty(key, value);
 
-            pRspParcel->WriteInt(ret);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(ret));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case PROPERTY_CMD_GET_PROPERTY: {
             std::string key;
             std::string value;
             std::string defaultValue;
-            pReqParcel->ReadString(key);
-            pReqParcel->ReadString(defaultValue);
+            NONZERO_CHECK(pReqParcel->ReadString(key));
+            NONZERO_CHECK(pReqParcel->ReadString(defaultValue));
             int ret = mPropertyManager->GetProperty(key, value, defaultValue);
 
-            pRspParcel->WriteString(value);
-            pRspParcel->WriteInt(ret);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteString(value));
+            NONZERO_CHECK(pRspParcel->WriteInt(ret));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case PROPERTY_CMD_GET_PROPERTIES: {
             mPropertyManager->GetProperties();
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         default: {

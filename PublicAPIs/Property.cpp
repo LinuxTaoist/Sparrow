@@ -19,6 +19,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "Property.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
 #include "BindInterface.h"
@@ -61,14 +62,14 @@ int Property::SetProperty(const std::string& key, const std::string& value)
         return -1;
     }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_SET_PROPERTY);
-    pReqParcel->WriteString(key);
-    pReqParcel->WriteString(value);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_SET_PROPERTY));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(key));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(value));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
@@ -80,15 +81,15 @@ int Property::GetProperty(const std::string& key, std::string& value, const std:
         return -1;
     }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY);
-    pReqParcel->WriteString(key);
-    pReqParcel->WriteString(defaultValue);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(key));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(defaultValue));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadString(value);
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadString(value));
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
@@ -100,12 +101,12 @@ int Property::GetProperties()
         return -1;
     }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }

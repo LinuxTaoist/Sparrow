@@ -19,8 +19,10 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "Parcel.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
+#include "CommonErrorCodes.h"
 #include "BindInterface.h"
 #include "OneNetInterface.h"
 
@@ -65,16 +67,16 @@ int OneNetInterface::ActiveDevice(const std::string& deviceName)
 {
     if (!mEnable) {
         SPR_LOGE("OneNet is disable!\n");
-        return -1;
+        return ERR_BINDER_INIT_FAILED;
     }
 
-    pReqParcel->WriteInt(ONENET_CMD_ACTIVE_DEVICE);
-    pReqParcel->WriteString(deviceName);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(ONENET_CMD_ACTIVE_DEVICE));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(deviceName));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -84,15 +86,15 @@ int OneNetInterface::DeactiveDevice()
 {
     if (!mEnable) {
         SPR_LOGE("OneNet is disable!\n");
-        return -1;
+        return ERR_BINDER_INIT_FAILED;
     }
 
-    pReqParcel->WriteInt(ONENET_CMD_DEACTIVE_DEVICE);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(ONENET_CMD_DEACTIVE_DEVICE));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;

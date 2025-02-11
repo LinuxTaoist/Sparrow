@@ -21,6 +21,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "Parcel.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
 #include "GeneralUtils.h"
@@ -65,12 +66,12 @@ int PowerManagerInterface::PowerOn()
         return -1;
     }
 
-    pReqParcel->WriteInt(POWERM_CMD_POWER_ON);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(POWERM_CMD_POWER_ON));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -83,12 +84,12 @@ int PowerManagerInterface::PowerOff()
         return -1;
     }
 
-    pReqParcel->WriteInt(POWERM_CMD_POWER_OFF);
-    pReqParcel->Post();
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(POWERM_CMD_POWER_OFF));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;

@@ -19,6 +19,7 @@
 #include "Parcel.h"
 #include "BindCommon.h"
 #include "BindInterface.h"
+#include "CommonMacros.h"
 
 using namespace InternalDefs;
 
@@ -65,15 +66,15 @@ bool BindInterface::InitializeClientBinder(const std::string& srvName,
 
 std::shared_ptr<Binder> BindInterface::AddService(const std::string& name)
 {
-    iReqParcel.WriteInt(BINDER_CMD_ADD_SERVICE);
-    iReqParcel.WriteString(name);
-    iReqParcel.Post();
+    NONZERO_CHECK_ERR(iReqParcel.WriteInt(BINDER_CMD_ADD_SERVICE), nullptr);
+    NONZERO_CHECK_ERR(iReqParcel.WriteString(name), nullptr);
+    NONZERO_CHECK_ERR(iReqParcel.Post(), nullptr);
 
     int key = 0;
     int ret = 0;
-    iRspParcel.Wait();
-    iRspParcel.ReadInt(key);
-    iRspParcel.ReadInt(ret);
+    NONZERO_CHECK_ERR(iRspParcel.TimedWait(), nullptr);
+    NONZERO_CHECK_ERR(iRspParcel.ReadInt(key), nullptr);
+    NONZERO_CHECK_ERR(iRspParcel.ReadInt(ret), nullptr);
 
     if (ret == 0) {
         return std::make_shared<Binder>(name, key);
@@ -84,17 +85,17 @@ std::shared_ptr<Binder> BindInterface::AddService(const std::string& name)
 
 std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name)
 {
-    iReqParcel.WriteInt(BINDER_CMD_GET_SERVICE);
-    iReqParcel.WriteString(name);
-    iReqParcel.Post();
+    NONZERO_CHECK_ERR(iReqParcel.WriteInt(BINDER_CMD_GET_SERVICE), nullptr);
+    NONZERO_CHECK_ERR(iReqParcel.WriteString(name), nullptr);
+    NONZERO_CHECK_ERR(iReqParcel.Post(), nullptr);
 
     int key = 0;
     int ret = 0;
     std::string shmName;
-    iRspParcel.Wait();
-    iRspParcel.ReadString(shmName);
-    iRspParcel.ReadInt(key);
-    iRspParcel.ReadInt(ret);
+    NONZERO_CHECK_ERR(iRspParcel.TimedWait(), nullptr);
+    NONZERO_CHECK_ERR(iRspParcel.ReadString(shmName), nullptr);
+    NONZERO_CHECK_ERR(iRspParcel.ReadInt(key), nullptr);
+    NONZERO_CHECK_ERR(iRspParcel.ReadInt(ret), nullptr);
 
     if (ret == 0) {
         return std::make_shared<IBinder>(name, key);
@@ -105,13 +106,13 @@ std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name)
 
 int32_t BindInterface::RemoveService(const std::string& name)
 {
-    iReqParcel.WriteInt(BINDER_CMD_REMOVE_SERVICE);
-    iReqParcel.WriteString(name);
-    iReqParcel.Post();
+    NONZERO_CHECK_RET(iReqParcel.WriteInt(BINDER_CMD_REMOVE_SERVICE));
+    NONZERO_CHECK_RET(iReqParcel.WriteString(name));
+    NONZERO_CHECK_RET(iReqParcel.Post());
 
     int ret = 0;
-    iRspParcel.Wait();
-    iRspParcel.ReadInt(ret);
+    NONZERO_CHECK_RET(iRspParcel.TimedWait());
+    NONZERO_CHECK_RET(iRspParcel.ReadInt(ret));
 
     return ret;
 }

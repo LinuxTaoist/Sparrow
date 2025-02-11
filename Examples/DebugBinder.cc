@@ -21,6 +21,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "CommonMacros.h"
 #include "BindInterface.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
@@ -46,7 +47,7 @@ int Server()
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-    BindInterface::GetInstance()->InitializeServiceBinder("SERVICE_NAME", pReqParcel, pRspParcel);
+    BindInterface::GetInstance()->InitializeServiceBinder(SERVICE_NAME, pReqParcel, pRspParcel);
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
         SPR_LOGE("GetParcel failed\n");
         return -1;
@@ -54,39 +55,39 @@ int Server()
 
     do {
         int cmd = 0;
-        pReqParcel->Wait();
-        pReqParcel->ReadInt(cmd);
+        NONZERO_CHECK_RET(pReqParcel->Wait());
+        NONZERO_CHECK_RET(pReqParcel->ReadInt(cmd));
         switch(cmd) {
             case CMD_TEST: {
                 SPR_LOGD("CMD_TEST\n");
-                pRspParcel->WriteInt(0);
-                pRspParcel->Post();
+                NONZERO_CHECK_RET(pRspParcel->WriteInt(0));
+                NONZERO_CHECK_RET(pRspParcel->Post());
                 break;
             }
             case CMD_SUM: {
                 SPR_LOGD("CMD_SUM\n");
                 int a = 0, b = 0;
-                pReqParcel->ReadInt(a);
-                pReqParcel->ReadInt(b);
+                NONZERO_CHECK_RET(pReqParcel->ReadInt(a));
+                NONZERO_CHECK_RET(pReqParcel->ReadInt(b));
 
                 int sum = a + b;
-                pRspParcel->WriteInt(sum);
-                pRspParcel->WriteInt(0);
-                pRspParcel->Post();
+                NONZERO_CHECK_RET(pRspParcel->WriteInt(sum));
+                NONZERO_CHECK_RET(pRspParcel->WriteInt(0));
+                NONZERO_CHECK_RET(pRspParcel->Post());
                 break;
             }
             case CMD_VEC: {
                 std::vector<int> vec = {1, 2, 3, 4, 5};
-                pRspParcel->WriteVector(vec);
-                pRspParcel->WriteInt(0);
-                pRspParcel->Post();
+                NONZERO_CHECK_RET(pRspParcel->WriteVector(vec));
+                NONZERO_CHECK_RET(pRspParcel->WriteInt(0));
+                NONZERO_CHECK_RET(pRspParcel->Post());
                 break;
             }
             case CMD_CUST_VEC: {
                 std::vector<STestData> vec = {{1,1}, {2,2}, {3,4}};
-                pRspParcel->WriteVector(vec);
-                pRspParcel->WriteInt(0);
-                pRspParcel->Post();
+                NONZERO_CHECK_RET(pRspParcel->WriteVector(vec));
+                NONZERO_CHECK_RET(pRspParcel->WriteInt(0));
+                NONZERO_CHECK_RET(pRspParcel->Post());
                 break;
             }
             default: {
@@ -125,8 +126,6 @@ int Client()
         return -1;
     }
 
-
-
     SPR_LOGD("Client start\n");
     usage();
 
@@ -135,51 +134,51 @@ int Client()
         std::cin >> in;
         switch (in) {
             case '0': {
-                pReqParcel->WriteInt(CMD_TEST);
-                pReqParcel->Post();
+                NONZERO_CHECK_RET(pReqParcel->WriteInt(CMD_TEST));
+                NONZERO_CHECK_RET(pReqParcel->Post());
 
                 int ret = 0;
-                pRspParcel->Wait();
-                pRspParcel->ReadInt(ret);
+                NONZERO_CHECK_RET(pRspParcel->TimedWait());
+                NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
                 SPR_LOGD("ret: %d\n", ret);
                 break;
             }
             case '1': {
-                pReqParcel->WriteInt(CMD_SUM);
-                pReqParcel->WriteInt(10);
-                pReqParcel->WriteInt(20);
-                pReqParcel->Post();
+                NONZERO_CHECK_RET(pReqParcel->WriteInt(CMD_SUM));
+                NONZERO_CHECK_RET(pReqParcel->WriteInt(10));
+                NONZERO_CHECK_RET(pReqParcel->WriteInt(20));
+                NONZERO_CHECK_RET(pReqParcel->Post());
 
                 int sum = 0, ret = 0;
-                pRspParcel->Wait();
-                pRspParcel->ReadInt(sum);
-                pRspParcel->ReadInt(ret);
+                NONZERO_CHECK_RET(pRspParcel->TimedWait());
+                NONZERO_CHECK_RET(pRspParcel->ReadInt(sum));
+                NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
                 SPR_LOGD("sum = %d, ret = %d\n", sum, ret);
                 break;
             }
             case '2': {
-                pReqParcel->WriteInt(CMD_VEC);
-                pReqParcel->Post();
+                NONZERO_CHECK_RET(pReqParcel->WriteInt(CMD_VEC));
+                NONZERO_CHECK_RET(pReqParcel->Post());
 
                 int ret = 0;
                 std::vector<int> vec;
-                pRspParcel->Wait();
-                pRspParcel->ReadVector(vec);
-                pRspParcel->ReadInt(ret);
+                NONZERO_CHECK_RET(pRspParcel->TimedWait());
+                NONZERO_CHECK_RET(pRspParcel->ReadVector(vec));
+                NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
                 for (auto v : vec) {
                     SPR_LOGD("vec: %d\n", v);
                 }
                 break;
             }
             case '3': {
-                pReqParcel->WriteInt(CMD_CUST_VEC);
-                pReqParcel->Post();
+                NONZERO_CHECK_RET(pReqParcel->WriteInt(CMD_CUST_VEC));
+                NONZERO_CHECK_RET(pReqParcel->Post());
 
                 int ret = 0;
                 std::vector<STestData> vec;
-                pRspParcel->Wait();
-                pRspParcel->ReadVector(vec);
-                pRspParcel->ReadInt(ret);
+                NONZERO_CHECK_RET(pRspParcel->TimedWait());
+                NONZERO_CHECK_RET(pRspParcel->ReadVector(vec));
+                NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
                 for (auto v : vec) {
                     SPR_LOGD("vec: %d, %d\n", v.value1, v.value2);
                 }

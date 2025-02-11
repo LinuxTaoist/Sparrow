@@ -18,6 +18,7 @@
  */
 #include <memory>
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "DebugModuleHub.h"
 
@@ -36,7 +37,6 @@ DebugModuleHub::DebugModuleHub(const std::string& srvName, DebugModule* pDebugMo
 
 DebugModuleHub::~DebugModuleHub()
 {
-
 }
 
 void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
@@ -45,15 +45,15 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
         case DEBUG_CMD_ENABLE_REMOTE_PORT: {
             SprMsg msg(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL);
             mpDebugModule->SendMsg(msg);
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case DEBUG_CMD_DISABLE_REMOTE_PORT: {
             SprMsg msg(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL);
             mpDebugModule->SendMsg(msg);
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case DEBUG_CMD_TEST_ADD_1S_TIMER: {
@@ -63,8 +63,8 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             msg.SetDatas(pInfo, sizeof(STimerInfo));
             mpDebugModule->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case DEBUG_CMD_TEST_DEL_1S_TIMER: {
@@ -74,8 +74,8 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             msg.SetDatas(pInfo, sizeof(STimerInfo));
             mpDebugModule->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case DEBUG_CMD_TEST_ADD_CUSTOM_TIMER: {
@@ -83,9 +83,9 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             int32_t delayInMilliSec;
             int32_t intervalInMilliSec;
 
-            pReqParcel->ReadInt(repeatTimes);
-            pReqParcel->ReadInt(delayInMilliSec);
-            pReqParcel->ReadInt(intervalInMilliSec);
+            NONZERO_CHECK(pReqParcel->ReadInt(repeatTimes));
+            NONZERO_CHECK(pReqParcel->ReadInt(delayInMilliSec));
+            NONZERO_CHECK(pReqParcel->ReadInt(intervalInMilliSec));
 
             STimerInfo timeInfo = { MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST,
                                    (uint32_t)repeatTimes, delayInMilliSec, intervalInMilliSec};
@@ -94,8 +94,8 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             msg.SetDatas(pInfo, sizeof(STimerInfo));
             mpDebugModule->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case DEBUG_CMD_TEST_DEL_CUSTOM_TIMER: {
@@ -105,22 +105,22 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
             msg.SetDatas(pInfo, sizeof(STimerInfo));
             mpDebugModule->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case DEBUG_CMD_ENABLE_REMOTE_SHELL: {
             SprMsg msg(MODULE_DEBUG, SIG_ID_DEBUG_ENABLE_REMOTE_SHELL);
             mpDebugModule->SendMsg(msg);
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case DEBUG_CMD_DISABLE_REMOTE_SHELL: {
             SprMsg msg(MODULE_DEBUG, SIG_ID_DEBUG_DISABLE_REMOTE_SHELL);
             mpDebugModule->SendMsg(msg);
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         default: {

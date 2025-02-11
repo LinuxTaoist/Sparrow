@@ -86,4 +86,67 @@
 #define SRV_NAME_POWER_MANAGER      "powermanagersrv"
 #define SRV_NAME_DEBUG_MODULE       "debugsrv"
 
+// --------------------------------------------------------------------------------------------------------------------
+// - Common macro check functions
+// --------------------------------------------------------------------------------------------------------------------
+#define POINTER_CHECK(__p) do {                  \
+    if (__p == nullptr) {                        \
+        return ;                                 \
+    }                                            \
+} while(0)
+
+#define POINTER_CHECK_RET(__p) do {              \
+    if (__p == nullptr) {                        \
+        return __p;                              \
+    }                                            \
+} while(0)
+
+#define POINTER_CHECK_ERR(__p, __err) do {      \
+    if (__p == nullptr) {                       \
+        return __err;                           \
+    }                                           \
+} while(0)
+
+#define NONZERO_CHECK(__expr) do {              \
+    int32_t __ret = (__expr);                   \
+    if (__ret != 0) {                           \
+        return ;                                \
+    }                                           \
+} while(0)
+
+#define NONZERO_CHECK_RET(__expr) do {          \
+    int32_t __ret = (__expr);                   \
+    if (__ret != 0) {                           \
+        return __ret;                           \
+    }                                           \
+} while(0)
+
+#define NONZERO_CHECK_ERR(__expr, __err) do {   \
+    int32_t __ret = (__expr);                   \
+    if (__ret != 0) {                           \
+        return __err;                           \
+    }                                           \
+} while(0)
+
+#define NONTRUE_CHECK(__expr) do {              \
+    bool __ret = (__expr);                      \
+    if (!__ret) {                               \
+        return ;                                \
+    }                                           \
+} while(0)
+
+#define NONTRUE_CHECK_RET(__expr) do {          \
+    bool __ret = (__expr);                      \
+    if (!__ret) {                               \
+        return __ret;                           \
+    }                                           \
+} while(0)
+
+#define NONTRUE_CHECK_ERR(__expr, __err) do {   \
+    bool __ret = (__expr);                      \
+    if (!__ret) {                               \
+        return __err;                           \
+    }                                           \
+} while(0)
+
 #endif // __COMMON_MACROS_H__

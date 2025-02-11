@@ -25,6 +25,8 @@
 #include <semaphore.h>
 #include "SharedRingBuffer.h"
 
+#define PARCEL_TIMEOUT_MS 2000
+
 class Parcel
 {
 public:
@@ -36,6 +38,7 @@ public:
     Parcel& operator=(Parcel&& other) = delete;
 
     int Wait();
+    int TimedWait(int timeout = PARCEL_TIMEOUT_MS);
     int Post();
     int WriteBool(bool value);
     int ReadBool(bool& value);

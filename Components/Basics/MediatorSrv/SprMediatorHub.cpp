@@ -17,6 +17,7 @@
  *
  */
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "SprMediatorHub.h"
 
@@ -40,21 +41,18 @@ void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
         case PROXY_CMD_GET_ALL_MQ_ATTRS: {
             std::vector<SMQStatus> tmpMQAttrs;
             int ret = mSprMediator->GetAllMQStatus(tmpMQAttrs);
-            pRspParcel->WriteInt(ret);
-            if (ret == 0) {
-                pRspParcel->WriteVector(tmpMQAttrs);
-            }
-
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(ret));
+            NONZERO_CHECK(pRspParcel->WriteVector(tmpMQAttrs));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case PROXY_CMD_GET_SIGNAL_NAME: {
             int id = 0;
-            pReqParcel->ReadInt(id);
+            NONZERO_CHECK(pReqParcel->ReadInt(id));
 
             std::string signalName = mSprMediator->GetSignalName(id);
-            pRspParcel->WriteString(signalName);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteString(signalName));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         default: {

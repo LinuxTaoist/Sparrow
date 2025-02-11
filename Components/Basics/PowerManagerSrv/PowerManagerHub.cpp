@@ -17,6 +17,7 @@
  *
  */
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "PowerManagerHub.h"
 
@@ -41,16 +42,16 @@ void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const
             SprMsg msg(SIG_ID_POWER_ON);
             mPowerManager->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         case POWERM_CMD_POWER_OFF: {
             SprMsg msg(SIG_ID_POWER_OFF);
             mPowerManager->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
         default: {
