@@ -59,12 +59,12 @@ Parcel::~Parcel()
         }
 
         // delete semaphore only when master
-        // if (mMaster) {
-        //     std::string semPath = mShmPath + std::to_string(mShmKey);
-        //     if (sem_unlink(semPath.c_str()) != 0) {
-        //         SPR_LOGE("sem_unlink %s failed! (%s)\n", semPath.c_str(), strerror(errno));
-        //     }
-        // }
+        if (mMaster) {
+            std::string semPath = mShmPath + std::to_string(mShmKey);
+            if (sem_unlink(semPath.c_str()) != 0) {
+                SPR_LOGE("sem_unlink %s failed! (%s)\n", semPath.c_str(), strerror(errno));
+            }
+        }
     }
 
     if (mRingBuffer != nullptr) {

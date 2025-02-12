@@ -19,6 +19,7 @@
 
 #include <iostream>
 #include <vector>
+#include <atomic>
 #include "SqliteAdapter.h"
 
 #define SPR_LOGD(fmt, args...) printf("%d SQLAdapter D: " fmt, __LINE__, ##args)
@@ -26,6 +27,8 @@
 #define SPR_LOGE(fmt, args...) printf("%d SQLAdapter E: " fmt, __LINE__, ##args)
 
 static sqlite3* pDb = nullptr;
+static std::atomic<bool> gObjAlive(true);
+
 static int callback(void* data, int argc, char** argv, char** azColName)
 {
     std::vector<std::vector<std::string>>* results = static_cast<std::vector<std::vector<std::string>>*>(data);
@@ -60,6 +63,7 @@ SqliteAdapter::SqliteAdapter(const std::string& dbPath)
 
 SqliteAdapter::~SqliteAdapter()
 {
+    gObjAlive = false;
     if (pDb) {
         sqlite3_close(pDb);
     }
@@ -67,6 +71,10 @@ SqliteAdapter::~SqliteAdapter()
 
 SqliteAdapter* SqliteAdapter::GetInstance(const std::string& dbPath)
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SqliteAdapter instance(dbPath);
     return &instance;
 }

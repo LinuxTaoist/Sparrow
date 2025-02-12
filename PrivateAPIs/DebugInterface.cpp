@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -35,6 +36,7 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IDebug", __LINE__, ##args)
 
 static bool mEnable;
+static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
 
@@ -50,10 +52,15 @@ DebugInterface::DebugInterface()
 DebugInterface::~DebugInterface()
 {
     mEnable = false;
+    gObjAlive = false;
 }
 
 DebugInterface* DebugInterface::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static DebugInterface instance;
     return &instance;
 }

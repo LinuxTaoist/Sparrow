@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <algorithm>
 #include <errno.h>
 #include <string.h>
@@ -31,13 +32,24 @@
 
 #define DEFAULT_CMD_MAX_SIZE   200
 
+static std::atomic<bool> gObjAlive(true);
+
 SprDebugNode::SprDebugNode() : mMaxNum(DEFAULT_CMD_MAX_SIZE)
 {
     RegisterBuildinCmds();
 }
 
+SprDebugNode::~SprDebugNode()
+{
+    gObjAlive = false;
+}
+
 SprDebugNode* SprDebugNode::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprDebugNode instance;
     return &instance;
 }

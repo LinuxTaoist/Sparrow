@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <memory>
 #include <fstream>
 #include <sys/resource.h>
@@ -37,8 +38,10 @@ using namespace InternalDefs;
 #define SPR_LOGW(fmt, args...) LOGW("SprSystem", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("SprSystem", fmt, ##args)
 
-#define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
 #define LOCAL_PATH_VERSION  "/tmp/sparrow_version"
+#define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
+
+static std::atomic<bool> gObjAlive(true);
 
 SprSystem::SprSystem()
 {
@@ -46,10 +49,15 @@ SprSystem::SprSystem()
 
 SprSystem::~SprSystem()
 {
+    gObjAlive = false;
 }
 
 SprSystem* SprSystem::GetInstance()
 {
+    if (gObjAlive == false) {
+        return nullptr;
+    }
+
     static SprSystem instance;
     return &instance;
 }

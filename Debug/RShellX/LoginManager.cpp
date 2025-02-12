@@ -17,6 +17,7 @@
  *
  */
 #include <list>
+#include <atomic>
 #include <string>
 #include <memory>
 #include <algorithm>
@@ -37,6 +38,7 @@ using namespace std;
 #define SPR_LOGD(fmt, args...) LOGD("RShellLoginM", fmt, ##args)
 #define SPR_LOGE(fmt, args...) LOGE("RShellLoginM", fmt, ##args)
 
+static std::atomic<bool> gObjAlive(true);
 pid_t LoginManager::mShellPid = -1;
 
 LoginManager::LoginManager()
@@ -62,6 +64,8 @@ LoginManager::~LoginManager()
         kill(mShellPid, SIGKILL);
         mShellPid = -1;
     }
+
+    gObjAlive = false;
     dup2(mStdin, STDIN_FILENO);
     dup2(mStdout, STDOUT_FILENO);
     dup2(mStderr, STDERR_FILENO);
@@ -73,6 +77,10 @@ LoginManager::~LoginManager()
 
 LoginManager* LoginManager::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static LoginManager instance;
     return &instance;
 }

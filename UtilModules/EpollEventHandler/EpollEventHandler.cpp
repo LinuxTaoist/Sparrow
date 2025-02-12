@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -26,6 +27,8 @@
 #define SPR_LOGD(fmt, args...) // printf("%4d EpEvtHandler D: " fmt, __LINE__, ##args)
 #define SPR_LOGW(fmt, args...) printf("%4d EpEvtHandler W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d EpEvtHandler E: " fmt, __LINE__, ##args)
+
+static std::atomic<bool> gObjAlive(true);
 
 EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
 {
@@ -45,11 +48,16 @@ EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
 
 EpollEventHandler::~EpollEventHandler()
 {
+    gObjAlive = false;
     ExitLoop();
 }
 
 EpollEventHandler* EpollEventHandler::GetInstance(int size, int blockTimeOut)
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static EpollEventHandler instance(size, blockTimeOut);
     return &instance;
 }

@@ -30,7 +30,7 @@ public:
     /**
      * @brief  Destructor
      */
-    ~BindInterface() = default;
+    ~BindInterface();
 
     /**
      * @brief  Get the Instance object

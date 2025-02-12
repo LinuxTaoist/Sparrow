@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -46,17 +47,24 @@
 
 #define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
 
+static std::atomic<bool> gObjAlive(true);
+
 PropertyManager::PropertyManager()
 {
 }
 
 PropertyManager::~PropertyManager()
 {
+    gObjAlive = false;
     UnregisterDebugFuncs();
 }
 
 PropertyManager* PropertyManager::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static PropertyManager instance;
     return &instance;
 }

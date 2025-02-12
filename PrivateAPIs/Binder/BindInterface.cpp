@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include "Parcel.h"
 #include "BindCommon.h"
 #include "BindInterface.h"
@@ -23,11 +24,21 @@
 
 using namespace InternalDefs;
 
-Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, true);
+static std::atomic<bool> gObjAlive(true);
+Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
 Parcel iRspParcel("BinderM",  KEY_BINDER_MANAGER,  false);
+
+BindInterface::~BindInterface()
+{
+    gObjAlive = false;
+}
 
 BindInterface* BindInterface::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static BindInterface instance;
     return &instance;
 }

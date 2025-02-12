@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <stdint.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -32,6 +33,8 @@ using namespace InternalDefs;
 #define DEFAULT_NTP_ADDR    "ntp1.tencent.com"
 #define DEFAULT_NTP_PORT    123
 
+static std::atomic<bool> gObjAlive(true);
+
 TimeManager::TimeManager(ModuleIDType id, const std::string& name)
             : SprObserverWithMQueue(id, name)
 {
@@ -44,10 +47,15 @@ TimeManager::TimeManager(ModuleIDType id, const std::string& name)
 
 TimeManager::~TimeManager()
 {
+    gObjAlive = false;
 }
 
 TimeManager* TimeManager::GetInstance(ModuleIDType id, const std::string& name)
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static TimeManager instance(id, name);
     return &instance;
 }

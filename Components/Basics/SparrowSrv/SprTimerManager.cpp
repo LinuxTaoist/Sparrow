@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -35,6 +36,8 @@ using namespace InternalDefs;
 
 #define TIMER_MIN_INTERVAL_MS 100   // 100ms
 
+static std::atomic<bool> gObjAlive(true);
+
 SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprSystemTimer> pSystemTimer)
         : SprObserverWithMQueue(id, name)
 {
@@ -49,6 +52,10 @@ SprTimerManager::~SprTimerManager()
 SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id,
                     const std::string& name, shared_ptr<SprSystemTimer> pSystemTimer)
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprTimerManager instance(id, name, pSystemTimer);
     return &instance;
 }

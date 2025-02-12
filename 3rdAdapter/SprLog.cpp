@@ -50,21 +50,23 @@ SprLog::SprLog()
 
 SprLog::~SprLog()
 {
-    if (SEM_FAILED != mWriteSem) {
-        sem_close(mWriteSem);
-        sem_unlink(SEMAPHORE_NAME);
-    }
+    // refer comment in SprLog::GetInstance()
+    // if (SEM_FAILED != mWriteSem) {
+    //     sem_close(mWriteSem);
+    //     sem_unlink(SEMAPHORE_NAME);
+    // }
 
-    if (pLogSCacheMem != nullptr) {
-        delete pLogSCacheMem;
-        pLogSCacheMem = nullptr;
-    }
+    // if (pLogSCacheMem != nullptr) {
+    //     delete pLogSCacheMem;
+    //     pLogSCacheMem = nullptr;
+    // }
 }
 
 SprLog* SprLog::GetInstance()
 {
-    static SprLog instance;
-    return &instance;
+    // never delete this instance
+    static SprLog *instance = new (std::nothrow) SprLog();
+    return instance;
 }
 
 int32_t SprLog::d(const char* tag, const char* format, ...)

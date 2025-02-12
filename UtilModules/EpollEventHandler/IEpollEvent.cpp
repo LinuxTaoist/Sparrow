@@ -159,10 +159,16 @@ void IEpollEvent::Close()
 
 void IEpollEvent::AddToPoll()
 {
-    EpollEventHandler::GetInstance()->AddPoll(this);
+    auto epollHandler = EpollEventHandler::GetInstance();
+    if (epollHandler) {
+        epollHandler->AddPoll(this);
+    }
 }
 
 void IEpollEvent::DelFromPoll()
 {
-    EpollEventHandler::GetInstance()->DelPoll(this);
+    auto epollHandler = EpollEventHandler::GetInstance();
+    if (epollHandler) {
+        epollHandler->DelPoll(this);
+    }
 }

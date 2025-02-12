@@ -19,6 +19,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <errno.h>
 #include <string.h>
 #include "SprLog.h"
@@ -38,6 +39,7 @@ using namespace InternalDefs;
 #define SPR_LOGE(fmt, args...) LOGE("SprMediator", fmt, ##args)
 
 const int32_t MSG_MAX_SIZE = 1024;
+static std::atomic<bool> gObjAlive(true);
 
 SprMediator::SprMediator()
 {
@@ -45,12 +47,17 @@ SprMediator::SprMediator()
 
 SprMediator::~SprMediator()
 {
+    gObjAlive = false;
     mMQStatusMap.clear();
     mModuleMap.clear();
 }
 
 SprMediator* SprMediator::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprMediator instance;
     return &instance;
 }

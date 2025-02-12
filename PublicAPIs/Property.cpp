@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <unistd.h>
 #include <sys/types.h>
 #include "Property.h"
@@ -33,6 +34,7 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "Property", __LINE__, ##args)
 
 static bool mEnable;
+static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
 
@@ -47,10 +49,15 @@ Property::Property()
 
 Property::~Property()
 {
+    gObjAlive = false;
 }
 
 Property* Property::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static Property instance;
     return &instance;
 }

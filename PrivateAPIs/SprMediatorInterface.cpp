@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -34,6 +35,7 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IMediator", __LINE__, ##args)
 
 static bool mEnable;
+static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
 
@@ -48,10 +50,15 @@ SprMediatorInterface::SprMediatorInterface()
 
 SprMediatorInterface::~SprMediatorInterface()
 {
+    gObjAlive = false;
 }
 
 SprMediatorInterface* SprMediatorInterface::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprMediatorInterface instance;
     return &instance;
 }

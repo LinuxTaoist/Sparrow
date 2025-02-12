@@ -17,6 +17,7 @@
  *  2024/05/20 | 1.0.0.2   | Xiang.D        | Rename from BindingHub to BinderManager
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <atomic>
 #include <fcntl.h>
 #include <unistd.h>
 #include "Parcel.h"
@@ -39,6 +40,7 @@ using namespace InternalDefs;
 Parcel* pReqParcel = nullptr;
 Parcel* pRspParcel = nullptr;
 
+static std::atomic<bool> gObjAlive(true);
 bool BinderManager::mRunning = false;
 
 BinderManager::BinderManager()
@@ -60,6 +62,7 @@ BinderManager::BinderManager()
 
 BinderManager::~BinderManager()
 {
+    gObjAlive = false;
     // if (pReqParcel != nullptr) {
     //     delete pReqParcel;
     //     pReqParcel = nullptr;
@@ -73,6 +76,10 @@ BinderManager::~BinderManager()
 
 BinderManager* BinderManager::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static BinderManager instance;
     return &instance;
 }

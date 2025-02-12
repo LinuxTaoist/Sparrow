@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <stdio.h>
 #include <memory.h>
 #include <unistd.h>
@@ -36,6 +37,7 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IPowerMgr", __LINE__, ##args)
 
 static bool mEnable;
+static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
 
@@ -51,10 +53,15 @@ PowerManagerInterface::PowerManagerInterface()
 PowerManagerInterface::~PowerManagerInterface()
 {
     mEnable = false;
+    gObjAlive = false;
 }
 
 PowerManagerInterface* PowerManagerInterface::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static PowerManagerInterface instance;
     return &instance;
 }
