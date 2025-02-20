@@ -82,7 +82,7 @@ std::string ToHexString(const std::vector<T>& vec)
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
-        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it);
+        ss << std::setw(sizeof(T) * 2) << static_cast<T>(it);
     }
 
     return ss.str();
@@ -100,7 +100,7 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
-        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it) << " ";
+        ss << std::setw(sizeof(T) * 2) << static_cast<T>(it) << " ";
     }
 
     return ss.str();

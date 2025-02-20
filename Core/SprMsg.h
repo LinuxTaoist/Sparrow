@@ -32,9 +32,11 @@ enum class ESprMsgType : uint32_t
     MSG_TYPE_U8VALUE,
     MSG_TYPE_U16VALUE,
     MSG_TYPE_U32VALUE,
+    MSG_TYPE_U64VALUE,
     MSG_TYPE_STRING,
     MSG_TYPE_U8VEC,
     MSG_TYPE_U32VEC,
+    MSG_TYPE_U64VEC,
     MSG_TYPE_PTR,
     MSG_TYPE_MAX
 };
@@ -65,9 +67,11 @@ public:
     void SetU8Value(uint8_t value);
     void SetU16Value(uint16_t value);
     void SetU32Value(uint32_t value);
+    void SetU64Value(uint64_t value);
     void SetString(const std::string& str);
     void SetU8Vec(const std::vector<uint8_t>& vec);
     void SetU32Vec(const std::vector<uint32_t>& vec);
+    void SetU64Vec(const std::vector<uint64_t>& vec);
 
     template<typename T>
     void SetDatas(std::shared_ptr<T> datas, uint32_t size) {
@@ -84,9 +88,11 @@ public:
     uint8_t     GetU8Value()    const { return mU8Value; }
     uint16_t    GetU16Value()   const { return mU16Value; }
     uint32_t    GetU32Value()   const { return mU32Value; }
+    uint64_t    GetU64Value()   const { return mU64Value; }
     std::string GetString()     const { return mString; }
     std::vector<uint8_t>    GetU8Vec()  const { return mU8Vec;  }
     std::vector<uint32_t>   GetU32Vec() const { return mU32Vec; }
+    std::vector<uint64_t>   GetU64Vec() const { return mU64Vec; }
 
     template<typename T>
     std::shared_ptr<T> GetDatas() const {
@@ -108,9 +114,11 @@ private:
     void EncodeU8Value(std::string& enDatas);
     void EncodeU16Value(std::string& enDatas);
     void EncodeU32Value(std::string& enDatas);
+    void EncodeU64Value(std::string& enDatas);
     void EncodeString(std::string& enDatas);
     void EncodeU8Vec(std::string& enDatas);
     void EncodeU32Vec(std::string& enDatas);
+    void EncodeU64Vec(std::string& enDatas);
     void EncodeDatas(std::string& enDatas);
 
     void DecodeFrom(std::string& deDatas);
@@ -121,9 +129,11 @@ private:
     void DecodeU8Value(std::string& deDatas);
     void DecodeU16Value(std::string& deDatas);
     void DecodeU32Value(std::string& deDatas);
+    void DecodeU64Value(std::string& deDatas);
     void DecodeString(std::string& deDatas);
     void DecodeU8Vec(std::string& deDatas);
     void DecodeU32Vec(std::string& deDatas);
+    void DecodeU64Vec(std::string& deDatas);
     void DecodeDatas(std::string& deDatas);
 
 private:
@@ -136,12 +146,15 @@ private:
     uint8_t                 mU8Value;
     uint16_t                mU16Value;
     uint32_t                mU32Value;
+    uint64_t                mU64Value;
     uint32_t                mStringLength;
     std::string             mString;
     uint32_t                mU8VecLength;
     std::vector<uint8_t>    mU8Vec;
     uint32_t                mU32VecLength;
     std::vector<uint32_t>   mU32Vec;
+    uint32_t                mU64VecLength;
+    std::vector<uint64_t>   mU64Vec;
     uint32_t                mDataSize;
     std::vector<uint8_t>    mDatas;
 
