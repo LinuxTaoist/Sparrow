@@ -54,7 +54,7 @@ public:
     virtual ~PowerManager();
 
     int32_t Init() override;
-    int ProcessMsg(const SprMsg& msg) override;
+    int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
      /* 更新一级状态 */
@@ -77,9 +77,9 @@ private:
     void UnregisterDebugFuncs();
 
     /* 调试函数 */
-    void DebugDumpCurState(const std::string& args);
-    void DebugSendPowerOn(const std::string& args);
-    void DebugSendPowerOff(const std::string& args);
+    void DebugDumpCurState(const std::vector<std::string>& args);
+    void DebugSendPowerOn(const std::vector<std::string>& args);
+    void DebugSendPowerOff(const std::vector<std::string>& args);
 
     /* 消息响应函数 */
     void MsgRespondPowerOnWithInit(const SprMsg& msg);

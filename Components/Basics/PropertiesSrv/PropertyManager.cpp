@@ -149,7 +149,7 @@ void PropertyManager::UnregisterDebugFuncs()
     p->UnregisterCmd(DEBUG_MODULE_NAME);
 }
 
-void PropertyManager::DebugDumpPropertyList(const std::string& args)
+void PropertyManager::DebugDumpPropertyList(const std::vector<std::string>& args)
 {
     DumpPropertyList();
 }

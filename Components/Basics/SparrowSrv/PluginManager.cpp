@@ -226,19 +226,19 @@ void PluginManager::UnregisterDebugFuncs()
     p->UnregisterCmd(OWNER_PLUGINMGR);
 }
 
-void PluginManager::DebugDumpPlugMInfo(const std::string& args)
+void PluginManager::DebugDumpPlugMInfo(const std::vector<std::string>& args)
 {
     SPR_LOGD("-------------- Dump PlugManager Info --------------\n");
     SPR_LOGD("- mHotPlugEnable = %d\n", mHotPlugEnable);
     SPR_LOGD("---------------------------------------------------\n");
 }
 
-void PluginManager::DebugEnableHotPlug(const std::string& args)
+void PluginManager::DebugEnableHotPlug(const std::vector<std::string>& args)
 {
     mHotPlugEnable = true;
 }
 
-void PluginManager::DebugDisableHotPlug(const std::string& args)
+void PluginManager::DebugDisableHotPlug(const std::vector<std::string>& args)
 {
     mHotPlugEnable = false;
 }

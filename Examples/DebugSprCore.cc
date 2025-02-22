@@ -49,7 +49,7 @@ public:
     {
     }
 
-    int ProcessMsg(const SprMsg& msg)
+    int32_t ProcessMsg(const SprMsg& msg)
     {
         switch(msg.GetMsgId()) {
             default:

@@ -1,0 +1,303 @@
+/**
+ *---------------------------------------------------------------------------------------------------------------------
+ *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
+ *
+ *  @file       : StatusMonitorManager.h
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
+ *  @date       : 2025/02/20
+ *
+ *  The minimum scale of the timer is milliseconds, and the value set during use must be
+ *  a multiple of 1 milliseconds
+ *
+ *  Change History:
+ *  <Date>     | <Version> | <Author>       | <Description>
+ *---------------------------------------------------------------------------------------------------------------------
+ *  2025/02/20 | 1.0.0.1   | Xiang.D        | Create file
+ *---------------------------------------------------------------------------------------------------------------------
+ *
+ */
+#include "SprLog.h"
+#include "SprDebugNode.h"
+#include "CommonMacros.h"
+#include "CommonErrorCodes.h"
+#include "StatusMonitorManager.h"
+
+using namespace InternalDefs;
+
+#define SPR_LOGD(fmt, args...) LOGD("StatusMonitorM", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("StatusMonitorM", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("StatusMonitorM", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("StatusMonitorM", fmt, ##args)
+
+#define OWNER_STATUSMONITOR         "StatusMonitorManager"
+#define STATUS_EVENT_NUM_LIMIT      100
+#define ERR_EVENT_LEVEL_UNKNOWN     0
+#define ERR_EVENT_LEVEL_CRITICAL    1
+#define ERR_EVENT_LEVEL_ERROR       2
+#define ERR_EVENT_LEVEL_WARNNING    3
+#define ERR_EVENT_LEVEL_INFO        4
+
+
+StatusMonitorManager::StatusMonitorManager(ModuleIDType id, const std::string& name)
+            : SprObserverWithMQueue(id, name)
+{
+
+}
+
+StatusMonitorManager::~StatusMonitorManager()
+{
+    UnregisterDebugFuncs();
+}
+
+int32_t StatusMonitorManager::Init()
+{
+    InitDebugNode();
+    RegisterDebugFuncs();
+    return 0;
+}
+
+int32_t StatusMonitorManager::InitDebugNode()
+{
+    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string("/tmp/") + SRV_NAME_STATUS_MONITOR);
+    return 0;
+}
+
+int32_t StatusMonitorManager::LoadStatusEvent(uint32_t moduleID, int32_t errCode, const std::string& text)
+{
+    auto& event = mAllEvents[moduleID];
+    time_t now = time(nullptr);
+
+    if (event.size() >= STATUS_EVENT_NUM_LIMIT) {
+        event.pop();
+    }
+
+    event.push({now, errCode, text});
+    return 0;
+}
+
+int32_t StatusMonitorManager::GetLevelFromErrCode(int32_t errCode)
+{
+    int32_t levelCode = (0 - errCode) % 100;
+
+    if (levelCode >= ERR_LEVEL_CRITICAL_BEGIN && levelCode < ERR_LEVEL_ERROR_BEGIN) {
+        return ERR_EVENT_LEVEL_CRITICAL;
+    }
+    if (levelCode >= ERR_LEVEL_ERROR_BEGIN && levelCode < ERR_LEVEL_WARNNING_BEGIN) {
+        return ERR_EVENT_LEVEL_ERROR;
+    }
+    if (levelCode >= ERR_LEVEL_WARNNING_BEGIN && levelCode < ERR_LEVEL_INFO_BEGIN) {
+        return ERR_EVENT_LEVEL_WARNNING;
+    }
+    if (levelCode >= ERR_LEVEL_INFO_BEGIN){
+        return ERR_EVENT_LEVEL_INFO;
+    }
+
+    return ERR_EVENT_LEVEL_UNKNOWN;
+}
+
+int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text)
+{
+    SPR_LOGI("                                    Show All Status Events                                     \n");
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOGI("MODULE    LEVEL STATUSCODE         TIME  TEXT\n");
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    for (const auto& moduleEvents : mAllEvents) {
+        int32_t tmpID = moduleEvents.first;
+        auto tmpEvents = moduleEvents.second;  // copy
+
+        while (!tmpEvents.empty()) {
+            auto& event = tmpEvents.front();
+            tmpEvents.pop();
+            int32_t eLevel = GetLevelFromErrCode(event.sErrorCode);
+
+            if ((moduleID == 0 || moduleID == tmpID)                            &&
+                (level == ERR_EVENT_LEVEL_UNKNOWN || level == eLevel)           &&
+                (errCode == ERR_GENERAL_SUCCESS || errCode == event.sErrorCode) &&
+                (text.empty() || text == event.sText.c_str()) ) {
+                SPR_LOGI("%6d %8d %10d %12d  %s\n", moduleID, eLevel, event.sErrorCode, event.sTime, event.sText.c_str());
+            }
+        }
+    }
+
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    return 0;
+}
+
+int32_t StatusMonitorManager::DumpAllStatusEvents()
+{
+    DumpStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, "");
+    return 0;
+}
+
+int32_t StatusMonitorManager::DumpStatusEventsWithModuleID(int32_t moduleID)
+{
+    DumpStatusEventsWithFilter(moduleID, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, "");
+    return 0;
+}
+
+int32_t StatusMonitorManager::DumpStatusEventsWithLevel(int32_t level)
+{
+    DumpStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, "");
+    return 0;
+}
+
+int32_t StatusMonitorManager::DumpStatusEventsWithErrorCode(int32_t errCode)
+{
+    DumpStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, errCode, "");
+    return 0;
+}
+
+int32_t StatusMonitorManager::DumpStatusEventsWithText(const std::string& text)
+{
+    DumpStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, text);
+    return 0;
+}
+
+int32_t StatusMonitorManager::ProcessMsg(const SprMsg& msg)
+{
+    SPR_LOGD("ProcessMsg: %x\n", msg.GetMsgId());
+    switch (msg.GetMsgId()) {
+        case SIG_ID_MONITOR_STATUS_EVENT: {
+            SPR_LOGI("Receive status event!\n");
+            LoadStatusEvent(msg.GetFrom(), msg.GetU32Value(), msg.GetString());
+            break;
+        }
+        default: {
+            break;
+        }
+    }
+
+    return 0;
+}
+
+void StatusMonitorManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(OWNER_STATUSMONITOR, "DumpAllEvents",    "Dump All Events",  std::bind(&StatusMonitorManager::DebugDumpAllStatusEvents, this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_STATUSMONITOR, "DumpWithID",       "Dump With ID",     std::bind(&StatusMonitorManager::DebugDumpStatusEventsWithModuleID, this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_STATUSMONITOR, "DumpWithLevel",    "Dump With Level",  std::bind(&StatusMonitorManager::DebugDumpStatusEventsWithLevel, this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_STATUSMONITOR, "DumpWithErrCode",  "Dump With ErrCode",std::bind(&StatusMonitorManager::DebugDumpStatusEventsWithErrorCode, this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_STATUSMONITOR, "DumpWithText",     "Dump With Text",   std::bind(&StatusMonitorManager::DebugDumpStatusEventsWithText, this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_STATUSMONITOR, "AddStatusEvent",   "Add Status Event", std::bind(&StatusMonitorManager::DebugAddStatusEvent, this, std::placeholders::_1));
+}
+
+void StatusMonitorManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Unregister %s all debug funcs\n", mModuleName.c_str());
+    p->UnregisterCmd(OWNER_STATUSMONITOR);
+}
+
+void StatusMonitorManager::DebugDumpAllStatusEvents(const std::vector<std::string>& args)
+{
+    DumpAllStatusEvents();
+}
+
+void StatusMonitorManager::DebugDumpStatusEventsWithModuleID(const std::vector<std::string>& args)
+{
+    if (args.size() <= 2) {
+        SPR_LOGE("Invalid args! size = %d\n", args.size());
+        SPR_LOGE("Usage: echo DumpWithID {moduleID} > /tmp/statusmonitorsrv\n");
+        return;
+    }
+
+    int32_t moduleID = atoi(args[1].c_str());
+    if (moduleID == 0) {
+        SPR_LOGE("Invalid moduleID: %s\n", args[1].c_str());
+        return;
+    }
+
+    DumpStatusEventsWithModuleID(moduleID);
+}
+
+void StatusMonitorManager::DebugDumpStatusEventsWithLevel(const std::vector<std::string>& args)
+{
+    if (args.size() <= 2) {
+        SPR_LOGE("Invalid args! size = %d\n", args.size());
+        SPR_LOGE("Usage: echo DumpWithLevel {level} > /tmp/statusmonitorsrv\n");
+        return;
+    }
+
+    int32_t level = atoi(args[1].c_str());
+    if (level == 0) {
+        SPR_LOGE("Invalid level: %s\n", args[1].c_str());
+        return;
+    }
+
+    DumpStatusEventsWithLevel(level);
+}
+
+void StatusMonitorManager::DebugDumpStatusEventsWithErrorCode(const std::vector<std::string>& args)
+{
+    if (args.size() <= 2) {
+        SPR_LOGE("Invalid args! size = %d\n", args.size());
+        SPR_LOGE("Usage: echo DumpWithErrCode {errCode} > /tmp/statusmonitorsrv\n");
+        return;
+    }
+
+    int32_t errCode = atoi(args[1].c_str());
+    if (errCode == 0) {
+        SPR_LOGE("Invalid errCode: %s\n", args[1].c_str());
+        return;
+    }
+
+    DumpStatusEventsWithErrorCode(errCode);
+}
+
+void StatusMonitorManager::DebugDumpStatusEventsWithText(const std::vector<std::string>& args)
+{
+    if (args.size() <= 2) {
+        SPR_LOGE("Invalid args! size = %d\n", args.size());
+        SPR_LOGE("Usage: echo DumpWithText {text} > /tmp/statusmonitorsrv\n");
+        return;
+    }
+
+    DumpStatusEventsWithText(args[1]);
+}
+
+void StatusMonitorManager::DebugDelStatusEvent(const std::vector<std::string>& args)
+{
+
+}
+
+void StatusMonitorManager::DebugDelStatusEventsWithModuleID(const std::vector<std::string>& args)
+{
+
+}
+
+void StatusMonitorManager::DebugDelStatusEventsWithLevel(const std::vector<std::string>& args)
+{
+
+}
+
+void StatusMonitorManager::DebugDelStatusEventsWithErrorCode(const std::vector<std::string>& args)
+{
+
+}
+
+void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::string>& args)
+{
+
+}
+
+void StatusMonitorManager::DebugAddStatusEvent(const std::vector<std::string>& args)
+{
+    SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
+    msg.SetU32Value(ERR_GENERAL_ERROR);
+    msg.SetString("For test");
+    SendMsg(msg);
+}
+
+

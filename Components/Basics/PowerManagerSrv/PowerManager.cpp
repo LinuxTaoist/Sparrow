@@ -185,17 +185,17 @@ void PowerManager::UnregisterDebugFuncs()
     p->UnregisterCmd(mModuleName);
 }
 
-void PowerManager::DebugDumpCurState(const std::string& args)
+void PowerManager::DebugDumpCurState(const std::vector<std::string>& args)
 {
     SPR_LOGD("Lev1State: %s\n", GetLev1String(mCurLev1State).c_str());
 }
 
-void PowerManager::DebugSendPowerOn(const std::string& args)
+void PowerManager::DebugSendPowerOn(const std::vector<std::string>& args)
 {
     SendMsg(SIG_ID_POWER_ON);
 }
 
-void PowerManager::DebugSendPowerOff(const std::string& args)
+void PowerManager::DebugSendPowerOff(const std::vector<std::string>& args)
 {
     SendMsg(SIG_ID_POWER_OFF);
 }

@@ -434,7 +434,7 @@ void OneNetManager::UnregisterDebugFuncs()
     p->UnregisterCmd(mModuleName);
 }
 
-void OneNetManager::DebugEnableDumpLog(const std::string& args)
+void OneNetManager::DebugEnableDumpLog(const std::vector<std::string>& args)
 {
     mDebugEnable = !mDebugEnable;
     SprMsg msg(SIG_ID_ONENET_MGR_DEBUG_ENABLE);
@@ -443,7 +443,7 @@ void OneNetManager::DebugEnableDumpLog(const std::string& args)
     SPR_LOGD("mDebugEnable = %d\n", mDebugEnable);
 }
 
-void OneNetManager::DebugDeviceList(const std::string& args)
+void OneNetManager::DebugDeviceList(const std::vector<std::string>& args)
 {
     SPR_LOGD("Device List:\n");
     int32_t i = 0;
@@ -452,22 +452,21 @@ void OneNetManager::DebugDeviceList(const std::string& args)
     }
 }
 
-void OneNetManager::DebugActiveDevice(const std::string& args)
+void OneNetManager::DebugActiveDevice(const std::vector<std::string>& args)
 {
-    std::vector<std::string> argVec = GeneralUtils::Split(args, ' ');
-    if (argVec.size() != 2) {
-        SPR_LOGD("Invalid args: %s\n", args.c_str());
+    if (args.size() != 2) {
+        SPR_LOGE("Invalid args size: %d\n", args.size());
         SPR_LOGE("Usage: echo active {device_name} > /tmp/debug_onenet\n");
         return;
     }
 
-    SPR_LOGD("Debug Active Device [%s]\n", argVec[1].c_str());
+    SPR_LOGD("Debug Active Device [%s]\n", args[1].c_str());
     SprMsg msg(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-    msg.SetString(argVec[1]);
+    msg.SetString(args[1]);
     SendMsg(msg);
 }
 
-void OneNetManager::DebugDeactiveDevice(const std::string& args)
+void OneNetManager::DebugDeactiveDevice(const std::vector<std::string>& args)
 {
     SPR_LOGD("Debug Deactive Device\n");
     SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);

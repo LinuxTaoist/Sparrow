@@ -55,7 +55,7 @@ private:
     int NotifyAllObserver(const SprMsg& msg);
 
     /* 消息处理函数 */
-    int ProcessMsg(const SprMsg& msg);
+    int32_t ProcessMsg(const SprMsg& msg);
 
     /* 消息响应函数 */
     int MsgRespondRegister(const SprMsg& msg);

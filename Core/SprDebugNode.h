@@ -23,12 +23,13 @@
 #include <list>
 #include <mutex>
 #include <memory>
+#include <vector>
 #include <string>
 #include <functional>
 #include <stdint.h>
 #include "PPipe.h"
 
-using DebugCmdFunc = std::function<void(const std::string&)>;
+using DebugCmdFunc = std::function<void(const std::vector<std::string>&)>;
 
 class DebugFuncDetail
 {
@@ -77,8 +78,8 @@ public:
     int32_t UnregisterCmd(const std::string& owner, const std::string& cmd);
 
     // Build in cmds
-    void DebugDumpAllOwners(const std::string& args);
-    void DebugDumpVersion(const std::string& args);
+    void DebugDumpAllOwners(const std::vector<std::string>& args);
+    void DebugDumpVersion(const std::vector<std::string>& args);
 
 private:
     SprDebugNode();

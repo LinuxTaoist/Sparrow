@@ -19,6 +19,7 @@
 #ifndef __PROPERTY_MANAGER_H__
 #define __PROPERTY_MANAGER_H__
 
+#include <vector>
 #include <string>
 #include <memory>
 #include "SharedBinaryTree.h"
@@ -85,7 +86,7 @@ private:
     void UnregisterDebugFuncs();
 
     // Debug functions
-    void DebugDumpPropertyList(const std::string& args);
+    void DebugDumpPropertyList(const std::vector<std::string>& args);
 
     int DumpPropertyList();
     int LoadPropertiesFromFile(const std::string& fileName);

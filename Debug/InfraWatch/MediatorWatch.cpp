@@ -83,7 +83,7 @@ char MediatorWatch::ShowMQStatus()
     SPR_LOG("                                   Show All Message Queues                                     \n");
     SPR_LOG("-----------------------------------------------------------------------------------------------\n");
     //        %6d     %5ld  %6ld     %6ld   %8s     %5u   %6u    %5u    %6u     %s\n"
-    SPR_LOG(" HANDLE  QLSUM  QMUSED  QCUSED  BLOCK   MLLEN MMUSED MLAST  MTOTAL  QNAME\n");
+    SPR_LOG(" HANDLE  QLSUM  QMUSED  QCUSED  BLOCK    MLLEN MMUSED MLAST  MTOTAL  QNAME\n");
     SPR_LOG("-----------------------------------------------------------------------------------------------\n");
     for (const auto& mqInfo : mqAttrVec) {
         SPR_LOG("%7d  %5ld  %6ld  %6ld  %s  %ld %6u %5u  %6u  %s\n", mqInfo.handle, mqInfo.mqAttr.mq_maxmsg, mqInfo.maxCount,

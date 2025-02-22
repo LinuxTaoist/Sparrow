@@ -84,6 +84,7 @@
 #define SRV_NAME_LOG                "logmanagersrv"
 #define SRV_NAME_SPARROW            "sparrowsrv"
 #define SRV_NAME_POWER_MANAGER      "powermanagersrv"
+#define SRV_NAME_STATUS_MONITOR     "statusmonitorsrv"
 #define SRV_NAME_DEBUG_MODULE       "debugsrv"
 
 // --------------------------------------------------------------------------------------------------------------------

@@ -82,7 +82,7 @@ private:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    int ProcessMsg(const SprMsg& msg) override;
+    int32_t ProcessMsg(const SprMsg& msg) override;
 
     /**
      * @brief  Dump current time

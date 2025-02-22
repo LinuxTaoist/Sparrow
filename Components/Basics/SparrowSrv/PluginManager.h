@@ -48,9 +48,9 @@ private:
     std::string GetDefaultLibraryPath();
 
     /* 调试函数 */
-    void DebugDumpPlugMInfo(const std::string& args);
-    void DebugEnableHotPlug(const std::string& args);
-    void DebugDisableHotPlug(const std::string& args);
+    void DebugDumpPlugMInfo(const std::vector<std::string>& args);
+    void DebugEnableHotPlug(const std::vector<std::string>& args);
+    void DebugDisableHotPlug(const std::vector<std::string>& args);
 
 private:
     bool mHotPlugEnable;

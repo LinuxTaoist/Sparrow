@@ -118,10 +118,10 @@ private:
     void UnregisterDebugFuncs();
 
     /* 调试函数 */
-    void DebugEnableDumpLog(const std::string& args);
-    void DebugDeviceList(const std::string& args);
-    void DebugActiveDevice(const std::string& args);
-    void DebugDeactiveDevice(const std::string& args);
+    void DebugEnableDumpLog(const std::vector<std::string>& args);
+    void DebugDeviceList(const std::vector<std::string>& args);
+    void DebugActiveDevice(const std::vector<std::string>& args);
+    void DebugDeactiveDevice(const std::vector<std::string>& args);
 
     /* 消息响应函数 */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);

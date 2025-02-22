@@ -43,7 +43,7 @@ DebugModule::~DebugModule()
 {
 }
 
-int DebugModule::ProcessMsg(const SprMsg& msg)
+int32_t DebugModule::ProcessMsg(const SprMsg& msg)
 {
     switch(msg.GetMsgId()) {
         case SIG_ID_DEBUG_ENABLE_REMOTE_SHELL: {

@@ -22,4 +22,4 @@ add_subdirectory(PowerManagerSrv)
 add_subdirectory(PropertiesSrv)
 add_subdirectory(ServiceManagerSrv)
 add_subdirectory(SparrowSrv)
-
+add_subdirectory(StatusMonitorSrv)

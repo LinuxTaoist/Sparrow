@@ -24,6 +24,7 @@
 #include "SprDebugNode.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
+#include "GeneralUtils.h"
 #include "CommonTypeDefs.h"
 
 #define SPR_LOGD(fmt, args...) LOGD("SprDebugNode", fmt, ##args)
@@ -77,15 +78,19 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
             return ch != '\r' && ch != '\n';
         }).base(), bytes.end());
 
-        SPR_LOGD("Recv bytes: %s\n", bytes.c_str());
         bool found = false;
+        std::vector<std::string> args = GeneralUtils::Split(bytes, ' ');
+        SPR_LOGD("Recv bytes: %s num = %d\n", bytes.c_str(), args.size());
+        if (args.empty()) {
+            return;
+        }
 
         // buildin cmds
         for (const auto& blnPair : mBuildinCmds) {
             std::string cmd = blnPair.first;
-            if (bytes.compare(0, cmd.size(), cmd) == 0) {
+            if (args[0].compare(0, cmd.size(), cmd) == 0) {
                 auto& func = blnPair.second.second;
-                func(bytes);
+                func(args);
                 found = true;
             }
         }
@@ -95,9 +100,9 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
             auto& cmdMap = ownerPair.second.mCmdMap;
             for (const auto& cmdPair : cmdMap) {
                 std::string cmd = cmdPair.first;
-                if (bytes.compare(0, cmd.size(), cmd) == 0) {
+                if (args[0].compare(0, cmd.size(), cmd) == 0) {
                     auto& func = cmdPair.second.second;
-                    func(bytes);
+                    func(args);
                     found = true;
                 }
             }
@@ -161,7 +166,7 @@ int32_t SprDebugNode::UnregisterCmd(const std::string& owner, const std::string&
     return 0;
 }
 
-void SprDebugNode::DebugDumpAllOwners(const std::string& args)
+void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
 {
     SPR_LOGD("==============================================================================\n");
     SPR_LOGD("                     Debug Command List                                       \n");
@@ -192,7 +197,7 @@ void SprDebugNode::DebugDumpAllOwners(const std::string& args)
     SPR_LOGD("==============================================================================\n");
 }
 
-void SprDebugNode::DebugDumpVersion(const std::string& args)
+void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
 {
     SPR_LOGD("==============================================================================\n");
     SPR_LOGD("                        Version About                                         \n");

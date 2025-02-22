@@ -62,6 +62,11 @@ ENUM_OR_STRING(SIG_ID_POWER_STANDBY),                           \
 ENUM_OR_STRING(SIG_ID_POWER_SLEEP),                             \
 
 //-----------------------------------------------------------------------------
+// STATUS_MONITOR_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_MONITOR_STATUS_EVENT),                    \
+
+//-----------------------------------------------------------------------------
 // ONENET_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT),        \

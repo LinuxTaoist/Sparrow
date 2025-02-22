@@ -20,57 +20,62 @@
 #ifndef __COMMON_ERROR_CODES_H__
 #define __COMMON_ERROR_CODES_H__
 
+// Define the starting points for different error levels.
+// Each module is allocated 50 error codes, which are divided into the following severity levels:
+// -01 ~ -09: Critical errors (severe issues that may cause system failure or data loss)
+// -10 ~ -29: Error level (issues that need immediate attention but do not cause system failure)
+// -30 ~ -39: Warning level (issues that should be addressed but do not require immediate action)
+// -40 ~ -49: Info level (informational messages or minor issues that do not affect system operation)
+#define ERR_LEVEL_CRITICAL_BEGIN    1
+#define ERR_LEVEL_ERROR_BEGIN       10
+#define ERR_LEVEL_WARNNING_BEGIN    30
+#define ERR_LEVEL_INFO_BEGIN        40
+
 enum CommonErrorCode {
     // general error code
     ERR_GENERAL_SUCCESS             =  0,
     ERR_GENERAL_ERROR               = -1,
 
-    // sysem error code
-    ERR_SYS_INVALID_PARAM           = -2,
-    ERR_SYS_MEMORY_ALLOC_FAILED     = -3,
+    // system error code
+    ERR_SYS_INVALID_PARAM           = -310,
+    ERR_SYS_MEMORY_ALLOC_FAILED     = -311,
+    ERR_PARCEL_WAIT_FAILED          = -312,
+    ERR_PARCEL_WAIT_TIMEOUT         = -303,
+    ERR_PARCEL_POST_FAILED          = -314,
+    ERR_PARCE_WRITE_FAILED          = -315,
+    ERR_PARCEL_READ_FAILED          = -316,
+    ERR_BINDER_INIT_FAILED          = -317,
+    ERR_BINDER_INVALID_POINTER      = -318,
+    ERR_SHM_CREATE_FAILED           = -319,
+    ERR_SHM_OPEN_FAILED             = -320,
+    ERR_SHM_READ_FAILED             = -321,
+    ERR_SHM_WRITE_FAILED            = -322,
+    ERR_SHM_CLOSE_FAILED            = -323,
+    ERR_SHM_DESTROY_FAILED          = -324,
+    ERR_SHM_GET_SIZE_FAILED         = -325,
 
-    // parcel error code
-    ERR_PARCEL_WAIT_FAILED          = -300,
-    ERR_PARCEL_WAIT_TIMEOUT         = -301,
-    ERR_PARCEL_POST_FAILED          = -302,
-    ERR_PARCE_WRITE_FAILED          = -303,
-    ERR_PARCEL_READ_FAILED          = -304,
+    ERR_PROPERTY_UNKOWN_ERROR       = -501,
+    ERR_PROPERTY_BINDER_INIT_FAILED = -510,
 
-    // binder error code
-    ERR_BINDER_INIT_FAILED          = -320,
-    ERR_BINDER_INVALID_POINTER      = -321,
+    ERR_CONFIG_UNKOWN_ERROR         = -551,
 
-    // shared memory error code
-    ERR_SHM_CREATE_FAILED           = -330,
-    ERR_SHM_OPEN_FAILED             = -331,
-    ERR_SHM_READ_FAILED             = -332,
-    ERR_SHM_WRITE_FAILED            = -333,
-    ERR_SHM_CLOSE_FAILED            = -334,
-    ERR_SHM_DESTROY_FAILED          = -335,
-    ERR_SHM_GET_SIZE_FAILED         = -336,
+    ERR_LOGM_UNKOWN_ERROR           = -601,
 
-    ERR_PROPERTY_UNKOWN_ERROR       = -500,
-    ERR_PROPERTY_BINDER_INIT_FAILED = -501,
+    ERR_TIMEM_UNKOWN_ERROR          = -651,
 
-    ERR_CONFIG_UNKOWN_ERROR         = -550,
+    ERR_TIMERM_UNKOWN_ERROR         = -651,
 
-    ERR_LOGM_UNKOWN_ERROR           = -600,
+    ERR_SYSTEM_TIMER_UNKOWN_ERROR   = -701,
 
-    ERR_TIMEM_UNKOWN_ERROR          = -650,
+    ERR_POWERM_UNKOWN_ERROR         = -751,
 
-    ERR_TIMERM_UNKOWN_ERROR         = -650,
+    ERR_ONENET_MANAGER_UNKOWN_ERROR = -801,
 
-    ERR_SYSTEM_TIMER_UNKOWN_ERROR   = -700,
+    ERR_ONENET_DEV_UNKOWN_ERROR     = -851,
 
-    ERR_POWERM_UNKOWN_ERROR         = -750,
+    ERR_ONENET_DRIVER_UNKOWN_ERROR  = -901,
 
-    ERR_ONENET_MANAGER_UNKOWN_ERROR = -800,
-
-    ERR_ONENET_DEV_UNKOWN_ERROR     = -850,
-
-    ERR_ONENET_DRIVER_UNKOWN_ERROR  = -900,
-
-    ERR_DEBUG_UNKNOW_ERROR          = -950,
+    ERR_DEBUG_UNKNOW_ERROR          = -951,
 
     ERR_CODE_BUTT
 };
