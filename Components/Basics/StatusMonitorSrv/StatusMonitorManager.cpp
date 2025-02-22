@@ -159,16 +159,20 @@ int32_t StatusMonitorManager::DelStatusEventWithFilter(int32_t moduleID, int32_t
         int32_t tmpModuleID = moduleEvents.first;
         auto& tmpEvents = moduleEvents.second;
 
-        for (auto it = tmpEvents.begin(); it != tmpEvents.end(); ++it) {
+        for (auto it = tmpEvents.begin(); it != tmpEvents.end(); ) {
             int32_t tmpErrCode = (*it).sErrorCode;
             int32_t tmpLevel = GetLevelFromErrCode(tmpErrCode);
             std::string tmpText = (*it).sText;
 
-            if ( (moduleID != 0 && moduleID == tmpModuleID)                 ||
-                 (level != ERR_EVENT_LEVEL_UNKNOWN && level == tmpLevel)    ||
-                 (errCode != ERR_GENERAL_SUCCESS && errCode == tmpErrCode)  ||
-                 (text.empty() || text == tmpText) ) {
-                tmpEvents.erase(it);
+            bool shouldDelete = (moduleID == 0 || moduleID == tmpModuleID) &&
+                                (level == ERR_EVENT_LEVEL_UNKNOWN || level == tmpLevel) &&
+                                (errCode == ERR_GENERAL_SUCCESS || errCode == tmpErrCode) &&
+                                (text.empty() || text == tmpText);
+
+            if (shouldDelete) {
+                it = tmpEvents.erase(it);
+            } else {
+                ++it;
             }
         }
     }
@@ -348,6 +352,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithText(const std::vector<std::
 
 void StatusMonitorManager::DebugDelAllStatusEvent(const std::vector<std::string>& args)
 {
+    SPR_LOGD("Delete all events\n");
     DelAllStatusEvents();
 }
 
@@ -365,6 +370,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithModuleID(const std::vector<st
         return;
     }
 
+    SPR_LOGD("Delete event moduleID: %d\n", moduleID);
     DelStatusEventsWithModuleID(moduleID);
 }
 
@@ -382,6 +388,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithLevel(const std::vector<std::
         return;
     }
 
+    SPR_LOGD("Delete event level: %d\n", level);
     DelStatusEventsWithLevel(level);
 }
 
@@ -399,6 +406,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithErrorCode(const std::vector<s
         return;
     }
 
+    SPR_LOGD("Delete event errCode: %d\n", errCode);
     DelStatusEventsWithErrorCode(errCode);
 }
 
@@ -410,6 +418,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::s
         return;
     }
 
+    SPR_LOGD("Delete event text: %s\n", args[1].c_str());
     DelStatusEventsWithText(args[1]);
 }
 
