@@ -104,6 +104,9 @@ private:
     EOneNetMgrLev2State GetLev2State();
     const char* GetLev2StateString(EOneNetMgrLev2State state);
 
+    /* 记录状态到监控组件 */
+    int32_t SendEventToMonitor(int32_t errcode, const std::string& text);
+
     /* 启动OneNet心跳 */
     void StartTimerToPingOneNet(int32_t intervalInMSec);
 
@@ -117,12 +120,6 @@ private:
     void RegisterDebugFuncs();
     void UnregisterDebugFuncs();
 
-    /* 调试函数 */
-    void DebugEnableDumpLog(const std::vector<std::string>& args);
-    void DebugDeviceList(const std::vector<std::string>& args);
-    void DebugActiveDevice(const std::vector<std::string>& args);
-    void DebugDeactiveDevice(const std::vector<std::string>& args);
-
     /* 消息响应函数 */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
@@ -134,6 +131,12 @@ private:
     void MsgRespondMqttDisconnect(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
+
+    /* 调试函数 */
+    void DebugEnableDumpLog(const std::vector<std::string>& args);
+    void DebugDeviceList(const std::vector<std::string>& args);
+    void DebugActiveDevice(const std::vector<std::string>& args);
+    void DebugDeactiveDevice(const std::vector<std::string>& args);
 
 private:
     bool mDebugEnable;

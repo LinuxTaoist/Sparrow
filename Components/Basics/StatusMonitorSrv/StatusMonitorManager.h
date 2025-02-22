@@ -21,7 +21,7 @@
 #ifndef __STATUS_MONITOR_MANAGER_H__
 #define __STATUS_MONITOR_MANAGER_H__
 
-#include <queue>
+#include <list>
 #include <time.h>
 #include "SprObserverWithMQueue.h"
 
@@ -46,7 +46,7 @@ public:
 
 private:
     int32_t InitDebugNode();
-    int32_t LoadStatusEvent(uint32_t moduleID, int32_t errCode, const std::string& text);
+    int32_t AddStatusEvent(uint32_t moduleID, int32_t errCode, const std::string& text);
     int32_t GetLevelFromErrCode(int32_t errCode);
     int32_t DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text);
     int32_t DumpAllStatusEvents();
@@ -54,18 +54,25 @@ private:
     int32_t DumpStatusEventsWithLevel(int32_t level);
     int32_t DumpStatusEventsWithErrorCode(int32_t errCode);
     int32_t DumpStatusEventsWithText(const std::string& text);
+    int32_t DelStatusEventWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text);
+    int32_t DelAllStatusEvents();
+    int32_t DelStatusEventsWithModuleID(int32_t moduleID);
+    int32_t DelStatusEventsWithLevel(int32_t level);
+    int32_t DelStatusEventsWithErrorCode(int32_t errCode);
+    int32_t DelStatusEventsWithText(const std::string& text);
 
     /* 注册/注销所有调试函数 */
     void RegisterDebugFuncs();
     void UnregisterDebugFuncs();
 
     /* 调试函数 */
+    void DebugDisplayUTCTimeAsLocalString(const std::vector<std::string>& args);
     void DebugDumpAllStatusEvents(const std::vector<std::string>& args);
     void DebugDumpStatusEventsWithModuleID(const std::vector<std::string>& args);
     void DebugDumpStatusEventsWithLevel(const std::vector<std::string>& args);
     void DebugDumpStatusEventsWithErrorCode(const std::vector<std::string>& args);
     void DebugDumpStatusEventsWithText(const std::vector<std::string>& args);
-    void DebugDelStatusEvent(const std::vector<std::string>& args);
+    void DebugDelAllStatusEvent(const std::vector<std::string>& args);
     void DebugDelStatusEventsWithModuleID(const std::vector<std::string>& args);
     void DebugDelStatusEventsWithLevel(const std::vector<std::string>& args);
     void DebugDelStatusEventsWithErrorCode(const std::vector<std::string>& args);
@@ -73,7 +80,7 @@ private:
     void DebugAddStatusEvent(const std::vector<std::string>& args);
 
 private:
-    std::map<int32_t, std::queue<StatusEvent>> mAllEvents;  // key: moduleID, value: events
+    std::map<int32_t, std::list<StatusEvent>> mAllEvents;  // key: moduleID, value: events
 };
 
 #endif // __STATUS_MONITOR_MANAGER_H__

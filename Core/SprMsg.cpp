@@ -88,17 +88,31 @@ int SprMsg::CopyMsg(const SprMsg& srcMsg)
     mTag = srcMsg.mTag;
     mBoolValue = srcMsg.mBoolValue;
     mU8Value = srcMsg.mU8Value;
+    mI8Value = srcMsg.mI8Value;
     mU16Value = srcMsg.mU16Value;
+    mI16Value = srcMsg.mI16Value;
     mU32Value = srcMsg.mU32Value;
+    mI32Value = srcMsg.mI32Value;
     mU64Value = srcMsg.mU64Value;
+    mI64Value = srcMsg.mI64Value;
     mStringLength = srcMsg.mStringLength;
     mString = srcMsg.mString;
     mU8VecLength = srcMsg.mU8VecLength;
     mU8Vec = srcMsg.mU8Vec;
+    mI8VecLength = srcMsg.mI8VecLength;
+    mI8Vec = srcMsg.mI8Vec;
+    mU16VecLength = srcMsg.mU16VecLength;
+    mU16Vec = srcMsg.mU16Vec;
+    mI16VecLength = srcMsg.mI16VecLength;
+    mI16Vec = srcMsg.mI16Vec;
     mU32VecLength = srcMsg.mU32VecLength;
     mU32Vec = srcMsg.mU32Vec;
+    mI32VecLength = srcMsg.mI32VecLength;
+    mI32Vec = srcMsg.mI32Vec;
     mU64VecLength = srcMsg.mU64VecLength;
     mU64Vec = srcMsg.mU64Vec;
+    mI64VecLength = srcMsg.mI64VecLength;
+    mI64Vec = srcMsg.mI64Vec;
     mDataSize = srcMsg.mDataSize;
     mDatas = srcMsg.mDatas;
     mEnFuncs = srcMsg.mEnFuncs;
@@ -116,36 +130,73 @@ void SprMsg::Init()
     mTag = 0;
     mBoolValue = false;
     mU8Value = 0;
+    mI8Value = 0;
     mU16Value = 0;
+    mI16Value = 0;
     mU32Value = 0;
+    mI32Value = 0;
     mU64Value = 0;
+    mI64Value = 0;
     mStringLength = 0;
+    mString.clear();
     mU8VecLength = 0;
+    mU8Vec.clear();
+    mI8VecLength = 0;
+    mI8Vec.clear();
+    mU16VecLength = 0;
+    mU16Vec.clear();
+    mI16VecLength = 0;
+    mI16Vec.clear();
     mU32VecLength = 0;
+    mU32Vec.clear();
+    mI32VecLength = 0;
+    mI32Vec.clear();
     mU64VecLength = 0;
+    mU64Vec.clear();
+    mI64VecLength = 0;
+    mI64Vec.clear();
     mDataSize = 0;
+    mDatas.clear();
 
     mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_BOOLVALUE, &SprMsg::EncodeBoolValue));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VALUE,   &SprMsg::EncodeU8Value));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VALUE,  &SprMsg::EncodeU16Value));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VALUE,  &SprMsg::EncodeU32Value));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VALUE,  &SprMsg::EncodeU64Value));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_STRING,    &SprMsg::EncodeString));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VEC,     &SprMsg::EncodeU8Vec));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VEC,    &SprMsg::EncodeU32Vec));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VEC,    &SprMsg::EncodeU64Vec));
-    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_PTR,       &SprMsg::EncodeDatas));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VALUE, &SprMsg::EncodeU8Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I8VALUE, &SprMsg::EncodeI8Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VALUE, &SprMsg::EncodeU16Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I16VALUE, &SprMsg::EncodeI16Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VALUE, &SprMsg::EncodeU32Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I32VALUE, &SprMsg::EncodeI32Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VALUE, &SprMsg::EncodeU64Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I64VALUE, &SprMsg::EncodeI64Value));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_STRING, &SprMsg::EncodeString));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VEC, &SprMsg::EncodeU8Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I8VEC, &SprMsg::EncodeI8Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VEC, &SprMsg::EncodeU16Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I16VEC, &SprMsg::EncodeI16Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VEC, &SprMsg::EncodeU32Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I32VEC, &SprMsg::EncodeI32Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VEC, &SprMsg::EncodeU64Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I64VEC, &SprMsg::EncodeI64Vec));
+    mEnFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_PTR, &SprMsg::EncodeDatas));
 
     mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_BOOLVALUE, &SprMsg::DecodeBoolValue));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VALUE,   &SprMsg::DecodeU8Value));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VALUE,  &SprMsg::DecodeU16Value));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VALUE,  &SprMsg::DecodeU32Value));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VALUE,  &SprMsg::DecodeU64Value));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_STRING,    &SprMsg::DecodeString));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VEC,     &SprMsg::DecodeU8Vec));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VEC,    &SprMsg::DecodeU32Vec));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VEC,    &SprMsg::DecodeU64Vec));
-    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_PTR,       &SprMsg::DecodeDatas));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VALUE, &SprMsg::DecodeU8Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I8VALUE, &SprMsg::DecodeI8Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VALUE, &SprMsg::DecodeU16Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I16VALUE, &SprMsg::DecodeI16Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VALUE, &SprMsg::DecodeU32Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I32VALUE, &SprMsg::DecodeI32Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VALUE, &SprMsg::DecodeU64Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I64VALUE, &SprMsg::DecodeI64Value));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_STRING, &SprMsg::DecodeString));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U8VEC, &SprMsg::DecodeU8Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I8VEC, &SprMsg::DecodeI8Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U16VEC, &SprMsg::DecodeU16Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I16VEC, &SprMsg::DecodeI16Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U32VEC, &SprMsg::DecodeU32Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I32VEC, &SprMsg::DecodeI32Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_U64VEC, &SprMsg::DecodeU64Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_I64VEC, &SprMsg::DecodeI64Vec));
+    mDeFuncs.insert(std::make_pair(ESprMsgType::MSG_TYPE_PTR, &SprMsg::DecodeDatas));
 }
 
 void SprMsg::Clear()
@@ -154,7 +205,13 @@ void SprMsg::Clear()
     mTag = 0;
     mString.clear();
     mU8Vec.clear();
+    mI8Vec.clear();
+    mU16Vec.clear();
+    mI16Vec.clear();
     mU32Vec.clear();
+    mI32Vec.clear();
+    mU64Vec.clear();
+    mI64Vec.clear();
     mDatas.clear();
 }
 
@@ -236,10 +293,22 @@ void SprMsg::SetU8Value(uint8_t value)
     mU8Value = value;
 }
 
+void SprMsg::SetI8Value(int8_t value)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I8VALUE);
+    mI8Value = value;
+}
+
 void SprMsg::SetU16Value(uint16_t value)
 {
     mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_U16VALUE);
     mU16Value = value;
+}
+
+void SprMsg::SetI16Value(int16_t value)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I16VALUE);
+    mI16Value = value;
 }
 
 void SprMsg::SetU32Value(uint32_t value)
@@ -248,10 +317,22 @@ void SprMsg::SetU32Value(uint32_t value)
     mU32Value = value;
 }
 
+void SprMsg::SetI32Value(int32_t value)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I32VALUE);
+    mI32Value = value;
+}
+
 void SprMsg::SetU64Value(uint64_t value)
 {
     mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_U64VALUE);
     mU64Value = value;
+}
+
+void SprMsg::SetI64Value(int64_t value)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I64VALUE);
+    mI64Value = value;
 }
 
 void SprMsg::SetString(const std::string& str)
@@ -268,6 +349,27 @@ void SprMsg::SetU8Vec(const std::vector<uint8_t>& vec)
     mU8Vec.assign(vec.begin(), vec.end());
 }
 
+void SprMsg::SetI8Vec(const std::vector<int8_t>& vec)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I8VEC);
+    mI8VecLength = vec.size();
+    mI8Vec.assign(vec.begin(), vec.end());
+}
+
+void SprMsg::SetU16Vec(const std::vector<uint16_t>& vec)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_U16VEC);
+    mU16VecLength = vec.size();
+    mU16Vec.assign(vec.begin(), vec.end());
+}
+
+void SprMsg::SetI16Vec(const std::vector<int16_t>& vec)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I16VEC);
+    mI16VecLength = vec.size();
+    mI16Vec.assign(vec.begin(), vec.end());
+}
+
 void SprMsg::SetU32Vec(const std::vector<uint32_t>& vec)
 {
     mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_U32VEC);
@@ -275,11 +377,25 @@ void SprMsg::SetU32Vec(const std::vector<uint32_t>& vec)
     mU32Vec.assign(vec.begin(), vec.end());
 }
 
+void SprMsg::SetI32Vec(const std::vector<int32_t>& vec)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I32VEC);
+    mI32VecLength = vec.size();
+    mI32Vec.assign(vec.begin(), vec.end());
+}
+
 void SprMsg::SetU64Vec(const std::vector<uint64_t>& vec)
 {
     mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_U64VEC);
     mU64VecLength = vec.size();
     mU64Vec.assign(vec.begin(), vec.end());
+}
+
+void SprMsg::SetI64Vec(const std::vector<int64_t>& vec)
+{
+    mTag |= (1 << (int32_t)ESprMsgType::MSG_TYPE_I64VEC);
+    mI64VecLength = vec.size();
+    mI64Vec.assign(vec.begin(), vec.end());
 }
 
 void SprMsg::EncodeFrom(std::string& enDatas) const
@@ -312,10 +428,21 @@ void SprMsg::EncodeU8Value(std::string& enDatas)
     enDatas.push_back(mU8Value);
 }
 
+void SprMsg::EncodeI8Value(std::string& enDatas)
+{
+    enDatas.push_back(mI8Value);
+}
+
 void SprMsg::EncodeU16Value(std::string& enDatas)
 {
     enDatas.push_back(0xFF & (mU16Value >> 8));
     enDatas.push_back(0xFF & mU16Value);
+}
+
+void SprMsg::EncodeI16Value(std::string& enDatas)
+{
+    enDatas.push_back(0xFF & (mI16Value >> 8));
+    enDatas.push_back(0xFF & mI16Value);
 }
 
 void SprMsg::EncodeU32Value(std::string& enDatas)
@@ -324,6 +451,14 @@ void SprMsg::EncodeU32Value(std::string& enDatas)
     enDatas.push_back(0xFF & (mU32Value >> 16));
     enDatas.push_back(0xFF & (mU32Value >> 8));
     enDatas.push_back(0xFF & mU32Value);
+}
+
+void SprMsg::EncodeI32Value(std::string& enDatas)
+{
+    enDatas.push_back(0xFF & (mI32Value >> 24));
+    enDatas.push_back(0xFF & (mI32Value >> 16));
+    enDatas.push_back(0xFF & (mI32Value >> 8));
+    enDatas.push_back(0xFF & mI32Value);
 }
 
 void SprMsg::EncodeU64Value(std::string& enDatas)
@@ -336,6 +471,18 @@ void SprMsg::EncodeU64Value(std::string& enDatas)
     enDatas.push_back(0xFF & (mU64Value >> 16));
     enDatas.push_back(0xFF & (mU64Value >> 8));
     enDatas.push_back(0xFF & mU64Value);
+}
+
+void SprMsg::EncodeI64Value(std::string& enDatas)
+{
+    enDatas.push_back(0xFF & (mI64Value >> 56));
+    enDatas.push_back(0xFF & (mI64Value >> 48));
+    enDatas.push_back(0xFF & (mI64Value >> 40));
+    enDatas.push_back(0xFF & (mI64Value >> 32));
+    enDatas.push_back(0xFF & (mI64Value >> 24));
+    enDatas.push_back(0xFF & (mI64Value >> 16));
+    enDatas.push_back(0xFF & (mI64Value >> 8));
+    enDatas.push_back(0xFF & mI64Value);
 }
 
 void SprMsg::EncodeString(std::string& enDatas)
@@ -356,6 +503,32 @@ void SprMsg::EncodeU8Vec(std::string& enDatas)
     enDatas.insert(enDatas.end(), mU8Vec.begin(), mU8Vec.end());
 }
 
+void SprMsg::EncodeI8Vec(std::string& enDatas) {
+    enDatas.push_back(static_cast<uint8_t>(mI8VecLength >> 24));
+    enDatas.push_back(static_cast<uint8_t>(mI8VecLength >> 16));
+    enDatas.push_back(static_cast<uint8_t>(mI8VecLength >> 8));
+    enDatas.push_back(static_cast<uint8_t>(mI8VecLength));
+    enDatas.insert(enDatas.end(), mI8Vec.begin(), mI8Vec.end());
+}
+
+void SprMsg::EncodeU16Vec(std::string& enDatas) {
+    enDatas.push_back(static_cast<uint8_t>(mU16VecLength >> 24));
+    enDatas.push_back(static_cast<uint8_t>(mU16VecLength >> 16));
+    enDatas.push_back(static_cast<uint8_t>(mU16VecLength >> 8));
+    enDatas.push_back(static_cast<uint8_t>(mU16VecLength));
+}
+
+void SprMsg::EncodeI16Vec(std::string& enDatas) {
+    enDatas.push_back(static_cast<uint8_t>(mI16VecLength >> 24));
+    enDatas.push_back(static_cast<uint8_t>(mI16VecLength >> 16));
+    enDatas.push_back(static_cast<uint8_t>(mI16VecLength >> 8));
+    enDatas.push_back(static_cast<uint8_t>(mI16VecLength));
+    for (const auto& value : mI16Vec) {
+        enDatas.push_back(static_cast<uint8_t>(value >> 8));
+        enDatas.push_back(static_cast<uint8_t>(value));
+    }
+}
+
 void SprMsg::EncodeU32Vec(std::string& enDatas)
 {
     enDatas.push_back(0xFF & (mU32VecLength >> 24));
@@ -369,6 +542,19 @@ void SprMsg::EncodeU32Vec(std::string& enDatas)
         enDatas.push_back(0xFF & (value >> 16));
         enDatas.push_back(0xFF & (value >> 8));
         enDatas.push_back(0xFF & value);
+    }
+}
+
+void SprMsg::EncodeI32Vec(std::string& enDatas) {
+    enDatas.push_back(static_cast<uint8_t>(mI32VecLength >> 24));
+    enDatas.push_back(static_cast<uint8_t>(mI32VecLength >> 16));
+    enDatas.push_back(static_cast<uint8_t>(mI32VecLength >> 8));
+    enDatas.push_back(static_cast<uint8_t>(mI32VecLength));
+    for (const auto& value : mI32Vec) {
+        enDatas.push_back(static_cast<uint8_t>(value >> 24));
+        enDatas.push_back(static_cast<uint8_t>(value >> 16));
+        enDatas.push_back(static_cast<uint8_t>(value >> 8));
+        enDatas.push_back(static_cast<uint8_t>(value));
     }
 }
 
@@ -389,6 +575,18 @@ void SprMsg::EncodeU64Vec(std::string& enDatas)
         enDatas.push_back(0xFF & (value >> 16));
         enDatas.push_back(0xFF & (value >> 8));
         enDatas.push_back(0xFF & value);
+    }
+}
+
+void SprMsg::EncodeI64Vec(std::string& enDatas) {
+    enDatas.push_back(static_cast<uint8_t>(mI64VecLength >> 24));
+    enDatas.push_back(static_cast<uint8_t>(mI64VecLength >> 16));
+    enDatas.push_back(static_cast<uint8_t>(mI64VecLength >> 8));
+    enDatas.push_back(static_cast<uint8_t>(mI64VecLength));
+    for (const auto& value : mI64Vec) {
+        for (int i = 7; i >= 0; --i) {
+            enDatas.push_back(static_cast<uint8_t>(value >> (i * 8)));
+        }
     }
 }
 
@@ -459,8 +657,19 @@ void SprMsg::DecodeU8Value(std::string& deDatas)
         return;
     }
 
-    mU8Value = deDatas[0];
+    mU8Value = deDatas[0] & 0xFF;
     deDatas = deDatas.substr(sizeof(uint8_t));
+}
+
+void SprMsg::DecodeI8Value(std::string& deDatas)
+{
+    if (deDatas.size() < sizeof(mI8Value)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    mI8Value = deDatas[0] & 0xFF;
+    deDatas = deDatas.substr(sizeof(int8_t));
 }
 
 void SprMsg::DecodeU16Value(std::string& deDatas)
@@ -470,8 +679,21 @@ void SprMsg::DecodeU16Value(std::string& deDatas)
         return;
     }
 
-    mU16Value = (deDatas[0] << 8) | deDatas[1];
+    mU16Value = ((deDatas[0] & 0xFF) << 8) |
+                (deDatas[1] & 0xFF) ;
     deDatas = deDatas.substr(sizeof(uint16_t));
+}
+
+void SprMsg::DecodeI16Value(std::string& deDatas)
+{
+    if (deDatas.size() < sizeof(mI16Value)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    mI16Value = ((deDatas[0] & 0xFF) << 8) |
+                (deDatas[1] & 0xFF);
+    deDatas = deDatas.substr(sizeof(int16_t));
 }
 
 void SprMsg::DecodeU32Value(std::string& deDatas)
@@ -484,10 +706,26 @@ void SprMsg::DecodeU32Value(std::string& deDatas)
     uint32_t value = 0;
     for (int i = 0; i < (int)sizeof(mU32Value); i++) {
         value <<= 8;
-        value |= deDatas[i];
+        value |= (deDatas[i] & 0xFF);
     }
     mU32Value = value;
     deDatas = deDatas.substr(sizeof(mU32Value));
+}
+
+void SprMsg::DecodeI32Value(std::string& deDatas)
+{
+    if (deDatas.size() < sizeof(mI32Value)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    int32_t value = 0;
+    for (int i = 0; i < (int)sizeof(mI32Value); i++) {
+        value <<= 8;
+        value |= (deDatas[i] & 0xFF);
+    }
+    mI32Value = value;
+    deDatas = deDatas.substr(sizeof(mI32Value));
 }
 
 void SprMsg::DecodeU64Value(std::string& deDatas)
@@ -500,10 +738,26 @@ void SprMsg::DecodeU64Value(std::string& deDatas)
     uint64_t value = 0;
     for (int i = 0; i < (int)sizeof(mU64Value); i++) {
         value <<= 8;
-        value |= deDatas[i];
+        value |= (deDatas[i] & 0xFF);
     }
     mU64Value = value;
     deDatas = deDatas.substr(sizeof(mU64Value));
+}
+
+void SprMsg::DecodeI64Value(std::string& deDatas)
+{
+    if (deDatas.size() < sizeof(mI64Value)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    int64_t value = 0;
+    for (int i = 0; i < (int)sizeof(mI64Value); i++) {
+        value <<= 8;
+        value |= (deDatas[i] & 0xFF);
+    }
+    mI64Value = value;
+    deDatas = deDatas.substr(sizeof(mI64Value));
 }
 
 void SprMsg::DecodeString(std::string& deDatas)
@@ -538,6 +792,69 @@ void SprMsg::DecodeU8Vec(std::string& deDatas)
     deDatas = deDatas.substr(sizeof(mU8VecLength) + mU8VecLength);
 }
 
+void SprMsg::DecodeI8Vec(std::string& deDatas)
+{
+    if (GeneralConversions::ToInteger(deDatas, mI8VecLength) == -1) {
+        SPR_LOGE("Decode vector size Fail!\n");
+        return;
+    }
+
+    if (deDatas.size() < sizeof(mI8VecLength) + mI8VecLength) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    mI8Vec.assign(deDatas.begin() + sizeof(mI8VecLength), deDatas.begin() + sizeof(mI8VecLength) + mI8VecLength);
+    deDatas = deDatas.substr(sizeof(mI8VecLength) + mI8VecLength);
+}
+
+void SprMsg::DecodeU16Vec(std::string& deDatas)
+{
+    if (GeneralConversions::ToInteger(deDatas, mU16VecLength) == -1) {
+        SPR_LOGE("Decode vector size Fail!\n");
+        return;
+    }
+
+    if (deDatas.size() < sizeof(mU16VecLength) + mU16VecLength * sizeof(uint16_t)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    for (uint32_t i = 0; i < mU16VecLength; i++) {
+        uint16_t value = 0;
+        for (uint32_t j = 0; j < sizeof(uint16_t); j++) {
+            value <<= 8;
+            value |= deDatas[sizeof(mU16VecLength) + i * sizeof(uint16_t) + j] & 0xFF;
+        }
+        mU16Vec.push_back(value);
+    }
+
+    deDatas = deDatas.substr(sizeof(mU16VecLength) + mU16VecLength * sizeof(uint16_t));
+}
+
+void SprMsg::DecodeI16Vec(std::string& deDatas)
+{
+    if (GeneralConversions::ToInteger(deDatas, mI16VecLength) == -1) {
+        SPR_LOGE("Decode vector size Fail!\n");
+        return;
+    }
+    if (deDatas.size() < sizeof(mI16VecLength) + mI16VecLength * sizeof(int16_t)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    for (uint32_t i = 0; i < mI16VecLength; i++) {
+        int16_t value = 0;
+        for (uint32_t j = 0; j < sizeof(int16_t); j++) {
+            value <<= 8;
+            value |= deDatas[sizeof(mI16VecLength) + i * sizeof(int16_t) + j] & 0xFF;
+        }
+        mI16Vec.push_back(value);
+    }
+
+    deDatas = deDatas.substr(sizeof(mI16VecLength) + mI16VecLength * sizeof(int16_t));
+}
+
 void SprMsg::DecodeU32Vec(std::string& deDatas)
 {
     if (GeneralConversions::ToInteger(deDatas, mU32VecLength) == -1) {
@@ -554,12 +871,35 @@ void SprMsg::DecodeU32Vec(std::string& deDatas)
         uint32_t value = 0;
         for (uint32_t j = 0; j < sizeof(uint32_t); j++) {
             value <<= 8;
-            value |= deDatas[sizeof(mU32VecLength) + i * sizeof(uint32_t) + j];
+            value |= deDatas[sizeof(mU32VecLength) + i * sizeof(uint32_t) + j] & 0xFF;
         }
         mU32Vec.push_back(value);
     }
 
     deDatas = deDatas.substr(sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t));
+}
+
+void SprMsg::DecodeI32Vec(std::string& deDatas)
+{
+    if (GeneralConversions::ToInteger(deDatas, mI32VecLength) == -1) {
+        SPR_LOGE("Decode vector size Fail!\n");
+        return;
+    }
+    if (deDatas.size() < sizeof(mI32VecLength) + mI32VecLength * sizeof(int32_t)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    for (uint32_t i = 0; i < mI32VecLength; i++) {
+        int32_t value = 0;
+        for (uint32_t j = 0; j < sizeof(int32_t); j++) {
+            value <<= 8;
+            value |= deDatas[sizeof(mI32VecLength) + i * sizeof(int32_t) + j] & 0xFF;
+        }
+        mI32Vec.push_back(value);
+    }
+
+    deDatas = deDatas.substr(sizeof(mI32VecLength) + mI32VecLength * sizeof(int32_t));
 }
 
 void SprMsg::DecodeU64Vec(std::string& deDatas)
@@ -578,12 +918,35 @@ void SprMsg::DecodeU64Vec(std::string& deDatas)
         uint64_t value = 0;
         for (uint32_t j = 0; j < sizeof(uint64_t); j++) {
             value <<= 8;
-            value |= deDatas[sizeof(mU64VecLength) + i * sizeof(uint64_t) + j];
+            value |= deDatas[sizeof(mU64VecLength) + i * sizeof(uint64_t) + j] & 0xFF;
         }
         mU64Vec.push_back(value);
     }
 
     deDatas = deDatas.substr(sizeof(mU64VecLength) + mU64VecLength * sizeof(uint64_t));
+}
+
+void SprMsg::DecodeI64Vec(std::string& deDatas)
+{
+    if (GeneralConversions::ToInteger(deDatas, mI64VecLength) == -1) {
+        SPR_LOGE("Decode vector size Fail!\n");
+        return;
+    }
+    if (deDatas.size() < sizeof(mI64VecLength) + mI64VecLength * sizeof(int64_t)) {
+        SPR_LOGE("deDatas is invalid!\n");
+        return;
+    }
+
+    for (uint32_t i = 0; i < mI64VecLength; i++) {
+        int64_t value = 0;
+        for (uint32_t j = 0; j < sizeof(int64_t); j++) {
+            value <<= 8;
+            value |= deDatas[sizeof(mI64VecLength) + i * sizeof(int64_t) + j] & 0xFF;
+        }
+        mI64Vec.push_back(value);
+    }
+
+    deDatas = deDatas.substr(sizeof(mI64VecLength) + mI64VecLength * sizeof(int64_t));
 }
 
 void SprMsg::DecodeDatas(std::string& deDatas)
@@ -601,4 +964,3 @@ void SprMsg::DecodeDatas(std::string& deDatas)
     mDatas.assign(deDatas.begin() + sizeof(mDataSize), deDatas.begin() + sizeof(mDataSize) + mDataSize);
     deDatas = deDatas.substr(sizeof(mDataSize) + mDataSize);
 }
-

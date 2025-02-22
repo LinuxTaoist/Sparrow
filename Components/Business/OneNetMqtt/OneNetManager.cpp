@@ -23,6 +23,7 @@
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
 #include "SprDebugNode.h"
+#include "CommonErrorCodes.h"
 #include "OneNetManager.h"
 
 using namespace std;
@@ -371,6 +372,14 @@ const char* OneNetManager::GetLev2StateString(EOneNetMgrLev2State state)
     return (Lev2Strings.size() > state) ? Lev2Strings[state].c_str() : "UNDEFINED";
 }
 
+int32_t OneNetManager::SendEventToMonitor(int32_t errcode, const std::string& text)
+{
+    SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
+    msg.SetI32Value(errcode);
+    msg.SetString(text);
+    return NotifyObserver(MODULE_STATUS_MONITOR, msg);
+}
+
 void OneNetManager::StartTimerToPingOneNet(int32_t intervalInMSec)
 {
     if (mEnablePingTimer) {
@@ -434,45 +443,6 @@ void OneNetManager::UnregisterDebugFuncs()
     p->UnregisterCmd(mModuleName);
 }
 
-void OneNetManager::DebugEnableDumpLog(const std::vector<std::string>& args)
-{
-    mDebugEnable = !mDebugEnable;
-    SprMsg msg(SIG_ID_ONENET_MGR_DEBUG_ENABLE);
-    msg.SetBoolValue(mDebugEnable);
-    NotifyAllObserver(msg);
-    SPR_LOGD("mDebugEnable = %d\n", mDebugEnable);
-}
-
-void OneNetManager::DebugDeviceList(const std::vector<std::string>& args)
-{
-    SPR_LOGD("Device List:\n");
-    int32_t i = 0;
-    for (auto it = mOneDeviceMap.begin(); it != mOneDeviceMap.end(); it++) {
-        SPR_LOGD(" %d. %s\n", ++i, it->first.c_str());
-    }
-}
-
-void OneNetManager::DebugActiveDevice(const std::vector<std::string>& args)
-{
-    if (args.size() != 2) {
-        SPR_LOGE("Invalid args size: %d\n", args.size());
-        SPR_LOGE("Usage: echo active {device_name} > /tmp/debug_onenet\n");
-        return;
-    }
-
-    SPR_LOGD("Debug Active Device [%s]\n", args[1].c_str());
-    SprMsg msg(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-    msg.SetString(args[1]);
-    SendMsg(msg);
-}
-
-void OneNetManager::DebugDeactiveDevice(const std::vector<std::string>& args)
-{
-    SPR_LOGD("Debug Deactive Device\n");
-    SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
-    SendMsg(disMsg);
-}
-
 /**
  * @brief Process SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
  *
@@ -515,6 +485,9 @@ void OneNetManager::MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg)
     SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
     SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
     NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
+
+    // 记录下线事件至监控组件
+    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, "device offline");
 }
 
 /**
@@ -544,6 +517,9 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
     StartTimerToReportData(DEFAULT_DATA_REPORT_INTERVAL * 1000);
     SPR_LOGD("OneNet return connect code: %d, start ping timer: %ds, report timer: %ds (%d %d)\n",
         msg.GetU8Value(), keepAliveInSec, DEFAULT_DATA_REPORT_INTERVAL, mReConnectReqCnt, mReConnectRspCnt);
+
+    // 记录上线事件至监控组件
+    SendEventToMonitor(ERR_ONENET_MANAGER_ONLINE, "device online");
 }
 
 /**
@@ -645,4 +621,43 @@ int32_t OneNetManager::ProcessMsg(const SprMsg& msg)
     }
 
     return 0;
+}
+
+void OneNetManager::DebugEnableDumpLog(const std::vector<std::string>& args)
+{
+    mDebugEnable = !mDebugEnable;
+    SprMsg msg(SIG_ID_ONENET_MGR_DEBUG_ENABLE);
+    msg.SetBoolValue(mDebugEnable);
+    NotifyAllObserver(msg);
+    SPR_LOGD("mDebugEnable = %d\n", mDebugEnable);
+}
+
+void OneNetManager::DebugDeviceList(const std::vector<std::string>& args)
+{
+    SPR_LOGD("Device List:\n");
+    int32_t i = 0;
+    for (auto it = mOneDeviceMap.begin(); it != mOneDeviceMap.end(); it++) {
+        SPR_LOGD(" %d. %s\n", ++i, it->first.c_str());
+    }
+}
+
+void OneNetManager::DebugActiveDevice(const std::vector<std::string>& args)
+{
+    if (args.size() != 2) {
+        SPR_LOGE("Invalid args size: %d\n", args.size());
+        SPR_LOGE("Usage: echo active {device_name} > /tmp/debug_onenet\n");
+        return;
+    }
+
+    SPR_LOGD("Debug Active Device [%s]\n", args[1].c_str());
+    SprMsg msg(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+    msg.SetString(args[1]);
+    SendMsg(msg);
+}
+
+void OneNetManager::DebugDeactiveDevice(const std::vector<std::string>& args)
+{
+    SPR_LOGD("Debug Deactive Device\n");
+    SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
+    SendMsg(disMsg);
 }

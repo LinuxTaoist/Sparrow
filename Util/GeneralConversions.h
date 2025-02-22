@@ -45,7 +45,7 @@ int ToInteger(const std::string& in, T& out)
     out = 0;
     for (size_t i = 0; i < size; i++) {
         out <<= 8;
-        out |= static_cast<unsigned char>(in[i]);
+        out |= static_cast<unsigned char>(in[i] & 0xFF);
     }
 
     return size;
