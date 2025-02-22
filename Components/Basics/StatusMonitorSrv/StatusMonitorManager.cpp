@@ -98,9 +98,9 @@ int32_t StatusMonitorManager::GetLevelFromErrCode(int32_t errCode)
 
 int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text)
 {
-    SPR_LOGI("                                    Show All Status Events                                     \n");
+    SPR_LOGI("                             Show All Status Events                                            \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
-    SPR_LOGI("MODULE    LEVEL STATUSCODE         TIME  TEXT                                                  \n");
+    SPR_LOGI("MODULE    LEVEL STATUSCODE         TIME    TEXT                                                \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
     for (const auto& moduleEvents : mAllEvents) {
         int32_t tmpID = moduleEvents.first;
@@ -114,7 +114,9 @@ int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32
                  (level == ERR_EVENT_LEVEL_UNKNOWN || level == tmpLevel)            &&
                  (errCode == ERR_GENERAL_SUCCESS || errCode == event.sErrorCode)    &&
                  (text.empty() || text == event.sText.c_str()) ) {
-                SPR_LOGI("%6d %8d %10d %12d  %s\n", tmpID, tmpLevel, event.sErrorCode, event.sTime, event.sText.c_str());
+
+                std::string timeStr = FormatTimeAsLocalString(event.sTime);
+                SPR_LOGI("%6d %8d %10d %12d    %s %s", tmpID, tmpLevel, event.sErrorCode, event.sTime, timeStr.c_str(), event.sText.c_str());
             }
         }
     }
@@ -208,6 +210,14 @@ int32_t StatusMonitorManager::DelStatusEventsWithText(const std::string& text)
 {
     DelStatusEventWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, text);
     return 0;
+}
+
+std::string StatusMonitorManager::FormatTimeAsLocalString(const time_t& time)
+{
+    struct tm* pTime = localtime(&time);
+    char buffer[64];
+    strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", pTime);
+    return buffer;
 }
 
 int32_t StatusMonitorManager::ProcessMsg(const SprMsg& msg)

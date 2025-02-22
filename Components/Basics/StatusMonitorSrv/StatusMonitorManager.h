@@ -60,6 +60,7 @@ private:
     int32_t DelStatusEventsWithLevel(int32_t level);
     int32_t DelStatusEventsWithErrorCode(int32_t errCode);
     int32_t DelStatusEventsWithText(const std::string& text);
+    std::string FormatTimeAsLocalString(const time_t& time);
 
     /* 注册/注销所有调试函数 */
     void RegisterDebugFuncs();

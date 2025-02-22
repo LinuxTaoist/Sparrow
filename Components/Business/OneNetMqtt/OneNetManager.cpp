@@ -374,6 +374,7 @@ const char* OneNetManager::GetLev2StateString(EOneNetMgrLev2State state)
 
 int32_t OneNetManager::SendEventToMonitor(int32_t errcode, const std::string& text)
 {
+    SPR_LOGD("Send event to monitor, errcode: %d, text: %s\n", errcode, text.c_str());
     SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
     msg.SetI32Value(errcode);
     msg.SetString(text);
