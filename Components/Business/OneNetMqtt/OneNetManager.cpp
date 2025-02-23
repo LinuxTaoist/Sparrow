@@ -579,6 +579,9 @@ void OneNetManager::MsgRespondMqttDisconnect(const SprMsg& msg)
     SprMsg disMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
     disMsg.SetBoolValue(false);
     NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
+
+    // 记录下线事件至监控组件
+    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, "device offline");
 }
 
 /**
