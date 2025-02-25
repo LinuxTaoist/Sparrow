@@ -26,10 +26,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("TimeMgr", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("TimeMgr", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("TimeMgr", fmt, ##args)
-
+#define LOG_TAG "TimeMgr"
 #define DEFAULT_NTP_ADDR    "ntp1.tencent.com"
 #define DEFAULT_NTP_PORT    123
 

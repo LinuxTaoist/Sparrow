@@ -29,7 +29,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("MainPower", fmt, ##args)
+#define LOG_TAG "MainPower"
 
 int main(int argc, const char *argv[])
 {

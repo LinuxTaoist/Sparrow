@@ -25,7 +25,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("MainMonitor", fmt, ##args)
+#define LOG_TAG "MainMonitor"
 
 int main(int argc, const char *argv[])
 {

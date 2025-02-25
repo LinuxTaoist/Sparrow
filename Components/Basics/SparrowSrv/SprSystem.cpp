@@ -34,9 +34,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("SprSystem", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprSystem", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprSystem", fmt, ##args)
+#define LOG_TAG "SprSystem"
 
 #define LOCAL_PATH_VERSION  "/tmp/sparrow_version"
 #define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)

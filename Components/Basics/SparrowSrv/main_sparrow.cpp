@@ -23,7 +23,7 @@
 #include "CoreTypeDefs.h"
 #include "SprEpollSchedule.h"
 
-#define SPR_LOGI(fmt, args...) LOGI("MainSparrow", fmt, ##args)
+#define LOG_TAG "MainSparrow"
 
 int main(int argc, const char *argv[])
 {

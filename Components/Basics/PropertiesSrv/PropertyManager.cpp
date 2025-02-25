@@ -32,10 +32,7 @@
 #include "SprDebugNode.h"
 #include "PropertyManager.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("Properties", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("Properties", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("Properties", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("Properties", fmt, ##args)
+#define LOG_TAG "Properties"
 
 #define DEBUG_MODULE_NAME       "Properties"
 #define SYSTEM_PROP_PATH        "system.prop"

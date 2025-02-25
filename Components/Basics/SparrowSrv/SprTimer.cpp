@@ -22,9 +22,7 @@
 #include "SprTimer.h"
 #include "SprLog.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprTimer", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprTimer", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprTimer", fmt, ##args)
+#define LOG_TAG "SprTimer"
 
 SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec)
 {

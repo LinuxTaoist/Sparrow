@@ -28,8 +28,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("EntryOneNet", fmt, ##args)
-#define SPR_LOGD(fmt, args...) LOGD("EntryOneNet", fmt, ##args)
+#define LOG_TAG "EntryOneNet"
 
 OneNetHub* gpOneNetHub = nullptr;
 

@@ -26,10 +26,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("MonitorM", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("MonitorM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("MonitorM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("MonitorM", fmt, ##args)
+#define LOG_TAG "MonitorM"
 
 #define OWNER_STATUSMONITOR         "StatusMonitorManager"
 #define STATUS_EVENT_NUM_LIMIT      100

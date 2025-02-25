@@ -28,9 +28,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("DebugM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("DebugM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("DebugM", fmt, ##args)
+#define LOG_TAG "DebugM"
 
 #define BUFFER_SIZE 1024
 

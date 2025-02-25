@@ -25,9 +25,7 @@
 // #include "LibgoAdapter.h"
 #include "SprEpollSchedule.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprEpollSch", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprEpollSch", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprEpollSch", fmt, ##args)
+#define LOG_TAG "SprEpollSch"
 
 const uint32_t EPOLL_FD_NUM = 10;
 

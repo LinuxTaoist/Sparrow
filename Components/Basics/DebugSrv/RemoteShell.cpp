@@ -28,9 +28,7 @@
 #include "GeneralUtils.h"
 #include "RemoteShell.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("RemoteShell", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("RemoteShell", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("RemoteShell", fmt, ##args)
+#define LOG_TAG "RemoteShell"
 
 #define BUFFER_SIZE 1024
 

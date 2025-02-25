@@ -29,11 +29,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("OneNetMgr", fmt, ##args)
-#define SPR_LOGD(fmt, args...) LOGD("OneNetMgr", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("OneNetMgr", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("OneNetMgr", fmt, ##args)
-
+#define LOG_TAG "OneNetMgr"
 #define DEFAULT_DATA_REPORT_INTERVAL    10   // sec
 #define DEFAULT_PING_TIMER_INTERVAL     60    // sec
 #define ONENET_DEVICE_NUM_LIMIT         5

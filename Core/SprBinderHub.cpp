@@ -24,9 +24,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprBinderHub", fmt, ##args)
+#define LOG_TAG "SprBinderHub"
 
 static std::shared_ptr<Parcel> pReqParcel = nullptr;
 static std::shared_ptr<Parcel> pRspParcel = nullptr;

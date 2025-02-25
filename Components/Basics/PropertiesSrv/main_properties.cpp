@@ -30,10 +30,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("MainProper", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("MainProper", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("MainProper", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("MainProper", fmt, ##args)
+#define LOG_TAG "MainProper"
 
 int main(int argc, char * argv[])
 {

@@ -30,10 +30,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("TimerM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("TimerM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("TimerM", fmt, ##args)
-
+#define LOG_TAG "TimerM"
 #define TIMER_MIN_INTERVAL_MS 100   // 100ms
 
 static std::atomic<bool> gObjAlive(true);

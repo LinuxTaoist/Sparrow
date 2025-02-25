@@ -24,9 +24,7 @@
 using namespace InternalDefs;
 using namespace GeneralUtils;
 
-#define SPR_LOGD(fmt, args...)  LOGD("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
-#define SPR_LOGW(fmt, args...)  LOGW("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
-#define SPR_LOGE(fmt, args...)  LOGE("SprObsMQ", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define LOG_TAG "SprObsMQ"
 
 #define MSG_SIZE_MAX  1025
 

@@ -25,9 +25,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("PowerM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("PowerM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("PowerM", fmt, ##args)
+#define LOG_TAG "PowerM"
 
 vector <StateTransition <   EPowerLev1State,
                             EPowerLev2State,

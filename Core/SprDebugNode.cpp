@@ -27,9 +27,7 @@
 #include "GeneralUtils.h"
 #include "CommonTypeDefs.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprDebugNode", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("SprDebugNode", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprDebugNode", fmt, ##args)
+#define LOG_TAG "SprDebugNode"
 
 #define DEFAULT_CMD_MAX_SIZE   200
 

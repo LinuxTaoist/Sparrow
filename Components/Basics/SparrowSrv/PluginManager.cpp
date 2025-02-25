@@ -27,9 +27,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("PlugMgr", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("PlugMgr", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("PlugMgr", fmt, ##args)
+#define LOG_TAG "PluginMgr"
 
 #define DEFAULT_HOT_PLUG_ENABLE true
 #define OWNER_PLUGINMGR         "PluginManager"

@@ -31,10 +31,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("OneNetDrv", fmt, ##args)
-#define SPR_LOGD(fmt, args...) LOGD("OneNetDrv", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("OneNetDrv", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("OneNetDrv", fmt, ##args)
+#define LOG_TAG "OneNetDrv"
 
 const std::string ONENET_MQTT_HOST  = "183.230.40.96";
 const int ONENET_MQTT_PORT          = 1883;

@@ -21,9 +21,7 @@
 #include "CoreTypeDefs.h"
 #include "SprMediatorHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprMediator", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("SprMediator", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprMediator", fmt, ##args)
+#define LOG_TAG "MediatorHub"
 
 using namespace InternalDefs;
 SprMediatorHub::SprMediatorHub(const std::string& srvName, SprMediator* SprMediator) : SprBinderHub(srvName)

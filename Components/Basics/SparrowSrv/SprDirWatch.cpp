@@ -23,9 +23,7 @@
 #include "SprLog.h"
 #include "SprDirWatch.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprDirWatch", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprDirWatch", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprDirWatch", fmt, ##args)
+#define LOG_TAG "SprDirWatch"
 
 SprDirWatch::SprDirWatch()
 {

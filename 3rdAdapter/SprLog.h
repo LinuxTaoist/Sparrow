@@ -45,10 +45,10 @@ constexpr bool check_str_length(const char* str, size_t maxLen, size_t index = 0
         SprLog::GetInstance()->x(tag, "%4d " fmt, __LINE__, ##args);    \
     } while(0)
 
-#define LOGD(tag, fmt, args...)     LOGX(d, tag, fmt, ##args)
-#define LOGI(tag, fmt, args...)     LOGX(i, tag, fmt, ##args)
-#define LOGW(tag, fmt, args...)     LOGX(w, tag, fmt, ##args)
-#define LOGE(tag, fmt, args...)     LOGX(e, tag, fmt, ##args)
+#define SPR_LOGD(fmt, args...)     LOGX(d, LOG_TAG, fmt, ##args)
+#define SPR_LOGI(fmt, args...)     LOGX(i, LOG_TAG, fmt, ##args)
+#define SPR_LOGW(fmt, args...)     LOGX(w, LOG_TAG, fmt, ##args)
+#define SPR_LOGE(fmt, args...)     LOGX(e, LOG_TAG, fmt, ##args)
 
 // --------------------------------------------------------------------------------------------------------------------
 // - SprLog implementation

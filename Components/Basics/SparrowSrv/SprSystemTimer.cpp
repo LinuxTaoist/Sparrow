@@ -28,9 +28,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("SysTimer", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SysTimer", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SysTimer", fmt, ##args)
+#define LOG_TAG "SysTimer"
 
 SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name)
     : SprObserverWithTimerfd(id, name)

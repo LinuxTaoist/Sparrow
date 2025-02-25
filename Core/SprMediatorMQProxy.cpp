@@ -29,9 +29,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("MQProxy", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("MQProxy", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("MQProxy", fmt, ##args)
+#define LOG_TAG "MQProxy"
 
 static std::atomic<bool> gObjAlive(true);
 

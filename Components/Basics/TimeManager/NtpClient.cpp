@@ -27,9 +27,7 @@
 
 using namespace std;
 
-#define SPR_LOGD(fmt, args...) LOGD("NtpClient", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("NtpClient", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("NtpClient", fmt, ##args)
+#define LOG_TAG "NtpClient"
 
 NtpClient::NtpClient(const std::string& addr, uint16_t port, const std::function<void(double)>& cb)
     : mIsReady(false), mPort(port), mAddr(addr), mCb(cb)

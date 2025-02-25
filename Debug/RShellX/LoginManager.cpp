@@ -35,8 +35,7 @@
 
 using namespace std;
 
-#define SPR_LOGD(fmt, args...) LOGD("RShellLoginM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("RShellLoginM", fmt, ##args)
+#define LOG_TAG "RShellLoginM"
 
 static std::atomic<bool> gObjAlive(true);
 pid_t LoginManager::mShellPid = -1;

@@ -27,8 +27,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("DebugMsg", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("DebugMsg", fmt, ##args)
+#define LOG_TAG "DebugMsg"
 
 int main(int argc, const char *argv[])
 {

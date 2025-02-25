@@ -19,9 +19,7 @@
 #include "SprLog.h"
 #include "SprObserverWithTimerfd.h"
 
-#define SPR_LOGD(fmt, args...)  LOGD("SprObsTmrFd", "[%s] " fmt, mModuleName.c_str(), ##args)
-#define SPR_LOGW(fmt, args...)  LOGW("SprObsTmrFd", "[%s] " fmt, mModuleName.c_str(), ##args)
-#define SPR_LOGE(fmt, args...)  LOGE("SprObsTmrFd", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define LOG_TAG "SprObsTmrFd"
 
 SprObserverWithTimerfd::SprObserverWithTimerfd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType)
     : SprObserver(id, name, proxyType)

@@ -19,10 +19,7 @@
 #include "SprLog.h"
 #include "MqttMsg.h"
 
-#define SPR_LOGI(fmt, args...) LOGI("MqttMsgBase", fmt, ##args)
-#define SPR_LOGD(fmt, args...) LOGD("MqttMsgBase", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("MqttMsgBase", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("MqttMsgBase", fmt, ##args)
+#define LOG_TAG "MqttMsgBase"
 
 MqttMsgBase::MqttMsgBase() : mFixedHeader(0, 0), mRemainLenValue(0)
 {

@@ -25,10 +25,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("DebugModule", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("DebugModule", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("DebugModule", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("DebugModule", fmt, ##args)
+#define LOG_TAG "DebugModule"
 
 DebugModuleHub::DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule) : SprBinderHub(srvName)
 {

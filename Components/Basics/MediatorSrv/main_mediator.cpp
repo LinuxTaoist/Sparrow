@@ -24,10 +24,7 @@
 #include "EpollEventHandler.h"
 #include "SprMediatorHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprMediator", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("SprMediator", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprMediator", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprMediator", fmt, ##args)
+#define LOG_TAG "MainMediator"
 
 int main(int argc, const char *argv[])
 {

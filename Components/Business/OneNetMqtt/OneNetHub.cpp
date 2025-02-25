@@ -21,9 +21,7 @@
 #include "CoreTypeDefs.h"
 #include "OneNetHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("OneNetHub", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("OneNetHub", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("OneNetHub", fmt, ##args)
+#define LOG_TAG "OneNetHub"
 
 using namespace InternalDefs;
 OneNetHub::OneNetHub(const std::string& srvName, OneNetManager* oneMgr) : SprBinderHub(srvName)

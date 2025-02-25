@@ -21,9 +21,7 @@
 #include "CoreTypeDefs.h"
 #include "PowerManagerHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("PowerHub", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("PowerHub", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("PowerHub", fmt, ##args)
+#define LOG_TAG "PowerHub"
 
 using namespace InternalDefs;
 PowerManagerHub::PowerManagerHub(const std::string& srvName, PowerManager* powerManager) : SprBinderHub(srvName)

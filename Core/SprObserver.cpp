@@ -25,8 +25,7 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...)  LOGD("SprObsBase", "[%s] " fmt, mModuleName.c_str(), ##args)
-#define SPR_LOGE(fmt, args...)  LOGE("SprObsBase", "[%s] " fmt, mModuleName.c_str(), ##args)
+#define LOG_TAG "SprObsBase"
 
 const int32_t MQ_BUFF_MAX_SIZE  = 1024;
 const int32_t RANDOM_STR_LENGTH = 8;

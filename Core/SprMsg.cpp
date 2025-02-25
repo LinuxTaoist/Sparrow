@@ -20,9 +20,7 @@
 #include "SprLog.h"
 #include "GeneralConversions.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprMsg", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("SprMsg", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprMsg", fmt, ##args)
+#define LOG_TAG "SprMsg"
 
 SprMsg::SprMsg()
 {
