@@ -23,6 +23,36 @@
 #include <stdint.h>
 #include <semaphore.h>
 
+#define TAG_PRINT_WIDTH_LIMIT       12
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Log interface macro
+//   the length of LOG_TAG must be less than TAG_PRINT_WIDTH_LIMIT
+// --------------------------------------------------------------------------------------------------------------------
+constexpr bool check_str_length(const char* str, size_t maxLen, size_t index = 0) {
+    return (str[index] == '\0') ? (index <= maxLen) : check_str_length(str, maxLen, index + 1);
+}
+
+#define COMPLIE_TAG_FAILURE_MSG(tag, maxLength)           \
+    "LOG_TAG '" tag "' is too long (max " #maxLength " characters)"
+
+#define STATIC_COMPLIE_CHECK_TAG_LENGTH(tag, maxLen)    \
+    static_assert(check_str_length(tag, maxLen), COMPLIE_TAG_FAILURE_MSG(tag, maxLen))
+
+#define LOGX(x, tag, fmt, args...)                                      \
+    do {                                                                    \
+        STATIC_COMPLIE_CHECK_TAG_LENGTH(tag, TAG_PRINT_WIDTH_LIMIT);    \
+        SprLog::GetInstance()->x(tag, "%4d " fmt, __LINE__, ##args);    \
+    } while(0)
+
+#define LOGD(tag, fmt, args...)     LOGX(d, tag, fmt, ##args)
+#define LOGI(tag, fmt, args...)     LOGX(i, tag, fmt, ##args)
+#define LOGW(tag, fmt, args...)     LOGX(w, tag, fmt, ##args)
+#define LOGE(tag, fmt, args...)     LOGX(e, tag, fmt, ##args)
+
+// --------------------------------------------------------------------------------------------------------------------
+// - SprLog implementation
+// --------------------------------------------------------------------------------------------------------------------
 class SprLog
 {
 public:
@@ -70,13 +100,5 @@ private:
 private:
     sem_t* mWriteSem;
 };
-
-// --------------------------------------------------------------------------------------------------------------------
-// - Log interface macro
-// --------------------------------------------------------------------------------------------------------------------
-#define LOGD(tag, fmt, args...)     SprLog::GetInstance()->d(tag, "%4d " fmt, __LINE__, ##args)
-#define LOGI(tag, fmt, args...)     SprLog::GetInstance()->i(tag, "%4d " fmt, __LINE__, ##args)
-#define LOGW(tag, fmt, args...)     SprLog::GetInstance()->w(tag, "%4d " fmt, __LINE__, ##args)
-#define LOGE(tag, fmt, args...)     SprLog::GetInstance()->e(tag, "%4d " fmt, __LINE__, ##args)
 
 #endif // __SPR_LOG_H__

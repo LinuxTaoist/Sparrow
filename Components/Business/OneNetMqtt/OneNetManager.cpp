@@ -426,7 +426,7 @@ void OneNetManager::RegisterDebugFuncs()
         return;
     }
 
-    p->RegisterCmd(mModuleName, "OnOffDump",   "Dump log on-off",   std::bind(&OneNetManager::DebugEnableDumpLog,  this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "OnOffLog",    "Enable log on-off", std::bind(&OneNetManager::DebugEnableDumpLog,  this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "DeviceList",  "Show device list",  std::bind(&OneNetManager::DebugDeviceList,     this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "Active",      "Active device",     std::bind(&OneNetManager::DebugActiveDevice,   this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "Deactive",    "Deactive device",   std::bind(&OneNetManager::DebugDeactiveDevice, this, std::placeholders::_1));

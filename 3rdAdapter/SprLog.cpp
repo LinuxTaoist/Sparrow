@@ -32,7 +32,6 @@
 #include "SprLog.h"
 
 #define PID_PRINT_WIDTH_LIMIT       6
-#define TAG_PRINT_WIDTH_LIMIT       12
 #define LOG_BUFFER_SIZE_LIMIT       256
 #define SEMAPHORE_NAME              "/SprLogSem"
 

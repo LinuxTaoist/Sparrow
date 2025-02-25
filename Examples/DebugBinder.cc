@@ -77,7 +77,7 @@ int Server()
                 break;
             }
             case CMD_VEC: {
-                std::vector<int> vec = {1, 2, 3, 4, 5};
+                std::vector<int> vec = {-1, -2, 3, 4, 5};
                 NONZERO_CHECK_RET(pRspParcel->WriteVector(vec));
                 NONZERO_CHECK_RET(pRspParcel->WriteInt(0));
                 NONZERO_CHECK_RET(pRspParcel->Post());

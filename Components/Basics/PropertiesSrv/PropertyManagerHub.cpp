@@ -21,9 +21,9 @@
 #include "CoreTypeDefs.h"
 #include "PropertyManagerHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("PropertyManager", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("PropertyManager", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("PropertyManager", fmt, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("PropertyHub", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGD("PropertyHub", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("PropertyHub", fmt, ##args)
 
 using namespace InternalDefs;
 PropertyManagerHub::PropertyManagerHub(const std::string& srvName, PropertyManager* powerManager) : SprBinderHub(srvName)

@@ -49,7 +49,7 @@ BinderManager::BinderManager()
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::BMsgRespondRemoveService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BinderManager::BMsgRespondGetService));
 
-    pReqParcel = new (std::nothrow) Parcel("IBinderM", KEY_IBINDER_MANAGER, false);
+    pReqParcel = new (std::nothrow) Parcel("IBinderM", KEY_IBINDER_MANAGER, true);
     pRspParcel = new (std::nothrow) Parcel("BinderM",  KEY_BINDER_MANAGER,  true);
 
     if (pReqParcel == nullptr || pRspParcel == nullptr) {
@@ -63,15 +63,15 @@ BinderManager::BinderManager()
 BinderManager::~BinderManager()
 {
     gObjAlive = false;
-    // if (pReqParcel != nullptr) {
-    //     delete pReqParcel;
-    //     pReqParcel = nullptr;
-    // }
+    if (pReqParcel != nullptr) {
+        delete pReqParcel;
+        pReqParcel = nullptr;
+    }
 
-    // if (pRspParcel != nullptr) {
-    //     delete pRspParcel;
-    //     pRspParcel = nullptr;
-    // }
+    if (pRspParcel != nullptr) {
+        delete pRspParcel;
+        pRspParcel = nullptr;
+    }
 }
 
 BinderManager* BinderManager::GetInstance()

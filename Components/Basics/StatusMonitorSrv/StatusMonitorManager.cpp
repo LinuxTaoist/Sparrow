@@ -26,10 +26,10 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("StatusMonitorM", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("StatusMonitorM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("StatusMonitorM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("StatusMonitorM", fmt, ##args)
+#define SPR_LOGD(fmt, args...) LOGD("MonitorM", fmt, ##args)
+#define SPR_LOGI(fmt, args...) LOGI("MonitorM", fmt, ##args)
+#define SPR_LOGW(fmt, args...) LOGW("MonitorM", fmt, ##args)
+#define SPR_LOGE(fmt, args...) LOGE("MonitorM", fmt, ##args)
 
 #define OWNER_STATUSMONITOR         "StatusMonitorManager"
 #define STATUS_EVENT_NUM_LIMIT      100
