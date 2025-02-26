@@ -20,7 +20,7 @@
 </span>
 
 
-## 目录
+## 源码目录
 
 ```c++
 Sparrow/
@@ -134,6 +134,68 @@ $ tail -f /tmp/sprlog/sparrow.log
 07-20 10:12:59.112  70543      BinderM D:   80 Add service info(92137, debugsrv)
 07-20 10:12:59.112  70545  SprMediator D:  247 Binder loop start!
 07-20 10:12:59.113  70550   SprObsBase D:  255 [DebugM] Register Successfully!
+```
+
+**内部命令集**
+
+项目集成了如下命令集，可通过`echo help > /tmp/{进程名}`查看具体进程支持命令集，回执在日志中：
+
+* 查询 `statusmonitorsrv` 支持的命令
+```Shell
+$ echo help > /tmp/statusmonitorsrv
+```
+
+```C++
+$ tail -f /tmp/sprlog/sparrow.log
+
+ ==============================================================================
+                      Debug Command List
+ ==============================================================================
+    1. Built-in Commands         Total:  2
+       ├── help                : Dump all cmds
+       └── version             : Dump version
+
+    2. StatusMonitorManager      Total: 12
+       ├── AddStatusEvent      : Add Status Event
+       ├── DelAllEvent         : Del All Events
+       ├── DelWithErrCode      : Del With ErrCode
+       ├── DelWithID           : Del With ID
+       ├── DelWithLevel        : Del With Level
+       ├── DelWithText         : Del With Text
+       ├── DisplayUTC          : Display UTC
+       ├── DumpAllEvents       : Dump All Events
+       ├── DumpWithErrCode     : Dump With ErrCode
+       ├── DumpWithID          : Dump With ID
+       ├── DumpWithLevel       : Dump With Level
+       └── DumpWithText        : Dump With Text
+
+ ==============================================================================
+    E.g. echo help > /tmp/statusmonitorsrv
+ ==============================================================================
+```
+
+* 查询 `servicemanagersrv` 支持的命令
+
+```shell
+$ echo help > /tmp/propertiessrv
+```
+
+```C++
+$ tail -f /tmp/sprlog/sparrow.log
+
+ ==============================================================================
+                      Debug Command List
+ ==============================================================================
+    1. Built-in Commands         Total:  2
+       ├── help                : Dump all cmds
+       └── version             : Dump version
+
+    2. Properties                Total:  1
+       └── DumpAllProperties   : Dump all properties
+
+ ==============================================================================
+    E.g. echo help > /tmp/propertiessrv
+ ==============================================================================
 ```
 
 **调试程序**

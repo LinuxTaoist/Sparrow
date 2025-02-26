@@ -25,7 +25,7 @@ set(SRC_BIN_DBINDER         DebugBinder.cc)
 add_executable              (debug_binder ${SRC_BIN_DBINDER})
 target_include_directories  (debug_binder PRIVATE ${PROJECT_PATH}/PrivateAPIs/Binder)
 set_target_properties       (debug_binder PROPERTIES OUTPUT_NAME "debugbinder")
-target_link_libraries       (debug_binder c sprbinder)
+target_link_libraries       (debug_binder c pthread sprbinder)
 add_dependencies            (debug_binder LibBinder)
 
 ## Bin sampleSqlite

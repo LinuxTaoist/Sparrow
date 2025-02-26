@@ -17,6 +17,7 @@
  *
  */
 #include <iostream>
+#include <thread>
 #include <errno.h>
 #include <string.h>
 #include <unistd.h>
@@ -108,6 +109,7 @@ void usage()
             "1: CMD_SUM\n"
             "2: CMD_VEC\n"
             "3: CMD_CUST_VEC\n"
+            "4: thread test\n"
             "h: Help\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
@@ -182,6 +184,52 @@ int Client()
                 for (auto v : vec) {
                     SPR_LOGD("vec: %d, %d\n", v.value1, v.value2);
                 }
+                break;
+            }
+            case '4': {
+                std::thread th1 ([&]() {
+                    for (int i = 0; i < 20; i++) {
+                        NONZERO_CHECK(pReqParcel->WriteInt(CMD_SUM));
+                        NONZERO_CHECK(pReqParcel->WriteInt(0));
+                        NONZERO_CHECK(pReqParcel->WriteInt(i));
+                        NONZERO_CHECK(pReqParcel->Post());
+
+                        int sum = 0, ret = 0;
+                        NONZERO_CHECK(pRspParcel->TimedWait());
+                        NONZERO_CHECK(pRspParcel->ReadInt(sum));
+                        NONZERO_CHECK(pRspParcel->ReadInt(ret));
+                        // SPR_LOGD("sum = %d, ret = %d\n", sum, ret);
+
+                        if (sum != i) {
+                            SPR_LOGE("failture! sum != i, sum = %d, i = %d\n", sum, i);
+                        } else {
+                            SPR_LOGD("success, %d + %d = %d\n", 0, i, sum);
+                        }
+                    }
+                });
+
+                std::thread th2 ([&]() {
+                    for (int i = 0; i < 20; i++) {
+                        NONZERO_CHECK(pReqParcel->WriteInt(CMD_SUM));
+                        NONZERO_CHECK(pReqParcel->WriteInt(i));
+                        NONZERO_CHECK(pReqParcel->WriteInt(i));
+                        NONZERO_CHECK(pReqParcel->Post());
+
+                        int sum = 0, ret = 0;
+                        NONZERO_CHECK(pRspParcel->TimedWait());
+                        NONZERO_CHECK(pRspParcel->ReadInt(sum));
+                        NONZERO_CHECK(pRspParcel->ReadInt(ret));
+                        // SPR_LOGD("sum = %d, ret = %d\n", sum, ret);
+                        if (sum != 2 * i) {
+                            SPR_LOGE("failture, sum != 2 * i, sum = %d, i = %d\n", sum, i);
+                        } else {
+                            SPR_LOGD("success, %d + %d = %d\n", i, i, sum);
+                        }
+                    }
+                });
+
+                th1.join();
+                th2.join();
                 break;
             }
             case 'h':

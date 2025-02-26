@@ -59,6 +59,12 @@ public:
 
         return 0;
     }
+
+protected:
+    virtual int32_t Init()
+    {
+        return 0;
+    }
 };
 
 static void usage()

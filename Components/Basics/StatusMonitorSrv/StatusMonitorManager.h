@@ -41,6 +41,7 @@ public:
     StatusMonitorManager(ModuleIDType id, const std::string& name);
     ~StatusMonitorManager();
 
+protected:
     int32_t Init() override;
     int32_t ProcessMsg(const SprMsg& msg) override;
 

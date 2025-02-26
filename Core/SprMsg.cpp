@@ -77,7 +77,7 @@ SprMsg& SprMsg::operator=(const SprMsg &srcMsg)
     return *this;
 }
 
-int SprMsg::CopyMsg(const SprMsg& srcMsg)
+int32_t SprMsg::CopyMsg(const SprMsg& srcMsg)
 {
     mSize = srcMsg.mSize;
     mFrom = srcMsg.mFrom;
@@ -214,9 +214,9 @@ void SprMsg::Clear()
 }
 
 // Frame : mMsgId(4) + mTag(4) + length1 +  data1 ... lengthN + dataN
-int8_t SprMsg::Decode(std::string& deDatas)
+int32_t SprMsg::Decode(std::string& deDatas)
 {
-    int8_t ret = 0;
+    int32_t ret = 0;
 
     Clear();
     SetSize(deDatas.size());
@@ -224,7 +224,7 @@ int8_t SprMsg::Decode(std::string& deDatas)
     DecodeTo(deDatas);
     DecodeMsgId(deDatas);
     DecodeTag(deDatas);
-    for (auto i = (int)ESprMsgType::MSG_TYPE_MIN; i < (int)ESprMsgType::MSG_TYPE_MAX; i++) {
+    for (auto i = (int32_t)ESprMsgType::MSG_TYPE_MIN; i < (int32_t)ESprMsgType::MSG_TYPE_MAX; i++) {
         if (mTag & (1 << i)) {
             ESprMsgType type = static_cast<ESprMsgType>(i);
             auto it = mDeFuncs.find(type);
@@ -240,9 +240,9 @@ int8_t SprMsg::Decode(std::string& deDatas)
     return ret;
 }
 
-int8_t SprMsg::Encode(std::string & enDatas) const
+int32_t SprMsg::Encode(std::string & enDatas) const
 {
-    int ret = 0;
+    int32_t ret = 0;
 
     EncodeFrom(enDatas);
     EncodeTo(enDatas);
@@ -582,7 +582,7 @@ void SprMsg::EncodeI64Vec(std::string& enDatas) {
     enDatas.push_back(static_cast<uint8_t>(mI64VecLength >> 8));
     enDatas.push_back(static_cast<uint8_t>(mI64VecLength));
     for (const auto& value : mI64Vec) {
-        for (int i = 7; i >= 0; --i) {
+        for (int32_t i = 7; i >= 0; --i) {
             enDatas.push_back(static_cast<uint8_t>(value >> (i * 8)));
         }
     }
@@ -702,7 +702,7 @@ void SprMsg::DecodeU32Value(std::string& deDatas)
     }
 
     uint32_t value = 0;
-    for (int i = 0; i < (int)sizeof(mU32Value); i++) {
+    for (int32_t i = 0; i < (int32_t)sizeof(mU32Value); i++) {
         value <<= 8;
         value |= (deDatas[i] & 0xFF);
     }
@@ -718,7 +718,7 @@ void SprMsg::DecodeI32Value(std::string& deDatas)
     }
 
     int32_t value = 0;
-    for (int i = 0; i < (int)sizeof(mI32Value); i++) {
+    for (int32_t i = 0; i < (int32_t)sizeof(mI32Value); i++) {
         value <<= 8;
         value |= (deDatas[i] & 0xFF);
     }
@@ -734,7 +734,7 @@ void SprMsg::DecodeU64Value(std::string& deDatas)
     }
 
     uint64_t value = 0;
-    for (int i = 0; i < (int)sizeof(mU64Value); i++) {
+    for (int32_t i = 0; i < (int32_t)sizeof(mU64Value); i++) {
         value <<= 8;
         value |= (deDatas[i] & 0xFF);
     }
@@ -750,7 +750,7 @@ void SprMsg::DecodeI64Value(std::string& deDatas)
     }
 
     int64_t value = 0;
-    for (int i = 0; i < (int)sizeof(mI64Value); i++) {
+    for (int32_t i = 0; i < (int32_t)sizeof(mI64Value); i++) {
         value <<= 8;
         value |= (deDatas[i] & 0xFF);
     }

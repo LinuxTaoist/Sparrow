@@ -183,20 +183,20 @@ OneNetManager::mStateTable =
     },
 
     // =============================================================
-    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT
+    // All States for SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT,
-      &OneNetManager::MsgRespondMqttDisconnect
+      SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE,
+      &OneNetManager::MsgRespondDeviceDisconnectPassive
     },
 
     { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT,
-      &OneNetManager::MsgRespondMqttDisconnect
+      SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE,
+      &OneNetManager::MsgRespondDeviceDisconnectPassive
     },
 
     { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT,
+      SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE,
       &OneNetManager::MsgRespondUnexpectedState
     },
 
@@ -484,7 +484,7 @@ void OneNetManager::MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg)
     NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
 
     // 记录下线事件至监控组件
-    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, "device offline");
+    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, "device offline (deactive by self)");
 }
 
 /**
@@ -516,7 +516,13 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
         msg.GetU8Value(), keepAliveInSec, DEFAULT_DATA_REPORT_INTERVAL, mReConnectReqCnt, mReConnectRspCnt);
 
     // 记录上线事件至监控组件
-    SendEventToMonitor(ERR_ONENET_MANAGER_ONLINE, "device online");
+    std::string description = "device online (req: "
+            + std::to_string(mReConnectReqCnt) + ", rsp: " + std::to_string(mReConnectRspCnt) + ")";
+    SendEventToMonitor(ERR_ONENET_MANAGER_ONLINE, description);
+
+    // 登录成功，清除重连计数
+    mReConnectReqCnt = 0;
+    mReConnectRspCnt = 0;
 }
 
 /**
@@ -564,12 +570,12 @@ void OneNetManager::MsgRespondMqttReportTimerEvent(const SprMsg& msg)
 }
 
 /**
- * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT
+ * @brief Process SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE
  *
  * @param[in] msg
  * @return none
  */
-void OneNetManager::MsgRespondMqttDisconnect(const SprMsg& msg)
+void OneNetManager::MsgRespondDeviceDisconnectPassive(const SprMsg& msg)
 {
     SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
     SprMsg disMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
@@ -577,7 +583,8 @@ void OneNetManager::MsgRespondMqttDisconnect(const SprMsg& msg)
     NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
 
     // 记录下线事件至监控组件
-    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, "device offline");
+    std::string description = "device offline (" + msg.GetString() + ")";
+    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, description);
 }
 
 /**

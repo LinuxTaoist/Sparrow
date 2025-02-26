@@ -29,7 +29,9 @@ public:
     DebugModule(ModuleIDType id, const std::string& name);
     ~DebugModule();
 
-    int  ProcessMsg(const SprMsg& msg) override;
+protected:
+    int32_t Init() override;
+    int32_t  ProcessMsg(const SprMsg& msg) override;
 
 private:
     int MsgRespondEnableRemoteShell(const SprMsg& msg);

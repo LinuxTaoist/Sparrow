@@ -114,7 +114,7 @@ protected:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int32_t Init();
+    virtual int32_t Init() = 0;
 
     /**
      * @brief Dump common versions for current module

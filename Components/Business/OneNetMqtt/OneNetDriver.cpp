@@ -400,6 +400,7 @@ int32_t OneNetDriver::InitOneNetClient()
 
             // Send to self socket disconnect passive
             SprMsg tmpMsg(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_PASSIVE);
+            tmpMsg.SetString("socket disconnect passive");
             SendMsg(tmpMsg);
         }
     });
@@ -645,7 +646,8 @@ void OneNetDriver::MsgRespondSocketDisconnectPassive(const SprMsg& msg)
 {
     if (LEV1_SOCKET_CONNECTED == mCurLev1State) {
         // Notify mqtt device disconnect state to OneNetManager
-        SprMsg msg1(MODULE_ONENET_MANAGER, SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT);
+        SprMsg msg1(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE);
+        msg1.SetString(msg.GetString());
         NotifyObserver(msg1);
     }
 

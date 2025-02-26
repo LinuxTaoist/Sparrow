@@ -39,7 +39,12 @@ SprSystemTimer::~SprSystemTimer()
 {
 }
 
-int SprSystemTimer::ProcessTimerEvent()
+int32_t SprSystemTimer::Init()
+{
+    return 0;
+}
+
+int32_t SprSystemTimer::ProcessTimerEvent()
 {
     // Event is triggered by timer, only notify to TimerManager
     SprMsg timerMsg(MODULE_TIMERM, SIG_ID_SYSTEM_TIMER_NOTIFY);

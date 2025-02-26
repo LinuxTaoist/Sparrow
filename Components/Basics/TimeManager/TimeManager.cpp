@@ -62,6 +62,11 @@ int32_t TimeManager::InitDebugDetails()
     return 0;
 }
 
+int32_t TimeManager::Init()
+{
+    return 0;
+}
+
 int32_t TimeManager::RequestNtpTime()
 {
     if (!mpNtpClient) {

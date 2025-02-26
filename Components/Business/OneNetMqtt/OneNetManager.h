@@ -128,7 +128,7 @@ private:
     void MsgRespondMqttSubAck(const SprMsg& msg);
     void MsgRespondMqttPingTimerEvent(const SprMsg& msg);
     void MsgRespondMqttReportTimerEvent(const SprMsg& msg);
-    void MsgRespondMqttDisconnect(const SprMsg& msg);
+    void MsgRespondDeviceDisconnectPassive(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 

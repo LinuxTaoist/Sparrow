@@ -76,7 +76,7 @@ void SprSystem::InitMsgQueueLimit()
     // Note: The values in /proc/sys/fs/mqueue/* seem to have no influence on this issue.
     // Also ulimit -n has no influence on this issue.
     struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
-    int ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
+    int32_t ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
     if (ret == 0) {
         rlim.rlim_cur = RLIM_INFINITY;  // soft limit
         rlim.rlim_max = RLIM_INFINITY;  // hard limit

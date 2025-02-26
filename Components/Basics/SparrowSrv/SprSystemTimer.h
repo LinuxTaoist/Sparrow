@@ -35,7 +35,9 @@ public:
     SprSystemTimer(SprSystemTimer&&) = delete;
     SprSystemTimer& operator=(SprSystemTimer&&) = delete;
 
-    int ProcessTimerEvent() override;
+protected:
+    int32_t Init() override;
+    int32_t ProcessTimerEvent() override;
 };
 
 #endif

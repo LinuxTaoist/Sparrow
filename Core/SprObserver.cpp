@@ -61,10 +61,10 @@ int32_t SprObserver::InitFramework()
     return 0;
 }
 
-int32_t SprObserver::Init()
-{
-    return 0;
-}
+// int32_t SprObserver::Init()
+// {
+//     return 0;
+// }
 
 int32_t SprObserver::NotifyObserver(SprMsg& msg)
 {

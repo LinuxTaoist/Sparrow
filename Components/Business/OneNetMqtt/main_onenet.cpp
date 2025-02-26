@@ -33,7 +33,7 @@ using namespace InternalDefs;
 OneNetHub* gpOneNetHub = nullptr;
 
 // The entry of OneNet business plugin
-extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& ctx)
+extern "C" void PluginEntry(std::map<int32_t, SprObserver*>& observers, SprContext& ctx)
 {
     if (observers.find(MODULE_ONENET_DRIVER) != observers.end() && observers[MODULE_ONENET_DRIVER]) {
         SPR_LOGD("OneNet driver module has been loaded!\n");
@@ -58,7 +58,7 @@ extern "C" void PluginEntry(std::map<int, SprObserver*>& observers, SprContext& 
 }
 
 // The exit of OneNet business plugin
-extern "C" void PluginExit(std::map<int, SprObserver*>& observers, SprContext& ctx)
+extern "C" void PluginExit(std::map<int32_t, SprObserver*>& observers, SprContext& ctx)
 {
     if (gpOneNetHub) {
         delete gpOneNetHub;

@@ -42,14 +42,6 @@ public:
     virtual ~TimeManager();
 
     /**
-     * @brief  Process message from message queue received
-     *
-     * @param msg
-     * @return 0 on success, or -1 if an error occurred
-     */
-    int32_t ProcessMsg(const SprMsg& msg) override;
-
-    /**
      * @brief Get the single instance
      *
      * @param id
@@ -57,6 +49,22 @@ public:
      * @return TimeManager*
      */
     static TimeManager* GetInstance(ModuleIDType id, const std::string& name);
+
+protected:
+     /**
+     * @brief Initializes the business module with overrides from derived business modules
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t Init() override;
+
+    /**
+     * @brief  Process message from message queue received
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
     /**

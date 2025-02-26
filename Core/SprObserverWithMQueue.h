@@ -37,13 +37,6 @@ public:
     virtual ~SprObserverWithMQueue();
 
     /**
-     * @brief Initialize function for derived class called in Initialize
-     *
-     * @return 0 on success, or -1 if an error occurred
-     */
-    virtual int32_t InitFramework() override;
-
-    /**
      * @brief SendMsg
      *
      * @param[in] msg
@@ -54,14 +47,6 @@ public:
      */
     int32_t SendMsg(SprMsg& msg);
     int32_t SendMsg(uint32_t msgId);
-
-    /**
-     * @brief  Process message from message queue received
-     *
-     * @param msg
-     * @return 0 on success, or -1 if an error occurred
-     */
-    virtual int32_t ProcessMsg(const SprMsg& msg) = 0;
 
     /**
      * @brief  Process message event called by epoll
@@ -75,6 +60,21 @@ public:
     virtual void* EpollEvent(int fd, EpollType eType, void* arg) final override;
 
 protected:
+    /**
+     * @brief Initialize function for derived class called in Initialize
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t InitFramework() override;
+
+    /**
+     * @brief  Process message from message queue received
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t ProcessMsg(const SprMsg& msg) = 0;
+
     /**
      * @brief Register self information from mediator module
      *

@@ -171,7 +171,7 @@ void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
     SPR_LOGD("==============================================================================\n");
 
     int32_t mIndex = 0, cIndex = 0;     // modle index, cmd index
-    int32_t total = (int)mBuildinCmds.size();
+    int32_t total = (int32_t)mBuildinCmds.size();
     SPR_LOGD(" %3d. %-20s      Total: %2d", ++mIndex, "Built-in Commands", total);
     for (const auto& pair : mBuildinCmds) {
         const std::string prefix = (++cIndex == total) ? "└──" : "├──";
@@ -181,8 +181,8 @@ void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
     SPR_LOGD("\n");
     for (const auto& ownerPair : mDebugOwners) {
         cIndex = 0;
-        total = (int)ownerPair.second.mCmdMap.size();
-        SPR_LOGD(" %3d. %-20s      Total: %2d", ++mIndex, ownerPair.first.c_str(), (int)ownerPair.second.mCmdMap.size());
+        total = (int32_t)ownerPair.second.mCmdMap.size();
+        SPR_LOGD(" %3d. %-20s      Total: %2d", ++mIndex, ownerPair.first.c_str(), (int32_t)ownerPair.second.mCmdMap.size());
         for (const auto& cmdPair : ownerPair.second.mCmdMap) {
             const std::string prefix = (++cIndex == total) ? "└──" : "├──";
             SPR_LOGD("      %s %-20s: %-20s \n", prefix.c_str(), cmdPair.first.c_str(), cmdPair.second.first.c_str());

@@ -41,6 +41,11 @@ DebugModule::~DebugModule()
 {
 }
 
+int32_t DebugModule::Init()
+{
+    return 0;
+}
+
 int32_t DebugModule::ProcessMsg(const SprMsg& msg)
 {
     switch(msg.GetMsgId()) {

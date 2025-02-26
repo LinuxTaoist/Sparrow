@@ -61,13 +61,13 @@ public:
     SprMsg(uint32_t from, uint32_t to, uint32_t msgId);
     explicit SprMsg(std::string datas);
     SprMsg& operator=(const SprMsg &srcMsg); // Assignment Operator
-    int CopyMsg(const SprMsg& srcMsg);
+    int32_t CopyMsg(const SprMsg& srcMsg);
 
-    void     Clear();
-    int8_t   Decode(std::string& deDatas);
-    int8_t   Encode(std::string& enDatas) const;
-    void     SetSize(int32_t size) { mSize = size; }
-    int32_t  GetSize() const { return mSize; }
+    void    Clear();
+    int32_t Decode(std::string& deDatas);
+    int32_t Encode(std::string& enDatas) const;
+    void    SetSize(int32_t size) { mSize = size; }
+    int32_t GetSize() const { return mSize; }
 
     void SetFrom(uint32_t from);
     void SetTo(uint32_t to);
@@ -130,6 +130,7 @@ public:
         std::shared_ptr<T> pData = std::make_shared<T>(*const_cast<T*>(reinterpret_cast<const T*>(mDatas.data())));
         return pData;
     }
+
 private:
     void Init();
     void EncodeFrom(std::string& enDatas) const;
