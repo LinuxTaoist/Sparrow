@@ -45,7 +45,7 @@ Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master),
         SPR_LOGE("mRingBuffer is nullptr!\n");
     }
 
-    mSem = sem_open((mShmPath + std::to_string(mShmKey)).c_str(), O_CREAT, 0666, 1);
+    mSem = sem_open((mShmPath + std::to_string(mShmKey)).c_str(), O_CREAT, 0666, 0);
     if (mSem == SEM_FAILED) {
         SPR_LOGE("sem_open %s failed! (%s)\n", (mShmPath + std::to_string(mShmKey)).c_str(), strerror(errno));
     }

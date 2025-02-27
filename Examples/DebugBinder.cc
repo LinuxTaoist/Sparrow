@@ -66,7 +66,7 @@ int Server()
                 break;
             }
             case CMD_SUM: {
-                SPR_LOGD("CMD_SUM\n");
+                // SPR_LOGD("CMD_SUM\n");
                 int a = 0, b = 0;
                 NONZERO_CHECK_RET(pReqParcel->ReadInt(a));
                 NONZERO_CHECK_RET(pReqParcel->ReadInt(b));
@@ -187,8 +187,8 @@ int Client()
                 break;
             }
             case '4': {
-                std::thread th1 ([&]() {
-                    for (int i = 0; i < 20; i++) {
+                std::thread th1([&]() {
+                    for (int i = 0; i < 1000; i++) {
                         NONZERO_CHECK(pReqParcel->WriteInt(CMD_SUM));
                         NONZERO_CHECK(pReqParcel->WriteInt(0));
                         NONZERO_CHECK(pReqParcel->WriteInt(i));
@@ -202,14 +202,14 @@ int Client()
 
                         if (sum != i) {
                             SPR_LOGE("failture! sum != i, sum = %d, i = %d\n", sum, i);
-                        } else {
-                            SPR_LOGD("success, %d + %d = %d\n", 0, i, sum);
                         }
                     }
+
+                    SPR_LOGD("th2 done\n");
                 });
 
-                std::thread th2 ([&]() {
-                    for (int i = 0; i < 20; i++) {
+                std::thread th2([&]() {
+                    for (int i = 0; i < 1000; i++) {
                         NONZERO_CHECK(pReqParcel->WriteInt(CMD_SUM));
                         NONZERO_CHECK(pReqParcel->WriteInt(i));
                         NONZERO_CHECK(pReqParcel->WriteInt(i));
@@ -222,10 +222,10 @@ int Client()
                         // SPR_LOGD("sum = %d, ret = %d\n", sum, ret);
                         if (sum != 2 * i) {
                             SPR_LOGE("failture, sum != 2 * i, sum = %d, i = %d\n", sum, i);
-                        } else {
-                            SPR_LOGD("success, %d + %d = %d\n", i, i, sum);
                         }
                     }
+
+                    SPR_LOGD("th2 done\n");
                 });
 
                 th1.join();

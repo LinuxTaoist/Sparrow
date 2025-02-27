@@ -17,6 +17,8 @@
  *
  */
 #include "SprLog.h"
+#include "ProcLock.h"
+#include "BindCommon.h"
 #include "SprBinderHub.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
@@ -78,7 +80,7 @@ void SprBinderHub::BinderLoop(void* pData)
     SPR_LOGD("Start %s binder loop!\n", mSelf->mSrvName.c_str());
     do {
         int cmd = 0;
-        NONZERO_CHECK(pReqParcel->Wait());
+        pReqParcel->Wait();
         int ret = pReqParcel->ReadInt(cmd);
         if (ret != 0) {
             SPR_LOGE("ReadInt failed!\n");
