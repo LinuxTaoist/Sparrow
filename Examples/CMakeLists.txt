@@ -89,5 +89,5 @@ add_executable              (sample_http_server ${SRC_BIN_HTTPSERVER} ${SRC_HTTP
 target_include_directories  (sample_tcp_server PRIVATE ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 target_include_directories  (sample_http_server PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)
 set_target_properties       (sample_http_server PROPERTIES OUTPUT_NAME "sample_httpserver")
-target_link_libraries       (sample_http_server c epollevent)
+target_link_libraries       (sample_http_server c epollevent rt)
 add_dependencies            (sample_http_server LibEpollEvent)

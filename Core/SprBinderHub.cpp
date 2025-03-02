@@ -17,7 +17,6 @@
  *
  */
 #include "SprLog.h"
-#include "ProcLock.h"
 #include "BindCommon.h"
 #include "SprBinderHub.h"
 #include "CommonMacros.h"
