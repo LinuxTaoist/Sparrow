@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "ProcMutex.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
@@ -35,6 +36,8 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IMediator", __LINE__, ##args)
 
 static bool mEnable;
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IOneNetMutex");
 static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
@@ -70,6 +73,7 @@ int SprMediatorInterface::GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec)
         return -1;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(PROXY_CMD_GET_ALL_MQ_ATTRS));
     NONZERO_CHECK_RET(pReqParcel->Post());
 
@@ -91,6 +95,7 @@ std::string SprMediatorInterface::GetSigalName(int sig)
         return "";
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_ERR(pReqParcel->WriteInt(PROXY_CMD_GET_SIGNAL_NAME), "");
     NONZERO_CHECK_ERR(pReqParcel->WriteInt(sig), "");
     NONZERO_CHECK_ERR(pReqParcel->Post(), "");

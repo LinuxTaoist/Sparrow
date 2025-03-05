@@ -6,82 +6,192 @@
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2025/05/26
+ *  @date       : 2025/03/02
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/05/26 | 1.0.0.1   | Xiang.D        | Create file
+ *  2025/03/02 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <sys/mman.h>
+#include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
-#include <stdio.h>
-#include <sys/mman.h>
-#include <sys/stat.h>
 #include "ProcMutex.h"
 
-#define SPR_LOG(fmt, args...)   printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...)  printf("%4d ProcMutex D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...)  printf("%4d ProcMutex W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...)  printf("%4d ProcMutex E: " fmt, __LINE__, ##args)
-
-ProcMutex::ProcMutex(const std::string& mutexName) : mMutexName(mutexName), mMutex(nullptr) {
+ProcMutex::ProcMutex(const std::string& mutexName)
+    : mShmId(-1), mMutexName(std::string("/") + mutexName), mSharedData(nullptr) {
     Init();
 }
 
 ProcMutex::~ProcMutex() {
-    Cleanup();
-}
-
-void ProcMutex::Lock() {
-    pthread_mutex_lock(mMutex);
-}
-
-void ProcMutex::Unlock() {
-    pthread_mutex_unlock(mMutex);
+    if (mSharedData) {
+        // Destroy resources only when both reference count and wait count are 0
+        if (mSharedData->refCnt == 0 && mSharedData->waitCnt == 0) {
+            DeInit();
+        } else {
+            munmap(mSharedData, sizeof(SharedData));
+            close(mShmId);
+        }
+    }
 }
 
 void ProcMutex::Init() {
-    int shmId = shm_open(mMutexName.c_str(), O_RDWR | O_CREAT, 0744);
-    if (shmId == -1) {
+    mShmId = shm_open(mMutexName.c_str(), O_RDWR | O_CREAT, 0744);
+    if (mShmId == -1) {
         perror("shm_open");
         return;
     }
-
-    int rc = ftruncate(shmId, sizeof(pthread_mutex_t));
-    if (rc == -1) {
+    if (ftruncate(mShmId, sizeof(SharedData)) == -1) {
         perror("ftruncate");
-        close(shmId);
+        close(mShmId);
+        mShmId = -1;
         return;
     }
 
-    mMutex = (pthread_mutex_t *)mmap(NULL, sizeof(pthread_mutex_t), PROT_READ | PROT_WRITE, MAP_SHARED, shmId, 0);
+    mSharedData = (SharedData*)mmap(NULL, sizeof(SharedData), PROT_READ | PROT_WRITE, MAP_SHARED, mShmId, 0);
+    if (mSharedData == MAP_FAILED) {
+        perror("mmap");
+        close(mShmId);
+        mShmId = -1;
+        return;
+    }
 
     pthread_mutexattr_t mutexAttr;
-    pthread_mutexattr_init(&mutexAttr);
-    pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED);
+    if (pthread_mutexattr_init(&mutexAttr) != 0) {
+        perror("pthread_mutexattr_init");
+        munmap(mSharedData, sizeof(SharedData));
+        close(mShmId);
+        mShmId = -1;
+        mSharedData = nullptr;
+        return;
+    }
 
-    if (((pthread_mutex_t*)mMutex)->__data.__kind == 0) {
-        pthread_mutex_init(mMutex, &mutexAttr);
+    // Set mutex to be process - shared
+    if (pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED) != 0) {
+        perror("pthread_mutexattr_setpshared");
+        pthread_mutexattr_destroy(&mutexAttr);
+        munmap(mSharedData, sizeof(SharedData));
+        close(mShmId);
+        mShmId = -1;
+        mSharedData = nullptr;
+        return;
+    }
+
+    // Set mutex to be robust
+    if (pthread_mutexattr_setrobust(&mutexAttr, PTHREAD_MUTEX_ROBUST) != 0) {
+        perror("pthread_mutexattr_setrobust");
+        return;
+    }
+
+    // Check if mutexes, reference count and wait count need initialization
+    if (mSharedData->refCnt == 0) {
+        if (pthread_mutex_init(&mSharedData->dataMutex, &mutexAttr) != 0) {
+            perror("pthread_mutex_init");
+            pthread_mutexattr_destroy(&mutexAttr);
+            munmap(mSharedData, sizeof(SharedData));
+            close(mShmId);
+            mShmId = -1;
+            mSharedData = nullptr;
+            return;
+        }
+
+        if (pthread_mutex_init(&mSharedData->waitMutex, &mutexAttr) != 0) {
+            perror("pthread_mutex_init (waitMutex)");
+            pthread_mutex_destroy(&mSharedData->dataMutex);
+            pthread_mutexattr_destroy(&mutexAttr);
+            munmap(mSharedData, sizeof(SharedData));
+            close(mShmId);
+            mShmId = -1;
+            mSharedData = nullptr;
+            return;
+        }
+
+        mSharedData->refCnt = 0;
+        mSharedData->waitCnt = 0;
     }
 
     pthread_mutexattr_destroy(&mutexAttr);
 }
 
-void ProcMutex::Cleanup() {
+void ProcMutex::DeInit() {
+    if (!mSharedData) {
+        return;
+    }
+
+    pthread_mutex_destroy(&mSharedData->dataMutex);
+    pthread_mutex_destroy(&mSharedData->waitMutex);
+    munmap(mSharedData, sizeof(SharedData));
+
+    if (mShmId != -1) {
+        close(mShmId);
+        mShmId = -1;
+    }
+
+    mSharedData = nullptr;
+    shm_unlink(mMutexName.c_str());
 }
 
-// ----------------------------------------------------------------------------------------------------------------------
-// ProcMutex RAII Guard
-// ----------------------------------------------------------------------------------------------------------------------
-ProcLockGuard::ProcLockGuard(ProcMutex& mutex) : mMutex(mutex) {
-    mMutex.Lock();
+void ProcMutex::Lock() {
+    if (!mSharedData) {
+        return;
+    }
+
+    // Try to acquire the lock non - blocking
+    if (pthread_mutex_trylock(&mSharedData->dataMutex) != 0) {
+        AddWait();
+        int rc = pthread_mutex_lock(&mSharedData->dataMutex);
+        if (rc != 0) {
+            perror("pthread_mutex_lock");
+        }
+        DelWait();
+    }
+
+    // Increment reference count after successful lock
+    mSharedData->refCnt++;
+}
+
+void ProcMutex::Unlock() {
+    if (!mSharedData) {
+        return;
+    }
+
+    // Decrement reference count after unlock
+    mSharedData->refCnt--;
+    pthread_mutex_unlock(&mSharedData->dataMutex);
+}
+
+void ProcMutex::AddWait() {
+    if (!mSharedData) {
+        return;
+    }
+
+    pthread_mutex_lock(&mSharedData->waitMutex);
+    mSharedData->waitCnt++;
+    pthread_mutex_unlock(&mSharedData->waitMutex);
+}
+
+void ProcMutex::DelWait() {
+    if (!mSharedData) {
+        return;
+    }
+
+    pthread_mutex_lock(&mSharedData->waitMutex);
+    mSharedData->waitCnt--;
+    pthread_mutex_unlock(&mSharedData->waitMutex);
+}
+
+ProcLockGuard::ProcLockGuard(ProcMutex& pMutex, std::mutex& tMutex)
+    : mTMutex(tMutex), mPMutex(pMutex) {
+    mTMutex.lock();
+    mPMutex.Lock();
 }
 
 ProcLockGuard::~ProcLockGuard() {
-    mMutex.Unlock();
+    mPMutex.Unlock();
+    mTMutex.unlock();
 }

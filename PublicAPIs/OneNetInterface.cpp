@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "Parcel.h"
+#include "ProcMutex.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
@@ -36,6 +37,8 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IOneNet", __LINE__, ##args)
 
 static bool mEnable;
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IOneNetMutex");
 static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
@@ -77,6 +80,7 @@ int OneNetInterface::ActiveDevice(const std::string& deviceName)
         return ERR_BINDER_INIT_FAILED;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(ONENET_CMD_ACTIVE_DEVICE));
     NONZERO_CHECK_RET(pReqParcel->WriteString(deviceName));
     NONZERO_CHECK_RET(pReqParcel->Post());
@@ -96,6 +100,7 @@ int OneNetInterface::DeactiveDevice()
         return ERR_BINDER_INIT_FAILED;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(ONENET_CMD_DEACTIVE_DEVICE));
     NONZERO_CHECK_RET(pReqParcel->Post());
 

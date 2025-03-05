@@ -22,6 +22,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "Parcel.h"
+#include "ProcMutex.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
@@ -38,6 +39,8 @@ using namespace GeneralUtils;
 
 static bool mEnable;
 static std::atomic<bool> gObjAlive(true);
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IPowerMgrMutex");
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
 
@@ -73,6 +76,7 @@ int PowerManagerInterface::PowerOn()
         return -1;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(POWERM_CMD_POWER_ON));
     NONZERO_CHECK_RET(pReqParcel->Post());
 
@@ -91,6 +95,7 @@ int PowerManagerInterface::PowerOff()
         return -1;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(POWERM_CMD_POWER_OFF));
     NONZERO_CHECK_RET(pReqParcel->Post());
 

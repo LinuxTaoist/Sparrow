@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "ProcMutex.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
@@ -36,6 +37,8 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IDebug", __LINE__, ##args)
 
 static bool mEnable;
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IOneNetMutex");
 static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
@@ -67,6 +70,7 @@ DebugInterface* DebugInterface::GetInstance()
 
 int DebugInterface::AddTimerInOneSec()
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
     POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
     POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
@@ -84,6 +88,7 @@ int DebugInterface::AddTimerInOneSec()
 
 int DebugInterface::DelTimerInOneSec()
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
     POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
     POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
@@ -101,6 +106,7 @@ int DebugInterface::DelTimerInOneSec()
 
 int DebugInterface::AddCustomTimer(uint32_t RepeatTimes, int32_t DelayInMilliSec, int32_t IntervalInMilliSec)
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
     POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
     POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
@@ -121,6 +127,7 @@ int DebugInterface::AddCustomTimer(uint32_t RepeatTimes, int32_t DelayInMilliSec
 
 int DebugInterface::DelCustomTimer()
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
     POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
     POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
@@ -138,6 +145,7 @@ int DebugInterface::DelCustomTimer()
 
 int DebugInterface::EnableRemoteShell()
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
     POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
     POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);
@@ -155,6 +163,7 @@ int DebugInterface::EnableRemoteShell()
 
 int DebugInterface::DisableRemoteShell()
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONTRUE_CHECK_ERR(mEnable, ERR_BINDER_INIT_FAILED);
     POINTER_CHECK_ERR(pReqParcel, ERR_BINDER_INVALID_POINTER);
     POINTER_CHECK_ERR(pRspParcel, ERR_BINDER_INVALID_POINTER);

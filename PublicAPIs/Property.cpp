@@ -20,6 +20,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include "Property.h"
+#include "ProcMutex.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
@@ -34,6 +35,8 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "Property", __LINE__, ##args)
 
 static bool mEnable;
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IPropertyMutex");
 static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pReqParcel = nullptr;
 std::shared_ptr<Parcel> pRspParcel = nullptr;
@@ -69,6 +72,7 @@ int Property::SetProperty(const std::string& key, const std::string& value)
         return -1;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_SET_PROPERTY));
     NONZERO_CHECK_RET(pReqParcel->WriteString(key));
     NONZERO_CHECK_RET(pReqParcel->WriteString(value));
@@ -88,6 +92,7 @@ int Property::GetProperty(const std::string& key, std::string& value, const std:
         return -1;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY));
     NONZERO_CHECK_RET(pReqParcel->WriteString(key));
     NONZERO_CHECK_RET(pReqParcel->WriteString(defaultValue));
@@ -108,6 +113,7 @@ int Property::GetProperties()
         return -1;
     }
 
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES));
     NONZERO_CHECK_RET(pReqParcel->Post());
 

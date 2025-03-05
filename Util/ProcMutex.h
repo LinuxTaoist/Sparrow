@@ -6,46 +6,58 @@
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2025/05/26
+ *  @date       : 2025/03/02
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/05/26 | 1.0.0.1   | Xiang.D        | Create file
+ *  2025/03/02 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
 #ifndef __PROC_MUTEX_H__
 #define __PROC_MUTEX_H__
 
+#include <mutex>
 #include <string>
 #include <pthread.h>
+
+struct SharedData {
+    int refCnt;
+    int waitCnt;
+    pthread_mutex_t dataMutex;  // Mutex for critical section protection
+    pthread_mutex_t waitMutex;  // Mutex for protecting the wait count
+};
 
 class ProcMutex {
 public:
     ProcMutex(const std::string& mutexName);
     ~ProcMutex();
+
     void Lock();
     void Unlock();
 
 private:
     void Init();
-    void Cleanup();
+    void DeInit();
+    void AddWait();
+    void DelWait();
 
 private:
+    int mShmId;
     std::string mMutexName;
-    pthread_mutex_t* mMutex;
-
+    SharedData* mSharedData;
 };
 
 class ProcLockGuard {
 public:
-    explicit ProcLockGuard(ProcMutex& mutex);
+    explicit ProcLockGuard(ProcMutex& pMutex, std::mutex& tMutex);
     ~ProcLockGuard();
 
 private:
-    ProcMutex& mMutex;
+    std::mutex& mTMutex;
+    ProcMutex& mPMutex;
 };
 
 #endif // __PROC_MUTEX_H__

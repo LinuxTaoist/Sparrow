@@ -18,6 +18,7 @@
  */
 #include <atomic>
 #include "Parcel.h"
+#include "ProcMutex.h"
 #include "BindCommon.h"
 #include "BindInterface.h"
 #include "CommonMacros.h"
@@ -25,6 +26,8 @@
 using namespace InternalDefs;
 
 static std::atomic<bool> gObjAlive(true);
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IBinderMutex");
 Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
 Parcel iRspParcel("BinderM",  KEY_BINDER_MANAGER,  false);
 
@@ -77,6 +80,7 @@ bool BindInterface::InitializeClientBinder(const std::string& srvName,
 
 std::shared_ptr<Binder> BindInterface::AddService(const std::string& name)
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_ERR(iReqParcel.WriteInt(BINDER_CMD_ADD_SERVICE), nullptr);
     NONZERO_CHECK_ERR(iReqParcel.WriteString(name), nullptr);
     NONZERO_CHECK_ERR(iReqParcel.Post(), nullptr);
@@ -96,6 +100,7 @@ std::shared_ptr<Binder> BindInterface::AddService(const std::string& name)
 
 std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name)
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_ERR(iReqParcel.WriteInt(BINDER_CMD_GET_SERVICE), nullptr);
     NONZERO_CHECK_ERR(iReqParcel.WriteString(name), nullptr);
     NONZERO_CHECK_ERR(iReqParcel.Post(), nullptr);
@@ -117,6 +122,7 @@ std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name)
 
 int32_t BindInterface::RemoveService(const std::string& name)
 {
+    ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(iReqParcel.WriteInt(BINDER_CMD_REMOVE_SERVICE));
     NONZERO_CHECK_RET(iReqParcel.WriteString(name));
     NONZERO_CHECK_RET(iReqParcel.Post());
