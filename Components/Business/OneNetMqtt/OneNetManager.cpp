@@ -137,6 +137,19 @@ OneNetManager::mStateTable =
     },
 
     // =============================================================
+    // All States for SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP
+    // =============================================================
+    { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP,
+      &OneNetManager::MsgRespondMqttPingResp
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // All States for SIG_ID_ONENET_MGR_PING_TIMER_EVENT
     // =============================================================
     { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
@@ -216,6 +229,7 @@ OneNetManager::OneNetManager(ModuleIDType id, const std::string& name)
     mDebugEnable = false;
     mEnablePingTimer = false;
     mEnableReportTimer = false;
+    mIsWatingPingResp = false;
     mReConnectReqCnt = 0;
     mReConnectRspCnt = 0;
     mCurLev1State = LEV1_ONENET_MGR_IDLE;
@@ -536,6 +550,16 @@ void OneNetManager::MsgRespondMqttSubAck(const SprMsg& msg)
 }
 
 /**
+ * @brief Process SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP
+ *
+ * @param msg
+ */
+void OneNetManager::MsgRespondMqttPingResp(const SprMsg& msg)
+{
+
+}
+
+/**
  * @brief Process SIG_ID_ONENET_MGR_PING_TIMER_EVENT
  *
  * @param[in] msg
@@ -545,10 +569,21 @@ void OneNetManager::MsgRespondMqttPingTimerEvent(const SprMsg& msg)
     if (mCurLev1State != LEV1_ONENET_MGR_CONNECTED) {
         SPR_LOGD("Device not connect, stop ping timer\n");
         mEnablePingTimer = false;
+        mIsWatingPingResp = false;
         UnregisterTimer(SIG_ID_ONENET_MGR_PING_TIMER_EVENT);
         return;
     }
 
+    // TODO: 添加ping超时处理
+    if (mIsWatingPingResp) {
+        SPR_LOGW("Ping timeout, disconnect device\n");
+        // SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
+        // SprMsg disMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
+        // disMsg.SetBoolValue(false);
+        return;
+    }
+
+    mIsWatingPingResp = true;
     NotifyMsgToOneNetDevice(mCurActiveDevice, msg);
 }
 

@@ -126,6 +126,7 @@ private:
     void MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
     void MsgRespondMqttSubAck(const SprMsg& msg);
+    void MsgRespondMqttPingResp(const SprMsg& msg);
     void MsgRespondMqttPingTimerEvent(const SprMsg& msg);
     void MsgRespondMqttReportTimerEvent(const SprMsg& msg);
     void MsgRespondDeviceDisconnectPassive(const SprMsg& msg);
@@ -142,6 +143,7 @@ private:
     bool mDebugEnable;
     bool mEnablePingTimer;
     bool mEnableReportTimer;
+    bool mIsWatingPingResp;
     uint32_t mReConnectReqCnt;
     uint32_t mReConnectRspCnt;
     using StateTransitionType =

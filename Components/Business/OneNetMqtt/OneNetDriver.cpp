@@ -760,6 +760,9 @@ void OneNetDriver::MsgRespondMqttMsgPingreq(const SprMsg& msg)
 void OneNetDriver::MsgRespondMqttMsgPingresq(const SprMsg& msg)
 {
     SPR_LOGD("Recv mqtt ping response!\n");
+
+    SprMsg copymsg(msg);
+    NotifyObserver(MODULE_ONENET_MANAGER, copymsg);
 }
 
 /**
