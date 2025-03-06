@@ -63,6 +63,19 @@ show_env() {
     echo -e "${PURPLE}${delimiter}${NC}"
 }
 
+# cmd adb_push
+adb_push() {
+    if [ -z "$1" ]; then
+        echo -e "${PURPLE}错误: 未提供路径! 用法: ./xtool.sh <path>${NC}"
+        return 1
+    fi
+
+    echo -e "${PURPLE} 开始推送文件 ${NC}"
+    adb shell mkdir -p $1/Release
+    adb push ../Release/Bin  $1/Release/
+    adb push ../Release/Lib  $1/Release/
+}
+
 # cmd commit-template
 config_commit_template() {
     template_path=$(pwd)/../.git-commit-template
@@ -140,6 +153,7 @@ usage() {
     echo -e ""
     echo -e "${PURPLE}Usage:${NC}"
     echo -e "${PURPLE}  $0 env                      查看当前环境${NC}"
+    echo -e "${PURPLE}  $0 adb-push <path>          adb push文件到设备${NC}"
     echo -e "${PURPLE}  $0 commit-template          配置commit模板${NC}"
     echo -e "${PURPLE}  $0 build-all                编译整个项目${NC}"
     echo -e "${PURPLE}  $0 build-3rd                编译依赖的第三方库${NC}"
@@ -161,6 +175,9 @@ main() {
     case "$1" in
         env)
             show_env
+            ;;
+        adb-push)
+            adb_push "$2"
             ;;
         commit-template)
             config_commit_template
