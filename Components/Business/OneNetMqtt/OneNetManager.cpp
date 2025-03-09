@@ -531,6 +531,9 @@ void OneNetManager::MsgRespondDeactiveDevice(const SprMsg& msg)
     // 记录下线事件至监控组件
     std::string description = "device offline (" + msg.GetString() + ")";
     SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, description);
+
+    mReConnectReqCnt = 0;
+    mReConnectRspCnt = 0;
 }
 
 /**
@@ -615,7 +618,6 @@ void OneNetManager::MsgRespondMqttPingTimerEvent(const SprMsg& msg)
 
     if (mIsWatingPingResp) {
         SPR_LOGW("Ping timeout, disconnect device\n");
-
         SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE);
         disMsg.SetBoolValue(true);  // 重连标记: true 重连，false 不重连
         disMsg.SetString("ping timeout");
