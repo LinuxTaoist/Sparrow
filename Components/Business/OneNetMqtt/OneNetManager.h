@@ -109,9 +109,11 @@ private:
 
     /* 启动OneNet心跳 */
     void StartTimerToPingOneNet(int32_t intervalInMSec);
+    void StopTimerToPingOneNet();
 
     /* 启动数据上报定时器 */
     void StartTimerToReportData(int32_t intervalInMSec);
+    void StopTimerToReportData();
 
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
@@ -123,7 +125,7 @@ private:
     /* 消息响应函数 */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
-    void MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg);
+    void MsgRespondDeactiveDevice(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
     void MsgRespondMqttSubAck(const SprMsg& msg);
     void MsgRespondMqttPingResp(const SprMsg& msg);

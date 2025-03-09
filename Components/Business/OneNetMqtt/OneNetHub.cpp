@@ -48,7 +48,8 @@ void OneNetHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::
             break;
         }
         case ONENET_CMD_DEACTIVE_DEVICE : {
-            SprMsg msg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
+            SprMsg msg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE);
+            msg.SetString("deactive by user");
             mOneMgr->SendMsg(msg);
 
             NONZERO_CHECK(pRspParcel->WriteInt(0));

@@ -103,6 +103,14 @@ private:
     EOneNetDrvLev2State GetLev2State();
 
     /**
+     * @brief start/stop socket reconnect timer
+     *
+     * @param intervalInMSec
+     */
+    void StartTimerToSocketReconnect(int32_t intervalInMSec);
+    void StopTimerToSocketReconnect();
+
+    /**
      * @brief Dump socket bytes for debug
      *
      * @param bytes socket bytes
@@ -129,7 +137,7 @@ private:
     void MsgRespondMqttMsgSubscribe(const SprMsg& msg);
     void MsgRespondMqttMsgPingreq(const SprMsg& msg);
     void MsgRespondMqttMsgPingresq(const SprMsg& msg);
-    void MsgRespondMqttMsgDisconnect(const SprMsg& msg);
+    void MsgRespondDeactiveDevice(const SprMsg& msg);
     void MsgRespondDebugEnable(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);

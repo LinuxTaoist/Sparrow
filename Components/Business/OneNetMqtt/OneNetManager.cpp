@@ -93,15 +93,20 @@ OneNetManager::mStateTable =
     },
 
     // =============================================================
-    // All States for SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT
+    // All States for SIG_ID_ONENET_MGR_DEACTIVE_DEVICE
     // ============================================================
     { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT,
-      &OneNetManager::MsgRespondDeactiveDeviceDisconnect
+      SIG_ID_ONENET_MGR_DEACTIVE_DEVICE,
+      &OneNetManager::MsgRespondDeactiveDevice
+    },
+
+    { LEV1_ONENET_MGR_CONNECTING, LEV2_ONENET_MGR_ANY,
+      SIG_ID_ONENET_MGR_DEACTIVE_DEVICE,
+      &OneNetManager::MsgRespondDeactiveDevice
     },
 
     { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
-      SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT,
+      SIG_ID_ONENET_MGR_DEACTIVE_DEVICE,
       &OneNetManager::MsgRespondUnexpectedState
     },
 
@@ -403,6 +408,17 @@ void OneNetManager::StartTimerToPingOneNet(int32_t intervalInMSec)
     RegisterTimer(0, intervalInMSec, SIG_ID_ONENET_MGR_PING_TIMER_EVENT, 0);
 }
 
+void OneNetManager::StopTimerToPingOneNet()
+{
+    if (!mEnablePingTimer) {
+        SPR_LOGD("Ping timer is already disabled!\n");
+        return;
+    }
+
+    mEnablePingTimer = false;
+    UnregisterTimer(SIG_ID_ONENET_MGR_PING_TIMER_EVENT);
+}
+
 void OneNetManager::StartTimerToReportData(int32_t intervalInMSec)
 {
     if (mEnableReportTimer) {
@@ -413,6 +429,17 @@ void OneNetManager::StartTimerToReportData(int32_t intervalInMSec)
     SPR_LOGD("Enable report timer, interval: %dms\n", intervalInMSec);
     mEnableReportTimer = true;
     RegisterTimer(0, intervalInMSec, SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT, 0);
+}
+
+void OneNetManager::StopTimerToReportData()
+{
+    if (!mEnableReportTimer) {
+        SPR_LOGD("Report timer is already disabled!\n");
+        return;
+    }
+
+    mEnableReportTimer = false;
+    UnregisterTimer(SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT);
 }
 
 void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg)
@@ -486,19 +513,24 @@ void OneNetManager::MsgRespondReactiveCurDeviceConnect(const SprMsg& msg)
 }
 
 /**
- * @brief Process SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT
+ * @brief Process SIG_ID_ONENET_MGR_DEACTIVE_DEVICE
  *
  * @param[in] msg
  * @return none
  */
-void OneNetManager::MsgRespondDeactiveDeviceDisconnect(const SprMsg& msg)
+void OneNetManager::MsgRespondDeactiveDevice(const SprMsg& msg)
 {
-    SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
-    SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
+    bool isReconnect = msg.GetBoolValue();
+    EOneNetMgrLev1State state = isReconnect ? LEV1_ONENET_MGR_CONNECTING : LEV1_ONENET_MGR_DISCONNECTED;
+    SetLev1State(state);
+
+    SprMsg disMsg(msg);
     NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
+    SPR_LOGD("Deactive device: %s, reconnect: %d, reason: %s\n", mCurActiveDevice.c_str(), isReconnect, msg.GetString().c_str());
 
     // 记录下线事件至监控组件
-    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, "device offline (deactive by self)");
+    std::string description = "device offline (" + msg.GetString() + ")";
+    SendEventToMonitor(ERR_ONENET_MANAGER_OFFLINE, description);
 }
 
 /**
@@ -517,6 +549,17 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
     conMsg.SetBoolValue(isConnected);
     NotifyMsgToOneNetDevice(mCurActiveDevice, conMsg);
 
+    // 记录上线事件至监控组件
+    std::string status = isConnected ? "device online" : "device offline";
+    std::string description = status + " (ack:" + std::to_string(msg.GetU8Value()) + ", req: "
+        + std::to_string(mReConnectReqCnt) + ", rsp: " + std::to_string(mReConnectRspCnt) + ")";
+    SendEventToMonitor(ERR_ONENET_MANAGER_ONLINE, description);
+
+    if (!isConnected) {
+        SPR_LOGD("Connect failed, server code: %d\n", msg.GetU8Value());
+        return;
+    }
+
     int32_t keepAliveInSec = mOneDeviceMap[mCurActiveDevice]->GetKeepAliveIntervalInSec();
     if (keepAliveInSec <= 0) {
         SPR_LOGW("Invaild keep alive interval: %d, set default: %d", keepAliveInSec, DEFAULT_PING_TIMER_INTERVAL);
@@ -524,15 +567,11 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
     }
 
     // 注册ping定时器，数据上报定时器
+    mIsWatingPingResp = false;
     StartTimerToPingOneNet(keepAliveInSec * 1000);
     StartTimerToReportData(DEFAULT_DATA_REPORT_INTERVAL * 1000);
     SPR_LOGD("OneNet return connect code: %d, start ping timer: %ds, report timer: %ds (%d %d)\n",
         msg.GetU8Value(), keepAliveInSec, DEFAULT_DATA_REPORT_INTERVAL, mReConnectReqCnt, mReConnectRspCnt);
-
-    // 记录上线事件至监控组件
-    std::string description = "device online (req: "
-            + std::to_string(mReConnectReqCnt) + ", rsp: " + std::to_string(mReConnectRspCnt) + ")";
-    SendEventToMonitor(ERR_ONENET_MANAGER_ONLINE, description);
 
     // 登录成功，清除重连计数
     mReConnectReqCnt = 0;
@@ -556,7 +595,8 @@ void OneNetManager::MsgRespondMqttSubAck(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondMqttPingResp(const SprMsg& msg)
 {
-
+    mIsWatingPingResp = false;
+    SPR_LOGD("Ping response received\n");
 }
 
 /**
@@ -568,18 +608,18 @@ void OneNetManager::MsgRespondMqttPingTimerEvent(const SprMsg& msg)
 {
     if (mCurLev1State != LEV1_ONENET_MGR_CONNECTED) {
         SPR_LOGD("Device not connect, stop ping timer\n");
-        mEnablePingTimer = false;
         mIsWatingPingResp = false;
-        UnregisterTimer(SIG_ID_ONENET_MGR_PING_TIMER_EVENT);
+        StopTimerToPingOneNet();
         return;
     }
 
-    // TODO: 添加ping超时处理
     if (mIsWatingPingResp) {
         SPR_LOGW("Ping timeout, disconnect device\n");
-        // SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
-        // SprMsg disMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
-        // disMsg.SetBoolValue(false);
+
+        SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE);
+        disMsg.SetBoolValue(true);  // 重连标记: true 重连，false 不重连
+        disMsg.SetString("ping timeout");
+        SendMsg(disMsg);
         return;
     }
 
@@ -596,8 +636,7 @@ void OneNetManager::MsgRespondMqttReportTimerEvent(const SprMsg& msg)
 {
     if (mCurLev1State != LEV1_ONENET_MGR_CONNECTED) {
         SPR_LOGD("Device not connect, stop report timer\n");
-        mEnableReportTimer = false;
-        UnregisterTimer(SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT);
+        StopTimerToReportData();
         return;
     }
 
@@ -612,7 +651,7 @@ void OneNetManager::MsgRespondMqttReportTimerEvent(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondDeviceDisconnectPassive(const SprMsg& msg)
 {
-    SetLev1State(LEV1_ONENET_MGR_DISCONNECTED);
+    SetLev1State(LEV1_ONENET_MGR_CONNECTING);
     SprMsg disMsg(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS);
     disMsg.SetBoolValue(false);
     NotifyMsgToOneNetDevice(mCurActiveDevice, disMsg);
@@ -700,6 +739,7 @@ void OneNetManager::DebugActiveDevice(const std::vector<std::string>& args)
 void OneNetManager::DebugDeactiveDevice(const std::vector<std::string>& args)
 {
     SPR_LOGD("Debug Deactive Device\n");
-    SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE_DISCONNECT);
+    SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE);
+    disMsg.SetString("deactive by node debug");
     SendMsg(disMsg);
 }

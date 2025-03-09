@@ -2,6 +2,7 @@
 
 SCRIPT_PATH=$(pwd)
 RELEASE_PATH=$(dirname "$SCRIPT_PATH")
+BIN_PATH="$RELEASE_PATH/Bin"
 LIB_PATH="$RELEASE_PATH/Lib"
 
 if [ -w "$BIN_PATH" ]; then
