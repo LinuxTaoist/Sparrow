@@ -41,7 +41,7 @@ int main(int argc, const char *argv[])
         }
     });
 
-    StatusMonitorManager monitorMgr(MODULE_STATUS_MONITOR, "StatusMonitor");
+    StatusMonitorManager monitorMgr(MODULE_STATUS_MONITOR, "StatusM");
     monitorMgr.Initialize();
     SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");

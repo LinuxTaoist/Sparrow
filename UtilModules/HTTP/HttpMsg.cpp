@@ -175,8 +175,7 @@ std::string HttpMsgRequest::GetHttpVersion()
 std::string HttpMsgRequest::GetMsgHeader(const std::string& key)
 {
     auto it = mMsgHeaders.find(key);
-    if (it != mMsgHeaders.end())
-    {
+    if (it != mMsgHeaders.end()) {
         return it->second;
     }
     return "";
@@ -322,8 +321,7 @@ std::string HttpMsgResponse::GetReasonPhrase()
 std::string HttpMsgResponse::GetMsgHeader(const std::string& key)
 {
     auto it = mMsgHeaders.find(key);
-    if (it != mMsgHeaders.end())
-    {
+    if (it != mMsgHeaders.end()) {
         return it->second;
     }
     return "";

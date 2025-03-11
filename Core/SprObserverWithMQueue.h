@@ -22,6 +22,7 @@
 #include "SprMsg.h"
 #include "PMsgQueue.h"
 #include "SprObserver.h"
+#include "CommonTypeDefs.h"
 
 class SprObserverWithMQueue : public SprObserver, public PMsgQueue
 {
@@ -59,6 +60,14 @@ public:
      */
     virtual void* EpollEvent(int fd, EpollType eType, void* arg) final override;
 
+    /**
+     * @brief Get the All message queue status
+     *
+     * @param mqInfoList
+     * @return int32_t
+     */
+    static int32_t GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
+
 protected:
     /**
      * @brief Initialize function for derived class called in Initialize
@@ -90,6 +99,19 @@ protected:
     int32_t UnRegisterFromMediator();
 
     /**
+     * @brief Load/Remove message queue information
+     *
+     * @param handle
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t LoadMQStaticInfo(int32_t handle, const std::string& devName);
+    int32_t LoadMQDynamicInfo(int32_t handle, const SprMsg& msg);
+    int32_t RemoveMQInformation(int32_t handle);
+
+    int32_t SendEventToMonitor(int32_t errcode, const std::string& text);
+
+    /**
      * @brief Dispatch messages from message queue
      *
      * @param msg
@@ -110,12 +132,13 @@ protected:
     // --------------------------------------------------------------------------------------------
     // - Message handle functions
     // --------------------------------------------------------------------------------------------
-    int MsgRespondSystemExitRsp(const SprMsg& msg);
-    int MsgRespondRegisterRsp(const SprMsg& msg);
-    int MsgRespondUnregisterRsp(const SprMsg& msg);
+    int32_t MsgRespondSystemExitRsp(const SprMsg& msg);
+    int32_t MsgRespondRegisterRsp(const SprMsg& msg);
+    int32_t MsgRespondUnregisterRsp(const SprMsg& msg);
 
 private:
     bool mConnected;
+    static std::map<int32_t, SMQStatus> mMQStatusMap;  // handle, mq status
 };
 
 #endif // __SPR_OBSERVER_WITH_MQUEUE_H__

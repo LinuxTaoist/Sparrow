@@ -16,9 +16,13 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <errno.h>
+#include <string.h>
 #include "SprLog.h"
 #include "PMsgQueue.h"
 #include "GeneralUtils.h"
+#include "RunningTiming.h"
+#include "CommonErrorCodes.h"
 #include "SprObserverWithMQueue.h"
 
 using namespace InternalDefs;
@@ -26,7 +30,10 @@ using namespace GeneralUtils;
 
 #define LOG_TAG "SprObsMQ"
 
-#define MSG_SIZE_MAX  1025
+#define MSG_SIZE_MAX    1025
+#define RUNTIME_WARN_MS 2000
+
+std::map<int32_t, SMQStatus> SprObserverWithMQueue::mMQStatusMap;
 
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
     : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), MSG_SIZE_MAX), mConnected(false)
@@ -35,6 +42,7 @@ SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string&
 
 SprObserverWithMQueue::~SprObserverWithMQueue()
 {
+    RemoveMQInformation(GetEvtFd());
     UnRegisterFromMediator();
 }
 
@@ -42,6 +50,7 @@ int32_t SprObserverWithMQueue::InitFramework()
 {
     SPR_LOGD("Initlize MQueue framework!\n");
     AddToPoll();
+    LoadMQStaticInfo(GetEvtFd(), GetMQDevName());
     return RegisterFromMediator();
 }
 
@@ -120,8 +129,75 @@ int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
     return 0;
 }
 
+int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::string& devName)
+{
+    if (devName.length() >= MQ_NAME_MAX_LENGTH) {
+        SPR_LOGW("devName %s too long(max %d characters)\n", devName.c_str(), MQ_NAME_MAX_LENGTH);
+    }
+
+    SMQStatus tmpMQStatus = {};
+    tmpMQStatus.handle = handle;
+    memset(tmpMQStatus.mqName, 0, sizeof(tmpMQStatus.mqName));
+    strncpy(tmpMQStatus.mqName, devName.c_str(), sizeof(tmpMQStatus.mqName) - 1);
+    mMQStatusMap[handle] = tmpMQStatus;
+    return 0;
+}
+
+int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& msg)
+{
+    auto mqStatus = mMQStatusMap.find(handle);
+    if (mqStatus == mMQStatusMap.end()) {
+        SPR_LOGE("Not exist mq handle: %d [%s]\n", handle, GetSigName(msg.GetMsgId()));
+        return -1;
+    }
+
+    // Update mqAttr
+    int32_t ret = mq_getattr(handle, &mqStatus->second.mqAttr);
+    if (ret != 0) {
+        SPR_LOGE("mq_getattr failed! (%s)\n", strerror(errno));
+        return -1;
+    }
+
+    // Update maxCount
+    const mq_attr& attr = mqStatus->second.mqAttr;
+    if (attr.mq_curmsgs >= mqStatus->second.maxCount) {
+        mqStatus->second.maxCount = attr.mq_curmsgs + 1;
+    }
+
+    // Update maxBytes
+    if (msg.GetSize() > mqStatus->second.maxBytes) {
+        mqStatus->second.maxBytes = msg.GetSize();
+    }
+
+    // Update lastMsg, total times
+    mqStatus->second.lastMsg = msg.GetMsgId();
+    mqStatus->second.total++;
+
+    return 0;
+}
+
+int32_t SprObserverWithMQueue::RemoveMQInformation(int32_t handle)
+{
+    auto it = mMQStatusMap.find(handle);
+    if (it != mMQStatusMap.end()) {
+        mMQStatusMap.erase(it);
+    }
+
+    return 0;
+}
+
+int32_t SprObserverWithMQueue::SendEventToMonitor(int32_t errcode, const std::string& text)
+{
+    SPR_LOGD("Send event to monitor, errcode: %d, text: %s\n", errcode, text.c_str());
+    SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
+    msg.SetI32Value(errcode);
+    msg.SetString(text);
+    return NotifyObserver(MODULE_STATUS_MONITOR, msg);
+}
+
 int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
 {
+    RunningTiming timer;
     switch (msg.GetMsgId()) {
         case SIG_ID_PROXY_REGISTER_RESPONSE: {
             MsgRespondRegisterRsp(msg);
@@ -141,6 +217,14 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
         }
     }
 
+    int32_t estime = timer.GetElapsedTimeInMSec();
+    if (estime >= RUNTIME_WARN_MS) {
+        std::string description = std::string(GetSigName(msg.GetMsgId())) + " took "
+            + std::to_string(estime) + "ms" + " (limit: " + std::to_string(RUNTIME_WARN_MS) + "ms" + ")";
+        SendEventToMonitor(ERR_GENERAL_RUN_LONGTIME, description);
+    }
+
+    // SPR_LOGD("Dispatch SprMsg %s time: %dms\n", GetSigName(msg.GetMsgId()), time);
     return 0;
 }
 
@@ -158,6 +242,16 @@ void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
     }
 
     DispatchSprMsg(msg);
+    LoadMQDynamicInfo(fd, msg);
     return nullptr;
 }
 
+int32_t SprObserverWithMQueue::GetAllMQStatus(std::vector<SMQStatus> &mqInfoList)
+{
+    mqInfoList.clear();
+    for (const auto& pair : mMQStatusMap) {
+        mqInfoList.push_back(pair.second);
+    }
+
+    return 0;
+}

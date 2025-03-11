@@ -33,14 +33,14 @@ constexpr bool check_str_length(const char* str, size_t maxLen, size_t index = 0
     return (str[index] == '\0') ? (index <= maxLen) : check_str_length(str, maxLen, index + 1);
 }
 
-#define COMPLIE_TAG_FAILURE_MSG(tag, maxLength)           \
+#define COMPLIE_TAG_FAILURE_MSG(tag, maxLength)         \
     "LOG_TAG '" tag "' is too long (max " #maxLength " characters)"
 
 #define STATIC_COMPLIE_CHECK_TAG_LENGTH(tag, maxLen)    \
     static_assert(check_str_length(tag, maxLen), COMPLIE_TAG_FAILURE_MSG(tag, maxLen))
 
 #define LOGX(x, tag, fmt, args...)                                      \
-    do {                                                                    \
+    do {                                                                \
         STATIC_COMPLIE_CHECK_TAG_LENGTH(tag, TAG_PRINT_WIDTH_LIMIT);    \
         SprLog::GetInstance()->x(tag, "%4d " fmt, __LINE__, ##args);    \
     } while(0)

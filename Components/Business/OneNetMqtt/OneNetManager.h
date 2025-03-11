@@ -104,9 +104,6 @@ private:
     EOneNetMgrLev2State GetLev2State();
     const char* GetLev2StateString(EOneNetMgrLev2State state);
 
-    /* 记录状态到监控组件 */
-    int32_t SendEventToMonitor(int32_t errcode, const std::string& text);
-
     /* 启动OneNet心跳 */
     void StartTimerToPingOneNet(int32_t intervalInMSec);
     void StopTimerToPingOneNet();

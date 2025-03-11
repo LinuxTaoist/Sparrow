@@ -35,6 +35,7 @@ enum CommonErrorCode {
     // general error code
     ERR_GENERAL_SUCCESS             =  0,
     ERR_GENERAL_ERROR               = -1,
+    ERR_GENERAL_RUN_LONGTIME        = -30,
 
     // system error code
     ERR_SYS_INVALID_PARAM           = -310,
