@@ -115,7 +115,15 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
 template<typename T>
 std::string ToString(const std::vector<T>& vec)
 {
-    std::string str(vec.begin(), vec.end());
+    std::string str;
+    str.reserve(vec.size() * sizeof(T));
+    size_t size = sizeof(T);
+    for (const auto& it : vec) {
+        for (size_t i = 0; i < size; i++) {
+            str.push_back(static_cast<char>((it >> ((size - 1 - i) * 8)) & 0xFF));
+        }
+    }
+
     return str;
 }
 

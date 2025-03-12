@@ -179,7 +179,7 @@ int32_t OneNetDevice::AddCPUUsageJsonNode(void* pNode)
     return 0;
 }
 
-int32_t OneNetDevice::AddDiskUsageJsonNode(void* pNode)
+int32_t OneNetDevice::AddDiskInfoJsonNode(void* pNode)
 {
     cJSON* pParamNode = (cJSON*)pNode;
     if (pParamNode == nullptr) {
@@ -187,11 +187,15 @@ int32_t OneNetDevice::AddDiskUsageJsonNode(void* pNode)
         return -1;
     }
 
-    int32_t diskUsage = 0;
-    GetDiskUsage(diskUsage);
+    DiskInfo diskInfo = {"Disk", "Total_Size", 0, "Free_Size", 0, "Used_Percent", 0.0};
+    GetDiskInfo(diskInfo);
     cJSON* pDiskNode = cJSON_CreateObject();
-    cJSON_AddNumberToObject(pDiskNode, "value", diskUsage);
-    cJSON_AddItemToObject(pParamNode, "Disk_Usage", pDiskNode);
+    cJSON* pValueNode = cJSON_CreateObject();
+    cJSON_AddNumberToObject(pValueNode, diskInfo.totalSizeIdentifier.c_str(), diskInfo.totalSize);
+    cJSON_AddNumberToObject(pValueNode, diskInfo.freeSizeIdentifier.c_str(), diskInfo.freeSize);
+    cJSON_AddNumberToObject(pValueNode, diskInfo.usedPercentIdentifier.c_str(), diskInfo.usedPercent);
+    cJSON_AddItemToObject(pDiskNode, "value", pValueNode);
+    cJSON_AddItemToObject(pParamNode, diskInfo.identifier.c_str(), pDiskNode);
     return 0;
 }
 
@@ -280,6 +284,7 @@ int32_t OneNetDevice::AddSystemInfoJsonNode(void* pNode)
     cJSON_AddItemToObject(pParamNode, sysInfo.identifier.c_str(), pSysNode);
     return 0;
 }
+
 std::string OneNetDevice::PreparePublishPayloadJson()
 {
     // payload 格式
@@ -292,7 +297,7 @@ std::string OneNetDevice::PreparePublishPayloadJson()
 
     AddBatteryStatusJsonNode(paramsNode);   // 添加电池状态
     AddCPUUsageJsonNode(paramsNode);        // 添加 CPU 使用率
-    AddDiskUsageJsonNode(paramsNode);       // 添加磁盘使用率
+    AddDiskInfoJsonNode(paramsNode);        // 添加磁盘信息
     AddMemoryUsageJsonNode(paramsNode);     // 添加内存使用率
     AddModelNameJsonNode(paramsNode);       // 添加设备型号
     AddLaunchTimeJsonNode(paramsNode);      // 添加启动时间
@@ -369,6 +374,24 @@ int32_t OneNetDevice::GetDiskUsage(int32_t& diskUsage)
     diskUsage = static_cast<int32_t>((fsinfo.f_blocks * fsinfo.f_bsize) / (1024 * 1024));
     SPR_LOGD("Disk Usage: %d MB\n", diskUsage);
     return 0; // Return success
+}
+
+int32_t OneNetDevice::GetDiskInfo(DiskInfo& diskInfo)
+{
+    struct statvfs fsinfo;
+    if (statvfs("/", &fsinfo) == -1) {
+        SPR_LOGE("statvfs failed!\n");
+        return -1;
+    }
+
+    // Calculate total capacity in MB
+    diskInfo.totalSize = fsinfo.f_blocks * fsinfo.f_frsize / (1024 * 1024);
+    diskInfo.freeSize = fsinfo.f_bfree * fsinfo.f_frsize / (1024 * 1024);
+    diskInfo.usedPercent = 100.0 * (1.0 - (double)fsinfo.f_bfree / fsinfo.f_blocks);
+    SPR_LOGD("Disk Info: totalSize: %d MB, freeSize: %d MB, usedPercent: %.2f%%\n",
+            diskInfo.totalSize, diskInfo.freeSize, diskInfo.usedPercent);
+
+    return 0;
 }
 
 int32_t OneNetDevice::GetMemoryUsage(int32_t& memoryUsage)

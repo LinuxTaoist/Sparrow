@@ -67,10 +67,7 @@ SprMsg::SprMsg(std::string datas)
 
 SprMsg& SprMsg::operator=(const SprMsg &srcMsg)
 {
-    if (this == &srcMsg) {
-        // do nothing
-    }
-    else {
+    if (this != &srcMsg) {
         CopyMsg(srcMsg);
     }
 

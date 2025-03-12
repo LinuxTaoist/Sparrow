@@ -22,6 +22,7 @@
 #include <string.h>
 #include "SprLog.h"
 #include "SprDebugNode.h"
+#include "SprProcInfo.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
@@ -211,9 +212,10 @@ void SprDebugNode::DebugDumpCurMQs(const std::vector<std::string>& args)
 {
     std::vector<SMQStatus> tmpMQAttrs;
     SprObserverWithMQueue::GetAllMQStatus(tmpMQAttrs);
+    std::string exe = SprProcInfo::GetInstance()->GetProcName();
 
     SPR_LOGD("====================================================================================================\n");
-    SPR_LOGD("                                   Show All Message Queues                                          \n");
+    SPR_LOGD("                                   Show %s Message Queues                              \n", exe.c_str());
     SPR_LOGD("====================================================================================================\n");
     //          %6d  %7ld  %7ld  %7ld  %s  %6ld %7u %7u  %6u  %s
     SPR_LOGD(" HANDLE  MNLIMIT  MNPUSED  MNCUSED  BLOCK    MLLIMIT MLPUSED MIDLAST  MTOTAL  QNAME\n");

@@ -24,6 +24,7 @@
 #include "SprContext.h"
 #include "CommonMacros.h"
 #include "SprSystem.h"
+#include "SprProcInfo.h"
 #include "SprTimeTrace.h"
 #include "CoreTypeDefs.h"
 #include "TimeManager.h"
@@ -67,6 +68,12 @@ void SprSystem::InitEnv()
 
     // write release information
     LoadReleaseInformation();
+}
+
+void SprSystem::InitOthers()
+{
+    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_SPARROW);
+    SprProcInfo::GetInstance()->Init();
 }
 
 void SprSystem::InitMsgQueueLimit()
@@ -139,5 +146,5 @@ void SprSystem::Init()
 
     SprContext ctx;
     mPluginMgr.Init();
-    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_SPARROW);
+    InitOthers();
 }

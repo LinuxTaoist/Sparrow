@@ -37,7 +37,7 @@
 #define DEBUG_MODULE_NAME       "Properties"
 #define SYSTEM_PROP_PATH        "system.prop"
 #define DEFAULT_PROP_PATH       "default.prop"
-#define VENDOR_PROP_PATH        "default.prop"
+#define VENDOR_PROP_PATH        "vendor.prop"
 
 #define PERSIST_FILE_PATH       "/tmp/persist/"
 #define SHARED_MEMORY_PATH      "/tmp/__property_shared_memory__"

@@ -40,6 +40,7 @@ public:
 private:
     SprSystem();
     void InitEnv();
+    void InitOthers();
     void InitMsgQueueLimit();
     void LoadReleaseInformation();
 
