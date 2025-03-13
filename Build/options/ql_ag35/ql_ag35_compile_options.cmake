@@ -3,9 +3,9 @@ message("load ql_ag35_compile_options.cmake")
 set(CMAKE_SYSTEM_NAME Linux)
 set(CMAKE_SYSTEM_PROCESSOR arm)
 set(TOOLCHAIN_DIR "/opt/ql_crosstools/ql-ag35-le22-gcc640-v1-toolchain/gcc/usr/bin/")
-set(TOOLCHAIN_PREFIX "arm-oe-linux-gnueabi/arm-oe-linux-gnueabi-")
-set(CMAKE_C_COMPILER "${TOOLCHAIN_DIR}${TOOLCHAIN_PREFIX}gcc")
-set(CMAKE_CXX_COMPILER "${TOOLCHAIN_DIR}${TOOLCHAIN_PREFIX}g++")
+set(TOOLCHAIN_PREFIX "arm-oe-linux-gnueabi/arm-oe-linux-gnueabi")
+set(CMAKE_C_COMPILER "${TOOLCHAIN_DIR}${TOOLCHAIN_PREFIX}-gcc")
+set(CMAKE_CXX_COMPILER "${TOOLCHAIN_DIR}${TOOLCHAIN_PREFIX}-g++")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dynamic-linker,/lib/ld-linux-armhf.so.3")
 
 # 设置 sysroot

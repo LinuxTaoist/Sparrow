@@ -45,8 +45,8 @@
     #define GCC_VERSION     "Unknown"
 #endif
 
-#ifndef RUN_ENV
-    #define RUN_ENV         "Unknown"
+#ifndef PROJECT_PLATFORM
+    #define PROJECT_PLATFORM "Unknown"
 #endif
 
 #ifndef BUILD_TIME

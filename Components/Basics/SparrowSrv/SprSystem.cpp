@@ -97,7 +97,7 @@ void SprSystem::LoadReleaseInformation()
     std::string cxxStandard     = CXX_STANDARD;
     std::string gxxStandard     = GXX_VERSION;
     std::string gccVersion      = GCC_VERSION;
-    std::string runEnv          = RUN_ENV;
+    std::string runPlatform     = PROJECT_PLATFORM;
     std::string buildTime       = BUILD_TIME;
     std::string buildType       = BUILD_TYPE;
     std::string buildHost       = BUILD_HOST;
@@ -109,7 +109,7 @@ void SprSystem::LoadReleaseInformation()
     releaseInfo += "C++ Standard   : " + cxxStandard + "\n";
     releaseInfo += "G++ Version    : " + gxxStandard + "\n";
     releaseInfo += "Gcc Version    : " + gccVersion + "\n";
-    releaseInfo += "Running Env    : " + runEnv + "\n";
+    releaseInfo += "Run Platform   : " + runPlatform + "\n";
     releaseInfo += "Build Time     : " + buildTime + "\n";
     releaseInfo += "Build Type     : " + buildType + "\n";
     releaseInfo += "Build Host     : " + buildHost + "\n";

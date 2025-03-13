@@ -446,32 +446,6 @@ void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const 
     SPR_LOGD("Notify module device: %s, msg: %s\n", devModule.c_str(), GetSigName(msg.GetMsgId()));
 }
 
-void OneNetManager::RegisterDebugFuncs()
-{
-    SprDebugNode* p = SprDebugNode::GetInstance();
-    if (!p) {
-        SPR_LOGE("p is nullptr!\n");
-        return;
-    }
-
-    p->RegisterCmd(mModuleName, "OnOffLog",    "Enable log on-off", std::bind(&OneNetManager::DebugEnableDumpLog,  this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "DeviceList",  "Show device list",  std::bind(&OneNetManager::DebugDeviceList,     this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "Active",      "Active device",     std::bind(&OneNetManager::DebugActiveDevice,   this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "Deactive",    "Deactive device",   std::bind(&OneNetManager::DebugDeactiveDevice, this, std::placeholders::_1));
-}
-
-void OneNetManager::UnregisterDebugFuncs()
-{
-    SprDebugNode* p = SprDebugNode::GetInstance();
-    if (!p) {
-        SPR_LOGE("p is nullptr!\n");
-        return;
-    }
-
-    SPR_LOGD("Unregister %s all debug funcs\n", mModuleName.c_str());
-    p->UnregisterCmd(mModuleName);
-}
-
 /**
  * @brief Process SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
  *
@@ -695,6 +669,32 @@ int32_t OneNetManager::ProcessMsg(const SprMsg& msg)
     }
 
     return 0;
+}
+
+void OneNetManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(mModuleName, "OnOffLog",    "Enable log on-off", std::bind(&OneNetManager::DebugEnableDumpLog,  this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "DeviceList",  "Show device list",  std::bind(&OneNetManager::DebugDeviceList,     this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "Active",      "Active device",     std::bind(&OneNetManager::DebugActiveDevice,   this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "Deactive",    "Deactive device",   std::bind(&OneNetManager::DebugDeactiveDevice, this, std::placeholders::_1));
+}
+
+void OneNetManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Unregister %s all debug funcs\n", mModuleName.c_str());
+    p->UnregisterCmd(mModuleName);
 }
 
 void OneNetManager::DebugEnableDumpLog(const std::vector<std::string>& args)

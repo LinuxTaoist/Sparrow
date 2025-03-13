@@ -115,10 +115,6 @@ private:
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
-    /* 注册/注销所有调试函数 */
-    void RegisterDebugFuncs();
-    void UnregisterDebugFuncs();
-
     /* 消息响应函数 */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
@@ -131,6 +127,10 @@ private:
     void MsgRespondDeviceDisconnectPassive(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
+
+    /* 注册/注销所有调试函数 */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
 
     /* 调试函数 */
     void DebugEnableDumpLog(const std::vector<std::string>& args);
