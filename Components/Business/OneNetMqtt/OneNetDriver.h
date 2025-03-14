@@ -126,8 +126,6 @@ private:
      */
     void MsgRespondSocketConnect(const SprMsg& msg);
     void MsgRespondSocketConnectSuccess(const SprMsg& msg);
-    void MsgRespondSocketConnectFail(const SprMsg& msg);
-    void MsgRespondSocketReconnect(const SprMsg& msg);
     void MsgRespondSocketReconnectTimerEvent(const SprMsg& msg);
     void MsgRespondSocketDisconnectActive(const SprMsg& msg);
     void MsgRespondSocketDisconnectPassive(const SprMsg& msg);
