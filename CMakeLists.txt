@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
+cmake_minimum_required(VERSION 3.16)
 project(Sparrow)
 
 # 兼容CMAKE旧版本
@@ -10,10 +10,10 @@ set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 ## 包含配置文件
 include(${PROJECT_PATH}/version.cmake)
 include(${PROJECT_PATH}/modules_configs.cmake)
-include(${PROJECT_PATH}/Build/options/${PROJECT_PLATFORM}/${PROJECT_PLATFORM}_compile_options.cmake)
 
 ## 设置全局位置无关代码标志
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ## 保存输出路径
 set(OUTPUT_PATH             ${PROJECT_PATH}/Release)

@@ -1,4 +1,5 @@
 .vscode/
 Release/
+3rdParty/googletest/googletest/
 3rdParty/libgo/libgo/
 3rdParty/sqlite/sqlite-autoconf-3450300/

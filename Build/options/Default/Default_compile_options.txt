@@ -1,4 +1,5 @@
 ## default compile options
+message("load default_compile_options.cmake")
 
 # 设置链接选项
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
