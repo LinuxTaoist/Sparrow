@@ -9,16 +9,11 @@ set(3RD_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 #)
 
 if(BUILD_GTEST)
-    if(NOT EXISTS ${3RD_PATH}/googletest/googletest)
-        message(STATUS "tar -zxf googletest.tar.gz")
-
-        # 解压文件
-        execute_process(
-            COMMAND tar -zxf ${3RD_PATH}/googletest/googletest.tar.gz -C ${3RD_PATH}/googletest
-            RESULT_VARIABLE extract_result
-            OUTPUT_VARIABLE extract_output
-        )
-    endif()
-
-    add_subdirectory(${3RD_PATH}/googletest/googletest)
+    execute_process(
+        COMMAND mkdir -p ${LIBRARY_OUTPUT_PATH}
+        COMMAND cp -rf ${3RD_PATH}/googletest/lib/${PROJECT_PLATFORM}/libgtest.a ${LIBRARY_OUTPUT_PATH}/
+        COMMAND cp -rf ${3RD_PATH}/googletest/lib/${PROJECT_PLATFORM}/libgtest_main.a ${LIBRARY_OUTPUT_PATH}/
+        RESULT_VARIABLE result
+        OUTPUT_VARIABLE output
+    )
 endif()

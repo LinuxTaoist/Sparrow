@@ -26,4 +26,4 @@ cmake ../../ \
     -DCMAKE_INSTALL_PREFIX=../              \
     -DBUILD_GTEST=$ENABLE_BUILD_GTEST
     -C $COMPILE_OPTIONS
-make install -j24
+make -j24

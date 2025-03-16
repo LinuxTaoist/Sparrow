@@ -27,14 +27,21 @@
 
 namespace GeneralUtils {
 
-int GetRandomInteger(int width)
-{
-    int maxValue = pow(10, width) - 1;
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<> distribution(0, maxValue);
+int32_t GetRandomInteger(int32_t width) {
+    if (width <= 0) {
+        return 0;
+    }
 
-    return distribution(generator);
+    int32_t minVal = static_cast<int32_t>(std::pow(10, width - 1));
+    int32_t maxVal = static_cast<int32_t>(std::pow(10, width)) - 1;
+    if (width == 1) {
+        minVal = 0;
+    }
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(minVal, maxVal);
+    return dis(gen);
 }
 
 int InitSignalHandler(void (*signalHandler)(int))

@@ -27,4 +27,4 @@ cmake ../../ \
     -DBUILD_GTEST=$ENABLE_BUILD_GTEST       \
     -C $COMPILE_OPTIONS
 
-make install -j16
+make -j16

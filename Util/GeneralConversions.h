@@ -82,9 +82,10 @@ std::string ToHexString(const std::vector<T>& vec)
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
-        ss << std::setw(sizeof(T) * 2) << static_cast<T>(it);
+        for (size_t i = 0; i < sizeof(T); ++i) {
+            ss << std::setw(2) << static_cast<int>((it >> ((sizeof(T) - 1 - i) * 8)) & 0xFF);
+        }
     }
-
     return ss.str();
 }
 

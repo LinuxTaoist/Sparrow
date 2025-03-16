@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.10)
 project(Sparrow)
 
 # 兼容CMAKE旧版本
@@ -74,3 +74,7 @@ add_subdirectory(Examples)
 add_subdirectory(PrivateAPIs)
 add_subdirectory(PublicAPIs)
 add_subdirectory(UtilModules)
+
+if(BUILD_GTEST)
+    add_subdirectory(Test)
+endif()
