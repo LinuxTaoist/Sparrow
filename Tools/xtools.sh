@@ -112,7 +112,7 @@ new_platform() {
     cd ${project_path}
     echo -e "${GREEN}touch ${project_path}/Build/${platform_name}/${platform_name}_build.sh ${NC}"
     mkdir -p ${project_path}/Build/options/${platform_name}
-    touch ${project_path}/Build/options/${platform_name}/${platform_name}_compile_options.txt
+    touch ${project_path}/Build/options/${platform_name}/${platform_name}_compile_options.cmake
     touch ${project_path}/Build/${platform_name}_build.sh
 
     echo -e "${GREEN}touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop ${NC}"

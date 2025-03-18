@@ -3,7 +3,6 @@ ENABLE_DEBUG="OFF"
 BUILD_TYPE="Release"
 PROJECT_PATH=$(pwd)/../
 PROJECT_PLATFORM="bw_imx6ull"
-COMPILE_OPTIONS=options/${PROJECT_PLATFORM}/${PROJECT_PLATFORM}_complile_options.cmake
 
 # Enable the build items option
 ENABLE_BUILD_GTEST="ON"
@@ -24,5 +23,5 @@ cmake ../../ \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
     -DCMAKE_INSTALL_PREFIX=../              \
     -DBUILD_GTEST=$ENABLE_BUILD_GTEST
-    -C $COMPILE_OPTIONS
+
 make install -j24
