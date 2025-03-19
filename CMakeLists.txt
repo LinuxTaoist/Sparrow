@@ -21,10 +21,13 @@ set(OUTPUT_PATH             ${PROJECT_PATH}/Release)
 set(LIBRARY_OUTPUT_PATH     ${OUTPUT_PATH}/Lib)
 set(EXECUTABLE_OUTPUT_PATH  ${OUTPUT_PATH}/Bin)
 
+## 打印所有开关状态
+message(STATUS "TEST_DEBUG = ${TEST_DEBUG}")
+message(STATUS "BUILD_GTEST = ${BUILD_GTEST}")
+
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
 
-option(TEST_DEBUG "option for debug" OFF)
 if (TEST_DEBUG)
     add_definitions(-DTEST_DEBUG)
 endif()

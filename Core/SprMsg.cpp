@@ -237,7 +237,7 @@ int32_t SprMsg::Decode(std::string& deDatas)
     return ret;
 }
 
-int32_t SprMsg::Encode(std::string & enDatas) const
+int32_t SprMsg::Encode(std::string& enDatas) const
 {
     int32_t ret = 0;
 
@@ -499,28 +499,34 @@ void SprMsg::EncodeU8Vec(std::string& enDatas)
 }
 
 void SprMsg::EncodeI8Vec(std::string& enDatas) {
-    enDatas.push_back(static_cast<uint8_t>(mI8VecLength >> 24));
-    enDatas.push_back(static_cast<uint8_t>(mI8VecLength >> 16));
-    enDatas.push_back(static_cast<uint8_t>(mI8VecLength >> 8));
-    enDatas.push_back(static_cast<uint8_t>(mI8VecLength));
+    enDatas.push_back(0xFF & (mI8VecLength >> 24));
+    enDatas.push_back(0xFF & (mI8VecLength >> 16));
+    enDatas.push_back(0xFF & (mI8VecLength >> 8));
+    enDatas.push_back(0xFF & mI8VecLength);
     enDatas.insert(enDatas.end(), mI8Vec.begin(), mI8Vec.end());
 }
 
 void SprMsg::EncodeU16Vec(std::string& enDatas) {
-    enDatas.push_back(static_cast<uint8_t>(mU16VecLength >> 24));
-    enDatas.push_back(static_cast<uint8_t>(mU16VecLength >> 16));
-    enDatas.push_back(static_cast<uint8_t>(mU16VecLength >> 8));
-    enDatas.push_back(static_cast<uint8_t>(mU16VecLength));
+    enDatas.push_back(0xFF & (mU16VecLength >> 24));
+    enDatas.push_back(0xFF & (mU16VecLength >> 16));
+    enDatas.push_back(0xFF & (mU16VecLength >> 8));
+    enDatas.push_back(0xFF & mU16VecLength);
+
+    for (const auto& value : mU16Vec) {
+        enDatas.push_back(0xFF & (value >> 8));
+        enDatas.push_back(0xFF & value);
+    }
 }
 
 void SprMsg::EncodeI16Vec(std::string& enDatas) {
-    enDatas.push_back(static_cast<uint8_t>(mI16VecLength >> 24));
-    enDatas.push_back(static_cast<uint8_t>(mI16VecLength >> 16));
-    enDatas.push_back(static_cast<uint8_t>(mI16VecLength >> 8));
-    enDatas.push_back(static_cast<uint8_t>(mI16VecLength));
+    enDatas.push_back(0xFF & (mI16VecLength >> 24));
+    enDatas.push_back(0xFF & (mI16VecLength >> 16));
+    enDatas.push_back(0xFF & (mI16VecLength >> 8));
+    enDatas.push_back(0xFF & mI16VecLength);
+
     for (const auto& value : mI16Vec) {
-        enDatas.push_back(static_cast<uint8_t>(value >> 8));
-        enDatas.push_back(static_cast<uint8_t>(value));
+        enDatas.push_back(0xFF & (value >> 8));
+        enDatas.push_back(0xFF & value);
     }
 }
 
@@ -541,15 +547,16 @@ void SprMsg::EncodeU32Vec(std::string& enDatas)
 }
 
 void SprMsg::EncodeI32Vec(std::string& enDatas) {
-    enDatas.push_back(static_cast<uint8_t>(mI32VecLength >> 24));
-    enDatas.push_back(static_cast<uint8_t>(mI32VecLength >> 16));
-    enDatas.push_back(static_cast<uint8_t>(mI32VecLength >> 8));
-    enDatas.push_back(static_cast<uint8_t>(mI32VecLength));
+    enDatas.push_back(0xFF & (mI32VecLength >> 24));
+    enDatas.push_back(0xFF & (mI32VecLength >> 16));
+    enDatas.push_back(0xFF & (mI32VecLength >> 8));
+    enDatas.push_back(0xFF & mI32VecLength);
+
     for (const auto& value : mI32Vec) {
-        enDatas.push_back(static_cast<uint8_t>(value >> 24));
-        enDatas.push_back(static_cast<uint8_t>(value >> 16));
-        enDatas.push_back(static_cast<uint8_t>(value >> 8));
-        enDatas.push_back(static_cast<uint8_t>(value));
+        enDatas.push_back(0xFF & (value >> 24));
+        enDatas.push_back(0xFF & (value >> 16));
+        enDatas.push_back(0xFF & (value >> 8));
+        enDatas.push_back(0xFF & value);
     }
 }
 
@@ -574,13 +581,14 @@ void SprMsg::EncodeU64Vec(std::string& enDatas)
 }
 
 void SprMsg::EncodeI64Vec(std::string& enDatas) {
-    enDatas.push_back(static_cast<uint8_t>(mI64VecLength >> 24));
-    enDatas.push_back(static_cast<uint8_t>(mI64VecLength >> 16));
-    enDatas.push_back(static_cast<uint8_t>(mI64VecLength >> 8));
-    enDatas.push_back(static_cast<uint8_t>(mI64VecLength));
+    enDatas.push_back(0xFF & (mI64VecLength >> 24));
+    enDatas.push_back(0xFF & (mI64VecLength >> 16));
+    enDatas.push_back(0xFF & (mI64VecLength >> 8));
+    enDatas.push_back(0xFF & mI64VecLength);
+
     for (const auto& value : mI64Vec) {
         for (int32_t i = 7; i >= 0; --i) {
-            enDatas.push_back(static_cast<uint8_t>(value >> (i * 8)));
+            enDatas.push_back(0xFF & (value >> (i * 8)));
         }
     }
 }

@@ -39,8 +39,8 @@ static bool mEnable;
 static std::mutex gTMutex;
 static ProcMutex gPMutex("IOneNetMutex");
 static std::atomic<bool> gObjAlive(true);
-std::shared_ptr<Parcel> pReqParcel = nullptr;
-std::shared_ptr<Parcel> pRspParcel = nullptr;
+static std::shared_ptr<Parcel> pReqParcel = nullptr;
+static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
 SprMediatorInterface::SprMediatorInterface()
 {

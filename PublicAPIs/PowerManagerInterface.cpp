@@ -41,8 +41,8 @@ static bool mEnable;
 static std::atomic<bool> gObjAlive(true);
 static std::mutex gTMutex;
 static ProcMutex gPMutex("IPowerMgrMutex");
-std::shared_ptr<Parcel> pReqParcel = nullptr;
-std::shared_ptr<Parcel> pRspParcel = nullptr;
+static std::shared_ptr<Parcel> pReqParcel = nullptr;
+static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
 PowerManagerInterface::PowerManagerInterface()
 {

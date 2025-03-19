@@ -15,6 +15,10 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)
 set(CMAKE_FIND_ROOT_PATH_MODE_LIBRARY ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 
+# 设置编译开关
+set(TEST_DEBUG ON)
+set(BUILD_GTEST ON)
+
 # 设置编译选项
 add_compile_options(
     -march=armv7-a

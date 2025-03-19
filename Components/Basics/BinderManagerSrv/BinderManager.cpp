@@ -34,8 +34,8 @@ using namespace InternalDefs;
 
 #define INT_KEY_LENGTH  5
 
-Parcel* pReqParcel = nullptr;
-Parcel* pRspParcel = nullptr;
+static Parcel* pReqParcel = nullptr;
+static Parcel* pRspParcel = nullptr;
 
 static std::atomic<bool> gObjAlive(true);
 bool BinderManager::mRunning = false;
