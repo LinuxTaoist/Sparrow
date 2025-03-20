@@ -64,8 +64,6 @@ enum CommonErrorCode {
 
     ERR_TIMEM_UNKOWN_ERROR          = -651,
 
-    ERR_TIMERM_UNKOWN_ERROR         = -651,
-
     ERR_SYSTEM_TIMER_UNKOWN_ERROR   = -701,
 
     ERR_POWERM_UNKOWN_ERROR         = -751,

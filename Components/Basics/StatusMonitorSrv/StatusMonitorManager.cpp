@@ -22,6 +22,7 @@
 #include "SprDebugNode.h"
 #include "CommonMacros.h"
 #include "CommonErrorCodes.h"
+#include "SprEnumHelper.h"
 #include "StatusMonitorManager.h"
 
 using namespace InternalDefs;
@@ -30,12 +31,6 @@ using namespace InternalDefs;
 
 #define OWNER_STATUSMONITOR         "StatusMonitorManager"
 #define STATUS_EVENT_NUM_LIMIT      100
-#define ERR_EVENT_LEVEL_UNKNOWN     0
-#define ERR_EVENT_LEVEL_CRITICAL    1
-#define ERR_EVENT_LEVEL_ERROR       2
-#define ERR_EVENT_LEVEL_WARNNING    3
-#define ERR_EVENT_LEVEL_INFO        4
-
 
 StatusMonitorManager::StatusMonitorManager(ModuleIDType id, const std::string& name)
             : SprObserverWithMQueue(id, name)
@@ -73,26 +68,6 @@ int32_t StatusMonitorManager::AddStatusEvent(uint32_t moduleID, int32_t errCode,
     return 0;
 }
 
-int32_t StatusMonitorManager::GetLevelFromErrCode(int32_t errCode)
-{
-    int32_t levelCode = (0 - errCode) % 100;
-
-    if (levelCode >= ERR_LEVEL_CRITICAL_BEGIN && levelCode < ERR_LEVEL_ERROR_BEGIN) {
-        return ERR_EVENT_LEVEL_CRITICAL;
-    }
-    if (levelCode >= ERR_LEVEL_ERROR_BEGIN && levelCode < ERR_LEVEL_WARNNING_BEGIN) {
-        return ERR_EVENT_LEVEL_ERROR;
-    }
-    if (levelCode >= ERR_LEVEL_WARNNING_BEGIN && levelCode < ERR_LEVEL_INFO_BEGIN) {
-        return ERR_EVENT_LEVEL_WARNNING;
-    }
-    if (levelCode >= ERR_LEVEL_INFO_BEGIN){
-        return ERR_EVENT_LEVEL_INFO;
-    }
-
-    return ERR_EVENT_LEVEL_UNKNOWN;
-}
-
 int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text)
 {
     SPR_LOGI("                             Show All Status Events                                            \n");
@@ -105,7 +80,7 @@ int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32
 
         for (auto it = tmpEvents.rbegin(); it != tmpEvents.rend(); ++it) {
             auto& event = *it;
-            int32_t tmpLevel = GetLevelFromErrCode(event.sErrorCode);
+            int32_t tmpLevel = GetSprErrorLevel(event.sErrorCode);
 
             if ( (moduleID == 0 || moduleID == tmpID)                               &&
                  (level == ERR_EVENT_LEVEL_UNKNOWN || level == tmpLevel)            &&
@@ -160,7 +135,7 @@ int32_t StatusMonitorManager::DelStatusEventWithFilter(int32_t moduleID, int32_t
 
         for (auto it = tmpEvents.begin(); it != tmpEvents.end(); ) {
             int32_t tmpErrCode = (*it).sErrorCode;
-            int32_t tmpLevel = GetLevelFromErrCode(tmpErrCode);
+            int32_t tmpLevel = GetSprErrorLevel(tmpErrCode);
             std::string tmpText = (*it).sText;
 
             bool shouldDelete = (moduleID == 0 || moduleID == tmpModuleID) &&
