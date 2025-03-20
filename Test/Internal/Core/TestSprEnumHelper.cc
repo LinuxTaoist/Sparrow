@@ -82,7 +82,7 @@ TEST(Core_SprEnumHelper, GetSprTimeSourceTypeDescription) {
     EXPECT_EQ(InternalDefs::GetSprTimeSourceTypeDescription(100), "UNDEFINED");
 }
 
-TEST(ErrorDescriptionTest, GetSprErrorDescription) {
+TEST(Core_SprEnumHelper, GetSprErrorDescription) {
     EXPECT_EQ(InternalDefs::GetSprErrorDescription(CommonErrorCode::ERR_GENERAL_SUCCESS), "General success");
     EXPECT_EQ(InternalDefs::GetSprErrorDescription(CommonErrorCode::ERR_DEBUG_UNKNOW_ERROR), "Debug unknown error");
     EXPECT_EQ(InternalDefs::GetSprErrorDescription(CommonErrorCode::ERR_CODE_BUTT), "Unknown error code");
