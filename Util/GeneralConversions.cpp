@@ -23,6 +23,45 @@
 namespace GeneralConversions
 {
 
+std::string HexStringToAscii(const std::string& hexString)
+{
+    if (hexString.empty() || hexString.size() % 2 != 0) {
+        return "";
+    }
+
+    std::string result;
+    for (size_t i = 0; i < hexString.size(); i += 2) {
+        char high = hexString[i];
+        char low = hexString[i + 1];
+
+        if (!((high >= '0' && high <= '9') || (high >= 'A' && high <= 'F') || (high >= 'a' && high <= 'f')) ||
+            !((low >= '0' && low <= '9') || (low >= 'A' && low <= 'F') || (low >= 'a' && low <= 'f'))) {
+            return "";
+        }
+
+        unsigned char byte = 0;
+        if (high >= '0' && high <= '9') {
+            byte = (high - '0') << 4;
+        } else if (high >= 'A' && high <= 'F') {
+            byte = (high - 'A' + 10) << 4;
+        } else {
+            byte = (high - 'a' + 10) << 4;
+        }
+
+        if (low >= '0' && low <= '9') {
+            byte |= (low - '0');
+        } else if (low >= 'A' && low <= 'F') {
+            byte |= (low - 'A' + 10);
+        } else {
+            byte |= (low - 'a' + 10);
+        }
+
+        result.push_back(byte);
+    }
+
+    return result;
+}
+
 int DumpBytesAscall(const std::string& bytes, std::string& out)
 {
     const int32_t BYTES_PER_LINE = 16; // Number of bytes per line in the dump.

@@ -129,6 +129,17 @@ std::string ToString(const std::vector<T>& vec)
 }
 
 /**
+ * @brief Convert a hexadecimal string to its corresponding ASCII string.
+ *
+ * This function takes a hexadecimal string as input and converts it to the corresponding ASCII string.
+ * If the input string is empty, has an odd length, or contains non - hexadecimal characters, the function will return an empty string.
+ *
+ * @param hexString The hexadecimal string to be converted. It should only consist of hexadecimal characters (0 - 9, A - F, or a - f).
+ * @return std::string The converted ASCII string. Returns an empty string if the input is invalid.
+ */
+std::string HexStringToAscii(const std::string& hexString);
+
+/**
  * @brief Dump ascall bytes
  *
  * @param in bytes
