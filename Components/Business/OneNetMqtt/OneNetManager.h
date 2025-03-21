@@ -26,11 +26,14 @@
 #include "OneNetDevice.h"
 #include "SprObserverWithMQueue.h"
 
+namespace {
+
 #ifdef ENUM_OR_STRING
 #undef ENUM_OR_STRING
 #endif
 #define ENUM_OR_STRING(x) x
 
+}
 // 一级状态
 #define ONENET_MGR_LEV1_MACROS                      \
     ENUM_OR_STRING(LEV1_ONENET_MGR_ANY),            \

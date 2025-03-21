@@ -31,6 +31,28 @@
 #define ERR_LEVEL_WARNNING_BEGIN    30
 #define ERR_LEVEL_INFO_BEGIN        40
 
+namespace {
+
+#ifdef ENUM_OR_STRING
+#undef ENUM_OR_STRING
+#endif
+#define ENUM_OR_STRING(x) x
+
+}
+
+#define ERR_EVENT_LEVEL_MACROS \
+    ENUM_OR_STRING(ERR_EVENT_LEVEL_UNKNOWN),    \
+    ENUM_OR_STRING(ERR_EVENT_LEVEL_CRITICAL),   \
+    ENUM_OR_STRING(ERR_EVENT_LEVEL_ERROR),      \
+    ENUM_OR_STRING(ERR_EVENT_LEVEL_WARNNING),   \
+    ENUM_OR_STRING(ERR_EVENT_LEVEL_INFO),       \
+    ENUM_OR_STRING(ERR_EVENT_LEVEL_BUTT)
+
+enum SprErrorLevel
+{
+    ERR_EVENT_LEVEL_MACROS
+};
+
 enum CommonErrorCode {
     // general error code
     ERR_GENERAL_SUCCESS             =  0,

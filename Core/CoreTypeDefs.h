@@ -56,11 +56,18 @@ typedef void(*PluginExitFunc) (std::map<int32_t, SprObserver*>& modules, SprCont
 
 namespace InternalDefs {
 
+namespace {
+
 #ifdef ENUM_OR_STRING
 #undef ENUM_OR_STRING
 #endif
 #define ENUM_OR_STRING(x) x
 
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - EProxyType
+// --------------------------------------------------------------------------------------------------------------------
 #define PROXY_TYPE_MACROS \
     ENUM_OR_STRING(MEDIATOR_PROXY_MQUEUE),  \
     ENUM_OR_STRING(MEDIATOR_PROXY_SOCKET),  \
@@ -72,6 +79,9 @@ enum EProxyType
     PROXY_TYPE_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - ESprModuleID
+// --------------------------------------------------------------------------------------------------------------------
 #define SPR_MODULE_ID_MACROS \
     ENUM_OR_STRING(MODULE_NONE),                \
     ENUM_OR_STRING(MODULE_PROXY ),              \
@@ -103,6 +113,9 @@ enum ESprModuleID
     SPR_MODULE_ID_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - EProxyBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
 #define PROXY_BINDER_CMD_MACROS \
     ENUM_OR_STRING(PROXY_CMD_GET_ALL_MQ_ATTRS), \
     ENUM_OR_STRING(PROXY_CMD_GET_SIGNAL_NAME),  \
@@ -114,6 +127,9 @@ enum EProxyBinderCmd
     PROXY_BINDER_CMD_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - EPropertyBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
 #define PROPERTY_BINDER_CMD_MACROS \
     ENUM_OR_STRING(PROPERTY_CMD_SET_PROPERTY),      \
     ENUM_OR_STRING(PROPERTY_CMD_GET_PROPERTY),      \
@@ -126,6 +142,9 @@ enum EPropertyBinderCmd
     PROPERTY_BINDER_CMD_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - EPowerBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
 #define POWER_BINDER_CMD_MACROS \
     ENUM_OR_STRING(POWERM_CMD_POWER_ON),    \
     ENUM_OR_STRING(POWERM_CMD_POWER_OFF),   \
@@ -137,6 +156,9 @@ enum EPowerMBinderCmd
     POWER_BINDER_CMD_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - EDebugBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
 #define DEBUG_BINDER_CMD_MACROS \
     ENUM_OR_STRING(DEBUG_CMD_ENABLE_REMOTE_PORT),       \
     ENUM_OR_STRING(DEBUG_CMD_DISABLE_REMOTE_PORT),      \
@@ -154,6 +176,9 @@ enum EDebugMBinderCmd
     DEBUG_BINDER_CMD_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - EOneNetBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
 #define ONENET_BINDER_CMD_MACROS \
     ENUM_OR_STRING(ONENET_CMD_ACTIVE_DEVICE),   \
     ENUM_OR_STRING(ONENET_CMD_DEACTIVE_DEVICE), \
@@ -165,6 +190,9 @@ enum EOneNetBinderCmd
     ONENET_BINDER_CMD_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - EGeneralBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
 #define GENERAL_BINDER_CMD_MACROS \
     ENUM_OR_STRING(GENERAL_CMD_EXE_EXIT),   \
     ENUM_OR_STRING(GENERAL_CMD_BUTT)
@@ -175,12 +203,15 @@ enum EGeneralBinderCmd
     GENERAL_BINDER_CMD_MACROS
 };
 
-// 0: used for environment initialization
-// 1: used for system core services
-// 2: used for critical services, initial project configuration, etc
-// 3: used for main business services
-// 4: used for ancillary services, not need to start immediately.
-// 5: used for optional services
+//---------------------------------------------------------------------------------------------------------------------
+// - EModuleBootPriority
+// --------------------------------------------------------------------------------------------------------------------
+// BOOT_PRIORITY_HIGHEST        : used for environment initialization
+// BOOT_PRIORITY_HIGH           : used for system core services
+// BOOT_PRIORITY_MEDIUM_HIGH    : used for critical services, initial project configuration, etc
+// BOOT_PRIORITY_MEDIUM         : used for main business services
+// BOOT_PRIORITY_MEDIUM_LOW     : used for ancillary services, not need to start immediately.
+// BOOT_PRIORITY_LOWEST         : used for optional services
 #define MODULE_BOOT_PRIORITY_MACROS \
     ENUM_OR_STRING(BOOT_PRIORITY_HIGHEST),      \
     ENUM_OR_STRING(BOOT_PRIORITY_HIGH),         \
@@ -194,6 +225,9 @@ enum EModuleBootPriority
     MODULE_BOOT_PRIORITY_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - ETimeSourceType
+// --------------------------------------------------------------------------------------------------------------------
 #define TIME_SOURCE_TYPE_MACROS \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_NTP),   \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_GNSS),  \
@@ -204,6 +238,9 @@ enum TimeSourceType
     TIME_SOURCE_TYPE_MACROS
 };
 
+//---------------------------------------------------------------------------------------------------------------------
+// - STimerInfo
+// --------------------------------------------------------------------------------------------------------------------
 typedef struct
 {
     uint32_t moduleId;

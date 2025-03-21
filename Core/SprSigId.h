@@ -22,11 +22,16 @@
 
 namespace InternalDefs {
 
+namespace
+{
+
 /* 消息ID转枚举 */
 #ifdef ENUM_OR_STRING
 #undef ENUM_OR_STRING
 #endif
 #define ENUM_OR_STRING(x) x
+
+}
 
 enum ESprSigId
 {

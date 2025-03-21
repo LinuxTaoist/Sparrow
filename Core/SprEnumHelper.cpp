@@ -17,6 +17,7 @@
  *
  */
 #include <vector>
+#include "CoreTypeDefs.h"
 #include "CommonErrorCodes.h"
 #include "SprEnumHelper.h"
 
@@ -27,6 +28,9 @@ namespace InternalDefs {
 #endif
 #define ENUM_OR_STRING(x) #x
 
+// --------------------------------------------------------------------------------------------------------------------
+// - Enums of CommonErrorCodes.h
+// --------------------------------------------------------------------------------------------------------------------
 int32_t GetSprErrorLevel(int32_t errorCode)
 {
     int32_t levelCode = (0 - errorCode) % 100;
@@ -48,6 +52,57 @@ int32_t GetSprErrorLevel(int32_t errorCode)
 
 }
 
+std::string GetSprErrorLevelDescription(int32_t level)
+{
+    std::vector<std::string> errorLevels = {
+        ERR_EVENT_LEVEL_MACROS
+    };
+
+    return ((int32_t)errorLevels.size() > level) ? errorLevels[level] : "UNDEFINED";
+}
+
+std::string GetSprErrorDescription(int32_t errorCode)
+{
+    switch (errorCode) {
+        case ERR_GENERAL_SUCCESS:             return "General success";
+        case ERR_GENERAL_ERROR:               return "General error";
+        case ERR_GENERAL_RUN_LONGTIME:        return "Run long time";
+        case ERR_SYS_INVALID_PARAM:           return "Invalid parameter";
+        case ERR_SYS_MEMORY_ALLOC_FAILED:     return "Memory allocation failed";
+        case ERR_PARCEL_WAIT_FAILED:          return "Parcel wait failed";
+        case ERR_PARCEL_WAIT_TIMEOUT:         return "Parcel wait timeout";
+        case ERR_PARCEL_POST_FAILED:          return "Parcel post failed";
+        case ERR_PARCE_WRITE_FAILED:          return "Parcel write failed";
+        case ERR_PARCEL_READ_FAILED:          return "Parcel read failed";
+        case ERR_BINDER_INIT_FAILED:          return "Binder initialization failed";
+        case ERR_BINDER_INVALID_POINTER:      return "Binder invalid pointer";
+        case ERR_SHM_CREATE_FAILED:           return "Shared memory creation failed";
+        case ERR_SHM_OPEN_FAILED:             return "Shared memory open failed";
+        case ERR_SHM_READ_FAILED:             return "Shared memory read failed";
+        case ERR_SHM_WRITE_FAILED:            return "Shared memory write failed";
+        case ERR_SHM_CLOSE_FAILED:            return "Shared memory close failed";
+        case ERR_SHM_DESTROY_FAILED:          return "Shared memory destroy failed";
+        case ERR_SHM_GET_SIZE_FAILED:         return "Failed to get shared memory size";
+        case ERR_PROPERTY_UNKOWN_ERROR:       return "Property unknown error";
+        case ERR_PROPERTY_BINDER_INIT_FAILED: return "Property binder initialization failed";
+        case ERR_CONFIG_UNKOWN_ERROR:         return "Configuration unknown error";
+        case ERR_LOGM_UNKOWN_ERROR:           return "Log manager unknown error";
+        case ERR_TIMEM_UNKOWN_ERROR:          return "Time manager unknown error";
+        case ERR_SYSTEM_TIMER_UNKOWN_ERROR:   return "System timer unknown error";
+        case ERR_POWERM_UNKOWN_ERROR:         return "Power manager unknown error";
+        case ERR_ONENET_MANAGER_UNKOWN_ERROR: return "OneNet manager unknown error";
+        case ERR_ONENET_MANAGER_OFFLINE:      return "OneNet manager is offline";
+        case ERR_ONENET_MANAGER_ONLINE:       return "OneNet manager is online";
+        case ERR_ONENET_DEV_UNKOWN_ERROR:     return "OneNet device unknown error";
+        case ERR_ONENET_DRIVER_UNKOWN_ERROR:  return "OneNet driver unknown error";
+        case ERR_DEBUG_UNKNOW_ERROR:          return "Debug unknown error";
+        default:                              return "Unknown error code";
+    }
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Enums of CoreTypeDefs.h
+// --------------------------------------------------------------------------------------------------------------------
 std::string GetSprProxTypeDescription(int32_t type)
 {
     std::vector<std::string> proxyTypes = {
@@ -142,45 +197,6 @@ std::string GetSprTimeSourceTypeDescription(int32_t timeSourceType)
     };
 
     return ((int32_t)timeSourceTypes.size() > timeSourceType) ? timeSourceTypes[timeSourceType] : "UNDEFINED";
-}
-
-std::string GetSprErrorDescription(int32_t errorCode)
-{
-    switch (errorCode) {
-        case ERR_GENERAL_SUCCESS:             return "General success";
-        case ERR_GENERAL_ERROR:               return "General error";
-        case ERR_GENERAL_RUN_LONGTIME:        return "Run long time";
-        case ERR_SYS_INVALID_PARAM:           return "Invalid parameter";
-        case ERR_SYS_MEMORY_ALLOC_FAILED:     return "Memory allocation failed";
-        case ERR_PARCEL_WAIT_FAILED:          return "Parcel wait failed";
-        case ERR_PARCEL_WAIT_TIMEOUT:         return "Parcel wait timeout";
-        case ERR_PARCEL_POST_FAILED:          return "Parcel post failed";
-        case ERR_PARCE_WRITE_FAILED:          return "Parcel write failed";
-        case ERR_PARCEL_READ_FAILED:          return "Parcel read failed";
-        case ERR_BINDER_INIT_FAILED:          return "Binder initialization failed";
-        case ERR_BINDER_INVALID_POINTER:      return "Binder invalid pointer";
-        case ERR_SHM_CREATE_FAILED:           return "Shared memory creation failed";
-        case ERR_SHM_OPEN_FAILED:             return "Shared memory open failed";
-        case ERR_SHM_READ_FAILED:             return "Shared memory read failed";
-        case ERR_SHM_WRITE_FAILED:            return "Shared memory write failed";
-        case ERR_SHM_CLOSE_FAILED:            return "Shared memory close failed";
-        case ERR_SHM_DESTROY_FAILED:          return "Shared memory destroy failed";
-        case ERR_SHM_GET_SIZE_FAILED:         return "Failed to get shared memory size";
-        case ERR_PROPERTY_UNKOWN_ERROR:       return "Property unknown error";
-        case ERR_PROPERTY_BINDER_INIT_FAILED: return "Property binder initialization failed";
-        case ERR_CONFIG_UNKOWN_ERROR:         return "Configuration unknown error";
-        case ERR_LOGM_UNKOWN_ERROR:           return "Log manager unknown error";
-        case ERR_TIMEM_UNKOWN_ERROR:          return "Time manager unknown error";
-        case ERR_SYSTEM_TIMER_UNKOWN_ERROR:   return "System timer unknown error";
-        case ERR_POWERM_UNKOWN_ERROR:         return "Power manager unknown error";
-        case ERR_ONENET_MANAGER_UNKOWN_ERROR: return "OneNet manager unknown error";
-        case ERR_ONENET_MANAGER_OFFLINE:      return "OneNet manager is offline";
-        case ERR_ONENET_MANAGER_ONLINE:       return "OneNet manager is online";
-        case ERR_ONENET_DEV_UNKOWN_ERROR:     return "OneNet device unknown error";
-        case ERR_ONENET_DRIVER_UNKOWN_ERROR:  return "OneNet driver unknown error";
-        case ERR_DEBUG_UNKNOW_ERROR:          return "Debug unknown error";
-        default:                              return "Unknown error code";
-    }
 }
 
 } // namespace InternalDefs

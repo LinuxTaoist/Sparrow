@@ -22,6 +22,15 @@
 #include <vector>
 #include "SprObserverWithMQueue.h"
 
+namespace {
+
+#ifdef ENUM_OR_STRING
+#undef ENUM_OR_STRING
+#endif
+#define ENUM_OR_STRING(x) x
+
+}
+
 #define POWER_LEV1_MACROS               \
     ENUM_OR_STRING(LEV1_POWER_ANY),     \
     ENUM_OR_STRING(LEV1_POWER_INIT),    \
@@ -29,11 +38,6 @@
     ENUM_OR_STRING(LEV1_POWER_STANDBY), \
     ENUM_OR_STRING(LEV1_POWER_SLEEP),   \
     ENUM_OR_STRING(LEV1_POWER_BUTT)
-
-#ifdef ENUM_OR_STRING
-#undef ENUM_OR_STRING
-#endif
-#define ENUM_OR_STRING(x) x
 
 // 一级状态:
 enum EPowerLev1State
