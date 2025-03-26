@@ -13,5 +13,5 @@ aux_source_directory        (${PROJECT_PATH}/Components/Basics/SparrowSrv   SRC_
 add_executable              (BinMainSpr ${SRC_SPARROW_SRV_PATH} ${TIME_MANAGER_SOURCES})
 target_include_directories  (BinMainSpr PRIVATE ${TIME_MANAGER_PATH})
 set_target_properties       (BinMainSpr PROPERTIES OUTPUT_NAME "sparrowsrv")
-target_link_libraries       (BinMainSpr sprcore epollevent dl)
-add_dependencies            (BinMainSpr LibSprCore LibEpollEvent)
+target_link_libraries       (BinMainSpr sprcore epollevent dl sprlog)
+add_dependencies            (BinMainSpr LibSprCore LibEpollEvent LibSprLog)

@@ -13,5 +13,5 @@ aux_source_directory    (${PROJECT_PATH}/Components/Business/OneNetMqtt     SRC_
 add_library             (LibOneNet SHARED ${SRC_ONENET_SRV_PATH})
 set_target_properties   (LibOneNet PROPERTIES OUTPUT_NAME "pluginonenet")
 set_target_properties   (LibOneNet PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries   (LibOneNet stdc++ 3rdadapter sprcore epollevent pthread rt dl)
-add_dependencies        (LibOneNet Lib3rdAdapter LibSprCore LibEpollEvent)
+target_link_libraries   (LibOneNet stdc++ sprlog sprcore epollevent pthread rt dl sprlog)
+add_dependencies        (LibOneNet LibSprLog LibSprCore LibEpollEvent LibSprLog)

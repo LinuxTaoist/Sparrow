@@ -9,5 +9,5 @@ aux_source_directory    (${PROJECT_PATH}/Util                                   
 aux_source_directory    (${PROJECT_PATH}/Components/Basics/PropertiesSrv        SRC_PROPERTIES_SRV_PATH)
 add_executable          (BinPropertySrv ${SRC_PROPERTIES_SRV_PATH})
 set_target_properties   (BinPropertySrv PROPERTIES OUTPUT_NAME                  "propertiessrv")
-target_link_libraries   (BinPropertySrv pthread rt sprcore sprbinder 3rdadapter epollevent)
-add_dependencies        (BinPropertySrv LibSprCore LibBinder Lib3rdAdapter LibEpollEvent)
+target_link_libraries   (BinPropertySrv pthread rt sprcore sprbinder sprlog epollevent)
+add_dependencies        (BinPropertySrv LibSprCore LibBinder LibSprLog LibEpollEvent)

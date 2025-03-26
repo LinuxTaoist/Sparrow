@@ -17,8 +17,8 @@ add_dependencies            (debug_core LibSprCore LibPowerManagerAPI LibEpollEv
 set(SRC_BIN_DMSG            DebugMsg.cc)
 add_executable              (debug_msg ${SRC_BIN_DMSG})
 set_target_properties       (debug_msg PROPERTIES OUTPUT_NAME "debugmsg")
-target_link_libraries       (debug_msg c 3rdadapter pthread sprcore epollevent)
-add_dependencies            (debug_msg Lib3rdAdapter LibSprCore LibEpollEvent)
+target_link_libraries       (debug_msg c sprlog pthread sprcore epollevent)
+add_dependencies            (debug_msg LibSprLog LibSprCore LibEpollEvent)
 
 ## Bin debugbinder
 set(SRC_BIN_DBINDER         DebugBinder.cc)
@@ -33,8 +33,8 @@ add_dependencies            (debug_binder LibBinder)
 # add_executable              (sample_sqlite ${SRC_BIN_SAMPLESQLITE})
 # target_include_directories  (sample_sqlite PRIVATE ${PROJECT_PATH}/3rdParty/sqlite/include)
 # set_target_properties       (sample_sqlite PROPERTIES OUTPUT_NAME "sample_sqlite")
-# target_link_libraries       (sample_sqlite c 3rdadapter sqlite3 pthread dl)
-# add_dependencies            (sample_sqlite Lib3rdAdapter)
+# target_link_libraries       (sample_sqlite c sprlog sqlite3 pthread dl)
+# add_dependencies            (sample_sqlite LibSprLog)
 
 ## Bin sampleTcpServer
 set(SRC_BIN_STCPSERVER      SampleTcpServer.cc)

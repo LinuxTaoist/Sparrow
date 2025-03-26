@@ -7,6 +7,7 @@ cd $PROJECT_PATH/Build/
 rm -rf ../Release/*
 mkdir -p ../Release/Cache
 mkdir -p ../Release/Include
+mkdir -p ../Release/Lib
 
 cd ../Release/Cache/
 cmake ../../ \

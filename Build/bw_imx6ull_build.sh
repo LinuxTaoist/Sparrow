@@ -6,6 +6,7 @@ PROJECT_PLATFORM="bw_imx6ull"
 cd $PROJECT_PATH/Build/
 mkdir -p ../Release/Cache
 mkdir -p ../Release/Include
+mkdir -p ../Release/Lib
 
 cd ../Release/Cache/
 cmake ../../ \
