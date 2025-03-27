@@ -32,7 +32,7 @@ struct SharedData {
 
 class ProcMutex {
 public:
-    ProcMutex(const std::string& mutexName);
+    explicit ProcMutex(const std::string& mutexName);
     ~ProcMutex();
 
     void Lock();
