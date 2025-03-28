@@ -217,14 +217,14 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
         }
     }
 
-    int32_t estime = timer.GetElapsedTimeInMSec();
+    uint64_t estime = timer.GetElapsedTimeInMSec();
     if (estime >= RUNTIME_WARN_MS) {
         std::string description = std::string(GetSigName(msg.GetMsgId())) + " took "
             + std::to_string(estime) + "ms" + " (limit: " + std::to_string(RUNTIME_WARN_MS) + "ms" + ")";
         SendEventToMonitor(ERR_GENERAL_RUN_LONGTIME, description);
     }
 
-    // SPR_LOGD("Dispatch SprMsg %s time: %dms\n", GetSigName(msg.GetMsgId()), time);
+    // SPR_LOGD("Dispatch SprMsg %s time: %dms\n", GetSigName(msg.GetMsgId()), estime);
     return 0;
 }
 
@@ -241,8 +241,8 @@ void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
         return nullptr;
     }
 
-    DispatchSprMsg(msg);
     LoadMQDynamicInfo(fd, msg);
+    DispatchSprMsg(msg);
     return nullptr;
 }
 

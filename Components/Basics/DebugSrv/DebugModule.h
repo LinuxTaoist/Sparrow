@@ -38,8 +38,15 @@ private:
     int MsgRespondDisableRemoteShell(const SprMsg& msg);
     int MsgRespondDispatchTimerMsg(const SprMsg& msg);
     int MsgRespondBroadcastMsg(const SprMsg& msg);
+    int MsgRespondTimer1sTest(const SprMsg& msg);
+    int MsgRespondSleepEvent(const SprMsg& msg);
+
+    void DebugStart1sTimer(const std::vector<std::string>& args);
+    void DebugStop1sTimer(const std::vector<std::string>& args);
+    void DebugHandleSleep(const std::vector<std::string>& args);
 
 private:
+    int mSleepSec;
     RemoteShell mShell;
 };
 

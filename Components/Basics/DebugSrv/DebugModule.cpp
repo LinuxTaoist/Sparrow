@@ -23,6 +23,7 @@
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
 #include "PSocket.h"
+#include "SprDebugNode.h"
 #include "RemoteShell.h"
 #include "DebugModule.h"
 
@@ -35,6 +36,7 @@ using namespace InternalDefs;
 DebugModule::DebugModule(ModuleIDType id, const std::string& name)
            : SprObserverWithMQueue(id, name)
 {
+    mSleepSec = 0;
 }
 
 DebugModule::~DebugModule()
@@ -43,6 +45,11 @@ DebugModule::~DebugModule()
 
 int32_t DebugModule::Init()
 {
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    p->RegisterCmd(mModuleName, "start1sTimer", "start 1s timer",   std::bind(&DebugModule::DebugStart1sTimer,  this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "stop1sTimer",  "stop 1s timer",    std::bind(&DebugModule::DebugStop1sTimer,   this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "sleep",        "sleep",            std::bind(&DebugModule::DebugHandleSleep,   this, std::placeholders::_1));
+
     return 0;
 }
 
@@ -66,6 +73,14 @@ int32_t DebugModule::ProcessMsg(const SprMsg& msg)
             MsgRespondBroadcastMsg(msg);
             break;
         }
+        case SIG_ID_DEBUG_TIMER_TEST_1S: {
+            MsgRespondTimer1sTest(msg);
+            break;
+        }
+        case SIG_ID_DEBUG_SLEEP_EVENT: {
+            MsgRespondSleepEvent(msg);
+            break;
+        }
         default:
             SPR_LOGD("msg id: %s\n", GetSigName(msg.GetMsgId()));
             break;
@@ -73,7 +88,6 @@ int32_t DebugModule::ProcessMsg(const SprMsg& msg)
 
     return 0;
 }
-
 
 int DebugModule::MsgRespondEnableRemoteShell(const SprMsg& msg)
 {
@@ -100,4 +114,42 @@ int DebugModule::MsgRespondBroadcastMsg(const SprMsg& msg)
     SprMsg disMsg(msg);
     NotifyAllObserver(disMsg);
     return 0;
+}
+
+int DebugModule::MsgRespondTimer1sTest(const SprMsg& msg)
+{
+    SPR_LOGD("msg id: %s\n", GetSigName(msg.GetMsgId()));
+    return 0;
+}
+
+int DebugModule::MsgRespondSleepEvent(const SprMsg& msg)
+{
+    SPR_LOGD("msg id: %s, sleep = %d\n", GetSigName(msg.GetMsgId()), msg.GetI32Value());
+    sleep(msg.GetI32Value());
+    return 0;
+}
+
+void DebugModule::DebugStart1sTimer(const std::vector<std::string>& args)
+{
+    RegisterTimer(1000, 1000, SIG_ID_DEBUG_TIMER_TEST_1S, 0);
+}
+
+void DebugModule::DebugStop1sTimer(const std::vector<std::string>& args)
+{
+    UnregisterTimer(SIG_ID_DEBUG_TIMER_TEST_1S);
+}
+
+void DebugModule::DebugHandleSleep(const std::vector<std::string>& args)
+{
+    if (args.empty()) {
+        SPR_LOGE("args is empty\n");
+        return;
+    }
+
+    mSleepSec = atoi(args[1].c_str());
+    SPR_LOGD("sleep %d\n", mSleepSec);
+
+    SprMsg msg(SIG_ID_DEBUG_SLEEP_EVENT);
+    msg.SetI32Value(mSleepSec);
+    SendMsg(msg);
 }

@@ -44,7 +44,6 @@
 #include <sys/time.h>
 #include "RunningTiming.h"
 
-
 RunningTiming::RunningTiming() : mStartTimeInMSec(0), mStopTimeInMSec(0)
 {
     Start();
@@ -57,25 +56,25 @@ RunningTiming::~RunningTiming()
 
 void RunningTiming::Start()
 {
-    timeval tv;
-    gettimeofday(&tv, nullptr);
-    mStartTimeInMSec = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    mStartTimeInMSec = static_cast<uint64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
 }
 
 void RunningTiming::Stop()
 {
-    timeval tv;
-    gettimeofday(&tv, nullptr);
-    mStopTimeInMSec = tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    mStopTimeInMSec = static_cast<uint64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
 }
 
-int RunningTiming::GetElapsedTimeInSec()
+uint64_t RunningTiming::GetElapsedTimeInSec()
 {
     Stop();
     return (mStopTimeInMSec - mStartTimeInMSec) / 1000;
 }
 
-int RunningTiming::GetElapsedTimeInMSec() {
+uint64_t RunningTiming::GetElapsedTimeInMSec() {
     Stop();
     return mStopTimeInMSec - mStartTimeInMSec;
 }

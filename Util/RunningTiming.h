@@ -43,6 +43,8 @@
 #ifndef __RUNNING_TIMING_H__
 #define __RUNNING_TIMING_H__
 
+#include <stdint.h>
+
 class RunningTiming
 {
 public:
@@ -61,14 +63,14 @@ public:
      *
      * @return The total time in seconds.
      */
-    int GetElapsedTimeInSec();
+    uint64_t GetElapsedTimeInSec();
 
     /**
      * @brief Get the total time in milliseconds.
      *
      * @return The total time in milliseconds.
      */
-    int GetElapsedTimeInMSec();
+    uint64_t GetElapsedTimeInMSec();
 
 private:
     /**
@@ -82,8 +84,8 @@ private:
     void Stop();
 
 private:
-    int mStartTimeInMSec;
-    int mStopTimeInMSec;
+    uint64_t mStartTimeInMSec;
+    uint64_t mStopTimeInMSec;
 };
 
 #endif // __RUNNING_TIMING_H__

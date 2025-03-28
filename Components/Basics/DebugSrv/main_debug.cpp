@@ -24,6 +24,7 @@
 #include "CommonMacros.h"
 #include "DebugModule.h"
 #include "DebugModuleHub.h"
+#include "SprDebugNode.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;
@@ -48,9 +49,11 @@ int main(int argc, const char *argv[])
         }
     });
 
+    theDebugModule.Initialize();
     theDebugModuleHub.InitializeHub();
-    SprEpollSchedule::GetInstance()->EpollLoop();
+    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_DEBUG_MODULE);
 
+    SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");
     return 0;
 }
