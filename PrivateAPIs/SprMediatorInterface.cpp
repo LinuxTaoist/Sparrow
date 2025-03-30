@@ -66,7 +66,7 @@ SprMediatorInterface* SprMediatorInterface::GetInstance()
     return &instance;
 }
 
-int SprMediatorInterface::GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec)
+int SprMediatorInterface::GetAllMQStatus(std::vector<SMQueueDetails>& mqAttrVec)
 {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");

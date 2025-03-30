@@ -45,7 +45,7 @@ SprMediator::SprMediator()
 SprMediator::~SprMediator()
 {
     gObjAlive = false;
-    mMQStatusMap.clear();
+    mMQDetailsMap.clear();
     mModuleMap.clear();
 }
 
@@ -74,20 +74,20 @@ int SprMediator::InitInternalPort()
     mpInternalMQ = make_shared<PMsgQueue>(MEDIATOR_MSG_QUEUE, MSG_MAX_SIZE, [&](int fd, string bytes, void* args) {
         SprMsg msg(bytes);
         ProcessMsg(msg);
-        LoadMQDynamicInfo(fd, msg);
     });
 
     mpInternalMQ->AddToPoll();
-    LoadMQStaticInfo(mpInternalMQ->GetEvtFd(), mpInternalMQ->GetMQDevName());   // load mq information of self
     SPR_LOGD("Init internal mq %s fd %d successfully!\n", mpInternalMQ->GetMQDevName().c_str(), mpInternalMQ->GetEvtFd());
     return 0;
 }
 
-int SprMediator::GetAllMQStatus(std::vector<SMQStatus> &mqInfoList)
+int SprMediator::GetAllMQStatus(std::vector<SMQueueDetails> &mqInfoList)
 {
     mqInfoList.clear();
-    for (const auto& pair : mMQStatusMap) {
-        mqInfoList.push_back(pair.second);
+    for (const auto& pair : mMQDetailsMap) {
+        SMQueueDetails details = {};
+        pair.second->GetMQDetails(details);
+        mqInfoList.push_back(details);
     }
 
     return 0;
@@ -101,47 +101,14 @@ std::string SprMediator::GetSignalName(int sig)
 
 int SprMediator::LoadMQStaticInfo(int handle, const std::string& devName)
 {
-    SMQStatus tmpMQStatus = {};
-
-    tmpMQStatus.handle = handle;
-    memset(tmpMQStatus.mqName, 0, sizeof(tmpMQStatus.mqName));
-    strncpy(tmpMQStatus.mqName, devName.c_str(), sizeof(tmpMQStatus.mqName) - 1);
-    mMQStatusMap[handle] = tmpMQStatus;
-    return 0;
-}
-
-int SprMediator::LoadMQDynamicInfo(int handle, const SprMsg& msg)
-{
-    // Avoid receiving SIG_ID_PROXY_REGISTER_REQUEST and reporting errors
-    auto mqStatus = mMQStatusMap.find(handle);
-    if ( msg.GetMsgId() != SIG_ID_PROXY_REGISTER_REQUEST
-      && mqStatus == mMQStatusMap.end()) {
-        SPR_LOGE("Not exist mq handle: %d [%s]\n", handle, GetSigName(msg.GetMsgId()));
+    auto pMQDetails = std::make_shared<SprMQueueDetails>(devName, false);
+    if (!pMQDetails) {
+        SPR_LOGE("new SprMQueueDetails failed!\n");
         return -1;
     }
 
-    // Update mqAttr
-    int ret = mq_getattr(handle, &mqStatus->second.mqAttr);
-    if (ret != 0) {
-        SPR_LOGE("mq_getattr failed! (%s)\n", strerror(errno));
-        return -1;
-    }
-
-    // Update maxCount
-    const mq_attr& attr = mqStatus->second.mqAttr;
-    if (attr.mq_curmsgs >= mqStatus->second.maxCount) {
-        mqStatus->second.maxCount = attr.mq_curmsgs + 1;
-    }
-
-    // Update maxBytes
-    if (msg.GetSize() > mqStatus->second.maxBytes) {
-        mqStatus->second.maxBytes = msg.GetSize();
-    }
-
-    // Update lastMsg, total times
-    mqStatus->second.lastMsg = msg.GetMsgId();
-    mqStatus->second.total++;
-
+    pMQDetails->SetHandle(handle);
+    mMQDetailsMap[handle] = pMQDetails;
     return 0;
 }
 
@@ -223,7 +190,6 @@ int SprMediator::MsgRespondRegister(const SprMsg& msg)
         result = true;
         mModuleMap[moduleId] = {monitored, pModuleMQ};
         LoadMQStaticInfo(pModuleMQ->GetEvtFd(), name);
-        LoadMQDynamicInfo(pModuleMQ->GetEvtFd(), msg);
         SPR_LOGD("Register %s success! moduleId = %d, monitored = %d\n", name.c_str(), (int)moduleId, monitored);
     } else {
         SPR_LOGE("Register %s fail!\n", name.c_str());
@@ -242,7 +208,7 @@ int SprMediator::MsgRespondUnregister(const SprMsg& msg)
     auto it = mModuleMap.find(moduleId);
     if (it != mModuleMap.end()) {
         if (it->second.pModMQ) {
-            mMQStatusMap.erase(it->second.pModMQ->GetEvtFd());
+            mMQDetailsMap.erase(it->second.pModMQ->GetEvtFd());
         }
         mModuleMap.erase(moduleId);
         SPR_LOGD("Unregister module 0x%x success!\n", moduleId);

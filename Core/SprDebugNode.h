@@ -80,7 +80,6 @@ public:
     // Build in cmds
     void DebugDumpAllOwners(const std::vector<std::string>& args);
     void DebugDumpVersion(const std::vector<std::string>& args);
-    void DebugDumpCurMQs(const std::vector<std::string>& args);
 
 private:
     SprDebugNode();

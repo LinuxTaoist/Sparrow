@@ -33,16 +33,14 @@ using namespace GeneralUtils;
 #define MSG_SIZE_MAX    1025
 #define RUNTIME_WARN_MS 2000
 
-std::map<int32_t, SMQStatus> SprObserverWithMQueue::mMQStatusMap;
-
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
     : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), MSG_SIZE_MAX), mConnected(false)
 {
+    mpDetails = std::make_shared<SprMQueueDetails>(GetMQDevName(), true);
 }
 
 SprObserverWithMQueue::~SprObserverWithMQueue()
 {
-    RemoveMQInformation(GetEvtFd());
     UnRegisterFromMediator();
 }
 
@@ -135,54 +133,43 @@ int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::strin
         SPR_LOGW("devName %s too long(max %d characters)\n", devName.c_str(), MQ_NAME_MAX_LENGTH);
     }
 
-    SMQStatus tmpMQStatus = {};
-    tmpMQStatus.handle = handle;
-    memset(tmpMQStatus.mqName, 0, sizeof(tmpMQStatus.mqName));
-    strncpy(tmpMQStatus.mqName, devName.c_str(), sizeof(tmpMQStatus.mqName) - 1);
-    mMQStatusMap[handle] = tmpMQStatus;
+    if (!mpDetails) {
+        SPR_LOGE("mpDetails is nullptr!\n");
+        return -1;
+    }
+
+    mpDetails->SetHandle(handle);
     return 0;
 }
 
 int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& msg)
 {
-    auto mqStatus = mMQStatusMap.find(handle);
-    if (mqStatus == mMQStatusMap.end()) {
-        SPR_LOGE("Not exist mq handle: %d [%s]\n", handle, GetSigName(msg.GetMsgId()));
+    if (!mpDetails) {
+        SPR_LOGE("mpDetails is nullptr!\n");
         return -1;
     }
 
-    // Update mqAttr
-    int32_t ret = mq_getattr(handle, &mqStatus->second.mqAttr);
+    mq_attr tmpMQAttr = {};
+    int32_t ret = mq_getattr(handle, &tmpMQAttr);
     if (ret != 0) {
         SPR_LOGE("mq_getattr failed! (%s)\n", strerror(errno));
         return -1;
     }
 
-    // Update maxCount
-    const mq_attr& attr = mqStatus->second.mqAttr;
-    if (attr.mq_curmsgs >= mqStatus->second.maxCount) {
-        mqStatus->second.maxCount = attr.mq_curmsgs + 1;
+    int32_t usedPeak = 0;
+    mpDetails->GetUsedPeak(usedPeak);
+    if (tmpMQAttr.mq_curmsgs + 1 >= usedPeak) {
+        mpDetails->SetUsedPeak(tmpMQAttr.mq_curmsgs + 1);
     }
 
-    // Update maxBytes
-    if (msg.GetSize() > mqStatus->second.maxBytes) {
-        mqStatus->second.maxBytes = msg.GetSize();
+    int32_t msgLenPeak = 0;
+    mpDetails->GetMsgLenPeak(msgLenPeak);
+    if (msg.GetSize() > msgLenPeak) {
+        mpDetails->SetMsgLenPeak(msg.GetSize());
     }
 
-    // Update lastMsg, total times
-    mqStatus->second.lastMsg = msg.GetMsgId();
-    mqStatus->second.total++;
-
-    return 0;
-}
-
-int32_t SprObserverWithMQueue::RemoveMQInformation(int32_t handle)
-{
-    auto it = mMQStatusMap.find(handle);
-    if (it != mMQStatusMap.end()) {
-        mMQStatusMap.erase(it);
-    }
-
+    mpDetails->SetLastMsgID(msg.GetMsgId());
+    mpDetails->IncrementMsgTotal();
     return 0;
 }
 
@@ -244,14 +231,4 @@ void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
     LoadMQDynamicInfo(fd, msg);
     DispatchSprMsg(msg);
     return nullptr;
-}
-
-int32_t SprObserverWithMQueue::GetAllMQStatus(std::vector<SMQStatus> &mqInfoList)
-{
-    mqInfoList.clear();
-    for (const auto& pair : mMQStatusMap) {
-        mqInfoList.push_back(pair.second);
-    }
-
-    return 0;
 }

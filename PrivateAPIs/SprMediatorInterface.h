@@ -44,7 +44,7 @@ public:
      * @param mqAttrVec  Message queue attribute vector
      * @return  0 if success, -1 if failed
      */
-    int GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec);
+    int GetAllMQStatus(std::vector<SMQueueDetails>& mqAttrVec);
 
     /**
      * @brief Get the signal name

@@ -29,6 +29,7 @@
 #include "PMsgQueue.h"
 #include "CoreTypeDefs.h"
 #include "CommonTypeDefs.h"
+#include "SprMQueueDetails.h"
 
 struct SModuleInfo
 {
@@ -43,14 +44,13 @@ public:
     static SprMediator* GetInstance();
 
     int Init();
-    int GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
+    int GetAllMQStatus(std::vector<SMQueueDetails> &mqInfoList);
     std::string GetSignalName(int sig);
 
 private:
     SprMediator();
     int InitInternalPort();
     int LoadMQStaticInfo(int handle, const std::string& devName);
-    int LoadMQDynamicInfo(int handle, const SprMsg& msg);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);
 
@@ -63,7 +63,7 @@ private:
 
 private:
     std::shared_ptr<PMsgQueue> mpInternalMQ;
-    std::map<int, SMQStatus> mMQStatusMap;  // handle, mq status
+    std::map<int, std::shared_ptr<SprMQueueDetails>> mMQDetailsMap;  // handle, mq
     std::map<InternalDefs::ESprModuleID, SModuleInfo> mModuleMap;
 };
 

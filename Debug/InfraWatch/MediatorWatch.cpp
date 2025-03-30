@@ -76,7 +76,7 @@ char MediatorWatch::ShowSignalName()
 
 char MediatorWatch::ShowMQStatus()
 {
-    std::vector<SMQStatus> mqAttrVec;
+    std::vector<SMQueueDetails> mqAttrVec;
     SprMediatorInterface::GetInstance()->GetAllMQStatus(mqAttrVec);
 
     InfraWatch::ClearScreen();
@@ -86,9 +86,9 @@ char MediatorWatch::ShowMQStatus()
     SPR_LOG(" HANDLE  MNLIMIT  MNPUSED  MNCUSED  BLOCK    MLLIMIT MLPUSED MIDLAST  MTOTAL  QNAME\n");
     SPR_LOG("----------------------------------------------------------------------------------------------------\n");
     for (const auto& mqInfo : mqAttrVec) {
-        SPR_LOG(" %6d  %7ld  %7ld  %7ld  %s  %6ld %7u %7u  %6u  %s\n", mqInfo.handle, mqInfo.mqAttr.mq_maxmsg, mqInfo.maxCount,
+        SPR_LOG(" %6d  %7ld  %7d  %7ld  %s  %6ld %7u %7u  %6d  %s\n", mqInfo.handle, mqInfo.mqAttr.mq_maxmsg, mqInfo.usedPeak,
                     mqInfo.mqAttr.mq_curmsgs, (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK  ",
-                    mqInfo.mqAttr.mq_msgsize, mqInfo.maxBytes, mqInfo.lastMsg, mqInfo.total % 100000, mqInfo.mqName);
+                    mqInfo.mqAttr.mq_msgsize, mqInfo.msgLenPeak, mqInfo.lastMsgID, mqInfo.msgTotal % 100000, mqInfo.mqName);
     }
     SPR_LOG("----------------------------------------------------------------------------------------------------\n");
     return 0;

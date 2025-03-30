@@ -26,7 +26,6 @@
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "CommonTypeDefs.h"
-#include "SprObserverWithMQueue.h"
 
 #define LOG_TAG "SprDebugNode"
 
@@ -127,7 +126,6 @@ int32_t SprDebugNode::RegisterBuildinCmds()
 {
     mBuildinCmds["help"]          = { "Dump all cmds", std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
     mBuildinCmds["version"]       = { "Dump version", std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
-    mBuildinCmds["mqs"]           = { "Dump all message queues", std::bind(&SprDebugNode::DebugDumpCurMQs, this, std::placeholders::_1)};
     return 0;
 }
 
@@ -205,26 +203,6 @@ void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
     SPR_LOGD("- CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
     SPR_LOGD("- CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
     SPR_LOGD("- CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
-}
-
-void SprDebugNode::DebugDumpCurMQs(const std::vector<std::string>& args)
-{
-    std::vector<SMQStatus> tmpMQAttrs;
-    SprObserverWithMQueue::GetAllMQStatus(tmpMQAttrs);
-    std::string exe = GeneralUtils::GetSubstringAfterLastDelimiter(mPipePath, '/');
-
-    SPR_LOGD("====================================================================================================\n");
-    SPR_LOGD("                                   Show %s Message Queues                              \n", exe.c_str());
-    SPR_LOGD("====================================================================================================\n");
-    //          %6d  %7ld  %7ld  %7ld  %s  %6ld %7u %7u  %6u  %s
-    SPR_LOGD(" HANDLE  MNLIMIT  MNPUSED  MNCUSED  BLOCK    MLLIMIT MLPUSED MIDLAST  MTOTAL  QNAME\n");
-    SPR_LOGD("====================================================================================================\n");
-    for (const auto& mqInfo : tmpMQAttrs) {
-        SPR_LOGD(" %6d  %7ld  %7ld  %7ld  %s  %6ld %7u %7u  %6u  %s\n", mqInfo.handle, mqInfo.mqAttr.mq_maxmsg, mqInfo.maxCount,
-                    mqInfo.mqAttr.mq_curmsgs, (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK  ",
-                    mqInfo.mqAttr.mq_msgsize, mqInfo.maxBytes, mqInfo.lastMsg, mqInfo.total % 100000, mqInfo.mqName);
-    }
-    SPR_LOGD("\n");
 }
 
 int32_t SprDebugNode::SetMaxNum(int32_t num)

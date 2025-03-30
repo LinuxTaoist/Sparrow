@@ -23,6 +23,7 @@
 #include "PMsgQueue.h"
 #include "SprObserver.h"
 #include "CommonTypeDefs.h"
+#include "SprMQueueDetails.h"
 
 class SprObserverWithMQueue : public SprObserver, public PMsgQueue
 {
@@ -59,14 +60,6 @@ public:
      * @return void*
      */
     virtual void* EpollEvent(int fd, EpollType eType, void* arg) final override;
-
-    /**
-     * @brief Get the All message queue status
-     *
-     * @param mqInfoList
-     * @return int32_t
-     */
-    static int32_t GetAllMQStatus(std::vector<SMQStatus> &mqInfoList);
 
 protected:
     /**
@@ -107,8 +100,14 @@ protected:
      */
     int32_t LoadMQStaticInfo(int32_t handle, const std::string& devName);
     int32_t LoadMQDynamicInfo(int32_t handle, const SprMsg& msg);
-    int32_t RemoveMQInformation(int32_t handle);
 
+    /**
+     * @brief Send event to monitor module
+     *
+     * @param errcode
+     * @param text
+     * @return 0 on success, or -1 if an error occurred
+     */
     int32_t SendEventToMonitor(int32_t errcode, const std::string& text);
 
     /**
@@ -138,7 +137,7 @@ protected:
 
 private:
     bool mConnected;
-    static std::map<int32_t, SMQStatus> mMQStatusMap;  // handle, mq status
+    std::shared_ptr<SprMQueueDetails> mpDetails;
 };
 
 #endif // __SPR_OBSERVER_WITH_MQUEUE_H__

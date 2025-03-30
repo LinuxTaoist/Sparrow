@@ -34,15 +34,14 @@
 // - Common defines for MQ
 // --------------------------------------------------------------------------------------------------------------------
 #define MQ_NAME_MAX_LENGTH  30
-struct SMQStatus
-{
-    int32_t     handle;
-    int32_t     maxBytes;
-    int32_t     total;
-    uint32_t    lastMsg;
-    long        maxCount;
-    char        mqName[MQ_NAME_MAX_LENGTH];
-    mq_attr     mqAttr;
+struct SMQueueDetails {
+    int32_t handle;
+    int32_t msgLenPeak;
+    int32_t msgTotal;
+    uint32_t lastMsgID;
+    int32_t usedPeak;
+    char mqName[MQ_NAME_MAX_LENGTH];
+    mq_attr mqAttr;
 };
 
 #endif // __COMMON_TYPE_DEFS_H__

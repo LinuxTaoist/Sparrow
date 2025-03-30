@@ -37,7 +37,7 @@ void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
 {
     switch(cmd) {
         case PROXY_CMD_GET_ALL_MQ_ATTRS: {
-            std::vector<SMQStatus> tmpMQAttrs;
+            std::vector<SMQueueDetails> tmpMQAttrs;
             int ret = mSprMediator->GetAllMQStatus(tmpMQAttrs);
             NONZERO_CHECK(pRspParcel->WriteInt(ret));
             NONZERO_CHECK(pRspParcel->WriteVector(tmpMQAttrs));
