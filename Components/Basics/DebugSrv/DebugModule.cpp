@@ -141,8 +141,9 @@ void DebugModule::DebugStop1sTimer(const std::vector<std::string>& args)
 
 void DebugModule::DebugHandleSleep(const std::vector<std::string>& args)
 {
-    if (args.empty()) {
-        SPR_LOGE("args is empty\n");
+    if (args.size() < 2) {
+        SPR_LOGE("Invalid args size: %d\n", args.size());
+        SPR_LOGE("Usage: echo sleep {sec} > /tmp/debugsrv\n");
         return;
     }
 
