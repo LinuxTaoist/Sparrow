@@ -23,13 +23,13 @@
 #include <map>
 #include <string>
 
-#define KEY_SIZE    32
-#define VALUE_SIZE  64
+#define SHARED_BTREE_KEY_MAX_LEN    32
+#define SHARED_BTREE_VALUE_MAX_LEN  64
 
 struct Node
 {
-    char key[KEY_SIZE];
-    char value[VALUE_SIZE];
+    char key[SHARED_BTREE_KEY_MAX_LEN];
+    char value[SHARED_BTREE_VALUE_MAX_LEN];
     Node* left;
     Node* right;
 };

@@ -16,7 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include "RunningTiming.h"
 #include <unistd.h>
 

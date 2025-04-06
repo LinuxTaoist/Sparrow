@@ -45,7 +45,7 @@ private:
     void DelWait();
 
 private:
-    int mShmId;
+    int mShmFd;
     std::string mMutexName;
     SharedData* mSharedData;
 };

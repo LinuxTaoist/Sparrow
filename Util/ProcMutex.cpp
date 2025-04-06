@@ -21,10 +21,15 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
+#include <cerrno>
 #include "ProcMutex.h"
 
+#define SPR_LOGD(fmt, args...)  printf("%4d ProcMutex D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...)  printf("%4d ProcMutex W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...)  printf("%4d ProcMutex E: " fmt, __LINE__, ##args)
+
 ProcMutex::ProcMutex(const std::string& mutexName)
-    : mShmId(-1), mMutexName(std::string("/") + mutexName), mSharedData(nullptr) {
+    : mShmFd(-1), mMutexName(std::string("/") + mutexName), mSharedData(nullptr) {
     Init();
 }
 
@@ -35,78 +40,90 @@ ProcMutex::~ProcMutex() {
             DeInit();
         } else {
             munmap(mSharedData, sizeof(SharedData));
-            close(mShmId);
+            close(mShmFd);
+            mSharedData = nullptr;
+            mShmFd = -1;
         }
     }
 }
 
 void ProcMutex::Init() {
-    mShmId = shm_open(mMutexName.c_str(), O_RDWR | O_CREAT, 0744);
-    if (mShmId == -1) {
-        perror("shm_open");
+    mShmFd = shm_open(mMutexName.c_str(), O_RDWR | O_CREAT, 0744);
+    if (mShmFd == -1) {
+        SPR_LOGE("shm_open failed! (%s)\n", strerror(errno));
         return;
     }
-    if (ftruncate(mShmId, sizeof(SharedData)) == -1) {
-        perror("ftruncate");
-        close(mShmId);
-        mShmId = -1;
+    if (ftruncate(mShmFd, sizeof(SharedData)) == -1) {
+        SPR_LOGE("ftruncate failed! (%s)\n", strerror(errno));
+        close(mShmFd);
+        mShmFd = -1;
         return;
     }
 
-    mSharedData = (SharedData*)mmap(NULL, sizeof(SharedData), PROT_READ | PROT_WRITE, MAP_SHARED, mShmId, 0);
+    mSharedData = (SharedData*)mmap(NULL, sizeof(SharedData), PROT_READ | PROT_WRITE, MAP_SHARED, mShmFd, 0);
     if (mSharedData == MAP_FAILED) {
-        perror("mmap");
-        close(mShmId);
-        mShmId = -1;
+        SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
+        close(mShmFd);
+        mShmFd = -1;
         return;
     }
 
     pthread_mutexattr_t mutexAttr;
-    if (pthread_mutexattr_init(&mutexAttr) != 0) {
-        perror("pthread_mutexattr_init");
+    int rc = pthread_mutexattr_init(&mutexAttr);
+    if (rc != 0) {
+        SPR_LOGE("init mutexattr failed! (%s)\n", strerror(rc));
         munmap(mSharedData, sizeof(SharedData));
-        close(mShmId);
-        mShmId = -1;
+        close(mShmFd);
+        mShmFd = -1;
         mSharedData = nullptr;
         return;
     }
 
     // Set mutex to be process - shared
-    if (pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED) != 0) {
-        perror("pthread_mutexattr_setpshared");
+    rc = pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED);
+    if (rc != 0) {
+        SPR_LOGE("setpshared mutexattr failed! (%s)\n", strerror(rc));
         pthread_mutexattr_destroy(&mutexAttr);
         munmap(mSharedData, sizeof(SharedData));
-        close(mShmId);
-        mShmId = -1;
+        close(mShmFd);
+        mShmFd = -1;
         mSharedData = nullptr;
         return;
     }
 
     // Set mutex to be robust
-    if (pthread_mutexattr_setrobust(&mutexAttr, PTHREAD_MUTEX_ROBUST) != 0) {
-        perror("pthread_mutexattr_setrobust");
+    rc = pthread_mutexattr_setrobust(&mutexAttr, PTHREAD_MUTEX_ROBUST);
+    if (rc != 0) {
+        SPR_LOGE("setrobust mutexattr failed! (%s)\n", strerror(rc));
+        pthread_mutexattr_destroy(&mutexAttr);
+        munmap(mSharedData, sizeof(SharedData));
+        close(mShmFd);
+        mShmFd = -1;
+        mSharedData = nullptr;
         return;
     }
 
     // Check if mutexes, reference count and wait count need initialization
     if (mSharedData->refCnt == 0) {
-        if (pthread_mutex_init(&mSharedData->dataMutex, &mutexAttr) != 0) {
-            perror("pthread_mutex_init");
+        rc = pthread_mutex_init(&mSharedData->dataMutex, &mutexAttr);
+        if (rc != 0) {
+            SPR_LOGE("init data mutex failed! (%s)\n", strerror(rc));
             pthread_mutexattr_destroy(&mutexAttr);
             munmap(mSharedData, sizeof(SharedData));
-            close(mShmId);
-            mShmId = -1;
+            close(mShmFd);
+            mShmFd = -1;
             mSharedData = nullptr;
             return;
         }
 
-        if (pthread_mutex_init(&mSharedData->waitMutex, &mutexAttr) != 0) {
-            perror("pthread_mutex_init (waitMutex)");
+        rc = pthread_mutex_init(&mSharedData->waitMutex, &mutexAttr);
+        if (rc != 0) {
+            SPR_LOGE("init wait mutex failed! (%s)\n", strerror(rc));
             pthread_mutex_destroy(&mSharedData->dataMutex);
             pthread_mutexattr_destroy(&mutexAttr);
             munmap(mSharedData, sizeof(SharedData));
-            close(mShmId);
-            mShmId = -1;
+            close(mShmFd);
+            mShmFd = -1;
             mSharedData = nullptr;
             return;
         }
@@ -123,13 +140,22 @@ void ProcMutex::DeInit() {
         return;
     }
 
-    pthread_mutex_destroy(&mSharedData->dataMutex);
-    pthread_mutex_destroy(&mSharedData->waitMutex);
-    munmap(mSharedData, sizeof(SharedData));
+    int rc = pthread_mutex_destroy(&mSharedData->dataMutex);
+    if (rc != 0) {
+        SPR_LOGE("destory data mutex failed! (%s)\n", strerror(rc));
+    }
 
-    if (mShmId != -1) {
-        close(mShmId);
-        mShmId = -1;
+    rc = pthread_mutex_destroy(&mSharedData->waitMutex);
+    if (rc != 0) {
+        SPR_LOGE("destroy wait mutex failed! (%s)\n", strerror(rc));
+    }
+
+    munmap(mSharedData, sizeof(SharedData));
+    if (mShmFd != -1) {
+        if (close(mShmFd) == -1) {
+            SPR_LOGE("close failed! (%s)\n", strerror(errno));
+        }
+        mShmFd = -1;
     }
 
     mSharedData = nullptr;
@@ -142,11 +168,12 @@ void ProcMutex::Lock() {
     }
 
     // Try to acquire the lock non - blocking
-    if (pthread_mutex_trylock(&mSharedData->dataMutex) != 0) {
+    int rc = pthread_mutex_trylock(&mSharedData->dataMutex);
+    if (rc != 0) {
         AddWait();
-        int rc = pthread_mutex_lock(&mSharedData->dataMutex);
+        rc = pthread_mutex_lock(&mSharedData->dataMutex);
         if (rc != 0) {
-            perror("pthread_mutex_lock");
+            SPR_LOGE("pthread_mutex_lock failed: %s\n", strerror(rc));
         }
         DelWait();
     }
@@ -162,7 +189,10 @@ void ProcMutex::Unlock() {
 
     // Decrement reference count after unlock
     mSharedData->refCnt--;
-    pthread_mutex_unlock(&mSharedData->dataMutex);
+    int rc = pthread_mutex_unlock(&mSharedData->dataMutex);
+    if (rc != 0) {
+        SPR_LOGE("pthread_mutex_unlock failed: %s\n", strerror(rc));
+    }
 }
 
 void ProcMutex::AddWait() {
@@ -170,9 +200,16 @@ void ProcMutex::AddWait() {
         return;
     }
 
-    pthread_mutex_lock(&mSharedData->waitMutex);
+    int rc = pthread_mutex_lock(&mSharedData->waitMutex);
+    if (rc != 0) {
+        SPR_LOGE("pthread_mutex_lock (waitMutex) failed: %s\n", strerror(rc));
+        return;
+    }
     mSharedData->waitCnt++;
-    pthread_mutex_unlock(&mSharedData->waitMutex);
+    rc = pthread_mutex_unlock(&mSharedData->waitMutex);
+    if (rc != 0) {
+        SPR_LOGE("pthread_mutex_unlock (waitMutex) failed: %s\n", strerror(rc));
+    }
 }
 
 void ProcMutex::DelWait() {
@@ -180,9 +217,16 @@ void ProcMutex::DelWait() {
         return;
     }
 
-    pthread_mutex_lock(&mSharedData->waitMutex);
+    int rc = pthread_mutex_lock(&mSharedData->waitMutex);
+    if (rc != 0) {
+        SPR_LOGE("pthread_mutex_lock (waitMutex) failed: %s\n", strerror(rc));
+        return;
+    }
     mSharedData->waitCnt--;
-    pthread_mutex_unlock(&mSharedData->waitMutex);
+    rc = pthread_mutex_unlock(&mSharedData->waitMutex);
+    if (rc != 0) {
+        SPR_LOGE("pthread_mutex_unlock (waitMutex) failed: %s\n", strerror(rc));
+    }
 }
 
 ProcLockGuard::ProcLockGuard(ProcMutex& pMutex, std::mutex& tMutex)

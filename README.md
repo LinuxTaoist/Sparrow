@@ -49,18 +49,10 @@ Sparrow/
 └── version.cmake           // 版本信息
 ```
 
-## 功能介绍
-### 日志管理
-### RPC框架
-### 配置管理
-### 消息分发
-### 组件优雅退出机制
-### 便捷的调试工具
-- 调试节点
 ## 使用教程
 
 ### 环境
-当前项目本地开发环境如下，尽量与本环境保持一致，否则会编译报错。
+当前项目本地开发环境如下，尽量与本环境保持一致，否则可能会编译报错。
 ```Shell
 C++ Standard   : 11
 G++ Version    : 11.4.0
@@ -69,36 +61,24 @@ Build Platform : Ubuntu 18.04.6 LTS
 ```
 
 ### 编译
-① 编译第三方库    \
-由于集成了第三方库，第一次编译时，需要先交叉编译第三方库，确保依赖库生成，再进行项目编译。
-
-<span style="font-size: 12px;">
-<span style="color: blue;">注：如需不同嵌入式平台，需要配置交叉编译工具链。</span>
-</span>
-
-```Shell
-$ cd 3rdParty
-$ ./build_3rdparty.sh
-```
-
-② 编译sparrow
+① 编译sparrow
 ```Shell
 $ cd Build
-$ ./general_build.sh
+$ ./final_general_build.sh
 ```
 
-③ 版本生成路径
+② 版本生成路径
 ```shell
 $ cd Release/
-$ ls -al
-Bin  Cache  Lib
+$ ls
+Bin  Cache  Include  Lib
 ```
 
-④ 程序执行
+③ 程序执行
 
 项目编译完成后，会在`Release/Bin`目录下生成可执行程序。通过执行`servicemanager`程序会自动拉起所有的服务，并启动服务监控。拉起服务配置参考`Release/Bin/init.conf`。
 
-**启动服务**
+### 启动服务
 ```shell
 $ ./servicemanagersrv
 192  ServiceM D: service: logmanagersrv        pid:  70542
@@ -121,7 +101,7 @@ $ ./servicemanagersrv
 183  ServiceM D: execl debugsrv (1).
 ```
 
-**实时查看日志**
+### 实时查看日志
 ```shell
 $ tail -f /tmp/sprlog/sparrow.log
 07-20 10:12:59.104  70543      BinderM D:   80 Add service info(8336, powermanagersrv)
@@ -136,7 +116,7 @@ $ tail -f /tmp/sprlog/sparrow.log
 07-20 10:12:59.113  70550   SprObsBase D:  255 [DebugM] Register Successfully!
 ```
 
-**内部命令集**
+### 内部命令集
 
 项目集成了如下命令集，可通过`echo help > /tmp/{进程名}`查看具体进程支持命令集，回执在日志中：
 
@@ -198,7 +178,7 @@ $ tail -f /tmp/sprlog/sparrow.log
  ==============================================================================
 ```
 
-**调试程序**
+### 调试程序
 
 项目同时集成了调试程序, 如下：
 * infrawatch   \
@@ -261,11 +241,9 @@ $ ./property_get ro.SoftwareVersion
 
 ## 第三方库依赖
 |    第三方库   | 依赖模块     | 备注 |
-| -----------   | -----------  | -- |
-|libgo	        | 所有组件     | 以协程代替协程方式实现事件驱动模型   |
-|sqlite	        | ConfigManager| 用于项目运行中的关键配置等数据存储|
-
-
+| -----------  | -----------  | -- |
+| sqlite       | ConfigManager| 用于项目运行中的关键配置等数据存储|
+| googlettest  | Test         | 用于项目内部白盒测试、外部黑盒测试|
 
 ## 文档
 

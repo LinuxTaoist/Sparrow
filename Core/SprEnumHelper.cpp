@@ -33,7 +33,7 @@ namespace InternalDefs {
 // --------------------------------------------------------------------------------------------------------------------
 int32_t GetSprErrorLevel(int32_t errorCode)
 {
-    int32_t levelCode = (0 - errorCode) % 100;
+    int32_t levelCode = (0 - errorCode) % 50;
 
     if (levelCode >= ERR_LEVEL_CRITICAL_BEGIN && levelCode < ERR_LEVEL_ERROR_BEGIN) {
         return ERR_EVENT_LEVEL_CRITICAL;

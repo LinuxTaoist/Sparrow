@@ -62,3 +62,10 @@ TEST(ThirdAdapter_SprLog, SingletonPattern) {
     SprLog* instance2 = SprLog::GetInstance();
     EXPECT_EQ(instance1, instance2);
 }
+
+// 测试1000条日志输出
+TEST(ThirdAdapter_SprLog, MultipleLogs) {
+    for (int i = 0; i <= 1000; ++i) {
+        SPR_LOGD("Test log out times: %d", i);
+    }
+}
