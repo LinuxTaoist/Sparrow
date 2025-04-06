@@ -81,6 +81,7 @@ private:
     void DebugAddStatusEvent(const std::vector<std::string>& args);
 
 private:
+    int32_t mErasedNum;  // 已删除的记录数
     std::map<int32_t, std::list<StatusEvent>> mAllEvents;  // key: moduleID, value: events
 };
 

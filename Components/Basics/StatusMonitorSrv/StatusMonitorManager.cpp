@@ -33,7 +33,7 @@ using namespace InternalDefs;
 #define STATUS_EVENT_NUM_LIMIT      100
 
 StatusMonitorManager::StatusMonitorManager(ModuleIDType id, const std::string& name)
-            : SprObserverWithMQueue(id, name)
+            : SprObserverWithMQueue(id, name), mErasedNum(0)
 {
 }
 
@@ -62,6 +62,7 @@ int32_t StatusMonitorManager::AddStatusEvent(uint32_t moduleID, int32_t errCode,
 
     if (event.size() >= STATUS_EVENT_NUM_LIMIT) {
         event.pop_front();
+        mErasedNum++;
     }
 
     event.push_back({now, errCode, text});
@@ -70,7 +71,8 @@ int32_t StatusMonitorManager::AddStatusEvent(uint32_t moduleID, int32_t errCode,
 
 int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text)
 {
-    SPR_LOGI("                             Show All Status Events                                            \n");
+    int32_t totalNum = mErasedNum + mAllEvents.size();
+    SPR_LOGI("                             Show All Status Events (%d)                                       \n", totalNum);
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
     SPR_LOGI("MODULE    LEVEL STATUSCODE         TIME    TEXT                                                \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");

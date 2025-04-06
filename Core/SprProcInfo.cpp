@@ -18,11 +18,12 @@
  */
 #include <atomic>
 #include <unistd.h>
+#include "CoreTypeDefs.h"
 #include "SprProcInfo.h"
 
 static std::atomic<bool> gObjAlive(true);
 
-SprProcInfo::SprProcInfo() : mBootTimeUs(0)
+SprProcInfo::SprProcInfo() : mEnable(false), mBootTimeUs(0)
 {
 }
 
@@ -43,7 +44,8 @@ SprProcInfo* SprProcInfo::GetInstance()
 
 void SprProcInfo::Init()
 {
-    LoadInternalAttrs();
+    mEnable = true;
+    LoadBootTimeUs();
 }
 
 uint64_t SprProcInfo::GetTickUs()
@@ -56,19 +58,9 @@ uint64_t SprProcInfo::GetTickUs()
     return td;
 }
 
-void SprProcInfo::LoadInternalAttrs()
+void SprProcInfo::LoadBootTimeUs()
 {
-    GetBootTimeUs();
-}
-
-void SprProcInfo::SetBootTimeUs(uint64_t us)
-{
-    mBootTimeUs = us;
-}
-
-void SprProcInfo::SetDebugPath(const std::string& path)
-{
-    mDebugPath = path;
+    mBootTimeUs = GetTickUs();
 }
 
 uint64_t SprProcInfo::GetBootTimeUs()
@@ -104,5 +96,5 @@ std::string SprProcInfo::GetProcName()
 
 std::string SprProcInfo::GetDebugPath()
 {
-    return mDebugPath;
+    return mEnable ? std::string(DEBUG_NODE_ROOT_PATH) + "/" + GetProcName() : "";
 }

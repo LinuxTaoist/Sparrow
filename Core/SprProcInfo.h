@@ -28,10 +28,6 @@ public:
     static SprProcInfo* GetInstance();
 
     void Init();
-    void LoadInternalAttrs();
-    void SetBootTimeUs(uint64_t us);
-    void SetDebugPath(const std::string& debugPath);
-
     uint64_t GetBootTimeUs();
     std::string GetBootTimeString();
     std::string GetProcName();
@@ -39,11 +35,12 @@ public:
 
 private:
     SprProcInfo();
+    void LoadBootTimeUs();
     uint64_t GetTickUs();
 
 private:
+    bool mEnable;
     uint64_t mBootTimeUs;
-    std::string mDebugPath;
 };
 
 #endif // __SPR_PROC_INFO_H__
