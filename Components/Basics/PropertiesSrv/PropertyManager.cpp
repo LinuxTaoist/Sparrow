@@ -119,7 +119,6 @@ int PropertyManager::Init()
     LoadPersistProperty();
 
     RegisterDebugFuncs();
-    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string("/tmp/") + SRV_NAME_PROPERTY);
     return 0;
 }
 

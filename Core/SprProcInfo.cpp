@@ -68,11 +68,47 @@ uint64_t SprProcInfo::GetBootTimeUs()
     return mBootTimeUs;
 }
 
+uint64_t SprProcInfo::GetRunTimeUs()
+{
+    return GetTickUs() - mBootTimeUs;
+}
+
+std::string SprProcInfo::UsToTimeString(uint64_t us)
+{
+    const uint64_t hourPerDay = 24;
+    const uint64_t minPerHour = 60;
+    const uint64_t secPerMin = 60;
+    const uint64_t usPerSec = 1000000;
+
+    uint64_t days = us / (hourPerDay * minPerHour * secPerMin * usPerSec);
+    uint64_t hours = (us % (hourPerDay * minPerHour * secPerMin * usPerSec)) / (minPerHour * secPerMin * usPerSec);
+    uint64_t mins  = (us % (minPerHour * secPerMin * usPerSec)) / (secPerMin * usPerSec);
+    uint64_t secs  = (us % (secPerMin * usPerSec)) / usPerSec;
+    uint64_t usecs = us % usPerSec;
+
+    std::string timeText;
+    if (days > 0) {
+        timeText = std::to_string(days) + "d ";
+    }
+    if (hours > 0 || days > 0) {
+        timeText += std::to_string(hours) + "h ";
+    }
+    if (mins > 0 || hours > 0 || days > 0) {
+        timeText += std::to_string(mins) + "m ";
+    }
+
+    timeText += std::to_string(secs) + "." + std::to_string(usecs) + "s";
+    return timeText;
+}
+
 std::string SprProcInfo::GetBootTimeString()
 {
-    std::string sec = std::to_string(mBootTimeUs / 1000000);
-    std::string us = std::to_string(mBootTimeUs % 1000000);
-    return sec + "." + us;
+    return UsToTimeString(mBootTimeUs);
+}
+
+std::string SprProcInfo::GetRunTimeString()
+{
+    return UsToTimeString(GetRunTimeUs());
 }
 
 std::string SprProcInfo::GetProcName()

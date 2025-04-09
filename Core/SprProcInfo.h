@@ -29,7 +29,9 @@ public:
 
     void Init();
     uint64_t GetBootTimeUs();
+    uint64_t GetRunTimeUs();
     std::string GetBootTimeString();
+    std::string GetRunTimeString();
     std::string GetProcName();
     std::string GetDebugPath();
 
@@ -37,6 +39,7 @@ private:
     SprProcInfo();
     void LoadBootTimeUs();
     uint64_t GetTickUs();
+    std::string UsToTimeString(uint64_t us);
 
 private:
     bool mEnable;

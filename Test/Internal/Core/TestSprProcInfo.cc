@@ -11,6 +11,14 @@ TEST(Core_SprProcInfo, GetDebugPathReturnsValidPath) {
     instance->Init();
     debugPath = instance->GetDebugPath();
     EXPECT_FALSE(debugPath.empty());
+
+    uint64_t expectTimeUs = 200000;
+    usleep(expectTimeUs);
+
+    uint64_t diffTimeUs = 20000;
+    uint64_t runTimeUs = instance->GetRunTimeUs();
+    EXPECT_GE(expectTimeUs, runTimeUs - diffTimeUs);
+    EXPECT_LE(expectTimeUs, runTimeUs + diffTimeUs);
 }
 
 // 测试 SprProcInfo::GetBootTimeUs 方法

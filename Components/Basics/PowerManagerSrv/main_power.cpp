@@ -23,6 +23,7 @@
 #include "CommonMacros.h"
 #include "PowerManager.h"
 #include "SprDebugNode.h"
+#include "SprProcInfo.h"
 #include "PowerManagerHub.h"
 #include "SprEpollSchedule.h"
 
@@ -50,6 +51,7 @@ int main(int argc, const char *argv[])
         }
     });
 
+    SprProcInfo::GetInstance()->Init();
     SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_POWER_MANAGER);
     SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");

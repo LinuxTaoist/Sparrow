@@ -20,6 +20,7 @@
 #include <stdio.h>
 #include <signal.h>
 #include "SprLog.h"
+#include "SprProcInfo.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "DebugModule.h"
@@ -51,6 +52,7 @@ int main(int argc, const char *argv[])
 
     theDebugModule.Initialize();
     theDebugModuleHub.InitializeHub();
+    SprProcInfo::GetInstance()->Init();
     SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_DEBUG_MODULE);
 
     SprEpollSchedule::GetInstance()->EpollLoop();

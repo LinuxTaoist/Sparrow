@@ -21,6 +21,7 @@
 #include <errno.h>
 #include <string.h>
 #include "SprLog.h"
+#include "SprProcInfo.h"
 #include "SprDebugNode.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
@@ -125,6 +126,7 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
 int32_t SprDebugNode::RegisterBuildinCmds()
 {
     mBuildinCmds["help"]          = { "Dump all cmds", std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
+    mBuildinCmds["proc"]          = { "Dump process info", std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
     mBuildinCmds["version"]       = { "Dump version", std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
     return 0;
 }
@@ -166,9 +168,8 @@ int32_t SprDebugNode::UnregisterCmd(const std::string& owner, const std::string&
 
 void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
 {
-    SPR_LOGD("==============================================================================\n");
-    SPR_LOGD("                     Debug Command List                                       \n");
-    SPR_LOGD("==============================================================================\n");
+    SPR_LOGD("============================  Debug Command List  ============================\n");
+    SPR_LOGD("\n");
 
     int32_t mIndex = 0, cIndex = 0;     // modle index, cmd index
     int32_t total = (int32_t)mBuildinCmds.size();
@@ -195,14 +196,34 @@ void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
     SPR_LOGD("==============================================================================\n");
 }
 
+void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
+{
+    auto pObj = SprProcInfo::GetInstance();
+    if (!pObj) {
+        SPR_LOGE("pObj is nullptr!\n");
+        return;
+    }
+
+    std::string name = pObj->GetProcName();
+    SPR_LOGD("==============================================================================\n");
+    SPR_LOGD("                         %s Infomation                                        \n", name.c_str());
+    SPR_LOGD("==============================================================================\n");
+    SPR_LOGD("\n");
+    SPR_LOGD("  RunTime : %s\n", pObj->GetRunTimeString().c_str());
+    SPR_LOGD("  DebugPath: %s\n", pObj->GetDebugPath().c_str());
+    SPR_LOGD("\n");
+    SPR_LOGD("==============================================================================\n");
+}
+
 void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
 {
+    SPR_LOGD("=============================   Version About   ==============================\n");
+    SPR_LOGD("\n");
+    SPR_LOGD("  CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
+    SPR_LOGD("  CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
+    SPR_LOGD("  CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
+    SPR_LOGD("\n");
     SPR_LOGD("==============================================================================\n");
-    SPR_LOGD("                        Version About                                         \n");
-    SPR_LOGD("==============================================================================\n");
-    SPR_LOGD("- CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
-    SPR_LOGD("- CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
-    SPR_LOGD("- CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
 }
 
 int32_t SprDebugNode::SetMaxNum(int32_t num)
