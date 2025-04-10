@@ -20,12 +20,11 @@
 #include <stdio.h>
 #include <signal.h>
 #include "SprLog.h"
-#include "SprProcInfo.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "DebugModule.h"
+#include "SprProcPrepare.h"
 #include "DebugModuleHub.h"
-#include "SprDebugNode.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;
@@ -35,9 +34,6 @@ using namespace InternalDefs;
 
 int main(int argc, const char *argv[])
 {
-    DebugModule theDebugModule(MODULE_DEBUG, "DebugM");
-    DebugModuleHub theDebugModuleHub(SRV_NAME_DEBUG_MODULE, &theDebugModule);
-
     GeneralUtils::InitSignalHandler([](int signum) {
 	    SPR_LOGI("Receive signal: %d!\n", signum);
 
@@ -50,11 +46,12 @@ int main(int argc, const char *argv[])
         }
     });
 
+    DebugModule theDebugModule(MODULE_DEBUG, "DebugM");
+    DebugModuleHub theDebugModuleHub(SRV_NAME_DEBUG_MODULE, &theDebugModule);
+
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_DEBUG_MODULE);
     theDebugModule.Initialize();
     theDebugModuleHub.InitializeHub();
-    SprProcInfo::GetInstance()->Init();
-    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_DEBUG_MODULE);
-
     SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");
     return 0;

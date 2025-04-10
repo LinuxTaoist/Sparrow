@@ -21,6 +21,7 @@
 #include "SprSystem.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "SprProcPrepare.h"
 #include "SprEpollSchedule.h"
 
 #define LOG_TAG "MainSparrow"

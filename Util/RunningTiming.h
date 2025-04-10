@@ -74,18 +74,12 @@ public:
 
 private:
     /**
-     * @brief Start the timer and record the start time.
+     * @brief Get the time in milliseconds.
      */
-    void Start();
-
-    /**
-     * @brief Stop the timer and record the end time.
-     */
-    void Stop();
+    uint64_t GetCurTimeInMSec();
 
 private:
     uint64_t mStartTimeInMSec;
-    uint64_t mStopTimeInMSec;
 };
 
 #endif // __RUNNING_TIMING_H__

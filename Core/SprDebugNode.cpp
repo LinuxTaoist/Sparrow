@@ -209,8 +209,8 @@ void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
     SPR_LOGD("                         %s Infomation                                        \n", name.c_str());
     SPR_LOGD("==============================================================================\n");
     SPR_LOGD("\n");
-    SPR_LOGD("  RunTime : %s\n", pObj->GetRunTimeString().c_str());
-    SPR_LOGD("  DebugPath: %s\n", pObj->GetDebugPath().c_str());
+    SPR_LOGD("  RunTime   : %s\n", pObj->GetRunTimeString().c_str());
+    SPR_LOGD("  DebugPath : %s\n", pObj->GetDebugPath().c_str());
     SPR_LOGD("\n");
     SPR_LOGD("==============================================================================\n");
 }

@@ -18,10 +18,10 @@
  */
 #include <signal.h>
 #include "SprLog.h"
-#include "SprProcInfo.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "SprMediator.h"
+#include "SprProcPrepare.h"
 #include "EpollEventHandler.h"
 #include "SprMediatorHub.h"
 
@@ -43,7 +43,7 @@ int main(int argc, const char *argv[])
     SprMediator *pMedObj = SprMediator::GetInstance();
     SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pMedObj);
 
-    SprProcInfo::GetInstance()->Init();
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_MEDIATOR);
     theMediatorHub.InitializeHub();
     pMedObj->Init();
     EpollEventHandler::GetInstance()->EpollLoop();

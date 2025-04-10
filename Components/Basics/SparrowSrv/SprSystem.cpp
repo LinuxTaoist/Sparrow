@@ -24,12 +24,11 @@
 #include "SprContext.h"
 #include "CommonMacros.h"
 #include "SprSystem.h"
-#include "SprProcInfo.h"
 #include "SprTimeTrace.h"
 #include "CoreTypeDefs.h"
 #include "TimeManager.h"
-#include "SprDebugNode.h"
 #include "SprSystemTimer.h"
+#include "SprProcPrepare.h"
 #include "SprTimerManager.h"
 
 using namespace std;
@@ -72,8 +71,7 @@ void SprSystem::InitEnv()
 
 void SprSystem::InitOthers()
 {
-    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_SPARROW);
-    SprProcInfo::GetInstance()->Init();
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_SPARROW);
 }
 
 void SprSystem::InitMsgQueueLimit()

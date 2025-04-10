@@ -19,13 +19,12 @@
 #include <signal.h>
 #include <unistd.h>
 #include "SprLog.h"
-#include "SprProcInfo.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
 #include "CoreTypeDefs.h"
-#include "SprDebugNode.h"
+#include "SprProcPrepare.h"
 #include "PropertyManager.h"
 #include "PropertyManagerHub.h"
 #include "EpollEventHandler.h"
@@ -49,9 +48,9 @@ int main(int argc, char * argv[])
 
     PropertyManager* pProperM = PropertyManager::GetInstance();
     PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
+
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_PROPERTY);
     pProperM->Init();
-    SprProcInfo::GetInstance()->Init();
-    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string("/tmp/") + SRV_NAME_PROPERTY);
     thePropertyManagerHub.InitializeHub();
 
     EpollEventHandler::GetInstance()->EpollLoop();

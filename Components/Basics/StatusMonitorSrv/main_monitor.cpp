@@ -18,9 +18,10 @@
  */
 #include <signal.h>
 #include "SprLog.h"
-#include "SprProcInfo.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "CommonMacros.h"
+#include "SprProcPrepare.h"
 #include "StatusMonitorManager.h"
 #include "SprEpollSchedule.h"
 
@@ -43,8 +44,8 @@ int main(int argc, const char *argv[])
     });
 
     StatusMonitorManager monitorMgr(MODULE_STATUS_MONITOR, "StatusM");
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_STATUS_MONITOR);
     monitorMgr.Initialize();
-    SprProcInfo::GetInstance()->Init();
     SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");
     return 0;

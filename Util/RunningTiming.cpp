@@ -23,14 +23,14 @@
  *  Usage:
  *  To measure the execution time of a code block, you need to call the Start method
  *  before the code block and the Stop method after the code block. Then, use the GetTimeInSec
- *  or GetTimeInMSec methods to retrieve the duration of the interval.
+ *  or GetCurTimeInMSec methods to retrieve the duration of the interval.
  *
  *  Example:
  *      RunningTiming timer;
  *      // Execute some code...
  *      double timeInSeconds = timer.GetTimeInSec();            // total time in seconds
  *      std::cout << "Code block took " << timeInSeconds << " seconds." << std::endl;
- *      // double timeInMilliseconds = timer.GetTimeInMSec();      // total time in milliseconds
+ *      // double timeInMilliseconds = timer.GetCurTimeInMSec();      // total time in milliseconds
  *      // std::cout << "Code block took " << timeInMilliseconds << " milliseconds." << std::endl;
  *
  *  Change History:
@@ -44,37 +44,29 @@
 #include <sys/time.h>
 #include "RunningTiming.h"
 
-RunningTiming::RunningTiming() : mStartTimeInMSec(0), mStopTimeInMSec(0)
+RunningTiming::RunningTiming()
 {
-    Start();
+    mStartTimeInMSec = GetCurTimeInMSec();
 }
 
 RunningTiming::~RunningTiming()
 {
-    Stop();
 }
 
-void RunningTiming::Start()
-{
+uint64_t RunningTiming::GetCurTimeInMSec() {
     timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    mStartTimeInMSec = static_cast<uint64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
-}
-
-void RunningTiming::Stop()
-{
-    timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    mStopTimeInMSec = static_cast<uint64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
+    uint64_t timeInMSec = static_cast<uint64_t>(ts.tv_sec) * 1000 + ts.tv_nsec / 1000000;
+    return timeInMSec;
 }
 
 uint64_t RunningTiming::GetElapsedTimeInSec()
 {
-    Stop();
-    return (mStopTimeInMSec - mStartTimeInMSec) / 1000;
+    uint64_t stopTimeInMsec = GetCurTimeInMSec();
+    return (stopTimeInMsec - mStartTimeInMSec) / 1000;
 }
 
 uint64_t RunningTiming::GetElapsedTimeInMSec() {
-    Stop();
-    return mStopTimeInMSec - mStartTimeInMSec;
+    uint64_t stopTimeInMsec = GetCurTimeInMSec();
+    return stopTimeInMsec - mStartTimeInMSec;
 }

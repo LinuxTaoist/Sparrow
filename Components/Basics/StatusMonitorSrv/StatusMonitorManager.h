@@ -46,7 +46,6 @@ protected:
     int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
-    int32_t InitDebugNode();
     int32_t AddStatusEvent(uint32_t moduleID, int32_t errCode, const std::string& text);
     int32_t DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text);
     int32_t DumpAllStatusEvents();

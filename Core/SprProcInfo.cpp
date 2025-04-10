@@ -50,10 +50,10 @@ void SprProcInfo::Init()
 
 uint64_t SprProcInfo::GetTickUs()
 {
-    uint32_t td = 0;
+    uint64_t td = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    td = ts.tv_sec * 1000000 + ts.tv_nsec / 1000;
+    td = (uint64_t)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
 
     return td;
 }

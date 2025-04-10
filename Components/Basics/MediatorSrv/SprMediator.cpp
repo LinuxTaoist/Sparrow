@@ -63,7 +63,6 @@ int SprMediator::Init()
 {
     SPR_LOGD("### Init SprMediator begin!\n");
     InitInternalPort();
-    SprDebugNode::GetInstance()->InitPipeDebugNode(string("/tmp/") + SRV_NAME_MEDIATOR);
     SPR_LOGD("### Init SprMediator end!\n");
     return 0;
 }

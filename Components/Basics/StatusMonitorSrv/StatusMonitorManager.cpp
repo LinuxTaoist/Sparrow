@@ -44,14 +44,7 @@ StatusMonitorManager::~StatusMonitorManager()
 
 int32_t StatusMonitorManager::Init()
 {
-    InitDebugNode();
     RegisterDebugFuncs();
-    return 0;
-}
-
-int32_t StatusMonitorManager::InitDebugNode()
-{
-    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string("/tmp/") + SRV_NAME_STATUS_MONITOR);
     return 0;
 }
 
