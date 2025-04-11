@@ -19,7 +19,6 @@
 #include <atomic>
 #include <memory>
 #include <fstream>
-#include <sys/resource.h>
 #include "SprLog.h"
 #include "SprContext.h"
 #include "CommonMacros.h"
@@ -62,9 +61,6 @@ SprSystem* SprSystem::GetInstance()
 
 void SprSystem::InitEnv()
 {
-    // Init msg queue limit
-    InitMsgQueueLimit();
-
     // write release information
     LoadReleaseInformation();
 }
@@ -72,21 +68,6 @@ void SprSystem::InitEnv()
 void SprSystem::InitOthers()
 {
     SprProcPrepare::GetInstance()->Init(SRV_NAME_SPARROW);
-}
-
-void SprSystem::InitMsgQueueLimit()
-{
-    // The limit for creating message queues has to be changed, otherwise the other
-    // applications can not create enough message queues.
-    // Note: The values in /proc/sys/fs/mqueue/* seem to have no influence on this issue.
-    // Also ulimit -n has no influence on this issue.
-    struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
-    int32_t ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
-    if (ret == 0) {
-        rlim.rlim_cur = RLIM_INFINITY;  // soft limit
-        rlim.rlim_max = RLIM_INFINITY;  // hard limit
-        setrlimit(RLIMIT_MSGQUEUE, &rlim);
-    }
 }
 
 void SprSystem::LoadReleaseInformation()

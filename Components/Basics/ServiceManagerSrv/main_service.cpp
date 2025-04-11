@@ -35,7 +35,7 @@ int main(int argc, char* argv[])
 	    SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:   // 用户自定义信号1
-                ServiceManager::StopWork();
+                ServiceManager::ExitLoop();
                 break;
             default:
                 break;
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     });
 
     ServiceManager theServiceManager;
-    theServiceManager.StartWork();
+    theServiceManager.WorkLoop();
 
     SPR_LOGI("Main exit!\n");
     return 0;

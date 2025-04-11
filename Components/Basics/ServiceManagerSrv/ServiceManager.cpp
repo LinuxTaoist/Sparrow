@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -55,7 +56,7 @@ ServiceManager::ServiceManager()
 
 ServiceManager::~ServiceManager()
 {
-    StopWork();
+    ExitLoop();
 }
 
 bool ServiceManager::IsExeAliveByProc(int32_t pid)
@@ -78,8 +79,33 @@ bool ServiceManager::IsExeAliveByProc(int32_t pid)
     return false;
 }
 
-int32_t ServiceManager::StartWork()
+int32_t ServiceManager::InitEnv()
 {
+    // Init msg queue limit
+    InitMsgQueueLimit();
+    return 0;
+}
+
+int32_t ServiceManager::InitMsgQueueLimit()
+{
+    // The limit for creating message queues has to be changed, otherwise the other
+    // applications can not create enough message queues.
+    // Note: The values in /proc/sys/fs/mqueue/* seem to have no influence on this issue.
+    // Also ulimit -n has no influence on this issue.
+    struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
+    int32_t ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
+    if (ret == 0) {
+        rlim.rlim_cur = RLIM_INFINITY;  // soft limit
+        rlim.rlim_max = RLIM_INFINITY;  // hard limit
+        setrlimit(RLIMIT_MSGQUEUE, &rlim);
+    }
+
+    return 0;
+}
+
+int32_t ServiceManager::WorkLoop()
+{
+    InitEnv();
     StartAllExesFromConfigure(INIT_CONFIGURE_PATH);
     mRunning = true;
     while(mRunning) {
@@ -113,7 +139,7 @@ int32_t ServiceManager::StopAllSubExes()
     return 0;
 }
 
-int32_t ServiceManager::StopWork()
+int32_t ServiceManager::ExitLoop()
 {
     mRunning = false;
     SPR_LOGI("Stop work!\n");
