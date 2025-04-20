@@ -134,6 +134,7 @@ $ tail -f /tmp/sprlog/sparrow.log
  ==============================================================================
     1. Built-in Commands         Total:  2
        ├── help                : Dump all cmds
+       ├── proc                : Dump process info
        └── version             : Dump version
 
     2. StatusMonitorManager      Total: 12
@@ -169,6 +170,7 @@ $ tail -f /tmp/sprlog/sparrow.log
  ==============================================================================
     1. Built-in Commands         Total:  2
        ├── help                : Dump all cmds
+       ├── proc                : Dump process info
        └── version             : Dump version
 
     2. Properties                Total:  1
