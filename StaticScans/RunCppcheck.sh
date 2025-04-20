@@ -34,8 +34,11 @@ CPPCHECK_OPTS="--std=c++11 --enable=all --suppress=unusedFunction --suppress=use
 # 指定待检查的源代码及头文件目录列表
 SOURCE_DIRS="../3rdAdapter/ ../Components/ ../Core/ ../Debug/ ../Examples/ ../Hardware/ ../PublicAPIs/ ../Util/"
 
+# 忽略的文件列表，使用更标准的cppcheck忽略格式
+CHECK_IGNORE="--suppress=*:../Util/cJSON.c --suppress=*:../cJSON.h"
+
 # 执行Cppcheck静态代码检查，包括源文件和对应的头文件
-cppcheck $CPPCHECK_OPTS $SOURCE_DIRS
+cppcheck $CPPCHECK_OPTS $CHECK_IGNORE $SOURCE_DIRS
 
 # 输出完成消息
 echo ""

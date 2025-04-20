@@ -101,11 +101,6 @@ std::string SprMediator::GetSignalName(int sig)
 int SprMediator::LoadMQStaticInfo(int handle, const std::string& devName)
 {
     auto pMQDetails = std::make_shared<SprMQueueDetails>(devName, false);
-    if (!pMQDetails) {
-        SPR_LOGE("new SprMQueueDetails failed!\n");
-        return -1;
-    }
-
     pMQDetails->SetHandle(handle);
     mMQDetailsMap[handle] = pMQDetails;
     return 0;
@@ -185,7 +180,7 @@ int SprMediator::MsgRespondRegister(const SprMsg& msg)
     }
 
     auto pModuleMQ = make_shared<PMsgQueue>(name, MSG_MAX_SIZE, nullptr);
-    if (pModuleMQ && pModuleMQ->GetEvtFd() != -1) {
+    if (pModuleMQ->GetEvtFd() != -1) {
         result = true;
         mModuleMap[moduleId] = {monitored, pModuleMQ};
         LoadMQStaticInfo(pModuleMQ->GetEvtFd(), name);

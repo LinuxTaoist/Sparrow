@@ -60,7 +60,8 @@ void ProcMutex::Init() {
         return;
     }
 
-    mSharedData = (SharedData*)mmap(NULL, sizeof(SharedData), PROT_READ | PROT_WRITE, MAP_SHARED, mShmFd, 0);
+    mSharedData = reinterpret_cast<SharedData*>(mmap(NULL, sizeof(SharedData),
+                                        PROT_READ | PROT_WRITE, MAP_SHARED, mShmFd, 0));
     if (mSharedData == MAP_FAILED) {
         SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
         close(mShmFd);

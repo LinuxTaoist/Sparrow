@@ -37,13 +37,6 @@ public:
     static SprMediatorMQProxy* GetInstance();
 
     /**
-     * @brief Connect to SprMediator
-     *
-     * @return 0 on success, or -1 if an error occurred
-     */
-    int ConnectMediator() override;
-
-    /**
      * @brief send message to other module
      *
      * @param msg
@@ -64,6 +57,13 @@ protected:
      * @brief Construct
      */
     SprMediatorMQProxy();
+
+    /**
+     * @brief Connect to SprMediator
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int ConnectMediator();
 
     /**
      * @brief Send message to other module

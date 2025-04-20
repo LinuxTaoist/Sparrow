@@ -50,12 +50,12 @@ int main(int argc, char *argv[])
             if (rc > 0) {
                 SPR_LOGD("# RECV [%d]> %s\n", sock, rBuf.c_str());
                 HttpMsgRequest req;
-                int32_t rc = req.Decode(rBuf);
+                int32_t ret = req.Decode(rBuf);
 
-                int32_t statusCode = rc;
+                int32_t statusCode = ret;
                 std::string httpVersion = "HTTP/1.0";
                 std::string body = "<h1>I'm Sorry!</h1>";
-                if (rc == 0) {
+                if (ret == 0) {
                     statusCode = 200;
                     httpVersion = req.GetHttpVersion();
                     body = "<h1>Hello World!</h1>";

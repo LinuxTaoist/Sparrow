@@ -29,7 +29,7 @@
 #define LOG_TAG "SprMQDetails"
 #define SPR_ROOT_PATH "/tmp/spr_details"
 
-SprMQueueDetails::SprMQueueDetails(std::string mqName, bool create) : mIsCreator(create), mMqName(mqName) {
+SprMQueueDetails::SprMQueueDetails(const std::string& mqName, bool create) : mIsCreator(create), mMqName(mqName) {
     int32_t fd = -1;
     mpDetails = nullptr;
     std::string filePath = std::string(SPR_ROOT_PATH) + "/" + mqName;

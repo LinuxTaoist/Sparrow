@@ -62,11 +62,8 @@ int32_t NtpClient::SendTimeRequest()
         }
     }
 
-    if (mpNtpClient) {
-        std::string bytes;
-        ret = mpNtpClient->Write(bytes, mAddr, mPort);
-    }
-
+    std::string bytes;
+    ret = mpNtpClient->Write(bytes, mAddr, mPort);
     return ret;
 }
 
@@ -94,7 +91,7 @@ int32_t NtpClient::InitNtpClient()
         pCliObj->Close();
     });
 
-    return mpNtpClient ? 0 : -1;
+    return 0;
 }
 
 int32_t NtpClient::HandleNtpBytes(const std::string& bytes)

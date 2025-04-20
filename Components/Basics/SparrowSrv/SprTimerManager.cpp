@@ -17,6 +17,7 @@
  *
  */
 #include <atomic>
+#include <algorithm>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -210,13 +211,17 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 void SprTimerManager::MsgRespondDelTimer(const SprMsg &msg)
 {
     std::shared_ptr<STimerInfo> p = msg.GetDatas<STimerInfo>();
-    if (p != nullptr) {
-        for (const auto& timer : mTimers) {
-            if (timer.GetMsgId() == p->msgId && timer.GetModuleId() == p->moduleId) {
-                DelTimer(timer);
-                break;
-            }
-        }
+    if (p == nullptr) {
+        SPR_LOGW("p is nullptr!\n");
+        return;
+    }
+
+    auto it = std::find_if(mTimers.begin(), mTimers.end(), [&p](const SprTimer& timer) {
+        return (timer.GetMsgId() == p->msgId && timer.GetModuleId() == p->moduleId);
+    });
+
+    if (it != mTimers.end()) {
+        DelTimer(*it);
     }
 }
 

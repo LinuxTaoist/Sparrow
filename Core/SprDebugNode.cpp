@@ -112,7 +112,7 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
         }
     }, this);
 
-    if (!mpDebugNode || !mpDebugNode->IsReady()) {
+    if (!mpDebugNode->IsReady()) {
         SPR_LOGE("Init pipe %s failed! (%s)\n", path.c_str(), strerror(errno));
         return -1;
     }

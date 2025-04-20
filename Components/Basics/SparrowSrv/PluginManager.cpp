@@ -59,7 +59,7 @@ void PluginManager::InitWatchDir()
     // - IN_MOVED_FROM: Triggered when a file or directory is moved from the specified directory.
     // Note: IN_CREATE is not used because it triggers immediately when a file is created,
     // which may result in attempting to process the file before it is fully written and closed.
-    mDirWatch.AddDirWatch(mDefaultLibPath.c_str(), IN_CLOSE_WRITE | IN_MOVED_TO | IN_MOVED_FROM | IN_DELETE);
+    mDirWatch.AddDirWatch(mDefaultLibPath, IN_CLOSE_WRITE | IN_MOVED_TO | IN_MOVED_FROM | IN_DELETE);
     mpFile = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void *arg) {
         const int size = 100;
         char buffer[size] = {0};

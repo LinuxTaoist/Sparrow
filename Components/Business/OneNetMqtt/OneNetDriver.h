@@ -24,6 +24,15 @@
 #include "MqttProtocol.h"
 #include "SprObserverWithMQueue.h"
 
+namespace {
+
+#ifdef ENUM_OR_STRING
+#undef ENUM_OR_STRING
+#endif
+#define ENUM_OR_STRING(x) x
+
+}
+
 #define ONENET_DRV_LEV1_MACROS                      \
     ENUM_OR_STRING(LEV1_SOCKET_ANY),                \
     ENUM_OR_STRING(LEV1_SOCKET_IDLE),               \

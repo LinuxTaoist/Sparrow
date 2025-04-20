@@ -27,7 +27,7 @@
 class SprMQueueDetails
 {
 public:
-    SprMQueueDetails(std::string mqName, bool create);
+    SprMQueueDetails(const std::string& mqName, bool create);
     ~SprMQueueDetails();
 
     int32_t SetHandle(int32_t handle);
@@ -49,7 +49,6 @@ private:
 
 private:
     bool mIsCreator;
-    int32_t mHandle;
     std::string mMqName; // mq name
     SMQueueDetails* mpDetails;
 };
