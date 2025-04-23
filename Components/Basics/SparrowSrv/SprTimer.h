@@ -29,7 +29,7 @@ public:
     SprTimer& operator = (SprTimer&& timer);
     ~SprTimer();
 
-    bool operator < (const SprTimer& t) const;
+    bool operator < (const SprTimer& t) const;  // used by SprTimerManager::mTimers insert
     bool IsExpired() const;
     uint32_t GetTick() const;
     uint32_t GetModuleId() const { return mModuleId; }

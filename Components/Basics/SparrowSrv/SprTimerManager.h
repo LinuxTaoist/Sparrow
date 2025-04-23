@@ -123,7 +123,7 @@ private:
 
 private:
     bool mEnable;                                       // Component init status
-    std::set<SprTimer> mTimers;                         // sort by SprTimer.mExpired from smallest to largest
+    std::set<SprTimer> mTimers;                         // sort by SprTimer.mExpired from smallest to largest with SprTimer::operator<()
     std::shared_ptr<SprSystemTimer> mpSystemTimer;      // SysTimer object
 };
 

@@ -200,21 +200,28 @@ void SprTimerManager::MsgRespondStopSystemTimer(const SprMsg &msg)
 
 void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 {
+    // When add a new timer:
+    // 1. check interval value, not less than TIMER_MIN_INTERVAL_MS
+    // 2. check if the timer already exist
+    // 3. add the timer to the timer list, and update the system timer from the earliest timer in the list
     auto p = msg.GetDatas<STimerInfo>();
     if (p != nullptr) {
         SPR_LOGD("AddTimer: [0x%x %d %dms %dms %s]\n", p->moduleId, p->repeatTimes,
                             p->delayInMilliSec, p->intervalInMilliSec, GetSigName(p->msgId));
 
+        // 1. check interval value, not less than TIMER_MIN_INTERVAL_MS
         if (p->intervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
             SPR_LOGW("Interval too small (%d ms), minimum allowed is %d ms!\n", p->intervalInMilliSec, TIMER_MIN_INTERVAL_MS);
             return;
         }
 
+        // 2. check if the timer already exist
         if (IsExistTimer(p->moduleId, p->msgId)) {
             SPR_LOGW("Timer already exist!\n");
             return;
         }
 
+        // 3. add the timer to the timer list, and update the system timer with the earliest timer in the list
         AddTimer(p->moduleId, p->msgId, p->repeatTimes, p->delayInMilliSec, p->intervalInMilliSec);
         SprMsg rspMsg(SIG_ID_TIMER_START_SYSTEM_TIMER);
         SendMsg(rspMsg);
