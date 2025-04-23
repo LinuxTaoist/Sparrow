@@ -28,6 +28,8 @@ public:
     MqttPuback(uint8_t flags, uint16_t identifier);
     virtual ~MqttPuback();
 
+    uint16_t GetIdentifier() { return mIdentifier; }
+
 protected:
     int32_t DecodeVariableHeader(const std::string& bytes) override;
     int32_t EncodeVariableHeader(std::string& bytes) override;

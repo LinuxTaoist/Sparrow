@@ -34,6 +34,7 @@ using namespace InternalDefs;
 #define LOG_TAG "OneNetDev"
 #define ONENET_DEVICE_CFG_PATH          "OneNetDevices.conf"
 #define DEFAULT_KEEP_ALIVE_INTERVAL     60  // 60s
+#define IDENTITY_USED_LIMIT             256
 
 #define TEMPLATE_TOPIC_THING            "$sys/%s/%s/thing/%s"
 #define TEMPLATE_TOPIC_CMD              "$sys/%s/%s/cmd/%s"
@@ -119,6 +120,12 @@ uint16_t OneNetDevice::GetUnusedIdentity()
     uint16_t identity = 1;
     if (mUsedIdentities.empty()) {
         mUsedIdentities.insert(identity);
+        return identity;
+    }
+
+    if (mUsedIdentities.size() >= IDENTITY_USED_LIMIT) {
+        SPR_LOGE("Identity used limit %d!\n", IDENTITY_USED_LIMIT);
+        mUsedIdentities.clear();
         return identity;
     }
 

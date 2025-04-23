@@ -105,6 +105,7 @@ private:
      *
      * Add a custom timer to the timer container
      */
+    bool IsExistTimer(uint32_t moduleId, uint32_t msgId);
     int AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec);
     int AddTimer(const SprTimer& timer);
     int DelTimer(const SprTimer& timer);

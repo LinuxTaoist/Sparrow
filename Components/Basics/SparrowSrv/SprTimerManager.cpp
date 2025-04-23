@@ -122,6 +122,19 @@ int SprTimerManager::PrintRealTime()
     return 0;
 }
 
+bool SprTimerManager::IsExistTimer(uint32_t moduleId, uint32_t msgId)
+{
+    auto it = std::find_if(mTimers.begin(), mTimers.end(), [moduleId, msgId](const SprTimer& t) {
+        return (t.GetModuleId() == moduleId && t.GetMsgId() == msgId);
+    });
+
+    if (it != mTimers.end()) {
+        return true;
+    }
+
+    return false;
+}
+
 int SprTimerManager::AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec)
 {
     SprTimer timer(moduleId, msgId, repeatTimes, delayInMilliSec, intervalInMilliSec);
@@ -194,6 +207,11 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 
         if (p->intervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
             SPR_LOGW("Interval too small (%d ms), minimum allowed is %d ms!\n", p->intervalInMilliSec, TIMER_MIN_INTERVAL_MS);
+            return;
+        }
+
+        if (IsExistTimer(p->moduleId, p->msgId)) {
+            SPR_LOGW("Timer already exist!\n");
             return;
         }
 

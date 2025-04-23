@@ -952,6 +952,11 @@ int32_t OneNetDriver::HandleMqttPublish(const std::string& bytes)
 
 int32_t OneNetDriver::HandleMqttPubAck(const std::string& bytes)
 {
+    MqttPuback mqttCmd;
+    int32_t ret = mqttCmd.Decode(bytes);
+    CHECK_ONENET_RET_VALIDITY(ret);
+
+    SPR_LOGD("Recv mqtt puback! packet id: %d\n", mqttCmd.GetIdentifier());
     return 0;
 }
 

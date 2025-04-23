@@ -117,7 +117,6 @@ int main(int argc, const char *argv[])
                     msg.SetFrom(MODULE_DEBUG);
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
                     theDebug.NotifyObserver(msg);
-
                     break;
                 }
                 case '2': {
@@ -126,7 +125,6 @@ int main(int argc, const char *argv[])
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
                     theDebug.NotifyObserver(msg);
-
                     break;
                 }
                 case '3': {
@@ -135,8 +133,7 @@ int main(int argc, const char *argv[])
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
                     msg.SetFrom(MODULE_DEBUG);
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyAllObserver(msg);
-
+                    theDebug.NotifyObserver(msg);
                     break;
                 }
                 case '4': {
@@ -145,8 +142,7 @@ int main(int argc, const char *argv[])
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
                     msg.SetFrom(MODULE_DEBUG);
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyAllObserver(msg);
-
+                    theDebug.NotifyObserver(msg);
                     break;
                 }
                 case '5': {
@@ -155,8 +151,7 @@ int main(int argc, const char *argv[])
                     SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
                     msg.SetFrom(MODULE_DEBUG);
                     msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyAllObserver(msg);
-
+                    theDebug.NotifyObserver(msg);
                     break;
                 }
                 case '6': {
