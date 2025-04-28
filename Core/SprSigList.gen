@@ -109,4 +109,14 @@ ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ),             \
 ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP),            \
 ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT),          \
 
+//-----------------------------------------------------------------------------
+// TEST_MODULE
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_200MS_TIMER_EVENT),           \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_500MS_TIMER_EVENT),           \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_1S_TIMER_EVENT),              \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_2S_TIMER_EVENT),              \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_3S_TIMER_EVENT),              \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_5S_TIMER_EVENT),              \
+
 ENUM_OR_STRING(SIG_ID_BUTT)
