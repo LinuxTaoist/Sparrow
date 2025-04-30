@@ -28,6 +28,7 @@
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
 #include "BindInterface.h"
+#include "SprEnumHelper.h"
 #include "SprMediator.h"
 
 using namespace std;
@@ -184,7 +185,8 @@ int SprMediator::MsgRespondRegister(const SprMsg& msg)
         result = true;
         mModuleMap[moduleId] = {monitored, pModuleMQ};
         LoadMQStaticInfo(pModuleMQ->GetEvtFd(), name);
-        SPR_LOGD("Register %s success! moduleId = %d, monitored = %d\n", name.c_str(), (int)moduleId, monitored);
+        SPR_LOGD("Register %s success! %s [%d], monitored = %d\n",
+                name.c_str(), GetSprModuleIDDescription(moduleId).c_str(), (int)moduleId, monitored);
     } else {
         SPR_LOGE("Register %s fail!\n", name.c_str());
     }
@@ -205,9 +207,9 @@ int SprMediator::MsgRespondUnregister(const SprMsg& msg)
             mMQDetailsMap.erase(it->second.pModMQ->GetEvtFd());
         }
         mModuleMap.erase(moduleId);
-        SPR_LOGD("Unregister module 0x%x success!\n", moduleId);
+        SPR_LOGD("Unregister module %s success!\n", GetSprModuleIDDescription(moduleId).c_str());
     } else {
-        SPR_LOGW("Not exist module 0x%x\n", moduleId);
+        SPR_LOGW("Not exist module %s\n", GetSprModuleIDDescription(moduleId).c_str());
     }
 
     SprMsg exitMsg(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT);

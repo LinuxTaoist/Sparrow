@@ -30,53 +30,16 @@ using namespace InternalDefs;
 TestModule::TestModule()
     : SprObserverWithMQueue(InternalDefs::MODULE_GTEST_INTERNAL, "TestInternal")
 {
-    mTimerCount = 0;
+    m200MSCnt = 0;
+    m500MSCnt = 0;
+    m1SCnt = 0;
+    m2SCnt = 0;
+    m3SCnt = 0;
+    m5SCnt = 0;
 }
 
 TestModule::~TestModule()
 {
-}
-
-void TestModule::InitEnv()
-{
-    SPR_LOGD("TestModule InitEnv!");
-
-    // 初始化组件框架
-    Initialize();
-
-    // 创建SprMs消息调度线程
-    mpMsgThread = std::make_shared<std::thread>([]() {
-        auto pSchedule = SprEpollSchedule::GetInstance();
-        if (!pSchedule) {
-            SPR_LOGE("Get Schedule Instance Failed!");
-            return;
-        }
-
-        pSchedule->EpollLoop();
-    });
-
-    SPR_LOGD("TestModule InitEnv OK!");
-}
-
-void TestModule::DeInitEnv()
-{
-    SPR_LOGD("TestModule DeInitEnv!");
-
-    auto pSchedule = SprEpollSchedule::GetInstance();
-    if (!pSchedule) {
-        SPR_LOGE("Get Schedule Instance Failed!");
-        return;
-    }
-
-    pSchedule->ExitLoop();
-    mpMsgThread->join();
-    SPR_LOGD("TestModule DeInitEnv OK!");
-}
-
-int32_t TestModule::ResetTimerCnt()
-{
-    mTimerCount = 0;
-    return 0;
 }
 
 int32_t TestModule::CondNotify()
@@ -85,12 +48,21 @@ int32_t TestModule::CondNotify()
     return 0;
 }
 
-int32_t TestModule::CondWait(int32_t timeoutMs, int32_t value)
+int32_t TestModule::CondWait(int32_t timeoutMs)
+{
+    std::unique_lock<std::mutex> lock(mMutex);
+    mCond.wait_for(lock, std::chrono::milliseconds(timeoutMs), []() {
+        return false;
+    });
+    return 0;
+}
+
+int32_t TestModule::CondWait(int32_t timeoutMs, int32_t expectValue, const int32_t& actualValue)
 {
     std::unique_lock<std::mutex> lock(mMutex);
     mCond.wait_for(lock, std::chrono::milliseconds(timeoutMs), [&]() {
-        SPR_LOGD("Waiting: cnt = %d, v = %d", mTimerCount, value);
-        return (mTimerCount == value);
+        SPR_LOGD("Waiting: expect = %d, actual = %d", expectValue, actualValue);
+        return (expectValue == actualValue);
     });
     return 0;
 }
@@ -103,34 +75,73 @@ int32_t TestModule::Init()
 int32_t TestModule::ProcessMsg(const SprMsg& msg)
 {
     switch (msg.GetMsgId()) {
-        case SIG_ID_TEST_MODULE_200MS_TIMER_EVENT:
-        case SIG_ID_TEST_MODULE_500MS_TIMER_EVENT:
-        case SIG_ID_TEST_MODULE_1S_TIMER_EVENT:
-        case SIG_ID_TEST_MODULE_2S_TIMER_EVENT:
-        case SIG_ID_TEST_MODULE_3S_TIMER_EVENT:
+        case SIG_ID_TEST_MODULE_200MS_TIMER_EVENT: {
+            m200MSCnt++;
+            break;
+        }
+        case SIG_ID_TEST_MODULE_500MS_TIMER_EVENT: {
+            m500MSCnt++;
+            break;
+        }
+        case SIG_ID_TEST_MODULE_1S_TIMER_EVENT: {
+            m1SCnt++;
+            break;
+        }
+        case SIG_ID_TEST_MODULE_2S_TIMER_EVENT: {
+            m2SCnt++;
+            break;
+        }
+        case SIG_ID_TEST_MODULE_3S_TIMER_EVENT: {
+            m3SCnt++;
+            break;
+        }
         case SIG_ID_TEST_MODULE_5S_TIMER_EVENT: {
-            mTimerCount++;
-            mCond.notify_one();
+            m5SCnt++;
             break;
         }
         default:
             break;
     }
+
+    mCond.notify_one();
     return 0;
 }
 
+int32_t TestSprComponents::mCaseIndex = 0;
+EpollEventHandler* TestSprComponents::mpEpollSchedule = nullptr;
+std::shared_ptr<std::thread> TestSprComponents::mpMsgThread = nullptr;
 std::shared_ptr<TestModule> TestSprComponents::mpTestModule = nullptr;
 
 void TestSprComponents::SetUpTestCase()
 {
-    SPR_LOGD("TestModule SetUpTestCase!");
+    SPR_LOGD("SetUpTestCase enter!");
+    mCaseIndex = 0;
+    mpEpollSchedule = SprEpollSchedule::GetInstance(0, 2000);
     mpTestModule = std::make_shared<TestModule>();
-    mpTestModule->InitEnv();
+    mpTestModule->Initialize();
+
+    mpMsgThread = std::make_shared<std::thread>([&]() {
+        if (!mpEpollSchedule) {
+            SPR_LOGE("mpEpollSchedule is nullptr!");
+            return;
+        }
+
+        mpEpollSchedule->EpollLoop();
+    });
+
+    SPR_LOGD("SetUpTestCase exit!");
 }
 
 void TestSprComponents::TearDownTestCase()
 {
-    SPR_LOGD("TestModule TearDownTestCase!");
-    mpTestModule->DeInitEnv();
+    SPR_LOGD("TearDownTestCase enter!");
+    if (!mpEpollSchedule) {
+        SPR_LOGE("mpEpollSchedule is nullptr!");
+        return;
+    }
+
     mpTestModule = nullptr;
+    mpEpollSchedule->ExitLoop();
+    mpMsgThread->join();
+    SPR_LOGD("TearDownTestCase exit!");
 }

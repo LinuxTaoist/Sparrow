@@ -26,6 +26,7 @@
 #include "SprLog.h"
 #include "SprMsg.h"
 #include "GeneralUtils.h"
+#include "SprEnumHelper.h"
 #include "SprTimerManager.h"
 
 using namespace std;
@@ -154,7 +155,7 @@ int SprTimerManager::DelTimer(const SprTimer& timer)
     if (it != mTimers.end()) {
         mTimers.erase(it);
     } else {
-        SPR_LOGW("Not exist the timer! moduleId = 0x%x, msgId = 0x%x", timer.GetModuleId(), timer.GetMsgId());
+        SPR_LOGW("Not exist the timer! [%s: %s]", GetSprModuleIDDescription(timer.GetModuleId()).c_str(), GetSigName(timer.GetMsgId()));
     }
 
     return 0;
@@ -185,7 +186,7 @@ void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
 
     // loop: If the timer has already expired, increment the wait time by the standard interval.
     while (timerIntervalInMSec <= 0) {
-        SPR_LOGW("timerIntervalInMSec <= 0! (%d) (%d). Reset timer interval %dms %\n", expired, tick, timerIntervalInMSec);
+        SPR_LOGW("timerIntervalInMSec <= 0! (%d) (%d). Reset timer interval %dms\n", expired, tick, timerIntervalInMSec);
         timerIntervalInMSec += timerNode->GetIntervalInMilliSec();
     }
 
@@ -206,8 +207,8 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
     // 3. add the timer to the timer list, and update the system timer from the earliest timer in the list
     auto p = msg.GetDatas<STimerInfo>();
     if (p != nullptr) {
-        SPR_LOGD("AddTimer: [0x%x %d %dms %dms %s]\n", p->moduleId, p->repeatTimes,
-                            p->delayInMilliSec, p->intervalInMilliSec, GetSigName(p->msgId));
+        SPR_LOGD("AddTimer: [%s %d %dms %dms %s]\n", GetSprModuleIDDescription(p->moduleId).c_str(),
+            p->repeatTimes, p->delayInMilliSec, p->intervalInMilliSec, GetSigName(p->msgId));
 
         // 1. check interval value, not less than TIMER_MIN_INTERVAL_MS
         if (p->intervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
@@ -246,6 +247,9 @@ void SprTimerManager::MsgRespondDelTimer(const SprMsg &msg)
     });
 
     if (it != mTimers.end()) {
+        SPR_LOGD("DelTimer: [%s %dms %s]\n", GetSprModuleIDDescription(it->GetModuleId()).c_str(),
+            it->GetIntervalInMilliSec(), GetSigName(it->GetMsgId()));
+
         DelTimer(*it);
     }
 }
