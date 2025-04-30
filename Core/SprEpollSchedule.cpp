@@ -29,7 +29,8 @@
 
 const uint32_t EPOLL_FD_NUM = 10;
 
-SprEpollSchedule::SprEpollSchedule(uint32_t size, bool enableCoroutine) : EpollEventHandler(size), mEnableCoroutine(enableCoroutine)
+SprEpollSchedule::SprEpollSchedule(int32_t size, int32_t timeout, bool enableCoroutine)
+    : EpollEventHandler(size, timeout), mEnableCoroutine(enableCoroutine)
 {
     // if (enableCoroutine) {
     //     mCoPool.InitCoroutinePool(1024);
@@ -43,9 +44,9 @@ SprEpollSchedule::~SprEpollSchedule()
 {
 }
 
-EpollEventHandler* SprEpollSchedule::GetInstance(uint32_t size, bool enableCoroutine)
+EpollEventHandler* SprEpollSchedule::GetInstance(int32_t size, int32_t timeout, bool enableCoroutine)
 {
-    return EpollEventHandler::GetInstance(size);
+    return EpollEventHandler::GetInstance(size, timeout);
 }
 
 void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)

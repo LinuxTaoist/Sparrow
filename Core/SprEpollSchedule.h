@@ -37,7 +37,7 @@ public:
      * @param[in] size the size of epoll
      * @return Instance of SprEpollSchedule
      */
-    static EpollEventHandler* GetInstance(uint32_t size = 0, bool enableCoroutine = false);
+    static EpollEventHandler* GetInstance(int32_t size = 0, int32_t timeout = -1, bool enableCoroutine = false);
 
     /**
      * @brief Handle epoll event
@@ -53,7 +53,7 @@ private:
      * @param[in] size the size of epoll
      * @param[in] enableCoroutine enable coroutine
      */
-    explicit SprEpollSchedule(uint32_t size = 0, bool enableCoroutine = true);
+    explicit SprEpollSchedule(int32_t size = 0, int32_t timeout = 0, bool enableCoroutine = true);
 
 private:
     bool mEnableCoroutine;
