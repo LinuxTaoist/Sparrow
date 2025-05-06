@@ -21,7 +21,8 @@
 * 需交叉编译平台
 
     解压googletest-1.5.0.tar.gz并交叉编译，放置googletest/lib/{platform}目录下。
-
+    示例：
+    ![交叉编译](../../Docs/png/gtest交叉编译.png)
 - 注:
     - `platform` 对应不同的交叉编译平台。
     - 若不使用`googletest-1.5.0.tar.gz`，需要同步更新`Sparrow/3rdParty/googletest/include/`头文件。
