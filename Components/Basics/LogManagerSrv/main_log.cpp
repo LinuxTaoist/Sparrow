@@ -22,6 +22,7 @@
 #include <sys/types.h>
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "Backtrace.h"
 #include "LogManager.h"
 
 using namespace GeneralUtils;
@@ -41,8 +42,16 @@ int main(int argc, const char *argv[])
             case MAIN_EXIT_SIGNUM:
                 LogManager::StopWork();
                 break;
-
-            case SIGUSR2:   // 用户自定义信号2
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGABRT:
+            case SIGILL:
+            case SIGFPE:
+            case SIGTERM:
+            case SIGQUIT:
+                Backtrace::DumpBacktrace();
+                LogManager::StopWork();
+                break;
             default:
                 break;
         }

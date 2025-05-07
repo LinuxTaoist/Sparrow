@@ -7,5 +7,5 @@ aux_source_directory        (${PROJECT_PATH}/Util                               
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/ServiceManagerSrv    SRC_SRVICE_MANAGER_PATH)
 add_executable              (BinSrvMgr ${SRC_SRVICE_MANAGER_PATH})
 set_target_properties       (BinSrvMgr PROPERTIES OUTPUT_NAME                       "servicemanagersrv")
-target_link_libraries       (BinSrvMgr pthread sprlog rt c)
+target_link_libraries       (BinSrvMgr pthread sprlog rt c dl)
 add_dependencies            (BinSrvMgr LibSprLog)

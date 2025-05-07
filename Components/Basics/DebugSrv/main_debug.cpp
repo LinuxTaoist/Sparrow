@@ -23,6 +23,7 @@
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "DebugModule.h"
+#include "Backtrace.h"
 #include "SprProcPrepare.h"
 #include "DebugModuleHub.h"
 #include "SprEpollSchedule.h"
@@ -39,6 +40,16 @@ int main(int argc, const char *argv[])
 
         switch (signum) {
             case MAIN_EXIT_SIGNUM:   // 用户自定义信号1
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGABRT:
+            case SIGILL:
+            case SIGFPE:
+            case SIGTERM:
+            case SIGQUIT:
+                Backtrace::DumpBacktrace();
                 SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
             default:

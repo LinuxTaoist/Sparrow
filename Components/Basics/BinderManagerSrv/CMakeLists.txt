@@ -9,5 +9,5 @@ aux_source_directory    (${PROJECT_PATH}/Util                                   
 aux_source_directory    (${PROJECT_PATH}/Components/Basics/BinderManagerSrv     SRC_BINDER_SRV_PATH)
 add_executable          (BinBinderSrv ${SRC_BINDER_SRV_PATH})
 set_target_properties   (BinBinderSrv PROPERTIES OUTPUT_NAME                    "bindermanagersrv")
-target_link_libraries   (BinBinderSrv pthread sprlog rt)
+target_link_libraries   (BinBinderSrv pthread sprlog rt dl)
 add_dependencies        (BinBinderSrv LibSprLog)

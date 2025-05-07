@@ -21,6 +21,7 @@
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "SprMediator.h"
+#include "Backtrace.h"
 #include "SprProcPrepare.h"
 #include "EpollEventHandler.h"
 #include "SprMediatorHub.h"
@@ -33,6 +34,16 @@ int main(int argc, const char *argv[])
 	    SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
+                EpollEventHandler::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGABRT:
+            case SIGILL:
+            case SIGFPE:
+            case SIGTERM:
+            case SIGQUIT:
+                Backtrace::DumpBacktrace();
                 EpollEventHandler::GetInstance()->ExitLoop();
                 break;
             default:

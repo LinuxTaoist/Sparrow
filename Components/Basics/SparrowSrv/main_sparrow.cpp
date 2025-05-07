@@ -21,6 +21,7 @@
 #include "SprSystem.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "Backtrace.h"
 #include "SprEpollSchedule.h"
 
 #define LOG_TAG "MainSparrow"
@@ -32,6 +33,16 @@ int main(int argc, const char *argv[])
 
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGABRT:
+            case SIGILL:
+            case SIGFPE:
+            case SIGTERM:
+            case SIGQUIT:
+                Backtrace::DumpBacktrace();
                 SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
             default:

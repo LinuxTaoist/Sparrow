@@ -21,6 +21,7 @@
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
+#include "Backtrace.h"
 #include "SprProcPrepare.h"
 #include "StatusMonitorManager.h"
 #include "SprEpollSchedule.h"
@@ -36,6 +37,16 @@ int main(int argc, const char *argv[])
 
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGABRT:
+            case SIGILL:
+            case SIGFPE:
+            case SIGTERM:
+            case SIGQUIT:
+                Backtrace::DumpBacktrace();
                 SprEpollSchedule::GetInstance()->ExitLoop();
                 break;
             default:

@@ -20,6 +20,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "Backtrace.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "BinderManager.h"
@@ -34,6 +35,16 @@ int main(int argc, const char *argv[])
 	    SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
+                BinderManager::StopWork();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGABRT:
+            case SIGILL:
+            case SIGFPE:
+            case SIGTERM:
+            case SIGQUIT:
+                Backtrace::DumpBacktrace();
                 BinderManager::StopWork();
                 break;
             default:
