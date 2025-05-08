@@ -95,7 +95,7 @@
     std::istringstream iss(Backtrace::DumpBacktrace(totalFrames));  \
     SPR_LOGE("Receive signal %d, %s.", signum, strsignal(signum));  \
     while (std::getline(iss, line)) {                               \
-        SPR_LOGD("%s", line.c_str());                               \
+        SPR_LOGE("%s", line.c_str());                               \
     }                                                               \
 } while(0)
 
