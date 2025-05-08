@@ -52,12 +52,12 @@ int InitSignalHandler(void (*signalHandler)(int))
     signal_action.sa_flags = 0;
     sigemptyset(&signal_action.sa_mask);
 
-    sigaction(SIGHUP,    &signal_action, NULL);    // 终端挂断，重载配置或终止
-    sigaction(SIGINT,    &signal_action, NULL);    // 用户中断（Ctrl+C）
+    // sigaction(SIGHUP,    &signal_action, NULL);    // 终端挂断，重载配置或终止
+    // sigaction(SIGINT,    &signal_action, NULL);    // 用户中断（Ctrl+C）
     sigaction(SIGQUIT,   &signal_action, NULL);    // 退出，带core dump，调试用
     sigaction(SIGILL,    &signal_action, NULL);    // 非法指令
     // sigaction(SIGTRAP,   &signal_action, NULL);    // 调试陷阱
-    sigaction(SIGKILL,   &signal_action, NULL);    // 请求进程终止
+    // sigaction(SIGKILL,   &signal_action, NULL);    // 请求进程终止
     // sigaction(SIGABRT,   &signal_action, NULL);    // 应用异常中止（abort函数）
     sigaction(SIGBUS,    &signal_action, NULL);    // 总线错误，内存访问对齐问题
     sigaction(SIGFPE,    &signal_action, NULL);    // 浮点错误，如除以0
@@ -66,7 +66,7 @@ int InitSignalHandler(void (*signalHandler)(int))
     sigaction(SIGUSR2,   &signal_action, NULL);    // 用户自定义信号2
     sigaction(SIGPIPE,   &signal_action, NULL);    // 管道破裂，写入无读取端的管道
     // sigaction(SIGALRM,   &signal_action, NULL);    // 定时器信号
-    sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
+    // sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
 
     return 0;
 }

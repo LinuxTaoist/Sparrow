@@ -16,6 +16,10 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
 #include "SprLog.h"
@@ -37,20 +41,19 @@ using namespace InternalDefs;
 int main(int argc, char * argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 EpollEventHandler::GetInstance()->ExitLoop();
                 break;
             case SIGSEGV:
             case SIGBUS:
-            case SIGABRT:
             case SIGILL:
             case SIGFPE:
-            case SIGTERM:
             case SIGQUIT:
-                Backtrace::DumpBacktrace();
+                PRINT_BACKTRACE(signum, 20);
                 EpollEventHandler::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;

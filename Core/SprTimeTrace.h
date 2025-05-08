@@ -27,7 +27,7 @@
 
 typedef struct
 {
-    int		    eId;
+    int         eId;
     timespec    eTimeStamp;
     std::string eText;
 } EntryInfo;

@@ -17,6 +17,7 @@
  *
  */
 #include <stdio.h>
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
@@ -37,7 +38,7 @@ int main(int argc, const char *argv[])
     LogManager theLogManager;
 
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 LogManager::StopWork();
@@ -49,8 +50,10 @@ int main(int argc, const char *argv[])
             case SIGFPE:
             case SIGTERM:
             case SIGQUIT:
-                Backtrace::DumpBacktrace();
+                SPR_LOGE("Receive signal %d, %s.", signum, strsignal(signum));
+                SPR_LOGE("%s", Backtrace::DumpBacktrace().c_str());
                 LogManager::StopWork();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;

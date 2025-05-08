@@ -32,7 +32,7 @@ using namespace GeneralUtils;
 int main(int argc, char* argv[])
 {
     InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:   // 用户自定义信号1
                 ServiceManager::ExitLoop();

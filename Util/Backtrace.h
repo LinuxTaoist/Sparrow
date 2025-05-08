@@ -23,7 +23,7 @@
 
 namespace Backtrace {
 
-std::string DumpBacktrace(const int32_t frames = 20);
+std::string DumpBacktrace(const int32_t totalFrames = 20);
 
 } // namespace Backtrace
 

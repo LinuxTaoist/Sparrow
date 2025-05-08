@@ -69,3 +69,9 @@ TEST(ThirdAdapter_SprLog, MultipleLogs) {
         SPR_LOGD("Test log out times: %d", i);
     }
 }
+
+// 测试超长日志输出
+TEST(ThirdAdapter_SprLog, LongLogOutput) {
+    std::string longMessage(1024, 'a');
+    SPR_LOGD("%s", longMessage.c_str());
+}

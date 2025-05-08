@@ -16,6 +16,10 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <signal.h>
 #include "SprLog.h"
 #include "GeneralUtils.h"
@@ -41,13 +45,12 @@ int main(int argc, const char *argv[])
                 break;
             case SIGSEGV:
             case SIGBUS:
-            case SIGABRT:
             case SIGILL:
             case SIGFPE:
-            case SIGTERM:
             case SIGQUIT:
-                Backtrace::DumpBacktrace();
+                PRINT_BACKTRACE(signum, 20);
                 SprEpollSchedule::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;
