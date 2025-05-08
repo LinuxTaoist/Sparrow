@@ -18,9 +18,13 @@
  */
 #include <string>
 #include "gtest/gtest.h"
+#include "SprLog.h"
+#include "CommonMacros.h"
 #include "Backtrace.h"
 
 using namespace Backtrace;
+
+#define LOG_TAG "TestTrace"
 
 // 测试 SprProcInfo::DumpBackTrace 方法
 TEST(Util_Backtrace, DumpBackTraceTest) {
@@ -32,4 +36,6 @@ TEST(Util_Backtrace, DumpBackTraceTest) {
     if (std::getline(iss, line)) {
         EXPECT_EQ(line[0], '#');
     }
+
+    PRINT_BACKTRACE(0, 20);
 }
