@@ -1,5 +1,5 @@
 ## Bin test_internal
-set(TEST_INTERNAL_PATH      ${PROJECT_PATH}/Test/Internal)
+set(TEST_INTERNAL_PATH      ${PROJECT_PATH}/TestCase/Internal)
 
 include_directories         (${PROJECT_PATH}/3rdAdapter)
 include_directories         (${PROJECT_PATH}/Core)

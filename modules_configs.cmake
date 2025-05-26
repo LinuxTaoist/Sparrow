@@ -6,5 +6,7 @@ set(BUSINESS_MODULES "")
 list(APPEND BUSINESS_MODULES OneNetMqtt)
 
 # 其他编译默认值, 可在Build/options中修改
-set(TEST_DEBUG OFF CACHE BOOL "Add Test Debug")
-set(BUILD_GTEST OFF CACHE BOOL "Add Google Test")
+set(BUILD_DEBUG OFF CACHE BOOL "Build Debug")
+set(BUILD_EXAMPLES OFF CACHE BOOL "Add Examples")
+set(BUILD_TESTCASE OFF CACHE BOOL "Add Test Case")
+

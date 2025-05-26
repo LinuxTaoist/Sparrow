@@ -2,10 +2,10 @@
 若需要编译，仅需两步：
 1. 打开编译选项
 
-   `Sparrow/Build/options/{platform}/{platform}_complie_options.cmake`, 将 `BUILD_GTEST` 设置为 `ON`，并保存。 例：
+   `Sparrow/Build/options/{platform}/{platform}_complie_options.cmake`, 将 `BUILD_TESTCASE` 设置为 `ON`，并保存。 例：
    ```cmake
    ## Sparrow/Build/options/Default/Default_compile_options.cmake
-   set(BUILD_GTEST ON)
+   set(BUILD_TESTCASE ON)
    ```
 2. 集成`gtest`库文件
 * ubuntu平台
