@@ -60,7 +60,7 @@ target_link_libraries       (sample_mqueue c epollevent pthread)
 add_dependencies            (sample_mqueue LibEpollEvent)
 
 ## Bin property_get
-set(SRC_BIN_PROPERTY_GET     GetProperty.cc)
+set(SRC_BIN_PROPERTY_GET    GetProperty.cc)
 add_executable              (property_get ${SRC_BIN_PROPERTY_GET})
 target_include_directories  (property_get PRIVATE ${PROJECT_PATH}/PublicAPIs)
 set_target_properties       (property_get PROPERTIES OUTPUT_NAME "property_get")
@@ -68,7 +68,7 @@ target_link_libraries       (property_get c propertyapi)
 add_dependencies            (property_get LibPropertyAPI)
 
 ## Bin property_set
-set(SRC_BIN_PROPERTY_SET     SetProperty.cc)
+set(SRC_BIN_PROPERTY_SET    SetProperty.cc)
 add_executable              (property_set ${SRC_BIN_PROPERTY_SET})
 target_include_directories  (property_set PRIVATE ${PROJECT_PATH}/PublicAPIs)
 set_target_properties       (property_set PROPERTIES OUTPUT_NAME "property_set")
@@ -77,14 +77,14 @@ add_dependencies            (property_set LibPropertyAPI)
 
 ## Bin sample_http_bytes
 aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HTTP_SRC_PATH)
-set(SRC_BIN_HTTPBYTES        SampleHttpBytes.cc)
+set(SRC_BIN_HTTPBYTES       SampleHttpBytes.cc)
 add_executable              (sample_http_bytes ${SRC_BIN_HTTPBYTES} ${SRC_HTTP_SRC_PATH})
 target_include_directories  (sample_http_bytes PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)
 set_target_properties       (sample_http_bytes PROPERTIES OUTPUT_NAME "sample_http_bytes")
 
 ## Bin sample_httpserver
 aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HTTP_SRC_PATH)
-set(SRC_BIN_HTTPSERVER       SampleHttpServer.cc)
+set(SRC_BIN_HTTPSERVER      SampleHttpServer.cc)
 add_executable              (sample_http_server ${SRC_BIN_HTTPSERVER} ${SRC_HTTP_SRC_PATH})
 target_include_directories  (sample_tcp_server PRIVATE ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 target_include_directories  (sample_http_server PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)

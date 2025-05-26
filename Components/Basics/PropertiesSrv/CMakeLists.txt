@@ -1,13 +1,11 @@
-# Bin propertiessrv
-include_directories     (${PROJECT_PATH}/Util)
-include_directories     (${PROJECT_PATH}/Core)
-include_directories     (${PROJECT_PATH}/3rdAdapter)
-include_directories     (${PROJECT_PATH}/PrivateAPIs/Binder)
-include_directories     (${PROJECT_PATH}/UtilModules/EpollEventHandler)
-
-aux_source_directory    (${PROJECT_PATH}/Util                                   SRC_PROPERTIES_SRV_PATH)
-aux_source_directory    (${PROJECT_PATH}/Components/Basics/PropertiesSrv        SRC_PROPERTIES_SRV_PATH)
-add_executable          (BinPropertySrv ${SRC_PROPERTIES_SRV_PATH})
-set_target_properties   (BinPropertySrv PROPERTIES OUTPUT_NAME                  "propertiessrv")
-target_link_libraries   (BinPropertySrv pthread rt sprcore sprbinder sprlog epollevent dl)
-add_dependencies        (BinPropertySrv LibSprCore LibBinder LibSprLog LibEpollEvent)
+## Bin propertiessrv
+aux_source_directory        (${PROJECT_PATH}/Components/Basics/PropertiesSrv        SRC_PROPERTIES_SRV_PATH)
+add_executable              (BinPropertySrv ${SRC_PROPERTIES_SRV_PATH})
+target_include_directories  (BinPropertySrv PRIVATE ${PROJECT_PATH}/Util
+                                                    ${PROJECT_PATH}/Core
+                                                    ${PROJECT_PATH}/3rdAdapter
+                                                    ${PROJECT_PATH}/PrivateAPIs/Binder
+                                                    ${PROJECT_PATH}/UtilModules/EpollEventHandler)
+set_target_properties       (BinPropertySrv PROPERTIES OUTPUT_NAME "propertiessrv")
+target_link_libraries       (BinPropertySrv pthread rt sprcore sprbinder sprlog epollevent dl)
+add_dependencies            (BinPropertySrv LibSprCore LibBinder LibSprLog LibEpollEvent)

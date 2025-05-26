@@ -27,7 +27,6 @@ add_dependencies            (BinInfraWatch LibSprCore LibMediatorAPI LibPowerMan
 aux_source_directory        (${PROJECT_PATH}/Util               SRC_RSHELLX_PATH)
 aux_source_directory        (${SRC_DEBUG_PATH}/RShellX          SRC_RSHELLX_PATH)
 add_executable              (BinRShellX ${SRC_RSHELLX_PATH})
-target_include_directories  (BinRShellX PRIVATE ${PROJECT_PATH}/Core/EpollEventHandler)
 set_target_properties       (BinRShellX PROPERTIES OUTPUT_NAME  "rshellx")
 target_link_libraries       (BinRShellX c epollevent sprlog rt pthread dl)
 add_dependencies            (BinRShellX LibEpollEvent LibSprLog)
