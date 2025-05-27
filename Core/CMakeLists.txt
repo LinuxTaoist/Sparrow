@@ -17,5 +17,5 @@ target_include_directories  (LibSprCore PRIVATE ${PROJECT_PATH}/Util
 
 set_target_properties       (LibSprCore PROPERTIES OUTPUT_NAME "sprcore")
 set_target_properties       (LibSprCore PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries       (LibSprCore stdc++ sprlog epollevent rt)
+target_link_libraries       (LibSprCore stdc++ sprlog epollevent rt dl)
 add_dependencies            (LibSprCore LibSprLog LibEpollEvent)
