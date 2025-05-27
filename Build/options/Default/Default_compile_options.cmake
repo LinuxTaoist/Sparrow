@@ -5,6 +5,6 @@ message("load default_compile_options.cmake")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
 
 # 设置编译开关
-set(BUILD_DEBUG ON)
-set(BUILD_EXAMPLES ON)
-set(BUILD_TESTCASE ON)
+# set(BUILD_DEBUG ON)
+# set(BUILD_EXAMPLES ON)
+# set(BUILD_TESTCASE ON)
