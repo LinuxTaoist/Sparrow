@@ -12,7 +12,7 @@ set(MODULE_CONFIG_VERSION "DEFAULT_MCONFIG_1002")
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
 
 ## 可选功能模块配置
-# 非核心组件，编译时默认禁用
+# 非核心模块，编译时默认禁用
 # 启用方法：取消对应行的注释符号(#)
 # set(BUILD_DEBUG ON)       # 调试工具集（含调试符号与增强日志）
 # set(BUILD_EXAMPLES ON)    # 示例程序（演示API用法，非生产环境）
