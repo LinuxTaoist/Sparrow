@@ -1,13 +1,12 @@
 ## OneNetMqtt
+
+# add source files
 aux_source_directory    (${PROJECT_PATH}/UtilModules/MQTT                   SRC_ONENET_SRV_PATH)
 aux_source_directory    (${PROJECT_PATH}/Components/Business/OneNetMqtt     SRC_ONENET_SRV_PATH)
-
-file(GLOB MQTT_SRC_FILES CONFIGURE_DEPENDS "${PROJECT_PATH}/MQTT/*.cpp")
 set(OTHER_SRC_FILES     ${PROJECT_PATH}/Util/cJSON.c)
 
 # Lib pluginonenet
 add_library                 (LibOneNet SHARED   ${SRC_ONENET_SRV_PATH}
-                                                ${MQTT_SRC_FILES}
                                                 ${OTHER_SRC_FILES})
 target_include_directories  (LibOneNet PRIVATE  ${PROJECT_PATH}/Util
                                                 ${PROJECT_PATH}/Core
