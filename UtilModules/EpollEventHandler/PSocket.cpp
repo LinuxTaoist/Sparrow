@@ -57,7 +57,7 @@ std::string SocketCommon::ResolveHostToIP(const std::string& host)
     hints.ai_family = AF_UNSPEC;     // 不限制 IPv4 或 IPv6
     hints.ai_socktype = SOCK_STREAM; // TCP
     if ((status = getaddrinfo(host.c_str(), nullptr, &hints, &res)) != 0) {
-        SPR_LOGE("getaddrinfo %s failed! (%s)\n", host.c_str(), strerror(errno));
+        SPR_LOGE("getaddrinfo %s failed! status = %d (%s)\n", host.c_str(), status, strerror(errno));
         return "";
     }
 
@@ -130,7 +130,7 @@ int32_t PUdp::Write(const std::string& bytes, const std::string& addr, uint16_t 
 
 int32_t PUdp::Write(const void* data, size_t size, const std::string& addr, uint16_t port)
 {
-    if (!data || size <= 0) {
+    if (!data || size == 0) {
         SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }
@@ -165,7 +165,7 @@ int32_t PUdp::Read(std::string& bytes, std::string& addr, uint16_t& port)
 
 int32_t PUdp::Read(void* data, size_t size, std::string& addr, uint16_t& port)
 {
-    if (!data || size <= 0) {
+    if (!data || size == 0) {
         SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }
@@ -447,7 +447,7 @@ int32_t PUnixDgram::Write(const std::string& bytes, const std::string& dstPath)
 
 int32_t PUnixDgram::Write(const void* data, size_t size, const std::string& dstPath)
 {
-    if (!data || size <= 0) {
+    if (!data || size == 0) {
         SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }
@@ -503,7 +503,7 @@ int32_t PUnixDgram::Read(std::string& bytes, std::string& dstPath)
 
 int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath)
 {
-    if (!data || size <= 0) {
+    if (!data || size == 0) {
         SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }

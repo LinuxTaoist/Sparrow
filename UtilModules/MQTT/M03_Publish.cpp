@@ -21,6 +21,7 @@
 MqttPublish::MqttPublish()
     : MqttMsgBase(MQTT_MSG_PUBLISH)
 {
+    mIdentifier = 0;
 }
 
 MqttPublish::MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload)

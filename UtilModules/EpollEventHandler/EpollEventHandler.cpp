@@ -111,10 +111,6 @@ void EpollEventHandler::EpollLoop()
     struct epoll_event ep[32];
     mRun = true;
     while(mRun) {
-        if (!mRun) {
-            break;
-        }
-
         // 无事件时, epoll_wait阻塞, 等待
         int count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), mTimeOut);
         if (count <= 0) {
