@@ -16,25 +16,41 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <stdio.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "SprLog.h"
+#include "Backtrace.h"
+#include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "BinderManager.h"
 
 using namespace GeneralUtils;
 
-#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainBinder", __LINE__, ##args)
+#define LOG_TAG "MainBinder"
 
 int main(int argc, const char *argv[])
 {
     InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 BinderManager::StopWork();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                BinderManager::StopWork();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;

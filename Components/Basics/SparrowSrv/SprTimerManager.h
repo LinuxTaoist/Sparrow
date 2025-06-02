@@ -53,11 +53,10 @@ public:
      *
      * @param[in] id
      * @param[in] name
-     * @param[in] mediatorPtr
-     * @param[in] systemTimerPtr
+     * @param[in] pSystemTimer
      * @return SprTimerManager*
      */
-    static SprTimerManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> systemTimerPtr);
+    static SprTimerManager* GetInstance(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> pSystemTimer);
 
 private:
     /**
@@ -65,10 +64,9 @@ private:
      *
      * @param[in] id
      * @param[in] name
-     * @param[in] mediatorPtr
-     * @param[in] systemTimerPtr
+     * @param[in] pSystemTimer
      */
-    SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> systemTimerPtr);
+    SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> pSystemTimer);
 
     /**
      * @brief  InitSystemTimer
@@ -84,7 +82,7 @@ private:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    int ProcessMsg(const SprMsg& msg) override;
+    int32_t ProcessMsg(const SprMsg& msg) override;
 
     /**
      * @brief  Dump current time
@@ -107,6 +105,7 @@ private:
      *
      * Add a custom timer to the timer container
      */
+    bool IsExistTimer(uint32_t moduleId, uint32_t msgId);
     int AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec);
     int AddTimer(const SprTimer& timer);
     int DelTimer(const SprTimer& timer);
@@ -124,8 +123,8 @@ private:
 
 private:
     bool mEnable;                                       // Component init status
-    std::set<SprTimer> mTimers;                         // sort by SprTimer.mExpired from smallest to largest
-    std::shared_ptr<SprSystemTimer> mSystemTimerPtr;    // SysTimer object
+    std::set<SprTimer> mTimers;                         // sort by SprTimer.mExpired from smallest to largest with SprTimer::operator<()
+    std::shared_ptr<SprSystemTimer> mpSystemTimer;      // SysTimer object
 };
 
 #endif // __TIMER_MANAGER_H__

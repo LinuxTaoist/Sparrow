@@ -29,7 +29,7 @@ using namespace std;
 
 int main(int argc, const char *argv[])
 {
-    auto pMQueue = make_shared<PMsgQueue>("MQTest", 1025, [](int fd, string msg, void* arg) {
+    auto pMQueue = make_shared<PMsgQueue>("MQTest", 1025, [](int fd, const string& msg, void* arg) {
         SPR_LOGD("fd = %d, msg = %s\n", fd, msg.c_str());
     });
 
@@ -44,9 +44,9 @@ int main(int argc, const char *argv[])
         }
     });
 
-    EpollEventHandler::GetInstance()->AddPoll(pMQueue.get());
-    EpollEventHandler::GetInstance()->AddPoll(pTimer.get());
+    pMQueue->AddToPoll();
+    pTimer->AddToPoll();
     pTimer->StartTimer(1000, 1000);
-    EpollEventHandler::GetInstance()->EpollLoop(true);
+    EpollEventHandler::GetInstance()->EpollLoop();
     return 0;
 }

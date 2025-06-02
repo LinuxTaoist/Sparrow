@@ -25,7 +25,7 @@ class MqttConnack : public MqttMsgBase
 {
 public:
     MqttConnack();
-    MqttConnack(const std::string& bytes);
+    explicit MqttConnack(const std::string& bytes);
     virtual ~MqttConnack();
 
     int32_t GetConnAckStatus() const;

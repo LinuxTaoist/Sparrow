@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <errno.h>
 #include <stdio.h>
 #include <string.h>
@@ -23,9 +24,11 @@
 #include <sys/epoll.h>
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) // printf("%4d EpollEvent D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%4d EpollEvent W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d EpollEvent E: " fmt, __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) // printf("%4d EpEvtHandler D: " fmt, __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%4d EpEvtHandler W: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%4d EpEvtHandler E: " fmt, __LINE__, ##args)
+
+static std::atomic<bool> gObjAlive(true);
 
 EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
 {
@@ -45,11 +48,16 @@ EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
 
 EpollEventHandler::~EpollEventHandler()
 {
+    gObjAlive = false;
     ExitLoop();
 }
 
 EpollEventHandler* EpollEventHandler::GetInstance(int size, int blockTimeOut)
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static EpollEventHandler instance(size, blockTimeOut);
     return &instance;
 }
@@ -60,16 +68,16 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     //EPOLLOUT：表示对应的文件描述符可以写；
     //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的，默认水平触发。
     struct epoll_event ep;
-    ep.events = EPOLLET | EPOLLIN;
+    ep.events = EPOLLIN;
     ep.data.ptr = p;
 
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
-    int fd = p->GetEpollFd();
+    int fd = p->GetEvtFd();
     int ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret == -1) {
-        SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
+        SPR_LOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
         return ;
     }
 
@@ -84,29 +92,25 @@ void EpollEventHandler::DelPoll(IEpollEvent* p)
         return ;
     }
 
-    int ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEpollFd(), nullptr);
+    int ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEvtFd(), nullptr);
     if (ret != 0) {
-        SPR_LOGE("epoll_ctl fail. (%s)\n", strerror(errno));
+        SPR_LOGE("epoll_ctl %d fail. (%s)\n", p->GetEvtFd(), strerror(errno));
     }
 
-    mEpollMap.erase(p->GetEpollFd());
-    SPR_LOGD("Delete epoll fd %d\n", p->GetEpollFd());
+    mEpollMap.erase(p->GetEvtFd());
+    SPR_LOGD("Delete epoll fd %d\n", p->GetEvtFd());
 }
 
 void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
 {
-    event.EpollEvent(event.GetEpollFd(), event.GetEpollType(), event.GetArgs());
+    event.EpollEvent(event.GetEvtFd(), event.GetEpollType(), event.GetArgs());
 }
 
-void EpollEventHandler::EpollLoop(bool bRun)
+void EpollEventHandler::EpollLoop()
 {
     struct epoll_event ep[32];
-    mRun = bRun;
+    mRun = true;
     while(mRun) {
-        if (!mRun) {
-            break;
-        }
-
         // 无事件时, epoll_wait阻塞, 等待
         int count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), mTimeOut);
         if (count <= 0) {
@@ -114,7 +118,7 @@ void EpollEventHandler::EpollLoop(bool bRun)
         }
 
         for (int i = 0; i < count; i++) {
-            IEpollEvent* p = (IEpollEvent*)ep[i].data.ptr;
+            IEpollEvent* p = reinterpret_cast<IEpollEvent*>(ep[i].data.ptr);
             if (p == nullptr) {
                 continue;
             }
@@ -129,8 +133,7 @@ void EpollEventHandler::EpollLoop(bool bRun)
 void EpollEventHandler::ExitLoop()
 {
     mRun = false;
-    if (mHandle != -1)
-    {
+    if (mHandle != -1) {
         close(mHandle);
         mHandle = -1;
     }

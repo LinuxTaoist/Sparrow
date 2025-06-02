@@ -22,6 +22,8 @@
 #include "SprMsg.h"
 #include "PMsgQueue.h"
 #include "SprObserver.h"
+#include "CommonTypeDefs.h"
+#include "SprMQueueDetails.h"
 
 class SprObserverWithMQueue : public SprObserver, public PMsgQueue
 {
@@ -37,13 +39,6 @@ public:
     virtual ~SprObserverWithMQueue();
 
     /**
-     * @brief Initialize function for derived class called in Initialize
-     *
-     * @return 0 on success, or -1 if an error occurred
-     */
-    virtual int32_t InitFramework() override;
-
-    /**
      * @brief SendMsg
      *
      * @param[in] msg
@@ -54,14 +49,6 @@ public:
      */
     int32_t SendMsg(SprMsg& msg);
     int32_t SendMsg(uint32_t msgId);
-
-    /**
-     * @brief  Process message from message queue received
-     *
-     * @param msg
-     * @return 0 on success, or -1 if an error occurred
-     */
-    virtual int32_t ProcessMsg(const SprMsg& msg) = 0;
 
     /**
      * @brief  Process message event called by epoll
@@ -76,6 +63,21 @@ public:
 
 protected:
     /**
+     * @brief Initialize function for derived class called in Initialize
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t InitFramework() override;
+
+    /**
+     * @brief  Process message from message queue received
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t ProcessMsg(const SprMsg& msg) = 0;
+
+    /**
      * @brief Register self information from mediator module
      *
      * @return 0 on success, or -1 if an error occurred
@@ -88,6 +90,25 @@ protected:
      * @return 0 on success, or -1 if an error occurred
      */
     int32_t UnRegisterFromMediator();
+
+    /**
+     * @brief Load/Remove message queue information
+     *
+     * @param handle
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t LoadMQStaticInfo(int32_t handle, const std::string& devName);
+    int32_t LoadMQDynamicInfo(int32_t handle, const SprMsg& msg);
+
+    /**
+     * @brief Send event to monitor module
+     *
+     * @param errcode
+     * @param text
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t SendEventToMonitor(int32_t errcode, const std::string& text);
 
     /**
      * @brief Dispatch messages from message queue
@@ -110,12 +131,13 @@ protected:
     // --------------------------------------------------------------------------------------------
     // - Message handle functions
     // --------------------------------------------------------------------------------------------
-    int MsgRespondSystemExitRsp(const SprMsg& msg);
-    int MsgRespondRegisterRsp(const SprMsg& msg);
-    int MsgRespondUnregisterRsp(const SprMsg& msg);
+    int32_t MsgRespondSystemExitRsp(const SprMsg& msg);
+    int32_t MsgRespondRegisterRsp(const SprMsg& msg);
+    int32_t MsgRespondUnregisterRsp(const SprMsg& msg);
 
 private:
     bool mConnected;
+    std::shared_ptr<SprMQueueDetails> mpDetails;
 };
 
 #endif // __SPR_OBSERVER_WITH_MQUEUE_H__

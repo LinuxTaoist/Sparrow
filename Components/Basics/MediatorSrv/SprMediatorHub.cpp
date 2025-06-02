@@ -17,12 +17,11 @@
  *
  */
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "SprMediatorHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprMediator", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("SprMediator", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprMediator", fmt, ##args)
+#define LOG_TAG "MediatorHub"
 
 using namespace InternalDefs;
 SprMediatorHub::SprMediatorHub(const std::string& srvName, SprMediator* SprMediator) : SprBinderHub(srvName)
@@ -36,22 +35,25 @@ SprMediatorHub::~SprMediatorHub()
 
 void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
-    switch(cmd)
-    {
-        case PROXY_CMD_GET_ALL_MQ_ATTRS:
-        {
-            std::vector<SMQStatus> tmpMQAttrs;
+    switch(cmd) {
+        case PROXY_CMD_GET_ALL_MQ_ATTRS: {
+            std::vector<SMQueueDetails> tmpMQAttrs;
             int ret = mSprMediator->GetAllMQStatus(tmpMQAttrs);
-            pRspParcel->WriteInt(ret);
-            if (ret == 0) {
-                pRspParcel->WriteVector(tmpMQAttrs);
-            }
-
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(ret));
+            NONZERO_CHECK(pRspParcel->WriteVector(tmpMQAttrs));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
-        default:
-        {
+        case PROXY_CMD_GET_SIGNAL_NAME: {
+            int id = 0;
+            NONZERO_CHECK(pReqParcel->ReadInt(id));
+
+            std::string signalName = mSprMediator->GetSignalName(id);
+            NONZERO_CHECK(pRspParcel->WriteString(signalName));
+            NONZERO_CHECK(pRspParcel->Post());
+            break;
+        }
+        default: {
             SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
             break;
         }

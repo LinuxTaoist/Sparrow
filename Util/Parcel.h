@@ -25,6 +25,8 @@
 #include <semaphore.h>
 #include "SharedRingBuffer.h"
 
+#define PARCEL_TIMEOUT_MS 2000
+
 class Parcel
 {
 public:
@@ -36,6 +38,7 @@ public:
     Parcel& operator=(Parcel&& other) = delete;
 
     int Wait();
+    int TimedWait(int timeout = PARCEL_TIMEOUT_MS);
     int Post();
     int WriteBool(bool value);
     int ReadBool(bool& value);
@@ -54,8 +57,7 @@ public:
             return -1;
         }
 
-        for (const auto& v : vec)
-        {
+        for (const auto& v : vec) {
             if (WriteData((void*)&v, (int)sizeof(T)) != 0) {
                 return -1;
             }
@@ -74,8 +76,7 @@ public:
 
         unsigned capacity = totalSize / sizeof(T);
         vec.clear();
-        for (unsigned i = 0; i < capacity; i++)
-        {
+        for (unsigned i = 0; i < capacity; i++) {
             T value;
             int byteSize;
             if (ReadData((void*)&value, byteSize) != 0) {
@@ -90,7 +91,7 @@ public:
 private:
     bool                mMaster;
     int                 mShmKey;
-    sem_t*              mSem ;
+    sem_t*              mSem;
     std::string         mShmPath;
     SharedRingBuffer*   mRingBuffer;
 };

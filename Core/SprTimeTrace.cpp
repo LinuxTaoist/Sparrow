@@ -17,20 +17,26 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include "SprTimeTrace.h"
+
+static std::atomic<bool> gObjAlive(true);
 
 SprTimeTrace::SprTimeTrace()
 {
-
 }
 
 SprTimeTrace::~SprTimeTrace()
 {
-
+    gObjAlive = false;
 }
 
 SprTimeTrace* SprTimeTrace::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprTimeTrace instance;
     return &instance;
 }

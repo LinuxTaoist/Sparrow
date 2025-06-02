@@ -34,11 +34,11 @@ using namespace std;
 int main(int argc, const char *argv[])
 {
     std::mutex epFdMutex;
-    auto pEpoll = EpollEventHandler::GetInstance();
-    auto tcpClient = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int sock, void *arg) {
-        PSocket* pCliObj = (PSocket*)arg;
+    EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
+    auto tcpClient = make_shared<PTcpClient>([&](int sock, void *arg) {
+        PTcpClient* pCliObj = (PTcpClient*)arg;
         if (pCliObj == nullptr) {
-            SPR_LOGE("PSocket is nullptr\n");
+            SPR_LOGE("pCliObj is nullptr\n");
             return;
         }
 
@@ -47,26 +47,22 @@ int main(int argc, const char *argv[])
         if (rc > 0) {
             SPR_LOGD("# RECV [%d]> %s\n", sock, rBuf.c_str());
         } else {
-            pEpoll->DelPoll(pCliObj);
             SPR_LOGD("## CLOSE [%d]\n", sock);
-
             std::lock_guard<std::mutex> lock(epFdMutex);
             pCliObj->Close();
         }
     });
 
     tcpClient->AsTcpClient(true, "192.168.0.104", 1883);
-    pEpoll->AddPoll(tcpClient.get());
-
     std::thread wThread([&]{
         while(true) {
             std::lock_guard<std::mutex> lock(epFdMutex);
-            tcpClient->Write(tcpClient->GetEpollFd(), "Hello World");
+            tcpClient->Write(tcpClient->GetEvtFd(), "Hello World");
             sleep(1);
         }
     });
 
-    pEpoll->EpollLoop(true);
+    pEpoll->EpollLoop();
     wThread.join();
     return 0;
 }

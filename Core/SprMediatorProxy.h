@@ -21,7 +21,6 @@
 
 #include "SprMsg.h"
 
-class SprObserver;
 class SprMediatorProxy
 {
 public:
@@ -34,13 +33,6 @@ public:
     SprMediatorProxy& operator=(SprMediatorProxy&) = delete;
     SprMediatorProxy(SprMediatorProxy&&) = delete;
     SprMediatorProxy& operator=(SprMediatorProxy&&) = delete;
-
-    /**
-     * @brief Connect to SprMediator
-     *
-     * @return 0 on success, or -1 if an error occurred
-     */
-    virtual int ConnectMediator() = 0;
 
     /**
      * @brief send message to other module
@@ -59,4 +51,4 @@ public:
     virtual int NotifyAllObserver(const SprMsg& msg) = 0;
 };
 
-#endif
+#endif  // __SPR_MEDIATOR_PROXY_H__

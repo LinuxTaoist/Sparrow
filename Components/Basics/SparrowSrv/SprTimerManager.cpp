@@ -16,6 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
+#include <algorithm>
 #include <errno.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,33 +26,36 @@
 #include "SprLog.h"
 #include "SprMsg.h"
 #include "GeneralUtils.h"
+#include "SprEnumHelper.h"
 #include "SprTimerManager.h"
 
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("TimerM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("TimerM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("TimerM", fmt, ##args)
-
+#define LOG_TAG "TimerM"
 #define TIMER_MIN_INTERVAL_MS 100   // 100ms
 
-SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprSystemTimer> systemTimerPtr)
+static std::atomic<bool> gObjAlive(true);
+
+SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, shared_ptr<SprSystemTimer> pSystemTimer)
         : SprObserverWithMQueue(id, name)
 {
     mEnable = false;
-    mSystemTimerPtr = systemTimerPtr;
+    mpSystemTimer = pSystemTimer;
 }
 
 SprTimerManager::~SprTimerManager()
 {
-
 }
 
 SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id,
-                    const std::string& name, shared_ptr<SprSystemTimer> systemTimerPtr)
+                    const std::string& name, shared_ptr<SprSystemTimer> pSystemTimer)
 {
-    static SprTimerManager instance(id, name, systemTimerPtr);
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
+    static SprTimerManager instance(id, name, pSystemTimer);
     return &instance;
 }
 
@@ -70,35 +75,28 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
     }
 
     // SPR_LOGD("[0x%x -> 0x%x] msg.GetMsgId() = %s\n", msg.GetFrom(), msg.GetTo(), GetSigName(msg.GetMsgId()));
-    switch (msg.GetMsgId())
-    {
-        case SIG_ID_TIMER_START_SYSTEM_TIMER:
-        {
+    switch (msg.GetMsgId()) {
+        case SIG_ID_TIMER_START_SYSTEM_TIMER: {
             MsgRespondStartSystemTimer(msg);
             break;
         }
-        case SIG_ID_TIMER_STOP_SYSTEM_TIMER:
-        {
+        case SIG_ID_TIMER_STOP_SYSTEM_TIMER: {
             MsgRespondStopSystemTimer(msg);
             break;
         }
-        case SIG_ID_TIMER_ADD_CUSTOM_TIMER:
-        {
+        case SIG_ID_TIMER_ADD_CUSTOM_TIMER: {
             MsgRespondAddTimer(msg);
             break;
         }
-        case SIG_ID_TIMER_DEL_TIMER:
-        {
+        case SIG_ID_TIMER_DEL_TIMER: {
             MsgRespondDelTimer(msg);
             break;
         }
-        case SIG_ID_SYSTEM_TIMER_NOTIFY:
-        {
+        case SIG_ID_SYSTEM_TIMER_NOTIFY: {
             MsgRespondSystemTimerNotify(msg);
             break;
         }
-        case SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT:
-        {
+        case SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT: {
             MsgRespondClearTimersForExitComponent(msg);
             break;
         }
@@ -125,6 +123,19 @@ int SprTimerManager::PrintRealTime()
     return 0;
 }
 
+bool SprTimerManager::IsExistTimer(uint32_t moduleId, uint32_t msgId)
+{
+    auto it = std::find_if(mTimers.begin(), mTimers.end(), [moduleId, msgId](const SprTimer& t) {
+        return (t.GetModuleId() == moduleId && t.GetMsgId() == msgId);
+    });
+
+    if (it != mTimers.end()) {
+        return true;
+    }
+
+    return false;
+}
+
 int SprTimerManager::AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec)
 {
     SprTimer timer(moduleId, msgId, repeatTimes, delayInMilliSec, intervalInMilliSec);
@@ -144,7 +155,7 @@ int SprTimerManager::DelTimer(const SprTimer& timer)
     if (it != mTimers.end()) {
         mTimers.erase(it);
     } else {
-        SPR_LOGW("Not exist the timer! moduleId = 0x%x, msgId = 0x%x", timer.GetModuleId(), timer.GetMsgId());
+        SPR_LOGW("Not exist the timer! [%s: %s]", GetSprModuleIDDescription(timer.GetModuleId()).c_str(), GetSigName(timer.GetMsgId()));
     }
 
     return 0;
@@ -158,8 +169,8 @@ uint32_t SprTimerManager::NextExpireTimes()
 int SprTimerManager::InitSystemTimer()
 {
     // systemTimer already initialized in sprSystem.Init()
-    if (mSystemTimerPtr == nullptr) {
-        SPR_LOGE("mSystemTimerPtr is nullptr!");
+    if (mpSystemTimer == nullptr) {
+        SPR_LOGE("mpSystemTimer is nullptr!");
         return -1;
     }
 
@@ -168,38 +179,59 @@ int SprTimerManager::InitSystemTimer()
 
 void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
 {
+    if (mTimers.empty()) {
+        SPR_LOGW("No timer exist!\n");
+        return;
+    }
+
     auto timerNode = mTimers.begin();
     uint32_t expired = timerNode->GetExpired();
     uint32_t tick = timerNode->GetTick();
     int32_t timerIntervalInMSec = expired - tick;
 
     // loop: If the timer has already expired, increment the wait time by the standard interval.
-    while (timerIntervalInMSec <= 0) {
-        SPR_LOGW("timerIntervalInMSec <= 0! (%d) (%d). Reset timer interval %dms %\n", expired, tick, timerIntervalInMSec);
+    //       retry up to 10 times
+    int32_t count = 0;
+    while (timerIntervalInMSec <= 0 && count < 10) {
+        SPR_LOGW("timerIntervalInMSec <= 0! (%u) (%u). Reset timer interval %dms, count = %d\n",
+                expired, tick, timerIntervalInMSec, count);
+        count++;
         timerIntervalInMSec += timerNode->GetIntervalInMilliSec();
     }
 
-    mSystemTimerPtr->StartTimer(timerIntervalInMSec);
+    mpSystemTimer->StartTimer(timerIntervalInMSec);
 }
 
 void SprTimerManager::MsgRespondStopSystemTimer(const SprMsg &msg)
 {
     SPR_LOGD("SIG_ID_TIMER_STOP_SYSTEM_TIMER\n");
-    mSystemTimerPtr->StopTimer();
+    mpSystemTimer->StopTimer();
 }
 
 void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 {
+    // When add a new timer:
+    // 1. check interval value, not less than TIMER_MIN_INTERVAL_MS
+    // 2. check if the timer already exist
+    // 3. add the timer to the timer list, and update the system timer from the earliest timer in the list
     auto p = msg.GetDatas<STimerInfo>();
     if (p != nullptr) {
-        SPR_LOGD("AddTimer: [0x%x %d %dms %dms %s]\n", p->moduleId, p->repeatTimes,
-                            p->delayInMilliSec, p->intervalInMilliSec, GetSigName(p->msgId));
+        SPR_LOGD("AddTimer: [%s %d %dms %dms %s]\n", GetSprModuleIDDescription(p->moduleId).c_str(),
+            p->repeatTimes, p->delayInMilliSec, p->intervalInMilliSec, GetSigName(p->msgId));
 
+        // 1. check interval value, not less than TIMER_MIN_INTERVAL_MS
         if (p->intervalInMilliSec < TIMER_MIN_INTERVAL_MS) {
             SPR_LOGW("Interval too small (%d ms), minimum allowed is %d ms!\n", p->intervalInMilliSec, TIMER_MIN_INTERVAL_MS);
             return;
         }
 
+        // 2. check if the timer already exist
+        if (IsExistTimer(p->moduleId, p->msgId)) {
+            SPR_LOGW("Timer already exist!\n");
+            return;
+        }
+
+        // 3. add the timer to the timer list, and update the system timer with the earliest timer in the list
         AddTimer(p->moduleId, p->msgId, p->repeatTimes, p->delayInMilliSec, p->intervalInMilliSec);
         SprMsg rspMsg(SIG_ID_TIMER_START_SYSTEM_TIMER);
         SendMsg(rspMsg);
@@ -214,15 +246,20 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
 void SprTimerManager::MsgRespondDelTimer(const SprMsg &msg)
 {
     std::shared_ptr<STimerInfo> p = msg.GetDatas<STimerInfo>();
-    if (p != nullptr) {
-        for (const auto& timer : mTimers)
-        {
-            if (timer.GetMsgId() == p->msgId && timer.GetModuleId() == p->moduleId)
-            {
-                DelTimer(timer);
-                break;
-            }
-        }
+    if (p == nullptr) {
+        SPR_LOGW("p is nullptr!\n");
+        return;
+    }
+
+    auto it = std::find_if(mTimers.begin(), mTimers.end(), [&p](const SprTimer& timer) {
+        return (timer.GetMsgId() == p->msgId && timer.GetModuleId() == p->moduleId);
+    });
+
+    if (it != mTimers.end()) {
+        SPR_LOGD("DelTimer: [%s %dms %s]\n", GetSprModuleIDDescription(it->GetModuleId()).c_str(),
+            it->GetIntervalInMilliSec(), GetSigName(it->GetMsgId()));
+
+        DelTimer(*it);
     }
 }
 

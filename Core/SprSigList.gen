@@ -25,6 +25,7 @@ ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_2S),                     \
 ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_3S),                     \
 ENUM_OR_STRING(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL),               \
 ENUM_OR_STRING(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL),              \
+ENUM_OR_STRING(SIG_ID_DEBUG_SLEEP_EVENT),                       \
 
 //-----------------------------------------------------------------------------
 // TIMER_MANAGER
@@ -47,6 +48,11 @@ ENUM_OR_STRING(SIG_ID_SYSTEM_EXIT),                             \
 ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
 
 //-----------------------------------------------------------------------------
+// TIME_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_TIMEM_NTP_SYNC),                          \
+
+//-----------------------------------------------------------------------------
 // POWER_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_POWER_ON),                                \
@@ -57,13 +63,21 @@ ENUM_OR_STRING(SIG_ID_POWER_STANDBY),                           \
 ENUM_OR_STRING(SIG_ID_POWER_SLEEP),                             \
 
 //-----------------------------------------------------------------------------
+// STATUS_MONITOR_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_MONITOR_STATUS_EVENT),                    \
+
+//-----------------------------------------------------------------------------
 // ONENET_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT),        \
+ENUM_OR_STRING(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE),              \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT),  \
+ENUM_OR_STRING(SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE),    \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS),           \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_PING_TIMER_EVENT),             \
 ENUM_OR_STRING(SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT),      \
+ENUM_OR_STRING(SIG_ID_ONENET_MGR_DEBUG_ENABLE),                 \
 
 //-----------------------------------------------------------------------------
 // ONENET_DEVICE
@@ -94,5 +108,15 @@ ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_UNSUBACK),            \
 ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ),             \
 ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP),            \
 ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT),          \
+
+//-----------------------------------------------------------------------------
+// TEST_MODULE
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_200MS_TIMER_EVENT),           \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_500MS_TIMER_EVENT),           \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_1S_TIMER_EVENT),              \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_2S_TIMER_EVENT),              \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_3S_TIMER_EVENT),              \
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_5S_TIMER_EVENT),              \
 
 ENUM_OR_STRING(SIG_ID_BUTT)

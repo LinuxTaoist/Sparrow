@@ -53,30 +53,23 @@ char CustomDebugWatch::MenuEntry()
 
 char CustomDebugWatch::HandleInputInMenu(char input)
 {
-    switch(input)
-    {
-        case '1':
-        {
+    switch(input) {
+        case '1': {
             DebugInterface::GetInstance()->AddTimerInOneSec();
             break;
         }
-
-        case '2':
-        {
+        case '2': {
             DebugInterface::GetInstance()->DelTimerInOneSec();
             break;
         }
-
-        case '3':
-        {
+        case '3': {
             uint32_t repeatTimes;
             int32_t delayInMilliSec;
             int32_t intervalInMilliSec;
 
             SPR_LOG("Input timer settings: <repetitions> <delay ms> <interval ms> \n");
             int ret = scanf("%u %d %d", &repeatTimes, &delayInMilliSec, &intervalInMilliSec);
-            if (ret != 3)
-            {
+            if (ret != 3) {
                 SPR_LOG("Invalid input! (%s)\n", strerror(errno));
                 break;
             }
@@ -84,30 +77,21 @@ char CustomDebugWatch::HandleInputInMenu(char input)
             DebugInterface::GetInstance()->AddCustomTimer(repeatTimes, delayInMilliSec, intervalInMilliSec);
             break;
         }
-
-        case '4':
-        {
+        case '4': {
             DebugInterface::GetInstance()->DelCustomTimer();
             break;
         }
-
-        case '5':
-        {
+        case '5': {
             DebugInterface::GetInstance()->EnableRemoteShell();
             break;
         }
-
-        case '6':
-        {
+        case '6': {
             DebugInterface::GetInstance()->DisableRemoteShell();
             break;
         }
-
-        case 'q':
-        {
+        case 'q': {
             break;
         }
-
         default:
             break;
     }

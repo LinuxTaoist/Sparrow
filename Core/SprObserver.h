@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SPR_NEW_OBSERVER_H__
-#define __SPR_NEW_OBSERVER_H__
+#ifndef __SPR_OBSERVER_H__
+#define __SPR_OBSERVER_H__
 
 #include <memory>
 #include <string>
@@ -101,7 +101,6 @@ public:
      */
     int32_t UnregisterTimer(uint32_t msgId);
 
-
 protected:
     /**
      * @brief Initializes the framework module with overrides from derived framework modules
@@ -115,7 +114,7 @@ protected:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int32_t Init();
+    virtual int32_t Init() = 0;
 
     /**
      * @brief Dump common versions for current module
@@ -129,7 +128,7 @@ protected:
     InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;
     std::string mModuleName;
-    SprMediatorProxy* mMsgMediatorPtr;
+    SprMediatorProxy* mpMsgMediator;
 };
 
-#endif
+#endif  // __SPR_OBSERVER_H__

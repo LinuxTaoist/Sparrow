@@ -50,3 +50,22 @@ void InfraWatch::ClearScreen()
     SPR_LOG("\033[H");
     fflush(stdout);
 }
+
+int InfraWatch::ReadIntFromUserInput(int& input)
+{
+    char buffer[100];
+    long result;
+    char *endptr;
+
+    if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+        return -1;
+    }
+
+    result = strtol(buffer, &endptr, 10);
+    if (endptr == buffer || (*endptr != '\n' && *endptr != '\0')) {
+        return -1;
+    }
+
+    input = (int)result;
+    return 0;
+}

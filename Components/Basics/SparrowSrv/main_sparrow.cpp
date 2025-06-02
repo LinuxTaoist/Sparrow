@@ -16,23 +16,38 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <signal.h>
 #include "SprLog.h"
 #include "SprSystem.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "CommonMacros.h"
+#include "Backtrace.h"
 #include "SprEpollSchedule.h"
 
-#define SPR_LOGI(fmt, args...) LOGI("MainSparrow", fmt, ##args)
+#define LOG_TAG "MainSparrow"
 
 int main(int argc, const char *argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
 
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;
@@ -40,7 +55,7 @@ int main(int argc, const char *argv[])
     });
 
     SprSystem::GetInstance()->Init();
-    SprEpollSchedule::GetInstance()->EpollLoop(true);
+    SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");
     return 0;
 }

@@ -51,31 +51,22 @@ char MainMenu::MenuEntry()
 
 char MainMenu::HandleInputInMenu(char input)
 {
-    switch(input)
-    {
-        case '1':
-        {
+    switch(input) {
+        case '1': {
             CONTINUE_ON_NONQUIT(theMediatorWatch.MenuEntry);
             break;
         }
-
-        case '2':
-        {
+        case '2': {
             CONTINUE_ON_NONQUIT(theManagersWatch.MenuEntry);
             break;
         }
-
-        case '3':
-        {
+        case '3': {
             CONTINUE_ON_NONQUIT(theCustomDebugWatch.MenuEntry);
             break;
         }
-
-        case 'q':
-        {
+        case 'q': {
             break;
         }
-
         default:
             break;
     }

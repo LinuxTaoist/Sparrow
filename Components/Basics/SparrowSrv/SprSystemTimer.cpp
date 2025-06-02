@@ -28,9 +28,7 @@
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("SysTimer", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SysTimer", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SysTimer", fmt, ##args)
+#define LOG_TAG "SysTimer"
 
 SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name)
     : SprObserverWithTimerfd(id, name)
@@ -41,7 +39,12 @@ SprSystemTimer::~SprSystemTimer()
 {
 }
 
-int SprSystemTimer::ProcessTimerEvent()
+int32_t SprSystemTimer::Init()
+{
+    return 0;
+}
+
+int32_t SprSystemTimer::ProcessTimerEvent()
 {
     // Event is triggered by timer, only notify to TimerManager
     SprMsg timerMsg(MODULE_TIMERM, SIG_ID_SYSTEM_TIMER_NOTIFY);

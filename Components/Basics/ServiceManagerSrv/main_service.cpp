@@ -24,18 +24,18 @@
 
 using namespace GeneralUtils;
 
-#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %6d %12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %6d %12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %6d %-12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %6d %-12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainSrv", __LINE__, ##args)
 
 int main(int argc, char* argv[])
 {
     InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:   // 用户自定义信号1
-                ServiceManager::StopWork();
+                ServiceManager::ExitLoop();
                 break;
             default:
                 break;
@@ -43,7 +43,7 @@ int main(int argc, char* argv[])
     });
 
     ServiceManager theServiceManager;
-    theServiceManager.StartWork();
+    theServiceManager.WorkLoop();
 
     SPR_LOGI("Main exit!\n");
     return 0;

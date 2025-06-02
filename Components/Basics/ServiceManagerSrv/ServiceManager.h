@@ -30,12 +30,14 @@ public:
     ServiceManager();
     ~ServiceManager();
 
-    int32_t StartWork();
-    static int32_t StopWork();
+    int32_t WorkLoop();
+    static int32_t ExitLoop();
     int32_t DumpPidMapInfo();
 
 private:
     bool IsExeAliveByProc(int32_t pid);
+    int32_t InitEnv();
+    int32_t InitMsgQueueLimit();
     int32_t StartAllExesFromConfigure(const std::string& cfgPath);
     int32_t StartExe(const std::string& exePath);
     int32_t StopAllSubExes();

@@ -16,49 +16,58 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
 #include "SprLog.h"
+#include "Backtrace.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
 #include "CoreTypeDefs.h"
+#include "SprProcPrepare.h"
 #include "PropertyManager.h"
 #include "PropertyManagerHub.h"
+#include "EpollEventHandler.h"
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("MainProper", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("MainProper", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("MainProper", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("MainProper", fmt, ##args)
-
-static bool wait = true;
+#define LOG_TAG "MainProper"
 
 int main(int argc, char * argv[])
 {
-    PropertyManager* pProperM = PropertyManager::GetInstance();
-    PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
-
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
-                wait = false;
+                EpollEventHandler::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                EpollEventHandler::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;
         }
     });
 
+    PropertyManager* pProperM = PropertyManager::GetInstance();
+    PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
+
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_PROPERTY);
     pProperM->Init();
     thePropertyManagerHub.InitializeHub();
 
-    while (wait) {
-        sleep(1);
-    }
-
+    EpollEventHandler::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;
 }

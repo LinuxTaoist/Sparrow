@@ -103,13 +103,12 @@ int SharedBinaryTree::GetValue(const string& key, string& value)
 
 int SharedBinaryTree::SetValue(const string& key, const string& value)
 {
-    sem_wait(&mSemaphore);
-
-    if (key.size() >= KEY_SIZE ||  value.size() >= VALUE_SIZE)
-    {
-        SPR_LOGW("Lenght out of limit! Limit length: %d %d\n", KEY_SIZE, VALUE_SIZE);
+    if (key.size() >= SHARED_BTREE_KEY_MAX_LEN || value.size() >= SHARED_BTREE_VALUE_MAX_LEN) {
+        SPR_LOGW("Lenght out of limit! Limit length: %d %d\n", SHARED_BTREE_KEY_MAX_LEN, SHARED_BTREE_VALUE_MAX_LEN);
+        return -1;
     }
 
+    sem_wait(&mSemaphore);
     Node* pNode = mFirstNode;
     if (pNode == nullptr) {
         SPR_LOGE("pNode is nullptr! \n");
@@ -120,8 +119,8 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
     Node* pPrev = nullptr;
     while (pNode != nullptr) {
         if (key == pNode->key) {
-            strncpy(pNode->value, value.c_str(), VALUE_SIZE);
-            pNode->value[VALUE_SIZE - 1] = '\0';
+            strncpy(pNode->value, value.c_str(), SHARED_BTREE_VALUE_MAX_LEN);
+            pNode->value[SHARED_BTREE_VALUE_MAX_LEN - 1] = '\0';
             sem_post(&mSemaphore);
             return 0;
         }
@@ -132,8 +131,7 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
 
     // 更新共享内存使用大小
     mCurUsedSize += sizeof(Node);
-    if (mCurUsedSize > mSize)
-    {
+    if (mCurUsedSize > mSize) {
         SPR_LOGE("Resource ou of limit! mCurUsedSize = %zu, mSize = %zu\n", mCurUsedSize, mSize);
         sem_post(&mSemaphore);
         return -1;
@@ -181,10 +179,10 @@ Node* SharedBinaryTree::CreateNode(const string& key, const string& value)
 {
     Node* newNode = (Node*)((char*)mRoot + mCurUsedSize);
 
-    strncpy(newNode->key, key.c_str(), KEY_SIZE - 1);
-    newNode->key[KEY_SIZE - 1] = '\0';
-    strncpy(newNode->value, value.c_str(), VALUE_SIZE - 1);
-    newNode->value[VALUE_SIZE - 1] = '\0';
+    strncpy(newNode->key, key.c_str(), SHARED_BTREE_KEY_MAX_LEN - 1);
+    newNode->key[SHARED_BTREE_KEY_MAX_LEN - 1] = '\0';
+    strncpy(newNode->value, value.c_str(), SHARED_BTREE_VALUE_MAX_LEN - 1);
+    newNode->value[SHARED_BTREE_VALUE_MAX_LEN - 1] = '\0';
 
     newNode->left = nullptr;
     newNode->right = nullptr;
@@ -202,8 +200,7 @@ void SharedBinaryTree::GetAllKeyValues(std::map<std::string, std::string>& keyVa
 
 void SharedBinaryTree::GetKeyValue(Node* pNode, std::map<std::string, std::string>& keyValueMap)
 {
-    if (pNode != nullptr)
-    {
+    if (pNode != nullptr) {
         GetKeyValue(pNode->left, keyValueMap);
         GetKeyValue(pNode->right, keyValueMap);
         keyValueMap[pNode->key] = pNode->value;

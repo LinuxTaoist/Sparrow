@@ -22,14 +22,18 @@
 #include <map>
 #include <string>
 #include <memory>
+#include "PPipe.h"
 #include "OneNetDevice.h"
 #include "SprObserverWithMQueue.h"
+
+namespace {
 
 #ifdef ENUM_OR_STRING
 #undef ENUM_OR_STRING
 #endif
 #define ENUM_OR_STRING(x) x
 
+}
 // 一级状态
 #define ONENET_MGR_LEV1_MACROS                      \
     ENUM_OR_STRING(LEV1_ONENET_MGR_ANY),            \
@@ -105,9 +109,11 @@ private:
 
     /* 启动OneNet心跳 */
     void StartTimerToPingOneNet(int32_t intervalInMSec);
+    void StopTimerToPingOneNet();
 
     /* 启动数据上报定时器 */
     void StartTimerToReportData(int32_t intervalInMSec);
+    void StopTimerToReportData();
 
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
@@ -115,17 +121,31 @@ private:
     /* 消息响应函数 */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
+    void MsgRespondDeactiveDevice(const SprMsg& msg);
     void MsgRespondMqttConnAck(const SprMsg& msg);
     void MsgRespondMqttSubAck(const SprMsg& msg);
+    void MsgRespondMqttPingResp(const SprMsg& msg);
     void MsgRespondMqttPingTimerEvent(const SprMsg& msg);
     void MsgRespondMqttReportTimerEvent(const SprMsg& msg);
-    void MsgRespondMqttDisconnect(const SprMsg& msg);
+    void MsgRespondDeviceDisconnectPassive(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
+    /* 注册/注销所有调试函数 */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
+    /* 调试函数 */
+    void DebugEnableDumpLog(const std::vector<std::string>& args);
+    void DebugDeviceList(const std::vector<std::string>& args);
+    void DebugActiveDevice(const std::vector<std::string>& args);
+    void DebugDeactiveDevice(const std::vector<std::string>& args);
+
 private:
+    bool mDebugEnable;
     bool mEnablePingTimer;
     bool mEnableReportTimer;
+    bool mIsWatingPingResp;
     uint32_t mReConnectReqCnt;
     uint32_t mReConnectRspCnt;
     using StateTransitionType =

@@ -19,14 +19,7 @@
 #ifndef __SPR_SYSTEM_H__
 #define __SPR_SYSTEM_H__
 
-#include <map>
-#include <vector>
-#include <string>
-#include <memory>
-#include "PFile.h"
-#include "SprObserver.h"
 #include "PluginManager.h"
-#include "CommonTypeDefs.h"
 
 class SprSystem
 {
@@ -47,13 +40,11 @@ public:
 private:
     SprSystem();
     void InitEnv();
-    void InitMsgQueueLimit();
+    void InitOthers();
     void LoadReleaseInformation();
-    int EnvReady(const std::string& srvName);
 
 private:
     PluginManager mPluginMgr;
-    // std::map<int, SprObserver*> mModules;
 };
 
 #endif // __SPR_SYSTEM_H__

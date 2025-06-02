@@ -43,6 +43,8 @@
 #ifndef __RUNNING_TIMING_H__
 #define __RUNNING_TIMING_H__
 
+#include <stdint.h>
+
 class RunningTiming
 {
 public:
@@ -61,29 +63,23 @@ public:
      *
      * @return The total time in seconds.
      */
-    int GetElapsedTimeInSec();
+    uint64_t GetElapsedTimeInSec();
 
     /**
      * @brief Get the total time in milliseconds.
      *
      * @return The total time in milliseconds.
      */
-    int GetElapsedTimeInMSec();
+    uint64_t GetElapsedTimeInMSec();
 
 private:
     /**
-     * @brief Start the timer and record the start time.
+     * @brief Get the time in milliseconds.
      */
-    void Start();
-
-    /**
-     * @brief Stop the timer and record the end time.
-     */
-    void Stop();
+    uint64_t GetCurTimeInMSec();
 
 private:
-    int mStartTimeInMSec;
-    int mStopTimeInMSec;
+    uint64_t mStartTimeInMSec;
 };
 
 #endif // __RUNNING_TIMING_H__

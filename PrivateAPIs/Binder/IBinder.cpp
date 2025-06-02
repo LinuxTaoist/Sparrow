@@ -23,7 +23,7 @@ int32_t IBinder::GetParcel(std::shared_ptr<Parcel>& reqParcel, std::shared_ptr<P
     std::string rootPath = ""; //"/tmp/";
 
     reqParcel = std::make_shared<Parcel>(rootPath + mName + "_req", mKey, false);
-    rspParcel = std::make_shared<Parcel>(rootPath + mName + "_rsp", mKey, true);
+    rspParcel = std::make_shared<Parcel>(rootPath + mName + "_rsp", mKey, false);
 
     return 0;
 }

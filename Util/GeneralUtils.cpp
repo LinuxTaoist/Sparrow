@@ -22,18 +22,26 @@
 #include <sstream>
 #include <stdarg.h>
 #include <signal.h>
+#include <string.h>
 #include "GeneralUtils.h"
 
 namespace GeneralUtils {
 
-int GetRandomInteger(int width)
-{
-    int maxValue = pow(10, width) - 1;
-    std::random_device rd;
-    std::mt19937 generator(rd());
-    std::uniform_int_distribution<> distribution(0, maxValue);
+int32_t GetRandomInteger(int32_t width) {
+    if (width <= 0) {
+        return 0;
+    }
 
-    return distribution(generator);
+    int32_t minVal = static_cast<int32_t>(std::pow(10, width - 1));
+    int32_t maxVal = static_cast<int32_t>(std::pow(10, width)) - 1;
+    if (width == 1) {
+        minVal = 0;
+    }
+
+    static std::random_device rd;
+    static std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(minVal, maxVal);
+    return dis(gen);
 }
 
 int InitSignalHandler(void (*signalHandler)(int))
@@ -44,24 +52,25 @@ int InitSignalHandler(void (*signalHandler)(int))
     signal_action.sa_flags = 0;
     sigemptyset(&signal_action.sa_mask);
 
-    sigaction(SIGHUP,    &signal_action, NULL);    // 终端挂断，重载配置或终止
-    sigaction(SIGINT,    &signal_action, NULL);    // 用户中断（Ctrl+C）
-    // sigaction(SIGQUIT,   &signal_action, NULL);    // 退出，带core dump，调试用
+    // sigaction(SIGHUP,    &signal_action, NULL);    // 终端挂断，重载配置或终止
+    // sigaction(SIGINT,    &signal_action, NULL);    // 用户中断（Ctrl+C）
+    sigaction(SIGQUIT,   &signal_action, NULL);    // 退出，带core dump，调试用
     sigaction(SIGILL,    &signal_action, NULL);    // 非法指令
     // sigaction(SIGTRAP,   &signal_action, NULL);    // 调试陷阱
-    sigaction(SIGKILL,   &signal_action, NULL);    // 请求进程终止
+    // sigaction(SIGKILL,   &signal_action, NULL);    // 请求进程终止
     // sigaction(SIGABRT,   &signal_action, NULL);    // 应用异常中止（abort函数）
-    // sigaction(SIGBUS,    &signal_action, NULL);    // 总线错误，内存访问对齐问题
+    sigaction(SIGBUS,    &signal_action, NULL);    // 总线错误，内存访问对齐问题
     sigaction(SIGFPE,    &signal_action, NULL);    // 浮点错误，如除以0
     sigaction(SIGUSR1,   &signal_action, NULL);    // 用户自定义信号1
-    // sigaction(SIGSEGV,   &signal_action, NULL);    // 段错误，非法内存访问
+    sigaction(SIGSEGV,   &signal_action, NULL);    // 段错误，非法内存访问
     sigaction(SIGUSR2,   &signal_action, NULL);    // 用户自定义信号2
-    // sigaction(SIGPIPE,   &signal_action, NULL);    // 管道破裂，写入无读取端的管道
+    sigaction(SIGPIPE,   &signal_action, NULL);    // 管道破裂，写入无读取端的管道
     // sigaction(SIGALRM,   &signal_action, NULL);    // 定时器信号
-    sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
+    // sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
 
     return 0;
 }
+
 int SystemCmd(const char* format, ...)
 {
     std::string out;
@@ -192,6 +201,41 @@ int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, c
     }
 
     return -1;
+}
+
+int CountWords(const std::string& str)
+{
+    std::istringstream iss(str);
+    std::string word;
+    int count = 0;
+
+    while (iss >> word) {
+        ++count;
+    }
+
+    return count;
+}
+
+void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen)
+{
+    if (srcMem == nullptr || tarMem == nullptr || tLen <= 0 || sLen <= 0 || sLen < tLen) {
+        return nullptr;
+    }
+
+    const char *pSrc = (const char*)srcMem;
+    const char *pEnd = (const char*)srcMem + sLen - tLen;
+    while(pSrc <= pEnd) {
+        if (pSrc == nullptr || pEnd == nullptr) {
+            return nullptr;
+        }
+
+        if (memcmp(pSrc, tarMem, tLen) == 0) {
+            return (void*)pSrc;
+        }
+        ++pSrc;
+    }
+
+    return nullptr;
 }
 
 }; // namespace GeneralUtils

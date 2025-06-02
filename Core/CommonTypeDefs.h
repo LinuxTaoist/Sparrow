@@ -28,20 +28,20 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CommonTypeDefs.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define COMMON_TYPE_DEFS_VERSION   "COMMON_TYPE_DEFS_VERSION_N1001"
+#define COMMON_TYPE_DEFS_VERSION   "COMMON_TYPE_DEFS_VERSION_N1002"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common defines for MQ
 // --------------------------------------------------------------------------------------------------------------------
-struct SMQStatus
-{
-    int         handle;
-    int         maxBytes;
-    int         total;
-    uint32_t    lastMsg;
-    long        maxCount;
-    char        mqName[20];
-    mq_attr     mqAttr;
+#define MQ_NAME_MAX_LENGTH  30
+struct SMQueueDetails {
+    int32_t handle;
+    int32_t msgLenPeak;
+    int32_t msgTotal;
+    uint32_t lastMsgID;
+    int32_t usedPeak;
+    char mqName[MQ_NAME_MAX_LENGTH];
+    mq_attr mqAttr;
 };
 
 #endif // __COMMON_TYPE_DEFS_H__

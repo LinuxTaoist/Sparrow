@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <errno.h>
 #include <string.h>
 #include <mqueue.h>
@@ -28,9 +29,9 @@
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("MQProxy", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("MQProxy", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("MQProxy", fmt, ##args)
+#define LOG_TAG "MQProxy"
+
+static std::atomic<bool> gObjAlive(true);
 
 SprMediatorMQProxy::SprMediatorMQProxy()
 {
@@ -40,6 +41,7 @@ SprMediatorMQProxy::SprMediatorMQProxy()
 
 SprMediatorMQProxy::~SprMediatorMQProxy()
 {
+    gObjAlive = false;
     if (mMdtFd != -1) {
         mq_close(mMdtFd);
         mMdtFd = -1;
@@ -48,6 +50,10 @@ SprMediatorMQProxy::~SprMediatorMQProxy()
 
 SprMediatorMQProxy* SprMediatorMQProxy::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprMediatorMQProxy instance;
     return &instance;
 }

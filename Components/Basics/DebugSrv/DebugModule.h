@@ -29,15 +29,24 @@ public:
     DebugModule(ModuleIDType id, const std::string& name);
     ~DebugModule();
 
-    int  ProcessMsg(const SprMsg& msg) override;
+protected:
+    int32_t Init() override;
+    int32_t  ProcessMsg(const SprMsg& msg) override;
 
 private:
     int MsgRespondEnableRemoteShell(const SprMsg& msg);
     int MsgRespondDisableRemoteShell(const SprMsg& msg);
     int MsgRespondDispatchTimerMsg(const SprMsg& msg);
     int MsgRespondBroadcastMsg(const SprMsg& msg);
+    int MsgRespondTimer1sTest(const SprMsg& msg);
+    int MsgRespondSleepEvent(const SprMsg& msg);
+
+    void DebugStart1sTimer(const std::vector<std::string>& args);
+    void DebugStop1sTimer(const std::vector<std::string>& args);
+    void DebugHandleSleep(const std::vector<std::string>& args);
 
 private:
+    int mSleepSec;
     RemoteShell mShell;
 };
 

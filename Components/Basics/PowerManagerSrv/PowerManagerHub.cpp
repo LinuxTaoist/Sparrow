@@ -17,12 +17,11 @@
  *
  */
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "PowerManagerHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("PowerManager", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("PowerManager", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("PowerManager", fmt, ##args)
+#define LOG_TAG "PowerHub"
 
 using namespace InternalDefs;
 PowerManagerHub::PowerManagerHub(const std::string& srvName, PowerManager* powerManager) : SprBinderHub(srvName)
@@ -36,30 +35,24 @@ PowerManagerHub::~PowerManagerHub()
 
 void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
-    switch(cmd)
-    {
-        case POWERM_CMD_POWER_ON:
-        {
+    switch(cmd) {
+        case POWERM_CMD_POWER_ON: {
             SprMsg msg(SIG_ID_POWER_ON);
             mPowerManager->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
-
-        case POWERM_CMD_POWER_OFF:
-        {
+        case POWERM_CMD_POWER_OFF: {
             SprMsg msg(SIG_ID_POWER_OFF);
             mPowerManager->SendMsg(msg);
 
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
-
-        default:
-        {
+        default: {
             SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
             break;
         }

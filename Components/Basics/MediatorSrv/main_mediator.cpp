@@ -16,37 +16,51 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
 #include <signal.h>
+#include <string.h>
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "SprMediator.h"
+#include "Backtrace.h"
+#include "SprProcPrepare.h"
+#include "EpollEventHandler.h"
 #include "SprMediatorHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("SprMediator", fmt, ##args)
-#define SPR_LOGI(fmt, args...) LOGI("SprMediator", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprMediator", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprMediator", fmt, ##args)
+#define LOG_TAG "MainMediator"
 
 int main(int argc, const char *argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
-                SprMediator::StopWork();
+                EpollEventHandler::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                EpollEventHandler::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;
         }
     });
 
-    SprMediator *pObj = SprMediator::GetInstance();
-    SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pObj);
-    theMediatorHub.InitializeHub();
-    pObj->Init();
-    pObj->EpollLoop();
+    SprMediator *pMedObj = SprMediator::GetInstance();
+    SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pMedObj);
 
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_MEDIATOR);
+    theMediatorHub.InitializeHub();
+    pMedObj->Init();
+    EpollEventHandler::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;
 }

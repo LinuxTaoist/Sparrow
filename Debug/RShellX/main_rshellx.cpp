@@ -16,14 +16,14 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <stdio.h>
 #include <stdlib.h>
-#include "SprLog.h"
 #include "LoginManager.h"
 
 using namespace std;
 
-#define SPR_LOGD(fmt, args...) LOGD("RShellMain", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("RShellMain", fmt, ##args)
+#define SPR_LOGD(fmt, args...) printf(fmt, ##args)
+#define SPR_LOGE(fmt, args...) printf(fmt, ##args)
 
 int main(int argc, const char *argv[])
 {
@@ -39,9 +39,9 @@ int main(int argc, const char *argv[])
     }
 
     SPR_LOGD("Start RShellX server on port %d\n", port);
-    auto loginMgr = LoginManager::GetInstance();
-    loginMgr->Init();
-    loginMgr->BuildConnectAsTcpServer(port);
-    loginMgr->ConnectLoop();
+    LoginManager* pLoginMgr = LoginManager::GetInstance();
+    pLoginMgr->Init();
+    pLoginMgr->BuildConnectAsTcpServer(port);
+    pLoginMgr->ConnectLoop();
     return 0;
 }

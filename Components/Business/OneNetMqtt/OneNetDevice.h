@@ -58,6 +58,17 @@ struct SystemInfo
     std::string description;
 };
 
+struct DiskInfo
+{
+    std::string identifier;
+    std::string totalSizeIdentifier;
+    int32_t totalSize;
+    std::string freeSizeIdentifier;
+    int32_t freeSize;
+    std::string usedPercentIdentifier;
+    float usedPercent;
+};
+
 class OneNetDevice : public SprObserverWithMQueue
 {
 public:
@@ -128,13 +139,14 @@ private:
      */
     int32_t GetCPUUsage(float& cpuUsage);
     int32_t GetDiskUsage(int32_t& diskUsage);
+    int32_t GetDiskInfo(DiskInfo& diskInfo);
     int32_t GetMemoryUsage(int32_t& memoryUsage);
     int32_t GetModelName(std::string& model);
     int32_t GetLaunchTime(int32_t& launchTime);
     int32_t GetBatteryStatus(BatteryStatus& batteryStatus);
     int32_t GetSystemInfo(SystemInfo& systemInfo);
     int32_t AddCPUUsageJsonNode(void* pNode);
-    int32_t AddDiskUsageJsonNode(void* pNode);
+    int32_t AddDiskInfoJsonNode(void* pNode);
     int32_t AddMemoryUsageJsonNode(void* pNode);
     int32_t AddModelNameJsonNode(void* pNode);
     int32_t AddLaunchTimeJsonNode(void* pNode);
@@ -148,6 +160,7 @@ private:
      * @param msg
      */
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
+    void MsgRespondDeactiveDevice(const SprMsg& msg);
     void MsgRespondSetConnectStatus(const SprMsg& msg);
     void MsgRespondSubscribeTopic(const SprMsg& msg);
     void MsgRespondSubscribeTopicAck(const SprMsg& msg);

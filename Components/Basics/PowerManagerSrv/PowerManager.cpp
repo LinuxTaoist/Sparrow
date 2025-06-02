@@ -19,14 +19,13 @@
 #include <vector>
 #include <algorithm>
 #include "SprLog.h"
+#include "SprDebugNode.h"
 #include "PowerManager.h"
 
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("PowerM", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("PowerM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("PowerM", fmt, ##args)
+#define LOG_TAG "PowerM"
 
 vector <StateTransition <   EPowerLev1State,
                             EPowerLev2State,
@@ -80,7 +79,13 @@ PowerManager::PowerManager(ModuleIDType id, const std::string& name)
 
 PowerManager::~PowerManager()
 {
+    UnregisterDebugFuncs();
+}
 
+int32_t PowerManager::Init()
+{
+    RegisterDebugFuncs();
+    return 0;
 }
 
 int PowerManager::ProcessMsg(const SprMsg& msg)
@@ -152,6 +157,45 @@ void PowerManager::BroadcastPowerEvent(uint32_t event)
     SprMsg msg(event);
     NotifyAllObserver(msg);
     SPR_LOGD("Broadcast power event: %s\n", GetSigName(event));
+}
+
+void PowerManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(mModuleName, "DumpCurState",     "Dump current state",   std::bind(&PowerManager::DebugDumpCurState,  this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "PowerOn",          "Send power on",        std::bind(&PowerManager::DebugSendPowerOn,   this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "PowerOff",         "Send power off",       std::bind(&PowerManager::DebugSendPowerOff,  this, std::placeholders::_1));
+}
+void PowerManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Unregister %s all debug funcs\n", mModuleName.c_str());
+    p->UnregisterCmd(mModuleName);
+}
+
+void PowerManager::DebugDumpCurState(const std::vector<std::string>& args)
+{
+    SPR_LOGD("Lev1State: %s\n", GetLev1String(mCurLev1State).c_str());
+}
+
+void PowerManager::DebugSendPowerOn(const std::vector<std::string>& args)
+{
+    SendMsg(SIG_ID_POWER_ON);
+}
+
+void PowerManager::DebugSendPowerOff(const std::vector<std::string>& args)
+{
+    SendMsg(SIG_ID_POWER_OFF);
 }
 
 void PowerManager::MsgRespondPowerOnWithInit(const SprMsg& msg)

@@ -45,7 +45,7 @@ int ToInteger(const std::string& in, T& out)
     out = 0;
     for (size_t i = 0; i < size; i++) {
         out <<= 8;
-        out |= static_cast<unsigned char>(in[i]);
+        out |= static_cast<unsigned char>(in[i] & 0xFF);
     }
 
     return size;
@@ -82,9 +82,10 @@ std::string ToHexString(const std::vector<T>& vec)
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
-        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it);
+        for (size_t i = 0; i < sizeof(T); ++i) {
+            ss << std::setw(2) << static_cast<int>((it >> ((sizeof(T) - 1 - i) * 8)) & 0xFF);
+        }
     }
-
     return ss.str();
 }
 
@@ -100,7 +101,7 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
-        ss << std::setw(sizeof(T) * 2) << static_cast<int>(it) << " ";
+        ss << std::setw(sizeof(T) * 2) << static_cast<T>(it) << " ";
     }
 
     return ss.str();
@@ -115,9 +116,28 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
 template<typename T>
 std::string ToString(const std::vector<T>& vec)
 {
-    std::string str(vec.begin(), vec.end());
+    std::string str;
+    str.reserve(vec.size() * sizeof(T));
+    size_t size = sizeof(T);
+    for (const auto& it : vec) {
+        for (size_t i = 0; i < size; i++) {
+            str.push_back(static_cast<char>((it >> ((size - 1 - i) * 8)) & 0xFF));
+        }
+    }
+
     return str;
 }
+
+/**
+ * @brief Convert a hexadecimal string to its corresponding ASCII string.
+ *
+ * This function takes a hexadecimal string as input and converts it to the corresponding ASCII string.
+ * If the input string is empty, has an odd length, or contains non - hexadecimal characters, the function will return an empty string.
+ *
+ * @param hexString The hexadecimal string to be converted. It should only consist of hexadecimal characters (0 - 9, A - F, or a - f).
+ * @return std::string The converted ASCII string. Returns an empty string if the input is invalid.
+ */
+std::string HexStringToAscii(const std::string& hexString);
 
 /**
  * @brief Dump ascall bytes

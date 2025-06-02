@@ -16,34 +16,29 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <memory>
 #include <fstream>
-#include <fcntl.h>
-#include <dlfcn.h>
-#include <errno.h>
-#include <dirent.h>
-#include <unistd.h>
-#include <string.h>
-#include <sys/resource.h>
 #include "SprLog.h"
 #include "SprContext.h"
 #include "CommonMacros.h"
 #include "SprSystem.h"
 #include "SprTimeTrace.h"
 #include "CoreTypeDefs.h"
+#include "TimeManager.h"
 #include "SprSystemTimer.h"
+#include "SprProcPrepare.h"
 #include "SprTimerManager.h"
-#include "EpollEventHandler.h"
 
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("SprSystem", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("SprSystem", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprSystem", fmt, ##args)
+#define LOG_TAG "SprSystem"
 
-#define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
 #define LOCAL_PATH_VERSION  "/tmp/sparrow_version"
+#define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
+
+static std::atomic<bool> gObjAlive(true);
 
 SprSystem::SprSystem()
 {
@@ -51,37 +46,28 @@ SprSystem::SprSystem()
 
 SprSystem::~SprSystem()
 {
+    gObjAlive = false;
 }
 
 SprSystem* SprSystem::GetInstance()
 {
+    if (gObjAlive == false) {
+        return nullptr;
+    }
+
     static SprSystem instance;
     return &instance;
 }
 
 void SprSystem::InitEnv()
 {
-    // Init msg queue limit
-    InitMsgQueueLimit();
-
     // write release information
     LoadReleaseInformation();
 }
 
-void SprSystem::InitMsgQueueLimit()
+void SprSystem::InitOthers()
 {
-    // The limit for creating message queues has to be changed, otherwise the other
-    // applications can not create enough message queues.
-    // Note: The values in /proc/sys/fs/mqueue/* seem to have no influence on this issue.
-    // Also ulimit -n has no influence on this issue.
-    struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
-    int ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
-    if (ret == 0)
-    {
-        rlim.rlim_cur = RLIM_INFINITY;  // soft limit
-        rlim.rlim_max = RLIM_INFINITY;  // hard limit
-        setrlimit(RLIMIT_MSGQUEUE, &rlim);
-    }
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_SPARROW);
 }
 
 void SprSystem::LoadReleaseInformation()
@@ -90,7 +76,7 @@ void SprSystem::LoadReleaseInformation()
     std::string cxxStandard     = CXX_STANDARD;
     std::string gxxStandard     = GXX_VERSION;
     std::string gccVersion      = GCC_VERSION;
-    std::string runEnv          = RUN_ENV;
+    std::string runPlatform     = PROJECT_PLATFORM;
     std::string buildTime       = BUILD_TIME;
     std::string buildType       = BUILD_TYPE;
     std::string buildHost       = BUILD_HOST;
@@ -102,7 +88,7 @@ void SprSystem::LoadReleaseInformation()
     releaseInfo += "C++ Standard   : " + cxxStandard + "\n";
     releaseInfo += "G++ Version    : " + gxxStandard + "\n";
     releaseInfo += "Gcc Version    : " + gccVersion + "\n";
-    releaseInfo += "Running Env    : " + runEnv + "\n";
+    releaseInfo += "Run Platform   : " + runPlatform + "\n";
     releaseInfo += "Build Time     : " + buildTime + "\n";
     releaseInfo += "Build Type     : " + buildType + "\n";
     releaseInfo += "Build Host     : " + buildHost + "\n";
@@ -119,17 +105,6 @@ void SprSystem::LoadReleaseInformation()
     }
 }
 
-int SprSystem::EnvReady(const std::string& srvName)
-{
-    std::string node = "/tmp/" + srvName;
-    int fd = creat(node.c_str(), 0644);
-    if (fd != -1) {
-        close(fd);
-    }
-
-    return 0;
-}
-
 void SprSystem::Init()
 {
     SPR_LOGD("=============================================\n");
@@ -138,14 +113,17 @@ void SprSystem::Init()
 
     InitEnv();
 
-    TTP(9, "systemTimerPtr->Initialize()");
-    shared_ptr<SprSystemTimer> systemTimerPtr = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
-    systemTimerPtr->Initialize();
+    TTP(8, "TimeManager->Initialize()");
+    TimeManager::GetInstance(MODULE_TIMEM, "TimeM")->Initialize();
+
+    TTP(9, "pSystemTimer->Initialize()");
+    shared_ptr<SprSystemTimer> pSystemTimer = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
+    pSystemTimer->Initialize();
 
     TTP(10, "TimerManager->Initialize()");
-    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", systemTimerPtr)->Initialize();
+    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", pSystemTimer)->Initialize();
 
     SprContext ctx;
     mPluginMgr.Init();
-    EnvReady(SRV_NAME_SPARROW);
+    InitOthers();
 }

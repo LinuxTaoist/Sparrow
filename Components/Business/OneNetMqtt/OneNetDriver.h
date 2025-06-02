@@ -20,9 +20,18 @@
 #define __ONENET_DRIVER_H__
 
 #include <string>
+#include "PSocket.h"
 #include "MqttProtocol.h"
-#include "SprObserverWithSocket.h"
 #include "SprObserverWithMQueue.h"
+
+namespace {
+
+#ifdef ENUM_OR_STRING
+#undef ENUM_OR_STRING
+#endif
+#define ENUM_OR_STRING(x) x
+
+}
 
 #define ONENET_DRV_LEV1_MACROS                      \
     ENUM_OR_STRING(LEV1_SOCKET_ANY),                \
@@ -76,6 +85,13 @@ private:
     int32_t InitUnixPIPE();
 
     /**
+     * @brief Init OneNet client
+     *
+     * @return int32_t 0 on success, or -1 if an error occurred
+     */
+    int32_t InitOneNetClient();
+
+    /**
      * @brief Set/Get the level 1 state
      *
      * @param state level 1 state
@@ -96,6 +112,14 @@ private:
     EOneNetDrvLev2State GetLev2State();
 
     /**
+     * @brief start/stop socket reconnect timer
+     *
+     * @param intervalInMSec
+     */
+    void StartTimerToSocketReconnect(int32_t intervalInMSec);
+    void StopTimerToSocketReconnect();
+
+    /**
      * @brief Dump socket bytes for debug
      *
      * @param bytes socket bytes
@@ -111,8 +135,6 @@ private:
      */
     void MsgRespondSocketConnect(const SprMsg& msg);
     void MsgRespondSocketConnectSuccess(const SprMsg& msg);
-    void MsgRespondSocketConnectFail(const SprMsg& msg);
-    void MsgRespondSocketReconnect(const SprMsg& msg);
     void MsgRespondSocketReconnectTimerEvent(const SprMsg& msg);
     void MsgRespondSocketDisconnectActive(const SprMsg& msg);
     void MsgRespondSocketDisconnectPassive(const SprMsg& msg);
@@ -122,7 +144,8 @@ private:
     void MsgRespondMqttMsgSubscribe(const SprMsg& msg);
     void MsgRespondMqttMsgPingreq(const SprMsg& msg);
     void MsgRespondMqttMsgPingresq(const SprMsg& msg);
-    void MsgRespondMqttMsgDisconnect(const SprMsg& msg);
+    void MsgRespondDeactiveDevice(const SprMsg& msg);
+    void MsgRespondDebugEnable(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
@@ -167,6 +190,7 @@ private:
     int32_t SendMqttBytes(const std::string& bytes);
 
 private:
+    bool mDebugEnable;
     bool mEnableReconTimer;
     int32_t mUnixPipeFd[2];
     std::string mSockBuffer;
@@ -174,9 +198,9 @@ private:
     uint16_t    mOneNetPort;
     EOneNetDrvLev1State mCurLev1State;
     EOneNetDrvLev2State mCurLev2State;
-    SprObserverWithSocket* mOneSocketPtr;
-    SprObserverWithSocket* mSendPIPEPtr; // unix pipe for send mqtt bytes
-    SprObserverWithSocket* mRecvPIPEPtr; // unix pipe for recv mqtt bytes
+    std::shared_ptr<PTcpClient> mpOneClient;
+    std::shared_ptr<PUnixStreamClient> mpSendPIPE; // unix pipe for send mqtt bytes
+    std::shared_ptr<PUnixStreamClient> mpRecvPIPE; // unix pipe for recv mqtt bytes
 
     using StateTransitionType = InternalDefs::StateTransition<EOneNetDrvLev1State,
                                                 EOneNetDrvLev2State,

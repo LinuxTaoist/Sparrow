@@ -17,6 +17,7 @@
  *
  */
 #include <list>
+#include <atomic>
 #include <string>
 #include <memory>
 #include <algorithm>
@@ -34,9 +35,9 @@
 
 using namespace std;
 
-#define SPR_LOGD(fmt, args...) LOGD("RShellLoginM", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("RShellLoginM", fmt, ##args)
+#define LOG_TAG "RShellLoginM"
 
+static std::atomic<bool> gObjAlive(true);
 pid_t LoginManager::mShellPid = -1;
 
 LoginManager::LoginManager()
@@ -62,6 +63,8 @@ LoginManager::~LoginManager()
         kill(mShellPid, SIGKILL);
         mShellPid = -1;
     }
+
+    gObjAlive = false;
     dup2(mStdin, STDIN_FILENO);
     dup2(mStdout, STDOUT_FILENO);
     dup2(mStderr, STDERR_FILENO);
@@ -73,13 +76,17 @@ LoginManager::~LoginManager()
 
 LoginManager* LoginManager::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static LoginManager instance;
     return &instance;
 }
 
 int LoginManager::ListenPipeEvent(int pipeFd)
 {
-    mPipePtr = std::make_shared<PPipe>(pipeFd, [&](int fd, std::string buf, void *arg) {
+    mpPipe = std::make_shared<PPipe>(pipeFd, [&](int fd, std::string buf, void *arg) {
         if (buf.empty()) {
             buf = "No return.";
         }
@@ -93,7 +100,8 @@ int LoginManager::ListenPipeEvent(int pipeFd)
         //     SPR_LOGE("# SEND failed!\n");
         // }
     });
-    EpollEventHandler::GetInstance()->AddPoll(mPipePtr.get());
+
+    mpPipe->AddToPoll();
     return 0;
 }
 
@@ -191,27 +199,28 @@ int LoginManager::ExecuteCmd(string& cmdBytes)
 
 int LoginManager::BuildConnectAsTcpServer(short port)
 {
-    auto pEpoll = EpollEventHandler::GetInstance();
-    mTcpSrvPtr = make_shared<PSocket>(AF_INET, SOCK_STREAM, 0, [&](int cli, void *arg) {
-        PSocket* pSrvObj = (PSocket*)arg;
+    EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
+
+    mpTcpSrv = make_shared<PTcpServer>([&](int cli, void *arg) {
+        PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
-            SPR_LOGE("PSocket is nullptr\n");
+            SPR_LOGE("pSrvObj is nullptr\n");
             return;
         }
 
-        auto tcpClient = make_shared<PSocket>(cli, [&](int sock, void *arg) {
-            PSocket* pCliObj = (PSocket*)arg;
+        auto tcpClient = make_shared<PTcpClient>(cli, [&](int sock, void *arg) {
+            PTcpClient* pCliObj = (PTcpClient*)arg;
             if (pCliObj == nullptr) {
-                SPR_LOGE("PSocket is nullptr\n");
+                SPR_LOGE("pCliObj is nullptr\n");
                 return;
             }
 
             std::string rBuf;
             int rc = pCliObj->Read(sock, rBuf);
             if (rc <= 0) {
-                mTcpClients.remove_if([sock, pEpoll, pCliObj](shared_ptr<PSocket>& v) {
-                    pEpoll->DelPoll(pCliObj);
-                    return (v->GetEpollFd() == sock);
+                mTcpClients.remove_if([sock, pEpoll, pCliObj](shared_ptr<PTcpClient>& v) {
+                    pCliObj->Close();
+                    return (v->GetEvtFd() == sock);
                 });
                 return;
             }
@@ -221,11 +230,10 @@ int LoginManager::BuildConnectAsTcpServer(short port)
         });
 
         tcpClient->AsTcpClient();
-        pEpoll->AddPoll(tcpClient.get());
         mTcpClients.push_back(tcpClient);
-        dup2(mTcpSrvPtr->GetEpollFd(), STDIN_FILENO);
-        dup2(tcpClient->GetEpollFd(), STDOUT_FILENO);
-        dup2(tcpClient->GetEpollFd(), STDERR_FILENO);
+        dup2(mpTcpSrv->GetEvtFd(), STDIN_FILENO);
+        dup2(tcpClient->GetEvtFd(), STDOUT_FILENO);
+        dup2(tcpClient->GetEvtFd(), STDERR_FILENO);
 
         const string welcomes = "Welcome to RShellX! >_<\n";
         if (write(STDOUT_FILENO, welcomes.c_str(), welcomes.size()) < 0) {
@@ -233,13 +241,12 @@ int LoginManager::BuildConnectAsTcpServer(short port)
         }
     });
 
-    mTcpSrvPtr->AsTcpServer(port, 5);
-    pEpoll->AddPoll(mTcpSrvPtr.get());
+    mpTcpSrv->AsTcpServer(port, 5);
     return 0;
 }
 
 int LoginManager::ConnectLoop()
 {
-    EpollEventHandler::GetInstance()->EpollLoop(true);
+    EpollEventHandler::GetInstance()->EpollLoop();
     return 0;
 }

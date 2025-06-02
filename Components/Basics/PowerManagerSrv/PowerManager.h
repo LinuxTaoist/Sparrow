@@ -22,6 +22,15 @@
 #include <vector>
 #include "SprObserverWithMQueue.h"
 
+namespace {
+
+#ifdef ENUM_OR_STRING
+#undef ENUM_OR_STRING
+#endif
+#define ENUM_OR_STRING(x) x
+
+}
+
 #define POWER_LEV1_MACROS               \
     ENUM_OR_STRING(LEV1_POWER_ANY),     \
     ENUM_OR_STRING(LEV1_POWER_INIT),    \
@@ -29,11 +38,6 @@
     ENUM_OR_STRING(LEV1_POWER_STANDBY), \
     ENUM_OR_STRING(LEV1_POWER_SLEEP),   \
     ENUM_OR_STRING(LEV1_POWER_BUTT)
-
-#ifdef ENUM_OR_STRING
-#undef ENUM_OR_STRING
-#endif
-#define ENUM_OR_STRING(x) x
 
 // 一级状态:
 enum EPowerLev1State
@@ -53,7 +57,8 @@ public:
     PowerManager(ModuleIDType id, const std::string& name);
     virtual ~PowerManager();
 
-    int ProcessMsg(const SprMsg& msg) override;
+    int32_t Init() override;
+    int32_t ProcessMsg(const SprMsg& msg) override;
 
 private:
      /* 更新一级状态 */
@@ -70,6 +75,15 @@ private:
     void PerformStandbyBusiness();
     void PerformSleepBusiness();
     void BroadcastPowerEvent(uint32_t event);
+
+    /* 注册/注销所有调试函数 */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
+    /* 调试函数 */
+    void DebugDumpCurState(const std::vector<std::string>& args);
+    void DebugSendPowerOn(const std::vector<std::string>& args);
+    void DebugSendPowerOff(const std::vector<std::string>& args);
 
     /* 消息响应函数 */
     void MsgRespondPowerOnWithInit(const SprMsg& msg);

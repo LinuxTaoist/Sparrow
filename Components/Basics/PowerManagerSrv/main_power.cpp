@@ -16,40 +16,57 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <stdio.h>
 #include <signal.h>
 #include "SprLog.h"
+#include "Backtrace.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "PowerManager.h"
+#include "SprDebugNode.h"
+#include "SprProcPrepare.h"
 #include "PowerManagerHub.h"
 #include "SprEpollSchedule.h"
 
 using namespace std;
 using namespace InternalDefs;
 
-#define SPR_LOGI(fmt, args...) LOGI("MainPower", fmt, ##args)
+#define LOG_TAG "MainPower"
 
 int main(int argc, const char *argv[])
 {
-    PowerManager thePowerManager(MODULE_POWERM, "PowerM");
-    thePowerManager.Initialize();
-    PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
-
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
 
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;
         }
     });
 
+    PowerManager thePowerManager(MODULE_POWERM, "PowerM");
+    PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
+
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_POWER_MANAGER);
+    thePowerManager.Initialize();
     thePowerManagerHub.InitializeHub();
-    SprEpollSchedule::GetInstance()->EpollLoop(true);
+    SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;
 }

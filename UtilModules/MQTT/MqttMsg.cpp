@@ -19,22 +19,19 @@
 #include "SprLog.h"
 #include "MqttMsg.h"
 
-#define SPR_LOGI(fmt, args...) LOGI("MqttMsgBase", fmt, ##args)
-#define SPR_LOGD(fmt, args...) LOGD("MqttMsgBase", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGW("MqttMsgBase", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("MqttMsgBase", fmt, ##args)
+#define LOG_TAG "MqttMsgBase"
 
 MqttMsgBase::MqttMsgBase() : mFixedHeader(0, 0), mRemainLenValue(0)
 {
 }
 
 MqttMsgBase::MqttMsgBase(uint8_t type, uint8_t flags)
-    : mFixedHeader(type, flags)
+    : mFixedHeader(type, flags), mRemainLenValue(0)
 {
 }
 
 MqttMsgBase::MqttMsgBase(uint8_t type, uint8_t flags, const std::string& payload)
-    : mFixedHeader(type, flags), mPayload(payload)
+    : mFixedHeader(type, flags), mPayload(payload), mRemainLenValue(0)
 {
 }
 
@@ -47,17 +44,18 @@ MqttMsgBase::MqttMsgBase(const std::string& bytes)
 MqttMsgBase::MqttMsgBase(const MqttMsgBase& msg)
     : mFixedHeader(msg.mFixedHeader.type, msg.mFixedHeader.flags),
       mVariableHeader(msg.mVariableHeader),
-      mPayload(msg.mPayload)
+      mPayload(msg.mPayload),
+      mRemainLenValue(msg.mRemainLenValue)
 {
 }
 
 MqttMsgBase& MqttMsgBase::operator=(const MqttMsgBase& msg)
 {
-    if (this != &msg)
-    {
+    if (this != &msg) {
         mFixedHeader = msg.mFixedHeader;
         mVariableHeader = msg.mVariableHeader;
         mPayload = msg.mPayload;
+        mRemainLenValue = msg.mRemainLenValue;
     }
     return *this;
 }
@@ -65,17 +63,18 @@ MqttMsgBase& MqttMsgBase::operator=(const MqttMsgBase& msg)
 MqttMsgBase::MqttMsgBase(MqttMsgBase&& msg)
     : mFixedHeader(std::move(msg.mFixedHeader)),
       mVariableHeader(std::move(msg.mVariableHeader)),
-      mPayload(std::move(msg.mPayload))
+      mPayload(std::move(msg.mPayload)),
+      mRemainLenValue(msg.mRemainLenValue)
 {
 }
 
 MqttMsgBase& MqttMsgBase::operator=(MqttMsgBase&& msg)
 {
-    if (this != &msg)
-    {
+    if (this != &msg) {
         mFixedHeader = std::move(msg.mFixedHeader);
         mVariableHeader = std::move(msg.mVariableHeader);
         mPayload = std::move(msg.mPayload);
+        mRemainLenValue = msg.mRemainLenValue;
     }
     return *this;
 }
@@ -125,12 +124,9 @@ int32_t MqttMsgBase::GetPayload(std::string& payload)
 int32_t MqttMsgBase::Decode(const std::string& bytes)
 {
     int32_t len = 0;
-
     CHECK_ADD_RESULT(DecodeFixedHeader(bytes), len);
     CHECK_ADD_RESULT(DecodeVariableHeader(bytes.substr(len)), len);
     CHECK_ADD_RESULT(DecodePayload(bytes.substr(len)), len);
-    SPR_LOGD("Decode len = %d\n", len);
-
     return len;
 }
 

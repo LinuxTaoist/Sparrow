@@ -16,11 +16,14 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <stdio.h>
 #include <memory.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include "Parcel.h"
+#include "ProcMutex.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
 #include "GeneralUtils.h"
@@ -35,8 +38,11 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IPowerMgr", __LINE__, ##args)
 
 static bool mEnable;
-std::shared_ptr<Parcel> pReqParcel = nullptr;
-std::shared_ptr<Parcel> pRspParcel = nullptr;
+static std::atomic<bool> gObjAlive(true);
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IPowerMgrMutex");
+static std::shared_ptr<Parcel> pReqParcel = nullptr;
+static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
 PowerManagerInterface::PowerManagerInterface()
 {
@@ -50,10 +56,15 @@ PowerManagerInterface::PowerManagerInterface()
 PowerManagerInterface::~PowerManagerInterface()
 {
     mEnable = false;
+    gObjAlive = false;
 }
 
 PowerManagerInterface* PowerManagerInterface::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static PowerManagerInterface instance;
     return &instance;
 }
@@ -65,12 +76,13 @@ int PowerManagerInterface::PowerOn()
         return -1;
     }
 
-    pReqParcel->WriteInt(POWERM_CMD_POWER_ON);
-    pReqParcel->Post();
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(POWERM_CMD_POWER_ON));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
@@ -83,12 +95,13 @@ int PowerManagerInterface::PowerOff()
         return -1;
     }
 
-    pReqParcel->WriteInt(POWERM_CMD_POWER_OFF);
-    pReqParcel->Post();
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(POWERM_CMD_POWER_OFF));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;

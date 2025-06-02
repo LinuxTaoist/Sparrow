@@ -1,12 +1,11 @@
-# Bin mediatorsrv
-include_directories         (${PROJECT_PATH}/Core)
-include_directories         (${PROJECT_PATH}/Util)
-include_directories         (${PROJECT_PATH}/3rdAdapter)
-include_directories         (${PROJECT_PATH}/PrivateAPIs/Binder)
-include_directories         (${PROJECT_PATH}/UtilModules/EpollEventHandler)
-
-aux_source_directory        (${PROJECT_PATH}/Components/Basics/MediatorSrv          SRC_MEDIATOR_SRV_PATH)
-add_executable              (BinProxySrv ${SRC_MEDIATOR_SRV_PATH})
-set_target_properties       (BinProxySrv PROPERTIES OUTPUT_NAME                     "mediatorsrv")
-target_link_libraries       (BinProxySrv rt pthread sprcore sprbinder)
-add_dependencies            (BinProxySrv LibSprCore LibBinder)
+## Bin mediatorsrv
+aux_source_directory        (${PROJECT_PATH}/Components/Basics/MediatorSrv SRC_MEDIATOR_SRV_PATH)
+add_executable              (BinProxySrv    ${SRC_MEDIATOR_SRV_PATH})
+target_include_directories  (BinProxySrv    PRIVATE ${PROJECT_PATH}/Core
+                                            ${PROJECT_PATH}/Util
+                                            ${PROJECT_PATH}/3rdAdapter
+                                            ${PROJECT_PATH}/PrivateAPIs/Binder
+                                            ${PROJECT_PATH}/UtilModules/EpollEventHandler)
+set_target_properties       (BinProxySrv    PROPERTIES OUTPUT_NAME "mediatorsrv")
+target_link_libraries       (BinProxySrv    rt pthread sprcore sprbinder epollevent sprlog)
+add_dependencies            (BinProxySrv    LibSprCore LibBinder LibEpollEvent LibSprLog)

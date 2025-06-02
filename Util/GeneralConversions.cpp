@@ -17,11 +17,50 @@
  *
  */
 #include <string.h>
-#include <cstdint>
+#include <stdint.h>
 #include "GeneralConversions.h"
 
 namespace GeneralConversions
 {
+
+std::string HexStringToAscii(const std::string& hexString)
+{
+    if (hexString.empty() || hexString.size() % 2 != 0) {
+        return "";
+    }
+
+    std::string result;
+    for (size_t i = 0; i < hexString.size(); i += 2) {
+        uint8_t high = static_cast<uint8_t>(hexString[i]);
+        uint8_t low = static_cast<uint8_t>(hexString[i + 1]);
+
+        if (!((high >= '0' && high <= '9') || (high >= 'A' && high <= 'F') || (high >= 'a' && high <= 'f')) ||
+            !((low >= '0' && low <= '9') || (low >= 'A' && low <= 'F') || (low >= 'a' && low <= 'f'))) {
+            return "";
+        }
+
+        uint8_t byte = 0;
+        if (high >= '0' && high <= '9') {
+            byte = static_cast<uint8_t>(high - '0') << 4;
+        } else if (high >= 'A' && high <= 'F') {
+            byte = static_cast<uint8_t>(high - 'A' + 10) << 4;
+        } else {
+            byte = static_cast<uint8_t>(high - 'a' + 10) << 4;
+        }
+
+        if (low >= '0' && low <= '9') {
+            byte |= static_cast<uint8_t>(low - '0');
+        } else if (low >= 'A' && low <= 'F') {
+            byte |= static_cast<uint8_t>(low - 'A' + 10);
+        } else {
+            byte |= static_cast<uint8_t>(low - 'a' + 10);
+        }
+
+        result.push_back(byte);
+    }
+
+    return result;
+}
 
 int DumpBytesAscall(const std::string& bytes, std::string& out)
 {

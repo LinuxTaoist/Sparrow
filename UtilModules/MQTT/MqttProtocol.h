@@ -19,6 +19,7 @@
 #include "M01_Connect.h"
 #include "M02_Connack.h"
 #include "M03_Publish.h"
+#include "M04_Puback.h"
 #include "M08_Subscribe.h"
 #include "M09_Suback.h"
 #include "M12_Pingreq.h"

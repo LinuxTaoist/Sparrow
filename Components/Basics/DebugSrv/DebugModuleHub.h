@@ -32,7 +32,7 @@ public:
     void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd);
 
 private:
-    DebugModule* mDebugModulePtr;
+    DebugModule* mpDebugModule;
 };
 
 #endif // __DEBUG_MODULE_HUB_H__

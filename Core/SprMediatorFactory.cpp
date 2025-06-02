@@ -16,10 +16,13 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include "SprMediatorFactory.h"
 #include "SprMediatorMQProxy.h"
 
 using namespace InternalDefs;
+
+static std::atomic<bool> gObjAlive(true);
 
 SprMediatorFactory::SprMediatorFactory()
 {
@@ -27,10 +30,15 @@ SprMediatorFactory::SprMediatorFactory()
 
 SprMediatorFactory::~SprMediatorFactory()
 {
+    gObjAlive = false;
 }
 
 SprMediatorFactory* SprMediatorFactory::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprMediatorFactory instance;
     return &instance;
 }
@@ -38,19 +46,15 @@ SprMediatorFactory* SprMediatorFactory::GetInstance()
 SprMediatorProxy* SprMediatorFactory::GetMediatorProxy(InternalDefs::EProxyType type)
 {
     SprMediatorProxy* pProxy = nullptr;
-    switch (type)
-    {
-        case MEDIATOR_PROXY_MQUEUE:
-        {
+    switch (type) {
+        case MEDIATOR_PROXY_MQUEUE: {
             pProxy = SprMediatorMQProxy::GetInstance();
             break;
         }
-        case MEDIATOR_PROXY_SOCKET:
-        {
+        case MEDIATOR_PROXY_SOCKET: {
             break;
         }
-        default:
-        {
+        default: {
             break;
         }
     }

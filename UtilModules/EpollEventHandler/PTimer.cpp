@@ -39,13 +39,13 @@ PTimer::~PTimer()
 
 int32_t PTimer::InitTimer()
 {
-    mEpollFd = timerfd_create(CLOCK_REALTIME, 0);
-    if (mEpollFd == -1) {
+    mEvtFd = timerfd_create(CLOCK_REALTIME, 0);
+    if (mEvtFd == -1) {
         SPR_LOGE("timerfd_create failed! (%s)\n", strerror(errno));
         return -1;
     }
 
-    return mEpollFd;
+    return mEvtFd;
 }
 
 int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
@@ -55,7 +55,7 @@ int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
     its.it_value.tv_nsec = (delayInMSec % 1000) * 1000000;
     its.it_interval.tv_sec = intervalInMSec / 1000;
     its.it_interval.tv_nsec = (intervalInMSec % 1000) * 1000000;
-    if (timerfd_settime(mEpollFd, 0, &its, nullptr) == -1) {
+    if (timerfd_settime(mEvtFd, 0, &its, nullptr) == -1) {
         SPR_LOGE("timerfd_settime fail! (%s)\n", strerror(errno));
         return -1;
     }
@@ -72,8 +72,8 @@ int32_t PTimer::StopTimer()
     its.it_interval.tv_sec  = 0;
     its.it_interval.tv_nsec = 0;
 
-    if (timerfd_settime(mEpollFd, 0, &its, nullptr) == -1) {
-        SPR_LOGE("timerfd_settime fail! fd = %d (%s)\n", mEpollFd, strerror(errno));
+    if (timerfd_settime(mEvtFd, 0, &its, nullptr) == -1) {
+        SPR_LOGE("timerfd_settime fail! fd = %d (%s)\n", mEvtFd, strerror(errno));
         return -1;
     }
 
@@ -83,9 +83,9 @@ int32_t PTimer::StopTimer()
 
 int32_t PTimer::DestoryTimer()
 {
-    if (mEpollFd != -1) {
-        close(mEpollFd);
-        mEpollFd = -1;
+    if (mEvtFd != -1) {
+        close(mEvtFd);
+        mEvtFd = -1;
     }
 
     SPR_LOGD("Destory system timer!\n");
@@ -114,7 +114,7 @@ ssize_t PTimer::Read(int fd, std::string& bytes)
 
 void* PTimer::EpollEvent(int fd, EpollType eType, void* arg)
 {
-    if (fd != mEpollFd) {
+    if (fd != mEvtFd) {
         SPR_LOGE("Invalid fd (%d)!\n", fd);
     }
 

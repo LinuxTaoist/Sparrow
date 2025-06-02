@@ -17,15 +17,15 @@
  *
  */
 #include "SprLog.h"
+#include "BindCommon.h"
 #include "SprBinderHub.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
 
 using namespace InternalDefs;
 
-#define SPR_LOGD(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("SprBinderHub", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("SprBinderHub", fmt, ##args)
+#define LOG_TAG "SprBinderHub"
 
 static std::shared_ptr<Parcel> pReqParcel = nullptr;
 static std::shared_ptr<Parcel> pRspParcel = nullptr;
@@ -60,8 +60,9 @@ int32_t SprBinderHub::DestoryHub()
 {
     if (mRun) {
         mRun = false;
-        pReqParcel->WriteInt(GENERAL_CMD_EXE_EXIT);
-        pReqParcel->Post();
+        POINTER_CHECK_ERR(pReqParcel, -1);
+        NONZERO_CHECK_RET(pReqParcel->WriteInt(GENERAL_CMD_EXE_EXIT));
+        NONZERO_CHECK_RET(pReqParcel->Post());
     }
     return 0;
 }

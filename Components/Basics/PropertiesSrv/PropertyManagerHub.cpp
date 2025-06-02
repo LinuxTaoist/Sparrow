@@ -17,12 +17,11 @@
  *
  */
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "PropertyManagerHub.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("PropertyManager", fmt, ##args)
-#define SPR_LOGW(fmt, args...) LOGD("PropertyManager", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("PropertyManager", fmt, ##args)
+#define LOG_TAG "PropertyHub"
 
 using namespace InternalDefs;
 PropertyManagerHub::PropertyManagerHub(const std::string& srvName, PropertyManager* powerManager) : SprBinderHub(srvName)
@@ -36,46 +35,38 @@ PropertyManagerHub::~PropertyManagerHub()
 
 void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
 {
-    switch (cmd)
-    {
-        case PROPERTY_CMD_SET_PROPERTY:
-        {
+    switch (cmd) {
+        case PROPERTY_CMD_SET_PROPERTY: {
             std::string key;
             std::string value;
-            pReqParcel->ReadString(key);
-            pReqParcel->ReadString(value);
+            NONZERO_CHECK(pReqParcel->ReadString(key));
+            NONZERO_CHECK(pReqParcel->ReadString(value));
             int ret = mPropertyManager->SetProperty(key, value);
 
-            pRspParcel->WriteInt(ret);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(ret));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
-
-        case PROPERTY_CMD_GET_PROPERTY:
-        {
+        case PROPERTY_CMD_GET_PROPERTY: {
             std::string key;
             std::string value;
             std::string defaultValue;
-            pReqParcel->ReadString(key);
-            pReqParcel->ReadString(defaultValue);
+            NONZERO_CHECK(pReqParcel->ReadString(key));
+            NONZERO_CHECK(pReqParcel->ReadString(defaultValue));
             int ret = mPropertyManager->GetProperty(key, value, defaultValue);
 
-            pRspParcel->WriteString(value);
-            pRspParcel->WriteInt(ret);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteString(value));
+            NONZERO_CHECK(pRspParcel->WriteInt(ret));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
-
-        case PROPERTY_CMD_GET_PROPERTIES:
-        {
+        case PROPERTY_CMD_GET_PROPERTIES: {
             mPropertyManager->GetProperties();
-            pRspParcel->WriteInt(0);
-            pRspParcel->Post();
+            NONZERO_CHECK(pRspParcel->WriteInt(0));
+            NONZERO_CHECK(pRspParcel->Post());
             break;
         }
-
-        default:
-        {
+        default: {
             SPR_LOGE("Unknown cmd: 0x%x\n", cmd);
             break;
         }

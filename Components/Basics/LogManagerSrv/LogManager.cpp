@@ -35,10 +35,10 @@
 using namespace std;
 using namespace GeneralUtils;
 
-#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %6d %12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %6d %12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %6d %-12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %6d %-12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
 
 #define DEFAULT_LOG_FILE_NUM_LIMIT  10
 #define DEFAULT_FRAME_LEN_LIMIT     1024
@@ -71,8 +71,7 @@ LogManager::LogManager()
     mLoadAttrMap.insert(std::make_pair("logging.frame_length",  &LogManager::LoadAttrFrameLengthLimit));
 
     LoadLogCfgFile(LOG_CONFIGURE_FILE_PATH);
-    if (access(mLogsFilePath.c_str(), F_OK) != 0)
-    {
+    if (access(mLogsFilePath.c_str(), F_OK) != 0) {
         int ret = mkdir(mLogsFilePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
             SPR_LOGE("mkdir %s failed! (%s)\n", mLogsFilePath.c_str(), strerror(errno));
@@ -174,8 +173,7 @@ void LogManager::LoadAttrFilePath(const std::string& value)
 int LogManager::LoadLogCfgFile(const std::string& cfgPath)
 {
     std::ifstream file(cfgPath);
-    if (!file)
-    {
+    if (!file) {
         SPR_LOGE("Open %s fail! \n", cfgPath.c_str());
         return -1;
     }
@@ -183,18 +181,15 @@ int LogManager::LoadLogCfgFile(const std::string& cfgPath)
     SPR_LOGD("Load %s\n", cfgPath.c_str());
     std::string line;
     std::string buffer;
-    while (std::getline(file, buffer))
-    {
+    while (std::getline(file, buffer)) {
         line += buffer + "\n";
     }
 
     std::istringstream iss(line);
     std::string keyValue;
-    while (std::getline(iss, keyValue, '\n'))
-    {
+    while (std::getline(iss, keyValue, '\n')) {
         size_t delimiter = keyValue.find('=');
-        if (delimiter != std::string::npos)
-        {
+        if (delimiter != std::string::npos) {
             std::string key = keyValue.substr(0, delimiter);
             std::string value = keyValue.substr(delimiter + 1);
             if (mLoadAttrMap.count(key) != 0) {
@@ -208,8 +203,7 @@ int LogManager::LoadLogCfgFile(const std::string& cfgPath)
 
 int LogManager::UpdateSuffixOfAllFiles()
 {
-    while (mLogFilePaths.size() >= mLogFileNum)
-    {
+    while (mLogFilePaths.size() >= mLogFileNum) {
         auto it = mLogFilePaths.end();
         --it;
         int ret = remove(it->c_str());
@@ -345,17 +339,16 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
 
 int LogManager::MainLoop()
 {
-    while (mRunning)
-    {
+    while (mRunning) {
         if (pLogMCacheMem->AvailData() < 10) {
             usleep(10000);
             continue;
         }
 
         int32_t len = 0;
-        int ret = pLogMCacheMem->read(&len, sizeof(int32_t));
+        int ret = pLogMCacheMem->Read(&len, sizeof(int32_t));
         if (ret != 0 || len < 0 || len > DEFAULT_FRAME_LEN_LIMIT) {
-            SPR_LOGE("read memory failed! len = %d, ret = %d\n", len, ret);
+            SPR_LOGE("Read memory failed! len = %d, ret = %d\n", len, ret);
             usleep(10000);
             continue;
         }
@@ -363,9 +356,9 @@ int LogManager::MainLoop()
         std::string value;
         value.resize(len);
         char* data = const_cast<char*>(value.c_str());
-        ret = pLogMCacheMem->read(data, len);
+        ret = pLogMCacheMem->Read(data, len);
         if (ret != 0) {
-            SPR_LOGE("read failed! len = %d\n", len);
+            SPR_LOGE("Read failed! len = %d\n", len);
         }
 
         // Write the log if level less than the limit

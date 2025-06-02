@@ -36,6 +36,18 @@ public:
     virtual ~SprObserverWithTimerfd();
 
     /**
+     * @brief  Process message event called by epoll
+     *
+     * @param fd file descriptor
+     * @param eType event type
+     * @param arg user data
+     *
+     * @return void*
+     */
+    virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
+
+protected:
+    /**
      * @brief Initialize function for derived class called in Initialize
      *
      * @return 0 on success, or -1 if an error occurred
@@ -48,17 +60,6 @@ public:
      * @return 0 on success, or -1 if an error occurred
      */
     virtual int32_t ProcessTimerEvent() = 0;
-
-    /**
-     * @brief  Process message event called by epoll
-     *
-     * @param fd file descriptor
-     * @param eType event type
-     * @param arg user data
-     *
-     * @return void*
-     */
-    virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
 };
 
 #endif // __SPR_OBSERVER_TIMER_FD_H__

@@ -23,10 +23,12 @@
 #include <sstream>
 #include <stdexcept>
 #include <string>
+#include <fcntl.h>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <sys/resource.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
@@ -37,10 +39,10 @@
 using namespace std;
 using namespace GeneralUtils;
 
-#define SPR_LOGI(fmt, args...) printf("%s %6d %12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
-#define SPR_LOGD(fmt, args...) printf("%s %6d %12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%s %6d %12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
+#define SPR_LOGI(fmt, args...) printf("%s %6d %-12s I: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
+#define SPR_LOGD(fmt, args...) printf("%s %6d %-12s D: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
+#define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 
 const char PROC_PATH[] = "/proc";
 const char ENV_ROOT_PATH[] = "/tmp/";
@@ -54,7 +56,7 @@ ServiceManager::ServiceManager()
 
 ServiceManager::~ServiceManager()
 {
-    StopWork();
+    ExitLoop();
 }
 
 bool ServiceManager::IsExeAliveByProc(int32_t pid)
@@ -77,8 +79,33 @@ bool ServiceManager::IsExeAliveByProc(int32_t pid)
     return false;
 }
 
-int32_t ServiceManager::StartWork()
+int32_t ServiceManager::InitEnv()
 {
+    // Init msg queue limit
+    InitMsgQueueLimit();
+    return 0;
+}
+
+int32_t ServiceManager::InitMsgQueueLimit()
+{
+    // The limit for creating message queues has to be changed, otherwise the other
+    // applications can not create enough message queues.
+    // Note: The values in /proc/sys/fs/mqueue/* seem to have no influence on this issue.
+    // Also ulimit -n has no influence on this issue.
+    struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
+    int32_t ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
+    if (ret == 0) {
+        rlim.rlim_cur = RLIM_INFINITY;  // soft limit
+        rlim.rlim_max = RLIM_INFINITY;  // hard limit
+        setrlimit(RLIMIT_MSGQUEUE, &rlim);
+    }
+
+    return 0;
+}
+
+int32_t ServiceManager::WorkLoop()
+{
+    InitEnv();
     StartAllExesFromConfigure(INIT_CONFIGURE_PATH);
     mRunning = true;
     while(mRunning) {
@@ -112,7 +139,7 @@ int32_t ServiceManager::StopAllSubExes()
     return 0;
 }
 
-int32_t ServiceManager::StopWork()
+int32_t ServiceManager::ExitLoop()
 {
     mRunning = false;
     SPR_LOGI("Stop work!\n");
@@ -124,16 +151,14 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
     int32_t startedCount = 0;
     std::ifstream configFile(cfgPath);
 
-    if (!configFile.is_open())
-    {
+    if (!configFile.is_open()) {
         SPR_LOGE("Open %s failed! (%s)\n", cfgPath.c_str(), strerror(errno));
         return -1;
     }
 
     std::string line;
     std::string lastExeName;
-    while (std::getline(configFile, line))
-    {
+    while (std::getline(configFile, line)) {
         line = line.substr(line.find_first_not_of(" \t"));
         if (line.empty() || line[0] == '#') {
             continue;
@@ -159,13 +184,10 @@ int32_t ServiceManager::StartAllExesFromConfigure(const std::string& cfgPath)
         }
 
         ClearExeEnvNode(line);
-        if (StartExe(line) == 0)
-        {
+        if (StartExe(line) == 0) {
             startedCount++;
             lastExeName = line;
-        }
-        else
-        {
+        } else {
             SPR_LOGE("Failed to start exe: %s", line.c_str());
         }
     }
@@ -183,12 +205,15 @@ int32_t ServiceManager::StartExe(const std::string& exePath)
     } else if (pid == 0) {          // child
         static int startCount = 0;
 
+        for (int fd = sysconf(_SC_OPEN_MAX); fd > 2; fd--) {
+            close(fd);
+        }
+
         SPR_LOGD("execl %s (%d).\n", exePath.c_str(), ++startCount);
         execl(exePath.c_str(), exePath.c_str(), nullptr);
     } else {                        // parent
         std::string srvName = GeneralUtils::GetSubstringAfterLastDelimiter(exePath, '/').c_str();
-        if (srvName.empty())
-        {
+        if (srvName.empty()) {
             srvName = exePath;
         }
 

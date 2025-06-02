@@ -45,25 +45,18 @@ char PowerManagerWatch::MenuEntry()
 
 char PowerManagerWatch::HandleInputInMenu(char input)
 {
-    switch(input)
-    {
-        case '1':
-        {
+    switch(input) {
+        case '1': {
             PowerManagerInterface::GetInstance()->PowerOn();
             break;
         }
-
-        case '2':
-        {
+        case '2': {
             PowerManagerInterface::GetInstance()->PowerOff();
             break;
         }
-
-        case 'q':
-        {
+        case 'q': {
             break;
         }
-
         default:
             break;
     }

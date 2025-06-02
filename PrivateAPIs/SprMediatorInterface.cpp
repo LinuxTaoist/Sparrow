@@ -16,9 +16,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <stdio.h>
 #include <unistd.h>
 #include <sys/types.h>
+#include "ProcMutex.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
 #include "BindInterface.h"
@@ -33,8 +36,11 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IMediator", __LINE__, ##args)
 
 static bool mEnable;
-std::shared_ptr<Parcel> pReqParcel = nullptr;
-std::shared_ptr<Parcel> pRspParcel = nullptr;
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IOneNetMutex");
+static std::atomic<bool> gObjAlive(true);
+static std::shared_ptr<Parcel> pReqParcel = nullptr;
+static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
 SprMediatorInterface::SprMediatorInterface()
 {
@@ -47,31 +53,55 @@ SprMediatorInterface::SprMediatorInterface()
 
 SprMediatorInterface::~SprMediatorInterface()
 {
+    gObjAlive = false;
 }
 
 SprMediatorInterface* SprMediatorInterface::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static SprMediatorInterface instance;
     return &instance;
 }
 
-int SprMediatorInterface::GetAllMQStatus(std::vector<SMQStatus>& mqAttrVec)
+int SprMediatorInterface::GetAllMQStatus(std::vector<SMQueueDetails>& mqAttrVec)
 {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return -1;
     }
 
-    pReqParcel->WriteInt(PROXY_CMD_GET_ALL_MQ_ATTRS);
-    pReqParcel->Post();
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROXY_CMD_GET_ALL_MQ_ATTRS));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     if (ret == 0) {
-        pRspParcel->ReadVector(mqAttrVec);
+        NONZERO_CHECK_RET(pRspParcel->ReadVector(mqAttrVec));
     }
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
+}
+
+std::string SprMediatorInterface::GetSigalName(int sig)
+{
+    if (!mEnable) {
+        SPR_LOGE("Property is disable!\n");
+        return "";
+    }
+
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_ERR(pReqParcel->WriteInt(PROXY_CMD_GET_SIGNAL_NAME), "");
+    NONZERO_CHECK_ERR(pReqParcel->WriteInt(sig), "");
+    NONZERO_CHECK_ERR(pReqParcel->Post(), "");
+
+    std::string name;
+    NONZERO_CHECK_ERR(pRspParcel->TimedWait(), "");
+    NONZERO_CHECK_ERR(pRspParcel->ReadString(name), "");
+    return name;
 }

@@ -27,32 +27,88 @@ MediatorWatch theMediatorWatch;
 
 char MediatorWatch::MenuEntry()
 {
-    std::vector<SMQStatus> mqAttrVec;
-    SprMediatorInterface::GetInstance()->GetAllMQStatus(mqAttrVec);
+    char bInput = 0;
+    do {
+        HandleInputInMenu(bInput);
+        char input = InfraWatch::WaitUserInputWithoutEnter();
+        bInput = toupper(input);
+    } while(bInput != 'Q');
 
-    InfraWatch::ClearScreen();
-    SPR_LOG("                                   Show All Message Queues                                     \n");
-    SPR_LOG("-----------------------------------------------------------------------------------------------\n");
-    //        %6d     %5ld  %6ld     %6ld   %8s     %5u   %6u    %5u    %6u     %s\n"
-    SPR_LOG(" HANDLE  QLSUM  QMUSED  QCUSED  BLOCK   MLLEN MMUSED MLAST  MTOTAL  NAME\n");
-    SPR_LOG("-----------------------------------------------------------------------------------------------\n");
-    for (const auto& mqInfo : mqAttrVec) {
-        SPR_LOG("%7d  %5ld  %6ld  %6ld  %s  %ld %6u %5u  %6u  %s\n", mqInfo.handle, mqInfo.mqAttr.mq_maxmsg, mqInfo.maxCount,
-                    mqInfo.mqAttr.mq_curmsgs, (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK  ",
-                    mqInfo.mqAttr.mq_msgsize, mqInfo.maxBytes, mqInfo.lastMsg, mqInfo.total % 100000, mqInfo.mqName);
-    }
-
-    SPR_LOG("-----------------------------------------------------------------------------------------------\n");
-    SPR_LOG("Press 'Q' to back\n");
-
-
-    char input = InfraWatch::WaitUserInputWithoutEnter();
-    HandleInputInMenu(input);
-
-    return input;
+    return bInput;
 }
 
 char MediatorWatch::HandleInputInMenu(char input)
 {
+    ShowMQStatus();
+    switch(input) {
+        case 'M': {
+            ShowFieldDetails();
+            break;
+        }
+        case 'S': {
+            ShowSignalName();
+            break;
+        }
+        default: {
+            SPR_LOG("Press 'S' to query signal\n");
+            SPR_LOG("Press 'M' to see more \n");
+            break;
+        }
+    }
+
+    SPR_LOG("Press 'Q' to back \n");
+    return input;
+}
+
+char MediatorWatch::ShowSignalName()
+{
+    SPR_LOG("\n");
+    SPR_LOG("Input Signal Information: \n");
+    SPR_LOG("----------------------------------------------------------------------------------------------------\n");
+    SPR_LOG("- Input sig id: ");
+    int sig = 0;
+    InfraWatch::ReadIntFromUserInput(sig);
+    SPR_LOG("- Signal %d -> %s\n", sig, SprMediatorInterface::GetInstance()->GetSigalName(sig).c_str());
+    SPR_LOG("----------------------------------------------------------------------------------------------------\n");
+    SPR_LOG("Press 'S' continue \n");
+    return 0;
+}
+
+char MediatorWatch::ShowMQStatus()
+{
+    std::vector<SMQueueDetails> mqAttrVec;
+    SprMediatorInterface::GetInstance()->GetAllMQStatus(mqAttrVec);
+
+    InfraWatch::ClearScreen();
+    SPR_LOG("                                   Show All Message Queues                                          \n");
+    SPR_LOG("----------------------------------------------------------------------------------------------------\n");
+    //          %6d  %7ld  %7ld  %7ld  %s  %6ld %7u %7u  %6u  %s
+    SPR_LOG(" HANDLE  MNLIMIT  MNPUSED  MNCUSED  BLOCK    MLLIMIT MLPUSED MIDLAST  MTOTAL  QNAME\n");
+    SPR_LOG("----------------------------------------------------------------------------------------------------\n");
+    for (const auto& mqInfo : mqAttrVec) {
+        SPR_LOG(" %6d  %7ld  %7d  %7ld  %s  %6ld %7u %7u  %6d  %s\n", mqInfo.handle, mqInfo.mqAttr.mq_maxmsg, mqInfo.usedPeak,
+                    mqInfo.mqAttr.mq_curmsgs, (mqInfo.mqAttr.mq_flags & O_NONBLOCK) ? "NONBLOCK" : "BLOCK  ",
+                    mqInfo.mqAttr.mq_msgsize, mqInfo.msgLenPeak, mqInfo.lastMsgID, mqInfo.msgTotal % 100000, mqInfo.mqName);
+    }
+    SPR_LOG("----------------------------------------------------------------------------------------------------\n");
+    return 0;
+}
+
+char MediatorWatch::ShowFieldDetails()
+{
+    SPR_LOG("\n");
+    SPR_LOG("Field Descriptions:\n");
+    SPR_LOG("----------------------------------------------------------------------------------------------------\n");
+    SPR_LOG("- HANDLE : MQ handle identifier                            \n");
+    SPR_LOG("- MNLIMIT: Message number limit                            \n");
+    SPR_LOG("- MNPUSED: Message number using peak                       \n");
+    SPR_LOG("- MNCUSED: Message number current used                     \n");
+    SPR_LOG("- BLOCK  : Blocking mode (NONBLOCK/BLOCK)                  \n");
+    SPR_LOG("- MLLIMIT: Message length limit (bytes)                    \n");
+    SPR_LOG("- MLPUSED: Message length using peak                       \n");
+    SPR_LOG("- MIDLAST: Last message ID                                 \n");
+    SPR_LOG("- MTOTAL : Total num of processed messages                 \n");
+    SPR_LOG("- QNAME  : Message queue name                              \n");
+    SPR_LOG("----------------------------------------------------------------------------------------------------\n");
     return 0;
 }

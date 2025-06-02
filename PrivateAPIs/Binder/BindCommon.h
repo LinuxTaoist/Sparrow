@@ -19,6 +19,8 @@
 #ifndef __BIND_COMMON_H__
 #define __BIND_COMMON_H__
 
+#include <string>
+
 #define     KEY_IBINDER_MANAGER     66666
 #define     KEY_BINDER_MANAGER      88888
 

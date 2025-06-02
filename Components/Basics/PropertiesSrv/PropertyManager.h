@@ -19,6 +19,7 @@
 #ifndef __PROPERTY_MANAGER_H__
 #define __PROPERTY_MANAGER_H__
 
+#include <vector>
 #include <string>
 #include <memory>
 #include "SharedBinaryTree.h"
@@ -80,8 +81,14 @@ private:
     PropertyManager(const PropertyManager&) = delete;
     PropertyManager& operator=(const PropertyManager&) = delete;
 
+    // Register/Unregister debug functions
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
+    // Debug functions
+    void DebugDumpPropertyList(const std::vector<std::string>& args);
+
     int DumpPropertyList();
-    int EnvReady(const std::string& srvName);
     int LoadPropertiesFromFile(const std::string& fileName);
     int LoadPersistProperty();
     int HandleKeyValue(const std::string& key, const std::string& value);
@@ -89,7 +96,7 @@ private:
 
 private:
     std::string mDevName;
-    std::unique_ptr<SharedBinaryTree> mSharedMemoryPtr;
+    std::unique_ptr<SharedBinaryTree> mpSharedMemory;
 };
 
 #endif // __PROPERTY_MANAGER_H__

@@ -35,43 +35,35 @@ const int RETRY_TIMES       = 10;
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 const int RESERVER_SIZE     = 1024;
 
-// Used for master mode
 SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
-    : mMapCapacity(capacity), mShmPath(path)
-{
-    mEnable = true;
+    : mEnable(true), mRoot(nullptr), mData(nullptr), mMapCapacity(capacity), mShmPath(path) {
     int fd = open(mShmPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         SPR_LOGE("open failed! (%s)\n", strerror(errno));
         mEnable = false;
+        return;
     }
 
     if (ftruncate(fd, mMapCapacity) == -1) {
         SPR_LOGE("ftruncate failed! (%s)\n", strerror(errno));
         mEnable = false;
+        close(fd);
+        return;
     }
 
     void* mapMemory = mmap(NULL, mMapCapacity, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    close(fd);  // 无论 mmap 是否成功，都关闭文件描述符
+
     if (mapMemory == MAP_FAILED) {
         SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
         mEnable = false;
+        return;
     }
 
-    mRoot = static_cast<Root*>(mapMemory);
-    if (mRoot == nullptr) {
-        SPR_LOGE("mRoot is nullptr!\n");
-        mEnable = false;
-    }
-
+    mRoot = reinterpret_cast<Root*>(mapMemory);
     mDataCapacity = mMapCapacity - sizeof(Root);
     mRoot->rp = mRoot->wp;
-    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
-    if (mData == nullptr) {
-        SPR_LOGE("mData is nullptr!\n");
-        mEnable = false;
-    }
-
-    close(fd);
+    mData = reinterpret_cast<uint8_t*>(mRoot) + sizeof(Root);
 }
 
 // Used for slave mode
@@ -100,13 +92,13 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     mShmPath = path;
     mMapCapacity = fileSize;
     mDataCapacity = mMapCapacity - sizeof(Root);
-    mRoot = static_cast<Root*>(mapMemory);
+    mRoot = reinterpret_cast<Root*>(mapMemory);
     if (mRoot == nullptr) {
         SPR_LOGE("mRoot is nullptr!\n");
         mEnable = false;
     }
 
-    mData = static_cast<uint8_t*>(mapMemory) + sizeof(Root);
+    mData = reinterpret_cast<uint8_t*>(mapMemory) + sizeof(Root);
     if (mData == nullptr) {
         SPR_LOGE("mData is nullptr!\n");
         mEnable = false;
@@ -120,13 +112,12 @@ SharedRingBuffer::~SharedRingBuffer()
     munmap(mRoot, mMapCapacity);
 }
 
-int SharedRingBuffer::write(const void* data, int32_t len)
+int SharedRingBuffer::Write(const void* data, int32_t len)
 {
     int ret = -1;
     int retry = RETRY_TIMES;
 
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -139,13 +130,13 @@ int SharedRingBuffer::write(const void* data, int32_t len)
         int32_t avail = AvailSpace();
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->wp, len);
-            memmove(static_cast<unsigned char*>(mData) + mRoot->wp, data, len);
+            memmove(reinterpret_cast<uint8_t*>(mData) + mRoot->wp, data, len);
             mRoot->wp = (mRoot->wp + (uint32_t)len) % mDataCapacity;
             SetRWStatus(CMD_READABLE);
             ret = 0;
             break;
         } else {
-            SPR_LOGE("AvailSpace invalid! avail = %d\n", avail);
+            SPR_LOGE("AvailSpace invalid! avail = %d, len = %d, retry = %d\n", avail, len, retry);
             DumpErrorInfo();
             retry--;
             usleep(RETRY_INTERVAL_US);
@@ -155,13 +146,12 @@ int SharedRingBuffer::write(const void* data, int32_t len)
     return ret;
 }
 
-int SharedRingBuffer::read(void* data, int32_t len)
+int SharedRingBuffer::Read(void* data, int32_t len)
 {
     int ret = -1;
     int retry = RETRY_TIMES;
 
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -172,7 +162,7 @@ int SharedRingBuffer::read(void* data, int32_t len)
         int32_t avail = AvailData();
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->rp, len);
-            memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
+            memcpy(data, reinterpret_cast<uint8_t*>(mData) + mRoot->rp, len);
             mRoot->rp = (mRoot->rp + len) % mDataCapacity;
             SetRWStatus(CMD_WRITEABLE);
             ret = 0;
@@ -191,8 +181,7 @@ int SharedRingBuffer::read(void* data, int32_t len)
 
 int32_t SharedRingBuffer::AvailSpace() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -202,8 +191,7 @@ int32_t SharedRingBuffer::AvailSpace() const noexcept
 
 int32_t SharedRingBuffer::AvailData() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return -1;
     }
@@ -225,7 +213,7 @@ int32_t SharedRingBuffer::AvailData() const noexcept
 //         return -1;
 //     }
 
-//     memcpy(data, static_cast<char*>(mData) + mRoot->rp, len);
+//     memcpy(data, reinterpret_cast<uint8_t*>(mData) + mRoot->rp, len);
 //     pos = (pos + len) % mDataCapacity;
 
 //     return 0;
@@ -233,8 +221,7 @@ int32_t SharedRingBuffer::AvailData() const noexcept
 
 bool SharedRingBuffer::IsReadable() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return false;
     }
@@ -244,8 +231,7 @@ bool SharedRingBuffer::IsReadable() const noexcept
 
 bool SharedRingBuffer::IsWriteable() const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return false;
     }
@@ -255,14 +241,12 @@ bool SharedRingBuffer::IsWriteable() const noexcept
 
 void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return;
     }
 
-    if (pos == nullptr)
-    {
+    if (pos == nullptr) {
         SPR_LOGE("pos is nullptr!\n");
         return;
     }
@@ -274,8 +258,7 @@ void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const no
 
 void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return;
     }
@@ -292,8 +275,7 @@ void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
 
 void SharedRingBuffer::DumpErrorInfo()
 {
-    if (!mEnable)
-    {
+    if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return ;
     }

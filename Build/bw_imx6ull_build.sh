@@ -1,19 +1,17 @@
 #!/bin/bash
-ENABLE_DEBUG="OFF"
 BUILD_TYPE="Release"
 PROJECT_PATH=$(pwd)/../
 PROJECT_PLATFORM="bw_imx6ull"
 
-if [[ $1 == $"DEBUG" ]]; then
-    echo "This is debug version"
-    ENABLE_DEBUG="ON"
-fi
-
 cd $PROJECT_PATH/Build/
-rm -rf ../Release/Cache
-rm -rf ../Release/Bin/*
-rm -rf ../Release/Lib/*
-mkdir -p ../Release/Cache/
+mkdir -p ../Release/Cache
+mkdir -p ../Release/Include
+mkdir -p ../Release/Lib
+
 cd ../Release/Cache/
-cmake ../../ -DTEST_DEBUG=$ENABLE_DEBUG -DCMAKE_BUILD_TYPE=$BUILD_TYPE -DPROJECT_PLATFORM=$PROJECT_PLATFORM
-make -j24
+cmake ../../ \
+    -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
+    -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
+    -DCMAKE_INSTALL_PREFIX=../
+
+make install -j24

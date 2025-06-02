@@ -32,7 +32,6 @@
 #include "SprLog.h"
 
 #define PID_PRINT_WIDTH_LIMIT       6
-#define TAG_PRINT_WIDTH_LIMIT       12
 #define LOG_BUFFER_SIZE_LIMIT       256
 #define SEMAPHORE_NAME              "/SprLogSem"
 
@@ -50,21 +49,23 @@ SprLog::SprLog()
 
 SprLog::~SprLog()
 {
-    if (SEM_FAILED != mWriteSem) {
-        sem_close(mWriteSem);
-        sem_unlink(SEMAPHORE_NAME);
-    }
+    // refer comment in SprLog::GetInstance()
+    // if (SEM_FAILED != mWriteSem) {
+    //     sem_close(mWriteSem);
+    //     sem_unlink(SEMAPHORE_NAME);
+    // }
 
-    if (pLogSCacheMem != nullptr) {
-        delete pLogSCacheMem;
-        pLogSCacheMem = nullptr;
-    }
+    // if (pLogSCacheMem != nullptr) {
+    //     delete pLogSCacheMem;
+    //     pLogSCacheMem = nullptr;
+    // }
 }
 
 SprLog* SprLog::GetInstance()
 {
-    static SprLog instance;
-    return &instance;
+    // never delete this instance
+    static SprLog *instance = new (std::nothrow) SprLog();
+    return instance;
 }
 
 int32_t SprLog::d(const char* tag, const char* format, ...)
@@ -153,7 +154,10 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
     char buffer[LOG_BUFFER_SIZE_LIMIT] = {0};
     int32_t result = vsnprintf(buffer, sizeof(buffer), format, args);
     if (result < 0 || result >= (int32_t)sizeof(buffer)) {
-        return -1;
+        memset(buffer, 0, sizeof(buffer));
+        snprintf(buffer, sizeof(buffer), "[ERROR] Invalid log length! Limit: %zu bytes, Actual: %d bytes.",
+            sizeof(buffer), result);
+        result = -1;
     }
 
     std::string log;
@@ -171,5 +175,5 @@ int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
 
     memcpy(buffer, &len, sizeof(int32_t));
     memcpy(buffer + sizeof(int32_t), logs, len);
-    return pLogSCacheMem->write(buffer, sizeof(int32_t) + len);
+    return pLogSCacheMem->Write(buffer, sizeof(int32_t) + len);
 }

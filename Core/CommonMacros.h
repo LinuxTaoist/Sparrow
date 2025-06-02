@@ -45,8 +45,8 @@
     #define GCC_VERSION     "Unknown"
 #endif
 
-#ifndef RUN_ENV
-    #define RUN_ENV         "Unknown"
+#ifndef PROJECT_PLATFORM
+    #define PROJECT_PLATFORM "Unknown"
 #endif
 
 #ifndef BUILD_TIME
@@ -84,6 +84,82 @@
 #define SRV_NAME_LOG                "logmanagersrv"
 #define SRV_NAME_SPARROW            "sparrowsrv"
 #define SRV_NAME_POWER_MANAGER      "powermanagersrv"
+#define SRV_NAME_STATUS_MONITOR     "statusmonitorsrv"
 #define SRV_NAME_DEBUG_MODULE       "debugsrv"
+
+//---------------------------------------------------------------------------------------------------------------------
+// - Common macros print backtrace
+//--------------------------------------------------------------------------------------------------------------------
+#define PRINT_BACKTRACE(signum, totalFrames) do {       \
+    std::string line;                                               \
+    std::istringstream iss(Backtrace::DumpBacktrace(totalFrames));  \
+    SPR_LOGE("Receive signal %d, %s.", signum, strsignal(signum));  \
+    while (std::getline(iss, line)) {                               \
+        SPR_LOGE("%s", line.c_str());                               \
+    }                                                               \
+} while(0)
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Common macro check functions
+// --------------------------------------------------------------------------------------------------------------------
+#define POINTER_CHECK(__p) do {                  \
+    if (__p == nullptr) {                        \
+        return ;                                 \
+    }                                            \
+} while(0)
+
+#define POINTER_CHECK_RET(__p) do {              \
+    if (__p == nullptr) {                        \
+        return __p;                              \
+    }                                            \
+} while(0)
+
+#define POINTER_CHECK_ERR(__p, __err) do {      \
+    if (__p == nullptr) {                       \
+        return __err;                           \
+    }                                           \
+} while(0)
+
+#define NONZERO_CHECK(__expr) do {              \
+    int32_t __ret = (__expr);                   \
+    if (__ret != 0) {                           \
+        return ;                                \
+    }                                           \
+} while(0)
+
+#define NONZERO_CHECK_RET(__expr) do {          \
+    int32_t __ret = (__expr);                   \
+    if (__ret != 0) {                           \
+        return __ret;                           \
+    }                                           \
+} while(0)
+
+#define NONZERO_CHECK_ERR(__expr, __err) do {   \
+    int32_t __ret = (__expr);                   \
+    if (__ret != 0) {                           \
+        return __err;                           \
+    }                                           \
+} while(0)
+
+#define NONTRUE_CHECK(__expr) do {              \
+    bool __ret = (__expr);                      \
+    if (!__ret) {                               \
+        return ;                                \
+    }                                           \
+} while(0)
+
+#define NONTRUE_CHECK_RET(__expr) do {          \
+    bool __ret = (__expr);                      \
+    if (!__ret) {                               \
+        return __ret;                           \
+    }                                           \
+} while(0)
+
+#define NONTRUE_CHECK_ERR(__expr, __err) do {   \
+    bool __ret = (__expr);                      \
+    if (!__ret) {                               \
+        return __err;                           \
+    }                                           \
+} while(0)
 
 #endif // __COMMON_MACROS_H__

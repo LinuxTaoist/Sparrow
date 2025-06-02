@@ -30,7 +30,7 @@ public:
 
     void AddPoll(IEpollEvent* p);
     void DelPoll(IEpollEvent* p);
-    void EpollLoop(bool bRun);
+    void EpollLoop();
     void ExitLoop();
     virtual void HandleEpollEvent(IEpollEvent& pEvent);
 

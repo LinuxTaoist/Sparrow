@@ -16,9 +16,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <atomic>
 #include <unistd.h>
 #include <sys/types.h>
 #include "Property.h"
+#include "ProcMutex.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "GeneralUtils.h"
 #include "BindInterface.h"
@@ -32,8 +35,11 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "Property", __LINE__, ##args)
 
 static bool mEnable;
-std::shared_ptr<Parcel> pReqParcel = nullptr;
-std::shared_ptr<Parcel> pRspParcel = nullptr;
+static std::mutex gTMutex;
+static ProcMutex gPMutex("IPropertyMutex");
+static std::atomic<bool> gObjAlive(true);
+static std::shared_ptr<Parcel> pReqParcel = nullptr;
+static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
 Property::Property()
 {
@@ -46,10 +52,15 @@ Property::Property()
 
 Property::~Property()
 {
+    gObjAlive = false;
 }
 
 Property* Property::GetInstance()
 {
+    if (!gObjAlive) {
+        return nullptr;
+    }
+
     static Property instance;
     return &instance;
 }
@@ -61,14 +72,15 @@ int Property::SetProperty(const std::string& key, const std::string& value)
         return -1;
     }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_SET_PROPERTY);
-    pReqParcel->WriteString(key);
-    pReqParcel->WriteString(value);
-    pReqParcel->Post();
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_SET_PROPERTY));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(key));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(value));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
@@ -80,15 +92,16 @@ int Property::GetProperty(const std::string& key, std::string& value, const std:
         return -1;
     }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY);
-    pReqParcel->WriteString(key);
-    pReqParcel->WriteString(defaultValue);
-    pReqParcel->Post();
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTY));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(key));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(defaultValue));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadString(value);
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadString(value));
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
@@ -100,12 +113,13 @@ int Property::GetProperties()
         return -1;
     }
 
-    pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES);
-    pReqParcel->Post();
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES));
+    NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    pRspParcel->Wait();
-    pRspParcel->ReadInt(ret);
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     SPR_LOGD("ret: %d\n", ret);
     return ret;
 }

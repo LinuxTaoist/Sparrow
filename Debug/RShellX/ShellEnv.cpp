@@ -25,8 +25,7 @@
 #include "GeneralUtils.h"
 #include "ShellEnv.h"
 
-#define SPR_LOGD(fmt, args...) LOGD("RShellEnv", fmt, ##args)
-#define SPR_LOGE(fmt, args...) LOGE("RShellEnv", fmt, ##args)
+#define LOG_TAG "RShellEnv"
 
 ShellEnv::ShellEnv(int inFd, int outFd, int errFd)
 {
