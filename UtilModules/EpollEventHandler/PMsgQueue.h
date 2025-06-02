@@ -40,7 +40,7 @@ public:
     virtual ssize_t Write(int fd, const char* data, size_t size) override;
     virtual ssize_t Read(int fd, char* data, size_t size) override;
 
-    virtual void  Close() override;
+    virtual void  Close() final;
     virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
 
     std::string GetMQDevName() const { return mDevName; }

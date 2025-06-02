@@ -58,8 +58,8 @@ public:
     std::map<std::string, std::string> GetMsgHeaders();
     std::string GetMsgBody();
 
-    virtual int32_t Decode(const std::string& bytes) override;
-    virtual int32_t Encode(std::string& bytes) override;
+    int32_t Decode(const std::string& bytes) final;
+    int32_t Encode(std::string& bytes) final;
 
 private:
     std::string mReqMethod;
@@ -90,8 +90,8 @@ public:
     std::map<std::string, std::string> GetMsgHeaders();
     std::string GetMsgBody();
 
-    virtual int32_t Decode(const std::string& bytes) override;
-    virtual int32_t Encode(std::string& bytes) override;
+    int32_t Decode(const std::string& bytes) final;
+    int32_t Encode(std::string& bytes) final;
 
 private:
     std::string mHttpVersion;
