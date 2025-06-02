@@ -26,12 +26,12 @@ MqttMsgBase::MqttMsgBase() : mFixedHeader(0, 0), mRemainLenValue(0)
 }
 
 MqttMsgBase::MqttMsgBase(uint8_t type, uint8_t flags)
-    : mFixedHeader(type, flags)
+    : mFixedHeader(type, flags), mRemainLenValue(0)
 {
 }
 
 MqttMsgBase::MqttMsgBase(uint8_t type, uint8_t flags, const std::string& payload)
-    : mFixedHeader(type, flags), mPayload(payload)
+    : mFixedHeader(type, flags), mPayload(payload), mRemainLenValue(0)
 {
 }
 
@@ -44,7 +44,8 @@ MqttMsgBase::MqttMsgBase(const std::string& bytes)
 MqttMsgBase::MqttMsgBase(const MqttMsgBase& msg)
     : mFixedHeader(msg.mFixedHeader.type, msg.mFixedHeader.flags),
       mVariableHeader(msg.mVariableHeader),
-      mPayload(msg.mPayload)
+      mPayload(msg.mPayload),
+      mRemainLenValue(msg.mRemainLenValue)
 {
 }
 
@@ -54,6 +55,7 @@ MqttMsgBase& MqttMsgBase::operator=(const MqttMsgBase& msg)
         mFixedHeader = msg.mFixedHeader;
         mVariableHeader = msg.mVariableHeader;
         mPayload = msg.mPayload;
+        mRemainLenValue = msg.mRemainLenValue;
     }
     return *this;
 }
@@ -61,7 +63,8 @@ MqttMsgBase& MqttMsgBase::operator=(const MqttMsgBase& msg)
 MqttMsgBase::MqttMsgBase(MqttMsgBase&& msg)
     : mFixedHeader(std::move(msg.mFixedHeader)),
       mVariableHeader(std::move(msg.mVariableHeader)),
-      mPayload(std::move(msg.mPayload))
+      mPayload(std::move(msg.mPayload)),
+      mRemainLenValue(msg.mRemainLenValue)
 {
 }
 
@@ -71,6 +74,7 @@ MqttMsgBase& MqttMsgBase::operator=(MqttMsgBase&& msg)
         mFixedHeader = std::move(msg.mFixedHeader);
         mVariableHeader = std::move(msg.mVariableHeader);
         mPayload = std::move(msg.mPayload);
+        mRemainLenValue = msg.mRemainLenValue;
     }
     return *this;
 }

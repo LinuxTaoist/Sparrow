@@ -28,16 +28,16 @@
 #define SPR_LOGE(fmt, args...) printf("%4d IEpEvt E: " fmt, __LINE__, ##args)
 
 IEpollEvent::~IEpollEvent() {
-    Close();
+    // Close();
 }
 
 ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)
 {
     const char *ptr = data;
     size_t nleft = size;
-    ssize_t nwritten = 0;
 
     while (nleft > 0) {
+        ssize_t nwritten = 0;
         if ( (nwritten = write(fd, ptr, nleft)) < 0) {
             if (errno == EINTR) {
                 SPR_LOGE("write failed! (%s)\n", strerror(errno));
@@ -80,9 +80,9 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
 {
     char *ptr = data;
     size_t nleft = size;
-    ssize_t nread = 0;
 
     while (nleft > 0) {
+        ssize_t nread = 0;
         if ( (nread = read(fd, ptr, nleft)) < 0) {
             if (errno == EINTR) {
                 SPR_LOGE("read fail! (%s)\n", strerror(errno));

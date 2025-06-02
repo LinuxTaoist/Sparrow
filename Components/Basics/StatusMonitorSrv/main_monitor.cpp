@@ -16,11 +16,16 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <signal.h>
 #include "SprLog.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
+#include "Backtrace.h"
 #include "SprProcPrepare.h"
 #include "StatusMonitorManager.h"
 #include "SprEpollSchedule.h"
@@ -37,6 +42,15 @@ int main(int argc, const char *argv[])
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;

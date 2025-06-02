@@ -18,7 +18,7 @@
  */
 #include "M01_Connect.h"
 
-MqttConnect::MqttConnect(std::string& protocolName, uint8_t version, uint8_t flags, uint16_t keepalive)
+MqttConnect::MqttConnect(const std::string& protocolName, uint8_t version, uint8_t flags, uint16_t keepalive)
     : MqttMsgBase(MQTT_MSG_CONNECT, 0)
 {
     mProtocolNameLength = protocolName.length();

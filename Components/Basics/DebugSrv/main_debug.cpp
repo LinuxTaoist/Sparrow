@@ -16,13 +16,18 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
 #include <memory>
 #include <stdio.h>
 #include <signal.h>
+#include <string.h>
 #include "SprLog.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "DebugModule.h"
+#include "Backtrace.h"
 #include "SprProcPrepare.h"
 #include "DebugModuleHub.h"
 #include "SprEpollSchedule.h"
@@ -35,11 +40,20 @@ using namespace InternalDefs;
 int main(int argc, const char *argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
 
         switch (signum) {
             case MAIN_EXIT_SIGNUM:   // 用户自定义信号1
                 SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;

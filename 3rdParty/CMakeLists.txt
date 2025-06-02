@@ -8,7 +8,7 @@ set(3RD_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 #    OUTPUT_VARIABLE output
 #)
 
-if(BUILD_GTEST)
+if(BUILD_TESTCASE)
     execute_process(
         COMMAND mkdir -p ${LIBRARY_OUTPUT_PATH}
         COMMAND cp -rf ${3RD_PATH}/googletest/lib/${PROJECT_PLATFORM}/libgtest.a ${LIBRARY_OUTPUT_PATH}/

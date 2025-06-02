@@ -79,8 +79,8 @@ public:
      * @param[in] flags The flags of the MQTT message
      */
     MqttMsgBase();
-    MqttMsgBase(const std::string& bytes);
-    MqttMsgBase(uint8_t type, uint8_t flags = 0);
+    explicit MqttMsgBase(const std::string& bytes);
+    explicit MqttMsgBase(uint8_t type, uint8_t flags = 0);
     MqttMsgBase(uint8_t type, uint8_t flags, const std::string& payload);
     MqttMsgBase(const MqttMsgBase& msg);
     MqttMsgBase& operator=(const MqttMsgBase& msg);

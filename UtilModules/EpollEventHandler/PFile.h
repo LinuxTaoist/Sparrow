@@ -27,8 +27,8 @@
 class PFile : public IEpollEvent
 {
 public:
-    PFile(int fd, std::function<void(int, void*)> cb = nullptr, void* arg = nullptr);
-    PFile(const std::string fileName, std::function<void(int, ssize_t, std::string, void*)> cb = nullptr,
+    explicit PFile(int fd, std::function<void(int, void*)> cb = nullptr, void* arg = nullptr);
+    explicit PFile(const std::string& fileName, std::function<void(int, ssize_t, std::string, void*)> cb = nullptr,
           void* arg = nullptr, int flags = O_RDWR | O_CREAT | O_TRUNC, mode_t mode = 0777);
 
     virtual ~PFile();

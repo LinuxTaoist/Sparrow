@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 2.8)
 project(Sparrow)
 
 # 兼容CMAKE旧版本
@@ -22,22 +22,19 @@ set(LIBRARY_OUTPUT_PATH     ${OUTPUT_PATH}/Lib)
 set(EXECUTABLE_OUTPUT_PATH  ${OUTPUT_PATH}/Bin)
 
 ## 打印所有开关状态
-message(STATUS "TEST_DEBUG = ${TEST_DEBUG}")
-message(STATUS "BUILD_GTEST = ${BUILD_GTEST}")
+message(STATUS "BUILD_DEBUG    = ${BUILD_DEBUG}")
+message(STATUS "BUILD_TESTCASE = ${BUILD_TESTCASE}")
+message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
 
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
-
-if (TEST_DEBUG)
-    add_definitions(-DTEST_DEBUG)
-endif()
 
 ## 打开编译警告
 set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
 
 set(CMAKE_CXX_STANDARD  11)
-set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -Wall -g3")
-set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3")
+set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -Wall -g3  -rdynamic")
+set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3 -rdynamic")
 
 ## 工程信息
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
@@ -73,12 +70,19 @@ add_subdirectory(3rdParty)
 add_subdirectory(3rdAdapter)
 add_subdirectory(Components)
 add_subdirectory(Core)
-add_subdirectory(Debug)
-add_subdirectory(Examples)
 add_subdirectory(PrivateAPIs)
 add_subdirectory(PublicAPIs)
 add_subdirectory(UtilModules)
 
-if(BUILD_GTEST)
-    add_subdirectory(Test)
+## 可选模块
+if (BUILD_DEBUG)
+    add_subdirectory(Debug)
+endif()
+
+if (BUILD_EXAMPLES)
+    add_subdirectory(Examples)
+endif()
+
+if(BUILD_TESTCASE)
+    add_subdirectory(TestCase)
 endif()

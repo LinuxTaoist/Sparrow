@@ -2,27 +2,40 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : main_watch.cpp
+ *  @file       : TestBacktrace.cc
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/04/23
+ *  @date       : 2025/05/15
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/23 | 1.0.0.1   | Xiang.D        | Create file
+ *  2025/05/15 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <stdio.h>
-#include "MainMenu.h"
+#include <string>
+#include "gtest/gtest.h"
+#include "SprLog.h"
+#include "CommonMacros.h"
+#include "Backtrace.h"
 
-#define SPR_LOG(fmt, args...)  printf(fmt, ##args)
+using namespace Backtrace;
 
-int main(int argc, const char *argv[])
-{
-    theMainMenu.MenuLoop();
-    return 0;
+#define LOG_TAG "TestTrace"
+
+// 测试 SprProcInfo::DumpBackTrace 方法
+TEST(Util_Backtrace, DumpBackTraceTest) {
+    std::string result = DumpBacktrace();
+
+    EXPECT_FALSE(result.empty());
+    std::istringstream iss(result);
+    std::string line;
+    if (std::getline(iss, line)) {
+        EXPECT_EQ(line[0], '#');
+    }
+
+    PRINT_BACKTRACE(0, 20);
 }

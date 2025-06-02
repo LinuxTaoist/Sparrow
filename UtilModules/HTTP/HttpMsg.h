@@ -40,7 +40,7 @@ class HttpMsgRequest : public HttpMsgBase
 {
 public:
     HttpMsgRequest() = default;
-    HttpMsgRequest(const std::string& bytes);
+    explicit HttpMsgRequest(const std::string& bytes);
     HttpMsgRequest(const std::string& method, const std::string& uri, const std::string& version);
     virtual ~HttpMsgRequest();
 
@@ -58,8 +58,8 @@ public:
     std::map<std::string, std::string> GetMsgHeaders();
     std::string GetMsgBody();
 
-    virtual int32_t Decode(const std::string& bytes) override;
-    virtual int32_t Encode(std::string& bytes) override;
+    int32_t Decode(const std::string& bytes) final;
+    int32_t Encode(std::string& bytes) final;
 
 private:
     std::string mReqMethod;
@@ -73,7 +73,7 @@ class HttpMsgResponse : public HttpMsgBase
 {
 public:
     HttpMsgResponse() = default;
-    HttpMsgResponse(const std::string& bytes);
+    explicit HttpMsgResponse(const std::string& bytes);
     HttpMsgResponse(const std::string& version, int32_t status, const std::string& body = "");
     virtual ~HttpMsgResponse();
 
@@ -90,8 +90,8 @@ public:
     std::map<std::string, std::string> GetMsgHeaders();
     std::string GetMsgBody();
 
-    virtual int32_t Decode(const std::string& bytes) override;
-    virtual int32_t Encode(std::string& bytes) override;
+    int32_t Decode(const std::string& bytes) final;
+    int32_t Encode(std::string& bytes) final;
 
 private:
     std::string mHttpVersion;

@@ -257,7 +257,7 @@ struct StateTransition
 {
     Lev1State   lev1State;
     Lev2State   lev2State;
-    SignalType	sigId;
+    SignalType  sigId;
     void (ClassName::*callback)(const MsgType& msg);
 };
 

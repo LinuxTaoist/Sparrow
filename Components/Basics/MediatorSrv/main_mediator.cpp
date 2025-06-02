@@ -16,11 +16,16 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
 #include <signal.h>
+#include <string.h>
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "SprMediator.h"
+#include "Backtrace.h"
 #include "SprProcPrepare.h"
 #include "EpollEventHandler.h"
 #include "SprMediatorHub.h"
@@ -30,10 +35,19 @@
 int main(int argc, const char *argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 EpollEventHandler::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                EpollEventHandler::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;

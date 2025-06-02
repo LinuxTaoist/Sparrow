@@ -37,7 +37,7 @@ PFile::PFile(int fd, std::function<void(int, void*)> cb, void* arg)
 // Note: See epoll_ctl(2) for further details.
 // EPERM  The target file fd does not support epoll.
 // This error can occur if fd refers to, for example, a regular file or a directory.
-PFile::PFile(const std::string fileName, std::function<void(int, ssize_t, std::string, void*)> cb,
+PFile::PFile(const std::string& fileName, std::function<void(int, ssize_t, std::string, void*)> cb,
     void* arg, int flags, mode_t mode)
     : IEpollEvent(-1, EPOLL_TYPE_FILE, arg), mCb1(nullptr), mCb2(cb)
 {

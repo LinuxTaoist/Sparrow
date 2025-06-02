@@ -54,9 +54,9 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 自定义数据，供回调使用
      */
-    PUdp(const std::function<void(int fd, void*)>& cb, void* arg = nullptr)
+    explicit PUdp(const std::function<void(int fd, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {}
-    PUdp(const std::function<void(ssize_t, std::string, std::string addr, uint16_t port, void*)>& cb, void* arg = nullptr)
+    explicit PUdp(const std::function<void(ssize_t, std::string, std::string addr, uint16_t port, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {}
     virtual ~PUdp();
 
@@ -116,7 +116,7 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 自定义数据，供回调使用
      */
-    PTcpServer(const std::function<void(int, void*)>& cb, void* arg = nullptr)
+    explicit PTcpServer(const std::function<void(int, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb) {}
     virtual ~PTcpServer();
 
@@ -165,8 +165,8 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 传递给回调函数的参数
      */
-    PTcpClient(const std::function<void(int, void*)>& cb, void* arg = nullptr);
-    PTcpClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
+    explicit PTcpClient(const std::function<void(int, void*)>& cb, void* arg = nullptr);
+    explicit PTcpClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
     virtual ~PTcpClient();
 
     int32_t AsTcpClient(bool con = false, const std::string& srvAddr = "", uint16_t srvPort = 0,
@@ -196,9 +196,9 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 自定义数据，供回调使用
      */
-    PUnixDgram(const std::function<void(int, void*)>& cb, void* arg = nullptr)
+    explicit PUnixDgram(const std::function<void(int, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {}
-    PUnixDgram(const std::function<void(ssize_t, std::string, std::string, void*)>& cb, void* arg = nullptr)
+    explicit PUnixDgram(const std::function<void(ssize_t, std::string, std::string, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {}
     virtual ~PUnixDgram();
 
@@ -250,7 +250,7 @@ private:
 class PUnixStreamServer : public IEpollEvent
 {
 public:
-    PUnixStreamServer(const std::function<void(int, void*)>& cb, void* arg = nullptr)
+    explicit PUnixStreamServer(const std::function<void(int, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb) {}
     virtual ~PUnixStreamServer();
 
@@ -286,7 +286,7 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 传递给回调函数的参数
      */
-    PUnixStreamClient(int fd, const std::function<void(int, void*)>& cb = nullptr, void* arg = nullptr);
+    explicit PUnixStreamClient(int fd, const std::function<void(int, void*)>& cb = nullptr, void* arg = nullptr);
     PUnixStreamClient(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
 
     /**
@@ -297,8 +297,8 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 传递给回调函数的参数
      */
-    PUnixStreamClient(const std::function<void(int, void*)>& cb, void* arg = nullptr);
-    PUnixStreamClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
+    explicit PUnixStreamClient(const std::function<void(int, void*)>& cb, void* arg = nullptr);
+    explicit PUnixStreamClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
     virtual ~PUnixStreamClient();
 
     int32_t AsUnixStreamClient(bool con = false, const std::string& srvPath = "", const std::string& cliPath = "");

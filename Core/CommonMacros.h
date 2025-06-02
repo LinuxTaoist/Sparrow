@@ -87,6 +87,18 @@
 #define SRV_NAME_STATUS_MONITOR     "statusmonitorsrv"
 #define SRV_NAME_DEBUG_MODULE       "debugsrv"
 
+//---------------------------------------------------------------------------------------------------------------------
+// - Common macros print backtrace
+//--------------------------------------------------------------------------------------------------------------------
+#define PRINT_BACKTRACE(signum, totalFrames) do {       \
+    std::string line;                                               \
+    std::istringstream iss(Backtrace::DumpBacktrace(totalFrames));  \
+    SPR_LOGE("Receive signal %d, %s.", signum, strsignal(signum));  \
+    while (std::getline(iss, line)) {                               \
+        SPR_LOGE("%s", line.c_str());                               \
+    }                                                               \
+} while(0)
+
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macro check functions
 // --------------------------------------------------------------------------------------------------------------------

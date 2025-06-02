@@ -154,7 +154,10 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
     char buffer[LOG_BUFFER_SIZE_LIMIT] = {0};
     int32_t result = vsnprintf(buffer, sizeof(buffer), format, args);
     if (result < 0 || result >= (int32_t)sizeof(buffer)) {
-        return -1;
+        memset(buffer, 0, sizeof(buffer));
+        snprintf(buffer, sizeof(buffer), "[ERROR] Invalid log length! Limit: %zu bytes, Actual: %d bytes.",
+            sizeof(buffer), result);
+        result = -1;
     }
 
     std::string log;

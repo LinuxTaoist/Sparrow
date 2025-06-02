@@ -17,11 +17,13 @@
  *
  */
 #include <stdio.h>
+#include <string.h>
 #include <signal.h>
 #include <unistd.h>
 #include <sys/types.h>
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "Backtrace.h"
 #include "LogManager.h"
 
 using namespace GeneralUtils;
@@ -36,13 +38,23 @@ int main(int argc, const char *argv[])
     LogManager theLogManager;
 
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 LogManager::StopWork();
                 break;
-
-            case SIGUSR2:   // 用户自定义信号2
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGABRT:
+            case SIGILL:
+            case SIGFPE:
+            case SIGTERM:
+            case SIGQUIT:
+                SPR_LOGE("Receive signal %d, %s.", signum, strsignal(signum));
+                SPR_LOGE("%s", Backtrace::DumpBacktrace().c_str());
+                LogManager::StopWork();
+                exit(EXIT_FAILURE);
+                break;
             default:
                 break;
         }

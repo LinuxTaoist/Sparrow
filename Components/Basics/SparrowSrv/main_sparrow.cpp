@@ -16,11 +16,17 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <iostream>
+#include <string>
+#include <sstream>
+#include <string.h>
 #include <signal.h>
 #include "SprLog.h"
 #include "SprSystem.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "CommonMacros.h"
+#include "Backtrace.h"
 #include "SprEpollSchedule.h"
 
 #define LOG_TAG "MainSparrow"
@@ -28,11 +34,20 @@
 int main(int argc, const char *argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
-	    SPR_LOGI("Receive signal: %d!\n", signum);
+        SPR_LOGI("Receive signal: %d!\n", signum);
 
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
                 SprEpollSchedule::GetInstance()->ExitLoop();
+                break;
+            case SIGSEGV:
+            case SIGBUS:
+            case SIGILL:
+            case SIGFPE:
+            case SIGQUIT:
+                PRINT_BACKTRACE(signum, 20);
+                SprEpollSchedule::GetInstance()->ExitLoop();
+                exit(EXIT_FAILURE);
                 break;
             default:
                 break;

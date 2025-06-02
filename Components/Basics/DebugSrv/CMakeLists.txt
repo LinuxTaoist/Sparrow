@@ -1,13 +1,11 @@
 ## Business
-include_directories     (${PROJECT_PATH}/Util)
-include_directories     (${PROJECT_PATH}/Core)
-include_directories     (${PROJECT_PATH}/3rdAdapter)
-include_directories     (${PROJECT_PATH}/UtilModules/EpollEventHandler)
-
 # Bin debugsrv
-aux_source_directory        (${PROJECT_PATH}/Components/Basics/DebugSrv             DEBUG_SRV_PATH)
-aux_source_directory        (${PROJECT_PATH}/Core/EpollEventHandler                 DEBUG_SRV_PATH)
+aux_source_directory        (${PROJECT_PATH}/Components/Basics/DebugSrv DEBUG_SRV_PATH)
 add_executable              (BinDebugSrv ${DEBUG_SRV_PATH})
-set_target_properties       (BinDebugSrv PROPERTIES OUTPUT_NAME                     "debugsrv")
-target_link_libraries       (BinDebugSrv sprcore sprbinder epollevent pthread sprlog)
+target_include_directories  (BinDebugSrv PRIVATE    ${PROJECT_PATH}/Util
+                                                    ${PROJECT_PATH}/Core
+                                                    ${PROJECT_PATH}/3rdAdapter
+                                                    ${PROJECT_PATH}/UtilModules/EpollEventHandler)
+set_target_properties       (BinDebugSrv PROPERTIES OUTPUT_NAME "debugsrv")
+target_link_libraries       (BinDebugSrv sprcore sprbinder epollevent pthread sprlog dl)
 add_dependencies            (BinDebugSrv LibSprCore LibEpollEvent LibBinder LibSprLog)
