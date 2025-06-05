@@ -80,3 +80,13 @@ git add .              # 添加更改
 git commit             # 提交更改，备注提交信息
 git push               # 推送更改
 ```
+
+8. 删除/创建tag:
+```shell
+git tag <tag-name> # 创建tag
+git push origin <tag-name> # 推送tag
+git push origin -a <tag-name> -m "tag message" # 推送tag并添加描述信息
+git push origin --tags # 推送所有tag
+git tag -d <tag-name> # 删除本地tag
+git push origin :refs/tags/<tag-name> # 删除远程tag
+```
