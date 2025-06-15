@@ -46,7 +46,7 @@ void SprTimeTrace::TimeTracePoint(int id, const std::string& text)
     EntryInfo entry;
     entry.eId = id;
     entry.eText = text;
-    clock_gettime(CLOCK_MONOTONIC, &entry.eTimeStamp);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &entry.eTimeStamp);
     mEntryList.push_back(entry);
 }
 

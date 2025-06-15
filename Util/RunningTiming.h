@@ -9,7 +9,7 @@
  *  @date       : 2024/09/13
  *
  *  RunningTiming is a class designed to measure the execution time of code blocks.
- *  It adheres to the RTII (Reactive, Testable, Isolated, Interoperable) principle,
+ *  It adheres to the RAII (Reactive, Testable, Isolated, Interoperable) principle,
  *  providing a straightforward interface to measure the execution time of any code block.
  *
  *  Declaration and Initialization:

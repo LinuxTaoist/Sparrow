@@ -52,7 +52,7 @@ uint64_t SprProcInfo::GetTickUs()
 {
     uint64_t td = 0;
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
     td = (uint64_t)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
 
     return td;

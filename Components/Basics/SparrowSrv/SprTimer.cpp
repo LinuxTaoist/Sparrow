@@ -102,7 +102,7 @@ uint32_t SprTimer::GetTick() const
 {
     uint32_t td = 0;
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
     td = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 
     return td;
