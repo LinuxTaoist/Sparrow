@@ -16,20 +16,13 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <string.h>
 #include <signal.h>
-#include <unistd.h>
 #include "SprLog.h"
-#include "Backtrace.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
-#include "BindInterface.h"
-#include "CoreTypeDefs.h"
 #include "SprProcPrepare.h"
+#include "BacktraceMacros.h"
 #include "PropertyManager.h"
 #include "PropertyManagerHub.h"
 #include "EpollEventHandler.h"

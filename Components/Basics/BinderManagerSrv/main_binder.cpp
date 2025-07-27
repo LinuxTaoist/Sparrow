@@ -16,19 +16,11 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <string.h>
-#include <stdio.h>
 #include <signal.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include "SprLog.h"
-#include "Backtrace.h"
-#include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "BacktraceMacros.h"
 #include "BinderManager.h"
 
 using namespace GeneralUtils;

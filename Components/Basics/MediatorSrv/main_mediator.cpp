@@ -16,19 +16,15 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
 #include <signal.h>
-#include <string.h>
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
-#include "SprMediator.h"
-#include "Backtrace.h"
 #include "SprProcPrepare.h"
-#include "EpollEventHandler.h"
+#include "SprMediator.h"
 #include "SprMediatorHub.h"
+#include "BacktraceMacros.h"
+#include "EpollEventHandler.h"
 
 #define LOG_TAG "MainMediator"
 

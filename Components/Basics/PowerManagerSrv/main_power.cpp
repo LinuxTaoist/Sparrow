@@ -16,23 +16,17 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <string.h>
-#include <stdio.h>
 #include <signal.h>
 #include "SprLog.h"
-#include "Backtrace.h"
 #include "GeneralUtils.h"
-#include "CommonMacros.h"
-#include "PowerManager.h"
 #include "SprDebugNode.h"
+#include "CommonMacros.h"
 #include "SprProcPrepare.h"
+#include "PowerManager.h"
 #include "PowerManagerHub.h"
+#include "BacktraceMacros.h"
 #include "SprEpollSchedule.h"
 
-using namespace std;
 using namespace InternalDefs;
 
 #define LOG_TAG "MainPower"
