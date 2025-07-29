@@ -40,7 +40,6 @@ struct SModuleInfo
 class SprMediator
 {
 public:
-    ~SprMediator();
     static SprMediator* GetInstance();
 
     int Init();
@@ -49,6 +48,7 @@ public:
 
 private:
     SprMediator();
+    ~SprMediator();
     int InitInternalPort();
     int LoadMQStaticInfo(int handle, const std::string& devName);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);

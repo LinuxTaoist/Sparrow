@@ -28,11 +28,6 @@ class BindInterface
 {
 public:
     /**
-     * @brief  Destructor
-     */
-    ~BindInterface();
-
-    /**
      * @brief  Get the Instance object
      *
      * @return  Signle instance of BindInterface
@@ -72,6 +67,11 @@ private:
      * @brief  Constructor
      */
     BindInterface() = default;
+
+    /**
+     * @brief  Destructor
+     */
+    ~BindInterface();
 
     /**
      * @brief  Add a service as a binder

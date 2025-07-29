@@ -29,13 +29,12 @@
 class SprProcPrepare
 {
 public:
-    ~SprProcPrepare();
-
     static SprProcPrepare* GetInstance();
     int32_t Init(const std::string& procName);
 
 private:
     SprProcPrepare();
+    ~SprProcPrepare();
 
 private:
     std::string mProcName;

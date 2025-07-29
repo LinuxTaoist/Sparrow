@@ -75,3 +75,10 @@ TEST(ThirdAdapter_SprLog, LongLogOutput) {
     std::string longMessage(1024, 'a');
     SPR_LOGD("%s", longMessage.c_str());
 }
+
+TEST(ThirdAdapter_SprLog, PressureTest) {
+    for (int32_t i = 0; i < 100000; ++i) {
+        std::string message = "Log message test index: " + std::to_string(i);
+        SPR_LOGD("%s", message.c_str());
+    }
+}

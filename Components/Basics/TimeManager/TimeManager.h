@@ -36,12 +36,6 @@ class TimeManager : public SprObserverWithMQueue
 {
 public:
     /**
-     * @brief Destructor
-     *
-     */
-    virtual ~TimeManager();
-
-    /**
      * @brief Get the single instance
      *
      * @param id
@@ -74,6 +68,12 @@ private:
      * @param[in] name
      */
     TimeManager(ModuleIDType id, const std::string& name);
+
+    /**
+     * @brief Destructor
+     *
+     */
+    virtual ~TimeManager();
 
     int32_t InitDebugDetails();
     int32_t RequestNtpTime();

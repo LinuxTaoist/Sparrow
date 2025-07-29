@@ -56,8 +56,6 @@ constexpr bool check_str_length(const char* str, size_t maxLen, size_t index = 0
 class SprLog
 {
 public:
-    ~SprLog();
-
     /**
      * @brief Get the Instance object
      *
@@ -75,6 +73,7 @@ public:
 
 private:
     SprLog();
+    ~SprLog();
 
     /**
      * @brief LogImpl

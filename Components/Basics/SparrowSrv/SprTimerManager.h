@@ -35,12 +35,6 @@ class SprTimerManager : public SprObserverWithMQueue
 {
 public:
     /**
-    * @brief Destroy the Spr Timer Manager object
-    *
-    */
-    virtual ~SprTimerManager();
-
-    /**
      * @brief  Init
      * @return 0 on success, or -1 if an error occurred
      *
@@ -67,6 +61,12 @@ private:
      * @param[in] pSystemTimer
      */
     SprTimerManager(ModuleIDType id, const std::string& name, std::shared_ptr<SprSystemTimer> pSystemTimer);
+
+    /**
+    * @brief Destroy the Spr Timer Manager object
+    *
+    */
+    virtual ~SprTimerManager();
 
     /**
      * @brief  InitSystemTimer

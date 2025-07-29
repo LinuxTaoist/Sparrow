@@ -26,7 +26,6 @@
 
 class SqliteAdapter {
 public:
-    ~SqliteAdapter();
     static SqliteAdapter* GetInstance(const std::string& dbPath);
 
     bool CreateTable(const std::string& tableName, const std::map<std::string, std::string>& columnsDefinition);
@@ -38,6 +37,7 @@ public:
 
 private:
     explicit SqliteAdapter(const std::string& dbPath);
+    ~SqliteAdapter();
 };
 
 #endif // __SQLITE_ADAPTER_H__

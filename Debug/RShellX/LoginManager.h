@@ -29,8 +29,6 @@
 class LoginManager
 {
 public:
-    LoginManager();
-    ~LoginManager();
     static LoginManager* GetInstance();
 
     int Init();
@@ -38,6 +36,8 @@ public:
     int ConnectLoop();
 
 private:
+    LoginManager();
+    ~LoginManager();
     int Usage();
     int ExitShell();
     int ExitAll();

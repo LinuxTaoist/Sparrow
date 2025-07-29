@@ -28,12 +28,6 @@ class PropertyManager
 {
 public:
     /**
-     * @brief Destroy the Property Manager object
-     *
-     */
-    virtual ~PropertyManager();
-
-    /**
      * @brief Init
      *
      * @return int
@@ -78,6 +72,7 @@ public:
 
 private:
     PropertyManager();
+    ~PropertyManager();
     PropertyManager(const PropertyManager&) = delete;
     PropertyManager& operator=(const PropertyManager&) = delete;
 

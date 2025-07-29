@@ -25,11 +25,6 @@ class Property
 {
 public:
     /**
-     * @brief Destructor
-     */
-    ~Property();
-
-    /**
      * @brief Get the Instance object
      *
      * @return object
@@ -69,6 +64,11 @@ private:
      * @brief Constructor
      */
     Property();
+
+    /**
+     * @brief Destructor
+     */
+    ~Property();
 };
 
 #endif // __PROPERTY_H__

@@ -23,11 +23,6 @@ class PowerManagerInterface
 {
 public:
     /**
-     * @brief  Destructor
-     */
-    ~PowerManagerInterface();
-
-    /**
      * @brief Get the Instance object
      *
      * @return  Single instance of PowerManagerInterface
@@ -53,6 +48,11 @@ private:
      * @brief Constructor
      */
     PowerManagerInterface();
+
+    /**
+     * @brief  Destructor
+     */
+    ~PowerManagerInterface();
 };
 
 #endif // __POWER_MANAGER_INTERFACE_H__

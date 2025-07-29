@@ -25,7 +25,6 @@
 class EpollEventHandler
 {
 public:
-    virtual ~EpollEventHandler();
     static EpollEventHandler* GetInstance(int size = 0, int blockTimeOut = -1);
 
     void AddPoll(IEpollEvent* p);
@@ -36,6 +35,7 @@ public:
 
 protected:
     explicit EpollEventHandler(int size = 0, int blockTimeOut = -1);
+    virtual ~EpollEventHandler();
 
 private:
     bool    mRun;

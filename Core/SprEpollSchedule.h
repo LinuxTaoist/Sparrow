@@ -27,11 +27,6 @@ class SprEpollSchedule : public EpollEventHandler
 {
 public:
     /**
-     * @brief Destrcuct
-     */
-    virtual ~SprEpollSchedule();
-
-    /**
      * @brief Get single instance
      *
      * @param[in] size the size of epoll
@@ -54,6 +49,11 @@ private:
      * @param[in] enableCoroutine enable coroutine
      */
     explicit SprEpollSchedule(int32_t size = 0, int32_t timeout = 0, bool enableCoroutine = true);
+
+    /**
+     * @brief Destrcuct
+     */
+    virtual ~SprEpollSchedule();
 
 private:
     bool mEnableCoroutine;

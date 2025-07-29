@@ -54,7 +54,6 @@ public:
     SprDebugNode& operator=(const SprDebugNode&) = delete;
     SprDebugNode(SprDebugNode&&) = delete;
     SprDebugNode& operator=(SprDebugNode&&) = delete;
-    virtual ~SprDebugNode();
 
     static SprDebugNode* GetInstance();
     std::string GetDebugPath();
@@ -84,6 +83,7 @@ public:
 
 private:
     SprDebugNode();
+    ~SprDebugNode();
 
 private:
     int32_t mMaxNum;
