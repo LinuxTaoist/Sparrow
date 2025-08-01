@@ -228,7 +228,7 @@ void PowerManager::NotifyEvent(uint32_t event)
 void PowerManager::MsgRespondPowerOn(const SprMsg& msg)
 {
     mStartupType = (EStartupType)msg.GetI32Value();
-    SPR_LOGD("Receice power on, startup type: 0x%x (%s)!\n", GetStartupTypeText(mStartupType).c_str());
+    SPR_LOGD("Receive power on, startup type: 0x%x (%s)!\n", mStartupType, GetStartupTypeText(mStartupType).c_str());
 
     if (mStartupType == STARTUP_COLD_BOOT) {
         DoBootBusiness();
