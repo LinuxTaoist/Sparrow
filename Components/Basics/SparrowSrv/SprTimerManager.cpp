@@ -155,7 +155,7 @@ int SprTimerManager::DelTimer(const SprTimer& timer)
     if (it != mTimers.end()) {
         mTimers.erase(it);
     } else {
-        SPR_LOGW("Not exist the timer! [%s: %s]", GetSprModuleIDDescription(timer.GetModuleId()).c_str(), GetSigName(timer.GetMsgId()));
+        SPR_LOGW("Not exist the timer! [%s: %s]", GetSprModuleIDText(timer.GetModuleId()).c_str(), GetSigName(timer.GetMsgId()));
     }
 
     return 0;
@@ -216,7 +216,7 @@ void SprTimerManager::MsgRespondAddTimer(const SprMsg &msg)
     // 3. add the timer to the timer list, and update the system timer from the earliest timer in the list
     auto p = msg.GetDatas<STimerInfo>();
     if (p != nullptr) {
-        SPR_LOGD("AddTimer: [%s %d %dms %dms %s]\n", GetSprModuleIDDescription(p->moduleId).c_str(),
+        SPR_LOGD("AddTimer: [%s %d %dms %dms %s]\n", GetSprModuleIDText(p->moduleId).c_str(),
             p->repeatTimes, p->delayInMilliSec, p->intervalInMilliSec, GetSigName(p->msgId));
 
         // 1. check interval value, not less than TIMER_MIN_INTERVAL_MS
@@ -256,7 +256,7 @@ void SprTimerManager::MsgRespondDelTimer(const SprMsg &msg)
     });
 
     if (it != mTimers.end()) {
-        SPR_LOGD("DelTimer: [%s %dms %s]\n", GetSprModuleIDDescription(it->GetModuleId()).c_str(),
+        SPR_LOGD("DelTimer: [%s %dms %s]\n", GetSprModuleIDText(it->GetModuleId()).c_str(),
             it->GetIntervalInMilliSec(), GetSigName(it->GetMsgId()));
 
         DelTimer(*it);

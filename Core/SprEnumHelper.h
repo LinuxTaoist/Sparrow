@@ -24,21 +24,23 @@
 namespace InternalDefs {
 
 int32_t GetSprErrorLevel(int32_t errorCode);
-std::string GetSprErrorLevelDescription(int32_t level);
-std::string GetSprErrorDescription(int32_t errorCode);
+std::string GetSprErrorLevelText(int32_t level);
+std::string GetSprErrorText(int32_t errorCode);
 
-std::string GetSprProxTypeDescription(int32_t type);
-std::string GetSprModuleIDDescription(int32_t id);
-std::string GetSprProxTypeDescription(int32_t type);
-std::string GetSprModuleIDDescription(int32_t id);
-std::string GetSprProxyBinderCmdDescription(int32_t cmd);
-std::string GetSprPropertyBinderCmdDescription(int32_t cmd);
-std::string GetSprPowerMBinderCmdDescription(int32_t cmd);
-std::string GetSprDebugMBinderCmdDescription(int32_t cmd);
-std::string GetSprOneNetBinderCmdDescription(int32_t cmd);
-std::string GetSprGeneralBinderCmdDescription(int32_t cmd);
-std::string GetSprModuleBootPriorityDescription(int32_t priority);
-std::string GetSprTimeSourceTypeDescription(int32_t source);
+std::string GetSprProxTypeText(int32_t type);
+std::string GetSprModuleIDText(int32_t id);
+std::string GetSprProxyBinderCmdText(int32_t cmd);
+std::string GetSprPropertyBinderCmdText(int32_t cmd);
+std::string GetSprPowerMBinderCmdText(int32_t cmd);
+std::string GetSprDebugMBinderCmdText(int32_t cmd);
+std::string GetSprOneNetBinderCmdText(int32_t cmd);
+std::string GetSprGeneralBinderCmdText(int32_t cmd);
+std::string GetSprModuleBootPriorityText(int32_t priority);
+std::string GetStartupTypeText(int32_t type);
+std::string GetSprPreStandbyAckText(int32_t standbyAck);
+std::string GetStandbyReasonTypeText(int32_t reason);
+std::string GetWakeupSourceTypeText(int32_t source);
+std::string GetSprTimeSourceTypeText(int32_t source);
 
 } // namespace InternalDefs
 

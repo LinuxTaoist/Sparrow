@@ -636,7 +636,7 @@ void OneNetManager::MsgRespondDeviceDisconnectPassive(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondUnexpectedState(const SprMsg& msg)
 {
-    SPR_LOGW("Unexpected msg: msg = %s on <%s : %s>\n",
+    SPR_LOGW("Unexpected state: msg = %s on <%s : %s>\n",
         GetSigName(msg.GetMsgId()), GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 }
 
@@ -648,7 +648,7 @@ void OneNetManager::MsgRespondUnexpectedState(const SprMsg& msg)
  */
 void OneNetManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
 {
-    SPR_LOGW("Unexpected state: msg = %s on <%s : %s>\n",
+    SPR_LOGW("Unexpected msg: msg = %s on <%s : %s>\n",
         GetSigName(msg.GetMsgId()), GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 }
 

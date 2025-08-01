@@ -189,7 +189,7 @@ std::string StatusMonitorManager::FormatTimeAsLocalString(const time_t& time)
 
 int32_t StatusMonitorManager::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("ProcessMsg: %x\n", msg.GetMsgId());
+    SPR_LOGD("Recv msg: %s\n", GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId()) {
         case SIG_ID_MONITOR_STATUS_EVENT: {
             SPR_LOGI("Receive status event!\n");

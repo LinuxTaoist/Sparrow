@@ -51,6 +51,12 @@ enum EPowerLev2State
     LEV2_POWER_ANY      = 0x00
 };
 
+struct ComponentPowerDetails
+{
+    InternalDefs::EPreStandbyAck preStandbyAck;
+    InternalDefs::EModuleBootPriority priority;
+};
+
 class PowerManager : public SprObserverWithMQueue
 {
 public:
@@ -70,11 +76,22 @@ private:
     void SetLev2State(EPowerLev2State state) { mCurLev2State = state; }
     EPowerLev2State GetLev2State() { return mCurLev2State; }
 
-    void PerformBootBusiness();
-    void PerformResumeBusiness();
-    void PerformStandbyBusiness();
-    void PerformSleepBusiness();
-    void BroadcastPowerEvent(uint32_t event);
+    void DoBootBusiness();
+    void DoResumeBusiness();
+    void NotifyAllWithStartup();
+    void NotifyAllWithStandby();
+    void NotifyAllWithSleep();
+    void NotifyEvent(uint32_t event);
+
+    /* 消息响应函数 */
+    void MsgRespondPowerOn(const SprMsg& msg);
+    void MsgRespondStartupPollTimerEvent(const SprMsg& msg);
+    void MsgRespondPowerOff(const SprMsg& msg);
+    void MsgRespondPreStandbyResponse(const SprMsg& msg);
+    void MsgRespondPreStandbyResponseTimeout(const SprMsg& msg);
+    void MsgRespondStandbyPollTimerEvent(const SprMsg& msg);
+    void MsgRespondUnexpectedState(const SprMsg& msg);
+    void MsgRespondUnexpectedMsg(const SprMsg& msg);
 
     /* 注册/注销所有调试函数 */
     void RegisterDebugFuncs();
@@ -85,13 +102,6 @@ private:
     void DebugSendPowerOn(const std::vector<std::string>& args);
     void DebugSendPowerOff(const std::vector<std::string>& args);
 
-    /* 消息响应函数 */
-    void MsgRespondPowerOnWithInit(const SprMsg& msg);
-    void MsgRespondPowerOnWithStandby(const SprMsg& msg);
-    void MsgRespondPowerOnWithSleep(const SprMsg& msg);
-    void MsgRespondPowerOffWithActive(const SprMsg& msg);
-    void MsgRespondUnexpectedMsg(const SprMsg& msg);
-
 private:
     using StateTransitionType = InternalDefs::StateTransition<EPowerLev1State,
                                                 EPowerLev2State,
@@ -100,8 +110,14 @@ private:
                                                 SprMsg>;
     static std::vector<StateTransitionType> mStateTable;
 
+    bool mEnableStandbyTimer;
+    int32_t mStandbyTimerCnt;
+    uint32_t mCurNotifyStartupEvent;
+    uint32_t mCurNotifyStandbyEvent;
+    InternalDefs::EStartupType mStartupType;
     EPowerLev1State mCurLev1State;
     EPowerLev2State mCurLev2State;
+    std::map<uint32_t, ComponentPowerDetails> mStandbyComponents;  // key: module id
 };
 
 #endif // __POWER_MANAGER_H__

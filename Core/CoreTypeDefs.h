@@ -210,21 +210,73 @@ enum EGeneralBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 // BOOT_PRIORITY_HIGHEST        : used for environment initialization
 // BOOT_PRIORITY_HIGH           : used for system core services
-// BOOT_PRIORITY_MEDIUM_HIGH    : used for critical services, initial project configuration, etc
 // BOOT_PRIORITY_MEDIUM         : used for main business services
-// BOOT_PRIORITY_MEDIUM_LOW     : used for ancillary services, not need to start immediately.
+// BOOT_PRIORITY_LOW            : used for ancillary services, not need to start immediately.
 // BOOT_PRIORITY_LOWEST         : used for optional services
 #define MODULE_BOOT_PRIORITY_MACROS \
     ENUM_OR_STRING(BOOT_PRIORITY_HIGHEST),      \
     ENUM_OR_STRING(BOOT_PRIORITY_HIGH),         \
-    ENUM_OR_STRING(BOOT_PRIORITY_MEDIUM_HIGH),  \
     ENUM_OR_STRING(BOOT_PRIORITY_MEDIUM),       \
-    ENUM_OR_STRING(BOOT_PRIORITY_MEDIUM_LOW),   \
-    ENUM_OR_STRING(BOOT_PRIORITY_LOWEST)
+    ENUM_OR_STRING(BOOT_PRIORITY_LOW),          \
+    ENUM_OR_STRING(BOOT_PRIORITY_LOWEST),       \
+    ENUM_OR_STRING(BOOT_PRIORITY_BUTT)
 
 enum EModuleBootPriority
 {
     MODULE_BOOT_PRIORITY_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EStartupType
+// --------------------------------------------------------------------------------------------------------------------
+#define STARTUP_TYPE_MACROS \
+    ENUM_OR_STRING(STARTUP_COLD_BOOT),  \
+    ENUM_OR_STRING(STARTUP_WARM_BOOT),  \
+    ENUM_OR_STRING(STARTUP_RESUME),     \
+    ENUM_OR_STRING(STARTUP_BUTT)
+
+enum EStartupType
+{
+    STARTUP_TYPE_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EPreStandbyAck
+// --------------------------------------------------------------------------------------------------------------------
+#define PRE_STANDBY_ACK_MACROS \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_ALLOW),  \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_REFUSE), \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_DELAY),  \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_BUTT)
+
+enum EPreStandbyAck
+{
+    PRE_STANDBY_ACK_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EStandbySourceType
+// --------------------------------------------------------------------------------------------------------------------
+#define STANDBY_REASON_TYPE_MACROS \
+    ENUM_OR_STRING(STANDBY_REASON_USER), \
+    ENUM_OR_STRING(STANDBY_REASON_BUTT)
+
+enum EStandbyReasonType
+{
+    STANDBY_REASON_TYPE_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EWakeupSourceType
+// --------------------------------------------------------------------------------------------------------------------
+#define WAKEUP_SOURCE_TYPE_MACROS \
+    ENUM_OR_STRING(WAKEUP_SOURCE_USER), \
+    ENUM_OR_STRING(WAKEUP_SOURCE_RTC),  \
+    ENUM_OR_STRING(WAKEUP_SOURCE_BUTT)
+
+enum EWakeupSourceType
+{
+    WAKEUP_SOURCE_TYPE_MACROS
 };
 
 //---------------------------------------------------------------------------------------------------------------------

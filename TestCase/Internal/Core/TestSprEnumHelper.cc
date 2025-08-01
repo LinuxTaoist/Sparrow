@@ -27,84 +27,123 @@ using namespace InternalDefs;
 // --------------------------------------------------------------------------------------------------------------------
 // - Test enums of CommonErrorCodes.h
 // --------------------------------------------------------------------------------------------------------------------
-TEST(Core_SprEnumHelper, GetSprErrorLevelDescription) {
-    EXPECT_EQ(GetSprErrorLevelDescription(ERR_EVENT_LEVEL_UNKNOWN), "ERR_EVENT_LEVEL_UNKNOWN");
-    EXPECT_EQ(GetSprErrorLevelDescription(ERR_EVENT_LEVEL_CRITICAL), "ERR_EVENT_LEVEL_CRITICAL");
-    EXPECT_EQ(GetSprErrorLevelDescription(ERR_EVENT_LEVEL_ERROR), "ERR_EVENT_LEVEL_ERROR");
-    EXPECT_EQ(GetSprErrorLevelDescription(ERR_EVENT_LEVEL_WARNNING), "ERR_EVENT_LEVEL_WARNNING");
-    EXPECT_EQ(GetSprErrorLevelDescription(ERR_EVENT_LEVEL_INFO), "ERR_EVENT_LEVEL_INFO");
-    EXPECT_EQ(GetSprErrorLevelDescription(ERR_EVENT_LEVEL_BUTT), "ERR_EVENT_LEVEL_BUTT");
-    EXPECT_EQ(GetSprErrorLevelDescription(ERR_EVENT_LEVEL_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprErrorLevelText) {
+    EXPECT_EQ(GetSprErrorLevelText(ERR_EVENT_LEVEL_UNKNOWN), "ERR_EVENT_LEVEL_UNKNOWN");
+    EXPECT_EQ(GetSprErrorLevelText(ERR_EVENT_LEVEL_CRITICAL), "ERR_EVENT_LEVEL_CRITICAL");
+    EXPECT_EQ(GetSprErrorLevelText(ERR_EVENT_LEVEL_ERROR), "ERR_EVENT_LEVEL_ERROR");
+    EXPECT_EQ(GetSprErrorLevelText(ERR_EVENT_LEVEL_WARNNING), "ERR_EVENT_LEVEL_WARNNING");
+    EXPECT_EQ(GetSprErrorLevelText(ERR_EVENT_LEVEL_INFO), "ERR_EVENT_LEVEL_INFO");
+    EXPECT_EQ(GetSprErrorLevelText(ERR_EVENT_LEVEL_BUTT), "ERR_EVENT_LEVEL_BUTT");
+    EXPECT_EQ(GetSprErrorLevelText(ERR_EVENT_LEVEL_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprErrorDescription) {
-    EXPECT_EQ(GetSprErrorDescription(ERR_GENERAL_SUCCESS), "General success");
-    EXPECT_EQ(GetSprErrorDescription(ERR_SHM_GET_SIZE_FAILED), "Failed to get shared memory size");
-    EXPECT_EQ(GetSprErrorDescription(ERR_DEBUG_UNKNOW_ERROR), "Debug unknown error");
-    EXPECT_EQ(GetSprErrorDescription(ERR_CODE_BUTT), "Unknown error code");
+TEST(Core_SprEnumHelper, GetSprErrorText) {
+    EXPECT_EQ(GetSprErrorText(ERR_GENERAL_SUCCESS), "General success");
+    EXPECT_EQ(GetSprErrorText(ERR_SHM_GET_SIZE_FAILED), "Failed to get shared memory size");
+    EXPECT_EQ(GetSprErrorText(ERR_DEBUG_UNKNOW_ERROR), "Debug unknown error");
+    EXPECT_EQ(GetSprErrorText(ERR_CODE_BUTT), "Unknown error code");
 }
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Test enums of CoreTypeDefs.h
 // --------------------------------------------------------------------------------------------------------------------
-TEST(Core_SprEnumHelper, GetSprProxTypeDescription) {
-    EXPECT_EQ(GetSprProxTypeDescription(MEDIATOR_PROXY_MQUEUE), "MEDIATOR_PROXY_MQUEUE");
-    EXPECT_EQ(GetSprProxTypeDescription(IPC_TYPE_BUTT), "IPC_TYPE_BUTT");
-    EXPECT_EQ(GetSprProxTypeDescription(IPC_TYPE_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprProxTypeText) {
+    EXPECT_EQ(GetSprProxTypeText(MEDIATOR_PROXY_MQUEUE), "MEDIATOR_PROXY_MQUEUE");
+    EXPECT_EQ(GetSprProxTypeText(IPC_TYPE_BUTT), "IPC_TYPE_BUTT");
+    EXPECT_EQ(GetSprProxTypeText(-1), "UNDEFINED");
+    EXPECT_EQ(GetSprProxTypeText(IPC_TYPE_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprModuleIDDescription) {
-    EXPECT_EQ(GetSprModuleIDDescription(MODULE_NONE), "MODULE_NONE");
-    EXPECT_EQ(GetSprModuleIDDescription(MODULE_GENERAL), "MODULE_GENERAL");
-    EXPECT_EQ(GetSprModuleIDDescription(MODULE_MAX), "MODULE_MAX");
-    EXPECT_EQ(GetSprModuleIDDescription(MODULE_MAX + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprModuleIDText) {
+    EXPECT_EQ(GetSprModuleIDText(MODULE_NONE), "MODULE_NONE");
+    EXPECT_EQ(GetSprModuleIDText(MODULE_GENERAL), "MODULE_GENERAL");
+    EXPECT_EQ(GetSprModuleIDText(MODULE_MAX), "MODULE_MAX");
+    EXPECT_EQ(GetSprModuleIDText(-1), "UNDEFINED");
+    EXPECT_EQ(GetSprModuleIDText(MODULE_MAX + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprProxyBinderCmdDescription) {
-    EXPECT_EQ(GetSprProxyBinderCmdDescription(PROXY_CMD_GET_ALL_MQ_ATTRS), "PROXY_CMD_GET_ALL_MQ_ATTRS");
-    EXPECT_EQ(GetSprProxyBinderCmdDescription(PROXY_CMD_BUTT), "PROXY_CMD_BUTT");
-    EXPECT_EQ(GetSprProxyBinderCmdDescription(PROXY_CMD_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprProxyBinderCmdText) {
+    EXPECT_EQ(GetSprProxyBinderCmdText(PROXY_CMD_GET_ALL_MQ_ATTRS), "PROXY_CMD_GET_ALL_MQ_ATTRS");
+    EXPECT_EQ(GetSprProxyBinderCmdText(PROXY_CMD_BUTT), "PROXY_CMD_BUTT");
+    EXPECT_EQ(GetSprProxyBinderCmdText(PROXY_CMD_GET_ALL_MQ_ATTRS - 10), "UNDEFINED");
+    EXPECT_EQ(GetSprProxyBinderCmdText(PROXY_CMD_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprPropertyBinderCmdDescription) {
-    EXPECT_EQ(GetSprPropertyBinderCmdDescription(PROPERTY_CMD_SET_PROPERTY), "PROPERTY_CMD_SET_PROPERTY");
-    EXPECT_EQ(GetSprPropertyBinderCmdDescription(PROPERTY_CMD_BUTT), "PROPERTY_CMD_BUTT");
-    EXPECT_EQ(GetSprPropertyBinderCmdDescription(PROPERTY_CMD_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprPropertyBinderCmdText) {
+    EXPECT_EQ(GetSprPropertyBinderCmdText(PROPERTY_CMD_SET_PROPERTY), "PROPERTY_CMD_SET_PROPERTY");
+    EXPECT_EQ(GetSprPropertyBinderCmdText(PROPERTY_CMD_BUTT), "PROPERTY_CMD_BUTT");
+    EXPECT_EQ(GetSprPropertyBinderCmdText(PROPERTY_CMD_SET_PROPERTY - 10), "UNDEFINED");
+    EXPECT_EQ(GetSprPropertyBinderCmdText(PROPERTY_CMD_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprPowerMBinderCmdDescription) {
-    EXPECT_EQ(GetSprPowerMBinderCmdDescription(POWERM_CMD_POWER_ON), "POWERM_CMD_POWER_ON");
-    EXPECT_EQ(GetSprPowerMBinderCmdDescription(POWERM_CMD_BUTT), "POWERM_CMD_BUTT");
-    EXPECT_EQ(GetSprPowerMBinderCmdDescription(POWERM_CMD_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprPowerMBinderCmdText) {
+    EXPECT_EQ(GetSprPowerMBinderCmdText(POWERM_CMD_POWER_ON), "POWERM_CMD_POWER_ON");
+    EXPECT_EQ(GetSprPowerMBinderCmdText(POWERM_CMD_BUTT), "POWERM_CMD_BUTT");
+    EXPECT_EQ(GetSprPowerMBinderCmdText(POWERM_CMD_POWER_ON - 10), "UNDEFINED");
+    EXPECT_EQ(GetSprPowerMBinderCmdText(POWERM_CMD_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprDebugMBinderCmdDescription) {
-    EXPECT_EQ(GetSprDebugMBinderCmdDescription(DEBUG_CMD_ENABLE_REMOTE_PORT), "DEBUG_CMD_ENABLE_REMOTE_PORT");
-    EXPECT_EQ(GetSprDebugMBinderCmdDescription(DEBUG_MSG_BUTT), "DEBUG_MSG_BUTT");
-    EXPECT_EQ(GetSprDebugMBinderCmdDescription(DEBUG_MSG_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprDebugMBinderCmdText) {
+    EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_CMD_ENABLE_REMOTE_PORT), "DEBUG_CMD_ENABLE_REMOTE_PORT");
+    EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_MSG_BUTT), "DEBUG_MSG_BUTT");
+    EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_CMD_ENABLE_REMOTE_PORT - 10), "UNDEFINED");
+    EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_MSG_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprOneNetBinderCmdDescription) {
-    EXPECT_EQ(GetSprOneNetBinderCmdDescription(ONENET_CMD_ACTIVE_DEVICE), "ONENET_CMD_ACTIVE_DEVICE");
-    EXPECT_EQ(GetSprOneNetBinderCmdDescription(ONENET_CMD_BUTT), "ONENET_CMD_BUTT");
-    EXPECT_EQ(GetSprOneNetBinderCmdDescription(ONENET_CMD_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprOneNetBinderCmdText) {
+    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_ACTIVE_DEVICE), "ONENET_CMD_ACTIVE_DEVICE");
+    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_BUTT), "ONENET_CMD_BUTT");
+    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_ACTIVE_DEVICE - 10), "UNDEFINED");
+    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprGeneralBinderCmdDescription) {
-    EXPECT_EQ(GetSprGeneralBinderCmdDescription(GENERAL_CMD_EXE_EXIT), "GENERAL_CMD_EXE_EXIT");
-    EXPECT_EQ(GetSprGeneralBinderCmdDescription(GENERAL_CMD_BUTT), "GENERAL_CMD_BUTT");
-    EXPECT_EQ(GetSprGeneralBinderCmdDescription(GENERAL_CMD_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprGeneralBinderCmdText) {
+    EXPECT_EQ(GetSprGeneralBinderCmdText(GENERAL_CMD_EXE_EXIT), "GENERAL_CMD_EXE_EXIT");
+    EXPECT_EQ(GetSprGeneralBinderCmdText(GENERAL_CMD_BUTT), "GENERAL_CMD_BUTT");
+    EXPECT_EQ(GetSprGeneralBinderCmdText(GENERAL_CMD_EXE_EXIT - 20), "UNDEFINED");
+    EXPECT_EQ(GetSprGeneralBinderCmdText(GENERAL_CMD_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprModuleBootPriorityDescription) {
-    EXPECT_EQ(GetSprModuleBootPriorityDescription(BOOT_PRIORITY_HIGHEST), "BOOT_PRIORITY_HIGHEST");
-    EXPECT_EQ(GetSprModuleBootPriorityDescription(BOOT_PRIORITY_LOWEST), "BOOT_PRIORITY_LOWEST");
-    EXPECT_EQ(GetSprModuleBootPriorityDescription(BOOT_PRIORITY_LOWEST + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetSprModuleBootPriorityText) {
+    EXPECT_EQ(GetSprModuleBootPriorityText(BOOT_PRIORITY_HIGHEST), "BOOT_PRIORITY_HIGHEST");
+    EXPECT_EQ(GetSprModuleBootPriorityText(BOOT_PRIORITY_LOWEST), "BOOT_PRIORITY_LOWEST");
+    EXPECT_EQ(GetSprModuleBootPriorityText(BOOT_PRIORITY_HIGHEST - 20), "UNDEFINED");
+    EXPECT_EQ(GetSprModuleBootPriorityText(BOOT_PRIORITY_LOWEST + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprTimeSourceTypeDescription) {
-    EXPECT_EQ(GetSprTimeSourceTypeDescription(TIME_SOURCE_TYPE_NTP), "TIME_SOURCE_TYPE_NTP");
-    EXPECT_EQ(GetSprTimeSourceTypeDescription(TIME_SOURCE_TYPE_BUTT), "TIME_SOURCE_TYPE_BUTT");
-    EXPECT_EQ(GetSprTimeSourceTypeDescription(TIME_SOURCE_TYPE_BUTT + 100), "UNDEFINED");
+TEST(Core_SprEnumHelper, GetStartupTypeText) {
+    EXPECT_EQ(GetStartupTypeText(STARTUP_COLD_BOOT), "STARTUP_COLD_BOOT");
+    EXPECT_EQ(GetStartupTypeText(STARTUP_WARM_BOOT), "STARTUP_WARM_BOOT");
+    EXPECT_EQ(GetStartupTypeText(STARTUP_BUTT), "STARTUP_BUTT");
+    EXPECT_EQ(GetStartupTypeText(STARTUP_COLD_BOOT - 20), "UNDEFINED");
+    EXPECT_EQ(GetStartupTypeText(STARTUP_BUTT + 100), "UNDEFINED");
 }
 
+TEST(Core_SprEnumHelper, GetSprPreStandbyAckText) {
+    EXPECT_EQ(GetSprPreStandbyAckText(PRE_STANDBY_ACK_ALLOW), "PRE_STANDBY_ACK_ALLOW");
+    EXPECT_EQ(GetSprPreStandbyAckText(PRE_STANDBY_ACK_BUTT), "PRE_STANDBY_ACK_BUTT");
+    EXPECT_EQ(GetSprPreStandbyAckText(PRE_STANDBY_ACK_ALLOW - 20), "UNDEFINED");
+    EXPECT_EQ(GetSprPreStandbyAckText(PRE_STANDBY_ACK_BUTT + 100), "UNDEFINED");
+}
+
+TEST(Core_SprEnumHelper, GetStandbyReasonTypeText) {
+    EXPECT_EQ(GetStandbyReasonTypeText(STANDBY_REASON_USER), "STANDBY_REASON_USER");
+    EXPECT_EQ(GetStandbyReasonTypeText(STANDBY_REASON_BUTT), "STANDBY_REASON_BUTT");
+    EXPECT_EQ(GetStandbyReasonTypeText(STANDBY_REASON_USER - 20), "UNDEFINED");
+    EXPECT_EQ(GetStandbyReasonTypeText(STANDBY_REASON_BUTT + 100), "UNDEFINED");
+}
+
+TEST(Core_SprEnumHelper, GetWakeupSourceTypeText) {
+    EXPECT_EQ(GetWakeupSourceTypeText(WAKEUP_SOURCE_USER), "WAKEUP_SOURCE_USER");
+    EXPECT_EQ(GetWakeupSourceTypeText(WAKEUP_SOURCE_RTC), "WAKEUP_SOURCE_RTC");
+    EXPECT_EQ(GetWakeupSourceTypeText(WAKEUP_SOURCE_BUTT), "WAKEUP_SOURCE_BUTT");
+    EXPECT_EQ(GetWakeupSourceTypeText(WAKEUP_SOURCE_USER - 20), "UNDEFINED");
+    EXPECT_EQ(GetWakeupSourceTypeText(WAKEUP_SOURCE_BUTT + 100), "UNDEFINED");
+}
+
+TEST(Core_SprEnumHelper, GetSprTimeSourceTypeText) {
+    EXPECT_EQ(GetSprTimeSourceTypeText(TIME_SOURCE_TYPE_NTP), "TIME_SOURCE_TYPE_NTP");
+    EXPECT_EQ(GetSprTimeSourceTypeText(TIME_SOURCE_TYPE_BUTT), "TIME_SOURCE_TYPE_BUTT");
+    EXPECT_EQ(GetSprTimeSourceTypeText(TIME_SOURCE_TYPE_NTP - 20), "UNDEFINED");
+    EXPECT_EQ(GetSprTimeSourceTypeText(TIME_SOURCE_TYPE_BUTT + 100), "UNDEFINED");
+}

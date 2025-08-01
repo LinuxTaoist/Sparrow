@@ -154,9 +154,12 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
     char buffer[LOG_BUFFER_SIZE_LIMIT] = {0};
     int32_t result = vsnprintf(buffer, sizeof(buffer), format, args);
     if (result < 0 || result >= (int32_t)sizeof(buffer)) {
+        char prefix[11] = {0};
+        memcpy(prefix, buffer, 10);
         memset(buffer, 0, sizeof(buffer));
-        snprintf(buffer, sizeof(buffer), "[ERROR] Invalid log length! Limit: %zu bytes, Actual: %d bytes.",
-            sizeof(buffer), result);
+        snprintf(buffer, sizeof(buffer),
+            "%s...... [TRUNCATED] LEN:%d > LIMIT:%zu [LOG CONTENT TRUNCATED]",
+            prefix, result, sizeof(buffer));
         result = -1;
     }
 
