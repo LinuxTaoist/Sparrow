@@ -448,7 +448,7 @@ void PowerManager::MsgRespondStandbyPollTimerEvent(const SprMsg& msg)
     // When dump mCurNotifyStandbyEvent, the value is the same as the event to be sent.
     mCurNotifyStandbyEvent++;
     NotifyEvent(mCurNotifyStandbyEvent);
-    SPR_LOGD("Finish send standby event: %s\n", GetSigName(mCurNotifyStandbyEvent));
+    // SPR_LOGD("Finish send standby event: %s\n", GetSigName(mCurNotifyStandbyEvent));
 }
 
 /**
