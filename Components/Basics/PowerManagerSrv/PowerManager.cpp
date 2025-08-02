@@ -166,6 +166,8 @@ PowerManager::PowerManager(ModuleIDType id, const std::string& name)
     mCurNotifyStartupEvent = SIG_ID_ANY;
     mCurNotifyStandbyEvent = SIG_ID_ANY;
     mStartupType = STARTUP_BUTT;
+    mWakeupSourceType = WAKEUP_SOURCE_BUTT;
+    mStandbyReason = STANDBY_REASON_BUTT;
     SetLev1State(LEV1_POWER_INIT);
     SetLev2State(LEV2_POWER_ANY);
 }
@@ -239,7 +241,7 @@ void PowerManager::EnterSleep()
 void PowerManager::NotifyAllWithStartup()
 {
     // Notify startup event with priority
-    mCurNotifyStartupEvent = SIG_ID_POWER_STARTUP_HIGHEST;
+    mCurNotifyStartupEvent = SIG_ID_POWER_STARTUP_HIGHEST - 1;
     RegisterTimer(0, STANDBY_POLL_EVENT_400MS, SIG_ID_POWER_STARTUP_POLL_TIMER_EVENT, 0);
 }
 
@@ -305,7 +307,10 @@ void PowerManager::MsgRespondObserverRegister(const SprMsg& msg)
 void PowerManager::MsgRespondPowerOn(const SprMsg& msg)
 {
     mStartupType = (EStartupType)msg.GetI32Value();
-    SPR_LOGD("Receive power on, startup type: 0x%x (%s)!\n", mStartupType, GetStartupTypeText(mStartupType).c_str());
+    mWakeupSourceType = (EWakeupSourceType)msg.GetU32Value();
+    SPR_LOGD("Receive power on, type = 0x%x (%s), source = 0x%x (%s)!\n",
+            mStartupType, GetStartupTypeText(mStartupType).c_str(),
+            mWakeupSourceType, GetWakeupSourceTypeText(mWakeupSourceType).c_str());
 
     if (mStartupType == STARTUP_COLD_BOOT) {
         DoBootBusiness();
@@ -324,14 +329,21 @@ void PowerManager::MsgRespondPowerOn(const SprMsg& msg)
  */
 void PowerManager::MsgRespondStartupPollTimerEvent(const SprMsg& msg)
 {
+    // Why mCurNotifyStartupEvent++ first, then send event:
+    // When dump mCurNotifyStartupEvent, the value is the same as the event to be sent.
+    mCurNotifyStartupEvent++;
+
+    // Finish all priority startup events
     if (mCurNotifyStartupEvent > SIG_ID_POWER_STARTUP_LOWEST) {
         SPR_LOGD("Send all startup events finished!\n");
         UnregisterTimer(SIG_ID_POWER_STARTUP_POLL_TIMER_EVENT);
         return;
     }
 
-    NotifyEvent(mCurNotifyStartupEvent);
-    mCurNotifyStartupEvent++;
+    SPR_LOGD("Send startup event: %s\n", GetSigName(mCurNotifyStartupEvent));
+    SprMsg msgEvent(mCurNotifyStartupEvent);
+    msgEvent.SetI32Value(mStartupType);
+    NotifyAllObserver(msgEvent);
 }
 
 /**
@@ -352,9 +364,11 @@ void PowerManager::MsgRespondPowerOff(const SprMsg& msg)
     // 6. If not received refuse and 6s timeout, unregister timer, send SIG_ID_POWER_STANDBY to
     //       all modules with priority
     // 7. After enter standby in n sec timeout, send SIG_ID_POWER_SLEEP to all modules
-    SPR_LOGD("Handle power off with %s!\n", GetLev1String(mCurLev1State).c_str());
-    NotifyEvent(SIG_ID_POWER_PRE_STANDBY_REQUEST);
+    mStandbyReason = (EStandbyReasonType)msg.GetI32Value();
+    SPR_LOGD("Receive power off, reason = 0x%x (%s)!\n",
+              mStandbyReason, GetStandbyReasonTypeText(mStandbyReason).c_str());
 
+    NotifyEvent(SIG_ID_POWER_PRE_STANDBY_REQUEST);
     mPreStandbyResponseTimer = true;
     mStandbyTimerCnt = 0;
     RegisterTimer(0, STANDBY_RESPONSE_TIMEOUT, SIG_ID_POWER_PRE_STANDBY_RESPONSE_TIMEOUT, 0);
@@ -437,18 +451,20 @@ void PowerManager::MsgRespondPreStandbyResponseTimeout(const SprMsg& msg)
  */
 void PowerManager::MsgRespondStandbyPollTimerEvent(const SprMsg& msg)
 {
-    // finish all priority standby events
-    if (mCurNotifyStandbyEvent >= SIG_ID_POWER_STANDBY_LOWEST) {
+    // Why mCurNotifyStandbyEvent++ first, then send event:
+    // When dump mCurNotifyStandbyEvent, the value is the same as the event to be sent.
+    mCurNotifyStandbyEvent++;
+
+    // Finish all priority standby events
+    if (mCurNotifyStandbyEvent > SIG_ID_POWER_STANDBY_LOWEST) {
         SPR_LOGD("Enter standby after send all standby events!\n");
         EnterStandby();
         return;
     }
 
-    // Why mCurNotifyStandbyEvent++ first, then send event:
-    // When dump mCurNotifyStandbyEvent, the value is the same as the event to be sent.
-    mCurNotifyStandbyEvent++;
-    NotifyEvent(mCurNotifyStandbyEvent);
-    // SPR_LOGD("Finish send standby event: %s\n", GetSigName(mCurNotifyStandbyEvent));
+    SPR_LOGD("Send standby event: %s\n", GetSigName(mCurNotifyStandbyEvent));
+    SprMsg msgEvent(mCurNotifyStandbyEvent);
+    NotifyAllObserver(msgEvent);
 }
 
 /**
@@ -510,10 +526,10 @@ void PowerManager::RegisterDebugFuncs()
         return;
     }
 
-    p->RegisterCmd(mModuleName, "DumpCurState",     "Dump current state",   std::bind(&PowerManager::DebugDumpCurState,  this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "PowerOn",          "Send power on",        std::bind(&PowerManager::DebugSendPowerOn,   this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "DumpObservers",    "Dump observers",       std::bind(&PowerManager::DebugDumpObservers, this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "PowerOff",         "Send power off",       std::bind(&PowerManager::DebugSendPowerOff,  this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "DumpCurState",     "Dump current state",   std::bind(&PowerManager::DebugDumpCurState,  this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "DumpObservers",    "Dump observers",       std::bind(&PowerManager::DebugDumpObservers, this, std::placeholders::_1));
 }
 void PowerManager::UnregisterDebugFuncs()
 {
@@ -527,9 +543,27 @@ void PowerManager::UnregisterDebugFuncs()
     p->UnregisterCmd(mModuleName);
 }
 
+void PowerManager::DebugSendPowerOn(const std::vector<std::string>& args)
+{
+    SprMsg msg(SIG_ID_POWER_ON);
+    msg.SetI32Value(STARTUP_WARM_BOOT);
+    msg.SetU32Value(WAKEUP_SOURCE_USER);
+    SendMsg(SIG_ID_POWER_ON);
+}
+
+void PowerManager::DebugSendPowerOff(const std::vector<std::string>& args)
+{
+    SprMsg msg(SIG_ID_POWER_OFF);
+    msg.SetI32Value(STANDBY_REASON_USER);
+    SendMsg(msg);
+}
+
 void PowerManager::DebugDumpCurState(const std::vector<std::string>& args)
 {
-    SPR_LOGD("Lev1State: %s\n", GetLev1String(mCurLev1State).c_str());
+    SPR_LOGD("mCurLev1State    : %s\n", GetLev1String(mCurLev1State).c_str());
+    SPR_LOGD("mStartupType     : %s\n", GetStartupTypeText(mStartupType).c_str());
+    SPR_LOGD("mWakeupSourceType: %s\n", GetWakeupSourceTypeText(mWakeupSourceType).c_str());
+    SPR_LOGD("mStandbyReason   : %s\n", GetStandbyReasonTypeText(mStandbyReason).c_str());
 }
 
 void PowerManager::DebugDumpObservers(const std::vector<std::string>& args)
@@ -547,14 +581,4 @@ void PowerManager::DebugDumpObservers(const std::vector<std::string>& args)
             GetSprPreStandbyAckText(detail.preStandbyAck).c_str(),
             GetSprModuleIDText(id).c_str());
     }
-}
-
-void PowerManager::DebugSendPowerOn(const std::vector<std::string>& args)
-{
-    SendMsg(SIG_ID_POWER_ON);
-}
-
-void PowerManager::DebugSendPowerOff(const std::vector<std::string>& args)
-{
-    SendMsg(SIG_ID_POWER_OFF);
 }

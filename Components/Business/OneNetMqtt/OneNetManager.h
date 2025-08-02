@@ -120,6 +120,7 @@ private:
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
     /* 消息响应函数 */
+    void MsgRespondStartupLow(const SprMsg& msg);
     void MsgRespondPreStandbyRequest(const SprMsg& msg);
     void MsgRespondStandbyHigh(const SprMsg& msg);
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);

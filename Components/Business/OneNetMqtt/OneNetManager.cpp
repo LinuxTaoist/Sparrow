@@ -52,6 +52,19 @@ vector <StateTransition <   EOneNetMgrLev1State,
 OneNetManager::mStateTable =
 {
     // =============================================================
+    // All States for SIG_ID_POWER_STARTUP_LOW
+    // ============================================================
+    { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
+      SIG_ID_POWER_STARTUP_LOW,
+      &OneNetManager::MsgRespondStartupLow
+    },
+
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_POWER_STARTUP_LOW,
+      &OneNetManager::MsgRespondUnexpectedState
+    },
+
+    // =============================================================
     // All States for SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
     // ============================================================
     { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
@@ -470,6 +483,17 @@ void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const 
     SprMsg copyMsg(msg);
     it->second->SendMsg(copyMsg);
     SPR_LOGD("Notify module device: %s, msg: %s\n", devModule.c_str(), GetSigName(msg.GetMsgId()));
+}
+
+/**
+ * @brief Process SIG_ID_POWER_STARTUP_LOW
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetManager::MsgRespondStartupLow(const SprMsg& msg)
+{
+    SPR_LOGD("Receive startup low!\n");
 }
 
 /**

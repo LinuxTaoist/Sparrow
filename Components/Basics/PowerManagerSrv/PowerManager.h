@@ -104,10 +104,10 @@ private:
     void UnregisterDebugFuncs();
 
     /* 调试函数 */
-    void DebugDumpCurState(const std::vector<std::string>& args);
-    void DebugDumpObservers(const std::vector<std::string>& args);
     void DebugSendPowerOn(const std::vector<std::string>& args);
     void DebugSendPowerOff(const std::vector<std::string>& args);
+    void DebugDumpCurState(const std::vector<std::string>& args);
+    void DebugDumpObservers(const std::vector<std::string>& args);
 
 private:
     using StateTransitionType = InternalDefs::StateTransition<EPowerLev1State,
@@ -122,6 +122,8 @@ private:
     uint32_t mCurNotifyStartupEvent;
     uint32_t mCurNotifyStandbyEvent;
     InternalDefs::EStartupType mStartupType;
+    InternalDefs::EWakeupSourceType mWakeupSourceType;
+    InternalDefs::EStandbyReasonType mStandbyReason;
     EPowerLev1State mCurLev1State;
     EPowerLev2State mCurLev2State;
     std::map<uint32_t, StandbyDetail> mStandbyObservers;  // key: module id
