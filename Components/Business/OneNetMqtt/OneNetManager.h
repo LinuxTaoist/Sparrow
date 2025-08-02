@@ -90,6 +90,7 @@ public:
 
 private:
     int32_t Init() override;
+    int32_t RegisterStandbyObservers();
 
     /* 初始化OneNet设备 */
     int32_t InitOneNetDevices(const std::vector<OneNetDevInfo>& devices);
@@ -119,6 +120,8 @@ private:
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
     /* 消息响应函数 */
+    void MsgRespondPreStandbyRequest(const SprMsg& msg);
+    void MsgRespondStandbyHigh(const SprMsg& msg);
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
     void MsgRespondDeactiveDevice(const SprMsg& msg);

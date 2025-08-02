@@ -54,6 +54,22 @@ OneNetManager::mStateTable =
     // =============================================================
     // All States for SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
     // ============================================================
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_POWER_PRE_STANDBY_REQUEST,
+      &OneNetManager::MsgRespondPreStandbyRequest
+    },
+
+    // =============================================================
+    // All States for SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
+    // ============================================================
+    { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
+      SIG_ID_POWER_STANDBY_HIGH,
+      &OneNetManager::MsgRespondStandbyHigh
+    },
+
+    // =============================================================
+    // All States for SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
+    // ============================================================
     { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
       SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT,
       &OneNetManager::MsgRespondActiveDeviceConnect
@@ -248,7 +264,7 @@ OneNetManager::~OneNetManager()
 
 int32_t OneNetManager::Init()
 {
-    SPR_LOGD("OneNetManager Init\n");
+    SPR_LOGD("Init\n");
     std::vector<OneNetDevInfo> devices;
     int32_t ret = LoadOneNetDevicesCfgFile(ONENET_DEVICES_CFG_PATH, devices);
     if (ret != 0) {
@@ -257,7 +273,17 @@ int32_t OneNetManager::Init()
     }
 
     RegisterDebugFuncs();
+    RegisterStandbyObservers();
     InitOneNetDevices(devices);
+    return 0;
+}
+
+int32_t OneNetManager::RegisterStandbyObservers()
+{
+    SprMsg msg(SIG_ID_POWER_OBSERVER_REGISTER);
+    msg.SetI32Value(BOOT_PRIORITY_LOW);
+    NotifyObserver(MODULE_POWERM, msg);
+    SPR_LOGD("Register standby observer, priority = %d\n", BOOT_PRIORITY_LOW);
     return 0;
 }
 
@@ -444,6 +470,31 @@ void OneNetManager::NotifyMsgToOneNetDevice(const std::string& devModule, const 
     SprMsg copyMsg(msg);
     it->second->SendMsg(copyMsg);
     SPR_LOGD("Notify module device: %s, msg: %s\n", devModule.c_str(), GetSigName(msg.GetMsgId()));
+}
+
+/**
+ * @brief Process SIG_ID_POWER_STANDBY_REQUEST
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetManager::MsgRespondPreStandbyRequest(const SprMsg& msg)
+{
+    SprMsg rspMsg(SIG_ID_POWER_PRE_STANDBY_RESPONSE);
+    rspMsg.SetI32Value((int32_t)PRE_STANDBY_ACK_ALLOW);
+    NotifyObserver(MODULE_POWERM, rspMsg);
+    SPR_LOGD("Allow to standby!\n");
+}
+
+/**
+ * @brief Process SIG_ID_POWER_STANDBY_HIGH
+ *
+ * @param[in] msg
+ * @return none
+ */
+void OneNetManager::MsgRespondStandbyHigh(const SprMsg& msg)
+{
+    SPR_LOGD("Receive standby high!\n");
 }
 
 /**
@@ -654,8 +705,8 @@ void OneNetManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
 
 int32_t OneNetManager::ProcessMsg(const SprMsg& msg)
 {
-    SPR_LOGD("Recv msg: %s on <%s : %s>\n", GetSigName(msg.GetMsgId()),
-              GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
+    // SPR_LOGD("Recv msg: %s on <%s : %s>\n", GetSigName(msg.GetMsgId()),
+    //           GetLev1StateString(mCurLev1State), GetLev2StateString(mCurLev2State));
 
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
         [this, &msg](const StateTransitionType& entry) {
