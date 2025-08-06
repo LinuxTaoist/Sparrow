@@ -22,6 +22,7 @@
 #include "SprDebugNode.h"
 #include "PowerManager.h"
 #include "SprEnumHelper.h"
+#include "CommonErrorCodes.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -236,6 +237,7 @@ void PowerManager::EnterSleep()
 {
     SPR_LOGD("Enter sleep!\n");
     SetLev1State(LEV1_POWER_SLEEP);
+    NotifyAllWithSleep();
 }
 
 void PowerManager::NotifyAllWithStartup()
@@ -382,40 +384,56 @@ void PowerManager::MsgRespondPowerOff(const SprMsg& msg)
  */
 void PowerManager::MsgRespondPreStandbyResponse(const SprMsg& msg)
 {
-    uint32_t moduleID = msg.GetFrom();
-    int32_t ack = msg.GetI32Value();
+    const uint32_t moduleID = msg.GetFrom();
+    const int32_t ack = msg.GetI32Value();
+    const string ackText = GetSprPreStandbyAckText(ack);
+    const string moduleIDText = GetSprModuleIDText(moduleID);
 
-    SPR_LOGD("Receive %s from %s!\n",
-        GetSprPreStandbyAckText(ack).c_str(),
-        GetSprModuleIDText(moduleID).c_str());
+    SPR_LOGD("Receive %s from %s!\n", ackText.c_str(), moduleIDText.c_str());
 
     auto observer = std::find_if(mStandbyObservers.begin(), mStandbyObservers.end(),
         [moduleID](const std::pair<const uint32_t, StandbyDetail>& obs) {
             return obs.first == moduleID;
-        });
+        }
+    );
 
-    if (observer == mStandbyObservers.end()){
-        SPR_LOGW("Ignore observer: %s\n",
-            GetSprModuleIDText(moduleID).c_str());
+    if (observer == mStandbyObservers.end()) {
+        SPR_LOGW("Ignore observer: %s\n", moduleIDText.c_str());
         return;
     }
 
-    observer->second.preStandbyAck = (EPreStandbyAck)ack;
-    if (ack == PRE_STANDBY_ACK_DELAY) {
-        SPR_LOGD("Delay standby!\n");
-        return;
+    observer->second.preStandbyAck = static_cast<EPreStandbyAck>(ack);
+
+    bool unregisterTimer = false;
+    switch (ack) {
+        case PRE_STANDBY_ACK_ALLOW:
+            SPR_LOGD("Allow standby from %s!\n", moduleIDText.c_str());
+            if (IsAllowStandbyWithAllObserver()) {
+                SPR_LOGD("All observers allow to standby!\n");
+                unregisterTimer = true;
+                NotifyAllWithStandby();
+            }
+            break;
+        case PRE_STANDBY_ACK_REFUSE:
+            SPR_LOGD("Refuse standby from %s!\n", moduleIDText.c_str());
+            unregisterTimer = true;
+            SendEventToMonitor(ERR_POWERM_REFUSE_STANDBY, "Refuse standby (from " + moduleIDText + ")");
+            break;
+        case PRE_STANDBY_ACK_DELAY:
+            SPR_LOGD("Delay standby from %s!\n", moduleIDText.c_str());
+            SendEventToMonitor(ERR_POWERM_DELAY_STANDBY, "Delay standby (from " + moduleIDText + ")");
+            break;
+        default:
+            SPR_LOGE("Invalid ack %d from %s!\n", ack, moduleIDText.c_str());
+            break;
     }
 
-    bool isAllow = IsAllowStandbyWithAllObserver();
-    if (isAllow) {
-        SPR_LOGD("all observers allow to standby!\n");
-        NotifyAllWithStandby();
-    }
-
-    // Unregister timer, When all modules are allowed to standby or
+    // Unregister timer, when all modules are allowed to standby or
     // some modules refuse standby
-    mPreStandbyResponseTimer = false;
-    UnregisterTimer(SIG_ID_POWER_PRE_STANDBY_RESPONSE_TIMEOUT);
+    if (unregisterTimer) {
+        mPreStandbyResponseTimer = false;
+        UnregisterTimer(SIG_ID_POWER_PRE_STANDBY_RESPONSE_TIMEOUT);
+    }
 }
 
 /**
