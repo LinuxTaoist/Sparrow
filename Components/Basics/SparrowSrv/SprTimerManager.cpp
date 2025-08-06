@@ -25,6 +25,7 @@
 #include <sys/timerfd.h>
 #include "SprLog.h"
 #include "SprMsg.h"
+#include "SprDebugNode.h"
 #include "GeneralUtils.h"
 #include "SprEnumHelper.h"
 #include "SprTimerManager.h"
@@ -46,6 +47,7 @@ SprTimerManager::SprTimerManager(ModuleIDType id, const std::string& name, share
 
 SprTimerManager::~SprTimerManager()
 {
+    UnregisterDebugFuncs();
 }
 
 SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id,
@@ -59,16 +61,17 @@ SprTimerManager* SprTimerManager::GetInstance(ModuleIDType id,
     return &instance;
 }
 
-int SprTimerManager::Init(void)
+int32_t SprTimerManager::Init(void)
 {
-    int ret = 0;
+    int32_t ret = 0;
     ret = InitSystemTimer();
     mEnable = (ret == 0) ? true : false;
 
+    RegisterDebugFuncs();
     return ret;
 }
 
-int SprTimerManager::ProcessMsg(const SprMsg& msg)
+int32_t SprTimerManager::ProcessMsg(const SprMsg& msg)
 {
     if (!mEnable) {
         SPR_LOGW("Disable status!\n");
@@ -107,14 +110,14 @@ int SprTimerManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-int SprTimerManager::PrintRealTime()
+int32_t SprTimerManager::PrintRealTime()
 {
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
 
     time_t seconds = currentTime.tv_sec;
     struct tm* localTime = localtime(&seconds);
-    int milliseconds = currentTime.tv_nsec / 1000000;
+    int32_t milliseconds = currentTime.tv_nsec / 1000000;
 
     char buffer[80];
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", localTime);
@@ -136,20 +139,20 @@ bool SprTimerManager::IsExistTimer(uint32_t moduleId, uint32_t msgId)
     return false;
 }
 
-int SprTimerManager::AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec)
+int32_t SprTimerManager::AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec)
 {
     SprTimer timer(moduleId, msgId, repeatTimes, delayInMilliSec, intervalInMilliSec);
     return AddTimer(timer);
 }
 
-int SprTimerManager::AddTimer(const SprTimer& timer)
+int32_t SprTimerManager::AddTimer(const SprTimer& timer)
 {
     // SPR_LOGD("AddTimer: [0x%x %dms %s]\n", timer.GetModuleId(), timer.GetIntervalInMilliSec(), GetSigName(timer.GetMsgId()));
     mTimers.insert(timer);
     return 0;
 }
 
-int SprTimerManager::DelTimer(const SprTimer& timer)
+int32_t SprTimerManager::DelTimer(const SprTimer& timer)
 {
     auto it = mTimers.find(timer);
     if (it != mTimers.end()) {
@@ -166,7 +169,7 @@ uint32_t SprTimerManager::NextExpireTimes()
     return 0;
 }
 
-int SprTimerManager::InitSystemTimer()
+int32_t SprTimerManager::InitSystemTimer()
 {
     // systemTimer already initialized in sprSystem.Init()
     if (mpSystemTimer == nullptr) {
@@ -305,7 +308,7 @@ void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)
     uint32_t msgId = mTimers.empty() ? SIG_ID_TIMER_STOP_SYSTEM_TIMER : SIG_ID_TIMER_START_SYSTEM_TIMER;
     SprMsg sysMsg(msgId);
     SendMsg(sysMsg);
-    // SPR_LOGD("Current total timers size = %d\n", (int)mTimers.size());
+    // SPR_LOGD("Current total timers size = %d\n", (int32_t)mTimers.size());
 }
 
 void SprTimerManager::MsgRespondClearTimersForExitComponent(const SprMsg &msg)
@@ -323,4 +326,41 @@ void SprTimerManager::MsgRespondClearTimersForExitComponent(const SprMsg &msg)
     for (const auto& timer : deleteTimers) {
         DelTimer(timer);
     }
+}
+
+void SprTimerManager::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(mModuleName, "DumpTimers",    "Dump all timers", std::bind(&SprTimerManager::DebugDumpTimers,  this, std::placeholders::_1));
+}
+
+void SprTimerManager::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Unregister %s all debug funcs\n", mModuleName.c_str());
+    p->UnregisterCmd(mModuleName);
+}
+
+void SprTimerManager::DebugDumpTimers(const std::vector<std::string>& args)
+{
+    SPR_LOGI("                           Show All Timers (%d)                                                \n", (int32_t)mTimers.size());
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOGI(" MODULE  INTERVAL(ms)  DIFTIME(ms)  RTIMES  RCOUNT  MSG \n");
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    for (auto it = mTimers.begin(); it != mTimers.end(); ++it) {
+        std::string moduleLabel = GetSprModuleIDText(it->GetModuleId());
+        SPR_LOGI(" %6d  %12d  %11d  %6d  %6d  %s", it->GetModuleId(), it->GetIntervalInMilliSec(),
+            it->GetExpired() - it->GetTick(), it->GetRepeatTimes(), it->GetRepeatCount(), GetSigName(it->GetMsgId()));
+    }
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
 }

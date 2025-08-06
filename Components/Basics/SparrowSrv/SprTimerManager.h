@@ -40,7 +40,7 @@ public:
      *
      * Will be called once to initialize the object instance
      */
-    int Init();
+    int32_t Init() override;
 
     /**
      * @brief Get the Instance object
@@ -74,7 +74,7 @@ private:
      *
      * Initialize the system timer
      */
-    int InitSystemTimer();
+    int32_t InitSystemTimer();
 
     /**
      * @brief  Process message from message queue received
@@ -89,7 +89,7 @@ private:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    int PrintRealTime();
+    int32_t PrintRealTime();
 
     // --------------------------------------------------------------------------------------------
     // - Module's timer book manager functions
@@ -106,9 +106,9 @@ private:
      * Add a custom timer to the timer container
      */
     bool IsExistTimer(uint32_t moduleId, uint32_t msgId);
-    int AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec);
-    int AddTimer(const SprTimer& timer);
-    int DelTimer(const SprTimer& timer);
+    int32_t AddTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, int32_t delayInMilliSec, int32_t intervalInMilliSec);
+    int32_t AddTimer(const SprTimer& timer);
+    int32_t DelTimer(const SprTimer& timer);
     uint32_t NextExpireTimes();
 
     // --------------------------------------------------------------------------------------------
@@ -120,6 +120,13 @@ private:
     void MsgRespondDelTimer(const SprMsg &msg);
     void MsgRespondSystemTimerNotify(const SprMsg &msg);
     void MsgRespondClearTimersForExitComponent(const SprMsg &msg);
+
+    // --------------------------------------------------------------------------------------------
+    // - Debug functions
+    // --------------------------------------------------------------------------------------------
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+    void DebugDumpTimers(const std::vector<std::string>& args);
 
 private:
     bool mEnable;                                       // Component init status
