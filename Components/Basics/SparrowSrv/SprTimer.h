@@ -43,12 +43,12 @@ public:
     void RepeatCount() const { mRepeatCount++; }
 
 private:
-    uint32_t mModuleId;
-    uint32_t mMsgId;
-    uint32_t mIntervalInMilliSec;
-    uint32_t mExpired;
-    uint32_t mRepeatTimes;
-    mutable uint32_t mRepeatCount;
+    uint32_t mModuleId;             // module id
+    uint32_t mMsgId;                // msg id
+    uint32_t mIntervalInMilliSec;   // interval in milliseconds
+    uint32_t mExpired;              // trigger time in milliseconds
+    uint32_t mRepeatTimes;          // limited repeat times, 0 means infinite
+    mutable uint32_t mRepeatCount;  // repeat count
 };
 
 #endif  // __SPR_TIMER_H__
