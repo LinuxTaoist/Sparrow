@@ -360,7 +360,7 @@ void SprTimerManager::DebugDumpTimers(const std::vector<std::string>& args)
     for (auto it = mTimers.begin(); it != mTimers.end(); ++it) {
         std::string moduleLabel = GetSprModuleIDText(it->GetModuleId());
         SPR_LOGI(" %6d  %12d  %11d  %6d  %6d  %s", it->GetModuleId(), it->GetIntervalInMilliSec(),
-            it->GetExpired() - it->GetTick(), it->GetRepeatTimes() % 10000, it->GetRepeatCount() % 10000, GetSigName(it->GetMsgId()));
+            it->GetExpired() - it->GetTick(), it->GetRepeatTimes() % 1000000, it->GetRepeatCount() % 1000000, GetSigName(it->GetMsgId()));
     }
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
 }
