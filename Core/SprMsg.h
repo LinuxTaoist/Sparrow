@@ -68,6 +68,8 @@ public:
     int32_t Encode(std::string& enDatas) const;
     void    SetSize(int32_t size) { mSize = size; }
     int32_t GetSize() const { return mSize; }
+    std::string DumpBrief();
+    std::string DumpDetails();
 
     void SetFrom(uint32_t from);
     void SetTo(uint32_t to);
@@ -182,6 +184,8 @@ private:
     void DecodeI64Vec(std::string& deDatas);
     void DecodeString(std::string& deDatas);
     void DecodeDatas(std::string& deDatas);
+
+    std::string DumpMemberString(ESprMsgType type, uint32_t limitLen) const;
 
 private:
     int32_t                 mSize;

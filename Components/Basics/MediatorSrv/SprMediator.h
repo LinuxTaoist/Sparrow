@@ -34,6 +34,7 @@
 struct SModuleInfo
 {
     bool monitored;
+    SprMsg lastMsg;
     std::shared_ptr<PMsgQueue> pModMQ;
 };
 
@@ -60,6 +61,14 @@ private:
     /* 消息响应函数 */
     int MsgRespondRegister(const SprMsg& msg);
     int MsgRespondUnregister(const SprMsg& msg);
+
+    /* 注册/注销所有调试函数 */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
+    /* 调试函数 */
+    void DebugDumpMQs(const std::vector<std::string>& args);
+    void DebugDumpMQWtihID(const std::vector<std::string>& args);
 
 private:
     std::shared_ptr<PMsgQueue> mpInternalMQ;

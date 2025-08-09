@@ -22,6 +22,8 @@
 
 #define LOG_TAG "SprMsg"
 
+#define DUMP_MEMBER_LENGTH_LIMIT 5
+
 SprMsg::SprMsg()
 {
     Init();
@@ -208,6 +210,56 @@ void SprMsg::Clear()
     mU64Vec.clear();
     mI64Vec.clear();
     mDatas.clear();
+}
+
+// [SprMsg] From:100 To:200 MsgId:3 Size:20 Data: {String:"hell...", U8Vec:[0x1,0x2,0x3,0x4...], BoolValue:true}
+std::string SprMsg::DumpBrief()
+{
+    std::string out = "From:" + std::to_string(mFrom) + " To:" + std::to_string(mTo) +
+        " MsgId:" + std::to_string(mMsgId) + " Size:" + std::to_string(mSize) + " Data: {";
+
+    for (int32_t i = (int32_t)ESprMsgType::MSG_TYPE_MIN + 1; i < (int32_t)ESprMsgType::MSG_TYPE_MAX; ++i)
+    {
+        if (mTag & (1 << i))
+        {
+            std::string str = DumpMemberString((ESprMsgType)i, DUMP_MEMBER_LENGTH_LIMIT);
+            out += str + ",";
+        }
+    }
+
+    if (out.back() == ',') {
+        out.pop_back();
+    }
+    out += "}";
+
+    return out;
+}
+
+std::string SprMsg::DumpDetails()
+{
+    std::string out = "{\n";
+    out += "  \"From\": " + std::to_string(mFrom) + ",\n";
+    out += "  \"To\": " + std::to_string(mTo) + ",\n";
+    out += "  \"MsgId\": " + std::to_string(mMsgId) + ",\n";
+    out += "  \"Size\": " + std::to_string(mSize) + ",\n";
+    out += "  \"Data\": {\n";
+
+    for (int32_t i = (int32_t)ESprMsgType::MSG_TYPE_MIN + 1; i < (int32_t)ESprMsgType::MSG_TYPE_MAX; ++i)
+    {
+        if (mTag & (1 << i))
+        {
+            std::string str = DumpMemberString((ESprMsgType)i, 0);
+            out += "    " + str + ",\n";
+        }
+    }
+
+    // 删除最后两个字符 ",\n"
+    if (out.substr(out.size() - 2) == ",\n") {
+        out.erase(out.size() - 2);
+    }
+
+    out += "\n    }\n}";
+    return out;
 }
 
 // Frame : mMsgId(4) + mTag(4) + length1 +  data1 ... lengthN + dataN
@@ -967,3 +1019,187 @@ void SprMsg::DecodeDatas(std::string& deDatas)
     mDatas.assign(deDatas.begin() + sizeof(mDataSize), deDatas.begin() + sizeof(mDataSize) + mDataSize);
     deDatas = deDatas.substr(sizeof(mDataSize) + mDataSize);
 }
+
+std::string SprMsg::DumpMemberString(ESprMsgType type, uint32_t limitLen) const
+{
+    std::string out;
+    bool isUnlimited = (limitLen == 0);
+    size_t actualLimit = isUnlimited ? SIZE_MAX : std::min(static_cast<size_t>(limitLen), static_cast<size_t>(DUMP_MEMBER_LENGTH_LIMIT));
+
+    switch (type)
+    {
+        case ESprMsgType::MSG_TYPE_BOOLVALUE: {
+            out = "\"BoolValue\":";
+            out += mBoolValue ? "true" : "false";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U8VALUE: {
+            out = "\"U8Value\":" + std::to_string(mU8Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I8VALUE: {
+            out = "\"I8Value\":" + std::to_string(mI8Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U16VALUE: {
+            out = "\"U16Value\":" + std::to_string(mU16Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I16VALUE: {
+            out = "\"I16Value\":" + std::to_string(mI16Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U32VALUE: {
+            out = "\"U32Value\":" + std::to_string(mU32Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I32VALUE: {
+            out = "\"I32Value\":" + std::to_string(mI32Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U64VALUE: {
+            out = "\"U64Value\":" + std::to_string(mU64Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I64VALUE: {
+            out = "\"I64Value\":" + std::to_string(mI64Value);
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_STRING: {
+            size_t strLen = mString.size();
+            size_t truncLen = strLen;
+            bool truncated = false;
+
+            if (!isUnlimited && strLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"String\":\"" + mString.substr(0, truncLen) + (truncated ? "..." : "") + "\"";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U8VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mU8Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"U8Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I8VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mI8Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"I8Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U16VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mU16Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"U16Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I16VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mI16Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"I16Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U32VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mU32Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"U32Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I32VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mI32Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"I32Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_U64VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mU64Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"U64Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_I64VEC: {
+            std::string tmp = GeneralConversions::ToHexStringWithSpace(mI64Vec);
+            size_t tmpLen = tmp.length();
+            size_t truncLen = tmpLen;
+            bool truncated = false;
+
+            if (!isUnlimited && tmpLen > actualLimit) {
+                truncLen = actualLimit;
+                truncated = true;
+            }
+
+            out = "\"I64Vec\":[" + tmp.substr(0, truncLen) + (truncated ? "..." : "") + "]";
+            break;
+        }
+        case ESprMsgType::MSG_TYPE_PTR: {
+            out = "\"Pointer\":\"{???}\"";
+            break;
+        }
+        default:
+            out = "";
+            break;
+    }
+
+    return out;
+}
+
+

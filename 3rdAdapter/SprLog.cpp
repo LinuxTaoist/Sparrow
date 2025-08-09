@@ -32,7 +32,7 @@
 #include "SprLog.h"
 
 #define PID_PRINT_WIDTH_LIMIT       6
-#define LOG_BUFFER_SIZE_LIMIT       256
+#define LOG_BUFFER_SIZE_LIMIT       512
 #define SEMAPHORE_NAME              "/SprLogSem"
 
 static SharedRingBuffer* pLogSCacheMem = nullptr;
