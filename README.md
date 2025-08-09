@@ -119,6 +119,8 @@ $ tail -f /tmp/sprlog/sparrow.log
 
 ### 内部命令集
 
+如下简单举例说明，详细参考 [使用说明-调试节点](Docs/UserManual/使用说明-调试节点.md)
+
 项目集成了如下命令集，可通过`echo help > /tmp/{进程名}`查看具体进程支持命令集，回执在日志中：
 
 * 查询 `statusmonitorsrv` 支持的命令

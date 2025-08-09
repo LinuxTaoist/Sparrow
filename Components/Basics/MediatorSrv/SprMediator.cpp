@@ -252,7 +252,7 @@ void SprMediator::DebugDumpMQs(const std::vector<std::string>& args)
 {
     SPR_LOGI("                   Show  All Message Details (%02d)                                            \n", mModuleMap.size());
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
-    SPR_LOGI(" [ID]MODULE                          MESSAGE                                                       \n");
+    SPR_LOGI(" [ID]MODULE                          MESSAGE                                                   \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
 
     for (auto& pair : mModuleMap) {
@@ -267,9 +267,9 @@ void SprMediator::DebugDumpMQs(const std::vector<std::string>& args)
 void SprMediator::DebugDumpMQWtihID(const std::vector<std::string>& args)
 {
     uint32_t moduleId = atoi(args[1].c_str());
-    SPR_LOGI("Dump %s's Message Details: \n", GetSprModuleIDText(moduleId).c_str());
     auto it = mModuleMap.find((InternalDefs::ESprModuleID)moduleId);
     if (it != mModuleMap.end()) {
+        SPR_LOGI("%s from Module %s: \n", GetSigName(it->second.lastMsg.GetMsgId()), GetSprModuleIDText(moduleId).c_str());
         SPR_LOGI("%s\n", it->second.lastMsg.DumpDetails().c_str());
     }
 }
