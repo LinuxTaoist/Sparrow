@@ -549,6 +549,7 @@ void PowerManager::RegisterDebugFuncs()
     p->RegisterCmd(mModuleName, "DumpCurState",     "Dump current state",   std::bind(&PowerManager::DebugDumpCurState,  this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "DumpObservers",    "Dump observers",       std::bind(&PowerManager::DebugDumpObservers, this, std::placeholders::_1));
 }
+
 void PowerManager::UnregisterDebugFuncs()
 {
     SprDebugNode* p = SprDebugNode::GetInstance();

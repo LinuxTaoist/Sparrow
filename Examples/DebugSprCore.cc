@@ -111,47 +111,23 @@ int main(int argc, const char *argv[])
                     break;
                 }
                 case '1': {
-                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 1000, 3000};
-                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
-                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
-                    msg.SetFrom(MODULE_DEBUG);
-                    msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyObserver(msg);
+                    theDebug.RegisterTimer(1000, 3000, SIG_ID_DEBUG_TIMER_TEST_3S, 0);
                     break;
                 }
                 case '2': {
-                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_3S, 0, 0, 0};
-                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
-                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
-                    msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyObserver(msg);
+                    theDebug.UnregisterTimer(SIG_ID_DEBUG_TIMER_TEST_3S);
                     break;
                 }
                 case '3': {
-                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 10, 0, 2000};
-                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
-                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
-                    msg.SetFrom(MODULE_DEBUG);
-                    msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyObserver(msg);
+                    theDebug.RegisterTimer(0, 2000, SIG_ID_DEBUG_TIMER_TEST_2S, 10);
                     break;
                 }
                 case '4': {
-                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_2S, 0, 0, 0};
-                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
-                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
-                    msg.SetFrom(MODULE_DEBUG);
-                    msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyObserver(msg);
+                    theDebug.UnregisterTimer(SIG_ID_DEBUG_TIMER_TEST_2S);
                     break;
                 }
                 case '5': {
-                    STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST, 0, 0, 20};
-                    shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
-                    SprMsg msg(MODULE_DEBUG, MODULE_TIMERM, SIG_ID_TIMER_ADD_CUSTOM_TIMER);
-                    msg.SetFrom(MODULE_DEBUG);
-                    msg.SetDatas(pInfo, sizeof(STimerInfo));
-                    theDebug.NotifyObserver(msg);
+                    theDebug.RegisterTimer(0, 0, SIG_ID_DEBUG_TIMER_TEST, 20);
                     break;
                 }
                 case '6': {
