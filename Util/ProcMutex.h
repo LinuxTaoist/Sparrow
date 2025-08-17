@@ -23,11 +23,11 @@
 #include <mutex>
 #include <string>
 #include <pthread.h>
-#include <atomic>  // 添加原子操作头文件
+#include <atomic>
 
 struct SharedData {
-    std::atomic<int> refCnt;  // 改为原子类型
-    std::atomic<int> waitCnt; // 改为原子类型
+    std::atomic<int> refCnt;
+    std::atomic<int> waitCnt;
     pthread_mutex_t dataMutex;  // Mutex for critical section protection
     pthread_mutex_t waitMutex;  // Mutex for protecting the wait count
 };
