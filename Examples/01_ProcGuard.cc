@@ -62,7 +62,7 @@ int main()
     SPR_LOG("=== 跨进程互斥锁演示程序启动 ===       \n"
             "演示内容:                              \n"
             "1. %d个进程竞争同一个共享资源          \n"
-            "2. 进程 %d: 在持有锁时异常退出          \n"
+            "2. 进程 %d: 在持有锁时异常退出         \n"
             "3. 验证其他进程能否检测并恢复锁状态    \n\n", NUM_PROCESSES, CRASH_PROCESS_ID);
 
     srand(time(nullptr));
