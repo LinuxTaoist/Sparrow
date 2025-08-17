@@ -6,6 +6,14 @@ include_directories (${PROJECT_PATH}/3rdAdapter)
 include_directories (${PROJECT_PATH}/PublicAPIs)
 include_directories (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 
+## Bin 01_procguard
+set(SRC_BIN_01_PROC_GUARD    01_ProcGuard.cc)
+set(OTHER_SOURCES           ${PROJECT_PATH}/Util/ProcMutex.cpp)
+add_executable              (01_proc_guard ${SRC_BIN_01_PROC_GUARD} ${OTHER_SOURCES})
+set_target_properties       (01_proc_guard PROPERTIES OUTPUT_NAME "01_proc_guard")
+target_link_libraries       (01_proc_guard c sprlog pthread)
+add_dependencies            (01_proc_guard LibSprLog)
+
 ## Bin debugcore
 set(SRC_BIN_DCORE           DebugSprCore.cc)
 add_executable              (debug_core ${SRC_BIN_DCORE})

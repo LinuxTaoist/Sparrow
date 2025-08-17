@@ -13,6 +13,7 @@
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
  *  2025/03/02 | 1.0.0.1   | Xiang.D        | Create file
+ *  2025/08/17 | 1.0.0.2   | Xiang.D        | Use atomic variables for thread safety
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
@@ -22,10 +23,11 @@
 #include <mutex>
 #include <string>
 #include <pthread.h>
+#include <atomic>  // 添加原子操作头文件
 
 struct SharedData {
-    int refCnt;
-    int waitCnt;
+    std::atomic<int> refCnt;  // 改为原子类型
+    std::atomic<int> waitCnt; // 改为原子类型
     pthread_mutex_t dataMutex;  // Mutex for critical section protection
     pthread_mutex_t waitMutex;  // Mutex for protecting the wait count
 };

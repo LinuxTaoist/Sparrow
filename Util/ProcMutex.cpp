@@ -13,6 +13,7 @@
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
  *  2025/03/02 | 1.0.0.1   | Xiang.D        | Create file
+ *  2025/08/17 | 1.0.0.2   | Xiang.D        | Adapt to atomic variables with minimal changes
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
@@ -35,7 +36,6 @@ ProcMutex::ProcMutex(const std::string& mutexName)
 
 ProcMutex::~ProcMutex() {
     if (mSharedData) {
-        // Destroy resources only when both reference count and wait count are 0
         if (mSharedData->refCnt == 0 && mSharedData->waitCnt == 0) {
             DeInit();
         } else {
@@ -80,7 +80,6 @@ void ProcMutex::Init() {
         return;
     }
 
-    // Set mutex to be process - shared
     rc = pthread_mutexattr_setpshared(&mutexAttr, PTHREAD_PROCESS_SHARED);
     if (rc != 0) {
         SPR_LOGE("setpshared mutexattr failed! (%s)\n", strerror(rc));
@@ -92,7 +91,6 @@ void ProcMutex::Init() {
         return;
     }
 
-    // Set mutex to be robust
     rc = pthread_mutexattr_setrobust(&mutexAttr, PTHREAD_MUTEX_ROBUST);
     if (rc != 0) {
         SPR_LOGE("setrobust mutexattr failed! (%s)\n", strerror(rc));
@@ -104,7 +102,6 @@ void ProcMutex::Init() {
         return;
     }
 
-    // Check if mutexes, reference count and wait count need initialization
     if (mSharedData->refCnt == 0) {
         rc = pthread_mutex_init(&mSharedData->dataMutex, &mutexAttr);
         if (rc != 0) {
@@ -168,19 +165,30 @@ void ProcMutex::Lock() {
         return;
     }
 
-    // Try to acquire the lock non - blocking
     int rc = pthread_mutex_trylock(&mSharedData->dataMutex);
     if (rc != 0) {
         AddWait();
         rc = pthread_mutex_lock(&mSharedData->dataMutex);
+        if (rc == EOWNERDEAD) {
+            // 持有者崩溃, 恢复锁的一致性
+            SPR_LOGW("Mutex owner died, trying to recover\n");
+            if (pthread_mutex_consistent(&mSharedData->dataMutex) != 0) {
+                SPR_LOGE("Failed to make mutex consistent\n");
+                DelWait();
+                return;
+            }
+            rc = 0;
+        }
+
         if (rc != 0) {
             SPR_LOGE("pthread_mutex_lock failed: %s\n", strerror(rc));
+            DelWait();
+            return;
         }
         DelWait();
     }
 
-    // Increment reference count after successful lock
-    mSharedData->refCnt++;
+    mSharedData->refCnt.fetch_add(1, std::memory_order_relaxed);
 }
 
 void ProcMutex::Unlock() {
@@ -188,8 +196,8 @@ void ProcMutex::Unlock() {
         return;
     }
 
-    // Decrement reference count after unlock
-    mSharedData->refCnt--;
+    mSharedData->refCnt.fetch_sub(1, std::memory_order_relaxed);
+
     int rc = pthread_mutex_unlock(&mSharedData->dataMutex);
     if (rc != 0) {
         SPR_LOGE("pthread_mutex_unlock failed: %s\n", strerror(rc));
@@ -206,7 +214,8 @@ void ProcMutex::AddWait() {
         SPR_LOGE("pthread_mutex_lock (waitMutex) failed: %s\n", strerror(rc));
         return;
     }
-    mSharedData->waitCnt++;
+
+    mSharedData->waitCnt.fetch_add(1, std::memory_order_relaxed);
     rc = pthread_mutex_unlock(&mSharedData->waitMutex);
     if (rc != 0) {
         SPR_LOGE("pthread_mutex_unlock (waitMutex) failed: %s\n", strerror(rc));
@@ -223,7 +232,8 @@ void ProcMutex::DelWait() {
         SPR_LOGE("pthread_mutex_lock (waitMutex) failed: %s\n", strerror(rc));
         return;
     }
-    mSharedData->waitCnt--;
+
+    mSharedData->waitCnt.fetch_sub(1, std::memory_order_relaxed);
     rc = pthread_mutex_unlock(&mSharedData->waitMutex);
     if (rc != 0) {
         SPR_LOGE("pthread_mutex_unlock (waitMutex) failed: %s\n", strerror(rc));
