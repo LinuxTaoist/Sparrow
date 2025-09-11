@@ -5,7 +5,7 @@
  *  @file       : NtpSource.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : 高精度NTP时间同步实现
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/11/21
  *
  *
