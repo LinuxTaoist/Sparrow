@@ -26,7 +26,6 @@
 #include <stdint.h>
 #include "PSocket.h"
 
-// NTP时间同步回调函数类型
 using TimeCallback = std::function<void(uint64_t, void*)>;
 
 class NtpSource {
