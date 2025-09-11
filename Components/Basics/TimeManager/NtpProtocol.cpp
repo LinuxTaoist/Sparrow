@@ -5,7 +5,7 @@
  *  @file       : NtpProtocol.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : NTPv4协议编解码实现（遵循RFC 5905）
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/11/11
  *
  *  Change History:
