@@ -77,4 +77,3 @@ private:
 };
 
 #endif // __SPR_MEDIATOR_H__
-

@@ -29,7 +29,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CoreTypeDefs.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1003"
+#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1004"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common defines for Plugin
@@ -283,6 +283,7 @@ enum EWakeupSourceType
 // - ETimeSourceType
 // --------------------------------------------------------------------------------------------------------------------
 #define TIME_SOURCE_TYPE_MACROS \
+    ENUM_OR_STRING(TIME_SOURCE_TYPE_MIN),   \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_NTP),   \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_GNSS),  \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_BUTT)

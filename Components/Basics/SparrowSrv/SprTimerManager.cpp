@@ -192,6 +192,12 @@ void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
     uint32_t tick = timerNode->GetTick();
     int32_t timerIntervalInMSec = expired - tick;
 
+    // To deal with problems that are triggered immediately (delay = 0)
+    // if immediate trigger, set timer interval to 1ms
+    if (timerIntervalInMSec >= -10 && timerIntervalInMSec <= 0) {
+        timerIntervalInMSec = 1;
+    }
+
     // loop: If the timer has already expired, increment the wait time by the standard interval.
     //       retry up to 10 times
     int32_t count = 0;
@@ -328,6 +334,9 @@ void SprTimerManager::MsgRespondClearTimersForExitComponent(const SprMsg &msg)
     }
 }
 
+// --------------------------------------------------------------------------------------------------------------------
+// Debug functions
+// --------------------------------------------------------------------------------------------------------------------
 void SprTimerManager::RegisterDebugFuncs()
 {
     SprDebugNode* p = SprDebugNode::GetInstance();

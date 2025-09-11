@@ -158,7 +158,7 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
         memcpy(prefix, buffer, 10);
         memset(buffer, 0, sizeof(buffer));
         snprintf(buffer, sizeof(buffer),
-            "%s...... [TRUNCATED] LEN:%d > LIMIT:%zu [LOG CONTENT TRUNCATED]",
+            "%s...... [TRUNCATED] LEN:%d >= LIMIT:%zu [LOG CONTENT TRUNCATED]",
             prefix, result, sizeof(buffer));
         result = -1;
     }

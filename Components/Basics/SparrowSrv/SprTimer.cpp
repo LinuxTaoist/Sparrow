@@ -29,7 +29,7 @@ SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint
     mModuleId = moduleId;
     mMsgId = msgId;
     mIntervalInMilliSec = intervalInMilliSec;
-    mExpired = GetTick() + delayInMilliSec + intervalInMilliSec;
+    mExpired = GetTick() + delayInMilliSec;
     mRepeatTimes = repeatTimes;
     mRepeatCount = 0;
 }

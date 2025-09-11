@@ -19,12 +19,12 @@
 #ifndef __TIME_MANAGER_H__
 #define __TIME_MANAGER_H__
 
-#include "NtpClient.h"
+#include "NtpSource.h"
 #include "SprObserverWithMQueue.h"
 
 enum TimeSourcePriority
 {
-    TIME_SOURCE_PRIORITY_HIGHEST = 0,
+    TIME_SOURCE_PRIORITY_HIGHEST,
     TIME_SOURCE_PRIORITY_HIGH,
     TIME_SOURCE_PRIORITY_MEDIUM,
     TIME_SOURCE_PRIORITY_LOW,
@@ -44,7 +44,10 @@ public:
      */
     static TimeManager* GetInstance(ModuleIDType id, const std::string& name);
 
-protected:
+    int32_t StartSyncTimePoller();
+    int32_t StopSyncTimePoller();
+
+private:
      /**
      * @brief Initializes the business module with overrides from derived business modules
      *
@@ -60,30 +63,57 @@ protected:
      */
     int32_t ProcessMsg(const SprMsg& msg) override;
 
-private:
     /**
-     * @brief Constructor
+     * @brief Constructor / Destructor
      *
      * @param[in] id
      * @param[in] name
      */
     TimeManager(ModuleIDType id, const std::string& name);
-
-    /**
-     * @brief Destructor
-     *
-     */
     virtual ~TimeManager();
 
-    int32_t InitDebugDetails();
+    int32_t InitNtpSource();
     int32_t RequestNtpTime();
     int32_t RequestGnssTime();
+    int32_t StartSyncTime();
+    int32_t StopSyncTime();
+    int32_t SmoothAdjustSystemTime(int64_t ns);
+    int32_t JumpAdjustSystemTime(uint64_t timestamp);
+    int32_t SyncSystemTime(int32_t source, uint64_t timestamp);
+    int32_t GetDiffWithLocalTime(uint64_t timestamp, int64_t& diff);
+
+    TimeSourcePriority GetTimeSourcePriority(InternalDefs::TimeSourceType source);
+    InternalDefs::TimeSourceType GetTimeSource(TimeSourcePriority priority);
+
+    /**
+     * @brief message handle function
+     *
+     * @param[in] msg
+     */
+    void MsgRespondSyncTimeTimerEvent(const SprMsg& msg);
+    void MsgRespondRequestNtpTime(const SprMsg& msg);
+    void MsgRespondSyncSystemTime(const SprMsg& msg);
+    void MsgRespondSyncTimePollerTimerEvent(const SprMsg& msg);
+
+    /**
+     * @brief Register / Unregister debug functions
+     */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
+    /** Debug functions */
+    void DebugStartSyncTime(const std::vector<std::string>& args);
+    void DebugStopSyncTime(const std::vector<std::string>& args);
+    void DebugStartSyncTimePoller(const std::vector<std::string>& args);
+    void DebugStopSyncTimePoller(const std::vector<std::string>& args);
+    void DebugRequestNtpTime(const std::vector<std::string>& args);
 
 private:
-    TimeSourcePriority mCurPriority;
+    bool mSyncTimeFinished;
+    int32_t mCurPriority;
     InternalDefs::TimeSourceType mCurTimeSource;
-    std::shared_ptr<NtpClient> mpNtpClient;
-    std::map<TimeSourcePriority, InternalDefs::TimeSourceType> mTimeSourceMap;
+    std::shared_ptr<NtpSource> mpNtpSource;
+    std::map<TimeSourcePriority, InternalDefs::TimeSourceType> mTimeSourceMap; // key: priority, value: source
 
     using DebugCmdFunc = void (TimeManager::*)(const std::string&);
     std::map<std::string, std::pair<std::string, DebugCmdFunc>> mDebugCmdMap;

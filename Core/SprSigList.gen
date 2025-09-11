@@ -50,7 +50,10 @@ ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
 //-----------------------------------------------------------------------------
 // TIME_MANAGER
 //-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_TIMEM_NTP_SYNC),                          \
+ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT),        \
+ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT),             \
+ENUM_OR_STRING(SIG_ID_TIMEM_REQ_NTP_TIME),                      \
+ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_SYSTEM_TIME),                  \
 
 //-----------------------------------------------------------------------------
 // POWER_MANAGER

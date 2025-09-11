@@ -224,14 +224,14 @@ TEST_F(TestSprComponents, TimerMultipleTimersSeqStartStop)
     mpTestModule->Reset500MSCnt();
     mpTestModule->Reset1SCnt();
 
-    mpTestModule->RegisterTimer(0, 200, SIG_ID_TEST_MODULE_200MS_TIMER_EVENT, 0);
-    mpTestModule->CondWait(waitMs1, expectVal200MS / 3, actualVal200MS);            // wait 1010ms
+    mpTestModule->RegisterTimer(200, 200, SIG_ID_TEST_MODULE_200MS_TIMER_EVENT, 0);
+    mpTestModule->CondWait(waitMs1, expectVal200MS / 3, actualVal200MS);            // wait 1000ms
 
-    mpTestModule->RegisterTimer(0, 500, SIG_ID_TEST_MODULE_500MS_TIMER_EVENT, 0);
-    mpTestModule->CondWait(waitMs2, expectVal500MS / 2, actualVal500MS);            // wait 101ms
+    mpTestModule->RegisterTimer(500, 500, SIG_ID_TEST_MODULE_500MS_TIMER_EVENT, 0);
+    mpTestModule->CondWait(waitMs2, expectVal500MS / 2, actualVal500MS);            // wait 1000ms
 
-    mpTestModule->RegisterTimer(0, 1000, SIG_ID_TEST_MODULE_1S_TIMER_EVENT, 0);
-    mpTestModule->CondWait(waitMs3, expectVal1S, actualVal1S);                      // wait 1010ms
+    mpTestModule->RegisterTimer(1000, 1000, SIG_ID_TEST_MODULE_1S_TIMER_EVENT, 0);
+    mpTestModule->CondWait(waitMs3, expectVal1S, actualVal1S);                      // wait 1000ms
 
     mpTestModule->UnregisterTimer(SIG_ID_TEST_MODULE_200MS_TIMER_EVENT);
     mpTestModule->UnregisterTimer(SIG_ID_TEST_MODULE_500MS_TIMER_EVENT);

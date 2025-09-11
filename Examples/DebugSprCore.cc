@@ -169,7 +169,7 @@ int main(int argc, const char *argv[])
                     break;
                 }
                 case 'e': {
-                    SprMsg msg(MODULE_TIMEM, SIG_ID_TIMEM_NTP_SYNC);
+                    SprMsg msg(MODULE_TIMEM, SIG_ID_TIMEM_REQ_NTP_TIME);
                     theDebug.NotifyObserver(msg);
                     break;
                 }
