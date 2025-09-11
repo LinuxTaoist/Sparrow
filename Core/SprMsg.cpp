@@ -1201,5 +1201,3 @@ std::string SprMsg::DumpMemberString(ESprMsgType type, uint32_t limitLen) const
 
     return out;
 }
-
-

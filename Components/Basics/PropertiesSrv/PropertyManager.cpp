@@ -28,11 +28,14 @@
 #include <errno.h>
 #include <string.h>
 #include "SprLog.h"
+#include "SprSigId.h"
 #include "CommonMacros.h"
 #include "SprDebugNode.h"
 #include "PropertyManager.h"
 
-#define LOG_TAG "Properties"
+using namespace InternalDefs;
+
+#define LOG_TAG "ProperM"
 
 #define DEBUG_MODULE_NAME       "Properties"
 #define SYSTEM_PROP_PATH        "system.prop"
@@ -46,7 +49,8 @@
 
 static std::atomic<bool> gObjAlive(true);
 
-PropertyManager::PropertyManager()
+PropertyManager::PropertyManager(ModuleIDType id, const std::string& name)
+    : SprObserverWithMQueue(id, name)
 {
 }
 
@@ -56,17 +60,17 @@ PropertyManager::~PropertyManager()
     UnregisterDebugFuncs();
 }
 
-PropertyManager* PropertyManager::GetInstance()
+PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name)
 {
     if (!gObjAlive) {
         return nullptr;
     }
 
-    static PropertyManager instance;
+    static PropertyManager instance(id, name);
     return &instance;
 }
 
-int PropertyManager::SetProperty(const std::string& key, const std::string& value)
+int32_t PropertyManager::SetProperty(const std::string& key, const std::string& value)
 {
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
@@ -76,9 +80,9 @@ int PropertyManager::SetProperty(const std::string& key, const std::string& valu
     return HandleKeyValue(key, value);
 }
 
-int PropertyManager::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
+int32_t PropertyManager::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
 {
-    int ret = -1;
+    int32_t ret = -1;
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
         return ret;
@@ -92,7 +96,7 @@ int PropertyManager::GetProperty(const std::string& key, std::string& value, con
     return ret;
 }
 
-int PropertyManager::GetProperties()
+int32_t PropertyManager::GetProperties()
 {
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
@@ -102,7 +106,7 @@ int PropertyManager::GetProperties()
     return DumpPropertyList();
 }
 
-int PropertyManager::Init()
+int32_t PropertyManager::Init()
 {
     mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
 
@@ -119,6 +123,11 @@ int PropertyManager::Init()
     LoadPersistProperty();
 
     RegisterDebugFuncs();
+    return 0;
+}
+
+int32_t PropertyManager::ProcessMsg(const SprMsg& msg)
+{
     return 0;
 }
 
@@ -150,7 +159,7 @@ void PropertyManager::DebugDumpPropertyList(const std::vector<std::string>& args
     DumpPropertyList();
 }
 
-int PropertyManager::DumpPropertyList()
+int32_t PropertyManager::DumpPropertyList()
 {
     std::map<std::string, std::string> keyValueMap;
     mpSharedMemory->GetAllKeyValues(keyValueMap);
@@ -162,7 +171,7 @@ int PropertyManager::DumpPropertyList()
     return 0;
 }
 
-int PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
+int32_t PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
 {
     std::ifstream file(fileName);
     if (!file) {
@@ -191,7 +200,7 @@ int PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
     return 0;
 }
 
-int PropertyManager::LoadPersistProperty()
+int32_t PropertyManager::LoadPersistProperty()
 {
     DIR* dir;
 
@@ -225,30 +234,46 @@ int PropertyManager::LoadPersistProperty()
     return 0;
 }
 
-int PropertyManager::HandleKeyValue(const std::string& key, const std::string& value)
+int32_t PropertyManager::HandleKeyValue(const std::string& key, const std::string& value)
 {
-    int ret = -1;
-    if (key.rfind("ro.", 0) == 0) {
-        std::string tmpValue;
-        int rs = mpSharedMemory->GetValue(key, tmpValue);
-        if (rs < 0) {
-            ret = mpSharedMemory->SetValue(key, value);
-        } else {
-            SPR_LOGW("%s already exists, modify fail!\n", key.c_str());
-        }
-    } else if (key.rfind("persist.", 0) == 0) {
-        ret = mpSharedMemory->SetValue(key, value);
-        if (ret == 0) {
+    if (!mpSharedMemory) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
+        return -1;
+    }
+
+    // 1. Not modify, if the same value
+    std::string tmpValue;
+    int32_t ret = mpSharedMemory->GetValue(key, tmpValue);
+    if (ret == 0 && tmpValue == value) {
+        SPR_LOGD("Not modify \"%s\" (the same value \"%s\")\n", key.c_str(), value.c_str());
+        return 0;
+    }
+
+    // 2. Not modify, if the key is "ro." type and already exists
+    if (ret == 0 && key.rfind("ro.", 0) == 0) {
+        SPR_LOGW("Not modify \"%s\" (ro. type key already exists)\n", key.c_str());
+        return -1;
+    }
+
+    // 3. Set the value, if the key is new or can be modified
+    // 4. Notify the property changed
+    // 5. Save the "persist." type value to file
+    ret = mpSharedMemory->SetValue(key, value);
+    if (ret == 0) {
+        SPR_LOGD("Set \"%s\"=\"%s\" success!\n", key.c_str(), value.c_str());
+        SprMsg msg(SIG_ID_PROPERTY_CHANGED);
+        msg.SetString(key + "=" + value);
+        NotifyAllObserver(msg);
+
+        if (key.rfind("persist.", 0) == 0) {
             SavePersistProperty(key, value);
         }
-    } else {
-        ret = mpSharedMemory->SetValue(key, value);
     }
 
     return ret;
 }
 
-int PropertyManager::SavePersistProperty(const std::string& key, const std::string& value)
+int32_t PropertyManager::SavePersistProperty(const std::string& key, const std::string& value)
 {
     std::string filePath = std::string(PERSIST_FILE_PATH) + key;
 

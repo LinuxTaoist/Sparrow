@@ -53,11 +53,11 @@ int main(int argc, char*  argv[])
         }
     });
 
-    PropertyManager* pProperM = PropertyManager::GetInstance();
+    PropertyManager* pProperM = PropertyManager::GetInstance(MODULE_PROPERTYM, "ProperM");
     PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
 
     SprProcPrepare::GetInstance()->Init(SRV_NAME_PROPERTY);
-    pProperM->Init();
+    pProperM->Initialize();
     thePropertyManagerHub.InitializeHub();
 
     EpollEventHandler::GetInstance()->EpollLoop();

@@ -15,7 +15,7 @@ ENUM_OR_STRING(SIG_ID_LOG_OPEN),                                \
 ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
 
 //-----------------------------------------------------------------------------
-// Debug
+// DEBUG
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_DEBUG_MSG_SERIAL),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_NOTIFY_ALL),                        \
@@ -26,6 +26,11 @@ ENUM_OR_STRING(SIG_ID_DEBUG_TIMER_TEST_3S),                     \
 ENUM_OR_STRING(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL),               \
 ENUM_OR_STRING(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL),              \
 ENUM_OR_STRING(SIG_ID_DEBUG_SLEEP_EVENT),                       \
+
+//-----------------------------------------------------------------------------
+// PROPERTY_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_PROPERTY_CHANGED),                        \
 
 //-----------------------------------------------------------------------------
 // TIMER_MANAGER
