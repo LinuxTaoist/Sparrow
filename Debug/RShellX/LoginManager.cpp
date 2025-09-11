@@ -86,7 +86,7 @@ LoginManager* LoginManager::GetInstance()
 
 int LoginManager::ListenPipeEvent(int pipeFd)
 {
-    mpPipe = std::make_shared<PPipe>(pipeFd, [&](int fd, std::string buf, void *arg) {
+    mpPipe = std::make_shared<PPipe>(pipeFd, [&](int fd, std::string buf, void* arg) {
         if (buf.empty()) {
             buf = "No return.";
         }
@@ -201,14 +201,14 @@ int LoginManager::BuildConnectAsTcpServer(short port)
 {
     EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
 
-    mpTcpSrv = make_shared<PTcpServer>([&](int cli, void *arg) {
+    mpTcpSrv = make_shared<PTcpServer>([&](int cli, void* arg) {
         PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
             SPR_LOGE("pSrvObj is nullptr\n");
             return;
         }
 
-        auto tcpClient = make_shared<PTcpClient>(cli, [&](int sock, void *arg) {
+        auto tcpClient = make_shared<PTcpClient>(cli, [&](int sock, void* arg) {
             PTcpClient* pCliObj = (PTcpClient*)arg;
             if (pCliObj == nullptr) {
                 SPR_LOGE("pCliObj is nullptr\n");

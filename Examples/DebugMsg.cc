@@ -29,7 +29,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "DebugMsg"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     char val = 0;
     bool run = true;

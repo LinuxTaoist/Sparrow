@@ -33,7 +33,7 @@ using namespace GeneralUtils;
 #define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainLog", __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "MainLog", __LINE__, ##args)
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     LogManager theLogManager;
 

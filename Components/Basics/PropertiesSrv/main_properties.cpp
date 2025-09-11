@@ -31,7 +31,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "MainProper"
 
-int main(int argc, char * argv[])
+int main(int argc, char*  argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);

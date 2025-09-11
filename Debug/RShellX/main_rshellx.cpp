@@ -25,7 +25,7 @@ using namespace std;
 #define SPR_LOGD(fmt, args...) printf(fmt, ##args)
 #define SPR_LOGE(fmt, args...) printf(fmt, ##args)
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     if (argc < 2) {
         SPR_LOGE("Usage: ./rshellx <port>\n");

@@ -27,7 +27,7 @@ using namespace GeneralUtils;
 
 #define LOG_TAG "MainBinder"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);

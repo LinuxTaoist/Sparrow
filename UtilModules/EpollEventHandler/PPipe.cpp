@@ -27,7 +27,7 @@
 #define SPR_LOGD(fmt, args...) printf("%4d PPipe D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PPipe E: " fmt, __LINE__, ##args)
 
-PPipe::PPipe(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void *arg)
+PPipe::PPipe(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mCb(cb)
 {
     int flags = fcntl(mEvtFd, F_GETFL, 0);

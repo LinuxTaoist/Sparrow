@@ -61,7 +61,7 @@ std::string SocketCommon::ResolveHostToIP(const std::string& host)
         return "";
     }
 
-    void *addr;
+    void* addr;
     if (res->ai_family == AF_INET) { // IPv4
         struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
         addr = &(ipv4->sin_addr);

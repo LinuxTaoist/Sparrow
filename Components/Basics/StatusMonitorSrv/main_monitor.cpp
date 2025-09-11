@@ -30,7 +30,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "MainMonitor"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);

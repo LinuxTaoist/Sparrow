@@ -95,7 +95,7 @@ int32_t NtpSource::SendTimeRequest()
 
 int32_t NtpSource::InitSocket()
 {
-    mpSocket = make_shared<PUdp>([&](int sock, void *arg) {
+    mpSocket = make_shared<PUdp>([&](int sock, void* arg) {
         PUdp* pUdp = static_cast<PUdp*>(arg);
         if (!pUdp) {
             SPR_LOGE("pUdp is nullptr\n");

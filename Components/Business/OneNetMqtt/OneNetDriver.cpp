@@ -322,7 +322,7 @@ int32_t OneNetDriver::InitUnixPIPE()
     mpSendPIPE->AsUnixStreamClient();
 
     // 读取管道pipe[0]中缓存的mqtt字节流
-    mpRecvPIPE = std::make_shared<PUnixStreamClient>(mUnixPipeFd[0], [&](int sock, void *arg) {
+    mpRecvPIPE = std::make_shared<PUnixStreamClient>(mUnixPipeFd[0], [&](int sock, void* arg) {
         PUnixStreamClient* pUnixPIPE0 = reinterpret_cast<PUnixStreamClient*>(arg);
         CHECK_ONENET_POINTER_NONRET(pUnixPIPE0);
         CHECK_ONENET_POINTER_NONRET(mpOneClient);
@@ -356,7 +356,7 @@ int32_t OneNetDriver::InitUnixPIPE()
 
 int32_t OneNetDriver::InitOneNetClient()
 {
-    mpOneClient = std::make_shared<PTcpClient>([&](int sock, void *arg) {
+    mpOneClient = std::make_shared<PTcpClient>([&](int sock, void* arg) {
         PTcpClient* pTcpClient = reinterpret_cast<PTcpClient*>(arg);
         if (pTcpClient == nullptr) {
             SPR_LOGE("pTcpClient is nullptr\n");

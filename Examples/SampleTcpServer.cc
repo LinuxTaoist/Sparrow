@@ -28,19 +28,19 @@ using namespace std;
 
 #define SPR_LOGD(fmt, args...) printf("%4d TcpServer D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d TcpServer E: " fmt, __LINE__, ##args)
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
 
     std::list<std::shared_ptr<PTcpClient>> clients;
-    auto tcpServer = make_shared<PTcpServer>([&](int cli, void *arg) {
+    auto tcpServer = make_shared<PTcpServer>([&](int cli, void* arg) {
         PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
             SPR_LOGE("pSrvObj is nullptr\n");
             return;
         }
 
-        auto tcpClient = make_shared<PTcpClient>(cli, [&](int sock, void *arg) {
+        auto tcpClient = make_shared<PTcpClient>(cli, [&](int sock, void* arg) {
             PTcpClient* pCliObj = (PTcpClient*)arg;
             if (pCliObj == nullptr) {
                 SPR_LOGE("pCliObj is nullptr\n");
