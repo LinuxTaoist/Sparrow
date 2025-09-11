@@ -25,7 +25,12 @@
 class NtpProtocol
 {
 public:
-    NtpProtocol(const std::string& bytes);
+    explicit NtpProtocol(const std::string& bytes);
+    NtpProtocol() = delete;
+    NtpProtocol(const NtpProtocol&) = delete;
+    NtpProtocol& operator=(const NtpProtocol&) = delete;
+    NtpProtocol(NtpProtocol&&) = delete;
+    NtpProtocol& operator=(NtpProtocol&&) = delete;
     ~NtpProtocol();
 
     int32_t Encode(std::string& bytes);

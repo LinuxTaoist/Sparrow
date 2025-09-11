@@ -110,7 +110,7 @@ int32_t NtpProtocol::Encode(std::string& bytes)
         offset += mAuthKeyIDs.size();
     }
 
-    return 0;
+    return offset;
 }
 
 int32_t NtpProtocol::Decode(const std::string& bytes)
@@ -158,7 +158,7 @@ int32_t NtpProtocol::Decode(const std::string& bytes)
         mAuthKeyIDs.clear();
     }
 
-    return 0;
+    return offset;
 }
 
 void NtpProtocol::EncodeNtpTimestamp(uint64_t timestamp, uint8_t* pBuf)
