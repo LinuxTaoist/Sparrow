@@ -2,10 +2,10 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : NtpSource.cpp
+ *  @file       : NtpSource.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : 高精度NTP时间同步实现
+ *  @brief      : 
  *  @date       : 2024/11/21
  *
  *
