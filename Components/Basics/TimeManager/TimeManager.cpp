@@ -107,7 +107,7 @@ int32_t TimeManager::GetDiffWithLocalTime(uint64_t timestamp, int64_t& diffNs)
     uint64_t targetNs = ((timestamp >> 32) & 0xFFFFFFFF) * 1000000000LL + (timestamp & 0xFFFFFFFF);
     uint64_t currentNs = current_ts.tv_sec * 1000000000LL + current_ts.tv_nsec;
 
-    diffNs = targetNs - currentNs;
+    diffNs = std::abs(static_cast<int64_t>(targetNs - currentNs));
     // SPR_LOGD("Time diff: %lld ns", diffNs);
     return 0;
 }

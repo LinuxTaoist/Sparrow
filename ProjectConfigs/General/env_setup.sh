@@ -17,4 +17,6 @@ if [[ ":$LD_LIBRARY_PATH:" != *":$LIB_PATH:"* ]]; then
     export LD_LIBRARY_PATH="$LIB_PATH:$LD_LIBRARY_PATH"
 fi
 
+# 设置时区 东八区
+export TZ=CST-8
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"
