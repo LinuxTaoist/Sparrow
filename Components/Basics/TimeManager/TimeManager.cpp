@@ -17,6 +17,7 @@
  *
  */
 #include <atomic>
+#include <mutex>
 #include <errno.h>
 #include <stdint.h>
 #include <string.h>
@@ -26,6 +27,7 @@
 #include "SprLog.h"
 #include "TimeManager.h"
 #include "SprDebugNode.h"
+#include "SprThreadPool.h"
 #include "SprEnumHelper.h"
 
 using namespace std;
@@ -237,9 +239,12 @@ int32_t TimeManager::RequestNtpTime()
     }
 
     SPR_LOGD("Start request ntp time");
-    int32_t ret = mpNtpSource->SendTimeRequest();
-    SPR_LOGD("Request ntp time ret = %d\n", ret);
-    return ret;
+    SprThreadPool::GetInstance(2)->SubmitTask([&]() {
+        // long time to send request, so run it in thread pool
+        mpNtpSource->SendTimeRequest();
+    });
+    SPR_LOGD("Request ntp time ret = %d\n", 0);
+    return 0;
 }
 
 int32_t TimeManager::RequestGnssTime()
@@ -286,8 +291,7 @@ void TimeManager::MsgRespondSyncTimeTimerEvent(const SprMsg& msg)
 
     int32_t ret = -1;
     InternalDefs::TimeSourceType source = GetTimeSource((TimeSourcePriority)mCurPriority);
-    switch(source)
-    {
+    switch(source) {
         case TIME_SOURCE_TYPE_NTP:
             ret = RequestNtpTime();
             break;

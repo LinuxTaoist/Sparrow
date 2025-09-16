@@ -426,7 +426,7 @@ const char* OneNetManager::GetLev2StateString(EOneNetMgrLev2State state)
     return (Lev2Strings.size() > state) ? Lev2Strings[state].c_str() : "UNDEFINED";
 }
 
-void OneNetManager::StartTimerToPingOneNet(int32_t intervalInMSec)
+void OneNetManager::StartTimerToPingOneNet(int32_t delayInMSec, int32_t intervalInMSec)
 {
     if (mEnablePingTimer) {
         SPR_LOGD("Ping timer is already enabled!\n");
@@ -435,7 +435,7 @@ void OneNetManager::StartTimerToPingOneNet(int32_t intervalInMSec)
 
     SPR_LOGD("Enable ping timer, interval: %dms\n", intervalInMSec);
     mEnablePingTimer = true;
-    RegisterTimer(0, intervalInMSec, SIG_ID_ONENET_MGR_PING_TIMER_EVENT, 0);
+    RegisterTimer(delayInMSec, intervalInMSec, SIG_ID_ONENET_MGR_PING_TIMER_EVENT, 0);
 }
 
 void OneNetManager::StopTimerToPingOneNet()
@@ -449,7 +449,7 @@ void OneNetManager::StopTimerToPingOneNet()
     UnregisterTimer(SIG_ID_ONENET_MGR_PING_TIMER_EVENT);
 }
 
-void OneNetManager::StartTimerToReportData(int32_t intervalInMSec)
+void OneNetManager::StartTimerToReportData(int32_t delayInMSec, int32_t intervalInMSec)
 {
     if (mEnableReportTimer) {
         SPR_LOGD("Report timer is already enabled!\n");
@@ -458,7 +458,7 @@ void OneNetManager::StartTimerToReportData(int32_t intervalInMSec)
 
     SPR_LOGD("Enable report timer, interval: %dms\n", intervalInMSec);
     mEnableReportTimer = true;
-    RegisterTimer(0, intervalInMSec, SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT, 0);
+    RegisterTimer(delayInMSec, intervalInMSec, SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT, 0);
 }
 
 void OneNetManager::StopTimerToReportData()
@@ -611,8 +611,8 @@ void OneNetManager::MsgRespondMqttConnAck(const SprMsg& msg)
 
     // 注册ping定时器，数据上报定时器
     mIsWatingPingResp = false;
-    StartTimerToPingOneNet(keepAliveInSec * 1000);
-    StartTimerToReportData(DEFAULT_DATA_REPORT_INTERVAL * 1000);
+    StartTimerToPingOneNet(1000, keepAliveInSec * 1000);
+    StartTimerToReportData(2000, DEFAULT_DATA_REPORT_INTERVAL * 1000);
     SPR_LOGD("OneNet return connect code: %d, start ping timer: %ds, report timer: %ds (%d %d)\n",
         msg.GetU8Value(), keepAliveInSec, DEFAULT_DATA_REPORT_INTERVAL, mReConnectReqCnt, mReConnectRspCnt);
 

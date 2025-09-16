@@ -34,7 +34,7 @@ using namespace std;
 #define NTP_UNIX_EPOCH_OFFSET   2208988800ULL   // 1970-1900
 
 NtpSource::NtpSource(uint16_t port, const TimeCallback& cb, void* arg)
-    : mIsReady(false), mArg(arg), mCb(cb), mLocalPort(port), mCurSrvIndex(0)
+    : mArg(arg), mIsReady(false), mCb(cb), mLocalPort(port), mCurSrvIndex(0)
 {
     InitSocket();
 }
@@ -78,10 +78,14 @@ int32_t NtpSource::SendTimeRequest()
     if (!ip.empty()) {
         std::string bytes;
         NtpProtocol ntpPacket("");
-
         ntpPacket.Encode(bytes);
         mNtpServers[mCurSrvIndex].ip = ip;
         mNtpServers[mCurSrvIndex].sendTs = GetCurTimeStamp();
+
+        if (mIsReady) {
+            SPR_LOGD("Sync time finished, not request again!");
+            return 0;
+        }
         ret = mpSocket->Write(bytes, ip, srvPort);
         SPR_LOGD("[%d/%u] Request to %s:%u %d bytes %s\n", mCurSrvIndex + 1, mNtpServers.size(),
                 ip.c_str(), srvPort, bytes.size(), ret == -1 ? "failed" : "success");

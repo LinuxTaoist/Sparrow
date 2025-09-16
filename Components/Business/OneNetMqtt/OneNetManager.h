@@ -109,11 +109,11 @@ private:
     const char* GetLev2StateString(EOneNetMgrLev2State state);
 
     /* 启动OneNet心跳 */
-    void StartTimerToPingOneNet(int32_t intervalInMSec);
+    void StartTimerToPingOneNet(int32_t delayInMSec, int32_t intervalInMSec);
     void StopTimerToPingOneNet();
 
     /* 启动数据上报定时器 */
-    void StartTimerToReportData(int32_t intervalInMSec);
+    void StartTimerToReportData(int32_t delayInMSec, int32_t intervalInMSec);
     void StopTimerToReportData();
 
     /* 通知消息到指定OneNetDevice */

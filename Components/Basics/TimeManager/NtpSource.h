@@ -22,6 +22,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+#include <atomic>
 #include <functional>
 #include <stdint.h>
 #include "PSocket.h"
@@ -50,8 +51,8 @@ private:
     uint64_t CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4);
 
 private:
-    bool mIsReady;                      // Socket是否准备就绪
     void* mArg;                         // 回调函数参数
+    std::atomic<bool> mIsReady;         // Socket是否准备就绪
     TimeCallback mCb;                   // 时间回调函数
     uint16_t mLocalPort;                // 本地端口
     int32_t mCurSrvIndex;               // 当前NTP服务器索引
