@@ -101,10 +101,10 @@ private:
     void RunWorkerLoop();
 
 private:
-    int32_t mInitWorkerCount;  // Initial worker thread count (fixed after init)
+    int32_t mInitWorkerCount;               // Initial worker thread count (fixed after init)
     using Task = std::function<void()>;     // Generic task type definition
     std::atomic<bool> mIsPoolRunning;       // Flag indicating if pool is running
-    std::atomic<int32_t> mIdleWorkerCount;      // Count of currently idle workers
+    std::atomic<int32_t> mIdleWorkerCount;  // Count of currently idle workers
     std::vector<std::thread> mWorkers;      // Container for worker threads
     std::queue<Task> mTaskQueue;            // FIFO queue for pending tasks
     std::mutex mTaskQueueLock;              // Mutex for synchronizing access to task queue
