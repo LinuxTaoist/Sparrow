@@ -238,7 +238,7 @@ int32_t TimeManager::RequestNtpTime()
     }
 
     SPR_LOGD("Start request ntp time");
-    SprThreadPool::GetInstance(2)->SubmitTask([&]() {
+    SprThreadPool::GetInstance()->SubmitTask([&]() {
         // long time to send request, so run it in thread pool
         mpNtpSource->SendTimeRequest();
     });

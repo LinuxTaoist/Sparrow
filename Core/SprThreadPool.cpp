@@ -34,7 +34,7 @@ SprThreadPool* SprThreadPool::GetInstance(int32_t initWorkerCount)
 }
 
 SprThreadPool::SprThreadPool(int32_t initWorkerCount)
-    : mInitWorkerCount(initWorkerCount), mIsPoolRunning(true), mIdleWorkerCount(0)
+    : mInitWorkerCount(initWorkerCount), mIsPoolRunning(true), mTaskCntPeak(0), mIdleWorkerCount(0)
 {
     AddWorkerThreads(initWorkerCount);
     SPR_LOGI("Init workers = %d, Max workers = %d", initWorkerCount, SPR_THREAD_POOL_MAX_WORKERS);
@@ -63,6 +63,19 @@ int32_t SprThreadPool::GetIdleWorkerCount() const
 int32_t SprThreadPool::GetTotalWorkerCount() const
 {
     return static_cast<int32_t>(mWorkers.size());
+}
+
+int32_t SprThreadPool::DumpDetails() const
+{
+    SPR_LOGI("                           Dump Thread Poll Details                                            \n");
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOGI("- Init workers = %d \n", mInitWorkerCount);
+    SPR_LOGI("- Max workers  = %d \n", SPR_THREAD_POOL_MAX_WORKERS);
+    SPR_LOGI("- Idle workers = %d \n", mIdleWorkerCount.load());
+    SPR_LOGI("- Total workers = %d \n", mWorkers.size());
+    SPR_LOGI("- Task count peak = %d \n", mTaskCntPeak.load());
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    return 0;
 }
 
 void SprThreadPool::AddWorkerThreads(int32_t workerCount)

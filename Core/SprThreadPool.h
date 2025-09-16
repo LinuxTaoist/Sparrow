@@ -22,6 +22,7 @@
 #include <vector>
 #include <queue>
 #include <atomic>
+
 #include <future>
 #include <mutex>
 #include <thread>
@@ -57,6 +58,13 @@ public:
      * @return Total worker thread count
      */
     int32_t GetTotalWorkerCount() const;
+
+    /**
+     * @brief Print thread pool details (worker count, idle count, etc.)
+     *
+     * @return int32_t
+     */
+    int32_t DumpDetails() const;
 
     /**
      * @brief Submit task with return value (support variable parameters)
@@ -101,9 +109,10 @@ private:
     void RunWorkerLoop();
 
 private:
-    int32_t mInitWorkerCount;               // Initial worker thread count (fixed after init)
     using Task = std::function<void()>;     // Generic task type definition
+    int32_t mInitWorkerCount;               // Initial worker thread count
     std::atomic<bool> mIsPoolRunning;       // Flag indicating if pool is running
+    std::atomic<int32_t> mTaskCntPeak;      // Peak task count
     std::atomic<int32_t> mIdleWorkerCount;  // Count of currently idle workers
     std::vector<std::thread> mWorkers;      // Container for worker threads
     std::queue<Task> mTaskQueue;            // FIFO queue for pending tasks
@@ -130,10 +139,12 @@ auto SprThreadPool::SubmitTask(F&& taskFunc, Args&&... args) -> std::future<decl
     {
         std::lock_guard<std::mutex> lock(mTaskQueueLock);
         mTaskQueue.emplace([taskWrapper]() {
-            // Catch internal exceptions to prevent worker crash (no rethrow)
             (*taskWrapper)();
         });
     }
+
+    // Update peak task count
+    mTaskCntPeak = std::max(mTaskCntPeak.load(), static_cast<int32_t>(mTaskQueue.size()));
 
     // Wake up one idle worker to process the new task
     mTaskCond.notify_one();
@@ -154,6 +165,9 @@ void SprThreadPool::SubmitTask(F&& task)
         std::lock_guard<std::mutex> lock(mTaskQueueLock);
         mTaskQueue.emplace(std::forward<F>(task));
     }
+
+    // Update peak task count
+    mTaskCntPeak = std::max(mTaskCntPeak.load(), static_cast<int32_t>(mTaskQueue.size()));
 
     // Wake up one idle worker
     mTaskCond.notify_one();

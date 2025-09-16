@@ -26,6 +26,7 @@
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
+#include "SprThreadPool.h"
 #include "CommonTypeDefs.h"
 
 #define LOG_TAG "SprDebugNode"
@@ -126,8 +127,9 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
 int32_t SprDebugNode::RegisterBuildinCmds()
 {
     mBuildinCmds["help"]          = { "Dump all cmds", std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
-    mBuildinCmds["proc"]          = { "Dump process info", std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
     mBuildinCmds["version"]       = { "Dump version", std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
+    mBuildinCmds["proc"]          = { "Dump process info", std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
+    mBuildinCmds["threadpool"]    = { "Dump threadpool details", std::bind(&SprDebugNode::DebugDumpThreadPoolDetails, this, std::placeholders::_1)};
     return 0;
 }
 
@@ -196,6 +198,18 @@ void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
     SPR_LOGD("==============================================================================\n");
 }
 
+void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
+{
+    SPR_LOGD("=============================   Version About   ==============================\n");
+    SPR_LOGD("\n");
+    SPR_LOGD("  CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
+    SPR_LOGD("  CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
+    SPR_LOGD("  CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
+    SPR_LOGD("\n");
+    SPR_LOGD("==============================================================================\n");
+}
+
+
 void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
 {
     auto pObj = SprProcInfo::GetInstance();
@@ -215,15 +229,15 @@ void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
     SPR_LOGD("==============================================================================\n");
 }
 
-void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
+void SprDebugNode::DebugDumpThreadPoolDetails(const std::vector<std::string>& args)
 {
-    SPR_LOGD("=============================   Version About   ==============================\n");
-    SPR_LOGD("\n");
-    SPR_LOGD("  CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
-    SPR_LOGD("  CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
-    SPR_LOGD("  CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
-    SPR_LOGD("\n");
-    SPR_LOGD("==============================================================================\n");
+    SprThreadPool* pPool = SprThreadPool::GetInstance();
+    if (!pPool) {
+        SPR_LOGE("pPool is nullptr!\n");
+        return;
+    }
+
+    pPool->DumpDetails();
 }
 
 int32_t SprDebugNode::SetMaxNum(int32_t num)
