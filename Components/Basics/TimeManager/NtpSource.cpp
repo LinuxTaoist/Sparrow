@@ -82,8 +82,9 @@ int32_t NtpSource::SendTimeRequest()
         mNtpServers[mCurSrvIndex].ip = ip;
         mNtpServers[mCurSrvIndex].sendTs = GetCurTimeStamp();
 
-        if (mIsReady) {
+        if (!mIsReady) {
             SPR_LOGD("Sync time finished, not request again!");
+            mCurSrvIndex++;
             return 0;
         }
         ret = mpSocket->Write(bytes, ip, srvPort);

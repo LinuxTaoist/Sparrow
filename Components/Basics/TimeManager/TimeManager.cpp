@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <mutex>
 #include <atomic>
 #include <errno.h>
 #include <stdint.h>
@@ -238,8 +239,10 @@ int32_t TimeManager::RequestNtpTime()
     }
 
     SPR_LOGD("Start request ntp time");
+    static std::mutex mutex;
     SprThreadPool::GetInstance()->SubmitTask([&]() {
         // long time to send request, so run it in thread pool
+        std::lock_guard<std::mutex> lock(mutex);
         mpNtpSource->SendTimeRequest();
     });
     SPR_LOGD("Request ntp time ret = %d\n", 0);

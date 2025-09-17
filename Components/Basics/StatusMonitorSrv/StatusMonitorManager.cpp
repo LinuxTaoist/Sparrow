@@ -219,7 +219,7 @@ void StatusMonitorManager::RegisterDebugFuncs()
     p->RegisterCmd(OWNER_STATUSMONITOR, "DumpWithErrCode",  "Dump With ErrCode",std::bind(&StatusMonitorManager::DebugDumpStatusEventsWithErrorCode, this, std::placeholders::_1));
     p->RegisterCmd(OWNER_STATUSMONITOR, "DumpWithText",     "Dump With Text",   std::bind(&StatusMonitorManager::DebugDumpStatusEventsWithText, this, std::placeholders::_1));
     p->RegisterCmd(OWNER_STATUSMONITOR, "AddStatusEvent",   "Add Status Event", std::bind(&StatusMonitorManager::DebugAddStatusEvent, this, std::placeholders::_1));
-    p->RegisterCmd(OWNER_STATUSMONITOR, "DelAllEvent",      "Del All Events",   std::bind(&StatusMonitorManager::DebugDelAllStatusEvent, this, std::placeholders::_1));
+    p->RegisterCmd(OWNER_STATUSMONITOR, "DelAllEvents",     "Del All Events",   std::bind(&StatusMonitorManager::DebugDelAllStatusEvent, this, std::placeholders::_1));
     p->RegisterCmd(OWNER_STATUSMONITOR, "DelWithID",        "Del With ID",      std::bind(&StatusMonitorManager::DebugDelStatusEventsWithModuleID, this, std::placeholders::_1));
     p->RegisterCmd(OWNER_STATUSMONITOR, "DelWithLevel",     "Del With Level",   std::bind(&StatusMonitorManager::DebugDelStatusEventsWithLevel, this, std::placeholders::_1));
     p->RegisterCmd(OWNER_STATUSMONITOR, "DelWithErrCode",   "Del With ErrCode", std::bind(&StatusMonitorManager::DebugDelStatusEventsWithErrorCode, this, std::placeholders::_1));
