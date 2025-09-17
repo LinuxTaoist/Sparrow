@@ -27,16 +27,7 @@
 #include <string>
 #include <fstream>
 #include <sstream>
-
-enum LogLevel
-{
-    LOG_LEVEL_MIN   = 0,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_WARN,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_BUTT
-};
+#include "CoreTypeDefs.h"
 
 enum LogOutputMode
 {
@@ -53,7 +44,7 @@ public:
     virtual ~LogManager();
     int MainLoop();
     static int StopWork();
-    static void SetLogLevel(LogLevel level) { mLogLevelLimit = level; }
+    static void SetLogLevel(InternalDefs::ELogLevel level) { mLogLevelLimit = level; }
     static int  GetLogLevel() { return mLogLevelLimit; }
 
 private:

@@ -81,7 +81,7 @@ int Property::SetProperty(const std::string& key, const std::string& value)
     int ret = 0;
     NONZERO_CHECK_RET(pRspParcel->TimedWait());
     NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
-    SPR_LOGD("ret: %d\n", ret);
+    // SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
 
@@ -102,7 +102,7 @@ int Property::GetProperty(const std::string& key, std::string& value, const std:
     NONZERO_CHECK_RET(pRspParcel->TimedWait());
     NONZERO_CHECK_RET(pRspParcel->ReadString(value));
     NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
-    SPR_LOGD("ret: %d\n", ret);
+    // SPR_LOGD("ret: %d\n", ret);
     return ret;
 }
 
@@ -120,6 +120,6 @@ int Property::GetProperties()
     int ret = 0;
     NONZERO_CHECK_RET(pRspParcel->TimedWait());
     NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
-    SPR_LOGD("ret: %d\n", ret);
+    // SPR_LOGD("ret: %d\n", ret);
     return ret;
 }

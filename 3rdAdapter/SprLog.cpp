@@ -37,6 +37,17 @@
 
 static SharedRingBuffer* pLogSCacheMem = nullptr;
 
+// Defined with the same as CoreTypeDefs.h
+enum ELogLevel
+{
+    LOG_LEVEL_MIN   = 0,
+    LOG_LEVEL_ERROR,
+    LOG_LEVEL_WARN,
+    LOG_LEVEL_INFO,
+    LOG_LEVEL_DEBUG,
+    LOG_LEVEL_BUTT
+};
+
 SprLog::SprLog()
 {
     mWriteSem = sem_open(SEMAPHORE_NAME, O_CREAT, 0644, 1);
@@ -44,6 +55,7 @@ SprLog::SprLog()
         perror("sem_open failed");
     }
 
+    mPrintLevel = LOG_LEVEL_BUTT;
     pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH);
 }
 
@@ -68,8 +80,23 @@ SprLog* SprLog::GetInstance()
     return instance;
 }
 
+int32_t SprLog::SetLevel(int32_t level)
+{
+    mPrintLevel = level;
+    return 0;
+}
+
+int32_t SprLog::GetLevel()
+{
+    return mPrintLevel;
+}
+
 int32_t SprLog::d(const char* tag, const char* format, ...)
 {
+    if (mPrintLevel < LOG_LEVEL_DEBUG) {
+        return 0;
+    }
+
     va_list args;
     va_start(args, format);
     int32_t result = LogImpl("D", tag, format, args);
@@ -80,6 +107,10 @@ int32_t SprLog::d(const char* tag, const char* format, ...)
 
 int32_t SprLog::i(const char* tag, const char* format, ...)
 {
+    if (mPrintLevel < LOG_LEVEL_INFO) {
+        return 0;
+    }
+
     va_list args;
     va_start(args, format);
     int32_t result = LogImpl("I", tag, format, args);
@@ -90,6 +121,10 @@ int32_t SprLog::i(const char* tag, const char* format, ...)
 
 int32_t SprLog::w(const char* tag, const char* format, ...)
 {
+    if (mPrintLevel < LOG_LEVEL_WARN) {
+        return 0;
+    }
+
     va_list args;
     va_start(args, format);
     int32_t result = LogImpl("W", tag, format, args);
@@ -100,6 +135,10 @@ int32_t SprLog::w(const char* tag, const char* format, ...)
 
 int32_t SprLog::e(const char* tag, const char* format, ...)
 {
+    if (mPrintLevel < LOG_LEVEL_ERROR) {
+        return 0;
+    }
+
     va_list args;
     va_start(args, format);
     int32_t result = LogImpl("E", tag, format, args);

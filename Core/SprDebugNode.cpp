@@ -27,6 +27,7 @@
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "SprThreadPool.h"
+#include "SprEnumHelper.h"
 #include "CommonTypeDefs.h"
 
 #define LOG_TAG "SprDebugNode"
@@ -130,6 +131,7 @@ int32_t SprDebugNode::RegisterBuildinCmds()
     mBuildinCmds["version"]       = { "Dump version", std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
     mBuildinCmds["proc"]          = { "Dump process info", std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
     mBuildinCmds["threadpool"]    = { "Dump threadpool details", std::bind(&SprDebugNode::DebugDumpThreadPoolDetails, this, std::placeholders::_1)};
+    mBuildinCmds["loglevel"]      = { "Set log level", std::bind(&SprDebugNode::DebugSetLogLevel, this, std::placeholders::_1)};
     return 0;
 }
 
@@ -218,11 +220,14 @@ void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
         return;
     }
 
+    int32_t level = SprLog::GetInstance()->GetLevel();
+    std::string levelStr = InternalDefs::GetSprLogLevelText(level);
     std::string name = pObj->GetProcName();
     SPR_LOGD("==============================================================================\n");
     SPR_LOGD("                         %s Infomation                                        \n", name.c_str());
     SPR_LOGD("==============================================================================\n");
     SPR_LOGD("\n");
+    SPR_LOGD("  LogLevel  : %s(%d)\n", levelStr.c_str(), level);
     SPR_LOGD("  RunTime   : %s\n", pObj->GetRunTimeString().c_str());
     SPR_LOGD("  DebugPath : %s\n", pObj->GetDebugPath().c_str());
     SPR_LOGD("\n");
@@ -238,6 +243,18 @@ void SprDebugNode::DebugDumpThreadPoolDetails(const std::vector<std::string>& ar
     }
 
     pPool->DumpDetails();
+}
+
+void SprDebugNode::DebugSetLogLevel(const std::vector<std::string>& args)
+{
+    if (args.size() < 2) {
+        SPR_LOGE("Invalid args! size = %d\n", args.size());
+        SPR_LOGE("Usage: echo loglevel {level} > %s (0: none, 1: error, 2: warning, 3: info, 4: debug)\n", mPipePath.c_str());
+        return;
+    }
+
+    int32_t level = atoi(args[1].c_str());
+    SprLog::GetInstance()->SetLevel(level);
 }
 
 int32_t SprDebugNode::SetMaxNum(int32_t num)

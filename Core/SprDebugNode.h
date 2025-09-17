@@ -81,6 +81,7 @@ public:
     void DebugDumpVersion(const std::vector<std::string>& args);
     void DebugDumpProcInfo(const std::vector<std::string>& args);
     void DebugDumpThreadPoolDetails(const std::vector<std::string>& args);
+    void DebugSetLogLevel(const std::vector<std::string>& args);
 
 private:
     SprDebugNode();

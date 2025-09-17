@@ -173,6 +173,17 @@ std::string GetSprDebugMBinderCmdText(int32_t debugMBinderCmd)
         debugMBinderCmds[index] : "UNDEFINED";
 }
 
+std::string GetSprLogLevelText(int32_t level)
+{
+    std::vector<std::string> logLevels = {
+        LOG_LEVEL_MACROS
+    };
+
+    return ( (level >= 0) &&
+             (level < (int32_t)logLevels.size()) ) ?
+        logLevels[level] : "UNDEFINED";
+}
+
 std::string GetSprOneNetBinderCmdText(int32_t oneNetBinderCmd)
 {
     std::vector<std::string> oneNetBinderCmds = {

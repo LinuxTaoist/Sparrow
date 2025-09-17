@@ -50,7 +50,7 @@ using namespace GeneralUtils;
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
 bool LogManager::mRunning = true;
-uint8_t LogManager::mLogLevelLimit = LOG_LEVEL_BUTT;
+uint8_t LogManager::mLogLevelLimit = InternalDefs::LOG_LEVEL_BUTT;
 
 LogManager::LogManager()
 {
@@ -132,15 +132,15 @@ void LogManager::LoadAttrOutputMode(const std::string& value)
 void LogManager::LoadAttrLevelLimit(const std::string& value)
 {
     if (value == "debug") {
-        mLogLevelLimit = LOG_LEVEL_DEBUG;
+        mLogLevelLimit = InternalDefs::LOG_LEVEL_DEBUG;
     } else if (value == "info") {
-        mLogLevelLimit = LOG_LEVEL_INFO;
+        mLogLevelLimit = InternalDefs::LOG_LEVEL_INFO;
     } else if (value == "warn") {
-        mLogLevelLimit = LOG_LEVEL_WARN;
+        mLogLevelLimit = InternalDefs::LOG_LEVEL_WARN;
     } else if (value == "error") {
-        mLogLevelLimit = LOG_LEVEL_ERROR;
+        mLogLevelLimit = InternalDefs::LOG_LEVEL_ERROR;
     } else {
-        mLogLevelLimit = LOG_LEVEL_BUTT;
+        mLogLevelLimit = InternalDefs::LOG_LEVEL_BUTT;
     }
 }
 
@@ -265,22 +265,22 @@ int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 
 int LogManager::GetLevelFromLogStrs(const std::string& logData)
 {
-    int level = LOG_LEVEL_BUTT;
+    int level = InternalDefs::LOG_LEVEL_BUTT;
 
     // 04-03 07:56:23.032  43930     DebugMsg D:
     char levelChar = 0;
     int rc = GetCharBeforeNthTarget(logData, ':', 3, levelChar);
     if (rc == 0) {
         if  (levelChar == 'D') {
-            level = LOG_LEVEL_DEBUG;
+            level = InternalDefs::LOG_LEVEL_DEBUG;
         } else if (levelChar == 'I') {
-            level = LOG_LEVEL_INFO;
+            level = InternalDefs::LOG_LEVEL_INFO;
         } else if (levelChar == 'W') {
-            level = LOG_LEVEL_WARN;
+            level = InternalDefs::LOG_LEVEL_WARN;
         } else if (levelChar == 'E') {
-            level = LOG_LEVEL_ERROR;
+            level = InternalDefs::LOG_LEVEL_ERROR;
         } else {
-            level = LOG_LEVEL_BUTT;
+            level = InternalDefs::LOG_LEVEL_BUTT;
         }
     }
 

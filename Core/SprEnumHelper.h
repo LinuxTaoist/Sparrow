@@ -33,6 +33,7 @@ std::string GetSprProxyBinderCmdText(int32_t cmd);
 std::string GetSprPropertyBinderCmdText(int32_t cmd);
 std::string GetSprPowerMBinderCmdText(int32_t cmd);
 std::string GetSprDebugMBinderCmdText(int32_t cmd);
+std::string GetSprLogLevelText(int32_t level);
 std::string GetSprOneNetBinderCmdText(int32_t cmd);
 std::string GetSprGeneralBinderCmdText(int32_t cmd);
 std::string GetSprModuleBootPriorityText(int32_t priority);

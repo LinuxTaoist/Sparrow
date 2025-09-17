@@ -63,6 +63,15 @@ public:
      */
     static SprLog* GetInstance();
 
+    /**
+     * @brief Set/Get the level of logs to be printed
+     *
+     * @param level
+     * @return int32_t
+     */
+    int32_t SetLevel(int32_t level);
+    int32_t GetLevel();
+
     // ----------------------------------------------------------------------------------------------------------------
     // - External interfaces for printing logs
     // ----------------------------------------------------------------------------------------------------------------
@@ -98,6 +107,7 @@ private:
 
 private:
     sem_t* mWriteSem;
+    int32_t mPrintLevel;  // allow to print log level
 };
 
 #endif // __SPR_LOG_H__
