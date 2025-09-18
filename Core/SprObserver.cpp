@@ -127,7 +127,7 @@ int32_t SprObserver::DumpCommonVersion()
     return 0;
 }
 
-int32_t SprObserver::UpdatePrintLogLevel(int32_t level)
+int32_t SprObserver::SetPrintLogLevel(int32_t level)
 {
     int32_t curLevel = SprLog::GetInstance()->GetLevel();
     if (level < LOG_LEVEL_MIN || level > LOG_LEVEL_BUTT) {
@@ -140,5 +140,6 @@ int32_t SprObserver::UpdatePrintLogLevel(int32_t level)
         return 0;
     }
 
+    SPR_LOGD("Set log level %d -> %d\n", curLevel, level);
     return SprLog::GetInstance()->SetLevel(level);
 }

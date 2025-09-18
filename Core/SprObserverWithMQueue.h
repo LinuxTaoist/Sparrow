@@ -131,10 +131,10 @@ protected:
     // --------------------------------------------------------------------------------------------
     // - Message handle functions
     // --------------------------------------------------------------------------------------------
-    int32_t MsgRespondSystemExitRsp(const SprMsg& msg);
+    int32_t MsgRespondSystemExit(const SprMsg& msg);
     int32_t MsgRespondRegisterRsp(const SprMsg& msg);
     int32_t MsgRespondUnregisterRsp(const SprMsg& msg);
-    int32_t MsgRespondPropertyChangedRsp(const SprMsg& msg);
+    int32_t MsgRespondPropertyLogLevelChanged(const SprMsg& msg);
 
 private:
     bool mConnected;

@@ -28,25 +28,17 @@
 #include <sys/stat.h>        /* For mode constants */
 #include <sys/time.h>
 #include "CommonMacros.h"
+#include "CoreTypeDefs.h"
 #include "SharedRingBuffer.h"
 #include "SprLog.h"
+
+using namespace InternalDefs;
 
 #define PID_PRINT_WIDTH_LIMIT       6
 #define LOG_BUFFER_SIZE_LIMIT       512
 #define SEMAPHORE_NAME              "/SprLogSem"
 
 static SharedRingBuffer* pLogSCacheMem = nullptr;
-
-// Defined with the same as CoreTypeDefs.h
-enum ELogLevel
-{
-    LOG_LEVEL_MIN   = 0,
-    LOG_LEVEL_ERROR,
-    LOG_LEVEL_WARN,
-    LOG_LEVEL_INFO,
-    LOG_LEVEL_DEBUG,
-    LOG_LEVEL_BUTT
-};
 
 SprLog::SprLog()
 {

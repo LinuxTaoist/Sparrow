@@ -105,7 +105,7 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
     return msg.Decode(bytes);
 }
 
-int32_t SprObserverWithMQueue::MsgRespondSystemExitRsp(const SprMsg& msg)
+int32_t SprObserverWithMQueue::MsgRespondSystemExit(const SprMsg& msg)
 {
     SPR_LOGD("System Exit!\n");
     return 0;
@@ -127,30 +127,10 @@ int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
     return 0;
 }
 
-int32_t SprObserverWithMQueue::MsgRespondPropertyChangedRsp(const SprMsg& msg)
+int32_t SprObserverWithMQueue::MsgRespondPropertyLogLevelChanged(const SprMsg& msg)
 {
-    const std::string text = msg.GetString();
-    const size_t eqPos = text.find('=');
-
-    if (eqPos == std::string::npos || text.substr(0, eqPos) != PROPERTY_KEY_LOG_LEVEL) {
-        return 0;
-    }
-
-    char* endptr;
-    const int32_t level = strtol(text.substr(eqPos + 1).c_str(), &endptr, 10);
-    if (*endptr != '\0' || level < InternalDefs::LOG_LEVEL_MIN || level > InternalDefs::LOG_LEVEL_BUTT) {
-        return 0;
-    }
-
-    const int32_t oldLevel = SprLog::GetInstance()->GetLevel();
-    if (level != oldLevel) {
-        SprLog::GetInstance()->SetLevel(level);
-        SPR_LOGD("Log level changed! %d -> %d\n", oldLevel, level);
-    }
-
-    return 0;
+    return SetPrintLogLevel(msg.GetI32Value());
 }
-
 
 int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::string& devName)
 {
@@ -220,12 +200,13 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
             break;
         }
         case SIG_ID_SYSTEM_EXIT: {
-            MsgRespondSystemExitRsp(msg);
+            MsgRespondSystemExit(msg);
             break;
         }
-        case SIG_ID_PROPERTY_CHANGED:   // Not break, only deal with property "loglevel"
-            MsgRespondPropertyChangedRsp(msg);
-            // fall through
+        case SIG_ID_PROPERTY_LOG_LEVEL_CHANGED: {
+            MsgRespondPropertyLogLevelChanged(msg);
+            break;
+        }
         default: {
             ProcessMsg(msg);
             break;

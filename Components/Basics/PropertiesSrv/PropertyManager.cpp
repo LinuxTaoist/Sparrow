@@ -272,8 +272,9 @@ int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text)
 
     char* endptr;
     const int32_t level = strtol(text.substr(eqPos + 1).c_str(), &endptr, 10);
-    if (*endptr != '\0' || level < InternalDefs::LOG_LEVEL_MIN || level > InternalDefs::LOG_LEVEL_BUTT) {
-        return 0;
+    if (*endptr != '\0' || level < (int32_t)InternalDefs::LOG_LEVEL_MIN || level > (int32_t)InternalDefs::LOG_LEVEL_BUTT) {
+        SPR_LOGE("Invalid log level: %s\n", text.c_str());
+        return -1;
     }
 
     const int32_t oldLevel = SprLog::GetInstance()->GetLevel();
