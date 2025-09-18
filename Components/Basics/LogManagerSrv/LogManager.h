@@ -44,8 +44,6 @@ public:
     virtual ~LogManager();
     int MainLoop();
     static int StopWork();
-    static void SetLogLevel(InternalDefs::ELogLevel level) { mLogLevelLimit = level; }
-    static int  GetLogLevel() { return mLogLevelLimit; }
 
 private:
     int EnvReady(const std::string& srvName);
@@ -67,6 +65,7 @@ private:
 
 private:
     static bool     mRunning;
+    uint8_t         mLogLevelLimit;     // defined with "logging.level"
     uint8_t         mOutputMode;        // defined with "logging.output"
     uint32_t        mLogFrameLength;    // defined with "logging.frame_length"
     uint32_t        mLogFileNum;        // defined with "logging.file_num"
@@ -76,8 +75,6 @@ private:
     std::string     mCurrentLogFile;
     std::ofstream   mLogFileStream;
     std::set<std::string> mLogFilePaths;
-
-    static uint8_t  mLogLevelLimit;     // defined with "logging.level"
 
     using LoadAttrFunc = void (LogManager::*)(const std::string&);
     std::map<std::string, LoadAttrFunc> mLoadAttrMap;

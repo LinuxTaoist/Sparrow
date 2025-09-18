@@ -50,10 +50,10 @@ using namespace GeneralUtils;
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
 bool LogManager::mRunning = true;
-uint8_t LogManager::mLogLevelLimit = InternalDefs::LOG_LEVEL_BUTT;
 
 LogManager::LogManager()
 {
+    mLogLevelLimit      = InternalDefs::LOG_LEVEL_BUTT;
     mOutputMode         = LOG_OUTPUT_FILE;
     mLogFrameLength     = DEFAULT_FRAME_LEN_LIMIT;
     mLogFileNum         = DEFAULT_LOG_FILE_NUM_LIMIT;

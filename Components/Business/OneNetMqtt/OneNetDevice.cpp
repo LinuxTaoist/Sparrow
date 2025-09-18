@@ -124,7 +124,7 @@ uint16_t OneNetDevice::GetUnusedIdentity()
     }
 
     if (mUsedIdentities.size() >= IDENTITY_USED_LIMIT) {
-        SPR_LOGE("Identity used limit %d!\n", IDENTITY_USED_LIMIT);
+        SPR_LOGW("Reset identity! (Reach identity limit %d)\n", IDENTITY_USED_LIMIT);
         mUsedIdentities.clear();
         return identity;
     }
