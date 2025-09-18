@@ -136,7 +136,6 @@ int32_t SprObserver::SetPrintLogLevel(int32_t level)
     }
 
     if (level == curLevel) {
-        SPR_LOGD("The log level is already %d\n", level);
         return 0;
     }
 
