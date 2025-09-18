@@ -399,6 +399,6 @@ void TimeManager::DebugStopSyncTimePoller(const std::vector<std::string>& args)
 
 void TimeManager::DebugRequestNtpTime(const std::vector<std::string>& args)
 {
-    SPR_LOGD("Debug request ntp time\n");
+    SPR_LOGI("Debug request ntp time\n");
     RequestNtpTime();
 }

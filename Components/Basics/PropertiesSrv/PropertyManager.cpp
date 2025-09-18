@@ -194,7 +194,7 @@ int32_t PropertyManager::DumpPropertyList()
     mpSharedMemory->GetAllKeyValues(keyValueMap);
 
     for (auto& it : keyValueMap) {
-        SPR_LOGD("%s=%s\n", it.first.c_str(), it.second.c_str());
+        SPR_LOGI("%s=%s\n", it.first.c_str(), it.second.c_str());
     }
 
     return 0;

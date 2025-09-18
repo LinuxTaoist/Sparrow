@@ -579,23 +579,23 @@ void PowerManager::DebugSendPowerOff(const std::vector<std::string>& args)
 
 void PowerManager::DebugDumpCurState(const std::vector<std::string>& args)
 {
-    SPR_LOGD("mCurLev1State    : %s\n", GetLev1String(mCurLev1State).c_str());
-    SPR_LOGD("mStartupType     : %s\n", GetStartupTypeText(mStartupType).c_str());
-    SPR_LOGD("mWakeupSourceType: %s\n", GetWakeupSourceTypeText(mWakeupSourceType).c_str());
-    SPR_LOGD("mStandbyReason   : %s\n", GetStandbyReasonTypeText(mStandbyReason).c_str());
+    SPR_LOGI("mCurLev1State    : %s\n", GetLev1String(mCurLev1State).c_str());
+    SPR_LOGI("mStartupType     : %s\n", GetStartupTypeText(mStartupType).c_str());
+    SPR_LOGI("mWakeupSourceType: %s\n", GetWakeupSourceTypeText(mWakeupSourceType).c_str());
+    SPR_LOGI("mStandbyReason   : %s\n", GetStandbyReasonTypeText(mStandbyReason).c_str());
 }
 
 void PowerManager::DebugDumpObservers(const std::vector<std::string>& args)
 {
-    SPR_LOGD("                   Show  Observers Details (%02d)                                              \n", mStandbyObservers.size());
-    SPR_LOGD("-----------------------------------------------------------------------------------------------\n");
-    SPR_LOGD("  ID  PRIORITY               ACK                     MODULE                                    \n");
-    SPR_LOGD("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOGI("                   Show  Observers Details (%02d)                                              \n", mStandbyObservers.size());
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOGI("  ID  PRIORITY               ACK                     MODULE                                    \n");
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
 
     for (auto& observer : mStandbyObservers) {
         const uint32_t& id = observer.first;
         const StandbyDetail& detail = observer.second;
-        SPR_LOGD("  %02d  %-21s  %-22s  %s\n", id,
+        SPR_LOGI("  %02d  %-21s  %-22s  %s\n", id,
             GetSprModuleBootPriorityText(detail.priority).c_str(),
             GetSprPreStandbyAckText(detail.preStandbyAck).c_str(),
             GetSprModuleIDText(id).c_str());

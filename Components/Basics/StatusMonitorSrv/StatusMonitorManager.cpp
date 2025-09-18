@@ -252,12 +252,12 @@ void StatusMonitorManager::DebugDisplayUTCTimeAsLocalString(const std::vector<st
         return;
     }
 
-    SPR_LOGD("utc: %u, local: %s", utc, ctime(&utc));
+    SPR_LOGI("utc: %u, local: %s", utc, ctime(&utc));
 }
 
 void StatusMonitorManager::DebugDumpAllStatusEvents(const std::vector<std::string>& args)
 {
-    SPR_LOGD("Dump all events\n");
+    SPR_LOGI("Dump all events\n");
     DumpAllStatusEvents();
 }
 
@@ -275,7 +275,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithModuleID(const std::vector<s
         return;
     }
 
-    SPR_LOGD("Dump event moduleID: %d\n", moduleID);
+    SPR_LOGI("Dump event moduleID: %d\n", moduleID);
     DumpStatusEventsWithModuleID(moduleID);
 }
 
@@ -293,7 +293,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithLevel(const std::vector<std:
         return;
     }
 
-    SPR_LOGD("Dump event level: %d\n", level);
+    SPR_LOGI("Dump event level: %d\n", level);
     DumpStatusEventsWithLevel(level);
 }
 
@@ -311,7 +311,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithErrorCode(const std::vector<
         return;
     }
 
-    SPR_LOGD("Dump error code: %d\n", errCode);
+    SPR_LOGI("Dump error code: %d\n", errCode);
     DumpStatusEventsWithErrorCode(errCode);
 }
 
@@ -323,13 +323,13 @@ void StatusMonitorManager::DebugDumpStatusEventsWithText(const std::vector<std::
         return;
     }
 
-    SPR_LOGD("Dump error content: %s\n", args[1].c_str());
+    SPR_LOGI("Dump error content: %s\n", args[1].c_str());
     DumpStatusEventsWithText(args[1]);
 }
 
 void StatusMonitorManager::DebugDelAllStatusEvent(const std::vector<std::string>& args)
 {
-    SPR_LOGD("Delete all events\n");
+    SPR_LOGI("Delete all events\n");
     DelAllStatusEvents();
 }
 
@@ -347,7 +347,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithModuleID(const std::vector<st
         return;
     }
 
-    SPR_LOGD("Delete event moduleID: %d\n", moduleID);
+    SPR_LOGI("Delete event moduleID: %d\n", moduleID);
     DelStatusEventsWithModuleID(moduleID);
 }
 
@@ -365,7 +365,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithLevel(const std::vector<std::
         return;
     }
 
-    SPR_LOGD("Delete event level: %d\n", level);
+    SPR_LOGI("Delete event level: %d\n", level);
     DelStatusEventsWithLevel(level);
 }
 
@@ -383,7 +383,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithErrorCode(const std::vector<s
         return;
     }
 
-    SPR_LOGD("Delete event errCode: %d\n", errCode);
+    SPR_LOGI("Delete event errCode: %d\n", errCode);
     DelStatusEventsWithErrorCode(errCode);
 }
 
@@ -395,7 +395,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::s
         return;
     }
 
-    SPR_LOGD("Delete event text: %s\n", args[1].c_str());
+    SPR_LOGI("Delete event text: %s\n", args[1].c_str());
     DelStatusEventsWithText(args[1]);
 }
 

@@ -139,6 +139,7 @@ int32_t SprObserver::SetPrintLogLevel(int32_t level)
         return 0;
     }
 
+    SprLog::GetInstance()->SetLevel(level);
     SPR_LOGD("Set log level %d -> %d\n", curLevel, level);
-    return SprLog::GetInstance()->SetLevel(level);
+    return 0;
 }

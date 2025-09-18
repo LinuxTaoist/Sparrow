@@ -777,16 +777,16 @@ void OneNetManager::DebugEnableDumpLog(const std::vector<std::string>& args)
     mDebugEnable = !mDebugEnable;
     SprMsg msg(SIG_ID_ONENET_MGR_DEBUG_ENABLE);
     msg.SetBoolValue(mDebugEnable);
-    NotifyAllObserver(msg);
-    SPR_LOGD("mDebugEnable = %d\n", mDebugEnable);
+    NotifyObserver(MODULE_ONENET_DRIVER, msg);
+    SPR_LOGI("mDebugEnable = %d\n", mDebugEnable);
 }
 
 void OneNetManager::DebugDeviceList(const std::vector<std::string>& args)
 {
-    SPR_LOGD("Device List:\n");
+    SPR_LOGI("Device List:\n");
     int32_t i = 0;
     for (auto it = mOneDeviceMap.begin(); it != mOneDeviceMap.end(); it++) {
-        SPR_LOGD(" %d. %s\n", ++i, it->first.c_str());
+        SPR_LOGI(" %d. %s\n", ++i, it->first.c_str());
     }
 }
 
@@ -798,7 +798,7 @@ void OneNetManager::DebugActiveDevice(const std::vector<std::string>& args)
         return;
     }
 
-    SPR_LOGD("Debug Active Device [%s]\n", args[1].c_str());
+    SPR_LOGI("Debug Active Device [%s]\n", args[1].c_str());
     SprMsg msg(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
     msg.SetString(args[1]);
     SendMsg(msg);
@@ -806,7 +806,7 @@ void OneNetManager::DebugActiveDevice(const std::vector<std::string>& args)
 
 void OneNetManager::DebugDeactiveDevice(const std::vector<std::string>& args)
 {
-    SPR_LOGD("Debug Deactive Device\n");
+    SPR_LOGI("Debug Deactive Device\n");
     SprMsg disMsg(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE);
     disMsg.SetString("deactive by node debug");
     SendMsg(disMsg);
