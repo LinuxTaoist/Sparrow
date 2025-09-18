@@ -124,6 +124,14 @@ protected:
      */
     int32_t DumpCommonVersion();
 
+    /**
+     * @brief Update print log level
+     *
+     * @param level
+     * @return int32_t
+     */
+    int32_t UpdatePrintLogLevel(int32_t level);
+
 protected:
     InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;

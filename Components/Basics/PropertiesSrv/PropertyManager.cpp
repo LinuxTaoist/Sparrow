@@ -128,7 +128,36 @@ int32_t PropertyManager::Init()
 
 int32_t PropertyManager::ProcessMsg(const SprMsg& msg)
 {
+    SPR_LOGD("Recv msg: %s\n", GetSigName(msg.GetMsgId()));
+    switch (msg.GetMsgId()) {
+        case SIG_ID_PROPERTY_CHANGED:
+            MsgRespondPropertyChanged(msg);
+            break;
+        default:
+            break;
+    }
     return 0;
+}
+
+void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg)
+{
+    const std::string text = msg.GetString();
+    const size_t eqPos = text.find('=');
+
+    if (eqPos == std::string::npos) {
+        SPR_LOGE("Invalid property: %s\n", text.c_str());
+        return;
+    }
+
+    std::string key = text.substr(0, eqPos);
+    if (key == PROPERTY_KEY_LOG_LEVEL) {
+        HandlePropertyLogLevel(text);
+        return;
+    }
+
+    SprMsg copyMsg = msg;
+    NotifyAllObserver(copyMsg);
+    return;
 }
 
 void PropertyManager::RegisterDebugFuncs()
@@ -234,6 +263,31 @@ int32_t PropertyManager::LoadPersistProperty()
     return 0;
 }
 
+int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text)
+{
+    const size_t eqPos = text.find('=');
+    if (eqPos == std::string::npos || text.substr(0, eqPos) != PROPERTY_KEY_LOG_LEVEL) {
+        return 0;
+    }
+
+    char* endptr;
+    const int32_t level = strtol(text.substr(eqPos + 1).c_str(), &endptr, 10);
+    if (*endptr != '\0' || level < InternalDefs::LOG_LEVEL_MIN || level > InternalDefs::LOG_LEVEL_BUTT) {
+        return 0;
+    }
+
+    const int32_t oldLevel = SprLog::GetInstance()->GetLevel();
+    if (level != oldLevel) {
+        SprLog::GetInstance()->SetLevel(level);
+        SPR_LOGD("Log level changed! %d -> %d\n", oldLevel, level);
+    }
+
+    SprMsg msg(SIG_ID_PROPERTY_LOG_LEVEL_CHANGED);
+    msg.SetI32Value(level);
+    NotifyAllObserver(msg);
+    return 0;
+}
+
 int32_t PropertyManager::HandleKeyValue(const std::string& key, const std::string& value)
 {
     if (!mpSharedMemory) {
@@ -263,7 +317,7 @@ int32_t PropertyManager::HandleKeyValue(const std::string& key, const std::strin
         SPR_LOGD("Set \"%s\"=\"%s\" success!\n", key.c_str(), value.c_str());
         SprMsg msg(SIG_ID_PROPERTY_CHANGED);
         msg.SetString(key + "=" + value);
-        NotifyAllObserver(msg);
+        SendMsg(msg);
 
         if (key.rfind("persist.", 0) == 0) {
             SavePersistProperty(key, value);
