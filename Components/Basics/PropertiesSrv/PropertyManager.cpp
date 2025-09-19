@@ -42,8 +42,8 @@ using namespace InternalDefs;
 #define DEFAULT_PROP_PATH       "default.prop"
 #define VENDOR_PROP_PATH        "vendor.prop"
 
-#define PERSIST_FILE_PATH       "/tmp/persist/"
 #define SHARED_MEMORY_PATH      "/tmp/__property_shared_memory__"
+#define SHARED_PERSIST_PATH     "/tmp/__property_shared_persist__"
 
 #define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
 
@@ -109,6 +109,7 @@ int32_t PropertyManager::GetProperties()
 int32_t PropertyManager::Init()
 {
     mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
+    mpPersistMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(SHARED_PERSIST_PATH, SHARED_MEMORY_MAX_SIZE, false));
 
     // load default property
     LoadPropertiesFromFile(DEFAULT_PROP_PATH);
@@ -231,33 +232,15 @@ int32_t PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
 
 int32_t PropertyManager::LoadPersistProperty()
 {
-    DIR* dir;
-
-    if (access(PERSIST_FILE_PATH, F_OK) != 0) {
-        SPR_LOGW("%s not exist. (%s)\n", PERSIST_FILE_PATH, strerror(errno));
-        return 0;
+    if (!mpPersistMemory) {
+        SPR_LOGE("mpPersistMemory is nullptr!\n");
+        return -1;
     }
 
-    if ((dir = opendir(PERSIST_FILE_PATH)) != nullptr) {
-        struct dirent* entry;
-        while ((entry = readdir(dir)) != nullptr) {
-            if (entry->d_type == DT_REG) {
-                std::string filePath = std::string(PERSIST_FILE_PATH) + entry->d_name;
-                std::ifstream file(filePath);
-
-                if (file) {
-                    std::string value((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-                    mpSharedMemory->SetValue(entry->d_name, value);
-                } else {
-                    SPR_LOGE("Open %s fail! (%s)\n", entry->d_name, strerror(errno));
-                }
-            }
-        }
-
-        closedir(dir);
-    } else {
-        SPR_LOGW("Open %s fail! (%s)\n", PERSIST_FILE_PATH, strerror(errno));
-        return -1;
+    std::map<std::string, std::string> persistMap;
+    mpPersistMemory->GetAllKeyValues(persistMap);
+    for (auto& it : persistMap) {
+        mpSharedMemory->SetValue(it.first, it.second);
     }
 
     return 0;
@@ -330,25 +313,5 @@ int32_t PropertyManager::HandleKeyValue(const std::string& key, const std::strin
 
 int32_t PropertyManager::SavePersistProperty(const std::string& key, const std::string& value)
 {
-    std::string filePath = std::string(PERSIST_FILE_PATH) + key;
-
-    struct stat info;
-    if (stat(PERSIST_FILE_PATH, &info) != 0) {
-        if (mkdir(PERSIST_FILE_PATH, 0777) != 0) {
-            SPR_LOGE("Create %s fail! (%s)", PERSIST_FILE_PATH, strerror(errno));
-            return -1;
-        }
-    }
-
-    std::ofstream file(filePath);
-    if (file) {
-        SPR_LOGD("Save persist property %s=%s\n", key.c_str(), value.c_str());
-        file << value;
-        file.close();
-    } else {
-        SPR_LOGE("Open %s fail! \n", filePath.c_str());
-        return -1;
-    }
-
-    return 0;
+    return mpPersistMemory->SetValue(key, value);
 }

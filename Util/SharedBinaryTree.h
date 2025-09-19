@@ -1,21 +1,3 @@
-/**
- *---------------------------------------------------------------------------------------------------------------------
- *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
- *
- *  @file       : SharedBinaryTree.h
- *  @author     : Xiang.D (dx_65535@163.com)
- *  @version    : 1.0
- *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2023/12/13
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
- *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/23 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
- */
 #ifndef __SHARED_BINARY_TREE_H__
 #define __SHARED_BINARY_TREE_H__
 
@@ -30,14 +12,14 @@ struct Node
 {
     char key[SHARED_BTREE_KEY_MAX_LEN];
     char value[SHARED_BTREE_VALUE_MAX_LEN];
-    Node* left;
-    Node* right;
+    uint32_t left;  // 改为偏移量，0表示空
+    uint32_t right; // 改为偏移量，0表示空
 };
 
 class SharedBinaryTree
 {
 public:
-    SharedBinaryTree(const std::string& filename, size_t size);
+    SharedBinaryTree(const std::string& filename, size_t size, bool create = true);
     ~SharedBinaryTree();
 
     int GetValue(const std::string& key, std::string& value);
@@ -53,7 +35,17 @@ private:
     Node*  mFirstNode;      // 第一个数据节点
     std::string mFilename;
 
-    int   OpenMapFile(const std::string& filename, size_t size);
+    // 辅助方法：通过偏移量获取节点指针
+    Node* GetNodeByOffset(uint32_t offset) {
+        return offset == 0 ? nullptr : (Node*)((char*)mRoot + sizeof(mCurUsedSize) + offset);
+    }
+
+    // 辅助方法：获取节点相对于根的偏移量
+    uint32_t GetNodeOffset(Node* node) {
+        return node == nullptr ? 0 : (uint32_t)((char*)node - (char*)mRoot - sizeof(mCurUsedSize));
+    }
+
+    int   OpenMapFile(const std::string& filename, size_t size, bool create);
     Node* CreateNode(const std::string& key, const std::string& value);
     void  GetKeyValue(Node* node, std::map<std::string, std::string>& keyValueMap);
 };

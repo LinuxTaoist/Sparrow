@@ -143,6 +143,7 @@ uint16_t OneNetDevice::GetUnusedIdentity()
         }
     }
 
+    mUsedIdentities.insert(identity);
     return identity;
 }
 

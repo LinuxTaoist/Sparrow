@@ -1,2 +1,2 @@
-ro.SoftwareVersion=1.0.0
-log_level=5
+ro.system.software.version=1.0.0
+system.log.level=5
