@@ -249,14 +249,13 @@ TEST_F(Util_SharedBinaryTree, TestMaxKeyCountIn128KB) {
     }
 
     TEST_LOG("Max insert %d keys into 128KB", i);
-
-    // for (int j = 0; j < i; ++j) {
-    //     std::string key = "k" + std::to_string(j);
-    //     std::string value;
-    //     int ret = pTree128KB->GetValue(key, value);
-    //     EXPECT_EQ(0, ret);
-    //     EXPECT_EQ(key + std::to_string(j), value);
-    // }
+    for (int j = 0; j < i; ++j) {
+        std::string key = "k" + std::to_string(j);
+        std::string value;
+        int ret = pTree128KB->GetValue(key, value);
+        EXPECT_EQ(0, ret);
+        EXPECT_EQ(key + std::to_string(j), value);
+    }
 
     unlink("/tmp/test_128kb_shared_tree");
 }
