@@ -31,7 +31,7 @@ protected:
     void SetUp() override {
         mpTree = std::make_shared<SharedBinaryTree>("/tmp/test_shared_tree", SHARED_BTREE_MAX_SIZE, false);
         ASSERT_EQ(true, (mpTree != nullptr));
-        SUCCEED() << "Node is " << sizeof(Node) << " bytes.";
+        // TEST_LOG("Node is %zu bytes.", sizeof(Node));
     }
 
     void TearDown() override {
@@ -129,7 +129,7 @@ TEST_F(Util_SharedBinaryTree, TestGetNonExistentKey) {
 
 // 测试共享内存空间不足的情况
 TEST_F(Util_SharedBinaryTree, TestSharedMemoryFull) {
-    SharedBinaryTree smallTree("/tmp/small_shared_tree", sizeof(size_t) + sizeof(Node));
+    SharedBinaryTree smallTree("/tmp/small_shared_tree", sizeof(size_t) + sizeof(Node), true);
     std::string key1 = "mem_full_key";
     std::string value1 = "mem_full_value";
     std::string actualValue1;
@@ -249,5 +249,14 @@ TEST_F(Util_SharedBinaryTree, TestMaxKeyCountIn128KB) {
     }
 
     TEST_LOG("Max insert %d keys into 128KB", i);
+
+    // for (int j = 0; j < i; ++j) {
+    //     std::string key = "k" + std::to_string(j);
+    //     std::string value;
+    //     int ret = pTree128KB->GetValue(key, value);
+    //     EXPECT_EQ(0, ret);
+    //     EXPECT_EQ(key + std::to_string(j), value);
+    // }
+
     unlink("/tmp/test_128kb_shared_tree");
 }

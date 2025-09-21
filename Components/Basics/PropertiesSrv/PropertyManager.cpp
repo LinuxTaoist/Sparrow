@@ -31,6 +31,7 @@
 #include "SprSigId.h"
 #include "CommonMacros.h"
 #include "SprDebugNode.h"
+#include "SprPropertyMacros.h"
 #include "PropertyManager.h"
 
 using namespace InternalDefs;
@@ -151,7 +152,7 @@ void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg)
     }
 
     std::string key = text.substr(0, eqPos);
-    if (key == PROPERTY_KEY_LOG_LEVEL) {
+    if (key == PROP_KEY_LOG_LEVEL) {
         HandlePropertyLogLevel(text);
         return;
     }
@@ -211,18 +212,33 @@ int32_t PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
 
     SPR_LOGI("Load %s.\n", fileName.c_str());
     std::string line;
-    std::string buffer;
-    while (std::getline(file, buffer)) {
-        line += buffer + "\n";
-    }
 
-    std::istringstream iss(line);
-    std::string keyValue;
-    while (std::getline(iss, keyValue, '\n')) {
-        size_t delimiter = keyValue.find('=');
+    while (std::getline(file, line)) {
+        // Deal with line tail comment: keep the content before #
+        size_t commentPos = line.find('#');
+        if (commentPos != std::string::npos) {
+            line = line.substr(0, commentPos);
+        }
+
+        // Jump through empty lines
+        if (line.empty()) continue;
+
+        // Jump through lines that only contain whitespace characters
+        size_t firstNonSpace = line.find_first_not_of(" \t");
+        if (firstNonSpace == std::string::npos) {
+            continue;
+        }
+
+        size_t delimiter = line.find('=');
         if (delimiter != std::string::npos) {
-            std::string key = keyValue.substr(0, delimiter);
-            std::string value = keyValue.substr(delimiter + 1);
+            std::string key = line.substr(0, delimiter);
+            std::string value = line.substr(delimiter + 1);
+
+            key.erase(key.find_last_not_of(" \t") + 1);
+            key.erase(0, key.find_first_not_of(" \t"));
+            value.erase(value.find_last_not_of(" \t") + 1);
+            value.erase(0, value.find_first_not_of(" \t"));
+
             HandleKeyValue(key, value);
         }
     }
@@ -249,7 +265,7 @@ int32_t PropertyManager::LoadPersistProperty()
 int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text)
 {
     const size_t eqPos = text.find('=');
-    if (eqPos == std::string::npos || text.substr(0, eqPos) != PROPERTY_KEY_LOG_LEVEL) {
+    if (eqPos == std::string::npos || text.substr(0, eqPos) != PROP_KEY_LOG_LEVEL) {
         return 0;
     }
 

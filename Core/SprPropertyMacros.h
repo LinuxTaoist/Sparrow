@@ -21,22 +21,22 @@
 #define __SPR_PROPERTY_MACROS_H__
 
 // Naming rules: [attribute].[namespace].[module/component].[function/feature].[description]
-// attribute:
+// [ ] attribute:
 //      ro      - read only
 //      persist - persistent
-// * namespace: means defined by files
+// [*] namespace: means defined by files
 //      vendor
 //      system
 //      ...
-// * module:
+// [*] module:
 //      wifi
 //      log
 //      ...
-// * function/feature:
+// [*] function/feature:
 //      signal
 //      level
 //      ...
-// description: ...
+// [ ] description: ...
 // Note: Mark with '*' means must be defined
 // Example:
 //   ro.system.software.version
@@ -46,8 +46,8 @@
 //-----------------------------------------------------------------------------
 
 // system.prop
-#define PROP_SOFTWARE_VERSION       "ro.system.software.version"
-#define PROPERTY_KEY_LOG_LEVEL      "system.log.level"
+#define PROP_KEY_SOFT_VERSION       "ro.system.software.version"
+#define PROP_KEY_LOG_LEVEL          "system.log.level"
 
 // others, not defined in propery files
 
@@ -56,6 +56,6 @@
 //-----------------------------------------------------------------------------
 
 // vendor.prop
-#define PROP_VENDOR                 "ro.vendor.platform.name"
+#define PROP_KEY_VENDOR             "ro.vendor.platform.name"
 
 #endif // __SPR_PROPERTY_MACROS_H__
