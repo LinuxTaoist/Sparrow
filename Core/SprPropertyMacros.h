@@ -49,7 +49,7 @@
 #define PROP_KEY_SOFT_VERSION       "ro.system.software.version"
 #define PROP_KEY_LOG_LEVEL          "system.log.level"
 
-// others, not defined in propery files
+// others, not defined in property files
 
 //-----------------------------------------------------------------------------
 // vendor
