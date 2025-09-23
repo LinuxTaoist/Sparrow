@@ -24,6 +24,7 @@
 #include <semaphore.h>
 
 #define TAG_PRINT_WIDTH_LIMIT       12
+#define LOG_BUFFER_SIZE_LIMIT       1024
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Log interface macro
@@ -71,6 +72,8 @@ public:
      */
     int32_t SetLevel(int32_t level);
     int32_t GetLevel();
+    int32_t SetLength(int32_t length);
+    int32_t GetLength();
 
     // ----------------------------------------------------------------------------------------------------------------
     // - External interfaces for printing logs
@@ -107,7 +110,8 @@ private:
 
 private:
     sem_t* mWriteSem;
-    int32_t mPrintLevel;  // allow to print log level
+    int32_t mLevel;     // allow to print log level
+    int32_t mLength;    // allow to print log length
 };
 
 #endif // __SPR_LOG_H__

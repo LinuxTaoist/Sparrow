@@ -35,7 +35,7 @@
 using namespace InternalDefs;
 
 #define PID_PRINT_WIDTH_LIMIT       6
-#define LOG_BUFFER_SIZE_LIMIT       512
+#define LOG_BUFFER_SIZE_DEFAULT     512
 #define SEMAPHORE_NAME              "/SprLogSem"
 
 static SharedRingBuffer* pLogSCacheMem = nullptr;
@@ -47,7 +47,8 @@ SprLog::SprLog()
         perror("sem_open failed");
     }
 
-    mPrintLevel = LOG_LEVEL_BUTT;
+    mLevel = LOG_LEVEL_BUTT;
+    mLength = LOG_BUFFER_SIZE_DEFAULT;
     pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH);
 }
 
@@ -74,18 +75,29 @@ SprLog* SprLog::GetInstance()
 
 int32_t SprLog::SetLevel(int32_t level)
 {
-    mPrintLevel = level;
+    mLevel = level;
     return 0;
 }
 
 int32_t SprLog::GetLevel()
 {
-    return mPrintLevel;
+    return mLevel;
+}
+
+int32_t SprLog::SetLength(int32_t length)
+{
+    mLength = length;
+    return 0;
+}
+
+int32_t SprLog::GetLength()
+{
+    return mLength;
 }
 
 int32_t SprLog::d(const char* tag, const char* format, ...)
 {
-    if (mPrintLevel < LOG_LEVEL_DEBUG) {
+    if (mLevel < LOG_LEVEL_DEBUG) {
         return 0;
     }
 
@@ -99,7 +111,7 @@ int32_t SprLog::d(const char* tag, const char* format, ...)
 
 int32_t SprLog::i(const char* tag, const char* format, ...)
 {
-    if (mPrintLevel < LOG_LEVEL_INFO) {
+    if (mLevel < LOG_LEVEL_INFO) {
         return 0;
     }
 
@@ -113,7 +125,7 @@ int32_t SprLog::i(const char* tag, const char* format, ...)
 
 int32_t SprLog::w(const char* tag, const char* format, ...)
 {
-    if (mPrintLevel < LOG_LEVEL_WARN) {
+    if (mLevel < LOG_LEVEL_WARN) {
         return 0;
     }
 
@@ -127,7 +139,7 @@ int32_t SprLog::w(const char* tag, const char* format, ...)
 
 int32_t SprLog::e(const char* tag, const char* format, ...)
 {
-    if (mPrintLevel < LOG_LEVEL_ERROR) {
+    if (mLevel < LOG_LEVEL_ERROR) {
         return 0;
     }
 
@@ -182,9 +194,9 @@ static int FormatLog(std::string& log, const char* level, const char* tag, const
 
 int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, va_list args)
 {
-    char buffer[LOG_BUFFER_SIZE_LIMIT] = {0};
+    char buffer[mLength] = {0};
     int32_t result = vsnprintf(buffer, sizeof(buffer), format, args);
-    if (result < 0 || result >= (int32_t)sizeof(buffer)) {
+    if (result < 0 || result >= (int32_t)sizeof(buffer) || result > LOG_BUFFER_SIZE_LIMIT) {
         char prefix[11] = {0};
         memcpy(prefix, buffer, 10);
         memset(buffer, 0, sizeof(buffer));

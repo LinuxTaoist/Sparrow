@@ -87,6 +87,7 @@ private:
     int32_t LoadPropertiesFromFile(const std::string& fileName);
     int32_t LoadPersistProperty();
     int32_t HandlePropertyLogLevel(const std::string& text);
+    int32_t HandlePropertyLogLength(const std::string& text);
     int32_t HandleKeyValue(const std::string& key, const std::string& value);
     int32_t SavePersistProperty(const std::string& key, const std::string& value);
 

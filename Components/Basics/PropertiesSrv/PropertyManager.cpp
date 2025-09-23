@@ -155,6 +155,9 @@ void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg)
     if (key == PROP_KEY_LOG_LEVEL) {
         HandlePropertyLogLevel(text);
         return;
+    } else if (key == PROP_KEY_LOG_LENGTH) {
+        HandlePropertyLogLength(text);
+        return;
     }
 
     SprMsg copyMsg = msg;
@@ -284,6 +287,32 @@ int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text)
 
     SprMsg msg(SIG_ID_PROPERTY_LOG_LEVEL_CHANGED);
     msg.SetI32Value(level);
+    NotifyAllObserver(msg);
+    return 0;
+}
+
+int32_t PropertyManager::HandlePropertyLogLength(const std::string& text)
+{
+    const size_t eqPos = text.find('=');
+    if (eqPos == std::string::npos || text.substr(0, eqPos) != PROP_KEY_LOG_LENGTH) {
+        return 0;
+    }
+
+    char* endptr;
+    const int32_t length = strtol(text.substr(eqPos + 1).c_str(), &endptr, 10);
+    if (*endptr != '\0' || length < 0 || length > LOG_BUFFER_SIZE_LIMIT) {
+        SPR_LOGE("Invalid log length: %s\n", text.c_str());
+        return -1;
+    }
+
+    const int32_t oldLength = SprLog::GetInstance()->GetLength();
+    if (length != oldLength) {
+        SprLog::GetInstance()->SetLength(length);
+        SPR_LOGD("Log length changed! %d -> %d\n", oldLength, length);
+    }
+
+    SprMsg msg(SIG_ID_PROPERTY_LOG_LENGTH_CHANGED);
+    msg.SetI32Value(length);
     NotifyAllObserver(msg);
     return 0;
 }

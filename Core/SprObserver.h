@@ -132,6 +132,14 @@ protected:
      */
     int32_t SetPrintLogLevel(int32_t level);
 
+    /**
+     * @brief Update print log length
+     *
+     * @param length
+     * @return int32_t
+     */
+    int32_t SetPrintLogLenth(int32_t length);
+
 protected:
     InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;

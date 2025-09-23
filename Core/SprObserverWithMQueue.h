@@ -135,6 +135,7 @@ protected:
     int32_t MsgRespondRegisterRsp(const SprMsg& msg);
     int32_t MsgRespondUnregisterRsp(const SprMsg& msg);
     int32_t MsgRespondPropertyLogLevelChanged(const SprMsg& msg);
+    int32_t MsgRespondPropertyLogLengthChanged(const SprMsg& msg);
 
 private:
     bool mConnected;

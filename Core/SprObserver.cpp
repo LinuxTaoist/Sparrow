@@ -135,11 +135,24 @@ int32_t SprObserver::SetPrintLogLevel(int32_t level)
         return -1;
     }
 
-    if (level == curLevel) {
-        return 0;
+    if (level != curLevel) {
+        SprLog::GetInstance()->SetLevel(level);
+        SPR_LOGD("Set log level %d -> %d\n", curLevel, level);
+    }
+    return 0;
+}
+
+int32_t SprObserver::SetPrintLogLenth(int32_t length)
+{
+    if (length < 0) {
+        SPR_LOGE("Invalid log length: %d\n", length);
+        return -1;
     }
 
-    SprLog::GetInstance()->SetLevel(level);
-    SPR_LOGD("Set log level %d -> %d\n", curLevel, level);
+    int32_t curLength = SprLog::GetInstance()->GetLength();
+    if (length != curLength) {
+        SprLog::GetInstance()->SetLength(length);
+        SPR_LOGD("Set log length %d -> %d\n", curLength, length);
+    }
     return 0;
 }

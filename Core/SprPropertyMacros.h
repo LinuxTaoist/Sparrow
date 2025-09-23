@@ -48,6 +48,7 @@
 // system.prop
 #define PROP_KEY_SOFT_VERSION       "ro.system.software.version"
 #define PROP_KEY_LOG_LEVEL          "system.log.level"
+#define PROP_KEY_LOG_LENGTH         "system.log.length"
 
 // others, not defined in property files
 
