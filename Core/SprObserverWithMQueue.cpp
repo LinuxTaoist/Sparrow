@@ -133,7 +133,7 @@ int32_t SprObserverWithMQueue::MsgRespondPropertyLogLevelChanged(const SprMsg& m
 
 int32_t SprObserverWithMQueue::MsgRespondPropertyLogLengthChanged(const SprMsg& msg)
 {
-    return SetPrintLogLenth(msg.GetI32Value());
+    return SetPrintLogLength(msg.GetI32Value());
 }
 
 int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::string& devName)

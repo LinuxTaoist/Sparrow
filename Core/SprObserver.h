@@ -138,7 +138,7 @@ protected:
      * @param length
      * @return int32_t
      */
-    int32_t SetPrintLogLenth(int32_t length);
+    int32_t SetPrintLogLength(int32_t length);
 
 protected:
     InternalDefs::EProxyType mProxyType;

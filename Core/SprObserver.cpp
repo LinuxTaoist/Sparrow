@@ -142,7 +142,7 @@ int32_t SprObserver::SetPrintLogLevel(int32_t level)
     return 0;
 }
 
-int32_t SprObserver::SetPrintLogLenth(int32_t length)
+int32_t SprObserver::SetPrintLogLength(int32_t length)
 {
     if (length < 0) {
         SPR_LOGE("Invalid log length: %d\n", length);
