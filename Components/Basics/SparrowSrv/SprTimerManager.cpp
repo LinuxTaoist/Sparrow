@@ -367,7 +367,7 @@ void SprTimerManager::DebugDumpTimers(const std::vector<std::string>& args)
     SPR_LOGI(" MODULE  INTERVAL(ms)  DIFTIME(ms)  RTIMES  RCOUNT  MSG \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
     for (auto it = mTimers.begin(); it != mTimers.end(); ++it) {
-        SPR_LOGI(" %6d  %12d  %11d  %6d  %6d  %s", it->GetModuleId(), it->GetIntervalInMilliSec(),
+        SPR_LOGI(" %6d  %12d  %11lld  %6d  %6d  %s", it->GetModuleId(), it->GetIntervalInMilliSec(),
             it->GetExpired() - it->GetTickMs(), it->GetRepeatTimes() % 1000000, it->GetRepeatCount() % 1000000, GetSigName(it->GetMsgId()));
     }
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
