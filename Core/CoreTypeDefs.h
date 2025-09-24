@@ -85,7 +85,7 @@ enum EProxyType
 // --------------------------------------------------------------------------------------------------------------------
 #define SPR_MODULE_ID_MACROS \
     ENUM_OR_STRING(MODULE_NONE),                \
-    ENUM_OR_STRING(MODULE_PROXY ),              \
+    ENUM_OR_STRING(MODULE_PROXY),               \
     ENUM_OR_STRING(MODULE_PROPERTYM),           \
     ENUM_OR_STRING(MODULE_CONFIG),              \
     ENUM_OR_STRING(MODULE_LOGM),                \

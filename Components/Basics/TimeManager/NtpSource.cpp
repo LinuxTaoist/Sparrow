@@ -154,8 +154,8 @@ int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& s
     }
 
     uint64_t t4 = GetCurTimeStamp();
-    uint64_t syncTime = CalculateTime(ntpSrv->sendTs, ntpPacket.GetTransmitTimestamp(),
-                                      ntpPacket.GetReceiveTimestamp(), t4);
+    uint64_t syncTime = CalculateTime(ntpSrv->sendTs, ntpPacket.GetReceiveTimestamp(),
+                                      ntpPacket.GetTransmitTimestamp(), t4);
 
     uint32_t sec = (syncTime >> 32) & 0xFFFFFFFF;
     if (sec < NTP_TIMESTAMP_CHECK) {
@@ -188,10 +188,11 @@ uint64_t NtpSource::GetCurTimeStamp()
 
 uint64_t NtpSource::CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4)
 {
-    uint32_t utc = ((t3 >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET;
+    const int32_t MASK = 0xFFFFFFFF;
+    uint32_t utc = ((t3 >> 32) & MASK) - NTP_UNIX_EPOCH_OFFSET;
     uint64_t offset = ((t4 - t1) + (t3 - t2)) / 2;
-    uint32_t offsetSec = (offset >> 32) & 0xFFFFFFFF;
-    uint32_t offsetFrac = offset & 0xFFFFFFFF;
+    uint32_t offsetSec = (offset >> 32) & MASK;
+    uint32_t offsetFrac = offset & MASK;
 
     return (static_cast<uint64_t>(utc + offsetSec) << 32) | offsetFrac;
 }

@@ -188,8 +188,8 @@ void SprTimerManager::MsgRespondStartSystemTimer(const SprMsg &msg)
     }
 
     auto timerNode = mTimers.begin();
-    uint32_t expired = timerNode->GetExpired();
-    uint32_t tick = timerNode->GetTick();
+    uint64_t expired = timerNode->GetExpired();
+    uint64_t tick = timerNode->GetTickMs();
     int32_t timerIntervalInMSec = expired - tick;
 
     // To deal with problems that are triggered immediately (delay = 0)
@@ -283,11 +283,11 @@ void SprTimerManager::MsgRespondSystemTimerNotify(const SprMsg &msg)
                 SprTimer t(*it);
 
                 // loop: update timer valid expired time
-                uint32_t tmpExpired = t.GetExpired();
+                uint64_t tmpExpired = t.GetExpired();
                 do {
                     tmpExpired += t.GetIntervalInMilliSec();
                     t.RepeatCount();
-                } while (tmpExpired < it->GetTick());
+                } while (tmpExpired < it->GetTickMs());
 
                 if (it->GetRepeatTimes() == 0 || (it->GetRepeatCount() + 1) < it->GetRepeatTimes()) {
                     t.SetExpired(tmpExpired);
@@ -368,7 +368,7 @@ void SprTimerManager::DebugDumpTimers(const std::vector<std::string>& args)
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
     for (auto it = mTimers.begin(); it != mTimers.end(); ++it) {
         SPR_LOGI(" %6d  %12d  %11d  %6d  %6d  %s", it->GetModuleId(), it->GetIntervalInMilliSec(),
-            it->GetExpired() - it->GetTick(), it->GetRepeatTimes() % 1000000, it->GetRepeatCount() % 1000000, GetSigName(it->GetMsgId()));
+            it->GetExpired() - it->GetTickMs(), it->GetRepeatTimes() % 1000000, it->GetRepeatCount() % 1000000, GetSigName(it->GetMsgId()));
     }
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
 }

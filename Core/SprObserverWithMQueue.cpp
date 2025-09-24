@@ -203,10 +203,6 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
             MsgRespondUnregisterRsp(msg);
             break;
         }
-        case SIG_ID_SYSTEM_EXIT: {
-            MsgRespondSystemExit(msg);
-            break;
-        }
         case SIG_ID_PROPERTY_LOG_LEVEL_CHANGED: {
             MsgRespondPropertyLogLevelChanged(msg);
             break;

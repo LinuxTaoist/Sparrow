@@ -334,13 +334,13 @@ void NtpProtocol::SetAuthKeyID(const std::string& key)
 
 void NtpProtocol::DumpDetails()
 {
-    SPR_LOGD("NTP Protocol Details:\n");
-    SPR_LOGD("Li: %d, VN: %d, Mode: %d\n", mLiVnMode.Li, mLiVnMode.VN, mLiVnMode.Mode);
-    SPR_LOGD("Stratum: %d, Poll: %d, Precision: %d\n", mStratum, mPoll, mPrecision);
-    SPR_LOGD("Root Delay: %u, Root Dispersion: %u\n", mRootDelay, mRootDispersion);
-    SPR_LOGD("Reference ID: %u\n", mReferenceId);
-    SPR_LOGD("Reference Timestamp: %llu.%llu\n", ((mReferenceTimestamp >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET, mReferenceTimestamp & 0xFFFFFFFF);
-    SPR_LOGD("Originate Timestamp: %llu.%llu\n", ((mOriginateTimestamp >> 32) & 0xFFFFFFFF), mOriginateTimestamp & 0xFFFFFFFF);
-    SPR_LOGD("Receive Timestamp  : %llu.%llu\n", ((mReceiveTimestamp >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET, mReceiveTimestamp & 0xFFFFFFFF);
-    SPR_LOGD("Transmit Timestamp : %llu.%llu\n", ((mTransmitTimestamp >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET, mTransmitTimestamp & 0xFFFFFFFF);
+    SPR_LOGI("NTP Protocol Details:\n");
+    SPR_LOGI("Li: %d, VN: %d, Mode: %d\n", mLiVnMode.Li, mLiVnMode.VN, mLiVnMode.Mode);
+    SPR_LOGI("Stratum: %d, Poll: %d, Precision: %d\n", mStratum, mPoll, mPrecision);
+    SPR_LOGI("Root Delay: %u, Root Dispersion: %u\n", mRootDelay, mRootDispersion);
+    SPR_LOGI("Reference ID: %u\n", mReferenceId);
+    SPR_LOGI("Reference Timestamp: %llu.%llu\n", ((mReferenceTimestamp >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET, mReferenceTimestamp & 0xFFFFFFFF);
+    SPR_LOGI("Originate Timestamp: %llu.%llu\n", ((mOriginateTimestamp >> 32) & 0xFFFFFFFF), mOriginateTimestamp & 0xFFFFFFFF);
+    SPR_LOGI("Receive Timestamp  : %llu.%llu\n", ((mReceiveTimestamp >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET, mReceiveTimestamp & 0xFFFFFFFF);
+    SPR_LOGI("Transmit Timestamp : %llu.%llu\n", ((mTransmitTimestamp >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET, mTransmitTimestamp & 0xFFFFFFFF);
 }

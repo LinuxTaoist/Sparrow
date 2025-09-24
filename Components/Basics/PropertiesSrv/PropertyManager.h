@@ -75,6 +75,8 @@ private:
 
     /* 消息响应函数 */
     void MsgRespondPropertyChanged(const SprMsg& msg);
+    void MsgRespondPropertyGetRequest(const SprMsg& msg);
+    void MsgRespondPropertySetRequest(const SprMsg& msg);
 
     // Register/Unregister debug functions
     void RegisterDebugFuncs();

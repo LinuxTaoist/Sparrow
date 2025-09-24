@@ -135,6 +135,12 @@ int32_t PropertyManager::ProcessMsg(const SprMsg& msg)
         case SIG_ID_PROPERTY_CHANGED:
             MsgRespondPropertyChanged(msg);
             break;
+        case SIG_ID_PROPERTY_GET_REQUEST:
+            MsgRespondPropertyGetRequest(msg);
+            break;
+        case SIG_ID_PROPERTY_SET_REQUEST:
+            MsgRespondPropertySetRequest(msg);
+            break;
         default:
             break;
     }
@@ -145,7 +151,6 @@ void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg)
 {
     const std::string text = msg.GetString();
     const size_t eqPos = text.find('=');
-
     if (eqPos == std::string::npos) {
         SPR_LOGE("Invalid property: %s\n", text.c_str());
         return;
@@ -162,7 +167,44 @@ void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg)
 
     SprMsg copyMsg = msg;
     NotifyAllObserver(copyMsg);
-    return;
+}
+
+void PropertyManager::MsgRespondPropertyGetRequest(const SprMsg& msg)
+{
+    std::string value;
+    std::string key = msg.GetString();
+    int32_t ret = GetProperty(key, value, "");
+    if (ret != 0) {
+        SPR_LOGE("Get property %s fail!\n", key.c_str());
+        return;
+    }
+
+    SprMsg rspMsg(SIG_ID_PROPERTY_GET_RESPONSE);
+    rspMsg.SetString(key + "=" + value);
+    NotifyObserver((ModuleIDType)msg.GetFrom(), rspMsg);
+}
+
+void PropertyManager::MsgRespondPropertySetRequest(const SprMsg& msg)
+{
+    const std::string text = msg.GetString();
+    const size_t eqPos = text.find('=');
+    if (eqPos == std::string::npos) {
+        SPR_LOGE("Invalid property: %s\n", text.c_str());
+        return;
+    }
+
+    std::string key = text.substr(0, eqPos);
+    std::string value = text.substr(eqPos + 1);
+    int32_t ret = SetProperty(key, value);
+    if (ret != 0) {
+        SPR_LOGE("Set property %s fail!\n", text.c_str());
+        return;
+    }
+
+    SprMsg rspMsg(SIG_ID_PROPERTY_SET_RESPONSE);
+    rspMsg.SetString(text);
+    rspMsg.SetBoolValue(true);
+    NotifyObserver((ModuleIDType)msg.GetFrom(), rspMsg);
 }
 
 void PropertyManager::RegisterDebugFuncs()

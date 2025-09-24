@@ -30,6 +30,10 @@ ENUM_OR_STRING(SIG_ID_DEBUG_SLEEP_EVENT),                       \
 //-----------------------------------------------------------------------------
 // PROPERTY_MANAGER
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_PROPERTY_GET_REQUEST),                    \
+ENUM_OR_STRING(SIG_ID_PROPERTY_GET_RESPONSE),                   \
+ENUM_OR_STRING(SIG_ID_PROPERTY_SET_REQUEST),                    \
+ENUM_OR_STRING(SIG_ID_PROPERTY_SET_RESPONSE),                   \
 ENUM_OR_STRING(SIG_ID_PROPERTY_LOG_LEVEL_CHANGED),              \
 ENUM_OR_STRING(SIG_ID_PROPERTY_LOG_LENGTH_CHANGED),             \
 ENUM_OR_STRING(SIG_ID_PROPERTY_CHANGED),                        \
@@ -43,11 +47,6 @@ ENUM_OR_STRING(SIG_ID_TIMER_ADD_ONCE_TIMER),                    \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_REPEAT_TIMER),                  \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
 ENUM_OR_STRING(SIG_ID_TIMER_DEL_TIMER),                         \
-
-//-----------------------------------------------------------------------------
-// SPARROW_SYSTEM
-//-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_SYSTEM_EXIT),                             \
 
 //-----------------------------------------------------------------------------
 // SYSTEM_TIMER_MANAGER

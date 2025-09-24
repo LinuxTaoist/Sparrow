@@ -67,7 +67,7 @@ protected:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int32_t InitFramework() override;
+    virtual int32_t InitFramework() final override;
 
     /**
      * @brief  Process message from message queue received

@@ -100,17 +100,18 @@ int32_t TimeManager::InitNtpSource()
 
 int32_t TimeManager::GetDiffWithLocalTime(uint64_t timestamp, int64_t& diffNs)
 {
-    struct timespec current_ts;
-    if (clock_gettime(CLOCK_REALTIME, &current_ts) == -1) {
+    const int32_t NS_PER_SEC = 1000000000LL;
+    struct timespec ts;
+    if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
         SPR_LOGE("Get time failed! (%s)\n", strerror(errno));
         return -1;
     }
 
-    uint64_t targetNs = ((timestamp >> 32) & 0xFFFFFFFF) * 1000000000LL + (timestamp & 0xFFFFFFFF);
-    uint64_t currentNs = current_ts.tv_sec * 1000000000LL + current_ts.tv_nsec;
+    uint64_t targetNs = ((timestamp >> 32) & 0xFFFFFFFF) * NS_PER_SEC + (timestamp & 0xFFFFFFFF) / NS_PER_SEC;
+    uint64_t currentNs = (uint64_t)ts.tv_sec * NS_PER_SEC + ts.tv_nsec;
 
     diffNs = std::abs(static_cast<int64_t>(targetNs - currentNs));
-    // SPR_LOGD("Time diff: %lld ns", diffNs);
+    SPR_LOGD("Time diff: %lld ns", diffNs);
     return 0;
 }
 
@@ -150,11 +151,11 @@ int32_t TimeManager::SmoothAdjustSystemTime(int64_t ns)
 
     int32_t ret = adjtimex(&tx);
     if (ret == -1) {
-        SPR_LOGE("Smooth adjust failed: %s (adjust_us: %d)\n", strerror(errno), us);
+        SPR_LOGE("Smooth adjust %dus failed! (%s)\n", us, strerror(errno));
         return -1;
     }
 
-    SPR_LOGI("Smooth adjust %lld ns (%d us) successfully\n", ns, us);
+    SPR_LOGI("Smooth adjust %dus successfully\n", us);
     return 0;
 }
 
@@ -166,11 +167,11 @@ int32_t TimeManager::JumpAdjustSystemTime(uint64_t timestamp)
 
     int32_t ret = clock_settime(CLOCK_REALTIME, &ts);
     if (ret == -1) {
-        SPR_LOGE("Set system time failed: %s\n", strerror(errno));
+        SPR_LOGE("Jump adjust %d.%lds failed! (%s)\n", ts.tv_sec, ts.tv_nsec, strerror(errno));
         return -1;
     }
 
-    SPR_LOGI("Jump adjust %lu successfully\n", ts.tv_sec);
+    SPR_LOGI("Jump adjust %d.%lds successfully\n", ts.tv_sec, ts.tv_nsec);
     return 0;
 }
 
