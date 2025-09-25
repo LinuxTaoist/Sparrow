@@ -102,15 +102,20 @@ private:
     void UnregisterDebugFuncs();
 
     /** Debug functions */
+    void DebugDumpDetails(const std::vector<std::string>& args);
     void DebugStartSyncTime(const std::vector<std::string>& args);
     void DebugStopSyncTime(const std::vector<std::string>& args);
     void DebugStartSyncTimePoller(const std::vector<std::string>& args);
     void DebugStopSyncTimePoller(const std::vector<std::string>& args);
     void DebugRequestNtpTime(const std::vector<std::string>& args);
+    void DebugSetSyncTimeOutMs(const std::vector<std::string>& args);
+    void DebugSetSyncPollTimeOutMs(const std::vector<std::string>& args);
 
 private:
     bool mSyncTimeFinished;
     int32_t mCurPriority;
+    int32_t mSyncTimeOutMs;
+    int32_t mSyncPollTimeOutMs;
     InternalDefs::TimeSourceType mCurTimeSource;
     std::shared_ptr<NtpSource> mpNtpSource;
     std::map<TimeSourcePriority, InternalDefs::TimeSourceType> mTimeSourceMap; // key: priority, value: source

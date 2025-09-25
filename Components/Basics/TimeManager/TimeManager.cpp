@@ -26,6 +26,7 @@
 #include <sys/socket.h>
 #include "SprLog.h"
 #include "TimeManager.h"
+#include "SprProcInfo.h"
 #include "SprDebugNode.h"
 #include "SprThreadPool.h"
 #include "SprEnumHelper.h"
@@ -34,11 +35,11 @@ using namespace std;
 using namespace InternalDefs;
 
 #define LOG_TAG "TimeMgr"
-#define DEFAULT_NTP_PORT        8087
-#define SYNC_TIME_TIMEOUT_SEC   4000    // 4 sec
-#define SYNC_TIME_POLL_TIMEOUT  600000  // 10 min
-#define TIME_ADJUST_SMALL_SEC   4
-#define TIME_ADJUST_LARGE_SEC   120
+#define DEFAULT_NTP_PORT            8087
+#define TIME_ADJUST_SMALL_SEC       4
+#define TIME_ADJUST_LARGE_SEC       120
+#define DEFAULT_SYNC_TIMEOUT        4000    // 4 sec
+#define DEFAULT_SYNC_POLL_TIMEOUT   600000  // 10 min
 
 static std::atomic<bool> gObjAlive(true);
 
@@ -48,6 +49,8 @@ TimeManager::TimeManager(ModuleIDType id, const std::string& name)
     mSyncTimeFinished = false;
     mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
     mCurTimeSource = TIME_SOURCE_TYPE_BUTT;
+    mSyncTimeOutMs = DEFAULT_SYNC_TIMEOUT;
+    mSyncPollTimeOutMs = DEFAULT_SYNC_POLL_TIMEOUT;
 
     mTimeSourceMap.insert(make_pair(TIME_SOURCE_PRIORITY_HIGH, TIME_SOURCE_TYPE_GNSS));
     mTimeSourceMap.insert(make_pair(TIME_SOURCE_PRIORITY_MEDIUM, TIME_SOURCE_TYPE_NTP));
@@ -122,7 +125,7 @@ int32_t TimeManager::StartSyncTime()
     // sync time from first priority configured
     mSyncTimeFinished = false;
     mCurPriority = mTimeSourceMap.empty() ? TIME_SOURCE_PRIORITY_BUTT : mTimeSourceMap.begin()->first;
-    return RegisterTimer(0, SYNC_TIME_TIMEOUT_SEC,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 0);
+    return RegisterTimer(0, mSyncTimeOutMs,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 0);
 }
 
 int32_t TimeManager::StopSyncTime()
@@ -134,7 +137,7 @@ int32_t TimeManager::StopSyncTime()
 
 int32_t TimeManager::StartSyncTimePoller()
 {
-    return RegisterTimer(0, SYNC_TIME_POLL_TIMEOUT, SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT, 0);
+    return RegisterTimer(0, mSyncPollTimeOutMs, SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT, 0);
 }
 
 int32_t TimeManager::StopSyncTimePoller()
@@ -359,11 +362,14 @@ void TimeManager::RegisterDebugFuncs()
         return;
     }
 
-    p->RegisterCmd(mModuleName, "ReqNtpTime",       "Request ntp time",    std::bind(&TimeManager::DebugRequestNtpTime,        this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "StartSyncTime",    "Start sync time",     std::bind(&TimeManager::DebugStartSyncTime,         this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "StopSyncTime",     "Stop sync time",      std::bind(&TimeManager::DebugStopSyncTime,          this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "StartPoll",        "Start time poll",     std::bind(&TimeManager::DebugStartSyncTimePoller,   this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "StopPoll",         "Stop time poll",      std::bind(&TimeManager::DebugStopSyncTimePoller,    this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "DumpDetails",      "Dump details",           std::bind(&TimeManager::DebugDumpDetails,        this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "ReqNtpTime",       "Request ntp time",       std::bind(&TimeManager::DebugRequestNtpTime,        this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "StartSyncTime",    "Start sync time",        std::bind(&TimeManager::DebugStartSyncTime,         this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "SetSyncTime",      "Set sync timeout (ms)",  std::bind(&TimeManager::DebugSetSyncTimeOutMs,      this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "SetPollTime",      "Set poll timeout (ms)",  std::bind(&TimeManager::DebugSetSyncPollTimeOutMs,  this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "StopSyncTime",     "Stop sync time",         std::bind(&TimeManager::DebugStopSyncTime,          this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "StartPoll",        "Start time poll",        std::bind(&TimeManager::DebugStartSyncTimePoller,   this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "StopPoll",         "Stop time poll",         std::bind(&TimeManager::DebugStopSyncTimePoller,    this, std::placeholders::_1));
 }
 
 void TimeManager::UnregisterDebugFuncs()
@@ -376,6 +382,18 @@ void TimeManager::UnregisterDebugFuncs()
 
     SPR_LOGD("Unregister %s all debug funcs\n", mModuleName.c_str());
     p->UnregisterCmd(mModuleName);
+}
+
+void TimeManager::DebugDumpDetails(const std::vector<std::string>& args)
+{
+    SPR_LOGI("                           Dump TimeManager Details                                            \n");
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOGI("- mSyncTimeFinished: %d\n", mSyncTimeFinished);
+    SPR_LOGI("- mCurPriority: %d\n", mCurPriority);
+    SPR_LOGI("- mCurTimeSource: %s\n", GetSprTimeSourceTypeText(mCurTimeSource).c_str());
+    SPR_LOGI("- mSyncTimeOutMs: %d\n", mSyncTimeOutMs);
+    SPR_LOGI("- mSyncPollTimeOutMs: %d\n", mSyncPollTimeOutMs);
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
 }
 
 void TimeManager::DebugStartSyncTime(const std::vector<std::string>& args)
@@ -402,4 +420,40 @@ void TimeManager::DebugRequestNtpTime(const std::vector<std::string>& args)
 {
     SPR_LOGI("Debug request ntp time\n");
     RequestNtpTime();
+}
+
+void TimeManager::DebugSetSyncTimeOutMs(const std::vector<std::string>& args)
+{
+    if (args.size() < 2) {
+        SPR_LOGE("Invalid args! size = %d\n", args.size());
+        SPR_LOGE("Usage: echo SetSyncTime {ms} > %s\n", SprProcInfo::GetInstance()->GetDebugPath().c_str());
+        return;
+    }
+
+    int32_t ms = atoi(args[1].c_str());
+    if (ms <= 0) {
+        SPR_LOGE("Invalid timeout: %s\n", args[1].c_str());
+        return;
+    }
+
+    SPR_LOGI("mSyncTimeOutMs: %d -> %d ms\n", mSyncTimeOutMs, ms);
+    mSyncTimeOutMs = ms;
+}
+
+void TimeManager::DebugSetSyncPollTimeOutMs(const std::vector<std::string>& args)
+{
+    if (args.size() < 2) {
+        SPR_LOGE("Invalid args! size = %d\n", args.size());
+        SPR_LOGE("Usage: echo SetPollTime {ms} > %s\n", SprProcInfo::GetInstance()->GetDebugPath().c_str());
+        return;
+    }
+
+    int32_t ms = atoi(args[1].c_str());
+    if (ms <= 0) {
+        SPR_LOGE("Invalid timeout: %s\n", args[1].c_str());
+        return;
+    }
+
+    SPR_LOGI("mSyncPollTimeOutMs: %d -> %d ms\n", mSyncPollTimeOutMs, ms);
+    mSyncPollTimeOutMs = ms;
 }

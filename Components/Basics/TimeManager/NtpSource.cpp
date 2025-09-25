@@ -188,11 +188,14 @@ uint64_t NtpSource::GetCurTimeStamp()
 
 uint64_t NtpSource::CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4)
 {
-    const int32_t MASK = 0xFFFFFFFF;
-    uint32_t utc = ((t3 >> 32) & MASK) - NTP_UNIX_EPOCH_OFFSET;
-    uint64_t offset = ((t4 - t1) + (t3 - t2)) / 2;
-    uint32_t offsetSec = (offset >> 32) & MASK;
-    uint32_t offsetFrac = offset & MASK;
+    #define NTPTIME_TO_NSEC(x) ( (((x >> 32) & MASK) * 1000000000ULL) + (x & MASK) )
 
-    return (static_cast<uint64_t>(utc + offsetSec) << 32) | offsetFrac;
+    const int32_t MASK = 0xFFFFFFFF;
+    uint64_t utc = ((t3 >> 32) & MASK) - NTP_UNIX_EPOCH_OFFSET;
+    uint64_t offset = ( (NTPTIME_TO_NSEC(t4) - NTPTIME_TO_NSEC(t1)) +
+                        (NTPTIME_TO_NSEC(t3) - NTPTIME_TO_NSEC(t2)) ) / 2;
+    uint64_t offsetSec = offset / 1000000000ULL;
+    uint64_t offsetFrac = offset % 1000000000ULL;
+
+    return ((utc + offsetSec) << 32) | offsetFrac;
 }
