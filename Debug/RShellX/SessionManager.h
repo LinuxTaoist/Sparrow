@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : LoginManager.h
+ *  @file       : SessionManager.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,50 +16,29 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __LOGIN_MANAGER_H__
-#define __LOGIN_MANAGER_H__
+#ifndef __SESSION_MANAGER_H__
+#define __SESSION_MANAGER_H__
 
 #include <list>
 #include <memory>
 #include <string>
-#include <sys/types.h>
-#include <PPipe.h>
 #include <PSocket.h>
 
-class LoginManager
+class SessionManager
 {
 public:
-    static LoginManager* GetInstance();
+    static SessionManager* GetInstance();
 
-    int Init();
-    int BuildConnectAsTcpServer(short port);
-    int ConnectLoop();
-
-private:
-    LoginManager();
-    ~LoginManager();
-    int Usage();
-    int ExitShell();
-    int ExitAll();
-    int WriteStdin(const std::string& buf);
-    int RegisterSignal();
-    int ListenPipeEvent(int pipeFd);
-    int ExecuteCmd(std::string& cmdBytes);
-    // int Login(const char* username, const char* password);
-    // int Logout();
+    int32_t Init(uint16_t port);
+    int32_t EpollLoop();
 
 private:
-    bool mIsLogin;
-    pid_t mCurPid;
-    static pid_t mShellPid;
-    int mStdin;
-    int mStdout;
-    int mStderr;
-    int mInPipe[2];
-    int mOutPipe[2];
-    std::shared_ptr<PPipe> mpPipe;
+    SessionManager();
+    ~SessionManager();
+
+private:
     std::shared_ptr<PTcpServer> mpTcpSrv;
     std::list<std::shared_ptr<PTcpClient>> mTcpClients;
 };
 
-#endif // __LOGIN_MANAGER_H__
+#endif // __SESSION_MANAGER_H__

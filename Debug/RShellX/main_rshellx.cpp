@@ -18,7 +18,7 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "LoginManager.h"
+#include "SessionManager.h"
 
 using namespace std;
 
@@ -38,10 +38,8 @@ int main(int argc, const char* argv[])
         return -1;
     }
 
-    SPR_LOGD("Start RShellX server on port %d\n", port);
-    LoginManager* pLoginMgr = LoginManager::GetInstance();
-    pLoginMgr->Init();
-    pLoginMgr->BuildConnectAsTcpServer(port);
-    pLoginMgr->ConnectLoop();
+    auto pSMgr = SessionManager::GetInstance();
+    pSMgr->Init(port);
+    pSMgr->EpollLoop();
     return 0;
 }

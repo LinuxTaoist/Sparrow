@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : ShellEnv.h
+ *  @file       : PtyTerminal.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,26 +16,27 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SHELL_ENVIRONMET_H__
-#define __SHELL_ENVIRONMET_H__
+#ifndef __PTY_TERMINAL_H__
+#define __PTY_TERMINAL_H__
 
-#include <string>
+#include <stdint.h>
 
-class ShellEnv
+class PtyTerminal
 {
 public:
-    explicit ShellEnv(int inFd, int outFd, int errFd);
-    ~ShellEnv();
+    PtyTerminal();
+    ~PtyTerminal();
 
-    int Execute(const std::string& cmd);
+    int32_t Init(int32_t clientFd);
 
 private:
-    // int mInFd;
-    // int mOutFd;
-    // int mErrFd;
-    // int mStdin;     // save stdin fd
-    // int mStdout;    // save stdout fd
-    // int mStderr;    // save stderr fd
+    void SetNonBlock(int32_t fd);
+    ssize_t FilterColorCode(char* input, ssize_t len, char* output);
+
+private:
+    int32_t mClientFd;
+    int32_t mMasterFd;
+    int32_t mSlaveFd;
 };
 
-#endif // __SHELL_ENVIRONMET_H__
+#endif // __PTY_TERMINAL_H__
