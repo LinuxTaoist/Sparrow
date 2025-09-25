@@ -35,7 +35,7 @@ using namespace std;
 using namespace InternalDefs;
 
 #define LOG_TAG "TimeMgr"
-#define DEFAULT_NTP_PORT            8087
+#define DEFAULT_NTP_PORT            0
 #define TIME_ADJUST_SMALL_SEC       4
 #define TIME_ADJUST_LARGE_SEC       120
 #define DEFAULT_SYNC_TIMEOUT        4000    // 4 sec
@@ -193,7 +193,7 @@ int32_t TimeManager::SyncSystemTime(int32_t source, uint64_t timestamp)
 
     int64_t diffSec = diffNs / 1000000000LL;
     if (diffSec <= TIME_ADJUST_SMALL_SEC)    {
-        SPR_LOGD("Not need sync time! (small time difference %lld sec)\n", diffSec);
+        SPR_LOGI("Not need sync time! (small time difference %lld sec)\n", diffSec);
     } else if (diffSec <= TIME_ADJUST_LARGE_SEC) {
         SmoothAdjustSystemTime(diffNs);
     } else {
@@ -438,6 +438,8 @@ void TimeManager::DebugSetSyncTimeOutMs(const std::vector<std::string>& args)
 
     SPR_LOGI("mSyncTimeOutMs: %d -> %d ms\n", mSyncTimeOutMs, ms);
     mSyncTimeOutMs = ms;
+    StopSyncTime();
+    StartSyncTime();
 }
 
 void TimeManager::DebugSetSyncPollTimeOutMs(const std::vector<std::string>& args)
@@ -456,4 +458,6 @@ void TimeManager::DebugSetSyncPollTimeOutMs(const std::vector<std::string>& args
 
     SPR_LOGI("mSyncPollTimeOutMs: %d -> %d ms\n", mSyncPollTimeOutMs, ms);
     mSyncPollTimeOutMs = ms;
+    StopSyncTimePoller();
+    StartSyncTimePoller();
 }
