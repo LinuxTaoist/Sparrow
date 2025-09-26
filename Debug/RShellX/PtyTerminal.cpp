@@ -16,8 +16,10 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <memory>
 #include <pty.h>
 #include <fcntl.h>
+#include <ctype.h>
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
@@ -26,9 +28,14 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include "SprLog.h"
+#include "PPipe.h"
+#include "PSocket.h"
 #include "PtyTerminal.h"
+#include "EpollEventHandler.h"
 
 #define LOG_TAG "PtyTerminal"
+
+using namespace std;
 
 static void SigChldHandler(int signo)
 {
@@ -36,28 +43,31 @@ static void SigChldHandler(int signo)
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
-PtyTerminal::PtyTerminal()
-    : mClientFd(-1), mMasterFd(-1), mSlaveFd(-1)
+PtyTerminal::PtyTerminal(const std::function<void(int32_t ret, std::string, void*)>& cb, void* arg)
+    : mArg(arg), mMasterFd(-1), mSlaveFd(-1), mCb(cb)
 {
 }
 
 PtyTerminal::~PtyTerminal()
 {
     if (mMasterFd != -1) {
+        SPR_LOGI("# CLOSE MASTER FD: %d", mMasterFd);
         close(mMasterFd);
         mMasterFd = -1;
     }
     if (mSlaveFd != -1) {
+        SPR_LOGI("# CLOSE SLAVE FD: %d", mSlaveFd);
         close(mSlaveFd);
         mSlaveFd = -1;
     }
-    if (mClientFd != -1) {
-        close(mClientFd);
-        mClientFd = -1;
-    }
 }
 
-int32_t PtyTerminal::Init(int32_t clientFd)
+int32_t PtyTerminal::Write(const std::string& bytes)
+{
+    return write(mMasterFd, bytes.c_str(), bytes.size());
+}
+
+int32_t PtyTerminal::Init()
 {
     int32_t ret = openpty(&mMasterFd, &mSlaveFd, nullptr, nullptr, nullptr);
     if (ret != 0) {
@@ -65,120 +75,111 @@ int32_t PtyTerminal::Init(int32_t clientFd)
         return ret;
     }
 
-    int32_t cmdPid = fork();
-    if (cmdPid == -1) {
+    int32_t pid = fork();
+    if (pid == 0) {             // Child process
+        BashProcess();
+    } else if (pid > 0) {       // Parent process
+        MasterProcess();
+    } else {                    // fork failed
         SPR_LOGE("fork failed! (%s)", strerror(errno));
-        return -1;
     }
 
-    // Execute shell in child process
-    if (cmdPid == 0) {
-        close(mMasterFd);
-        close(clientFd);
-
-        // Set the slave fd as the controlling terminal
-        setsid();
-        ioctl(mSlaveFd, TIOCSCTTY, 0);
-
-        dup2(mSlaveFd, STDIN_FILENO);
-        dup2(mSlaveFd, STDOUT_FILENO);
-        dup2(mSlaveFd, STDERR_FILENO);
-        close(mSlaveFd);
-
-        // Set the terminal attributes
-        struct termios term;
-        if (tcgetattr(STDIN_FILENO, &term) == 0) {
-            term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL);
-            term.c_lflag |= (ICANON | ISIG | IEXTEN);
-            tcsetattr(STDIN_FILENO, TCSANOW, &term);
-        }
-
-        // No Color Output
-        setenv("TERM", "dumb", 1);
-        execl("/bin/bash", "bash", -1, nullptr);
-        SPR_LOGE("execl failed! (%s)", strerror(errno));
-        exit(EXIT_FAILURE);
-    }
-
-    close(mSlaveFd);
-    signal(SIGCHLD, SigChldHandler);
-
-    SetNonBlock(mMasterFd);
-    SetNonBlock(mClientFd);
-
-    fd_set readfds;
-    const int32_t MAX_BUFF_SIZE = 1024;
-    while (1) {
-        FD_ZERO(&readfds);
-        FD_SET(mMasterFd, &readfds);
-        FD_SET(mClientFd, &readfds);
-
-        int32_t maxFd = (mMasterFd > mClientFd) ? mMasterFd : mClientFd;
-        int32_t ret = select(maxFd + 1, &readfds, nullptr, nullptr, nullptr);
-        if (ret < 0 && errno != EINTR) {
-            SPR_LOGE("select failed! (%s)", strerror(errno));
-            break;
-        }
-
-        if (FD_ISSET(mMasterFd, &readfds)) {
-            char buf[MAX_BUFF_SIZE] = {0};
-            int32_t n = read(mMasterFd, buf, MAX_BUFF_SIZE);
-            if (n <= 0) {
-                break;
-            }
-
-            char filedBuffer[MAX_BUFF_SIZE] = {0};
-            ssize_t filtedLen = FilterColorCode(buf, n, filedBuffer);
-            if (filtedLen > 0) {
-                write(mClientFd, filedBuffer, filtedLen);
-            }
-        }
-
-        if (FD_ISSET(mClientFd, &readfds)) {
-            char buf[MAX_BUFF_SIZE] = {0};
-            int32_t n = read(mClientFd, buf, MAX_BUFF_SIZE);
-            if (n <= 0) {
-                break;
-            }
-            write(mMasterFd, buf, n);
-        }
-    }
-
-    // clear resources
-    kill(cmdPid, SIGTERM);
-    close(mMasterFd);
-    close(mClientFd);
-    mMasterFd = -1;
-    mClientFd = -1;
     return 0;
 }
 
-void PtyTerminal::SetNonBlock(int32_t fd)
+int32_t PtyTerminal::BashProcess()
 {
-    int32_t flags = fcntl(fd, F_GETFL, 0);
-    fcntl(fd, F_SETFL, flags | O_NONBLOCK);
-}
+    // Set the slave fd as the controlling terminal
+    setsid();
+    ioctl(mSlaveFd, TIOCSCTTY, 0);
 
-ssize_t PtyTerminal::FilterColorCode(char* input, ssize_t len, char* output)
-{
-    ssize_t outputLen = 0;
-    int32_t inEscape = 0;
-    for (ssize_t i = 0; i < len; ++i) {
-        if (input[i] == '\033') {
-            inEscape = 1;
-        } else if (inEscape) {
-            if ((input[i] >= 'A' && input[i] <= 'Z') ||
-                (input[i] >= 'a' && input[i] <= 'z') ||
-                input[i] == '[' || input [i] == '(' || input[i] == ')' ||
-                input[i] == '*' || input[i] == '?' || input[i] == '!' ||
-                input[i] == '#' || input[i] == ' ' || input[i] == '`' ||
-                input[i] == ')' || input[i] == '~') {
-                inEscape = 0;
-            }
-        } else {
-            output[outputLen++] = input[i];
+    // Redirect stdin, stdout, and stderr
+    dup2(mSlaveFd, STDIN_FILENO);
+    dup2(mSlaveFd, STDOUT_FILENO);
+    dup2(mSlaveFd, STDERR_FILENO);
+
+    // close all other file descriptors
+    for (int fd = sysconf(_SC_OPEN_MAX); fd > 2; fd--) {
+        if (fcntl(fd, F_GETFD) != -1) {
+            close(fd);
         }
     }
 
-    return outputLen;
+    // Set the terminal attributes
+    struct termios term;
+    int32_t rc = tcgetattr(STDIN_FILENO, &term);
+    if (rc == 0) {
+        term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL);
+        term.c_lflag |= (ICANON | ISIG | IEXTEN);
+        tcsetattr(STDIN_FILENO, TCSANOW, &term);
+    }
+
+    // No Color Output
+    setenv("TERM", "dumb", 1);
+    std::string shell = GetCurShell();  // /bin/sh
+    execl(shell.c_str(), shell.c_str(), "-l", nullptr);
+    SPR_LOGE("execl %s failed! (%s)", shell.c_str(), strerror(errno));
+    exit(EXIT_FAILURE);
+    return 0;
+}
+
+int32_t PtyTerminal::MasterProcess()
+{
+    close(mSlaveFd);
+    signal(SIGCHLD, SigChldHandler);
+
+    mPtyPipe = std::make_shared<PPipe>(mMasterFd, [&](ssize_t ret, std::string bytes, void* arg){
+        PPipe* pPipe = reinterpret_cast<PPipe*>(arg);
+        if (pPipe == nullptr) {
+            SPR_LOGE("pPipe is nullptr!\n");
+            return;
+        }
+
+        // When erase color, the output is messed such as vi
+        // std::string out;
+        // EraseColor(bytes, out);
+        if (mCb) {
+            mCb(ret, bytes, mArg ? mArg : this);
+        }
+    });
+
+    mPtyPipe->AddToPoll();
+    return 0;
+}
+
+int32_t PtyTerminal::EraseColor(const std::string& in, std::string& out)
+{
+    out.clear();
+    out.reserve(in.size());
+
+    const size_t len = in.size();
+    size_t i = 0;
+
+    while (i < len) {
+        if (in[i] == '\033') {
+            i++;
+            if (i < len && in[i] == '[') {
+                i++;
+                while (i < len && !isalpha(static_cast<unsigned char>(in[i]))) {
+                    i++;
+                }
+                if (i < len) {
+                    i++;
+                }
+            } else if (i < len) {
+                i++;
+            }
+        } else {
+            out.push_back(in[i]);
+            i++;
+        }
+    }
+
+    return (int32_t)(out.size());
+}
+
+std::string PtyTerminal::GetCurShell()
+{
+    const char* shell = getenv("SHELL");
+    return shell ? shell : "/bin/sh";
 }

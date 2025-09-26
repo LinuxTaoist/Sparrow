@@ -19,24 +19,32 @@
 #ifndef __PTY_TERMINAL_H__
 #define __PTY_TERMINAL_H__
 
+#include <string>
+#include <memory>
 #include <stdint.h>
+#include <PPipe.h>
 
 class PtyTerminal
 {
 public:
-    PtyTerminal();
+    explicit PtyTerminal(const std::function<void(int32_t ret, std::string, void*)>& cb = nullptr, void* arg = nullptr);
     ~PtyTerminal();
 
-    int32_t Init(int32_t clientFd);
+    int32_t Init();
+    int32_t Write(const std::string& bytes);
 
 private:
-    void SetNonBlock(int32_t fd);
-    ssize_t FilterColorCode(char* input, ssize_t len, char* output);
+    int32_t BashProcess();
+    int32_t MasterProcess();
+    int32_t EraseColor(const std::string& in, std::string& out);
+    std::string GetCurShell();
 
 private:
-    int32_t mClientFd;
+    void* mArg;
     int32_t mMasterFd;
     int32_t mSlaveFd;
+    std::shared_ptr<PPipe> mPtyPipe;
+    std::function<void(int32_t, std::string, void*)> mCb;
 };
 
 #endif // __PTY_TERMINAL_H__

@@ -22,14 +22,16 @@
 #include <list>
 #include <memory>
 #include <string>
-#include <PSocket.h>
+#include "PSocket.h"
+#include "PtyTerminal.h"
 
 class SessionManager
 {
 public:
     static SessionManager* GetInstance();
 
-    int32_t Init(uint16_t port);
+    int32_t AsTcpServer(uint16_t port);
+    int32_t AsTcpClient(const std::string& ip, uint16_t port);
     int32_t EpollLoop();
 
 private:
@@ -37,8 +39,10 @@ private:
     ~SessionManager();
 
 private:
-    std::shared_ptr<PTcpServer> mpTcpSrv;
-    std::list<std::shared_ptr<PTcpClient>> mTcpClients;
+    std::shared_ptr<PTcpClient> mpTcpClient;
+    std::shared_ptr<PTcpServer> mpTcpServer;
+    std::list< std::pair<std::shared_ptr<PTcpClient>,
+                         std::shared_ptr<PtyTerminal>> > mpPtyTerminals;     // key: client, value: terminal
 };
 
 #endif // __SESSION_MANAGER_H__

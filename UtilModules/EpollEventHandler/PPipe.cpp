@@ -85,13 +85,14 @@ void* PPipe::EpollEvent(int fd, EpollType eType, void* arg)
     }
 
     std::string buf;
-    if (Read(fd, buf) < 0) {
+    int ret = Read(fd, buf);
+    if (ret < 0) {
         SPR_LOGE("Read error!\n");
     }
 
     if (mCb) {
         arg = arg ? arg : this;
-        mCb(fd, buf, arg);
+        mCb(ret, buf, arg);
     }
 
     return nullptr;
