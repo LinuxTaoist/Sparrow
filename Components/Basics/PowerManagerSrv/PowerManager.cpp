@@ -225,7 +225,7 @@ void PowerManager::EnterActive()
 
     // Notify active to clients
     int32_t ret = ASYNC_NOTIFY(POWER_MGR_ACTIVE, nullptr, 0);
-    SPR_LOGD("Notify active to clients, ret = %d\n", ret);
+    SPR_LOGI("Send POWER_MGR_ACTIVE to client, ret = %d\n", ret);
 }
 
 void PowerManager::EnterStandby()
@@ -239,7 +239,7 @@ void PowerManager::EnterStandby()
 
     // Notify standby to clients
     int32_t ret = ASYNC_NOTIFY(POWER_MGR_STANDBY, nullptr, 0);
-    SPR_LOGD("Notify active to clients, ret = %d\n", ret);
+    SPR_LOGI("Send POWER_MGR_STANDBY to client, ret = %d\n", ret);
 }
 
 void PowerManager::EnterSleep()
@@ -250,7 +250,7 @@ void PowerManager::EnterSleep()
 
     // Notify sleep to clients
     int ret = ASYNC_NOTIFY(POWER_MGR_SLEEP, nullptr, 0);
-    SPR_LOGD("Notify sleep to clients, ret = %d\n", ret);
+    SPR_LOGI("Send POWER_MGR_SLEEP to client, ret = %d\n", ret);
 }
 
 void PowerManager::NotifyAllWithStartup()
