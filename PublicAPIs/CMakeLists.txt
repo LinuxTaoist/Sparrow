@@ -3,6 +3,7 @@
 include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
 include_directories (${PROJECT_PATH}/PrivateAPIs/Binder)
+include_directories (${PROJECT_PATH}/PrivateAPIs/Event)
 
 ## Build libpowermanagerapi.so
 set (SRC_POWERM_API_PATH  ${PROJECT_PATH}/PublicAPIs/PowerManagerInterface.cpp)

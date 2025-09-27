@@ -90,9 +90,16 @@ static void usage()
     );
 }
 
+static void callback(int32_t eventID, void* data, int32_t size)
+{
+    SPR_LOG("Recv eventId: %d\n", eventID);
+}
+
 int main(int argc, const char* argv[])
 {
     PowerManagerInterface* pPowerM = PowerManagerInterface::GetInstance();
+    pPowerM->RegisterCallback(callback);
+
     DebugCore theDebug(MODULE_DEBUG, "Debug");
     theDebug.Initialize();
 

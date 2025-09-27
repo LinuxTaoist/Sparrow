@@ -212,7 +212,9 @@ enum EOneNetBinderCmd
 // - EGeneralBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 #define GENERAL_BINDER_CMD_MACROS \
-    ENUM_OR_STRING(GENERAL_CMD_EXE_EXIT),   \
+    ENUM_OR_STRING(GENERAL_CMD_EXE_EXIT),           \
+    ENUM_OR_STRING(GENERAL_REGISTER_CALLBACK),      \
+    ENUM_OR_STRING(GENERAL_UNREGISTER_CALLBACK),    \
     ENUM_OR_STRING(GENERAL_CMD_BUTT)
 
 enum EGeneralBinderCmd

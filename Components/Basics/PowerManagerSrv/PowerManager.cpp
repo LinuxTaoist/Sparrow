@@ -19,6 +19,7 @@
 #include <vector>
 #include <algorithm>
 #include "SprLog.h"
+#include "AsyncEvent.h"
 #include "SprDebugNode.h"
 #include "PowerManager.h"
 #include "SprEnumHelper.h"
@@ -221,6 +222,10 @@ void PowerManager::EnterActive()
     SPR_LOGD("Enter active!\n");
     SetLev1State(LEV1_POWER_ACTIVE);
     NotifyAllWithStartup();
+
+    // Notify active to clients
+    int32_t ret = ASYNC_NOTIFY(POWER_MGR_ACTIVE, nullptr, 0);
+    SPR_LOGD("Notify active to clients, ret = %d\n", ret);
 }
 
 void PowerManager::EnterStandby()
@@ -231,6 +236,10 @@ void PowerManager::EnterStandby()
 
     // Enter sleep after 5s in standby state
     RegisterTimer(0, STANDBY_ENTER_SLEEP_TIMEOUT, SIG_ID_POWER_ENTER_SLEEP_TIMER_EVENT, 1);
+
+    // Notify standby to clients
+    int32_t ret = ASYNC_NOTIFY(POWER_MGR_STANDBY, nullptr, 0);
+    SPR_LOGD("Notify active to clients, ret = %d\n", ret);
 }
 
 void PowerManager::EnterSleep()
@@ -238,6 +247,10 @@ void PowerManager::EnterSleep()
     SPR_LOGD("Enter sleep!\n");
     SetLev1State(LEV1_POWER_SLEEP);
     NotifyAllWithSleep();
+
+    // Notify sleep to clients
+    int ret = ASYNC_NOTIFY(POWER_MGR_SLEEP, nullptr, 0);
+    SPR_LOGD("Notify sleep to clients, ret = %d\n", ret);
 }
 
 void PowerManager::NotifyAllWithStartup()
