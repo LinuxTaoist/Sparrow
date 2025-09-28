@@ -29,7 +29,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "DebugMsg"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     char val = 0;
     bool run = true;
@@ -54,7 +54,7 @@ int main(int argc, const char *argv[])
                 theEnMsg.SetU8Vec(u8Vec1);
                 std::vector<uint32_t> u32Vec1 = {0x11111111, 0x22222222, 0x33333333, 0x44444444, 0x55555555};
                 theEnMsg.SetU32Vec(u32Vec1);
-                std::vector<uint64_t> u64Vec1 = {0x1111111111111111, 0x2222222222222222, 0x3333333333333333, 0x4444444444444444, 0x5555555555555555};
+                std::vector<uint64_t> u64Vec1 = {0x1111111111111111, 0x2222222222222222, 0x3333333333333333};
                 theEnMsg.SetU64Vec(u64Vec1);
 
                 struct TestSpr
@@ -117,6 +117,14 @@ int main(int argc, const char *argv[])
                 SPR_LOGD("u64Vec[%ld]   : %s    \n", copyU64Vec.size(), GeneralConversions::ToHexStringWithSpace(copyU64Vec).c_str());
                 SPR_LOGD("ptr           : %d    \n", pCopy->id);
                 SPR_LOGD("                %s    \n", pCopy->buf);
+
+                std::string brierOut = copyMsg.DumpBrief();
+                SPR_LOGD("----------------------- DumpBrief ----------------------------\n");
+                SPR_LOGD("%s\n", brierOut.c_str());
+
+                std::string detailOut = copyMsg.DumpDetails();
+                SPR_LOGD("----------------------- DumpDetails --------------------------\n");
+                SPR_LOGD("%s\n", detailOut.c_str());
                 break;
             }
 

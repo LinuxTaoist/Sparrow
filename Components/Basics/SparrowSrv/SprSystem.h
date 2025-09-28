@@ -27,7 +27,6 @@ public:
     // --------------------------------------------------------------------------------------------
     // - Init functions
     // --------------------------------------------------------------------------------------------
-    ~SprSystem();
     SprSystem(const SprSystem&) = delete;
     SprSystem& operator=(const SprSystem&) = delete;
     void Init();
@@ -39,6 +38,7 @@ public:
 
 private:
     SprSystem();
+    ~SprSystem();
     void InitEnv();
     void InitOthers();
     void LoadReleaseInformation();

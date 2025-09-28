@@ -38,6 +38,8 @@ void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const
     switch(cmd) {
         case POWERM_CMD_POWER_ON: {
             SprMsg msg(SIG_ID_POWER_ON);
+            msg.SetI32Value(STARTUP_WARM_BOOT);
+            msg.SetU32Value(WAKEUP_SOURCE_USER);
             mPowerManager->SendMsg(msg);
 
             NONZERO_CHECK(pRspParcel->WriteInt(0));
@@ -46,6 +48,7 @@ void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const
         }
         case POWERM_CMD_POWER_OFF: {
             SprMsg msg(SIG_ID_POWER_OFF);
+            msg.SetI32Value(STANDBY_REASON_USER);
             mPowerManager->SendMsg(msg);
 
             NONZERO_CHECK(pRspParcel->WriteInt(0));

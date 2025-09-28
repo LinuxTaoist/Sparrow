@@ -36,12 +36,6 @@ class SprTimeTrace
 {
 public:
     /**
-     * @brief Destroy the Spr Time Trace object
-     *
-     */
-    ~SprTimeTrace();
-
-    /**
      * @brief Get the Instance object
      *
      * @return SprTimeTrace*
@@ -64,6 +58,12 @@ private:
      *
      */
     SprTimeTrace();
+
+    /**
+     * @brief Destroy the Spr Time Trace object
+     *
+     */
+    ~SprTimeTrace();
 
 private:
     std::vector<EntryInfo> mEntryList;

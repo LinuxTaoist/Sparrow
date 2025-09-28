@@ -105,7 +105,7 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
     return msg.Decode(bytes);
 }
 
-int32_t SprObserverWithMQueue::MsgRespondSystemExitRsp(const SprMsg& msg)
+int32_t SprObserverWithMQueue::MsgRespondSystemExit(const SprMsg& msg)
 {
     SPR_LOGD("System Exit!\n");
     return 0;
@@ -121,10 +121,19 @@ int32_t SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
 
 int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
 {
-
     mConnected = !msg.GetU8Value();
     SPR_LOGD("Unregister Successfully! mConnected = %d\n", mConnected);
     return 0;
+}
+
+int32_t SprObserverWithMQueue::MsgRespondPropertyLogLevelChanged(const SprMsg& msg)
+{
+    return SetPrintLogLevel(msg.GetI32Value());
+}
+
+int32_t SprObserverWithMQueue::MsgRespondPropertyLogLengthChanged(const SprMsg& msg)
+{
+    return SetPrintLogLength(msg.GetI32Value());
 }
 
 int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::string& devName)
@@ -194,8 +203,12 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
             MsgRespondUnregisterRsp(msg);
             break;
         }
-        case SIG_ID_SYSTEM_EXIT: {
-            MsgRespondSystemExitRsp(msg);
+        case SIG_ID_PROPERTY_LOG_LEVEL_CHANGED: {
+            MsgRespondPropertyLogLevelChanged(msg);
+            break;
+        }
+        case SIG_ID_PROPERTY_LOG_LENGTH_CHANGED: {
+            MsgRespondPropertyLogLengthChanged(msg);
             break;
         }
         default: {

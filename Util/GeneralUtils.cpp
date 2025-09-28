@@ -222,8 +222,8 @@ void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen)
         return nullptr;
     }
 
-    const char *pSrc = (const char*)srcMem;
-    const char *pEnd = (const char*)srcMem + sLen - tLen;
+    const char* pSrc = (const char*)srcMem;
+    const char* pEnd = (const char*)srcMem + sLen - tLen;
     while(pSrc <= pEnd) {
         if (pSrc == nullptr || pEnd == nullptr) {
             return nullptr;

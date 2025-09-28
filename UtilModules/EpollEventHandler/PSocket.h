@@ -33,6 +33,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 class SocketCommon
 {
+public:
     static bool IsIPAddress(const std::string& str);
     static std::string ResolveHostToIP(const std::string& host);
 };

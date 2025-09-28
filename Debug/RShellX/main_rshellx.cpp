@@ -18,30 +18,39 @@
  */
 #include <stdio.h>
 #include <stdlib.h>
-#include "LoginManager.h"
+#include "SessionManager.h"
 
 using namespace std;
 
+#define SPR_LOGI(fmt, args...) printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...) printf(fmt, ##args)
 #define SPR_LOGE(fmt, args...) printf(fmt, ##args)
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
-    if (argc < 2) {
-        SPR_LOGE("Usage: ./rshellx <port>\n");
+    if (argc != 2 && argc != 3) {
+        SPR_LOGE("Usage: \n");
+        SPR_LOGE(" As server: ./rshellx <port>\n");
+        SPR_LOGE(" As client: ./rshellx <ip> <port>\n");
         return -1;
     }
 
-    short port = atoi(argv[1]);
-    if (port <= 0) {
-        SPR_LOGE("Invalid port: %d\n", port);
-        return -1;
+    int ret = 0;
+    auto pSMgr = SessionManager::GetInstance();
+    if (argc == 2) {    // As tcp server
+        uint16_t port = atoi(argv[1]);
+        ret = pSMgr->AsTcpServer(port);
+        SPR_LOGI("As server, port: %d\n", port);
+    } else {            // As tcp client
+        string ip = argv[1];
+        uint16_t port = atoi(argv[2]);
+        ret = pSMgr->AsTcpClient(ip, port);
+        SPR_LOGI("As client, ip: %s, port: %d\n", ip.c_str(), port);
     }
 
-    SPR_LOGD("Start RShellX server on port %d\n", port);
-    LoginManager* pLoginMgr = LoginManager::GetInstance();
-    pLoginMgr->Init();
-    pLoginMgr->BuildConnectAsTcpServer(port);
-    pLoginMgr->ConnectLoop();
+    if (ret == 0) {
+        pSMgr->EpollLoop();
+    }
+
     return 0;
 }

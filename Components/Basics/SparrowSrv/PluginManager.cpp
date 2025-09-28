@@ -60,7 +60,7 @@ void PluginManager::InitWatchDir()
     // Note: IN_CREATE is not used because it triggers immediately when a file is created,
     // which may result in attempting to process the file before it is fully written and closed.
     mDirWatch.AddDirWatch(mDefaultLibPath, IN_CLOSE_WRITE | IN_MOVED_TO | IN_MOVED_FROM | IN_DELETE);
-    mpFile = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void *arg) {
+    mpFile = std::make_shared<PFile>(mDirWatch.GetInotifyFd(), [&](int fd, void* arg) {
         const int size = 100;
         char buffer[size] = {0};
         ssize_t numRead = read(fd, buffer, size);
@@ -226,9 +226,9 @@ void PluginManager::UnregisterDebugFuncs()
 
 void PluginManager::DebugDumpPlugMInfo(const std::vector<std::string>& args)
 {
-    SPR_LOGD("-------------- Dump PlugManager Info --------------\n");
-    SPR_LOGD("- mHotPlugEnable = %d\n", mHotPlugEnable);
-    SPR_LOGD("---------------------------------------------------\n");
+    SPR_LOGI("-------------- Dump PlugManager Info --------------\n");
+    SPR_LOGI("- mHotPlugEnable = %d\n", mHotPlugEnable);
+    SPR_LOGI("---------------------------------------------------\n");
 }
 
 void PluginManager::DebugEnableHotPlug(const std::vector<std::string>& args)

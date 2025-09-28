@@ -118,7 +118,7 @@ new_platform() {
     echo -e "${GREEN}touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop ${NC}"
     mkdir -p ${project_path}/ProjectConfigs/Vendor/${platform_name}
     touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
-    echo "ro.vendor=${platform_name}" > ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
+    echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
 }
 
 # cmd static_scan

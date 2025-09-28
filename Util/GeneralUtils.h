@@ -64,7 +64,7 @@ int InitSignalHandler(void (*signalHandler)(int));
  * @param ...  command parameters
  * @return  0 if success, -1 if failed
  */
-int SystemCmd(const char *format, ...);
+int SystemCmd(const char* format, ...);
 
 /**
  * @brief  system command exec with output
@@ -74,7 +74,7 @@ int SystemCmd(const char *format, ...);
  * @param ...  command parameters
  * @return  0 if success, -1 if failed
  */
-int SystemCmd(std::string& out, const char *format, ...);
+int SystemCmd(std::string& out, const char* format, ...);
 
 /**
  * @brief  Get the current time as a string.

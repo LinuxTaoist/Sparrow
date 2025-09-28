@@ -6,6 +6,21 @@ include_directories (${PROJECT_PATH}/3rdAdapter)
 include_directories (${PROJECT_PATH}/PublicAPIs)
 include_directories (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 
+## Bin 01_procguard
+set(SRC_BIN_01_PROC_GUARD    01_ProcGuard.cc)
+set(OTHER_SOURCES           ${PROJECT_PATH}/Util/ProcMutex.cpp)
+add_executable              (01_proc_guard ${SRC_BIN_01_PROC_GUARD} ${OTHER_SOURCES})
+set_target_properties       (01_proc_guard PROPERTIES OUTPUT_NAME "01_proc_guard")
+target_link_libraries       (01_proc_guard c sprlog pthread rt)
+add_dependencies            (01_proc_guard LibSprLog)
+
+## Bin 02_dirwatch
+set(SRC_BIN_02_DIR_WATCH     02_SprDirWatch.cc)
+add_executable              (02_dir_watch ${SRC_BIN_02_DIR_WATCH} ${SRC_DIR_WATCH})
+set_target_properties       (02_dir_watch PROPERTIES OUTPUT_NAME "02_dir_watch")
+target_link_libraries       (02_dir_watch c sprcore epollevent pthread)
+add_dependencies            (02_dir_watch LibSprCore LibEpollEvent)
+
 ## Bin debugcore
 set(SRC_BIN_DCORE           DebugSprCore.cc)
 add_executable              (debug_core ${SRC_BIN_DCORE})
@@ -59,19 +74,19 @@ set_target_properties       (sample_mqueue PROPERTIES OUTPUT_NAME "sample_mqueue
 target_link_libraries       (sample_mqueue c epollevent pthread)
 add_dependencies            (sample_mqueue LibEpollEvent)
 
-## Bin property_get
+## Bin getprop
 set(SRC_BIN_PROPERTY_GET    GetProperty.cc)
 add_executable              (property_get ${SRC_BIN_PROPERTY_GET})
 target_include_directories  (property_get PRIVATE ${PROJECT_PATH}/PublicAPIs)
-set_target_properties       (property_get PROPERTIES OUTPUT_NAME "property_get")
+set_target_properties       (property_get PROPERTIES OUTPUT_NAME "getprop")
 target_link_libraries       (property_get c propertyapi)
 add_dependencies            (property_get LibPropertyAPI)
 
-## Bin property_set
+## Bin setprop
 set(SRC_BIN_PROPERTY_SET    SetProperty.cc)
 add_executable              (property_set ${SRC_BIN_PROPERTY_SET})
 target_include_directories  (property_set PRIVATE ${PROJECT_PATH}/PublicAPIs)
-set_target_properties       (property_set PROPERTIES OUTPUT_NAME "property_set")
+set_target_properties       (property_set PROPERTIES OUTPUT_NAME "setprop")
 target_link_libraries       (property_set c propertyapi)
 add_dependencies            (property_set LibPropertyAPI)
 
@@ -81,6 +96,7 @@ set(SRC_BIN_HTTPBYTES       SampleHttpBytes.cc)
 add_executable              (sample_http_bytes ${SRC_BIN_HTTPBYTES} ${SRC_HTTP_SRC_PATH})
 target_include_directories  (sample_http_bytes PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)
 set_target_properties       (sample_http_bytes PROPERTIES OUTPUT_NAME "sample_http_bytes")
+target_link_libraries       (sample_http_bytes c rt)
 
 ## Bin sample_httpserver
 aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HTTP_SRC_PATH)

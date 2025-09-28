@@ -33,7 +33,7 @@ IEpollEvent::~IEpollEvent() {
 
 ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)
 {
-    const char *ptr = data;
+    const char* ptr = data;
     size_t nleft = size;
 
     while (nleft > 0) {
@@ -78,7 +78,7 @@ ssize_t IEpollEvent::Write(const std::string& bytes)
 
 ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
 {
-    char *ptr = data;
+    char* ptr = data;
     size_t nleft = size;
 
     while (nleft > 0) {

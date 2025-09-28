@@ -52,7 +52,7 @@ int32_t GetSprErrorLevel(int32_t errorCode)
 
 }
 
-std::string GetSprErrorLevelDescription(int32_t level)
+std::string GetSprErrorLevelText(int32_t level)
 {
     std::vector<std::string> errorLevels = {
         ERR_EVENT_LEVEL_MACROS
@@ -61,7 +61,7 @@ std::string GetSprErrorLevelDescription(int32_t level)
     return ((int32_t)errorLevels.size() > level) ? errorLevels[level] : "UNDEFINED";
 }
 
-std::string GetSprErrorDescription(int32_t errorCode)
+std::string GetSprErrorText(int32_t errorCode)
 {
     switch (errorCode) {
         case ERR_GENERAL_SUCCESS:             return "General success";
@@ -103,100 +103,175 @@ std::string GetSprErrorDescription(int32_t errorCode)
 // --------------------------------------------------------------------------------------------------------------------
 // - Enums of CoreTypeDefs.h
 // --------------------------------------------------------------------------------------------------------------------
-std::string GetSprProxTypeDescription(int32_t type)
+std::string GetSprProxTypeText(int32_t type)
 {
     std::vector<std::string> proxyTypes = {
         PROXY_TYPE_MACROS
     };
 
-    return ((int32_t)proxyTypes.size() > type) ? proxyTypes[type] : "UNDEFINED";
+    return ( (type >= 0) &&
+             (type < (int32_t)proxyTypes.size()) ) ?
+        proxyTypes[type] : "UNDEFINED";
 }
 
-std::string GetSprModuleIDDescription(int32_t moduleID)
+std::string GetSprModuleIDText(int32_t moduleID)
 {
     std::vector<std::string> moduleIDs = {
         SPR_MODULE_ID_MACROS
     };
 
-    return ((int32_t)moduleIDs.size() > moduleID) ? moduleIDs[moduleID] : "UNDEFINED";
+    return ( (moduleID >= 0) &&
+             (moduleID < (int32_t)moduleIDs.size()) ) ?
+        moduleIDs[moduleID] : "UNDEFINED";
 }
 
-std::string GetSprProxyBinderCmdDescription(int32_t proxyBinderCmd)
+std::string GetSprProxyBinderCmdText(int32_t proxyBinderCmd)
 {
     std::vector<std::string> proxyBinderCmds = {
         PROXY_BINDER_CMD_MACROS
     };
 
     int32_t index = proxyBinderCmd - PROXY_CMD_BEGIN - 1;
-    return ((int32_t)proxyBinderCmds.size() > index) ? proxyBinderCmds[index] : "UNDEFINED";
+    return ( (index >= 0) &&
+             (index < (int32_t)proxyBinderCmds.size()) ) ?
+        proxyBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprPropertyBinderCmdDescription(int32_t propertyBinderCmd)
+std::string GetSprPropertyBinderCmdText(int32_t propertyBinderCmd)
 {
     std::vector<std::string> propertyBinderCmds = {
         PROPERTY_BINDER_CMD_MACROS
     };
 
     int32_t index = propertyBinderCmd - PROPERTY_CMD_BEGIN - 1;
-    return ((int32_t)propertyBinderCmds.size() > index) ? propertyBinderCmds[index] : "UNDEFINED";
+    return ( (index >= 0) &&
+             (index < (int32_t)propertyBinderCmds.size()) ) ?
+        propertyBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprPowerMBinderCmdDescription(int32_t powerMBinderCmd)
+std::string GetSprPowerMBinderCmdText(int32_t powerMBinderCmd)
 {
     std::vector<std::string> powerMBinderCmds = {
         POWER_BINDER_CMD_MACROS
     };
 
     int32_t index = powerMBinderCmd - POWERM_CMD_BEGIN - 1;
-    return ((int32_t)powerMBinderCmds.size() > index) ? powerMBinderCmds[index] : "UNDEFINED";
+    return ( (index >= 0) &&
+             (index < (int32_t)powerMBinderCmds.size()) ) ?
+        powerMBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprDebugMBinderCmdDescription(int32_t debugMBinderCmd)
+std::string GetSprDebugMBinderCmdText(int32_t debugMBinderCmd)
 {
     std::vector<std::string> debugMBinderCmds = {
         DEBUG_BINDER_CMD_MACROS
     };
 
     int32_t index = debugMBinderCmd - DEBUG_CMD_BEGIN - 1;
-    return ((int32_t)debugMBinderCmds.size() > index) ? debugMBinderCmds[index] : "UNDEFINED";
+    return ( (index >= 0) &&
+             (index < (int32_t)debugMBinderCmds.size()) ) ?
+        debugMBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprOneNetBinderCmdDescription(int32_t oneNetBinderCmd)
+std::string GetSprLogLevelText(int32_t level)
+{
+    std::vector<std::string> logLevels = {
+        LOG_LEVEL_MACROS
+    };
+
+    return ( (level >= 0) &&
+             (level < (int32_t)logLevels.size()) ) ?
+        logLevels[level] : "UNDEFINED";
+}
+
+std::string GetSprOneNetBinderCmdText(int32_t oneNetBinderCmd)
 {
     std::vector<std::string> oneNetBinderCmds = {
         ONENET_BINDER_CMD_MACROS
     };
 
     int32_t index = oneNetBinderCmd - ONENET_CMD_BEGIN - 1;
-    return ((int32_t)oneNetBinderCmds.size() > index) ? oneNetBinderCmds[index] : "UNDEFINED";
+    return ( (index >= 0) &&
+             (index < (int32_t)oneNetBinderCmds.size()) ) ?
+        oneNetBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprGeneralBinderCmdDescription(int32_t generalBinderCmd)
+std::string GetSprGeneralBinderCmdText(int32_t generalBinderCmd)
 {
     std::vector<std::string> generalBinderCmds = {
         GENERAL_BINDER_CMD_MACROS
     };
 
     int32_t index = generalBinderCmd - GENERAL_CMD_BEGIN - 1;
-    return ((int32_t)generalBinderCmds.size() > index) ? generalBinderCmds[index] : "UNDEFINED";
+    return ( (index >= 0) &&
+             (index < (int32_t)generalBinderCmds.size()) ) ?
+        generalBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprModuleBootPriorityDescription(int32_t moduleBootPriority)
+std::string GetSprModuleBootPriorityText(int32_t moduleBootPriority)
 {
     std::vector<std::string> moduleBootPriorities = {
         MODULE_BOOT_PRIORITY_MACROS
     };
 
-    return ((int32_t)moduleBootPriorities.size() > moduleBootPriority) ? moduleBootPriorities[moduleBootPriority] : "UNDEFINED";
+    return ( (moduleBootPriority >= 0) &&
+             (moduleBootPriority < (int32_t)moduleBootPriorities.size()) ) ?
+        moduleBootPriorities[moduleBootPriority] : "UNDEFINED";
 }
 
-std::string GetSprTimeSourceTypeDescription(int32_t timeSourceType)
+std::string GetStartupTypeText(int32_t type)
+{
+    std::vector<std::string> startupTypes = {
+        STARTUP_TYPE_MACROS
+    };
+
+    return ( (type >= 0) &&
+             (type < (int32_t)startupTypes.size()) ) ?
+        startupTypes[type] : "UNDEFINED";
+}
+
+std::string GetSprPreStandbyAckText(int32_t standbyAck)
+{
+    std::vector<std::string> preStandbyAcks = {
+        PRE_STANDBY_ACK_MACROS
+    };
+
+    return ( (standbyAck >= 0) &&
+             (standbyAck < (int32_t)preStandbyAcks.size()) ) ?
+        preStandbyAcks[standbyAck] : "UNDEFINED";
+}
+
+std::string GetStandbyReasonTypeText(int32_t reason)
+{
+    std::vector<std::string> standbyReasonTypes = {
+        STANDBY_REASON_TYPE_MACROS
+    };
+
+    return ( (reason >= 0) &&
+             (reason < (int32_t)standbyReasonTypes.size()) ) ?
+        standbyReasonTypes[reason] : "UNDEFINED";
+}
+
+std::string GetWakeupSourceTypeText(int32_t source)
+{
+    std::vector<std::string> wakeupSourceTypes = {
+        WAKEUP_SOURCE_TYPE_MACROS
+    };
+
+    return ( (source >= 0) &&
+             (source < (int32_t)wakeupSourceTypes.size()) ) ?
+        wakeupSourceTypes[source] : "UNDEFINED";
+}
+
+std::string GetSprTimeSourceTypeText(int32_t timeSourceType)
 {
     std::vector<std::string> timeSourceTypes = {
         TIME_SOURCE_TYPE_MACROS
     };
 
-    return ((int32_t)timeSourceTypes.size() > timeSourceType) ? timeSourceTypes[timeSourceType] : "UNDEFINED";
+    return ( (timeSourceType >= 0) &&
+             (timeSourceType < (int32_t)timeSourceTypes.size()) ) ?
+        timeSourceTypes[timeSourceType] : "UNDEFINED";
 }
 
 } // namespace InternalDefs

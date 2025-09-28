@@ -23,29 +23,17 @@
 #include <string>
 #include <memory>
 #include "SharedBinaryTree.h"
+#include "SprObserverWithMQueue.h"
 
-class PropertyManager
+class PropertyManager : public SprObserverWithMQueue
 {
 public:
-    /**
-     * @brief Destroy the Property Manager object
-     *
-     */
-    virtual ~PropertyManager();
-
-    /**
-     * @brief Init
-     *
-     * @return int
-     */
-    int Init();
-
     /**
      * @brief GetInstance
      * @return PropertyManager*
      *
      */
-    static PropertyManager* GetInstance();
+    static PropertyManager* GetInstance(ModuleIDType id, const std::string& name);
 
     /**
      * @brief SetProperty
@@ -55,7 +43,7 @@ public:
      * @return 0 on success, or -1 if an error occurred
      *
      */
-    int SetProperty(const std::string& key, const std::string& value);
+    int32_t SetProperty(const std::string& key, const std::string& value);
 
     /**
      * @brief GetProperty
@@ -66,7 +54,7 @@ public:
      * @return 0 on success, or -1 if an error occurred
      *
      */
-    int GetProperty(const std::string& key, std::string& value, const std::string& defaultValue);
+    int32_t GetProperty(const std::string& key, std::string& value, const std::string& defaultValue);
 
     /**
      * @brief GetProperties
@@ -74,12 +62,21 @@ public:
      *
      * Dump all properties to logs, only used for debug.
      */
-    int GetProperties();
+    int32_t GetProperties();
 
 private:
-    PropertyManager();
+    PropertyManager(ModuleIDType id, const std::string& name);
+    ~PropertyManager();
     PropertyManager(const PropertyManager&) = delete;
     PropertyManager& operator=(const PropertyManager&) = delete;
+
+    int32_t Init() override;
+    int32_t ProcessMsg(const SprMsg& msg) override;
+
+    /* 消息响应函数 */
+    void MsgRespondPropertyChanged(const SprMsg& msg);
+    void MsgRespondPropertyGetRequest(const SprMsg& msg);
+    void MsgRespondPropertySetRequest(const SprMsg& msg);
 
     // Register/Unregister debug functions
     void RegisterDebugFuncs();
@@ -88,15 +85,18 @@ private:
     // Debug functions
     void DebugDumpPropertyList(const std::vector<std::string>& args);
 
-    int DumpPropertyList();
-    int LoadPropertiesFromFile(const std::string& fileName);
-    int LoadPersistProperty();
-    int HandleKeyValue(const std::string& key, const std::string& value);
-    int SavePersistProperty(const std::string& key, const std::string& value);
+    int32_t DumpPropertyList();
+    int32_t LoadPropertiesFromFile(const std::string& fileName);
+    int32_t LoadPersistProperty();
+    int32_t HandlePropertyLogLevel(const std::string& text);
+    int32_t HandlePropertyLogLength(const std::string& text);
+    int32_t HandleKeyValue(const std::string& key, const std::string& value);
+    int32_t SavePersistProperty(const std::string& key, const std::string& value);
 
 private:
     std::string mDevName;
     std::unique_ptr<SharedBinaryTree> mpSharedMemory;
+    std::unique_ptr<SharedBinaryTree> mpPersistMemory;
 };
 
 #endif // __PROPERTY_MANAGER_H__

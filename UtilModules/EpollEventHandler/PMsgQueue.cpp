@@ -32,7 +32,7 @@
 #define SPR_LOGE(fmt, args...) printf("%6d PMsgQueue E: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
 
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
-            std::function<void(int, const std::string&, void*)>cb,
+            const std::function<void(int, const std::string&, void*)>& cb,
             void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mCb(cb)
 {

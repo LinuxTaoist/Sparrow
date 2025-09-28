@@ -26,7 +26,7 @@
 #define SPR_LOGW(fmt, args...) printf("%4d PTimer W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PTimer E: " fmt, __LINE__, ##args)
 
-PTimer::PTimer(std::function<void(int, uint64_t, void*)> cb, void *arg)
+PTimer::PTimer(const std::function<void(int, uint64_t, void*)>& cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_TIMERFD, arg), mCb(cb)
 {
     InitTimer();

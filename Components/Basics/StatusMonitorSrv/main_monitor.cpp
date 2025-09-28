@@ -16,17 +16,13 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <string.h>
 #include <signal.h>
 #include "SprLog.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
-#include "Backtrace.h"
 #include "SprProcPrepare.h"
+#include "BacktraceMacros.h"
 #include "StatusMonitorManager.h"
 #include "SprEpollSchedule.h"
 
@@ -34,7 +30,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "MainMonitor"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);

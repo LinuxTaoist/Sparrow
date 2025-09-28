@@ -38,6 +38,7 @@ using namespace InternalDefs;
 
 const int32_t MSG_MAX_SIZE = 1024;
 static std::atomic<bool> gObjAlive(true);
+const std::string MEDIATOR_LABEL = "Mediator";
 
 SprMediator::SprMediator()
 {
@@ -48,6 +49,7 @@ SprMediator::~SprMediator()
     gObjAlive = false;
     mMQDetailsMap.clear();
     mModuleMap.clear();
+    UnregisterDebugFuncs();
 }
 
 SprMediator* SprMediator::GetInstance()
@@ -64,6 +66,7 @@ int SprMediator::Init()
 {
     SPR_LOGD("### Init SprMediator begin!\n");
     InitInternalPort();
+    RegisterDebugFuncs();
     SPR_LOGD("### Init SprMediator end!\n");
     return 0;
 }
@@ -146,14 +149,17 @@ int SprMediator::NotifyObserver(ESprModuleID id, const SprMsg& msg)
     int ret = p->Send(datas);
     if (ret < 0) {
         SPR_LOGE("Send failed! (%s)\n", strerror(errno));
+        return -1;
     }
 
+    it->second.lastMsg = msg;
+    it->second.lastMsg.SetTo(id);
     return ret;
 }
 
 int SprMediator::NotifyAllObserver(const SprMsg& msg)
 {
-    for (const auto& pair : mModuleMap) {
+    for (auto& pair : mModuleMap) {
         // Skip modules that are unregistered, inactive, or the source of the message
         if (!pair.second.pModMQ || !pair.second.monitored || msg.GetFrom() == pair.first) {
             continue;
@@ -183,10 +189,10 @@ int SprMediator::MsgRespondRegister(const SprMsg& msg)
     auto pModuleMQ = make_shared<PMsgQueue>(name, MSG_MAX_SIZE, nullptr);
     if (pModuleMQ->GetEvtFd() != -1) {
         result = true;
-        mModuleMap[moduleId] = {monitored, pModuleMQ};
+        mModuleMap[moduleId] = {monitored, {}, pModuleMQ};
         LoadMQStaticInfo(pModuleMQ->GetEvtFd(), name);
         SPR_LOGD("Register %s success! %s [%d], monitored = %d\n",
-                name.c_str(), GetSprModuleIDDescription(moduleId).c_str(), (int)moduleId, monitored);
+                name.c_str(), GetSprModuleIDText(moduleId).c_str(), (int)moduleId, monitored);
     } else {
         SPR_LOGE("Register %s fail!\n", name.c_str());
     }
@@ -207,13 +213,63 @@ int SprMediator::MsgRespondUnregister(const SprMsg& msg)
             mMQDetailsMap.erase(it->second.pModMQ->GetEvtFd());
         }
         mModuleMap.erase(moduleId);
-        SPR_LOGD("Unregister module %s success!\n", GetSprModuleIDDescription(moduleId).c_str());
+        SPR_LOGD("Unregister module %s success!\n", GetSprModuleIDText(moduleId).c_str());
     } else {
-        SPR_LOGW("Not exist module %s\n", GetSprModuleIDDescription(moduleId).c_str());
+        SPR_LOGW("Not exist module %s\n", GetSprModuleIDText(moduleId).c_str());
     }
 
     SprMsg exitMsg(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT);
     exitMsg.SetU32Value(moduleId);
     NotifyAllObserver(exitMsg);
     return 0;
+}
+
+void SprMediator::RegisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(MEDIATOR_LABEL, "DumpMQDetails",     "Dump MQ details",      std::bind(&SprMediator::DebugDumpMQs, this, std::placeholders::_1));
+    p->RegisterCmd(MEDIATOR_LABEL, "DumpMQWithID",      "Dump MQ with id",      std::bind(&SprMediator::DebugDumpMQWtihID, this, std::placeholders::_1));
+}
+
+void SprMediator::UnregisterDebugFuncs()
+{
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Unregister %s all debug funcs\n", MEDIATOR_LABEL.c_str());
+    p->UnregisterCmd(MEDIATOR_LABEL);
+}
+
+void SprMediator::DebugDumpMQs(const std::vector<std::string>& args)
+{
+    SPR_LOGI("                   Show  All Message Details (%02d)                                            \n", mModuleMap.size());
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+    SPR_LOGI(" [ID]MODULE                          MESSAGE                                                   \n");
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+
+    for (auto& pair : mModuleMap) {
+        SPR_LOGI(" [%2d]%-30s  %s\n",
+            pair.first,
+            GetSprModuleIDText(pair.first).c_str(),
+            pair.second.monitored ? pair.second.lastMsg.DumpBrief().c_str() : " - ");
+    }
+    SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+}
+
+void SprMediator::DebugDumpMQWtihID(const std::vector<std::string>& args)
+{
+    uint32_t moduleId = atoi(args[1].c_str());
+    auto it = mModuleMap.find((InternalDefs::ESprModuleID)moduleId);
+    if (it != mModuleMap.end()) {
+        SPR_LOGI("%s from Module %s: \n", GetSigName(it->second.lastMsg.GetMsgId()), GetSprModuleIDText(moduleId).c_str());
+        SPR_LOGI("%s\n", it->second.lastMsg.DumpDetails().c_str());
+    }
 }

@@ -90,6 +90,7 @@ public:
 
 private:
     int32_t Init() override;
+    int32_t RegisterStandbyObservers();
 
     /* 初始化OneNet设备 */
     int32_t InitOneNetDevices(const std::vector<OneNetDevInfo>& devices);
@@ -108,17 +109,20 @@ private:
     const char* GetLev2StateString(EOneNetMgrLev2State state);
 
     /* 启动OneNet心跳 */
-    void StartTimerToPingOneNet(int32_t intervalInMSec);
+    void StartTimerToPingOneNet(int32_t delayInMSec, int32_t intervalInMSec);
     void StopTimerToPingOneNet();
 
     /* 启动数据上报定时器 */
-    void StartTimerToReportData(int32_t intervalInMSec);
+    void StartTimerToReportData(int32_t delayInMSec, int32_t intervalInMSec);
     void StopTimerToReportData();
 
     /* 通知消息到指定OneNetDevice */
     void NotifyMsgToOneNetDevice(const std::string& devModule, const SprMsg& msg);
 
     /* 消息响应函数 */
+    void MsgRespondStartupLow(const SprMsg& msg);
+    void MsgRespondPreStandbyRequest(const SprMsg& msg);
+    void MsgRespondStandbyHigh(const SprMsg& msg);
     void MsgRespondActiveDeviceConnect(const SprMsg& msg);
     void MsgRespondReactiveCurDeviceConnect(const SprMsg& msg);
     void MsgRespondDeactiveDevice(const SprMsg& msg);

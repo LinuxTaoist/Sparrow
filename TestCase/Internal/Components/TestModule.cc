@@ -44,7 +44,7 @@ TestModule::~TestModule()
 
 int32_t TestModule::CondNotify()
 {
-    mCond.notify_one();
+    mCond.notify_all();
     return 0;
 }
 
@@ -74,6 +74,7 @@ int32_t TestModule::Init()
 
 int32_t TestModule::ProcessMsg(const SprMsg& msg)
 {
+    SPR_LOGD("Recv msgId: %s\n", GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId()) {
         case SIG_ID_TEST_MODULE_200MS_TIMER_EVENT: {
             m200MSCnt++;
@@ -103,7 +104,7 @@ int32_t TestModule::ProcessMsg(const SprMsg& msg)
             break;
     }
 
-    mCond.notify_one();
+    CondNotify();
     return 0;
 }
 

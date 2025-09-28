@@ -25,7 +25,7 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     // int ret = 0;
     // SharedRingBuffer theLogBuffer(LOG_CACHE_MEMORY_PATH);

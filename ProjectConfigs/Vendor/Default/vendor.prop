@@ -1,1 +1,2 @@
-ro.vendor=default
+# vendor.prop
+ro.vendor.platform.name=default

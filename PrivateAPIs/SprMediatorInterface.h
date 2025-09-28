@@ -27,11 +27,6 @@ class SprMediatorInterface
 {
 public:
     /**
-     * @brief  Destructor
-     */
-    ~SprMediatorInterface();
-
-    /**
      * @brief  Get the instance
      *
      * @return  Single instance
@@ -60,6 +55,11 @@ private:
      *
      */
     SprMediatorInterface();
+
+    /**
+     * @brief  Destructor
+     */
+    ~SprMediatorInterface();
 };
 
 #endif // __SPR_MEDIATOR_INTERFACE_H__

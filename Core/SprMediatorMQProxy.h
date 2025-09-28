@@ -25,11 +25,6 @@ class SprMediatorMQProxy : public SprMediatorProxy
 {
 public:
     /**
-     * @brief Destruct
-     */
-    virtual ~SprMediatorMQProxy();
-
-    /**
      * @brief Get the single instance object
      *
      * @return single instance object
@@ -57,6 +52,11 @@ protected:
      * @brief Construct
      */
     SprMediatorMQProxy();
+
+    /**
+     * @brief Destruct
+     */
+    virtual ~SprMediatorMQProxy();
 
     /**
      * @brief Connect to SprMediator

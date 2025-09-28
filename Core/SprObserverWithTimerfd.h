@@ -44,7 +44,7 @@ public:
      *
      * @return void*
      */
-    virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
+    virtual void* EpollEvent(int fd, EpollType eType, void* arg) final override;
 
 protected:
     /**
@@ -52,7 +52,7 @@ protected:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int32_t InitFramework() override;
+    virtual int32_t InitFramework() final override;
 
     /**
      * @brief  Process timer event

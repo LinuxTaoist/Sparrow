@@ -16,26 +16,18 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <string.h>
-#include <stdio.h>
 #include <signal.h>
-#include <unistd.h>
-#include <sys/types.h>
 #include "SprLog.h"
-#include "Backtrace.h"
-#include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "BacktraceMacros.h"
 #include "BinderManager.h"
 
 using namespace GeneralUtils;
 
 #define LOG_TAG "MainBinder"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);

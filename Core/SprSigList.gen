@@ -15,7 +15,7 @@ ENUM_OR_STRING(SIG_ID_LOG_OPEN),                                \
 ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
 
 //-----------------------------------------------------------------------------
-// Debug
+// DEBUG
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_DEBUG_MSG_SERIAL),                        \
 ENUM_OR_STRING(SIG_ID_DEBUG_NOTIFY_ALL),                        \
@@ -28,6 +28,17 @@ ENUM_OR_STRING(SIG_ID_DEBUG_DISABLE_REMOTE_SHELL),              \
 ENUM_OR_STRING(SIG_ID_DEBUG_SLEEP_EVENT),                       \
 
 //-----------------------------------------------------------------------------
+// PROPERTY_MANAGER
+//-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_PROPERTY_GET_REQUEST),                    \
+ENUM_OR_STRING(SIG_ID_PROPERTY_GET_RESPONSE),                   \
+ENUM_OR_STRING(SIG_ID_PROPERTY_SET_REQUEST),                    \
+ENUM_OR_STRING(SIG_ID_PROPERTY_SET_RESPONSE),                   \
+ENUM_OR_STRING(SIG_ID_PROPERTY_LOG_LEVEL_CHANGED),              \
+ENUM_OR_STRING(SIG_ID_PROPERTY_LOG_LENGTH_CHANGED),             \
+ENUM_OR_STRING(SIG_ID_PROPERTY_CHANGED),                        \
+
+//-----------------------------------------------------------------------------
 // TIMER_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_TIMER_START_SYSTEM_TIMER),                \
@@ -38,11 +49,6 @@ ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
 ENUM_OR_STRING(SIG_ID_TIMER_DEL_TIMER),                         \
 
 //-----------------------------------------------------------------------------
-// SPARROW_SYSTEM
-//-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_SYSTEM_EXIT),                             \
-
-//-----------------------------------------------------------------------------
 // SYSTEM_TIMER_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
@@ -50,17 +56,35 @@ ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
 //-----------------------------------------------------------------------------
 // TIME_MANAGER
 //-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_TIMEM_NTP_SYNC),                          \
+ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT),        \
+ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT),             \
+ENUM_OR_STRING(SIG_ID_TIMEM_REQ_NTP_TIME),                      \
+ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_SYSTEM_TIME),                  \
 
 //-----------------------------------------------------------------------------
 // POWER_MANAGER
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_POWER_ON),                                \
 ENUM_OR_STRING(SIG_ID_POWER_OFF),                               \
-ENUM_OR_STRING(SIG_ID_POWER_BOOT),                              \
-ENUM_OR_STRING(SIG_ID_POWER_RESUME),                            \
+ENUM_OR_STRING(SIG_ID_POWER_STARTUP_HIGHEST),                   \
+ENUM_OR_STRING(SIG_ID_POWER_STARTUP_HIGH),                      \
+ENUM_OR_STRING(SIG_ID_POWER_STARTUP),                           \
+ENUM_OR_STRING(SIG_ID_POWER_STARTUP_LOW),                       \
+ENUM_OR_STRING(SIG_ID_POWER_STARTUP_LOWEST),                    \
+ENUM_OR_STRING(SIG_ID_POWER_STANDBY_HIGHEST),                   \
+ENUM_OR_STRING(SIG_ID_POWER_STANDBY_HIGH),                      \
 ENUM_OR_STRING(SIG_ID_POWER_STANDBY),                           \
+ENUM_OR_STRING(SIG_ID_POWER_STANDBY_LOW),                       \
+ENUM_OR_STRING(SIG_ID_POWER_STANDBY_LOWEST),                    \
 ENUM_OR_STRING(SIG_ID_POWER_SLEEP),                             \
+ENUM_OR_STRING(SIG_ID_POWER_POLL),                              \
+ENUM_OR_STRING(SIG_ID_POWER_OBSERVER_REGISTER),                 \
+ENUM_OR_STRING(SIG_ID_POWER_STARTUP_POLL_TIMER_EVENT),          \
+ENUM_OR_STRING(SIG_ID_POWER_PRE_STANDBY_REQUEST),               \
+ENUM_OR_STRING(SIG_ID_POWER_PRE_STANDBY_RESPONSE),              \
+ENUM_OR_STRING(SIG_ID_POWER_STANDBY_POLL_TIMER_EVENT),          \
+ENUM_OR_STRING(SIG_ID_POWER_PRE_STANDBY_RESPONSE_TIMEOUT),      \
+ENUM_OR_STRING(SIG_ID_POWER_ENTER_SLEEP_TIMER_EVENT),           \
 
 //-----------------------------------------------------------------------------
 // STATUS_MONITOR_MANAGER

@@ -27,14 +27,14 @@
 #define SPR_LOGD(fmt, args...) printf("%4d PPipe D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PPipe E: " fmt, __LINE__, ##args)
 
-PPipe::PPipe(int fd, std::function<void(ssize_t, std::string, void*)> cb, void *arg)
+PPipe::PPipe(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mCb(cb)
 {
     int flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 }
 
-PPipe::PPipe(const std::string& fileName, std::function<void(ssize_t, std::string, void*)> cb, void* arg)
+PPipe::PPipe(const std::string& fileName, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_PIPE, arg), mFifoName(fileName), mCb(cb)
 {
     bool isExist = IsExistFifo(fileName);
@@ -85,13 +85,14 @@ void* PPipe::EpollEvent(int fd, EpollType eType, void* arg)
     }
 
     std::string buf;
-    if (Read(fd, buf) < 0) {
+    int ret = Read(fd, buf);
+    if (ret < 0) {
         SPR_LOGE("Read error!\n");
     }
 
     if (mCb) {
         arg = arg ? arg : this;
-        mCb(fd, buf, arg);
+        mCb(ret, buf, arg);
     }
 
     return nullptr;

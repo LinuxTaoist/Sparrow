@@ -16,28 +16,21 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <memory>
-#include <stdio.h>
 #include <signal.h>
-#include <string.h>
 #include "SprLog.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "DebugModule.h"
-#include "Backtrace.h"
 #include "SprProcPrepare.h"
 #include "DebugModuleHub.h"
+#include "BacktraceMacros.h"
 #include "SprEpollSchedule.h"
 
-using namespace std;
 using namespace InternalDefs;
 
 #define LOG_TAG "MainDebug"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);
