@@ -126,3 +126,33 @@ int32_t SprObserver::DumpCommonVersion()
     SPR_LOGD("- CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
     return 0;
 }
+
+int32_t SprObserver::SetPrintLogLevel(int32_t level)
+{
+    int32_t curLevel = SprLog::GetInstance()->GetLevel();
+    if (level < LOG_LEVEL_MIN || level > LOG_LEVEL_BUTT) {
+        SPR_LOGE("Invalid log level: %d\n", level);
+        return -1;
+    }
+
+    if (level != curLevel) {
+        SprLog::GetInstance()->SetLevel(level);
+        SPR_LOGD("Set log level %d -> %d\n", curLevel, level);
+    }
+    return 0;
+}
+
+int32_t SprObserver::SetPrintLogLength(int32_t length)
+{
+    if (length < 0) {
+        SPR_LOGE("Invalid log length: %d\n", length);
+        return -1;
+    }
+
+    int32_t curLength = SprLog::GetInstance()->GetLength();
+    if (length != curLength) {
+        SprLog::GetInstance()->SetLength(length);
+        SPR_LOGD("Set log length %d -> %d\n", curLength, length);
+    }
+    return 0;
+}

@@ -21,7 +21,7 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     theMainMenu.MenuLoop();
     return 0;

@@ -22,6 +22,7 @@
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
+#include "AsyncEvent.h"
 
 using namespace InternalDefs;
 
@@ -90,6 +91,18 @@ void SprBinderHub::BinderLoop(void* pData)
             mRun = false;
             SPR_LOGD("Binder loop exit!\n");
             break;
+        } else if (cmd == GENERAL_REGISTER_CALLBACK) {
+            std::string name;
+            ret = pReqParcel->ReadString(name);
+
+            int rc = -1;
+            if (ret == 0) {
+                rc = AsyncEvent::GetInstance()->AsWriter(name);
+                SPR_LOGD("Register callback %s, ret = %d\n", name.c_str(), ret);
+            }
+
+            pRspParcel->WriteInt(rc);
+            pRspParcel->Post();
         }
 
         mSelf->handleCmd(pReqParcel, pRspParcel, cmd);

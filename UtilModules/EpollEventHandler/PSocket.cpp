@@ -61,7 +61,7 @@ std::string SocketCommon::ResolveHostToIP(const std::string& host)
         return "";
     }
 
-    void *addr;
+    void* addr;
     if (res->ai_family == AF_INET) { // IPv4
         struct sockaddr_in *ipv4 = (struct sockaddr_in *)res->ai_addr;
         addr = &(ipv4->sin_addr);
@@ -94,6 +94,13 @@ int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
 
     int flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
+
+    int op = 1;
+    if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
+        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        Close();
+        return -1;
+    }
 
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_RCVBUF, &rcvLen, sizeof(rcvLen)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));

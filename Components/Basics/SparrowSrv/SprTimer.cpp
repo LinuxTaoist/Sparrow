@@ -29,7 +29,7 @@ SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint
     mModuleId = moduleId;
     mMsgId = msgId;
     mIntervalInMilliSec = intervalInMilliSec;
-    mExpired = GetTick() + delayInMilliSec + intervalInMilliSec;
+    mExpired = GetTickMs() + delayInMilliSec;
     mRepeatTimes = repeatTimes;
     mRepeatCount = 0;
 }
@@ -95,15 +95,15 @@ bool SprTimer::operator < (const SprTimer& timer) const
 
 bool SprTimer::IsExpired() const
 {
-    return (GetTick() >= mExpired);
+    return (GetTickMs() >= mExpired);
 }
 
-uint32_t SprTimer::GetTick() const
+uint64_t SprTimer::GetTickMs() const
 {
-    uint32_t td = 0;
+    uint64_t td = 0;
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    td = ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
+    clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+    td = (uint64_t)ts.tv_sec * 1000 + ts.tv_nsec / 1000000;
 
     return td;
 }

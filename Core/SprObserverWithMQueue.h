@@ -67,7 +67,7 @@ protected:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int32_t InitFramework() override;
+    virtual int32_t InitFramework() final override;
 
     /**
      * @brief  Process message from message queue received
@@ -131,9 +131,11 @@ protected:
     // --------------------------------------------------------------------------------------------
     // - Message handle functions
     // --------------------------------------------------------------------------------------------
-    int32_t MsgRespondSystemExitRsp(const SprMsg& msg);
+    int32_t MsgRespondSystemExit(const SprMsg& msg);
     int32_t MsgRespondRegisterRsp(const SprMsg& msg);
     int32_t MsgRespondUnregisterRsp(const SprMsg& msg);
+    int32_t MsgRespondPropertyLogLevelChanged(const SprMsg& msg);
+    int32_t MsgRespondPropertyLogLengthChanged(const SprMsg& msg);
 
 private:
     bool mConnected;

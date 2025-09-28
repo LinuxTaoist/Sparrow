@@ -91,7 +91,7 @@ void TestHttpResponseBytes()
     SPR_LOGD("-- Encode : \n%s\n", enBytes.c_str());
 }
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
     TestHttpRequestBytes();
     TestHttpResponseBytes();

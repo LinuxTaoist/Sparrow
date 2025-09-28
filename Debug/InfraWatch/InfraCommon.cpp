@@ -55,7 +55,7 @@ int InfraWatch::ReadIntFromUserInput(int& input)
 {
     char buffer[100];
     long result;
-    char *endptr;
+    char* endptr;
 
     if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
         return -1;

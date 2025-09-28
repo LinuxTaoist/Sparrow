@@ -29,14 +29,13 @@
 class BinderManager
 {
 public:
-    ~BinderManager();
-
     static BinderManager* GetInstance();
     int32_t StartWork();
     static int32_t StopWork();
 
 private:
     BinderManager();
+    ~BinderManager();
     int32_t EnvReady(const std::string& srvName);
     int32_t BMsgRespondAddService();
     int32_t BMsgRespondRemoveService();

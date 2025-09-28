@@ -24,7 +24,6 @@
 class DebugInterface
 {
 public:
-    ~DebugInterface();
     static DebugInterface* GetInstance();
 
     int AddTimerInOneSec();
@@ -36,6 +35,7 @@ public:
 
 private:
     DebugInterface();
+    ~DebugInterface();
 };
 
 #endif // __DEBUG_INTERFACE_H__

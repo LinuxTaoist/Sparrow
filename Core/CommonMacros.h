@@ -87,31 +87,19 @@
 #define SRV_NAME_STATUS_MONITOR     "statusmonitorsrv"
 #define SRV_NAME_DEBUG_MODULE       "debugsrv"
 
-//---------------------------------------------------------------------------------------------------------------------
-// - Common macros print backtrace
-//--------------------------------------------------------------------------------------------------------------------
-#define PRINT_BACKTRACE(signum, totalFrames) do {       \
-    std::string line;                                               \
-    std::istringstream iss(Backtrace::DumpBacktrace(totalFrames));  \
-    SPR_LOGE("Receive signal %d, %s.", signum, strsignal(signum));  \
-    while (std::getline(iss, line)) {                               \
-        SPR_LOGE("%s", line.c_str());                               \
-    }                                                               \
-} while(0)
-
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macro check functions
 // --------------------------------------------------------------------------------------------------------------------
-#define POINTER_CHECK(__p) do {                  \
-    if (__p == nullptr) {                        \
-        return ;                                 \
-    }                                            \
+#define POINTER_CHECK(__p) do {                 \
+    if (__p == nullptr) {                       \
+        return ;                                \
+    }                                           \
 } while(0)
 
-#define POINTER_CHECK_RET(__p) do {              \
-    if (__p == nullptr) {                        \
-        return __p;                              \
-    }                                            \
+#define POINTER_CHECK_RET(__p) do {             \
+    if (__p == nullptr) {                       \
+        return __p;                             \
+    }                                           \
 } while(0)
 
 #define POINTER_CHECK_ERR(__p, __err) do {      \

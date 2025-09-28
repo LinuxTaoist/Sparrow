@@ -23,11 +23,6 @@ class PowerManagerInterface
 {
 public:
     /**
-     * @brief  Destructor
-     */
-    ~PowerManagerInterface();
-
-    /**
      * @brief Get the Instance object
      *
      * @return  Single instance of PowerManagerInterface
@@ -48,11 +43,32 @@ public:
      */
     int PowerOff();
 
+    /**
+     * @brief  Register callback function
+     *
+     * @param callback
+     * @return int
+     */
+    int RegisterCallback(void (*callback)(int32_t eventID, void* data, int32_t size));
+
+    /**
+     * @brief  Unregister callback function
+     *
+     * @param callback
+     * @return int
+     */
+    int UnRegisterCallback();
+
 private:
     /**
      * @brief Constructor
      */
     PowerManagerInterface();
+
+    /**
+     * @brief  Destructor
+     */
+    ~PowerManagerInterface();
 };
 
 #endif // __POWER_MANAGER_INTERFACE_H__

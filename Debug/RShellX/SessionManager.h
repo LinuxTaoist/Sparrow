@@ -2,47 +2,47 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : NtpClient.h
+ *  @file       : SessionManager.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/11/21
+ *  @date       : 2024/10/13
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/11/21 | 1.0.0.1   | Xiang.D        | Create file
+ *  2024/10/13 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __NTP_CLIENT_H__
-#define __NTP_CLIENT_H__
+#ifndef __SESSION_MANAGER_H__
+#define __SESSION_MANAGER_H__
 
+#include <list>
 #include <memory>
 #include <string>
-#include <stdint.h>
 #include "PSocket.h"
+#include "PtyTerminal.h"
 
-class NtpClient
+class SessionManager
 {
 public:
-    NtpClient(const std::string& addr, uint16_t port, const std::function<void(double)>& cb);
-    ~NtpClient();
+    static SessionManager* GetInstance();
 
-    int32_t SendTimeRequest();
-
-private:
-    int32_t InitNtpClient();
-    int32_t HandleNtpBytes(const std::string& bytes);
-    double  GetOffset(void* ntp, void* local);
+    int32_t AsTcpServer(uint16_t port);
+    int32_t AsTcpClient(const std::string& ip, uint16_t port);
+    int32_t EpollLoop();
 
 private:
-    bool mIsReady;
-    uint16_t mPort;
-    std::string mAddr;
-    std::shared_ptr<PUdp> mpNtpClient;
-    std::function<void(double)> mCb;
+    SessionManager();
+    ~SessionManager();
+
+private:
+    std::shared_ptr<PTcpClient> mpTcpClient;
+    std::shared_ptr<PTcpServer> mpTcpServer;
+    std::list< std::pair<std::shared_ptr<PTcpClient>,
+                         std::shared_ptr<PtyTerminal>> > mpPtyTerminals;     // key: client, value: terminal
 };
 
-#endif // __NTP_CLIENT_H__
+#endif // __SESSION_MANAGER_H__

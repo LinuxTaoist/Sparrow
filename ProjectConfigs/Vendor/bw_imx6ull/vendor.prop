@@ -1,1 +1,2 @@
-ro.vendor=bw_imx6ull
+# vendor.prop
+ro.vendor.platform.name=bw_imx6ull

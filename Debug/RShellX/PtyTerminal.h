@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : ShellEnv.h
+ *  @file       : PtyTerminal.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,26 +16,35 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SHELL_ENVIRONMET_H__
-#define __SHELL_ENVIRONMET_H__
+#ifndef __PTY_TERMINAL_H__
+#define __PTY_TERMINAL_H__
 
 #include <string>
+#include <memory>
+#include <stdint.h>
+#include <PPipe.h>
 
-class ShellEnv
+class PtyTerminal
 {
 public:
-    explicit ShellEnv(int inFd, int outFd, int errFd);
-    ~ShellEnv();
+    explicit PtyTerminal(const std::function<void(int32_t ret, std::string, void*)>& cb = nullptr, void* arg = nullptr);
+    ~PtyTerminal();
 
-    int Execute(const std::string& cmd);
+    int32_t Init();
+    int32_t Write(const std::string& bytes);
 
 private:
-    // int mInFd;
-    // int mOutFd;
-    // int mErrFd;
-    // int mStdin;     // save stdin fd
-    // int mStdout;    // save stdout fd
-    // int mStderr;    // save stderr fd
+    int32_t BashProcess();
+    int32_t MasterProcess();
+    int32_t EraseColor(const std::string& in, std::string& out);
+    std::string GetCurShell();
+
+private:
+    void* mArg;
+    int32_t mMasterFd;
+    int32_t mSlaveFd;
+    std::shared_ptr<PPipe> mPtyPipe;
+    std::function<void(int32_t, std::string, void*)> mCb;
 };
 
-#endif // __SHELL_ENVIRONMET_H__
+#endif // __PTY_TERMINAL_H__

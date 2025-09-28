@@ -25,11 +25,6 @@ class OneNetInterface
 {
 public:
     /**
-     * @brief Destructor
-     */
-    ~OneNetInterface();
-
-    /**
      * @brief Get the Instance object
      *
      * @return  Single instance of OneNetInterface
@@ -64,6 +59,11 @@ private:
      * @brief Construct
      */
     OneNetInterface();
+
+    /**
+     * @brief Destructor
+     */
+    ~OneNetInterface();
 };
 
 #endif // __ONENET_INTERFACE_H__

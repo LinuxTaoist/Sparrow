@@ -16,22 +16,17 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <string.h>
 #include <signal.h>
 #include "SprLog.h"
 #include "SprSystem.h"
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
-#include "CommonMacros.h"
-#include "Backtrace.h"
+#include "BacktraceMacros.h"
 #include "SprEpollSchedule.h"
 
 #define LOG_TAG "MainSparrow"
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);

@@ -30,10 +30,10 @@ using namespace std;
 #define SPR_LOGW(fmt, args...) printf("%d SharedBinaryTree W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d SharedBinaryTree E: " fmt, __LINE__, ##args)
 
-SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size)
+SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size, bool create)
     : mRoot(nullptr), mSize(size), mCurUsedSize(0), mFirstNode(nullptr), mFilename(filename)
 {
-    mHandler = OpenMapFile(filename, size);
+    mHandler = OpenMapFile(filename, size, create);
     if (mHandler == -1) {
         SPR_LOGE("OpenAndCreateFile fail!\n");
     }
@@ -50,13 +50,16 @@ SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size)
     }
 
     // mCurUsedSize record at 0 and the length is sizeof(mCurUsedSize)
-    mCurUsedSize = sizeof(mCurUsedSize);
+    mCurUsedSize = *(size_t*)mRoot ? *(size_t*)mRoot : sizeof(mCurUsedSize);
 
     // init first node
-    mFirstNode = (Node*)((char*)mRoot + mCurUsedSize);
-    if (mFirstNode != nullptr) {
+    mFirstNode = (Node*)((char*)mRoot + sizeof(mCurUsedSize));
+    if (mFirstNode != nullptr && create) {
+        // 初始化根节点的左右子树偏移量为0
         mFirstNode->key[0] = '\0';
-    } else {
+        mFirstNode->left = 0;
+        mFirstNode->right = 0;
+    } else if (mFirstNode == nullptr) {
         SPR_LOGE("mFirstNode is nullptr!\n");
     }
 
@@ -73,10 +76,6 @@ SharedBinaryTree::~SharedBinaryTree()
         close(mHandler);
         mHandler = -1;
     }
-
-    if (remove(mFilename.c_str()) == -1) {
-        SPR_LOGE("remove fail! (%s)\n", strerror(errno));
-    }
 }
 
 int SharedBinaryTree::GetValue(const string& key, string& value)
@@ -91,9 +90,11 @@ int SharedBinaryTree::GetValue(const string& key, string& value)
             ret = 0;
             break;
         } else if (key < pNode->key) {
-            pNode = pNode->left;
+            // 通过偏移量获取左子节点
+            pNode = GetNodeByOffset(pNode->left);
         } else {
-            pNode = pNode->right;
+            // 通过偏移量获取右子节点
+            pNode = GetNodeByOffset(pNode->right);
         }
     }
 
@@ -116,6 +117,22 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
         return -1;
     }
 
+    // 如果根节点为空，直接设置根节点
+    if (pNode->key[0] == '\0') {
+        strncpy(pNode->key, key.c_str(), SHARED_BTREE_KEY_MAX_LEN - 1);
+        pNode->key[SHARED_BTREE_KEY_MAX_LEN - 1] = '\0';
+        strncpy(pNode->value, value.c_str(), SHARED_BTREE_VALUE_MAX_LEN - 1);
+        pNode->value[SHARED_BTREE_VALUE_MAX_LEN - 1] = '\0';
+        pNode->left = 0;
+        pNode->right = 0;
+
+        mCurUsedSize = sizeof(mCurUsedSize) + sizeof(Node);
+        *reinterpret_cast<size_t*>(mRoot) = mCurUsedSize;
+
+        sem_post(&mSemaphore);
+        return 0;
+    }
+
     Node* pPrev = nullptr;
     while (pNode != nullptr) {
         if (key == pNode->key) {
@@ -126,10 +143,13 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
         }
 
         pPrev = pNode;
-        pNode = (key < pNode->key) ? pNode->left : pNode->right;
+        if (key < pNode->key) {
+            pNode = GetNodeByOffset(pNode->left);
+        } else {
+            pNode = GetNodeByOffset(pNode->right);
+        }
     }
 
-    // 更新共享内存使用大小
     mCurUsedSize += sizeof(Node);
     if (mCurUsedSize > mSize) {
         SPR_LOGE("Resource ou of limit! mCurUsedSize = %zu, mSize = %zu\n", mCurUsedSize, mSize);
@@ -145,21 +165,26 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
         return -1;
     }
 
+    // 更新共享内存使用大小
     *reinterpret_cast<size_t*>(mRoot) = mCurUsedSize;
 
+    // 设置父节点的子节点偏移量
     if (key < pPrev->key) {
-        pPrev->left = pNewNode;
+        pPrev->left = GetNodeOffset(pNewNode);
     } else {
-        pPrev->right = pNewNode;
+        pPrev->right = GetNodeOffset(pNewNode);
     }
 
     sem_post(&mSemaphore);
     return 0;
 }
 
-int SharedBinaryTree::OpenMapFile(const string& filename, size_t size)
+int SharedBinaryTree::OpenMapFile(const string& filename, size_t size, bool create)
 {
-    unlink(filename.c_str());
+    if (create) {
+        unlink(filename.c_str());
+    }
+
     int fd = open(filename.c_str(), O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
     if (fd == -1) {
         SPR_LOGE("Open %s fail! (%s)\n", filename.c_str(), strerror(errno));
@@ -184,8 +209,9 @@ Node* SharedBinaryTree::CreateNode(const string& key, const string& value)
     strncpy(newNode->value, value.c_str(), SHARED_BTREE_VALUE_MAX_LEN - 1);
     newNode->value[SHARED_BTREE_VALUE_MAX_LEN - 1] = '\0';
 
-    newNode->left = nullptr;
-    newNode->right = nullptr;
+    // 新节点的左右子节点初始化为0（空）
+    newNode->left = 0;
+    newNode->right = 0;
 
     return newNode;
 }
@@ -193,16 +219,19 @@ Node* SharedBinaryTree::CreateNode(const string& key, const string& value)
 void SharedBinaryTree::GetAllKeyValues(std::map<std::string, std::string>& keyValueMap)
 {
     sem_wait(&mSemaphore);
-    GetKeyValue(mFirstNode->left, keyValueMap);
-    GetKeyValue(mFirstNode->right, keyValueMap);
+    // 从根节点开始遍历，包括根节点本身
+    GetKeyValue(mFirstNode, keyValueMap);
     sem_post(&mSemaphore);
 }
 
 void SharedBinaryTree::GetKeyValue(Node* pNode, std::map<std::string, std::string>& keyValueMap)
 {
-    if (pNode != nullptr) {
-        GetKeyValue(pNode->left, keyValueMap);
-        GetKeyValue(pNode->right, keyValueMap);
+    if (pNode != nullptr && pNode->key[0] != '\0') {
+        // 先遍历左子树
+        GetKeyValue(GetNodeByOffset(pNode->left), keyValueMap);
+        // 再添加当前节点
         keyValueMap[pNode->key] = pNode->value;
+        // 最后遍历右子树
+        GetKeyValue(GetNodeByOffset(pNode->right), keyValueMap);
     }
 }

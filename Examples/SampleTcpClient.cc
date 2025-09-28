@@ -31,11 +31,11 @@ using namespace std;
 
 #define SPR_LOGD(fmt, args...) printf("%4d TcpClient D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d TcpClient E: " fmt, __LINE__, ##args)
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     std::mutex epFdMutex;
     EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
-    auto tcpClient = make_shared<PTcpClient>([&](int sock, void *arg) {
+    auto tcpClient = make_shared<PTcpClient>([&](int sock, void* arg) {
         PTcpClient* pCliObj = (PTcpClient*)arg;
         if (pCliObj == nullptr) {
             SPR_LOGE("pCliObj is nullptr\n");

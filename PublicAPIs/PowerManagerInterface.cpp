@@ -26,6 +26,7 @@
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
+#include "AsyncEvent.h"
 #include "GeneralUtils.h"
 #include "PowerManagerInterface.h"
 
@@ -38,6 +39,7 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IPowerMgr", __LINE__, ##args)
 
 static bool mEnable;
+static std::string eventName;
 static std::atomic<bool> gObjAlive(true);
 static std::mutex gTMutex;
 static ProcMutex gPMutex("IPowerMgrMutex");
@@ -51,6 +53,9 @@ PowerManagerInterface::PowerManagerInterface()
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }
+
+    eventName = "powermanagersrv_event";
+    AsyncEvent::GetInstance()->AsReader(eventName);
 }
 
 PowerManagerInterface::~PowerManagerInterface()
@@ -105,5 +110,37 @@ int PowerManagerInterface::PowerOff()
 
     SPR_LOGD("ret: %d\n", ret);
     return ret;
+}
+
+int PowerManagerInterface::RegisterCallback(void (*callback)(int32_t eventID, void* data, int32_t size))
+{
+    if (!mEnable) {
+        SPR_LOGE("PowerManager is disable!\n");
+        return -1;
+    }
+
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(GENERAL_REGISTER_CALLBACK));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(eventName));
+    NONZERO_CHECK_RET(pReqParcel->Post());
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+
+    int ret = 0;
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
+
+    SPR_LOGD("ret: %d\n", ret);
+    AsyncEvent::GetInstance()->RegisterEventCallback(callback);
+    return ret;
+}
+
+
+int PowerManagerInterface::UnRegisterCallback()
+{
+    if (!mEnable) {
+        SPR_LOGE("PowerManager is disable!\n");
+        return -1;
+    }
+
+    return AsyncEvent::GetInstance()->UnregisterEventCallback();
 }
 

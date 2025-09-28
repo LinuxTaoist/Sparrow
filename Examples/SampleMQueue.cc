@@ -27,7 +27,7 @@ using namespace std;
 #define SPR_LOGD(fmt, args...) printf("%4d MQueue D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d MQueue E: " fmt, __LINE__, ##args)
 
-int main(int argc, const char *argv[])
+int main(int argc, const char* argv[])
 {
     auto pMQueue = make_shared<PMsgQueue>("MQTest", 1025, [](int fd, const string& msg, void* arg) {
         SPR_LOGD("fd = %d, msg = %s\n", fd, msg.c_str());

@@ -34,13 +34,13 @@
 struct SModuleInfo
 {
     bool monitored;
+    SprMsg lastMsg;
     std::shared_ptr<PMsgQueue> pModMQ;
 };
 
 class SprMediator
 {
 public:
-    ~SprMediator();
     static SprMediator* GetInstance();
 
     int Init();
@@ -49,6 +49,7 @@ public:
 
 private:
     SprMediator();
+    ~SprMediator();
     int InitInternalPort();
     int LoadMQStaticInfo(int handle, const std::string& devName);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
@@ -61,6 +62,14 @@ private:
     int MsgRespondRegister(const SprMsg& msg);
     int MsgRespondUnregister(const SprMsg& msg);
 
+    /* 注册/注销所有调试函数 */
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+
+    /* 调试函数 */
+    void DebugDumpMQs(const std::vector<std::string>& args);
+    void DebugDumpMQWtihID(const std::vector<std::string>& args);
+
 private:
     std::shared_ptr<PMsgQueue> mpInternalMQ;
     std::map<int, std::shared_ptr<SprMQueueDetails>> mMQDetailsMap;  // handle, mq
@@ -68,4 +77,3 @@ private:
 };
 
 #endif // __SPR_MEDIATOR_H__
-

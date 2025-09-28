@@ -29,7 +29,7 @@ fi
 OUTPUT_FILENAME="StaticScan_${DATE}_${SEQUENCE_NUMBER}.xml"
 
 # 设置Cppcheck命令行参数
-CPPCHECK_OPTS="--std=c++11 --enable=all --suppress=unusedFunction --suppress=useInitializationList --error-exitcode=1 --xml --xml-version=2 --output-file=../StaticScans/${OUTPUT_FILENAME}"
+CPPCHECK_OPTS="-UENUM_OR_STRING --std=c++11 --enable=all --suppress=unusedFunction --suppress=useInitializationList --error-exitcode=1 --xml --xml-version=2 --output-file=../StaticScans/${OUTPUT_FILENAME}"
 
 # 指定待检查的源代码及头文件目录列表
 SOURCE_DIRS="../3rdAdapter/ ../Components/ ../Core/ ../Debug/ ../Examples/ ../Hardware/ ../PrivateAPIs ../PublicAPIs/ ../TestCase ../Util/ ../UtilModules"

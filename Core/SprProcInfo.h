@@ -24,7 +24,6 @@
 class SprProcInfo
 {
 public:
-    ~SprProcInfo();
     static SprProcInfo* GetInstance();
 
     void Init();
@@ -37,6 +36,7 @@ public:
 
 private:
     SprProcInfo();
+    ~SprProcInfo();
     void LoadBootTimeUs();
     uint64_t GetTickUs();
     std::string UsToTimeString(uint64_t us);

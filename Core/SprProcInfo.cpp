@@ -18,8 +18,12 @@
  */
 #include <atomic>
 #include <unistd.h>
+#include <string.h>
+#include "SprLog.h"
 #include "CoreTypeDefs.h"
 #include "SprProcInfo.h"
+
+#define LOG_TAG "SprProcInfo"
 
 static std::atomic<bool> gObjAlive(true);
 
@@ -50,11 +54,15 @@ void SprProcInfo::Init()
 
 uint64_t SprProcInfo::GetTickUs()
 {
-    uint64_t td = 0;
+    static uint64_t td = 0;
     struct timespec ts;
-    clock_gettime(CLOCK_MONOTONIC, &ts);
-    td = (uint64_t)(ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
+    int32_t ret = clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
+    if (ret != 0) {
+        SPR_LOGE("clock_gettime failed! (%s)", strerror(errno));
+        return td;
+    }
 
+    td = (uint64_t)((uint64_t)ts.tv_sec * 1000000 + ts.tv_nsec / 1000);
     return td;
 }
 
@@ -78,7 +86,7 @@ std::string SprProcInfo::UsToTimeString(uint64_t us)
     const uint64_t hourPerDay = 24;
     const uint64_t minPerHour = 60;
     const uint64_t secPerMin = 60;
-    const uint64_t usPerSec = 1000000;
+    const uint64_t usPerSec = 1000000UL;
 
     uint64_t days = us / (hourPerDay * minPerHour * secPerMin * usPerSec);
     uint64_t hours = (us % (hourPerDay * minPerHour * secPerMin * usPerSec)) / (minPerHour * secPerMin * usPerSec);

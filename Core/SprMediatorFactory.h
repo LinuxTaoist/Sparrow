@@ -26,11 +26,6 @@ class SprMediatorFactory
 {
 public:
     /**
-     * @brief Destruct
-     */
-    ~SprMediatorFactory();
-
-    /**
      * @brief Get the instance object
      *
      * @return Single instance of SprMediatorFactory
@@ -47,6 +42,11 @@ protected:
      * @brief Construct
      */
     SprMediatorFactory();
+
+    /**
+     * @brief Destruct
+     */
+    ~SprMediatorFactory();
 };
 
 #endif // __SPR_MEDIATOR_FACTORY_H__

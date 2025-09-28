@@ -29,7 +29,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CoreTypeDefs.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1003"
+#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1006"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common defines for Plugin
@@ -85,7 +85,7 @@ enum EProxyType
 // --------------------------------------------------------------------------------------------------------------------
 #define SPR_MODULE_ID_MACROS \
     ENUM_OR_STRING(MODULE_NONE),                \
-    ENUM_OR_STRING(MODULE_PROXY ),              \
+    ENUM_OR_STRING(MODULE_PROXY),               \
     ENUM_OR_STRING(MODULE_PROPERTYM),           \
     ENUM_OR_STRING(MODULE_CONFIG),              \
     ENUM_OR_STRING(MODULE_LOGM),                \
@@ -179,6 +179,22 @@ enum EDebugMBinderCmd
 };
 
 //---------------------------------------------------------------------------------------------------------------------
+// - ELogLevel
+// --------------------------------------------------------------------------------------------------------------------
+#define LOG_LEVEL_MACROS \
+    ENUM_OR_STRING(LOG_LEVEL_MIN),   \
+    ENUM_OR_STRING(LOG_LEVEL_ERROR), \
+    ENUM_OR_STRING(LOG_LEVEL_WARN),  \
+    ENUM_OR_STRING(LOG_LEVEL_INFO),  \
+    ENUM_OR_STRING(LOG_LEVEL_DEBUG), \
+    ENUM_OR_STRING(LOG_LEVEL_BUTT)
+
+enum ELogLevel
+{
+    LOG_LEVEL_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
 // - EOneNetBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 #define ONENET_BINDER_CMD_MACROS \
@@ -196,7 +212,9 @@ enum EOneNetBinderCmd
 // - EGeneralBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 #define GENERAL_BINDER_CMD_MACROS \
-    ENUM_OR_STRING(GENERAL_CMD_EXE_EXIT),   \
+    ENUM_OR_STRING(GENERAL_CMD_EXE_EXIT),           \
+    ENUM_OR_STRING(GENERAL_REGISTER_CALLBACK),      \
+    ENUM_OR_STRING(GENERAL_UNREGISTER_CALLBACK),    \
     ENUM_OR_STRING(GENERAL_CMD_BUTT)
 
 enum EGeneralBinderCmd
@@ -210,17 +228,16 @@ enum EGeneralBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 // BOOT_PRIORITY_HIGHEST        : used for environment initialization
 // BOOT_PRIORITY_HIGH           : used for system core services
-// BOOT_PRIORITY_MEDIUM_HIGH    : used for critical services, initial project configuration, etc
 // BOOT_PRIORITY_MEDIUM         : used for main business services
-// BOOT_PRIORITY_MEDIUM_LOW     : used for ancillary services, not need to start immediately.
+// BOOT_PRIORITY_LOW            : used for ancillary services, not need to start immediately.
 // BOOT_PRIORITY_LOWEST         : used for optional services
 #define MODULE_BOOT_PRIORITY_MACROS \
     ENUM_OR_STRING(BOOT_PRIORITY_HIGHEST),      \
     ENUM_OR_STRING(BOOT_PRIORITY_HIGH),         \
-    ENUM_OR_STRING(BOOT_PRIORITY_MEDIUM_HIGH),  \
     ENUM_OR_STRING(BOOT_PRIORITY_MEDIUM),       \
-    ENUM_OR_STRING(BOOT_PRIORITY_MEDIUM_LOW),   \
-    ENUM_OR_STRING(BOOT_PRIORITY_LOWEST)
+    ENUM_OR_STRING(BOOT_PRIORITY_LOW),          \
+    ENUM_OR_STRING(BOOT_PRIORITY_LOWEST),       \
+    ENUM_OR_STRING(BOOT_PRIORITY_BUTT)
 
 enum EModuleBootPriority
 {
@@ -228,9 +245,63 @@ enum EModuleBootPriority
 };
 
 //---------------------------------------------------------------------------------------------------------------------
+// - EStartupType
+// --------------------------------------------------------------------------------------------------------------------
+#define STARTUP_TYPE_MACROS \
+    ENUM_OR_STRING(STARTUP_COLD_BOOT),  \
+    ENUM_OR_STRING(STARTUP_WARM_BOOT),  \
+    ENUM_OR_STRING(STARTUP_RESUME),     \
+    ENUM_OR_STRING(STARTUP_BUTT)
+
+enum EStartupType
+{
+    STARTUP_TYPE_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EPreStandbyAck
+// --------------------------------------------------------------------------------------------------------------------
+#define PRE_STANDBY_ACK_MACROS \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_ALLOW),  \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_REFUSE), \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_DELAY),  \
+    ENUM_OR_STRING(PRE_STANDBY_ACK_BUTT)
+
+enum EPreStandbyAck
+{
+    PRE_STANDBY_ACK_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EStandbySourceType
+// --------------------------------------------------------------------------------------------------------------------
+#define STANDBY_REASON_TYPE_MACROS \
+    ENUM_OR_STRING(STANDBY_REASON_USER), \
+    ENUM_OR_STRING(STANDBY_REASON_BUTT)
+
+enum EStandbyReasonType
+{
+    STANDBY_REASON_TYPE_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EWakeupSourceType
+// --------------------------------------------------------------------------------------------------------------------
+#define WAKEUP_SOURCE_TYPE_MACROS \
+    ENUM_OR_STRING(WAKEUP_SOURCE_USER), \
+    ENUM_OR_STRING(WAKEUP_SOURCE_RTC),  \
+    ENUM_OR_STRING(WAKEUP_SOURCE_BUTT)
+
+enum EWakeupSourceType
+{
+    WAKEUP_SOURCE_TYPE_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
 // - ETimeSourceType
 // --------------------------------------------------------------------------------------------------------------------
 #define TIME_SOURCE_TYPE_MACROS \
+    ENUM_OR_STRING(TIME_SOURCE_TYPE_MIN),   \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_NTP),   \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_GNSS),  \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_BUTT)

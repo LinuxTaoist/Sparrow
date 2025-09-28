@@ -54,7 +54,6 @@ public:
     SprDebugNode& operator=(const SprDebugNode&) = delete;
     SprDebugNode(SprDebugNode&&) = delete;
     SprDebugNode& operator=(SprDebugNode&&) = delete;
-    virtual ~SprDebugNode();
 
     static SprDebugNode* GetInstance();
     std::string GetDebugPath();
@@ -81,9 +80,12 @@ public:
     void DebugDumpAllOwners(const std::vector<std::string>& args);
     void DebugDumpVersion(const std::vector<std::string>& args);
     void DebugDumpProcInfo(const std::vector<std::string>& args);
+    void DebugDumpThreadPoolDetails(const std::vector<std::string>& args);
+    void DebugSetLogLevel(const std::vector<std::string>& args);
 
 private:
     SprDebugNode();
+    ~SprDebugNode();
 
 private:
     int32_t mMaxNum;

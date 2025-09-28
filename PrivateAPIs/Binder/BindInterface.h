@@ -28,11 +28,6 @@ class BindInterface
 {
 public:
     /**
-     * @brief  Destructor
-     */
-    ~BindInterface();
-
-    /**
      * @brief  Get the Instance object
      *
      * @return  Signle instance of BindInterface
@@ -74,6 +69,11 @@ private:
     BindInterface() = default;
 
     /**
+     * @brief  Destructor
+     */
+    ~BindInterface();
+
+    /**
      * @brief  Add a service as a binder
      *
      * @param name  The name of the service to add
@@ -100,6 +100,22 @@ private:
      * @return  0 if success, -1 if failed
      */
     int32_t RemoveService(const std::string& name);
+
+    /**
+     * @brief  Register a async callback
+     *
+     * @param name
+     * @return int32_t
+     */
+    int32_t RegisterAsyncCallback(const std::string& name);
+
+    /**
+     * @brief  Unregister a async callback
+     *
+     * @param name
+     * @return int32_t
+     */
+    int32_t UnregisterAsyncCallback(const std::string& name);
 };
 
 #endif // __BIND_INTERFACE_H__

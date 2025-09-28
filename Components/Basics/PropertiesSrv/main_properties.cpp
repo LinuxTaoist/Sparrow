@@ -16,20 +16,13 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <iostream>
-#include <string>
-#include <sstream>
-#include <string.h>
 #include <signal.h>
-#include <unistd.h>
 #include "SprLog.h"
-#include "Backtrace.h"
 #include "GeneralUtils.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
-#include "BindInterface.h"
-#include "CoreTypeDefs.h"
 #include "SprProcPrepare.h"
+#include "BacktraceMacros.h"
 #include "PropertyManager.h"
 #include "PropertyManagerHub.h"
 #include "EpollEventHandler.h"
@@ -38,7 +31,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "MainProper"
 
-int main(int argc, char * argv[])
+int main(int argc, char*  argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);
@@ -60,11 +53,11 @@ int main(int argc, char * argv[])
         }
     });
 
-    PropertyManager* pProperM = PropertyManager::GetInstance();
+    PropertyManager* pProperM = PropertyManager::GetInstance(MODULE_PROPERTYM, "ProperM");
     PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
 
     SprProcPrepare::GetInstance()->Init(SRV_NAME_PROPERTY);
-    pProperM->Init();
+    pProperM->Initialize();
     thePropertyManagerHub.InitializeHub();
 
     EpollEventHandler::GetInstance()->EpollLoop();

@@ -263,11 +263,15 @@ int32_t ServiceManager::WaitLastExeFinished(const std::string& exeName)
     std::string monitorNode = std::string(ENV_ROOT_PATH) + exeName;
     while (retryTimes--) {
         if (access(monitorNode.c_str(), F_OK) != 0) {
-            SPR_LOGD("Waiting exe: %-20s retryTimes = %-3d\n", exeName.c_str(), 10 - retryTimes);
+            // SPR_LOGD("Waiting exe: %-20s retryTimes = %-3d\n", exeName.c_str(), 10 - retryTimes);
             usleep(50000);
         } else {
             break;
         }
+    }
+
+    if (retryTimes == 0) {
+        SPR_LOGE("Waiting exe: %-20s timeout!\n", exeName.c_str());
     }
 
     return 0;
