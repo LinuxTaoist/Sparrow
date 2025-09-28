@@ -36,7 +36,7 @@ public:
     int AsWriter(const std::string& name);
     int AsReader(const std::string& name);
     int UnregisterEventCallback();
-    int RegisterEventCallback(EventCallback callback);
+    int RegisterEventCallback(const EventCallback& callback);
     int EventNotify(int32_t event, void* args, int32_t size);
 
 private:

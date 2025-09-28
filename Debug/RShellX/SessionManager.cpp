@@ -93,7 +93,7 @@ int32_t SessionManager::AsTcpServer(uint16_t port)
         });
 
         std::shared_ptr<PtyTerminal> pPtyObj = make_shared<PtyTerminal>([&](int32_t ret, std::string bytes, void* arg) {
-            PtyTerminal* pPty = (PtyTerminal*) arg;
+            PtyTerminal* pPty = reinterpret_cast<PtyTerminal*>(arg);
             if (pPty == nullptr) {
                 SPR_LOGE("pPty is nullptr!\n");
                 return;

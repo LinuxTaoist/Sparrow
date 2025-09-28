@@ -37,7 +37,7 @@ AsyncEvent* AsyncEvent::GetInstance()
 }
 
 AsyncEvent::AsyncEvent()
-    : mRunning(true)
+    : mRunning(true), mCb(nullptr)
 {
 }
 
@@ -71,13 +71,9 @@ int AsyncEvent::UnregisterEventCallback()
     return 0;
 }
 
-int AsyncEvent::RegisterEventCallback(EventCallback callback)
+int AsyncEvent::RegisterEventCallback(const EventCallback& callback)
 {
-    if (!callback) {
-        return -1;
-    }
-
-    if (mCbThread.joinable()) {
+    if (!callback || mCbThread.joinable()) {
         return -1;
     }
 

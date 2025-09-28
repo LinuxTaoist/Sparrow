@@ -95,7 +95,7 @@ int32_t NtpSource::SendTimeRequest()
     }
 
     mCurSrvIndex++;
-    return 0;
+    return ret;
 }
 
 int32_t NtpSource::InitSocket()
