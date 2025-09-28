@@ -14,6 +14,13 @@ set_target_properties       (01_proc_guard PROPERTIES OUTPUT_NAME "01_proc_guard
 target_link_libraries       (01_proc_guard c sprlog pthread rt)
 add_dependencies            (01_proc_guard LibSprLog)
 
+## Bin 02_dirwatch
+set(SRC_BIN_02_DIR_WATCH     02_SprDirWatch.cc)
+add_executable              (02_dir_watch ${SRC_BIN_02_DIR_WATCH} ${SRC_DIR_WATCH})
+set_target_properties       (02_dir_watch PROPERTIES OUTPUT_NAME "02_dir_watch")
+target_link_libraries       (02_dir_watch c sprcore epollevent pthread)
+add_dependencies            (02_dir_watch LibSprCore LibEpollEvent)
+
 ## Bin debugcore
 set(SRC_BIN_DCORE           DebugSprCore.cc)
 add_executable              (debug_core ${SRC_BIN_DCORE})
