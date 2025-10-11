@@ -49,20 +49,17 @@ int32_t NtpSource::SendTimeRequest()
     if (!mIsReady) {
         SPR_LOGD("Creating UDP socket on port %d\n", mLocalPort);
         ret = mpSocket->AsUdp(mLocalPort);
-        if (ret == -1) {
-            SPR_LOGE("Failed to create UDP socket on port %d\n", mLocalPort);
+        if (ret == -1 || !mpSocket) {
+            SPR_LOGE("Create UDP failed! port %d \n", mLocalPort);
             return ret;
         }
         mIsReady = true;
     }
 
-    if (!mpSocket) {
-        SPR_LOGE("mpSocket is nullptr\n");
-        return -1;
-    }
-
+    int32_t tmpIndex = mCurSrvIndex;
+    mCurSrvIndex++;
     SPR_LOGD("Sending time request to %d NTP servers\n", mNtpServers.size());
-    if (mCurSrvIndex >= (int32_t)mNtpServers.size()) {
+    if (mCurSrvIndex > (int32_t)mNtpServers.size()) {
         mCurSrvIndex = 0;
         mIsReady = false;
         mpSocket->Close();
@@ -70,31 +67,30 @@ int32_t NtpSource::SendTimeRequest()
         return -1;
     }
 
-    std::string srvAddr = mNtpServers[mCurSrvIndex].addr;
-    uint16_t srvPort = mNtpServers[mCurSrvIndex].port;
+    std::string srvAddr = mNtpServers[tmpIndex].addr;
+    uint16_t srvPort = mNtpServers[tmpIndex].port;
     std::string ip = SocketCommon::ResolveHostToIP(srvAddr);    // Warn: long time-consuming interface
-    SPR_LOGD("[%d/%u] Resolve %s to %s\n", mCurSrvIndex + 1, mNtpServers.size(), srvAddr.c_str(), ip.c_str());
-
-    if (!ip.empty()) {
-        std::string bytes;
-        NtpProtocol ntpPacket("");
-        ntpPacket.Encode(bytes);
-        mNtpServers[mCurSrvIndex].ip = ip;
-        mNtpServers[mCurSrvIndex].sendTs = GetCurTimeStamp();
-
-        if (!mIsReady) {
-            SPR_LOGD("Sync time finished, not request again!");
-            mCurSrvIndex++;
-            return 0;
-        }
-        ret = mpSocket->Write(bytes, ip, srvPort);
-        SPR_LOGD("[%d/%u] Request to %s:%u %d bytes %s\n", mCurSrvIndex + 1, mNtpServers.size(),
-                ip.c_str(), srvPort, bytes.size(), ret == -1 ? "failed" : "success");
-    } else {
+    if (ip.empty()) {
         SPR_LOGE("Resolve host %s failed! (%s)\n", srvAddr.c_str(), strerror(errno));
+        return -1;
     }
 
-    mCurSrvIndex++;
+    std::string bytes;
+    NtpProtocol ntpPacket("");
+    ntpPacket.Encode(bytes);
+    mNtpServers[tmpIndex].ip = ip;
+    mNtpServers[tmpIndex].sendTs = GetCurTimeStamp();
+
+    // mutiple thread request
+    // if other thread request success, the socket will be closed
+    if (!mIsReady) {
+        SPR_LOGD("Sync time finished, not request again!");
+        return 0;
+    }
+    ret = mpSocket->Write(bytes, ip, srvPort);
+    SPR_LOGD("[%d/%u] Request to %s:%u %d bytes %s\n", tmpIndex + 1, mNtpServers.size(),
+            ip.c_str(), srvPort, bytes.size(), ret == -1 ? "failed" : "success");
+
     return ret;
 }
 
@@ -183,19 +179,21 @@ uint64_t NtpSource::GetCurTimeStamp()
 
     uint64_t ntpSec = (uint64_t)ts.tv_sec;
     uint64_t ntpFrac = ts.tv_nsec * 4294967296ULL / 1000000000ULL;
-    return (ntpSec << 32) | ntpFrac;
+    return (ntpSec * 4294967296ULL) | ntpFrac;
 }
 
 uint64_t NtpSource::CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4)
 {
-    #define NTPTIME_TO_NSEC(x) ( (((x >> 32) & MASK) * 1000000000ULL) + (x & MASK) )
+    #define NTPTIME_TO_NSEC(x) ( \
+        ((x >> 32) & MASK) * 1000000000ULL + \
+        (uint64_t)(( (x & MASK) * 1000000000ULL ) / 4294967296ULL) \
+    )
 
-    const int32_t MASK = 0xFFFFFFFF;
+    const uint32_t MASK = 0xFFFFFFFF;
     uint64_t utc = ((t3 >> 32) & MASK) - NTP_UNIX_EPOCH_OFFSET;
     uint64_t offset = ( (NTPTIME_TO_NSEC(t4) - NTPTIME_TO_NSEC(t1)) +
                         (NTPTIME_TO_NSEC(t3) - NTPTIME_TO_NSEC(t2)) ) / 2;
     uint64_t offsetSec = offset / 1000000000ULL;
     uint64_t offsetFrac = offset % 1000000000ULL;
-
-    return ((utc + offsetSec) << 32) | offsetFrac;
+    return ((utc + offsetSec) * 4294967296ULL) | offsetFrac;
 }
