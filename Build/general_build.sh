@@ -1,7 +1,4 @@
 #!/bin/bash
-# 记录开始时间
-START_TIME=$(date +%s)
-START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
 
 BUILD_TYPE="Release"
 PROJECT_PATH=$(pwd)/..
@@ -11,8 +8,12 @@ cd $PROJECT_PATH/Build/
 mkdir -p ../Release/Cache
 mkdir -p ../Release/Include
 mkdir -p ../Release/Lib
-
 cd ../Release/Cache/
+
+# 记录开始时间
+START_TIME=$(date +%s)
+START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
+
 cmake ../../ \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \

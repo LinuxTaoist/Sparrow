@@ -9,6 +9,9 @@ set(CMAKE_C_COMPILER "${TOOLCHAIN_DIR}${TOOLCHAIN_PREFIX}-gcc")
 set(CMAKE_CXX_COMPILER "${TOOLCHAIN_DIR}${TOOLCHAIN_PREFIX}-g++")
 set(CMAKE_EXE_LINKER_FLAGS "-Wl,-dynamic-linker,/lib/ld-linux-armhf.so.3")
 
+## 设置链接选项
+set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
+
 # 设置 sysroot
 set(CMAKE_SYSROOT "/opt/ql_sdk/ql-ol-extsdk-ag35cevnr12a02m4g_ocpu/ql-sysroots")
 set(CMAKE_FIND_ROOT_PATH_MODE_PROGRAM NEVER)

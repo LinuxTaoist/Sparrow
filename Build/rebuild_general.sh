@@ -1,9 +1,10 @@
 #!/bin/bash
 BUILD_TYPE="Release"
-PROJECT_PATH=$(pwd)/../
-PROJECT_PLATFORM="ql_ag35"
+PROJECT_PATH=$(pwd)/..
+PROJECT_PLATFORM="Default"
 
 cd $PROJECT_PATH/Build/
+rm -rf ../Release/*
 mkdir -p ../Release/Cache
 mkdir -p ../Release/Include
 mkdir -p ../Release/Lib
@@ -17,7 +18,8 @@ cmake ../../ \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
     -DCMAKE_INSTALL_PREFIX=../
-make -j24
+
+make -j16
 
 # 记录结束时间并计算耗时
 END_TIME=$(date +%s)

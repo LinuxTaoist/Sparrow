@@ -1,11 +1,7 @@
 #!/bin/bash
-# 记录开始时间
-START_TIME=$(date +%s)
-START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
-
 BUILD_TYPE="Release"
-PROJECT_PATH=$(pwd)/..
-PROJECT_PLATFORM="Default"
+PROJECT_PATH=$(pwd)/../
+PROJECT_PLATFORM="ql_ag35"
 
 cd $PROJECT_PATH/Build/
 rm -rf ../Release/*
@@ -13,13 +9,17 @@ mkdir -p ../Release/Cache
 mkdir -p ../Release/Include
 mkdir -p ../Release/Lib
 
+# 记录开始时间
+START_TIME=$(date +%s)
+START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
+
 cd ../Release/Cache/
 cmake ../../ \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
     -DCMAKE_INSTALL_PREFIX=../
 
-make -j16
+make -j24
 
 # 记录结束时间并计算耗时
 END_TIME=$(date +%s)

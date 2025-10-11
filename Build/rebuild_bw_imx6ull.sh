@@ -1,9 +1,10 @@
 #!/bin/bash
 BUILD_TYPE="Release"
 PROJECT_PATH=$(pwd)/../
-PROJECT_PLATFORM="ql_ag35"
+PROJECT_PLATFORM="bw_imx6ull"
 
 cd $PROJECT_PATH/Build/
+rm -rf ../Release/*
 mkdir -p ../Release/Cache
 mkdir -p ../Release/Include
 mkdir -p ../Release/Lib
@@ -17,6 +18,7 @@ cmake ../../ \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
     -DCMAKE_INSTALL_PREFIX=../
+
 make -j24
 
 # 记录结束时间并计算耗时

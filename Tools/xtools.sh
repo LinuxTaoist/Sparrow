@@ -114,10 +114,12 @@ new_platform() {
     mkdir -p ${project_path}/Build/options/${platform_name}
     touch ${project_path}/Build/options/${platform_name}/${platform_name}_compile_options.cmake
     touch ${project_path}/Build/${platform_name}_build.sh
+    touch ${project_path}/Build/rebuild_${platform_name}.sh
 
     echo -e "${GREEN}touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop ${NC}"
     mkdir -p ${project_path}/ProjectConfigs/Vendor/${platform_name}
     touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
+    touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/sprlog.conf
     echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
 }
 
