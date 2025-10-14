@@ -84,21 +84,15 @@ int AsyncEvent::RegisterEventCallback(const EventCallback& callback)
         while (mRunning) {
             int32_t event = 0;
             int32_t size = 0;
-            char* pData = nullptr;
             pEventParcel->Wait();
             pEventParcel->ReadInt(event);
             pEventParcel->ReadInt(size);
-            if (size <= 0 || !mCb) {
-                usleep(500);
-                continue;
+            unsigned char data[size] = {};
+            if (size > 0) {
+                pEventParcel->ReadData(data, size);
             }
 
-            pData = new (std::nothrow) char[size];
-            if (pData) {
-                pEventParcel->ReadData((void*)pData, size);
-                mCb(event, pData, size);
-                delete[] pData;
-            }
+            mCb(event, data, size);
         }
     });
 
@@ -113,7 +107,7 @@ int AsyncEvent::EventNotify(int32_t event, void* data, int32_t size)
 
     pEventParcel->WriteInt(event);
     pEventParcel->WriteInt(size);
-    if (size != 0 ) {
+    if (size != 0) {
         pEventParcel->WriteData(data, size);
     }
     pEventParcel->Post();
