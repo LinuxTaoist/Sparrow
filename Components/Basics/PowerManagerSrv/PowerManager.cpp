@@ -319,7 +319,7 @@ void PowerManager::MsgRespondObserverRegister(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager:: MsgRespondPowerOn(const SprMsg& msg)
+void PowerManager::MsgRespondPowerOn(const SprMsg& msg)
 {
     mStartupType = (EStartupType)msg.GetI32Value();
     mWakeupSourceType = (EWakeupSourceType)msg.GetU32Value();
