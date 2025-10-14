@@ -46,6 +46,7 @@ static std::atomic<bool> gObjAlive(true);
 TimeManager::TimeManager(ModuleIDType id, const std::string& name)
             : SprObserverWithMQueue(id, name)
 {
+    mSyncPollerTimer = false;
     mSyncTimeFinished = false;
     mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
     mCurTimeSource = TIME_SOURCE_TYPE_BUTT;
@@ -70,6 +71,13 @@ TimeManager* TimeManager::GetInstance(ModuleIDType id, const std::string& name)
 
     static TimeManager instance(id, name);
     return &instance;
+}
+
+int32_t TimeManager::Init()
+{
+    RegisterDebugFuncs();
+    InitNtpSource();
+    return 0;
 }
 
 int32_t TimeManager::InitNtpSource()
@@ -101,21 +109,27 @@ int32_t TimeManager::InitNtpSource()
     return 0;
 }
 
-int32_t TimeManager::GetDiffWithLocalTime(uint64_t timestamp, int64_t& diffNs)
+int32_t TimeManager::RequestNtpTime()
 {
-    const int32_t NS_PER_SEC = 1000000000LL;
-    struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
-        SPR_LOGE("Get time failed! (%s)\n", strerror(errno));
+    if (!mpNtpSource) {
+        SPR_LOGE("Ntp client is nullptr!");
         return -1;
     }
 
-    uint64_t targetNs = ((timestamp >> 32) & 0xFFFFFFFF) * NS_PER_SEC + (timestamp & 0xFFFFFFFF) / NS_PER_SEC;
-    uint64_t currentNs = (uint64_t)ts.tv_sec * NS_PER_SEC + ts.tv_nsec;
-
-    diffNs = std::abs(static_cast<int64_t>(targetNs - currentNs));
-    SPR_LOGD("Time diff: %lld ns", diffNs);
+    SPR_LOGD("Start request ntp time");
+    static std::mutex mutex;
+    SprThreadPool::GetInstance()->SubmitTask([&]() {
+        // long time to send request, so run it in thread pool
+        std::lock_guard<std::mutex> lock(mutex);
+        mpNtpSource->SendTimeRequest();
+    });
+    SPR_LOGD("Request ntp time ret = %d\n", 0);
     return 0;
+}
+
+int32_t TimeManager::RequestGnssTime()
+{
+    return -1;
 }
 
 int32_t TimeManager::StartSyncTime()
@@ -137,11 +151,23 @@ int32_t TimeManager::StopSyncTime()
 
 int32_t TimeManager::StartSyncTimePoller()
 {
+    if (mSyncPollerTimer) {
+        SPR_LOGD("Sync time poller already started!\n");
+        return 0;
+    }
+
+    mSyncPollerTimer = true;
     return RegisterTimer(0, mSyncPollTimeOutMs, SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT, 0);
 }
 
 int32_t TimeManager::StopSyncTimePoller()
 {
+    if (!mSyncPollerTimer) {
+        SPR_LOGD("Sync time poller already stopped!\n");
+        return 0;
+    }
+
+    mSyncPollerTimer = false;
     return UnregisterTimer(SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT);
 }
 
@@ -205,6 +231,23 @@ int32_t TimeManager::SyncSystemTime(int32_t source, uint64_t timestamp)
     return ret;
 }
 
+int32_t TimeManager::GetDiffWithLocalTime(uint64_t timestamp, int64_t& diffNs)
+{
+    const int32_t NS_PER_SEC = 1000000000LL;
+    struct timespec ts;
+    if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
+        SPR_LOGE("Get time failed! (%s)\n", strerror(errno));
+        return -1;
+    }
+
+    uint64_t targetNs = ((timestamp >> 32) & 0xFFFFFFFF) * NS_PER_SEC + (timestamp & 0xFFFFFFFF) / NS_PER_SEC;
+    uint64_t currentNs = (uint64_t)ts.tv_sec * NS_PER_SEC + ts.tv_nsec;
+
+    diffNs = std::abs(static_cast<int64_t>(targetNs - currentNs));
+    SPR_LOGD("Time diff: %lld ns", diffNs);
+    return 0;
+}
+
 TimeSourcePriority TimeManager::GetTimeSourcePriority(InternalDefs::TimeSourceType source)
 {
     TimeSourcePriority ret = TIME_SOURCE_PRIORITY_BUTT;
@@ -228,36 +271,6 @@ InternalDefs::TimeSourceType TimeManager::GetTimeSource(TimeSourcePriority prior
     return TIME_SOURCE_TYPE_BUTT;
 }
 
-int32_t TimeManager::Init()
-{
-    RegisterDebugFuncs();
-    InitNtpSource();
-    return 0;
-}
-
-int32_t TimeManager::RequestNtpTime()
-{
-    if (!mpNtpSource) {
-        SPR_LOGE("Ntp client is nullptr!");
-        return -1;
-    }
-
-    SPR_LOGD("Start request ntp time");
-    static std::mutex mutex;
-    SprThreadPool::GetInstance()->SubmitTask([&]() {
-        // long time to send request, so run it in thread pool
-        std::lock_guard<std::mutex> lock(mutex);
-        mpNtpSource->SendTimeRequest();
-    });
-    SPR_LOGD("Request ntp time ret = %d\n", 0);
-    return 0;
-}
-
-int32_t TimeManager::RequestGnssTime()
-{
-    return -1;
-}
-
 int32_t TimeManager::ProcessMsg(const SprMsg& msg)
 {
     switch(msg.GetMsgId())
@@ -273,6 +286,12 @@ int32_t TimeManager::ProcessMsg(const SprMsg& msg)
             break;
         case SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT:
             MsgRespondSyncTimePollerTimerEvent(msg);
+            break;
+        case SIG_ID_POWER_STARTUP_HIGH:
+            MsgRespondPowerStartupHigh(msg);
+            break;
+        case SIG_ID_POWER_STANDBY_LOW:
+            MsgRespondPowerStandbyLow(msg);
             break;
         default:
             break;
@@ -349,6 +368,30 @@ void TimeManager::MsgRespondSyncTimePollerTimerEvent(const SprMsg& msg)
 {
     SPR_LOGD("Receive sync time poller timer event\n");
     StartSyncTime();
+}
+
+/**
+ * @brief Process SIG_ID_POWER_STARTUP_HIGH
+ *
+ * @param[in] msg
+ * @return none
+ */
+void TimeManager::MsgRespondPowerStartupHigh(const SprMsg& msg)
+{
+    SPR_LOGD("Receive power startup high\n");
+    StartSyncTimePoller();
+}
+
+/**
+ * @brief Process SIG_ID_POWER_STANDBY_LOW
+ *
+ * @param[in] msg
+ * @return none
+ */
+void TimeManager::MsgRespondPowerStandbyLow(const SprMsg& msg)
+{
+    SPR_LOGD("Receive power standby low\n");
+    StopSyncTimePoller();
 }
 
 // --------------------------------------------------------------------------------------------------------------------

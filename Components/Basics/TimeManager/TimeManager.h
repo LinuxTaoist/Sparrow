@@ -48,21 +48,6 @@ public:
     int32_t StopSyncTimePoller();
 
 private:
-     /**
-     * @brief Initializes the business module with overrides from derived business modules
-     *
-     * @return 0 on success, or -1 if an error occurred
-     */
-    int32_t Init() override;
-
-    /**
-     * @brief  Process message from message queue received
-     *
-     * @param msg
-     * @return 0 on success, or -1 if an error occurred
-     */
-    int32_t ProcessMsg(const SprMsg& msg) override;
-
     /**
      * @brief Constructor / Destructor
      *
@@ -72,6 +57,16 @@ private:
     TimeManager(ModuleIDType id, const std::string& name);
     virtual ~TimeManager();
 
+     /**
+     * @brief Initializes the business module with overrides from derived business modules
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t Init() override;
+
+    /**
+     * @brief private functions
+     */
     int32_t InitNtpSource();
     int32_t RequestNtpTime();
     int32_t RequestGnssTime();
@@ -86,6 +81,14 @@ private:
     InternalDefs::TimeSourceType GetTimeSource(TimeSourcePriority priority);
 
     /**
+     * @brief  Process message from message queue received
+     *
+     * @param msg
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t ProcessMsg(const SprMsg& msg) override;
+
+    /**
      * @brief message handle function
      *
      * @param[in] msg
@@ -94,6 +97,8 @@ private:
     void MsgRespondRequestNtpTime(const SprMsg& msg);
     void MsgRespondSyncSystemTime(const SprMsg& msg);
     void MsgRespondSyncTimePollerTimerEvent(const SprMsg& msg);
+    void MsgRespondPowerStartupHigh(const SprMsg& msg);
+    void MsgRespondPowerStandbyLow(const SprMsg& msg);
 
     /**
      * @brief Register / Unregister debug functions
@@ -112,6 +117,7 @@ private:
     void DebugSetSyncPollTimeOutMs(const std::vector<std::string>& args);
 
 private:
+    bool mSyncPollerTimer;
     bool mSyncTimeFinished;
     int32_t mCurPriority;
     int32_t mSyncTimeOutMs;

@@ -72,11 +72,11 @@ static void usage()
     SPR_LOG("------------------------------------------------------------------\n"
             "usage:\n"
             "0: NotifyAllObserver\n"
-            "1: AddTimer ( 0, 1s, 3s)\n"
+            "1: AddTimer (0, 1s, 3s)\n"
             "2: DelTimer case 1 \n"
             "3: AddTimer (10, 0s, 2s)\n"
             "4: DelTimer case 3 \n"
-            "5: AddTimer ( 0, 0s, 20ms)\n"
+            "5: AddTimer (0, 0s, 20ms)\n"
             "6: PowerOn\n"
             "7: PowerOff\n"
             "8: OneNetDrv socket connect\n"
@@ -147,24 +147,24 @@ int main(int argc, const char* argv[])
                     break;
                 }
                 case '8': {
-                    SprMsg msg( MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
+                    SprMsg msg(MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
                     theDebug.NotifyObserver(msg);
                     break;
                 }
                 case '9': {
-                    SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("MQTT-OneJson01");
                     theDebug.NotifyObserver(msg);
                     break;
                 }
                 case 'a': {
-                    SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("MQTT-DEV01");
                     theDebug.NotifyObserver(msg);
                     break;
                 }
                 case 'b': {
-                    SprMsg msg( MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
                     msg.SetString("PC_TEST_01");
                     theDebug.NotifyObserver(msg);
                     break;
