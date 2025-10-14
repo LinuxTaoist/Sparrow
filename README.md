@@ -26,7 +26,7 @@
 ```bash
 # 进入构建目录执行脚本
 $ cd Sparrow/Build
-$ ./final_general_build.sh
+$ ./rebuild_general.sh
 
 # 编译产物在 Release 目录
 $ cd Release

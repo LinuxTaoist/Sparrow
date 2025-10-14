@@ -34,7 +34,7 @@
 // - Common defines for PowerManager
 // --------------------------------------------------------------------------------------------------------------------
 enum EPowerManagerEvent {
-    POWER_MGR_ACTIVE,
+    POWER_MGR_ACTIVE = 0,
     POWER_MGR_STANDBY,
     POWER_MGR_SLEEP,
     POWER_MGR_WAKEUP,
