@@ -19,6 +19,7 @@
 #ifndef __PROPERTY_H__
 #define __PROPERTY_H__
 
+#include <map>
 #include <string>
 
 class Property
@@ -53,11 +54,19 @@ public:
     /**
      * @brief GetProperties
      *
+     * @param properties
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int GetProperties(std::map<std::string, std::string>& properties);
+
+    /**
+     * @brief GetProperties
+     *
      * @return 0 on success, or -1 if an error occurred
      *
      * Dump all properties to logs, only used for debug.
      */
-    int GetProperties();
+    int DumpProperties();
 
 private:
     /**

@@ -39,7 +39,6 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "IPowerMgr", __LINE__, ##args)
 
 static bool mEnable;
-static std::string eventName;
 static std::atomic<bool> gObjAlive(true);
 static std::mutex gTMutex;
 static ProcMutex gPMutex("IPowerMgrMutex");
@@ -49,13 +48,12 @@ static std::shared_ptr<Parcel> pRspParcel = nullptr;
 PowerManagerInterface::PowerManagerInterface()
 {
     mEnable = true;
-    bool ret = BindInterface::GetInstance()->InitializeClientBinder("powermanagersrv", pReqParcel, pRspParcel);
+    bool ret = BindInterface::GetInstance()->InitializeClientBinder(SRV_NAME_POWER_MANAGER, pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }
 
-    eventName = "powermanagersrv_event";
-    AsyncEvent::GetInstance()->AsReader(eventName);
+    AsyncEvent::GetInstance()->AsReader(SRV_NAME_POWER_MANAGER);
 }
 
 PowerManagerInterface::~PowerManagerInterface()
@@ -121,7 +119,7 @@ int PowerManagerInterface::RegisterCallback(void (*callback)(int32_t eventID, vo
 
     ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(GENERAL_REGISTER_CALLBACK));
-    NONZERO_CHECK_RET(pReqParcel->WriteString(eventName));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(SRV_NAME_POWER_MANAGER));
     NONZERO_CHECK_RET(pReqParcel->Post());
     NONZERO_CHECK_RET(pRspParcel->TimedWait());
 

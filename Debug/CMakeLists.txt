@@ -23,6 +23,22 @@ set_target_properties       (BinInfraWatch PROPERTIES OUTPUT_NAME "infrawatch")
 target_link_libraries       (BinInfraWatch sprcore mediatorapi powermanagerapi onenetapi debugapi rt pthread dl)
 add_dependencies            (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibOneNetAPI LibDebugAPI)
 
+## Bin getprop
+set(SRC_BIN_PROPERTY_GET    ${SRC_DEBUG_PATH}/Property/GetProperty.cpp)
+add_executable              (property_get ${SRC_BIN_PROPERTY_GET})
+target_include_directories  (property_get PRIVATE ${PROJECT_PATH}/PublicAPIs)
+set_target_properties       (property_get PROPERTIES OUTPUT_NAME "getprop")
+target_link_libraries       (property_get c propertyapi)
+add_dependencies            (property_get LibPropertyAPI)
+
+## Bin setprop
+set(SRC_BIN_PROPERTY_SET    ${SRC_DEBUG_PATH}/Property/SetProperty.cpp)
+add_executable              (property_set ${SRC_BIN_PROPERTY_SET})
+target_include_directories  (property_set PRIVATE ${PROJECT_PATH}/PublicAPIs)
+set_target_properties       (property_set PROPERTIES OUTPUT_NAME "setprop")
+target_link_libraries       (property_set c propertyapi)
+add_dependencies            (property_set LibPropertyAPI)
+
 # Bin rshellx
 aux_source_directory        (${PROJECT_PATH}/Util               SRC_RSHELLX_PATH)
 aux_source_directory        (${SRC_DEBUG_PATH}/RShellX          SRC_RSHELLX_PATH)

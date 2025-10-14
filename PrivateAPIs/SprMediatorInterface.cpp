@@ -45,7 +45,7 @@ static std::shared_ptr<Parcel> pRspParcel = nullptr;
 SprMediatorInterface::SprMediatorInterface()
 {
     mEnable = true;
-    bool ret = BindInterface::GetInstance()->InitializeClientBinder("mediatorsrv", pReqParcel, pRspParcel);
+    bool ret = BindInterface::GetInstance()->InitializeClientBinder(SRV_NAME_MEDIATOR, pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }

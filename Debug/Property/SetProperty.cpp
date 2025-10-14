@@ -19,15 +19,12 @@
 #include <stdio.h>
 #include "Property.h"
 
-
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...) printf("%d DebugBinder D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d DebugBinder E: " fmt, __LINE__, ##args)
 
 int main(int argc, const char* argv[])
 {
     if (argc != 3) {
-        SPR_LOGE("Usage:%s <property name> <property value>", argv[0]);
+        SPR_LOG("Usage:%s <property name> <property value>", argv[0]);
         return -1;
     }
 

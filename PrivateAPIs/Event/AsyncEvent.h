@@ -26,7 +26,7 @@
 
 typedef void(*EventCallback)(int32_t eventID, void* data, int32_t size);
 
-#define ASYNC_NOTIFY(eventID, args, size)   AsyncEvent::GetInstance()->EventNotify(eventID, args, size)
+#define POST_AEVENT(eventID, args, size)   AsyncEvent::GetInstance()->EventNotify(eventID, args, size)
 
 class AsyncEvent
 {

@@ -18,10 +18,12 @@
  */
 #include <atomic>
 #include <memory>
+#include <unistd.h>
 #include "Parcel.h"
 #include "AsyncEvent.h"
 
 #define     KEY_EVENT_NOTIFY        99999
+#define     AEVENT_NAME_SUFFIX      "_event"
 
 static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pEventParcel = nullptr;
@@ -54,14 +56,14 @@ AsyncEvent::~AsyncEvent()
 int AsyncEvent::AsWriter(const std::string& name)
 {
     mName = name;
-    pEventParcel = std::make_shared<Parcel>(mName + "_event", KEY_EVENT_NOTIFY, true);
+    pEventParcel = std::make_shared<Parcel>(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, true);
     return pEventParcel ? 0 : -1;
 }
 
 int AsyncEvent::AsReader(const std::string& name)
 {
     mName = name;
-    pEventParcel = std::make_shared<Parcel>(mName + "_event", KEY_EVENT_NOTIFY, false);
+    pEventParcel = std::make_shared<Parcel>(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, false);
     return pEventParcel ? 0 : -1;
 }
 
@@ -86,14 +88,17 @@ int AsyncEvent::RegisterEventCallback(const EventCallback& callback)
             pEventParcel->Wait();
             pEventParcel->ReadInt(event);
             pEventParcel->ReadInt(size);
-            if (size > 0) {
-                pData = new (std::nothrow) char[size];
+            if (size <= 0 || !mCb) {
+                usleep(500);
+                continue;
+            }
+
+            pData = new (std::nothrow) char[size];
+            if (pData) {
                 pEventParcel->ReadData((void*)pData, size);
-            }
-            if (mCb) {
                 mCb(event, pData, size);
+                delete[] pData;
             }
-            delete[] pData;
         }
     });
 

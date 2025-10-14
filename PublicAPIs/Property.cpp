@@ -106,7 +106,7 @@ int Property::GetProperty(const std::string& key, std::string& value, const std:
     return ret;
 }
 
-int Property::GetProperties()
+int Property::GetProperties(std::map<std::string, std::string>& properties)
 {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
@@ -115,6 +115,37 @@ int Property::GetProperties()
 
     ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_GET_PROPERTIES));
+    NONZERO_CHECK_RET(pReqParcel->Post());
+
+    int ret = 0;
+    int num = 0;
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
+    if (ret == 0) {
+        properties.clear();
+        NONZERO_CHECK_RET(pRspParcel->ReadInt(num));
+        for (int i = 0; i < num; i++) {
+            std::string key;
+            std::string value;
+            NONZERO_CHECK_RET(pRspParcel->ReadString(key));
+            NONZERO_CHECK_RET(pRspParcel->ReadString(value));
+            properties[key] = value;
+        }
+    }
+
+    // SPR_LOGD("ret: %d\n", ret);
+    return ret;
+}
+
+int Property::DumpProperties()
+{
+    if (!mEnable) {
+        SPR_LOGE("Property is disable!\n");
+        return -1;
+    }
+
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(PROPERTY_CMD_DUMP_PROPERTIES));
     NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;

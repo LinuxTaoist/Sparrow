@@ -97,7 +97,18 @@ int32_t PropertyManager::GetProperty(const std::string& key, std::string& value,
     return ret;
 }
 
-int32_t PropertyManager::GetProperties()
+int32_t PropertyManager::GetProperties(std::map<std::string, std::string>& properties)
+{
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
+        return -1;
+    }
+
+    mpSharedMemory->GetAllKeyValues(properties);
+    return 0;
+}
+
+int32_t PropertyManager::DumpProperties()
 {
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");

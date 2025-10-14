@@ -21,13 +21,11 @@
 #include "Property.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
-#define SPR_LOGD(fmt, args...) printf("%d DebugBinder D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%d DebugBinder E: " fmt, __LINE__, ##args)
 
 int main(int argc, const char* argv[])
 {
     if (argc > 3) {
-        SPR_LOGE("Usage:%s <property name>\n", argv[0]);
+        SPR_LOG("Usage:%s <property name>\n", argv[0]);
         return -1;
     }
 
@@ -37,7 +35,11 @@ int main(int argc, const char* argv[])
         Property::GetInstance()->GetProperty(propertyName, propertyValue, "null");
         SPR_LOG("%s\n", propertyValue.c_str());
     } else {
-        Property::GetInstance()->GetProperties();
+        std::map<std::string, std::string> properties;
+        Property::GetInstance()->GetProperties(properties);
+        for (auto& item : properties) {
+            SPR_LOG("%s=%s\n", item.first.c_str(), item.second.c_str());
+        }
     }
 
     return 0;
