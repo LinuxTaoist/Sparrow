@@ -35,7 +35,7 @@ SprMQueueDetails::SprMQueueDetails(const std::string& mqName, bool create) : mIs
     std::string filePath = std::string(SPR_ROOT_PATH) + "/" + mqName;
 
     if (access(SPR_ROOT_PATH, F_OK) != 0) {
-        int ret = mkdir(SPR_ROOT_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+        int32_t ret = mkdir(SPR_ROOT_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
             SPR_LOGE("mkdir %s failed! (%s)\n", SPR_ROOT_PATH, strerror(errno));
         }

@@ -40,7 +40,7 @@ public:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int NotifyObserver(const SprMsg& msg) = 0;
+    virtual int32_t NotifyObserver(const SprMsg& msg) = 0;
 
     /**
      * @brief send message to all module
@@ -48,7 +48,7 @@ public:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int NotifyAllObserver(const SprMsg& msg) = 0;
+    virtual int32_t NotifyAllObserver(const SprMsg& msg) = 0;
 };
 
 #endif  // __SPR_MEDIATOR_PROXY_H__

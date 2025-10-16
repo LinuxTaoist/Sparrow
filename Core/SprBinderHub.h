@@ -35,7 +35,7 @@ public:
 
     static int32_t DestoryHub();
     static void BinderLoop(void* pData);
-    virtual void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) = 0;
+    virtual void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int32_t cmd) = 0;
 
 private:
     static bool mRun;

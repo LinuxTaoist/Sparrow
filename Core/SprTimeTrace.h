@@ -27,7 +27,7 @@
 
 typedef struct
 {
-    int         eId;
+    int32_t         eId;
     timespec    eTimeStamp;
     std::string eText;
 } EntryInfo;
@@ -50,7 +50,7 @@ public:
      *
      * Call it in the system main entry, used to cache information for each entry
      */
-    void TimeTracePoint(int id, const std::string& text);
+    void TimeTracePoint(int32_t id, const std::string& text);
 
 private:
     /**

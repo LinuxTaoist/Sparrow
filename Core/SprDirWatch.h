@@ -30,15 +30,15 @@ public:
     SprDirWatch();
     ~SprDirWatch();
 
-    int GetInotifyFd() const { return mInotifyFd; }
-    int AddDirWatch(const std::string& path, uint32_t mask);
+    int32_t GetInotifyFd() const { return mInotifyFd; }
+    int32_t AddDirWatch(const std::string& path, uint32_t mask);
 
 private:
-    int DelDirWatch(int fd);
+    int32_t DelDirWatch(int32_t fd);
 
 private:
-    int mInotifyFd;
-    std::set<int> mWatchFds;
+    int32_t mInotifyFd;
+    std::set<int32_t> mWatchFds;
 };
 
 #endif // __SPR_DIR_WATCH_H__

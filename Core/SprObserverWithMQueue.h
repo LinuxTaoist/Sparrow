@@ -59,7 +59,7 @@ public:
      *
      * @return void*
      */
-    virtual void* EpollEvent(int fd, EpollType eType, void* arg) final override;
+    virtual void* EpollEvent(int32_t fd, EpollType eType, void* arg) final override;
 
 protected:
     /**

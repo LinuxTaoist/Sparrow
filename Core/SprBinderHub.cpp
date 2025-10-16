@@ -79,9 +79,9 @@ void SprBinderHub::BinderLoop(void* pData)
 
     SPR_LOGD("Start %s binder loop!\n", mSelf->mSrvName.c_str());
     do {
-        int cmd = 0;
+        int32_t cmd = 0;
         pReqParcel->Wait();
-        int ret = pReqParcel->ReadInt(cmd);
+        int32_t ret = pReqParcel->ReadInt(cmd);
         if (ret != 0) {
             SPR_LOGE("ReadInt failed!\n");
             continue;
@@ -95,7 +95,7 @@ void SprBinderHub::BinderLoop(void* pData)
             std::string name;
             ret = pReqParcel->ReadString(name);
 
-            int rc = -1;
+            int32_t rc = -1;
             if (ret == 0) {
                 rc = AsyncEvent::GetInstance()->AsWriter(name);
                 SPR_LOGD("Register callback %s, ret = %d\n", name.c_str(), ret);

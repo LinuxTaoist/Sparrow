@@ -37,7 +37,7 @@ public:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int NotifyObserver(const SprMsg& msg) override;
+    virtual int32_t NotifyObserver(const SprMsg& msg) override;
 
     /**
      * @brief send message to all module
@@ -45,7 +45,7 @@ public:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int NotifyAllObserver(const SprMsg& msg) override;
+    virtual int32_t NotifyAllObserver(const SprMsg& msg) override;
 
 protected:
     /**
@@ -63,7 +63,7 @@ protected:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    int ConnectMediator();
+    int32_t ConnectMediator();
 
     /**
      * @brief Send message to other module
@@ -71,10 +71,10 @@ protected:
      * @param msg
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int SendMsg(const SprMsg& msg);
+    virtual int32_t SendMsg(const SprMsg& msg);
 
 private:
-    int mMdtFd;
+    int32_t mMdtFd;
 };
 
 #endif // __SPR_MEDIATOR_MQ_PROXY_H__

@@ -41,7 +41,7 @@ SprTimeTrace* SprTimeTrace::GetInstance()
     return &instance;
 }
 
-void SprTimeTrace::TimeTracePoint(int id, const std::string& text)
+void SprTimeTrace::TimeTracePoint(int32_t id, const std::string& text)
 {
     EntryInfo entry;
     entry.eId = id;

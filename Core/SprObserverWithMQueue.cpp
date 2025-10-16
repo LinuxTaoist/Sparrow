@@ -228,7 +228,7 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
     return 0;
 }
 
-void* SprObserverWithMQueue::EpollEvent(int fd, EpollType eType, void* arg)
+void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != GetEvtFd()) {
         SPR_LOGW("fd is not match!\n");
