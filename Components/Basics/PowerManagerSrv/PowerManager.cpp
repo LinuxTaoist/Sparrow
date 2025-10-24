@@ -170,8 +170,8 @@ PowerManager::PowerManager(ModuleIDType id, const std::string& name)
     mStartupType = STARTUP_BUTT;
     mWakeupSourceType = WAKEUP_SOURCE_BUTT;
     mStandbyReason = STANDBY_REASON_BUTT;
-    SetLev1State(LEV1_POWER_INIT);
-    SetLev2State(LEV2_POWER_ANY);
+    mCurLev1State = LEV1_POWER_INIT;
+    mCurLev2State = LEV2_POWER_ANY;
 }
 
 PowerManager::~PowerManager()

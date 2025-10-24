@@ -123,11 +123,25 @@ new_platform() {
     echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
 }
 
-# cmd static_scan
+## cmd static_scan
 static_scan() {
     echo -e "${GREEN}开始静态代码扫描...${NC}"
-    cd $(pwd)/../StaticScans
+    cd $(pwd)/cppcheck
     ./RunCppcheck.sh
+}
+
+## start_valgrind
+start_valgrind() {
+    echo -e "${GREEN}开始启动valgrind...${NC}"
+    cd $(pwd)/valgrind
+    ./start_valgrind.sh
+}
+
+## stop_valgrind
+stop_valgrind() {
+    echo -e "${GREEN}开始停止valgrind...${NC}"
+    cd $(pwd)/valgrind
+    ./stop_valgrind.sh
 }
 
 # Function to print usage information with logo
@@ -161,6 +175,8 @@ usage() {
     echo -e "${PURPLE}  $0 build-3rd                编译依赖的第三方库${NC}"
     echo -e "${PURPLE}  $0 new-platform <platform>  创建新项目${NC}"
     echo -e "${PURPLE}  $0 staticscan               执行静态代码扫描${NC}"
+    echo -e "${PURPLE}  $0 start-valgrind           启动valgrind${NC}"
+    echo -e "${PURPLE}  $0 stop-valgrind            停止valgrind${NC}"
     echo -e "${PURPLE}  $0 help                     显示此帮助信息${NC}"
     echo -e ""
     echo -e "${PURPLE}================================================================================${NC}"
@@ -193,6 +209,12 @@ main() {
             new_platform "$2";;
         staticscan)
             static_scan
+            ;;
+        start-valgrind)
+            start_valgrind
+            ;;
+        stop-valgrind)
+            stop_valgrind
             ;;
         help|?)
             usage

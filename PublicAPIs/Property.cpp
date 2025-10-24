@@ -118,10 +118,10 @@ int Property::GetProperties(std::map<std::string, std::string>& properties)
     NONZERO_CHECK_RET(pReqParcel->Post());
 
     int ret = 0;
-    int num = 0;
     NONZERO_CHECK_RET(pRspParcel->TimedWait());
     NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
     if (ret == 0) {
+        int num = 0;
         properties.clear();
         NONZERO_CHECK_RET(pRspParcel->ReadInt(num));
         for (int i = 0; i < num; i++) {
