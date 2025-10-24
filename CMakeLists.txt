@@ -33,8 +33,8 @@ link_directories(${OUTPUT_PATH}/Lib)
 set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
 
 set(CMAKE_CXX_STANDARD  11)
-set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -Wall -g3 -O0")
-set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3 -O0")
+set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -Wall -g3")
+set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3")
 
 ## 工程信息
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
