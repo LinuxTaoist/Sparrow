@@ -27,10 +27,9 @@
 #include <stdint.h>
 #include "PSocket.h"
 
-using TimeCallback = std::function<void(uint64_t, void*)>;
-
 class NtpSource {
 public:
+    using TimeCallback = std::function<void(uint64_t, void*)>;
     NtpSource(uint16_t port, const TimeCallback& cb, void* arg = nullptr);
     ~NtpSource();
 

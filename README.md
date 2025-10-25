@@ -110,9 +110,8 @@ Sparrow/
 ├── README.en.md
 ├── README.md
 ├── Release                   // 发布路径
-├── StaticScans               // 静态扫描修复纪录
 ├── TestCase                  // 测试用例
-├── Tools                     // 常用辅助脚本/可执行程序
+├── Tools                     // 常用辅助脚本
 ├── Util                      // 通用工具函数
 ├── UtilModules               // 通用模块库
 ├── modules_configs.cmake     // 模块配置

@@ -1,106 +1,48 @@
-## Introduction
-`Sparrow` is a Linux middleware framework based on the event-driven model. It adopts a microservices architecture and aims to quickly build an efficient Linux C++ middleware application framework.
+# Sparrow: Linux C++ Embedded Middleware
 
-## Application Scenarios
-- Smart Hardware: Such as smart bulbs, smart sockets, smart cameras, robot control systems, etc., suitable for devices that require efficient communication and control.
-- Consumer Electronics: For example, smartwatches, health monitoring bracelets, smart TVs, etc., supporting data collection, analysis, and user interface management.
-- Vehicle-mounted Systems: Including in-vehicle T-Box, smart cockpits, etc., providing functions such as navigation, entertainment, and phone connection to enhance the driving experience.
-- Internet of Things (IoT): Covering smart homes, environmental monitoring, IoT gateways, etc., enabling device interconnection, data collection, and processing.
+## 📌 Project Positioning
+`Sparrow` is an `Linux` middleware framework based on the event-driven model. It adopts a microservice architecture and aims to quickly build efficient `Linux C++` middleware application frameworks.
 
-## Software Architecture
-It adopts a microservices architecture, decomposing the system functions into multiple independent modules, with each module responsible for a specific function. Modules communicate with each other through a message publish-subscribe mechanism to ensure high-level decoupling and flexible expansion.
 
-The preliminary framework concept is as follows:
+## 🌟 Core Highlights
+- **Out-of-the-box**: Basic functions do not depend on third-party libraries, enabling out-of-the-box use and rapid deployment.
+- **Remote Troubleshooting**: Provides the remote tool `rshellx` to implement remote `shell` execution and quickly locate problems.
+- **Configuration Separation**: Separates configuration files from code to easily achieve project differentiation.
+- **Status Monitoring**: Offers status monitoring function to record various priority events such as interface execution timeout and device status change.
+- **Static Scanning**: Provides tools for static scanning of `shell` scripts, and cooperates with `cppcheck` to realize code risk scanning.
+- **Real-time Debugging**: Integrates debugging node function to facilitate triggering simulation and debugging during the development phase.
+- **Crash Capture**: Automatically records crash stacks when the program crashes abnormally, facilitating problem troubleshooting.
+- **Unit Testing**: Provides test cases and cooperates with `googletest` to facilitate full-function verification after code modification.
+- **Plug-in Programming**: Supports plug-in programming to realize dynamic loading and unloading of functional modules.
 
-![架构图](Docs/png/架构图.png)
+For more functions, please refer to the Function Introduction.
 
-<span style="font-size: 12px;">
-<span style="color: blue;">Note: The architecture diagram will be updated at any time with version iterations.</span>
-</span>
+## 🚀 Quick Start in 3 Minutes
+### 1. Environment Requirements
+- C++11 or higher version
+- Linux system
 
-## Source Code Directory
+### 2. Compile the Project
+```bash
+# Enter the build directory and execute the script
+$ cd Sparrow/Build
+$ ./rebuild_general.sh
 
-```c++
-Sparrow/
-├── 3rdAdapter                // Third-party software adaptation interface
-├── 3rdParty                  // Third-party software libraries
-├── Build                     // Build scripts
-├── CMakeLists.txt
-├── Components                // Independent components
-├── Core                      // Core framework
-├── Debug                     // Debugging tools
-├── Docs                      // Documentation
-├── Examples                  // Examples
-├── Hardware                  // Hardware adaptation interface
-├── LICENSE                   // License
-├── PrivateAPIs               // Internally public interfaces
-├── ProjectConfigs            // Project configurations
-├── PublicAPIs                // Externally public interfaces
-├── README.en.md
-├── README.md
-├── Release                   // Release path
-├── StaticScans               // Static scan repair records
-├── Test                      // Test cases
-├── Tools                     // Commonly used auxiliary scripts/executable programs
-├── Util                      // General utility functions
-├── UtilModules               // General module libraries
-├── modules_configs.cmake     // Module configurations
-└── version.cmake             // Version information
-```
-
-## Usage Tutorial
-
-### Environment
-The current local development environment of the project is as follows. Try to keep it consistent with this environment; otherwise, compilation errors may occur.
-```Shell
-C++ Standard   : 11
-G++ Version    : 11.4.0
-Gcc Version    : 11.4.0
-Build Platform : Ubuntu 18.04.6 LTS
-```
-
-### Compilation
-① Compile sparrow
-```Shell
-$ cd Build
-$ ./final_general_build.sh
-```
-
-② Version generation path
-```shell
-$ cd Release/
+# Compiled products are in the Release directory
+$ cd Release
 $ ls
 Bin  Cache  Include  Lib
 ```
 
-③ Program execution
-After the project is compiled, an executable program will be generated in the `Release/Bin` directory. By executing the `servicemanager` program, all services will be automatically launched, and service monitoring will be started. Refer to `Release/Bin/init.conf` for the service launch configuration.
-
-### Start Services
-```shell
+### 3. Start the Service
+```bash
+# Enter the binary directory and start the service manager (automatically starts all core services)
+$ cd Release/Bin
 $ ./servicemanagersrv
-192  ServiceM D: service: logmanagersrv        pid:  70542
-238  ServiceM D: Waiting exe: logmanagersrv        retryTimes = 1
-183  ServiceM D: execl logmanagersrv (1).
-192  ServiceM D: service: bindermanagersrv     pid:  70543
-238  ServiceM D: Waiting exe: bindermanagersrv     retryTimes = 1
-183  ServiceM D: execl bindermanagersrv (1).
-192  ServiceM D: service: propertiessrv        pid:  70544
-238  ServiceM D: Waiting exe: propertiessrv        retryTimes = 1
-183  ServiceM D: execl propertiessrv (1).
-192  ServiceM D: service: mediatorsrv          pid:  70545
-183  ServiceM D: execl mediatorsrv (1).
-238  ServiceM D: Waiting exe: mediatorsrv          retryTimes = 1
-192  ServiceM D: service: sparrowsrv           pid:  70548
-183  ServiceM D: execl sparrowsrv (1).
-192  ServiceM D: service: powermanagersrv      pid:  70549
-183  ServiceM D: execl powermanagersrv (1).
-192  ServiceM D: service: debugsrv             pid:  70550
-183  ServiceM D: execl debugsrv (1).
 ```
 
-### View Logs in Real Time
-```shell
+### 4. View Logs in Real Time
+```
 $ tail -f /tmp/sprlog/sparrow.log
 07-20 10:12:59.104  70543      BinderM D:   80 Add service info(8336, powermanagersrv)
 07-20 10:12:59.107  70550     EpollSch D:   36 ===========  Sparrow Epoll Start  ===========
@@ -114,123 +56,92 @@ $ tail -f /tmp/sprlog/sparrow.log
 07-20 10:12:59.113  70550   SprObsBase D:  255 [DebugM] Register Successfully!
 ```
 
-### Internal Command Set
-The project integrates the following command set. You can view the specific command set supported by a process by running `echo help > /tmp/{process name}`, and the response will be in the log:
+## 📢 Function Introduction
 
-* Query the commands supported by `statusmonitorsrv`
-```Shell
-$ echo help > /tmp/statusmonitorsrv
+### Core Functions
+| Function          | Key Features                                  | Description                          |
+|-------------------|-----------------------------------------------|--------------------------------------|
+| Process Management | Process launching, process guarding, process status monitoring | Ensure stable operation of key services |
+| Log Management    | Dynamic adjustment of log levels, formatted log output | Facilitate problem location and debugging |
+| RPC Communication | Support for synchronous and asynchronous communication |                                      |
+| Message Transfer  | Support for message broadcasting and message subscription | Realize decoupling between modules    |
+| Property Management | Support for property reading/writing, property change notification, property export | Realize configuration management     |
+| Power Management  | Support for power status management and power event notification | Realize device power management      |
+| Plug-in Management | Support for dynamic loading and unloading of plug-ins | Realize dynamic expansion of functional modules |
+| Timer Management  | Support for scheduled tasks and scheduled task callbacks | Realize scheduled task management    |
+| Status Monitoring | Support for status exception capture and storage |                                      |
+| Thread Pool       | Support for thread pool creation, task submission, and task callbacks |                                      |
+| Debug Node        | Support for registration, cancellation, and trigger response of debugging entrances for each module | Facilitate debugging                 |
+| Test Case         | Cooperate with gtest to facilitate full-function verification after code modification | Improve code quality and reduce risks |
+| Crash Capture     | Automatically record crash stacks when the program crashes abnormally, facilitating problem troubleshooting | Improve code quality and reduce risks |
+| Static Scanning   | Static code scanning and code risk analysis   | Improve code quality and reduce risks |
+
+### Auxiliary Tools
+| Tool          | Key Features                                  | Description                          |
+|---------------|-----------------------------------------------|--------------------------------------|
+| rshellx       | Remote shell execution, remote file transfer  | Quickly locate problems in hardware scenarios |
+| infrawatch    | Status monitoring, real-time logging, remote debugging | Locate problems online without restarting the device |
+
+
+## 🎯 Application Scenarios
+- Smart Hardware: Such as smart light bulbs, smart sockets, smart cameras, robot control systems, etc., suitable for devices that require efficient communication and control.
+- Consumer Electronics: For example, smart watches, health monitoring bracelets, smart TVs, etc., supporting data collection, analysis, and user interface management.
+- In-Vehicle Systems: Including in-vehicle T-Box (Telematics Box), smart cockpits, etc., providing navigation, entertainment, phone connection and other functions to enhance the driving experience.
+- Internet of Things (IoT): Covering smart homes, environmental monitoring, IoT gateways, etc., realizing device interconnection, data collection and processing.
+
+
+## 📂 Source Code Structure Overview
+```
+Sparrow/
+├── 3rdAdapter                // Third-party software adaptation interface
+├── 3rdParty                  // Third-party software library
+├── Build                     // Build scripts
+├── CMakeLists.txt
+├── Components                // Independent components
+├── Core                      // Core framework
+├── Debug                     // Debugging tools
+├── Docs                      // Documents
+├── Examples                  // Examples
+├── Hardware                  // Hardware adaptation interface
+├── LICENSE                   // License
+├── PrivateAPIs               // Internal public interfaces
+├── ProjectConfigs            // Project configurations
+├── PublicAPIs                // External public interfaces
+├── README.en.md
+├── README.md
+├── Release                   // Release path
+├── TestCase                  // Test cases
+├── Tools                     // Common auxiliary scripts
+├── Util                      // General tool functions
+├── UtilModules               // General module library
+├── modules_configs.cmake     // Module configuration
+└── version.cmake             // Version information
 ```
 
-```C++
-$ tail -f /tmp/sprlog/sparrow.log
 
- ==============================================================================
-                      Debug Command List
- ==============================================================================
-    1. Built-in Commands         Total:  2
-       ├── help                : Dump all cmds
-       ├── proc                : Dump process info
-       └── version             : Dump version
+## 📚 Documents and Resources
+- [User Guide](Docs/UserManual): Contains usage instructions for functions such as debug nodes, timers, and logs.
+- [Programming Specifications](Docs/C++ Programming Specification.md): Unify the code style, with priority given to the current project code.
+- [Version Management](Docs/Version Management.md): Version release records, continuously updated.
+- [FAQs & Troubleshooting](Docs/FAQs & Troubleshooting.md): Solutions to common problems, continuously updated.
 
-    2. StatusMonitorManager      Total: 12
-       ├── AddStatusEvent      : Add Status Event
-       ├── DelAllEvent         : Del All Events
-       ├── DelWithErrCode      : Del With ErrCode
-       ├── DelWithID           : Del With ID
-       ├── DelWithLevel        : Del With Level
-       ├── DelWithText         : Del With Text
-       ├── DisplayUTC          : Display UTC
-       ├── DumpAllEvents       : Dump All Events
-       ├── DumpWithErrCode     : Dump With ErrCode
-       ├── DumpWithID          : Dump With ID
-       ├── DumpWithLevel       : Dump With Level
-       └── DumpWithText        : Dump With Text
 
- ==============================================================================
-    E.g. echo help > /tmp/statusmonitorsrv
- ==============================================================================
-```
+## 🤝 Interaction and Communication
+- Issues: Submit bugs, suggestions or participate in discussions.
+- WeChat Official Account: KaiYuan519
+- WeChat: StopCoding (please note "Sparrow" when adding)
 
-* Query the commands supported by `servicemanagersrv`
 
-```shell
-$ echo help > /tmp/propertiessrv
-```
+## 📄 License
+This project is licensed under the MIT License. For details, see [LICENSE](LICENSE)
 
-```C++
-$ tail -f /tmp/sprlog/sparrow.log
+---
 
- ==============================================================================
-                      Debug Command List
- ==============================================================================
-    1. Built-in Commands         Total:  2
-       ├── help                : Dump all cmds
-       ├── proc                : Dump process info
-       └── version             : Dump version
+## 💖 Support and Encouragement
+If you find this project meaningful, you can support it in the following ways:
+- Threefold Support: Star, Fork, Watch
+- Actively participate in discussions: Raise questions or suggestions in Issues
+- WeChat Official Account: Follow "KaiYuan519", forward and like the [official account article](https://mp.weixin.qq.com/s/DHiZ4iQJAQVrN8z4kDTiLg)
+- WeChat: Add "StopCoding" to join the technical exchange group
 
-    2. Properties                Total:  1
-       └── DumpAllProperties   : Dump all properties
-
- ==============================================================================
-    E.g. echo help > /tmp/propertiessrv
- ==============================================================================
-```
-
-### Debugging Programs
-The project also integrates debugging programs as follows:
-* infrawatch
-View the running status of each component in real time. First, start the `servicemanagersrv` to launch the services of each component.
-```
-$ ./infrawatch
-==================================  MAIN MENU  ==================================
-
-    1. Display All Message Queues
-    2. Manager's Entrance
-    3. Custom Debug Options
-
-    [Q] Quit
-
-=================================================================================
-```
-
-* property_set, property_get
-Used to set and get system properties during terminal debugging
-```shell
-$ ./property_get ro.SoftwareVersion
-1.0.0
-```
-
-## Third-Party Library Dependencies
-| Third-Party Library | Dependent Module | Remarks |
-| ------------------- | ---------------- | ------ |
-| sqlite              | ConfigManager    | Used for storing key configuration and other data during project operation |
-| googletest          | Test             | Used for internal white-box testing and external black-box testing of the project |
-
-## Documentation
-During the project process, some documents will be generated to record some details of the development, doubts, and key solutions worthy of recording, etc.
-```
-Docs/
-├── C++ Programming Specification.md
-├── Issue Submission Specification.md
-├── Sparrow Q&A.md
-├── TODO.md
-├── png
-├── share
-├── spec
-├── tips
-├── Notes.md
-├── Version Management.md
-├── Troubleshooting.md
-└── Third-Party Dependencies.md
-```
-
-**Documents to Pay Attention To**
-
-- [C++ Programming Specification.md](Docs/C++ Programming Specification.md)
-The reference basis for the project code specification. It is not mandatory, and it is preferred to be consistent with the existing style.
-- [Issue Submission Specification.md](Docs/Issue Submission Specification.md)
-The reference template for submitting Github/Gitee Issues.
-
-## Finally
-Once in this line of work, strive for progress and excellence; every small step counts towards a thousand miles, and every small stream contributes to a vast ocean. Keep moving forward, and you will eventually reach excellence!
+Once in this field, we strive for progress; every small step leads to a thousand miles, and every small stream merges into a river. Keep moving forward, and we will eventually achieve excellence!
