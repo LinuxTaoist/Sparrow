@@ -48,7 +48,7 @@ TimeManager::TimeManager(ModuleIDType id, const std::string& name)
 {
     mSyncPollerTimer = false;
     mSyncTimeFinished = false;
-    mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
+    mReqPriority = TIME_SOURCE_PRIORITY_BUTT;
     mCurTimeSource = TIME_SOURCE_TYPE_BUTT;
     mSyncTimeOutMs = DEFAULT_SYNC_TIMEOUT;
     mSyncPollTimeOutMs = DEFAULT_SYNC_POLL_TIMEOUT;
@@ -138,15 +138,8 @@ int32_t TimeManager::StartSyncTime()
 
     // sync time from first priority configured
     mSyncTimeFinished = false;
-    mCurPriority = mTimeSourceMap.empty() ? TIME_SOURCE_PRIORITY_BUTT : mTimeSourceMap.begin()->first;
-    return RegisterTimer(0, mSyncTimeOutMs,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 0);
-}
-
-int32_t TimeManager::StopSyncTime()
-{
-    SPR_LOGD("Stop sync time\n");
-    mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
-    return UnregisterTimer(SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT);
+    mReqPriority = TIME_SOURCE_PRIORITY_NONE;
+    return RegisterTimer(0, mSyncTimeOutMs,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 1);
 }
 
 int32_t TimeManager::StartSyncTimePoller()
@@ -278,9 +271,6 @@ int32_t TimeManager::ProcessMsg(const SprMsg& msg)
         case SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT:
             MsgRespondSyncTimeTimerEvent(msg);
             break;
-        case SIG_ID_TIMEM_REQ_NTP_TIME:
-            MsgRespondRequestNtpTime(msg);
-            break;
         case SIG_ID_TIMEM_SYNC_SYSTEM_TIME:
             MsgRespondSyncSystemTime(msg);
             break;
@@ -308,14 +298,20 @@ int32_t TimeManager::ProcessMsg(const SprMsg& msg)
  */
 void TimeManager::MsgRespondSyncTimeTimerEvent(const SprMsg& msg)
 {
-    if (mSyncTimeFinished || mCurPriority >= TIME_SOURCE_PRIORITY_BUTT) {
-        UnregisterTimer(SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT);
-        SPR_LOGD("Sync time finished %d, priority %d\n", mSyncTimeFinished, mCurPriority);
+    mReqPriority++;
+    for (; mReqPriority < TIME_SOURCE_PRIORITY_BUTT; mReqPriority++) {
+        if (mTimeSourceMap.find((TimeSourcePriority)mReqPriority) != mTimeSourceMap.end()) {
+            break;
+        }
+    }
+
+    if (mSyncTimeFinished || mReqPriority >= TIME_SOURCE_PRIORITY_BUTT) {
+        SPR_LOGD("Sync time finished %d, priority %d\n", mSyncTimeFinished, mReqPriority);
         return;
     }
 
-    int32_t ret = -1;
-    InternalDefs::TimeSourceType source = GetTimeSource((TimeSourcePriority)mCurPriority);
+    int32_t ret = 0;
+    InternalDefs::TimeSourceType source = GetTimeSource((TimeSourcePriority)mReqPriority);
     switch(source) {
         case TIME_SOURCE_TYPE_NTP:
             ret = RequestNtpTime();
@@ -327,21 +323,9 @@ void TimeManager::MsgRespondSyncTimeTimerEvent(const SprMsg& msg)
             break;
     }
 
-    // if ret is -1, means the time source is not available, try next priority
-    mCurPriority = (ret == -1) ? mCurPriority + 1 : mCurPriority;
-    SPR_LOGD("Syncing time, priority = %d, source = %s\n", mCurPriority, GetSprTimeSourceTypeText(source).c_str());
-}
-
-/**
- * @brief Process SIG_ID_TIMEM_REQ_NTP_TIME
- *
- * @param[in] msg
- * @return none
- */
-void TimeManager::MsgRespondRequestNtpTime(const SprMsg& msg)
-{
-    SPR_LOGD("Request ntp time\n");
-    RequestNtpTime();
+    SPR_LOGD("Syncing (%d, %s) ret = %d\n", mReqPriority, GetSprTimeSourceTypeText(source).c_str(), ret);
+    int32_t delay = (ret == -1) ? 0 : mSyncTimeOutMs;
+    RegisterTimer(delay, mSyncTimeOutMs,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 1);
 }
 
 /**
@@ -410,7 +394,6 @@ void TimeManager::RegisterDebugFuncs()
     p->RegisterCmd(mModuleName, "StartSyncTime",    "Start sync time",        std::bind(&TimeManager::DebugStartSyncTime,         this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "SetSyncTime",      "Set sync timeout (ms)",  std::bind(&TimeManager::DebugSetSyncTimeOutMs,      this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "SetPollTime",      "Set poll timeout (ms)",  std::bind(&TimeManager::DebugSetSyncPollTimeOutMs,  this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "StopSyncTime",     "Stop sync time",         std::bind(&TimeManager::DebugStopSyncTime,          this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "StartPoll",        "Start time poll",        std::bind(&TimeManager::DebugStartSyncTimePoller,   this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "StopPoll",         "Stop time poll",         std::bind(&TimeManager::DebugStopSyncTimePoller,    this, std::placeholders::_1));
 }
@@ -432,7 +415,7 @@ void TimeManager::DebugDumpDetails(const std::vector<std::string>& args)
     SPR_LOGI("                           Dump TimeManager Details                                            \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
     SPR_LOGI("- mSyncTimeFinished: %d\n", mSyncTimeFinished);
-    SPR_LOGI("- mCurPriority: %d\n", mCurPriority);
+    SPR_LOGI("- mReqPriority: %d\n", mReqPriority);
     SPR_LOGI("- mCurTimeSource: %s\n", GetSprTimeSourceTypeText(mCurTimeSource).c_str());
     SPR_LOGI("- mSyncTimeOutMs: %d\n", mSyncTimeOutMs);
     SPR_LOGI("- mSyncPollTimeOutMs: %d\n", mSyncPollTimeOutMs);
@@ -442,11 +425,6 @@ void TimeManager::DebugDumpDetails(const std::vector<std::string>& args)
 void TimeManager::DebugStartSyncTime(const std::vector<std::string>& args)
 {
     StartSyncTime();
-}
-
-void TimeManager::DebugStopSyncTime(const std::vector<std::string>& args)
-{
-    StopSyncTime();
 }
 
 void TimeManager::DebugStartSyncTimePoller(const std::vector<std::string>& args)
@@ -481,8 +459,6 @@ void TimeManager::DebugSetSyncTimeOutMs(const std::vector<std::string>& args)
 
     SPR_LOGI("mSyncTimeOutMs: %d -> %d ms\n", mSyncTimeOutMs, ms);
     mSyncTimeOutMs = ms;
-    StopSyncTime();
-    StartSyncTime();
 }
 
 void TimeManager::DebugSetSyncPollTimeOutMs(const std::vector<std::string>& args)

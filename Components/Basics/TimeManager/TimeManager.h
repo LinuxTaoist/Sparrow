@@ -24,6 +24,7 @@
 
 enum TimeSourcePriority
 {
+    TIME_SOURCE_PRIORITY_NONE,
     TIME_SOURCE_PRIORITY_HIGHEST,
     TIME_SOURCE_PRIORITY_HIGH,
     TIME_SOURCE_PRIORITY_MEDIUM,
@@ -71,7 +72,6 @@ private:
     int32_t RequestNtpTime();
     int32_t RequestGnssTime();
     int32_t StartSyncTime();
-    int32_t StopSyncTime();
     int32_t SmoothAdjustSystemTime(int64_t ns);
     int32_t JumpAdjustSystemTime(uint64_t timestamp);
     int32_t SyncSystemTime(int32_t source, uint64_t timestamp);
@@ -94,7 +94,6 @@ private:
      * @param[in] msg
      */
     void MsgRespondSyncTimeTimerEvent(const SprMsg& msg);
-    void MsgRespondRequestNtpTime(const SprMsg& msg);
     void MsgRespondSyncSystemTime(const SprMsg& msg);
     void MsgRespondSyncTimePollerTimerEvent(const SprMsg& msg);
     void MsgRespondPowerStartupHigh(const SprMsg& msg);
@@ -109,7 +108,6 @@ private:
     /** Debug functions */
     void DebugDumpDetails(const std::vector<std::string>& args);
     void DebugStartSyncTime(const std::vector<std::string>& args);
-    void DebugStopSyncTime(const std::vector<std::string>& args);
     void DebugStartSyncTimePoller(const std::vector<std::string>& args);
     void DebugStopSyncTimePoller(const std::vector<std::string>& args);
     void DebugRequestNtpTime(const std::vector<std::string>& args);
@@ -119,7 +117,7 @@ private:
 private:
     bool mSyncPollerTimer;
     bool mSyncTimeFinished;
-    int32_t mCurPriority;
+    int32_t mReqPriority;
     int32_t mSyncTimeOutMs;
     int32_t mSyncPollTimeOutMs;
     InternalDefs::TimeSourceType mCurTimeSource;

@@ -46,6 +46,7 @@ private:
     };
 
     int32_t InitSocket();
+    int32_t SendTimeRequest(NtpServer& srv);
     int32_t HandleNtpBytes(const std::string& bytes, const std::string& srcAddr);
     uint64_t GetCurTimeStamp();
     uint64_t CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4);
@@ -55,7 +56,6 @@ private:
     std::atomic<bool> mIsReady;         // Socket是否准备就绪
     TimeCallback mCb;                   // 时间回调函数
     uint16_t mLocalPort;                // 本地端口
-    int32_t mCurSrvIndex;               // 当前NTP服务器索引
     std::shared_ptr<PUdp> mpSocket;     // UDP套接字
     std::vector<NtpServer> mNtpServers; // NTP服务器列表
 };
