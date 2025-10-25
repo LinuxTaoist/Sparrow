@@ -1,5 +1,7 @@
 # Sparrow：Linux C++ 嵌入式中间件
 
+👉 [[English]](README.en.md)
+
 ## 📌 项目定位
 `Sparrow`是一款基于事件驱动模型的`Linux`中间件框架。采用微服务架构，旨在快速构建高效的`Linux C++`中间件应用框架。
 

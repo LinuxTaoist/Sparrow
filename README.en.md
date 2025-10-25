@@ -1,4 +1,5 @@
 # Sparrow: Linux C++ Embedded Middleware
+👉 [[中文]](README.md)
 
 ## 📌 Project Positioning
 `Sparrow` is an `Linux` middleware framework based on the event-driven model. It adopts a microservice architecture and aims to quickly build efficient `Linux C++` middleware application frameworks.
