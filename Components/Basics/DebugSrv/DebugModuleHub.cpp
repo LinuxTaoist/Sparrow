@@ -67,7 +67,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
         case DEBUG_CMD_TEST_DEL_1S_TIMER: {
             STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST_1S, 0, 0, 0};
             auto pInfo = make_shared<STimerInfo>(timeInfo);
-            SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_TIMER);
+            SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_CUSTOM_TIMER);
             msg.SetDatas(pInfo, sizeof(STimerInfo));
             mpDebugModule->SendMsg(msg);
 
@@ -98,7 +98,7 @@ void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const 
         case DEBUG_CMD_TEST_DEL_CUSTOM_TIMER: {
             STimerInfo timeInfo = {MODULE_DEBUG, SIG_ID_DEBUG_TIMER_TEST, 0, 0, 0};
             auto pInfo = make_shared<STimerInfo>(timeInfo);
-            SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_TIMER);
+            SprMsg msg(MODULE_DEBUG, SIG_ID_TIMER_DEL_CUSTOM_TIMER);
             msg.SetDatas(pInfo, sizeof(STimerInfo));
             mpDebugModule->SendMsg(msg);
 

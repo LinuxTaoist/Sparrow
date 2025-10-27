@@ -11,8 +11,6 @@ ENUM_OR_STRING(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT),          \
 //-----------------------------------------------------------------------------
 // LOG_MANAGER
 //-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_LOG_OPEN),                                \
-ENUM_OR_STRING(SIG_ID_LOG_CLOSE),                               \
 
 //-----------------------------------------------------------------------------
 // DEBUG
@@ -43,10 +41,8 @@ ENUM_OR_STRING(SIG_ID_PROPERTY_CHANGED),                        \
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_TIMER_START_SYSTEM_TIMER),                \
 ENUM_OR_STRING(SIG_ID_TIMER_STOP_SYSTEM_TIMER),                 \
-ENUM_OR_STRING(SIG_ID_TIMER_ADD_ONCE_TIMER),                    \
-ENUM_OR_STRING(SIG_ID_TIMER_ADD_REPEAT_TIMER),                  \
 ENUM_OR_STRING(SIG_ID_TIMER_ADD_CUSTOM_TIMER),                  \
-ENUM_OR_STRING(SIG_ID_TIMER_DEL_TIMER),                         \
+ENUM_OR_STRING(SIG_ID_TIMER_DEL_CUSTOM_TIMER),                  \
 
 //-----------------------------------------------------------------------------
 // SYSTEM_TIMER_MANAGER

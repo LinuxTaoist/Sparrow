@@ -113,7 +113,7 @@ int32_t SprObserver::UnregisterTimer(uint32_t msgId)
     STimerInfo timeInfo = {mModuleID, msgId, 0, 0, 0};
     shared_ptr<STimerInfo> pInfo = static_pointer_cast<STimerInfo>(make_shared<STimerInfo>(timeInfo));
 
-    SprMsg msg(MODULE_TIMERM, SIG_ID_TIMER_DEL_TIMER);
+    SprMsg msg(MODULE_TIMERM, SIG_ID_TIMER_DEL_CUSTOM_TIMER);
     msg.SetDatas(pInfo, sizeof(STimerInfo));
     return NotifyObserver(msg);
 }

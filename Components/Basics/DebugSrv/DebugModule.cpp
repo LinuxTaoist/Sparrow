@@ -65,7 +65,7 @@ int32_t DebugModule::ProcessMsg(const SprMsg& msg)
             break;
         }
         case SIG_ID_TIMER_ADD_CUSTOM_TIMER:
-        case SIG_ID_TIMER_DEL_TIMER: {
+        case SIG_ID_TIMER_DEL_CUSTOM_TIMER: {
             MsgRespondDispatchTimerMsg(msg);
             break;
         }
