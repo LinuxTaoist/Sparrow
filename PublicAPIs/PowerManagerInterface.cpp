@@ -52,8 +52,6 @@ PowerManagerInterface::PowerManagerInterface()
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }
-
-    AsyncEvent::GetInstance()->AsReader(SRV_NAME_POWER_MANAGER);
 }
 
 PowerManagerInterface::~PowerManagerInterface()
@@ -127,6 +125,7 @@ int PowerManagerInterface::RegisterCallback(void (*callback)(int32_t eventID, vo
     NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
 
     SPR_LOGD("ret: %d\n", ret);
+    AsyncEvent::GetInstance()->AsReader(SRV_NAME_POWER_MANAGER);
     AsyncEvent::GetInstance()->RegisterEventCallback(callback);
     return ret;
 }

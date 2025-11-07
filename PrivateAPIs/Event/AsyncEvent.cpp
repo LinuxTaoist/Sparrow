@@ -70,6 +70,8 @@ int AsyncEvent::AsReader(const std::string& name)
 int AsyncEvent::UnregisterEventCallback()
 {
     mCb = nullptr;
+    mRunning = false;
+    mCbThread.join();
     return 0;
 }
 

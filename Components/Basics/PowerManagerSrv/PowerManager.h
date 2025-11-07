@@ -85,6 +85,7 @@ private:
     void NotifyAllWithStandby();
     void NotifyAllWithSleep();
     void NotifyEvent(uint32_t event);
+    void PostAEvent(uint32_t event, void* args = nullptr, int32_t size = 0);
     bool IsAllowStandbyWithAllObserver();
 
     /* 消息响应函数 */

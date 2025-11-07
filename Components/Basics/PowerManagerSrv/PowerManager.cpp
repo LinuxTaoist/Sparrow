@@ -223,9 +223,8 @@ void PowerManager::EnterActive()
     SetLev1State(LEV1_POWER_ACTIVE);
     NotifyAllWithStartup();
 
-    // Notify active to clients
-    int32_t ret = POST_AEVENT(POWER_MGR_ACTIVE, nullptr, 0);
-    SPR_LOGI("Send POWER_MGR_ACTIVE to client, ret = %d\n", ret);
+    // Post active event to external
+    PostAEvent(POWER_MGR_ACTIVE);
 }
 
 void PowerManager::EnterStandby()
@@ -234,12 +233,11 @@ void PowerManager::EnterStandby()
     SetLev1State(LEV1_POWER_STANDBY);
     UnregisterTimer(SIG_ID_POWER_STANDBY_POLL_TIMER_EVENT);
 
-    // Enter sleep after 5s in standby state
-    RegisterTimer(0, STANDBY_ENTER_SLEEP_TIMEOUT, SIG_ID_POWER_ENTER_SLEEP_TIMER_EVENT, 1);
+    // Post standby event to external
+    PostAEvent(POWER_MGR_STANDBY);
 
-    // Notify standby to clients
-    int32_t ret = POST_AEVENT(POWER_MGR_STANDBY, nullptr, 0);
-    SPR_LOGI("Send POWER_MGR_STANDBY to client, ret = %d\n", ret);
+    // Enter sleep after 5s in standby state
+    RegisterTimer(STANDBY_ENTER_SLEEP_TIMEOUT, STANDBY_ENTER_SLEEP_TIMEOUT, SIG_ID_POWER_ENTER_SLEEP_TIMER_EVENT, 1);
 }
 
 void PowerManager::EnterSleep()
@@ -248,9 +246,8 @@ void PowerManager::EnterSleep()
     SetLev1State(LEV1_POWER_SLEEP);
     NotifyAllWithSleep();
 
-    // Notify sleep to clients
-    int ret = POST_AEVENT(POWER_MGR_SLEEP, nullptr, 0);
-    SPR_LOGI("Send POWER_MGR_SLEEP to client, ret = %d\n", ret);
+    // Post sleep event to external
+    PostAEvent(POWER_MGR_SLEEP);
 }
 
 void PowerManager::NotifyAllWithStartup()
@@ -278,6 +275,12 @@ void PowerManager::NotifyEvent(uint32_t event)
     SprMsg msg(event);
     NotifyAllObserver(msg);
     SPR_LOGD("Broadcast power event: %s\n", GetSigName(event));
+}
+
+void PowerManager::PostAEvent(uint32_t event, void* args, int32_t size)
+{
+    int32_t ret = POST_AEVENT(event, args, size);
+    SPR_LOGI("Post event (%u) %s\n", event, (ret == 0) ? "success" : "failed");
 }
 
 bool PowerManager::IsAllowStandbyWithAllObserver()
@@ -532,7 +535,7 @@ void PowerManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
                 GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
 }
 
-int PowerManager::ProcessMsg(const SprMsg& msg)
+int32_t PowerManager::ProcessMsg(const SprMsg& msg)
 {
     // SPR_LOGD("Recv msg: %s on %s\n", GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),

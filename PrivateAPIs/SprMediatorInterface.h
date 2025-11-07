@@ -20,6 +20,7 @@
 #define __SPR_MEDIATOR_INTERFACE_H__
 
 #include <vector>
+#include <string>
 #include <mqueue.h>
 #include "CommonTypeDefs.h"
 

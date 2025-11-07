@@ -22,9 +22,10 @@
 extern void (*pSprUserEntry)();
 extern void NOT_IMPLEMENT_SPR_ENTRY();
 
-// struct SprEntryRegister: Auto-assign user's SprUserEntry
-// to global pSprUserEntry before main
-// NOT_IMPLEMENT_SPR_ENTRY: to report error when user didn't implement SprUserEntry
+// SprEntryRegister struct: Automatically assigns the user's
+// SprUserEntry to the global pSprUserEntry before main()
+// NOT_IMPLEMENT_SPR_ENTRY: Reports an error when the library
+// is linked but SprUserEntry is not implemented
 #define SPR_ENTRY()         \
     void SprUserEntry();                                        \
     static struct SprEntryRegister {                            \

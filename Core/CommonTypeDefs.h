@@ -21,7 +21,6 @@
 #ifndef __COMMON_TYPE_DEFS_H__
 #define __COMMON_TYPE_DEFS_H__
 
-#include <string>
 #include <stdint.h>
 #include <mqueue.h>
 
