@@ -266,7 +266,6 @@ void PowerManager::NotifyAllWithStandby()
 
 void PowerManager::NotifyAllWithSleep()
 {
-    SetLev1State(LEV1_POWER_SLEEP);
     NotifyEvent(SIG_ID_POWER_SLEEP);
 }
 
