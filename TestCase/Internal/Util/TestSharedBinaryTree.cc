@@ -150,6 +150,7 @@ TEST_F(Util_SharedBinaryTree, TestSharedMemoryFull) {
     int gRet2 = smallTree.GetValue(key2, actualValue1);
     EXPECT_EQ(-1, sRet2);
     EXPECT_EQ(-1, gRet2);
+    unlink(smallTestPath.c_str());
 }
 
 // 测试关闭后重新打开共享内存二叉树，验证数据复用能力
