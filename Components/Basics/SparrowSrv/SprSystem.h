@@ -44,6 +44,7 @@ private:
     void LoadReleaseInformation();
 
 private:
+    std::string mVersionPath;
     PluginManager mPluginMgr;
 };
 

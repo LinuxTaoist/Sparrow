@@ -34,6 +34,7 @@
 #include <sys/wait.h>
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
+#include "CommonMacros.h"
 #include "ServiceManager.h"
 
 using namespace std;
@@ -44,14 +45,13 @@ using namespace GeneralUtils;
 #define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 
-const char PROC_PATH[] = "/proc";
-const char ENV_ROOT_PATH[] = "/tmp/";
 const char INIT_CONFIGURE_PATH[] = "init.conf";
 
 bool ServiceManager::mRunning = false;
 
 ServiceManager::ServiceManager()
 {
+    mRootDir = DEFAULT_DEBUG_ROOT_DIR;
 }
 
 ServiceManager::~ServiceManager()
@@ -64,7 +64,7 @@ bool ServiceManager::IsExeAliveByProc(int32_t pid)
     struct stat fileStat;
     char pidPath[20] = {0};
 
-    snprintf(pidPath, sizeof(pidPath), "%s/%d", PROC_PATH, pid);
+    snprintf(pidPath, sizeof(pidPath), "%s/%d", SYS_PROC_DIR, pid);
     int ret = lstat(pidPath, &fileStat);
     if (ret) {
         SPR_LOGD("%s lstat failed. (%s)\n", pidPath, strerror(errno));
@@ -245,7 +245,7 @@ int32_t ServiceManager::ClearExeEnvNode(const std::string& exeName)
         return 0;
     }
 
-    std::string monitorNode = std::string(ENV_ROOT_PATH) + exeName;
+    std::string monitorNode = mRootDir + "/" + exeName;
     if (access(monitorNode.c_str(), F_OK) == 0) {
         unlink(monitorNode.c_str());
     }
@@ -260,7 +260,7 @@ int32_t ServiceManager::WaitLastExeFinished(const std::string& exeName)
     }
 
     int retryTimes = 10;
-    std::string monitorNode = std::string(ENV_ROOT_PATH) + exeName;
+    std::string monitorNode = mRootDir + "/" + exeName;
     while (retryTimes--) {
         if (access(monitorNode.c_str(), F_OK) != 0) {
             // SPR_LOGD("Waiting exe: %-20s retryTimes = %-3d\n", exeName.c_str(), 10 - retryTimes);

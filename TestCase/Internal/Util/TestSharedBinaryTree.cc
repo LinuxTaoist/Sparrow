@@ -20,6 +20,7 @@
 #include <memory>
 #include <stdio.h>
 #include "gtest/gtest.h"
+#include "CommonMacros.h"
 #include "SharedBinaryTree.h"
 
 #define SHARED_BTREE_MAX_SIZE 10240
@@ -29,16 +30,18 @@
 class Util_SharedBinaryTree : public ::testing::Test {
 protected:
     void SetUp() override {
-        mpTree = std::make_shared<SharedBinaryTree>("/tmp/test_shared_tree", SHARED_BTREE_MAX_SIZE, false);
+        mTestPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/test_shared_tree";
+        mpTree = std::make_shared<SharedBinaryTree>(mTestPath, SHARED_BTREE_MAX_SIZE, false);
         ASSERT_EQ(true, (mpTree != nullptr));
         // TEST_LOG("Node is %zu bytes.", sizeof(Node));
     }
 
     void TearDown() override {
-        unlink("/tmp/test_shared_tree");
+        unlink(mTestPath.c_str());
     }
 
 protected:
+    std::string mTestPath;
     std::shared_ptr<SharedBinaryTree> mpTree;
 };
 
@@ -129,7 +132,8 @@ TEST_F(Util_SharedBinaryTree, TestGetNonExistentKey) {
 
 // 测试共享内存空间不足的情况
 TEST_F(Util_SharedBinaryTree, TestSharedMemoryFull) {
-    SharedBinaryTree smallTree("/tmp/small_shared_tree", sizeof(size_t) + sizeof(Node), true);
+    std::string smallTestPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/test_shared_tree_small";
+    SharedBinaryTree smallTree(smallTestPath, sizeof(size_t) + sizeof(Node), true);
     std::string key1 = "mem_full_key";
     std::string value1 = "mem_full_value";
     std::string actualValue1;
@@ -159,7 +163,7 @@ TEST_F(Util_SharedBinaryTree, TestReopenAndReuse) {
     mpTree = nullptr;
 
     // 重新打开共享内存
-    mpTree = std::make_shared<SharedBinaryTree>("/tmp/test_shared_tree", SHARED_BTREE_MAX_SIZE, false);
+    mpTree = std::make_shared<SharedBinaryTree>(mTestPath, SHARED_BTREE_MAX_SIZE, false);
     ASSERT_TRUE(nullptr != mpTree);
 
     // 验证原有数据可复用
@@ -181,7 +185,7 @@ TEST_F(Util_SharedBinaryTree, TestMultipleInstancesReuse) {
     EXPECT_EQ(0, mpTree->SetValue(key, value));
 
     // 创建第二个实例复用同一共享内存
-    std::shared_ptr<SharedBinaryTree> pTree2 = std::make_shared<SharedBinaryTree>("/tmp/test_shared_tree", SHARED_BTREE_MAX_SIZE, false);
+    std::shared_ptr<SharedBinaryTree> pTree2 = std::make_shared<SharedBinaryTree>(mTestPath, SHARED_BTREE_MAX_SIZE, false);
     ASSERT_TRUE(nullptr != pTree2);
 
     // 实例2读取并更新数据
@@ -210,7 +214,7 @@ TEST_F(Util_SharedBinaryTree, TestContinuousReuseOperations) {
     }
 
     // 销毁并重新打开（第一次复用）
-    mpTree = std::make_shared<SharedBinaryTree>("/tmp/test_shared_tree", SHARED_BTREE_MAX_SIZE, false);
+    mpTree = std::make_shared<SharedBinaryTree>(mTestPath, SHARED_BTREE_MAX_SIZE, false);
     ASSERT_TRUE(nullptr != mpTree);
 
     // 第二次操作：更新数据
@@ -221,7 +225,7 @@ TEST_F(Util_SharedBinaryTree, TestContinuousReuseOperations) {
     }
 
     // 销毁并重新打开（第二次复用）
-    mpTree = std::make_shared<SharedBinaryTree>("/tmp/test_shared_tree", SHARED_BTREE_MAX_SIZE, false);
+    mpTree = std::make_shared<SharedBinaryTree>(mTestPath, SHARED_BTREE_MAX_SIZE, false);
     ASSERT_TRUE(nullptr != mpTree);
 
     // 第三次操作：验证最终数据
@@ -237,7 +241,9 @@ TEST_F(Util_SharedBinaryTree, TestContinuousReuseOperations) {
 
 // 测试128KB大小的共享内存二叉树能存储的最大key数量
 TEST_F(Util_SharedBinaryTree, TestMaxKeyCountIn128KB) {
-    std::shared_ptr<SharedBinaryTree> pTree128KB = std::make_shared<SharedBinaryTree>("/tmp/test_128kb_shared_tree", 128 * 1024, true);
+    std::string testPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/test_128kb_shared_tree";
+    std::shared_ptr<SharedBinaryTree> pTree128KB =
+        std::make_shared<SharedBinaryTree>(testPath, 128 * 1024, true);
     ASSERT_TRUE(nullptr != pTree128KB) << "Create 128KB failed!";
     int i = 0;
     for (; i < 100000; ++i) {
@@ -257,5 +263,5 @@ TEST_F(Util_SharedBinaryTree, TestMaxKeyCountIn128KB) {
         EXPECT_EQ(key + std::to_string(j), value);
     }
 
-    unlink("/tmp/test_128kb_shared_tree");
+    unlink(testPath.c_str());
 }

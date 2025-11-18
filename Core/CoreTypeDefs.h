@@ -47,9 +47,7 @@ typedef void(*PluginExitFunc) (std::map<int32_t, SprObserver*>& modules, SprCont
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for core commponents
 // --------------------------------------------------------------------------------------------------------------------
-#define     DEBUG_NODE_ROOT_PATH        "/tmp"
 #define     MEDIATOR_MSG_QUEUE          "/SprMdrQ_20231126"          // mqueue
-#define     MEDIATOR_UNIX_DGRAM_PATH    "/tmp/SprMdrU_20231126"      // unix socket
 #define     MAIN_EXIT_SIGNUM            SIGUSR1
 #define     MEDIATOR_INET_PORT          1126
 #define     MSG_BUF_MAX_LENGTH          1024

@@ -103,6 +103,8 @@ private:
 
 private:
     std::string mDevName;
+    std::string mSharedMemoryPath;
+    std::string mSharedPersistPath;
     std::unique_ptr<SharedBinaryTree> mpSharedMemory;
     std::unique_ptr<SharedBinaryTree> mpPersistMemory;
 };

@@ -45,6 +45,7 @@ private:
     using HandleFunction = int32_t (BinderManager::*)(void);
 
     static bool mRunning;
+    std::string mRootDir;
     std::map<std::string, BinderInfo> mBinderMap;
     std::map<int32_t, HandleFunction> mHandleFuncs;
 };

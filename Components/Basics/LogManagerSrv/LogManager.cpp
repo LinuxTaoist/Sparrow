@@ -44,7 +44,6 @@ using namespace GeneralUtils;
 #define DEFAULT_FRAME_LEN_LIMIT     1024
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 #define DEFAULT_BASE_LOG_FILE_NAME  "sprlog.log"
-#define DEFAULT_LOGS_STORAGE_PATH   "/tmp/sprlog"
 #define LOG_CONFIGURE_FILE_PATH     "sprlog.conf"
 
 static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
@@ -59,7 +58,7 @@ LogManager::LogManager()
     mLogFileNum         = DEFAULT_LOG_FILE_NUM_LIMIT;
     mLogFileCapacity    = DEFAULT_LOG_FILE_MAX_SIZE;
     mLogFileName        = DEFAULT_BASE_LOG_FILE_NAME;
-    mLogsFilePath       = DEFAULT_LOGS_STORAGE_PATH;
+    mLogsFilePath       = DEFAULT_DEBUG_ROOT_DIR + std::string("/") + DEFAULT_BASE_LOG_FILE_NAME;
     mCurrentLogFile     = DEFAULT_BASE_LOG_FILE_NAME;
 
     mLoadAttrMap.insert(std::make_pair("logging.output",        &LogManager::LoadAttrOutputMode));
@@ -93,7 +92,7 @@ LogManager::~LogManager()
 
 int LogManager::EnvReady(const std::string& srvName)
 {
-    std::string node = "/tmp/" + srvName;
+    std::string node = DEFAULT_DEBUG_ROOT_DIR + std::string("/") + srvName;
     int fd = creat(node.c_str(), 0644);
     if (fd != -1) {
         close(fd);

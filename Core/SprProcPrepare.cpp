@@ -24,6 +24,7 @@
 #include <atomic>
 #include "SprProcInfo.h"
 #include "SprDebugNode.h"
+#include "CommonMacros.h"
 #include "SprProcPrepare.h"
 
 static std::atomic<bool> gObjAlive(true);
@@ -50,6 +51,6 @@ SprProcPrepare* SprProcPrepare::GetInstance()
 int32_t SprProcPrepare::Init(const std::string& procName)
 {
     SprProcInfo::GetInstance()->Init();
-    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string("/tmp/") + procName);
+    SprDebugNode::GetInstance()->InitPipeDebugNode(std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + procName);
     return 0;
 }

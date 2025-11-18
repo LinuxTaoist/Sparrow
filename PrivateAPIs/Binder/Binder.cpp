@@ -20,10 +20,8 @@
 
 int32_t Binder::GetParcel(std::shared_ptr<Parcel>& reqParcel, std::shared_ptr<Parcel>& rspParcel)
 {
-    std::string rootPath = ""; ///tmp/";
-
-    reqParcel = std::make_shared<Parcel>(rootPath + mName + "_req", mKey, true);
-    rspParcel = std::make_shared<Parcel>(rootPath + mName + "_rsp", mKey, true);
+    reqParcel = std::make_shared<Parcel>(mName + "_req", mKey, true);
+    rspParcel = std::make_shared<Parcel>(mName + "_rsp", mKey, true);
 
     return 0;
 }

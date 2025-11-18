@@ -46,6 +46,7 @@ private:
 
 private:
     static bool mRunning;
+    std::string mRootDir;
     std::map<int, std::pair<std::string, int>> mPidMap;     // key: pid, value: exePath, times
 };
 

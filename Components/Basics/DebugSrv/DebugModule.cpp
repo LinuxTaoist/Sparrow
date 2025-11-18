@@ -23,6 +23,7 @@
 #include <sys/types.h>          /* See NOTES */
 #include <sys/socket.h>
 #include "PSocket.h"
+#include "CommonMacros.h"
 #include "SprDebugNode.h"
 #include "RemoteShell.h"
 #include "DebugModule.h"
@@ -143,7 +144,7 @@ void DebugModule::DebugHandleSleep(const std::vector<std::string>& args)
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args size: %d\n", args.size());
-        SPR_LOGE("Usage: echo sleep {sec} > /tmp/debugsrv\n");
+        SPR_LOGE("Usage: echo sleep {sec} > %s/debugsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
