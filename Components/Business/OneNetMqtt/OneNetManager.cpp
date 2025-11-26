@@ -53,7 +53,7 @@ OneNetManager::mStateTable =
 {
     // =============================================================
     // All States for SIG_ID_POWER_STARTUP_LOW
-    // ============================================================
+    // =============================================================
     { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
       SIG_ID_POWER_STARTUP_LOW,
       &OneNetManager::MsgRespondStartupLow
@@ -66,7 +66,7 @@ OneNetManager::mStateTable =
 
     // =============================================================
     // All States for SIG_ID_POWER_PRE_STANDBY_REQUEST
-    // ============================================================
+    // =============================================================
     { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
       SIG_ID_POWER_PRE_STANDBY_REQUEST,
       &OneNetManager::MsgRespondPreStandbyRequest
@@ -74,7 +74,7 @@ OneNetManager::mStateTable =
 
     // =============================================================
     // All States for SIG_ID_POWER_STANDBY_HIGH
-    // ============================================================
+    // =============================================================
     { LEV1_ONENET_MGR_ANY, LEV2_ONENET_MGR_ANY,
       SIG_ID_POWER_STANDBY_HIGH,
       &OneNetManager::MsgRespondStandbyHigh
@@ -82,7 +82,7 @@ OneNetManager::mStateTable =
 
     // =============================================================
     // All States for SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT
-    // ============================================================
+    // =============================================================
     { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
       SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT,
       &OneNetManager::MsgRespondActiveDeviceConnect
@@ -100,7 +100,7 @@ OneNetManager::mStateTable =
 
     // =============================================================
     // All States for SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT
-    // ============================================================
+    // =============================================================
     { LEV1_ONENET_MGR_IDLE, LEV2_ONENET_MGR_ANY,
       SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT,
       &OneNetManager::MsgRespondReactiveCurDeviceConnect
@@ -123,7 +123,7 @@ OneNetManager::mStateTable =
 
     // =============================================================
     // All States for SIG_ID_ONENET_MGR_DEACTIVE_DEVICE
-    // ============================================================
+    // =============================================================
     { LEV1_ONENET_MGR_CONNECTED, LEV2_ONENET_MGR_ANY,
       SIG_ID_ONENET_MGR_DEACTIVE_DEVICE,
       &OneNetManager::MsgRespondDeactiveDevice

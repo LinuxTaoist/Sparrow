@@ -91,7 +91,7 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
                 //SPR_LOGW("read retry.\n");
                 break;
             } else {
-                SPR_LOGE("read fail! (%s)\n", strerror(errno));
+                SPR_LOGE("read %d fail! (%s)\n", fd, strerror(errno));
                 return -1;
             }
         } else if (nread == 0) {

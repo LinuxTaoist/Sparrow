@@ -49,7 +49,6 @@ int32_t GetSprErrorLevel(int32_t errorCode)
     }
 
     return ERR_EVENT_LEVEL_UNKNOWN;
-
 }
 
 std::string GetSprErrorLevelText(int32_t level)

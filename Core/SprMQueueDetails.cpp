@@ -31,7 +31,7 @@
 
 SprMQueueDetails::SprMQueueDetails(const std::string& mqName, bool create) : mIsCreator(create), mMqName(mqName) {
     int32_t fd = -1;
-    mRootDir = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "spr_details";
+    mRootDir = DEFAULT_MQS_DIR;
     mpDetails = nullptr;
     std::string filePath = mRootDir + "/" + mqName;
 

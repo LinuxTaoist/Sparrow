@@ -24,7 +24,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CommonMacros.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define COMMON_MACROS_VERSION   "COMMON_MACROS_VERSION_M1001"
+#define COMMON_MACROS_VERSION   "COMMON_MACROS_VERSION_M1002"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for environment path
@@ -36,6 +36,7 @@
 
 // User path
 #define DEFAULT_DEBUG_ROOT_DIR      SYS_TEMP_DIR
+#define DEFAULT_MQS_DIR             SYS_TEMP_DIR "/mq_details"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for service and client
