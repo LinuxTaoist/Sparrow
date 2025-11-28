@@ -48,6 +48,8 @@ TimeManager::TimeManager(ModuleIDType id, const std::string& name)
 {
     mSyncPollerTimer = false;
     mSyncTimeFinished = false;
+    mSAdjustCnt = 0;
+    mJAdjustCnt = 0;
     mReqPriority = TIME_SOURCE_PRIORITY_BUTT;
     mCurTimeSource = TIME_SOURCE_TYPE_BUTT;
     mSyncTimeOutMs = DEFAULT_SYNC_TIMEOUT;
@@ -177,6 +179,7 @@ int32_t TimeManager::SmoothAdjustSystemTime(int64_t ns)
         return -1;
     }
 
+    mSAdjustCnt++;
     SPR_LOGI("Smooth adjust %dus successfully\n", us);
     return 0;
 }
@@ -193,6 +196,7 @@ int32_t TimeManager::JumpAdjustSystemTime(uint64_t timestamp)
         return -1;
     }
 
+    mJAdjustCnt++;
     SPR_LOGI("Jump adjust %d.%lds successfully\n", ts.tv_sec, ts.tv_nsec);
     return 0;
 }
@@ -389,7 +393,8 @@ void TimeManager::RegisterDebugFuncs()
         return;
     }
 
-    p->RegisterCmd(mModuleName, "DumpDetails",      "Dump details",           std::bind(&TimeManager::DebugDumpDetails,        this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "DumpDetails",      "Dump details",           std::bind(&TimeManager::DebugDumpDetails,           this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "Reset",            "Reset",                  std::bind(&TimeManager::DebugResetDetails,          this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "ReqNtpTime",       "Request ntp time",       std::bind(&TimeManager::DebugRequestNtpTime,        this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "StartSyncTime",    "Start sync time",        std::bind(&TimeManager::DebugStartSyncTime,         this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "SetSyncTime",      "Set sync timeout (ms)",  std::bind(&TimeManager::DebugSetSyncTimeOutMs,      this, std::placeholders::_1));
@@ -414,12 +419,19 @@ void TimeManager::DebugDumpDetails(const std::vector<std::string>& args)
 {
     SPR_LOGI("                           Dump TimeManager Details                                            \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
-    SPR_LOGI("- mSyncTimeFinished: %d\n", mSyncTimeFinished);
+    SPR_LOGI("- mSyncTimeFinished: %d (SCnt:%d JCnt:%d)\n", mSyncTimeFinished, mSAdjustCnt, mJAdjustCnt);
     SPR_LOGI("- mReqPriority: %d\n", mReqPriority);
     SPR_LOGI("- mCurTimeSource: %s\n", GetSprTimeSourceTypeText(mCurTimeSource).c_str());
     SPR_LOGI("- mSyncTimeOutMs: %d\n", mSyncTimeOutMs);
     SPR_LOGI("- mSyncPollTimeOutMs: %d\n", mSyncPollTimeOutMs);
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
+}
+
+void TimeManager::DebugResetDetails(const std::vector<std::string>& args)
+{
+    SPR_LOGI("Reset details\n");
+    mSAdjustCnt = 0;
+    mJAdjustCnt = 0;
 }
 
 void TimeManager::DebugStartSyncTime(const std::vector<std::string>& args)

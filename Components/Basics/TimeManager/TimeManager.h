@@ -107,6 +107,7 @@ private:
 
     /** Debug functions */
     void DebugDumpDetails(const std::vector<std::string>& args);
+    void DebugResetDetails(const std::vector<std::string>& args);
     void DebugStartSyncTime(const std::vector<std::string>& args);
     void DebugStartSyncTimePoller(const std::vector<std::string>& args);
     void DebugStopSyncTimePoller(const std::vector<std::string>& args);
@@ -117,6 +118,8 @@ private:
 private:
     bool mSyncPollerTimer;
     bool mSyncTimeFinished;
+    int32_t mSAdjustCnt;
+    int32_t mJAdjustCnt;
     int32_t mReqPriority;
     int32_t mSyncTimeOutMs;
     int32_t mSyncPollTimeOutMs;
