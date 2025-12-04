@@ -73,9 +73,8 @@ private:
     int32_t RequestGnssTime();
     int32_t StartSyncTime();
     int32_t SmoothAdjustSystemTime(int64_t ns);
-    int32_t JumpAdjustSystemTime(uint64_t timestamp);
-    int32_t SyncSystemTime(int32_t source, uint64_t timestamp);
-    int32_t GetDiffWithLocalTime(uint64_t timestamp, int64_t& diff);
+    int32_t JumpAdjustSystemTime(uint64_t diffNsec);
+    int32_t SyncSystemTime(int32_t source, uint64_t diffNsec);
 
     TimeSourcePriority GetTimeSourcePriority(InternalDefs::TimeSourceType source);
     InternalDefs::TimeSourceType GetTimeSource(TimeSourcePriority priority);

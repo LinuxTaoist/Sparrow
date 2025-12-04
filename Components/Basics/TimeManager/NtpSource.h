@@ -47,8 +47,9 @@ private:
     int32_t InitSocket();
     int32_t SendTimeRequest(NtpServer& srv);
     int32_t HandleNtpBytes(const std::string& bytes, const std::string& srcAddr);
-    uint64_t GetCurTimeStamp();
-    uint64_t CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4);
+    int32_t GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, uint64_t& ns);
+    uint64_t GetCurTimeStampWithNtp();
+
 
 private:
     void* mArg;                         // 回调函数参数

@@ -36,10 +36,10 @@ using namespace InternalDefs;
 
 #define LOG_TAG "TimeMgr"
 #define DEFAULT_NTP_PORT            0
-#define TIME_ADJUST_SMALL_SEC       4
-#define TIME_ADJUST_LARGE_SEC       120
-#define DEFAULT_SYNC_TIMEOUT        4000    // 4 sec
-#define DEFAULT_SYNC_POLL_TIMEOUT   600000  // 10 min
+#define TIME_ADJUST_SMALL_NSEC      50000000    // 50ms
+#define TIME_ADJUST_LARGE_NSEC      10000000000 // 10s
+#define DEFAULT_SYNC_TIMEOUT        4000        // 4s
+#define DEFAULT_SYNC_POLL_TIMEOUT   60000       // 1 min
 
 static std::atomic<bool> gObjAlive(true);
 
@@ -85,8 +85,8 @@ int32_t TimeManager::Init()
 int32_t TimeManager::InitNtpSource()
 {
     if (!mpNtpSource) {
-        mpNtpSource = make_shared<NtpSource>(DEFAULT_NTP_PORT, [&](uint64_t timestamp, void* arg) {
-            SPR_LOGD("Receive ntp time: %llu.%llu", (timestamp >> 32) & 0xFFFFFFFF, timestamp & 0xFFFFFFFF);
+        mpNtpSource = make_shared<NtpSource>(DEFAULT_NTP_PORT, [&](uint64_t diffNsec, void* arg) {
+            SPR_LOGD("Receive ntp time: %llu", diffNsec);
 
             TimeManager* mySelf = static_cast<TimeManager*>(arg);
             if (!mySelf) {
@@ -96,7 +96,7 @@ int32_t TimeManager::InitNtpSource()
 
             SprMsg msg(SIG_ID_TIMEM_SYNC_SYSTEM_TIME);
             msg.SetI32Value((int32_t)TIME_SOURCE_TYPE_NTP);
-            msg.SetU64Value(timestamp);
+            msg.SetU64Value(diffNsec);
             mySelf->SendMsg(msg);
         }, this);
     }
@@ -184,64 +184,46 @@ int32_t TimeManager::SmoothAdjustSystemTime(int64_t ns)
     return 0;
 }
 
-int32_t TimeManager::JumpAdjustSystemTime(uint64_t timestamp)
+int32_t TimeManager::JumpAdjustSystemTime(uint64_t diffNsec)
 {
+    struct timespec curTs;
+    clock_gettime(CLOCK_REALTIME, &curTs);
+
+    uint64_t curTimeNs = (uint64_t)curTs.tv_sec * 1000000000ULL + (uint64_t)curTs.tv_nsec;
+    uint64_t targetTimeNs = curTimeNs + diffNsec;
+
     struct timespec ts;
-    ts.tv_sec = (timestamp >> 32) & 0xFFFFFFFF;
-    ts.tv_nsec = timestamp & 0xFFFFFFFF;
+    ts.tv_sec = (time_t)(targetTimeNs / 1000000000ULL);
+    ts.tv_nsec = (long)(targetTimeNs % 1000000000ULL);
 
     int32_t ret = clock_settime(CLOCK_REALTIME, &ts);
     if (ret == -1) {
-        SPR_LOGE("Jump adjust %d.%lds failed! (%s)\n", ts.tv_sec, ts.tv_nsec, strerror(errno));
+        SPR_LOGE("Jump adjust %ld.%lds failed! (%s)\n", ts.tv_sec, ts.tv_nsec, strerror(errno));
         return -1;
     }
 
     mJAdjustCnt++;
-    SPR_LOGI("Jump adjust %d.%lds successfully\n", ts.tv_sec, ts.tv_nsec);
+    SPR_LOGI("Jump adjust %ld.%lds successfully\n", ts.tv_sec, ts.tv_nsec);
     return 0;
 }
 
-int32_t TimeManager::SyncSystemTime(int32_t source, uint64_t timestamp)
+int32_t TimeManager::SyncSystemTime(int32_t source, uint64_t diffNsec)
 {
     if (source < TIME_SOURCE_TYPE_NTP || source >= TIME_SOURCE_TYPE_BUTT) {
         SPR_LOGE("Invalid time source: %d\n", source);
         return -1;
     }
 
-    int64_t diffNs = 0;
-    int32_t ret = GetDiffWithLocalTime(timestamp, diffNs);
-    if (ret == -1) {
-        return -1;
-    }
-
-    int64_t diffSec = diffNs / 1000000000LL;
-    if (diffSec <= TIME_ADJUST_SMALL_SEC)    {
-        SPR_LOGI("Not need sync time! (small time difference %lld sec)\n", diffSec);
-    } else if (diffSec <= TIME_ADJUST_LARGE_SEC) {
-        SmoothAdjustSystemTime(diffNs);
+    if (diffNsec <= TIME_ADJUST_SMALL_NSEC)    {
+        SPR_LOGI("Not need sync time! (small time difference %lld ns)\n", diffNsec);
+    } else if (diffNsec <= TIME_ADJUST_LARGE_NSEC) {
+        SmoothAdjustSystemTime(diffNsec);
     } else {
-        JumpAdjustSystemTime(timestamp);
+        JumpAdjustSystemTime(diffNsec);
     }
 
     mSyncTimeFinished = true;
     mCurTimeSource = (InternalDefs::TimeSourceType)source;
-    return ret;
-}
-
-int32_t TimeManager::GetDiffWithLocalTime(uint64_t timestamp, int64_t& diffNs)
-{
-    const int32_t NS_PER_SEC = 1000000000LL;
-    struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
-        SPR_LOGE("Get time failed! (%s)\n", strerror(errno));
-        return -1;
-    }
-
-    uint64_t targetNs = ((timestamp >> 32) & 0xFFFFFFFF) * NS_PER_SEC + (timestamp & 0xFFFFFFFF) / NS_PER_SEC;
-    uint64_t currentNs = (uint64_t)ts.tv_sec * NS_PER_SEC + ts.tv_nsec;
-
-    diffNs = std::abs(static_cast<int64_t>(targetNs - currentNs));
-    SPR_LOGD("Time diff: %lld ns", diffNs);
     return 0;
 }
 
@@ -341,8 +323,8 @@ void TimeManager::MsgRespondSyncTimeTimerEvent(const SprMsg& msg)
 void TimeManager::MsgRespondSyncSystemTime(const SprMsg& msg)
 {
     int32_t source = msg.GetI32Value();
-    uint64_t timestamp = msg.GetU64Value();
-    int32_t ret = SyncSystemTime(source, timestamp);
+    uint64_t diffNsec = msg.GetU64Value();
+    int32_t ret = SyncSystemTime(source, diffNsec);
     SPR_LOGD("Sync time from %s %s\n", GetSprTimeSourceTypeText(source).c_str(), ret == -1 ? "failed" : "success");
 }
 

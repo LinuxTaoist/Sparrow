@@ -118,7 +118,7 @@ int32_t NtpSource::SendTimeRequest(NtpServer& srv)
     NtpProtocol ntpPacket("");
     ntpPacket.Encode(bytes);
     srv.ip = ip;
-    srv.sendTs = GetCurTimeStamp();
+    srv.sendTs = GetCurTimeStampWithNtp();
 
     // mutiple thread request
     // if other thread request success, the socket will be closed
@@ -144,24 +144,23 @@ int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& s
         return -1;
     }
 
-    uint64_t t4 = GetCurTimeStamp();
-    uint64_t syncTime = CalculateTime(ntpSrv->sendTs, ntpPacket.GetReceiveTimestamp(),
-                                      ntpPacket.GetTransmitTimestamp(), t4);
-
-    uint32_t sec = (syncTime >> 32) & 0xFFFFFFFF;
-    if (sec < NTP_TIMESTAMP_CHECK) {
-        SPR_LOGE("Invalid NTP time %u\n", sec);
+    uint64_t offsetNsec = 0;
+    uint64_t t4 = GetCurTimeStampWithNtp();
+    int32_t ret = GetOffsetNsec(ntpSrv->sendTs, ntpPacket.GetReceiveTimestamp(),
+                    ntpPacket.GetTransmitTimestamp(), t4, offsetNsec);
+    if (ret != 0) {
+        SPR_LOGE("GetOffsetNsec failed!\n");
         return -1;
     }
 
     if (mCb) {
-        mCb(syncTime, mArg);
+        mCb(offsetNsec, mArg);
     }
 
     return 0;
 }
 
-uint64_t NtpSource::GetCurTimeStamp()
+uint64_t NtpSource::GetCurTimeStampWithNtp()
 {
     struct timespec ts;
     if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
@@ -169,23 +168,33 @@ uint64_t NtpSource::GetCurTimeStamp()
         return 0;
     }
 
-    uint64_t ntpSec = (uint64_t)ts.tv_sec;
+    uint64_t ntpSec = (uint64_t)ts.tv_sec + NTP_UNIX_EPOCH_OFFSET;
     uint64_t ntpFrac = ts.tv_nsec * 4294967296ULL / 1000000000ULL;
     return (ntpSec * 4294967296ULL) | ntpFrac;
 }
 
-uint64_t NtpSource::CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4)
+int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, uint64_t& ns)
 {
     #define NTPTIME_TO_NSEC(x) ( \
-        ((x >> 32) & MASK) * 1000000000ULL + \
-        (uint64_t)(( (x & MASK) * 1000000000ULL ) / 4294967296ULL) \
+        (((x >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET) * 1000000000ULL + \
+        (uint64_t)(( (x & 0xFFFFFFFF) * 1000000000ULL ) / 4294967296ULL) \
     )
 
-    const uint32_t MASK = 0xFFFFFFFF;
-    uint64_t utc = ((t3 >> 32) & MASK) - NTP_UNIX_EPOCH_OFFSET;
-    uint64_t offset = ( (NTPTIME_TO_NSEC(t4) - NTPTIME_TO_NSEC(t1)) +
-                        (NTPTIME_TO_NSEC(t3) - NTPTIME_TO_NSEC(t2)) ) / 2;
-    uint64_t offsetSec = offset / 1000000000ULL;
-    uint64_t offsetFrac = offset % 1000000000ULL;
-    return ((utc + offsetSec) * 4294967296ULL) | offsetFrac;
+    uint64_t utc = ((t3 >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET;
+    if (utc < NTP_TIMESTAMP_CHECK) {
+        SPR_LOGE("Invalid NTP time %u\n", utc);
+        return -1;
+    }
+
+    uint64_t cliTranNs = NTPTIME_TO_NSEC(t1);
+    uint64_t srvRecvNs = NTPTIME_TO_NSEC(t2);
+    uint64_t srvTranNs = NTPTIME_TO_NSEC(t3);
+    uint64_t cliRecvNs = NTPTIME_TO_NSEC(t4);
+
+    ns = ( (cliRecvNs - cliTranNs) + (srvTranNs - srvRecvNs) ) / 2;
+    SPR_LOGD("t1: (%llu.%llu), t2: (%llu.%llu), t3: (%llu.%llu), t4: (%llu.%llu), offset: %lluns\n",
+        cliTranNs / 1000000000, cliTranNs % 1000000000, srvRecvNs / 1000000000, srvRecvNs % 1000000000,
+        srvTranNs / 1000000000, srvTranNs % 1000000000, cliRecvNs / 1000000000, cliRecvNs % 1000000000, ns);
+
+    return 0;
 }
