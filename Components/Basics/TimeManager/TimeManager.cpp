@@ -85,8 +85,8 @@ int32_t TimeManager::Init()
 int32_t TimeManager::InitNtpSource()
 {
     if (!mpNtpSource) {
-        mpNtpSource = make_shared<NtpSource>(DEFAULT_NTP_PORT, [&](uint64_t diffNsec, void* arg) {
-            SPR_LOGD("Receive ntp time: %llu", diffNsec);
+        mpNtpSource = make_shared<NtpSource>(DEFAULT_NTP_PORT, [&](int64_t diffNsec, void* arg) {
+            SPR_LOGD("Receive ntp time: %lld", diffNsec);
 
             TimeManager* mySelf = static_cast<TimeManager*>(arg);
             if (!mySelf) {
@@ -96,7 +96,7 @@ int32_t TimeManager::InitNtpSource()
 
             SprMsg msg(SIG_ID_TIMEM_SYNC_SYSTEM_TIME);
             msg.SetI32Value((int32_t)TIME_SOURCE_TYPE_NTP);
-            msg.SetU64Value(diffNsec);
+            msg.SetI64Value(diffNsec);
             mySelf->SendMsg(msg);
         }, this);
     }
@@ -184,7 +184,7 @@ int32_t TimeManager::SmoothAdjustSystemTime(int64_t ns)
     return 0;
 }
 
-int32_t TimeManager::JumpAdjustSystemTime(uint64_t diffNsec)
+int32_t TimeManager::JumpAdjustSystemTime(int64_t diffNsec)
 {
     struct timespec curTs;
     clock_gettime(CLOCK_REALTIME, &curTs);
@@ -207,16 +207,16 @@ int32_t TimeManager::JumpAdjustSystemTime(uint64_t diffNsec)
     return 0;
 }
 
-int32_t TimeManager::SyncSystemTime(int32_t source, uint64_t diffNsec)
+int32_t TimeManager::SyncSystemTime(int32_t source, int64_t diffNsec)
 {
     if (source < TIME_SOURCE_TYPE_NTP || source >= TIME_SOURCE_TYPE_BUTT) {
         SPR_LOGE("Invalid time source: %d\n", source);
         return -1;
     }
 
-    if (diffNsec <= TIME_ADJUST_SMALL_NSEC)    {
+    if (std::abs(diffNsec) <= TIME_ADJUST_SMALL_NSEC)    {
         SPR_LOGI("Not need sync time! (small time difference %lld ns)\n", diffNsec);
-    } else if (diffNsec <= TIME_ADJUST_LARGE_NSEC) {
+    } else if (std::abs(diffNsec) <= TIME_ADJUST_LARGE_NSEC) {
         SmoothAdjustSystemTime(diffNsec);
     } else {
         JumpAdjustSystemTime(diffNsec);
@@ -323,7 +323,7 @@ void TimeManager::MsgRespondSyncTimeTimerEvent(const SprMsg& msg)
 void TimeManager::MsgRespondSyncSystemTime(const SprMsg& msg)
 {
     int32_t source = msg.GetI32Value();
-    uint64_t diffNsec = msg.GetU64Value();
+    int64_t diffNsec = msg.GetI64Value();
     int32_t ret = SyncSystemTime(source, diffNsec);
     SPR_LOGD("Sync time from %s %s\n", GetSprTimeSourceTypeText(source).c_str(), ret == -1 ? "failed" : "success");
 }

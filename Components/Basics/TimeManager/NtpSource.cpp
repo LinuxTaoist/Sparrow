@@ -144,7 +144,7 @@ int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& s
         return -1;
     }
 
-    uint64_t offsetNsec = 0;
+    int64_t offsetNsec = 0;
     uint64_t t4 = GetCurTimeStampWithNtp();
     int32_t ret = GetOffsetNsec(ntpSrv->sendTs, ntpPacket.GetReceiveTimestamp(),
                     ntpPacket.GetTransmitTimestamp(), t4, offsetNsec);
@@ -173,28 +173,30 @@ uint64_t NtpSource::GetCurTimeStampWithNtp()
     return (ntpSec * 4294967296ULL) | ntpFrac;
 }
 
-int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, uint64_t& ns)
+int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, int64_t& ns)
 {
     #define NTPTIME_TO_NSEC(x) ( \
-        (((x >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET) * 1000000000ULL + \
-        (uint64_t)(( (x & 0xFFFFFFFF) * 1000000000ULL ) / 4294967296ULL) \
+        (int64_t)(((x >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET) * 1000000000ULL + \
+        (int64_t)(( (x & 0xFFFFFFFF) * 1000000000ULL ) / 4294967296ULL) \
     )
 
-    uint64_t utc = ((t3 >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET;
-    if (utc < NTP_TIMESTAMP_CHECK) {
-        SPR_LOGE("Invalid NTP time %u\n", utc);
+    uint64_t srvTranSec = (t3 >> 32) & 0xFFFFFFFF;
+    if (srvTranSec < NTP_TIMESTAMP_CHECK) {
+        SPR_LOGE("Invalid NTP time: t3 seconds = %llu\n", srvTranSec);
         return -1;
     }
 
-    uint64_t cliTranNs = NTPTIME_TO_NSEC(t1);
-    uint64_t srvRecvNs = NTPTIME_TO_NSEC(t2);
-    uint64_t srvTranNs = NTPTIME_TO_NSEC(t3);
-    uint64_t cliRecvNs = NTPTIME_TO_NSEC(t4);
+    int64_t cliTranNs = NTPTIME_TO_NSEC(t1);
+    int64_t srvRecvNs = NTPTIME_TO_NSEC(t2);
+    int64_t srvTranNs = NTPTIME_TO_NSEC(t3);
+    int64_t cliRecvNs = NTPTIME_TO_NSEC(t4);
 
-    ns = ( (cliRecvNs - cliTranNs) + (srvTranNs - srvRecvNs) ) / 2;
+    ns = ((srvRecvNs - cliTranNs) + (srvTranNs - cliRecvNs)) / 2;
+
     SPR_LOGD("t1: (%llu.%llu), t2: (%llu.%llu), t3: (%llu.%llu), t4: (%llu.%llu), offset: %lluns\n",
         cliTranNs / 1000000000, cliTranNs % 1000000000, srvRecvNs / 1000000000, srvRecvNs % 1000000000,
         srvTranNs / 1000000000, srvTranNs % 1000000000, cliRecvNs / 1000000000, cliRecvNs % 1000000000, ns);
 
     return 0;
 }
+

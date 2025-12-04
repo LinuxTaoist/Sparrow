@@ -29,7 +29,7 @@
 
 class NtpSource {
 public:
-    using TimeCallback = std::function<void(uint64_t, void*)>;
+    using TimeCallback = std::function<void(int64_t, void*)>;
     NtpSource(uint16_t port, const TimeCallback& cb, void* arg = nullptr);
     ~NtpSource();
 
@@ -47,7 +47,7 @@ private:
     int32_t InitSocket();
     int32_t SendTimeRequest(NtpServer& srv);
     int32_t HandleNtpBytes(const std::string& bytes, const std::string& srcAddr);
-    int32_t GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, uint64_t& ns);
+    int32_t GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, int64_t& ns);
     uint64_t GetCurTimeStampWithNtp();
 
 
