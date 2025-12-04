@@ -180,9 +180,9 @@ int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t
         (int64_t)(( (x & 0xFFFFFFFF) * 1000000000ULL ) / 4294967296ULL) \
     )
 
-    uint64_t srvTranSec = (t3 >> 32) & 0xFFFFFFFF;
-    if (srvTranSec < NTP_TIMESTAMP_CHECK) {
-        SPR_LOGE("Invalid NTP time: t3 seconds = %llu\n", srvTranSec);
+    int32_t utc = (int32_t)(t3 >> 32) & 0xFFFFFFFF;
+    if (utc < NTP_TIMESTAMP_CHECK) {
+        SPR_LOGE("Invalid NTP time %d\n", utc);
         return -1;
     }
 
