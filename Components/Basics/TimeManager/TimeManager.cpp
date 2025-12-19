@@ -39,7 +39,7 @@ using namespace InternalDefs;
 #define TIME_ADJUST_SMALL_NSEC      50000000    // 50ms
 #define TIME_ADJUST_LARGE_NSEC      10000000000 // 10s
 #define DEFAULT_SYNC_TIMEOUT        4000        // 4s
-#define DEFAULT_SYNC_POLL_TIMEOUT   60000       // 1 min
+#define DEFAULT_SYNC_POLL_TIMEOUT   600000      // 10 min
 
 static std::atomic<bool> gObjAlive(true);
 

@@ -193,7 +193,7 @@ int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t
 
     ns = ((srvRecvNs - cliTranNs) + (srvTranNs - cliRecvNs)) / 2;
 
-    SPR_LOGD("t1: (%llu.%llu), t2: (%llu.%llu), t3: (%llu.%llu), t4: (%llu.%llu), offset: %lluns\n",
+    SPR_LOGD("t1: (%llu.%llu), t2: (%llu.%llu), t3: (%llu.%llu), t4: (%llu.%llu), offset: %lldns\n",
         cliTranNs / 1000000000, cliTranNs % 1000000000, srvRecvNs / 1000000000, srvRecvNs % 1000000000,
         srvTranNs / 1000000000, srvTranNs % 1000000000, cliRecvNs / 1000000000, cliRecvNs % 1000000000, ns);
 
