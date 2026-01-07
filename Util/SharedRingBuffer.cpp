@@ -236,7 +236,7 @@ bool SharedRingBuffer::IsWriteable() const noexcept
         return false;
     }
 
-    return ((mRoot->rwStatus == CMD_WRITEABLE && AvailData() != 0));
+    return ((mRoot->rwStatus == CMD_WRITEABLE && AvailSpace() != 0));
 }
 
 void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept
