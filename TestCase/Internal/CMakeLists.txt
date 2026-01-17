@@ -6,6 +6,7 @@ include_directories         (${PROJECT_PATH}/Core)
 include_directories         (${PROJECT_PATH}/Util)
 include_directories         (${PROJECT_PATH}/PrivateAPIs/Event)
 include_directories         (${PROJECT_PATH}/PrivateAPIs/Binder)
+include_directories         (${PROJECT_PATH}/UtilModules/CodecX)
 include_directories         (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 include_directories         (${TEST_INTERNAL_PATH}/Components)
 
@@ -15,6 +16,7 @@ aux_source_directory        (${PROJECT_PATH}/Util               SRC_TEST_INTERNA
 aux_source_directory        (${TEST_INTERNAL_PATH}/Util         SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/3rdAdapter   SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/Components   SRC_TEST_INTERNAL_PATH)
+aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules  SRC_TEST_INTERNAL_PATH)
 
 add_executable              (test_internal ${SRC_TEST_INTERNAL_PATH})
 target_include_directories  (test_internal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include)
