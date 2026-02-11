@@ -29,12 +29,13 @@ message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
 
-## 打开编译警告
-set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
-
-set(CMAKE_CXX_STANDARD  11)
-set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -Wall -g3")
-set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3")
+## 设置编译选项
+set(CMAKE_CXX_STANDARD          11)
+set(CMAKE_WARNING_FLAGS         "-Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
+set(CMAKE_C_FLAGS               "${CMAKE_C_FLAGS} -Wall -g3 ${CMAKE_WARNING_FLAGS}")
+set(CMAKE_CXX_FLAGS             "${CMAKE_CXX_FLAGS} -Wall -g3 ${CMAKE_WARNING_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS      "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link=${LIBRARY_OUTPUT_PATH}")
+set(CMAKE_SHARED_LINKER_FLAGS   "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath-link=${LIBRARY_OUTPUT_PATH}")
 
 ## 工程信息
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
