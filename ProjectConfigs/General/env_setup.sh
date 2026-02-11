@@ -19,4 +19,5 @@ fi
 
 # 设置时区 东八区
 export TZ=CST-8
+echo "TZ=$TZ"
 echo "LD_LIBRARY_PATH=$LD_LIBRARY_PATH"

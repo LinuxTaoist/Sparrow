@@ -60,9 +60,7 @@ int32_t CAtom::GetStrValue(std::string& value) {
 }
 
 std::shared_ptr<CNode> CAtom::Clone() {
-    std::shared_ptr<CAtom> pAtom = std::make_shared<CAtom>(*this);
-    pAtom->mValue.assign(mValue.begin(), mValue.end());
-    return pAtom;
+    return std::make_shared<CAtom>(*this);
 }
 
 int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {

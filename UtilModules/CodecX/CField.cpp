@@ -66,9 +66,7 @@ int32_t CField::GetCapacity(int32_t& capacity) {
 }
 
 std::shared_ptr<CNode> CField::Clone() {
-    std::shared_ptr<CField> pFiled = std::make_shared<CField>(*this);
-    pFiled->mSerial = mSerial;
-    return pFiled;
+    return std::make_shared<CField>(*this);
 }
 
 int32_t CField::Decode(const std::vector<uint8_t>& bytes) {

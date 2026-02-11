@@ -28,9 +28,9 @@ class CNode {
 public:
     CNode(bool isField = true);
     CNode(const CNode& node);
-    CNode& operator=(const CNode& node);
+    CNode& operator = (const CNode& node);
     CNode(CNode&& node);
-    CNode& operator=(CNode&& node);
+    CNode& operator = (CNode&& node);
     virtual ~CNode();
 
     bool IsField();
@@ -48,6 +48,7 @@ public:
     int32_t GetText(std::string& text);
     int32_t AddNode(const std::shared_ptr<CNode>& node);
     int32_t DelNode(const std::shared_ptr<CNode>& node);
+    std::vector<std::shared_ptr<CNode>>& GetChildNodes();
 
     virtual std::shared_ptr<CNode> Clone() = 0;
     virtual int32_t Decode(const std::vector<uint8_t>& bytes) = 0;

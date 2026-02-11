@@ -48,7 +48,7 @@ CNode::CNode(const CNode& node)
     }
 }
 
-CNode& CNode::operator=(const CNode& node) {
+CNode& CNode::operator = (const CNode& node) {
     if (this != &node) {
         mIsField = node.mIsField;
         mSIndex = node.mSIndex;
@@ -83,7 +83,7 @@ CNode::CNode(CNode&& node)
     node.mEndian = CENDIAN_BUTT;
 }
 
-CNode& CNode::operator=(CNode&& node) {
+CNode& CNode::operator = (CNode&& node) {
     if (this != &node) {
         mIsField = std::move(node.mIsField);
         mSIndex = std::move(node.mSIndex);
@@ -175,7 +175,7 @@ int32_t CNode::DelNode(const std::shared_ptr<CNode>& node) {
     auto it = std::find_if(mChildNodes.begin(), mChildNodes.end(), [&](const std::shared_ptr<CNode>& ptr) {
         std::string name;
         ptr->GetName(name);
-        return name == target;
+        return (name == target);
     });
 
     if (it != mChildNodes.end()) {
@@ -184,4 +184,8 @@ int32_t CNode::DelNode(const std::shared_ptr<CNode>& node) {
     }
 
     return -1;
+}
+
+std::vector<std::shared_ptr<CNode>>& CNode::GetChildNodes() {
+    return mChildNodes;
 }

@@ -29,7 +29,7 @@ public:
     PTimer(const std::function<void(int, uint64_t, void*)>& cb = nullptr, void* arg = nullptr);
     virtual ~PTimer();
 
-    int32_t InitTimer();
+    int32_t InitTimer(bool isWakeup = false);
     int32_t StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec = 0);
     int32_t StopTimer();
     int32_t DestoryTimer();

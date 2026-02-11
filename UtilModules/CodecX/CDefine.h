@@ -19,8 +19,7 @@
 #ifndef __CDEFINE_H__
 #define __CDEFINE_H__
 
-enum CEndianType
-{
+enum CEndianType {
     CENDIAN_LITTLE = 0,
     CENDIAN_BIG,
     CENDIAN_BUTT
