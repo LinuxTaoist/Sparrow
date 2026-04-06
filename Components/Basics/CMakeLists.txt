@@ -1,8 +1,8 @@
 ## Basics
 
 ## Project configures path
-set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/ProjectConfigs/General)
-set (VENDOR_CONFIGURE_PATH  ${PROJECT_PATH}/ProjectConfigs/Vendor/${PROJECT_PLATFORM})
+set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/Configs/General)
+set (VENDOR_CONFIGURE_PATH  ${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/Configs)
 
 ## Project general configures
 file(COPY ${GENERAL_CONFIGURE_PATH}/default.prop        DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)

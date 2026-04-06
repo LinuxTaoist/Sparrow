@@ -110,17 +110,20 @@ new_platform() {
     echo -e "${GREEN}开始搭建新项目...${NC}"
     platform_name="$1"
     cd ${project_path}
-    echo -e "${GREEN}touch ${project_path}/Build/${platform_name}/${platform_name}_build.sh ${NC}"
-    mkdir -p ${project_path}/Build/options/${platform_name}
-    touch ${project_path}/Build/options/${platform_name}/${platform_name}_compile_options.cmake
-    touch ${project_path}/Build/${platform_name}_build.sh
-    touch ${project_path}/Build/rebuild_${platform_name}.sh
 
-    echo -e "${GREEN}touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop ${NC}"
-    mkdir -p ${project_path}/ProjectConfigs/Vendor/${platform_name}
-    touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
-    touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/sprlog.conf
-    echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
+    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/${platform_name}_build.sh ${NC}"
+    mkdir -p ${project_path}/Platform/${platform_name}
+    mkdir -p ${project_path}/Platform/${platform_name}/Build
+    mkdir -p ${project_path}/Platform/${platform_name}/Build/Options
+    touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_compile_options.cmake
+    touch    ${project_path}/Platform/${platform_name}/Build/${platform_name}_build.sh
+    touch    ${project_path}/Platform/${platform_name}/Build/rebuild_${platform_name}.sh
+
+    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/Configs/vendor.prop ${NC}"
+    mkdir -p ${project_path}/Platform/${platform_name}/Configs
+    touch    ${project_path}/Platform/${platform_name}/Configs/vendor.prop
+    touch    ${project_path}/Platform/${platform_name}/Configs/sprlog.conf
+    echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/Platform/${platform_name}/Configs/vendor.prop
 }
 
 ## cmd static_scan
