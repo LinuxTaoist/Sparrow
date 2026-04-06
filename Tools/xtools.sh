@@ -124,6 +124,9 @@ new_platform() {
     touch    ${project_path}/Platform/${platform_name}/Configs/vendor.prop
     touch    ${project_path}/Platform/${platform_name}/Configs/sprlog.conf
     echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/Platform/${platform_name}/Configs/vendor.prop
+
+    echo -e "${GREEN}mkdir -p ${project_path}/Platform/${platform_name}/3rdParty ${NC}"
+    mkdir -p ${project_path}/Platform/${platform_name}/3rdParty
 }
 
 ## cmd static_scan
