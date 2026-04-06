@@ -5,5 +5,5 @@ Release/
 3rdParty/libgo/libgo/
 3rdParty/sqlite/sqlite-autoconf-3450300/
 
-/Platform/*
-!*/Platform/Default
+Platform/*
+!/Platform/Default
