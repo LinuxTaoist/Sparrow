@@ -1,0 +1,1 @@
+../Platform/Default/Build/rebuild_default.sh

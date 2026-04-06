@@ -1,23 +1,31 @@
 #!/bin/bash
-BUILD_TYPE="Release"
-PROJECT_PATH=$(pwd)/../
-PROJECT_PLATFORM="ql_ar590"
-
-cd $PROJECT_PATH/Build/
-mkdir -p ../Release/Cache
-mkdir -p ../Release/Include
-mkdir -p ../Release/Lib
-
 # 记录开始时间
 START_TIME=$(date +%s)
 START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
 
-cd ../Release/Cache/
-cmake ../../ \
+SCRIPT_REAL_PATH=$(readlink -f "$0")
+SCRIPT_REAL_DIR=$(dirname "${SCRIPT_REAL_PATH}")
+PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
+
+BUILD_TYPE="Release"
+PROJECT_PLATFORM="Default"
+GTEST_LIB_PATH=$PROJECT_PATH/3rdParty/googletest/lib/$PROJECT_PLATFORM
+
+mkdir -p $PROJECT_PATH/Release/Cache
+mkdir -p $PROJECT_PATH/Release/Include
+mkdir -p $PROJECT_PATH/Release/Lib
+mkdir -p $GTEST_LIB_PATH
+
+# 拷贝第三方库至工程
+cp  $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/googletest/lib/* $GTEST_LIB_PATH/ -rf
+
+cd $PROJECT_PATH/Release/Cache/
+cmake $PROJECT_PATH \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
-    -DCMAKE_INSTALL_PREFIX=../
-make -j8
+    -DCMAKE_INSTALL_PREFIX=$PROJECT_PATH/Release/
+
+make -j16
 
 # 记录结束时间并计算耗时
 END_TIME=$(date +%s)
