@@ -9,15 +9,10 @@ PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
 
 BUILD_TYPE="Release"
 PROJECT_PLATFORM="Default"
-GTEST_LIB_PATH=$PROJECT_PATH/3rdParty/googletest/lib/$PROJECT_PLATFORM
 
 mkdir -p $PROJECT_PATH/Release/Cache
 mkdir -p $PROJECT_PATH/Release/Include
 mkdir -p $PROJECT_PATH/Release/Lib
-mkdir -p $GTEST_LIB_PATH
-
-# 拷贝第三方库至工程
-cp $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/googletest/lib/* $GTEST_LIB_PATH/ -rf
 
 cd $PROJECT_PATH/Release/Cache/
 cmake $PROJECT_PATH \
@@ -25,7 +20,7 @@ cmake $PROJECT_PATH \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
     -DCMAKE_INSTALL_PREFIX=$PROJECT_PATH/Release/
 
-make -j16
+make -j8
 
 # 记录结束时间并计算耗时
 END_TIME=$(date +%s)

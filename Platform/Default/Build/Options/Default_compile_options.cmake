@@ -16,3 +16,15 @@ set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
 set(BUILD_DEBUG ON)       # 调试工具集（含调试符号与增强日志）
 set(BUILD_EXAMPLES ON)    # 示例程序（演示API用法，非生产环境）
 set(BUILD_TESTCASE ON)    # 单元测试套件（依赖gtest库）
+
+# 拷贝第三方库gtest
+if(BUILD_TESTCASE)
+    message(STATUS "BUILD_TESTCASE 已启用，开始拷贝 googletest 库文件...")
+    set(GTEST_SRC_LIB "${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/3rdParty/googletest/lib")
+    set(GTEST_DST_LIB "${PROJECT_PATH}/3rdParty/googletest/lib/${PROJECT_PLATFORM}")
+
+    file(MAKE_DIRECTORY ${GTEST_DST_LIB})
+    file(COPY ${GTEST_SRC_LIB}/libgtest_main.a DESTINATION ${GTEST_DST_LIB}/)
+    file(COPY ${GTEST_SRC_LIB}/libgtest.a DESTINATION ${GTEST_DST_LIB}/)
+    message(STATUS "googletest 库拷贝完成：${GTEST_SRC_LIB} -> ${GTEST_DST_LIB}")
+endif()
