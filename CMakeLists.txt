@@ -13,7 +13,8 @@ set(PLATFORM_OPTIONS_PATH ${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/Build/Opt
 
 ## 包含配置文件
 include(${PROJECT_PATH}/version.cmake)
-include(${PLATFORM_OPTIONS_PATH}/modules_config.cmake)
+include(${PROJECT_PATH}/modules_config.cmake)
+include(${PLATFORM_OPTIONS_PATH}/${PROJECT_PLATFORM}_modules_config.cmake)
 include(${PLATFORM_OPTIONS_PATH}/${PROJECT_PLATFORM}_compile_options.cmake)
 
 ## 设置全局位置无关代码标志
