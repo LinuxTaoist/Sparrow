@@ -7,10 +7,14 @@ cmake_policy(SET CMP0046 OLD)
 ## 保存工程路径
 set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
+## 定制模块选项
+set(BUSINESS_MODULES "")
+set(PLATFORM_OPTIONS_PATH ${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/Build/Options)
+
 ## 包含配置文件
 include(${PROJECT_PATH}/version.cmake)
-include(${PROJECT_PATH}/modules_configs.cmake)
-include(${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/Build/Options/${PROJECT_PLATFORM}_compile_options.cmake)
+include(${PLATFORM_OPTIONS_PATH}/modules_config.cmake)
+include(${PLATFORM_OPTIONS_PATH}/${PROJECT_PLATFORM}_compile_options.cmake)
 
 ## 设置全局位置无关代码标志
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
