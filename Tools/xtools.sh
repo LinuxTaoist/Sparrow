@@ -116,6 +116,7 @@ new_platform() {
     mkdir -p ${project_path}/Platform/${platform_name}/Build
     mkdir -p ${project_path}/Platform/${platform_name}/Build/Options
     touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_compile_options.cmake
+    touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_modules_config.cmake
     touch    ${project_path}/Platform/${platform_name}/Build/${platform_name}_build.sh
     touch    ${project_path}/Platform/${platform_name}/Build/rebuild_${platform_name}.sh
 
