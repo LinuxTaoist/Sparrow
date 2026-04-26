@@ -338,6 +338,11 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
 
 int LogManager::MainLoop()
 {
+    if (!pLogMCacheMem) {
+        SPR_LOGE("pLogMCacheMem is nullptr!\n");
+        return -1;
+    }
+
     while (mRunning) {
         if (pLogMCacheMem->AvailData() < 10) {
             usleep(10000);

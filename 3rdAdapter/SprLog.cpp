@@ -16,6 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <memory>
+#include <vector>
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
@@ -38,7 +40,7 @@ using namespace InternalDefs;
 #define LOG_BUFFER_SIZE_DEFAULT     512
 #define SEMAPHORE_NAME              "/SprLogSem"
 
-static SharedRingBuffer* pLogSCacheMem = nullptr;
+static std::unique_ptr<SharedRingBuffer> pLogSCacheMem = nullptr;
 
 SprLog::SprLog()
 {
@@ -49,7 +51,7 @@ SprLog::SprLog()
 
     mLevel = LOG_LEVEL_BUTT;
     mLength = LOG_BUFFER_SIZE_DEFAULT;
-    pLogSCacheMem = new (std::nothrow) SharedRingBuffer(LOG_CACHE_MEMORY_PATH);
+    pLogSCacheMem = std::unique_ptr<SharedRingBuffer>(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH));
 }
 
 SprLog::~SprLog()
@@ -69,8 +71,8 @@ SprLog::~SprLog()
 SprLog* SprLog::GetInstance()
 {
     // never delete this instance
-    static SprLog *instance = new (std::nothrow) SprLog();
-    return instance;
+    static SprLog instance;
+    return &instance;
 }
 
 int32_t SprLog::SetLevel(int32_t level)
@@ -194,26 +196,33 @@ static int FormatLog(std::string& log, const char* level, const char* tag, const
 
 int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, va_list args)
 {
-    char buffer[mLength] = {0};
-    int32_t result = vsnprintf(buffer, sizeof(buffer), format, args);
-    if (result < 0 || result >= (int32_t)sizeof(buffer) || result > LOG_BUFFER_SIZE_LIMIT) {
+    std::vector<char> buffer(mLength, 0);
+    int32_t result = vsnprintf(buffer.data(), buffer.size(), format, args);
+
+    if (result < 0 || result >= (int32_t)buffer.size() || result > LOG_BUFFER_SIZE_LIMIT) {
         char prefix[11] = {0};
-        memcpy(prefix, buffer, 10);
-        memset(buffer, 0, sizeof(buffer));
-        snprintf(buffer, sizeof(buffer),
+        memcpy(prefix, buffer.data(), 10);
+        std::fill(buffer.begin(), buffer.end(), 0);
+        snprintf(buffer.data(), buffer.size(),
             "%s...... [TRUNCATED] LEN:%d >= LIMIT:%zu [LOG CONTENT TRUNCATED]",
-            prefix, result, sizeof(buffer));
+            prefix, result, buffer.size());
         result = -1;
     }
 
     std::string log;
-    FormatLog(log, level, tag, buffer);
+    FormatLog(log, level, tag, buffer.data());
+    if (mWriteSem == SEM_FAILED) {
+        fputs(log.c_str(), stdout);
+        return result;
+    }
+
     sem_wait(mWriteSem);
-    LogsToMemory(log.c_str(), log.length());
+    LogsToMemory(log.c_str(), (int32_t)log.length());
     sem_post(mWriteSem);
 
     return result;
 }
+
 
 int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
 {
