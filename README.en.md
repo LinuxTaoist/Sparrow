@@ -1,9 +1,9 @@
-# Sparrow: Linux C++ Embedded IoT Middleware
+# Sparrow: Linux C++ Embedded Middleware
 👉 [[中文]](README.md)
 
 ## 📌 Project Overview
-`Sparrow` is a Linux C++ embedded IoT middleware framework based on the **epoll event-driven model**.
-Adopting a **microservice & plug-in architecture** with full multi-platform adaptation capability, it delivers a high-performance, stable and extensible development foundation for smart devices, vehicle-mounted systems and IoT gateways.
+`Sparrow` is a Linux C++ embedded middleware framework based on the **epoll event-driven model**.
+Adopting a **microservice & plug-in architecture** with full multi-platform adaptation capability, it delivers a high-performance, stable and extensible development foundation for smart devices and vehicle-mounted systems.
 
 ## 🌟 Key Features
 - **Out-of-the-box**: Core framework with minimal third-party dependencies, one-click compilation and rapid deployment
@@ -87,7 +87,6 @@ $ tail -f /tmp/sprlog/sparrow.log
 ## 🎯 Application Scenarios
 - Smart Hardware: IP cameras, robot control systems, industrial sensors and intelligent terminals
 - Vehicle-mounted System: T-Box, intelligent cockpit and vehicle networking gateway
-- IoT Gateway: Smart home hub, environmental monitoring gateway and industrial IoT data forwarder
 - Consumer Electronics: Wearable devices, health monitors and smart home appliances
 
 ## 📂 Source Code Structure
