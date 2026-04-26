@@ -40,7 +40,11 @@ display_completion_details() {
 
     echo ""
     echo -e "${GREEN}================================================================================${NC}"
-    echo -e "${GREEN}所有操作已完成。${NC}"
+    if [ "${1:-0}" -eq 0 ]; then
+        echo -e "${GREEN}所有操作已完成。${NC}"
+    else
+        echo -e "${RED}操作失败，退出码：${1}${NC}"
+    fi
     echo -e "${GREEN}完成时间：$(date '+%Y-%m-%d %H:%M:%S') 耗时 ${duration} 秒。${NC}"
     echo ""
 }
@@ -156,21 +160,28 @@ stop_valgrind() {
 ## sync_code
 sync_code() {
     echo -e "${PURPLE}开始同步代码仓库...${NC}"
-    cd ${project_path}
+    cd "${project_path}" || return 1
 
     if [ -d ".repo" ]; then
         echo -e "${GREEN}检测到 repo 管理环境，批量同步所有子仓库${NC}"
         repo forall -p -c git pull --ff-only
     else
+        if [ ! -d ".git" ]; then
+            echo -e "${RED}错误：${project_path} 不是 Git 仓库${NC}"
+            return 1
+        fi
         echo -e "${GREEN}单仓库环境，同步当前仓库${NC}"
         git pull --ff-only
     fi
+    local sync_status=$?
 
-    if [ $? -eq 0 ]; then
+    if [ ${sync_status} -eq 0 ]; then
         echo -e "${GREEN}代码同步完成${NC}"
     else
-        echo -e "${RED}同步失败，请检查本地是否有未提交改动${NC}"
+        echo -e "${RED}同步失败，请检查上方具体仓库的错误信息（可能存在未提交改动或未完成的 rebase）${NC}"
     fi
+
+    return ${sync_status}
 }
 
 # Function to print usage information with logo
@@ -259,7 +270,9 @@ main() {
             ;;
     esac
 
-    display_completion_details
+    command_status=$?
+    display_completion_details ${command_status}
+    return ${command_status}
 }
 
 # Call the main function with all passed arguments
