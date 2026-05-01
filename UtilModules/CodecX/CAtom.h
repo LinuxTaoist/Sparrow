@@ -25,13 +25,11 @@
 
 class CAtom : public CNode {
 public:
-    CAtom();
+    explicit CAtom(const std::shared_ptr<CNode>& parent);
     CAtom(const CAtom& atom);
     CAtom& operator = (const CAtom& atom);
-    CAtom(CAtom&& atom);
-    CAtom& operator = (CAtom&& atom);
+    CAtom(const std::shared_ptr<CNode>& parent, const std::string& name, const std::vector<uint8_t>& value);
     ~CAtom();
-    CAtom(const std::string& name, const std::string& text, const std::vector<uint8_t>& value);
 
     template <typename T>
     int32_t SetIntValue(T value) {

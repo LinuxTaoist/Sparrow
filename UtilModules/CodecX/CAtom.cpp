@@ -18,7 +18,7 @@
  */
 #include "CAtom.h"
 
-CAtom::CAtom() : CNode(false) {
+CAtom::CAtom(const std::shared_ptr<CNode>& parent) : CNode(parent, false) {
 }
 
 CAtom::CAtom(const CAtom& atom) : CNode(atom) {
@@ -31,25 +31,15 @@ CAtom& CAtom::operator = (const CAtom& atom) {
     return *this;
 }
 
-CAtom::CAtom(CAtom&& atom)
-    : CNode(std::move(atom)),
-      mValue(std::move(atom.mValue)) {
-}
-
-CAtom& CAtom::operator = (CAtom&& atom) {
-    CNode::operator = (std::move(atom));
-    mValue = std::move(atom.mValue);
-    return *this;
+CAtom::CAtom(const std::shared_ptr<CNode>& parent, const std::string& name, const std::vector<uint8_t>& value)
+    : CNode(parent, false) {
+    mName = name;
+    mValue = value;
 }
 
 CAtom::~CAtom() {
 }
 
-CAtom::CAtom(const std::string& name, const std::string& text, const std::vector<uint8_t>& value) {
-    mName = name;
-    mText = text;
-    mValue = value;
-}
 
 int32_t CAtom::SetStrValue(const std::string& value) {
     return CUtils::SToV(value, mValue);

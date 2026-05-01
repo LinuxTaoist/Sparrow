@@ -26,29 +26,24 @@
 
 class CNode {
 public:
-    CNode(bool isField = true);
+    explicit CNode(const std::shared_ptr<CNode>& pParent, bool isField = true);
     CNode(const CNode& node);
     CNode& operator = (const CNode& node);
-    CNode(CNode&& node);
-    CNode& operator = (CNode&& node);
+    CNode(CNode&& node) = delete;
+    CNode& operator = (CNode&& node) = delete;
     virtual ~CNode();
 
     bool IsField();
     int32_t SetSIndex(int32_t sIndex);
-    int32_t GetSIndex(int32_t& sIndex);
+    int32_t GetSIndex();
     int32_t SetEIndex(int32_t eIndex);
-    int32_t GetEIndex(int32_t& eIndex);
+    int32_t GetEIndex();
     int32_t SetLength(int32_t length);
-    int32_t GetLength(int32_t& length);
+    int32_t GetLength();
     int32_t SetEndian(CEndianType endian);
-    int32_t GetEndian(CEndianType& endian);
+    int32_t GetEndian();
     int32_t SetName(const std::string& name);
-    int32_t GetName(std::string& name);
-    int32_t SetText(const std::string& text);
-    int32_t GetText(std::string& text);
-    int32_t AddNode(const std::shared_ptr<CNode>& node);
-    int32_t DelNode(const std::shared_ptr<CNode>& node);
-    std::vector<std::shared_ptr<CNode>>& GetChildNodes();
+    std::string GetName();
 
     virtual std::shared_ptr<CNode> Clone() = 0;
     virtual int32_t Decode(const std::vector<uint8_t>& bytes) = 0;
@@ -61,8 +56,7 @@ protected:
     int32_t mLength;
     CEndianType mEndian;
     std::string mName;
-    std::string mText;
-    std::vector<std::shared_ptr<CNode>> mChildNodes;
+    std::shared_ptr<CNode> mParentNode;
 };
 
 #endif // __CNODE_H__

@@ -16,29 +16,24 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <algorithm>
 #include "CField.h"
 
-CField::CField() {
+CField::CField(const std::shared_ptr<CNode>& parent)
+    : CNode(parent, true)
+    , mSerial(0)
+    , mCapacity(0) {
 }
 
 CField::CField(const CField& field) : CNode(field) {
     mSerial = field.mSerial;
+    mCapacity = field.mCapacity;
 }
 
 CField& CField::operator = (const CField& field) {
     CNode::operator = (field);
     mSerial = field.mSerial;
-    return *this;
-}
-
-CField::CField(CField&& field)
-    : CNode(field) {
-    mSerial = field.mSerial;
-}
-
-CField& CField::operator = (CField&& field) {
-    CNode::operator = (field);
-    mSerial = field.mSerial;
+    mCapacity = field.mCapacity;
     return *this;
 }
 
@@ -63,6 +58,38 @@ int32_t CField::SetCapacity(int32_t capacity) {
 int32_t CField::GetCapacity(int32_t& capacity) {
     capacity = mCapacity;
     return 0;
+}
+
+
+int32_t CField::AddNode(const std::shared_ptr<CNode>& node) {
+    mChildNodes.emplace_back(node);
+    return 0;
+}
+
+int32_t CField::DelNode(const std::shared_ptr<CNode>& node) {
+    std::string target = node->GetName();
+    auto it = std::find_if(mChildNodes.begin(), mChildNodes.end(),
+        [&](const std::shared_ptr<CNode>& ptr) {
+        std::string name = ptr->GetName();
+        return (name == target);
+    });
+
+    if (it != mChildNodes.end()) {
+        mChildNodes.erase(it);
+        return 0;
+    }
+
+    return -1;
+}
+
+int32_t CField::GetNode(const std::string& name, std::shared_ptr<CNode>& node) {
+    const auto it = std::find_if(mChildNodes.begin(), mChildNodes.end(),
+        [&](const std::shared_ptr<CNode>& ptr) {
+        return (ptr->GetName() == name);
+    });
+
+    node = (it != mChildNodes.end()) ? (*it) : nullptr;
+    return (it != mChildNodes.end()) ? 0 : -1;
 }
 
 std::shared_ptr<CNode> CField::Clone() {
