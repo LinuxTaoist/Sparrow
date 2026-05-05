@@ -24,7 +24,7 @@ CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
     , mSIndex(-1)
     , mEIndex(-1)
     , mLength(-1)
-    , mEndian(CENDIAN_BUTT)
+    , mEndian(CENDIAN_BIG)
     , mName()
     , mParentNode(pParent) {
 }
