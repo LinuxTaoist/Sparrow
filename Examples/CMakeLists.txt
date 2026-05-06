@@ -84,9 +84,16 @@ target_link_libraries       (http_bytes c rt)
 
 ## Bin 11_http_server
 set(SRC_BIN_11_HTTPSERVER    11_HttpServer.cc)
-aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HTTP_SRC_PATH)
-add_executable              (http_server ${SRC_BIN_11_HTTPSERVER} ${SRC_HTTP_SRC_PATH})
+aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP SRC_HSRV_SRC_PATH)
+add_executable              (http_server ${SRC_BIN_11_HTTPSERVER} ${SRC_HSRV_SRC_PATH})
 target_include_directories  (http_server PRIVATE ${PROJECT_PATH}/UtilModules/HTTP)
 set_target_properties       (http_server PROPERTIES OUTPUT_NAME "11_http_server")
 target_link_libraries       (http_server c epollevent rt)
 add_dependencies            (http_server LibEpollEvent)
+
+## Bin 13_debug_codecx
+set(SRC_BIN_13_DCODECX      13_DebugCodecX.cc)
+aux_source_directory        (${PROJECT_PATH}/UtilModules/CodecX SRC_CODECX_PATH)
+add_executable              (debug_codecx ${SRC_BIN_13_DCODECX} ${SRC_CODECX_PATH})
+target_include_directories  (debug_codecx PRIVATE ${PROJECT_PATH}/UtilModules/CodecX)
+set_target_properties       (debug_codecx PROPERTIES OUTPUT_NAME "13_debug_codecx")

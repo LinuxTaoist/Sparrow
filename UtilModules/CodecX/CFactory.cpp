@@ -19,10 +19,10 @@
 #include <fstream>
 #include <errno.h>
 #include <string.h>
-#include "cJSON.h"
 #include "CLog.h"
 #include "CField.h"
 #include "CFactory.h"
+#include "CJConfigParser.h"
 
 CFactory::CFactory() {
 
@@ -48,16 +48,8 @@ std::shared_ptr<CNode> CFactory::LoadJsonFile(const std::string& path) {
 }
 
 std::shared_ptr<CNode> CFactory::LoadJsonString(const std::string& str) {
-    cJSON* pRoot = cJSON_Parse(str.c_str());
-    if (!pRoot) {
-        CLOGE("Parse json failed! (%s)", cJSON_GetErrorPtr());
-        return nullptr;
-    }
-
-    std::shared_ptr<CField> pRoot = std::make_shared<CField>(nullptr);
-
-    cJSON_Delete(pRoot);
-    return nullptr;
+    CJConfigParser parser(str);
+    return parser.CJsonToNode();
 }
 
 int32_t CFactory::ReadFile(const std::string& path, std::string& str) {

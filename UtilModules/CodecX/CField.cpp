@@ -20,46 +20,39 @@
 #include "CField.h"
 
 CField::CField(const std::shared_ptr<CNode>& parent)
-    : CNode(parent, true)
-    , mSerial(0)
-    , mCapacity(0) {
+    : CNode(parent, true) {
 }
 
 CField::CField(const CField& field) : CNode(field) {
-    mSerial = field.mSerial;
-    mCapacity = field.mCapacity;
+    mLenReference = field.mLenReference;
+    mLenMode = field.mLenMode;
 }
 
 CField& CField::operator = (const CField& field) {
     CNode::operator = (field);
-    mSerial = field.mSerial;
-    mCapacity = field.mCapacity;
+    mLenReference = field.mLenReference;
+    mLenMode = field.mLenMode;
     return *this;
 }
 
 CField::~CField() {
 }
 
-int32_t CField::SetSerial(int32_t serial) {
-    mSerial = serial;
-    return 0;
+void CField::SetLenReference(const std::string& lenReference) {
+    mLenReference = lenReference;
 }
 
-int32_t CField::GetSerial(int32_t& serial) {
-    serial = mSerial;
-    return 0;
+std::string CField::GetLenReference() {
+    return mLenReference;
 }
 
-int32_t CField::SetCapacity(int32_t capacity) {
-    mCapacity = capacity;
-    return 0;
+void CField::SetLenMode(const std::string& lenMode) {
+    mLenMode = lenMode;
 }
 
-int32_t CField::GetCapacity(int32_t& capacity) {
-    capacity = mCapacity;
-    return 0;
+std::string CField::GetLenMode() {
+    return mLenMode;
 }
-
 
 int32_t CField::AddNode(const std::shared_ptr<CNode>& node) {
     mChildNodes.emplace_back(node);

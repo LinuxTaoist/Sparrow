@@ -56,47 +56,59 @@ CNode& CNode::operator = (const CNode& node) {
 CNode::~CNode() {
 }
 
+void CNode::SetField(bool isField) {
+    mIsField = isField;
+}
+
 bool CNode::IsField() {
     return mIsField;
 }
 
-int32_t CNode::SetSIndex(int32_t sIndex) {
-    return (sIndex >= 0) ? (mSIndex = sIndex, 0) : -1;
+void CNode::SetSIndex(int32_t sIndex) {
+    mSIndex = sIndex;
 }
 
 int32_t CNode::GetSIndex() {
     return mSIndex;
 }
 
-int32_t CNode::SetEIndex(int32_t eIndex) {
-    return (eIndex >= 0) ? (mEIndex = eIndex, 0) : -1;
+void CNode::SetEIndex(int32_t eIndex) {
+    mEIndex = eIndex;
 }
 
 int32_t CNode::GetEIndex() {
     return mEIndex;
 }
 
-int32_t CNode::SetLength(int32_t length) {
-    return (length >= 0) ? (mLength = length, 0) : -1;
+void CNode::SetLength(int32_t length) {
+    mLength = length;
 }
 
 int32_t CNode::GetLength() {
     return mLength;
 }
 
-int32_t CNode::SetEndian(CEndianType endian) {
-    return ((endian >= CENDIAN_LITTLE) && (endian < CENDIAN_BUTT)) ? (mEndian = endian, 0) : -1;
+void CNode::SetEndian(CEndianType endian) {
+    mEndian = endian;
 }
 
 int32_t CNode::GetEndian() {
     return mEndian;
 }
 
-int32_t CNode::SetName(const std::string& name) {
-    return name.empty() ? -1 : (mName = name, 0);
+void CNode::SetName(const std::string& name) {
+    mName = name;
 }
 
 std::string CNode::GetName() {
     return mName;
+}
+
+void CNode::SetType(const std::string& type) {
+    mType = type;
+}
+
+std::string CNode::GetType() {
+    return mType;
 }
 

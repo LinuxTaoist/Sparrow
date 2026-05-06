@@ -30,10 +30,10 @@ public:
     CField& operator = (CField&& field) = delete;
     ~CField();
 
-    int32_t SetSerial(int32_t serial);
-    int32_t GetSerial(int32_t& serial);
-    int32_t SetCapacity(int32_t capacity);
-    int32_t GetCapacity(int32_t& capacity);
+    void SetLenReference(const std::string& lenReference);
+    std::string GetLenReference();
+    void SetLenMode(const std::string& lenMode);
+    std::string GetLenMode();
     int32_t AddNode(const std::shared_ptr<CNode>& node);
     int32_t DelNode(const std::shared_ptr<CNode>& node);
     int32_t GetNode(const std::string& name, std::shared_ptr<CNode>& node);
@@ -43,9 +43,8 @@ public:
     int32_t Encode(std::vector<uint8_t>& bytes) override;
 
 private:
-    int32_t mSerial;            // 所在序列号，从0开始
-    int32_t mCapacity;          // 节点容量
     std::string mLenReference;  // 容量引用
+    std::string mLenMode;       // 容量模式
     std::vector<std::shared_ptr<CNode>> mChildNodes;
 };
 

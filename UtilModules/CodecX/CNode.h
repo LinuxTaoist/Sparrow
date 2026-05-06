@@ -33,17 +33,20 @@ public:
     CNode& operator = (CNode&& node) = delete;
     virtual ~CNode();
 
+    void SetField(bool isField);
     bool IsField();
-    int32_t SetSIndex(int32_t sIndex);
+    void SetSIndex(int32_t sIndex);
     int32_t GetSIndex();
-    int32_t SetEIndex(int32_t eIndex);
+    void SetEIndex(int32_t eIndex);
     int32_t GetEIndex();
-    int32_t SetLength(int32_t length);
+    void SetLength(int32_t length);
     int32_t GetLength();
-    int32_t SetEndian(CEndianType endian);
+    void SetEndian(CEndianType endian);
     int32_t GetEndian();
-    int32_t SetName(const std::string& name);
+    void SetName(const std::string& name);
     std::string GetName();
+    void SetType(const std::string& type);
+    std::string GetType();
 
     virtual std::shared_ptr<CNode> Clone() = 0;
     virtual int32_t Decode(const std::vector<uint8_t>& bytes) = 0;
@@ -56,6 +59,7 @@ protected:
     int32_t mLength;
     CEndianType mEndian;
     std::string mName;
+    std::string mType;
     std::shared_ptr<CNode> mParentNode;
 };
 

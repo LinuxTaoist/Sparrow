@@ -19,9 +19,6 @@
 #ifndef __CDEFINE_H__
 #define __CDEFINE_H__
 
-#define TEXT_STATIC_FIELD   "static_field"
-#define TEXT_DYNAMIC_FIELD  "dynamic_field"
-
 enum CEndianType {
     CENDIAN_LITTLE = 0,
     CENDIAN_BIG,
