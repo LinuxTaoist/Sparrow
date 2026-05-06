@@ -2,36 +2,30 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : CFactory.h
+ *  @file       : CDefine.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2026/05/05
+ *  @date       : 2026/05/06
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/05/05 | 1.0.0.1   | Xiang.D        | Create file
+ *  2026/05/06 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __CFACTORY_H__
-#define __CFACTORY_H__
+#ifndef __CLOG_H__
+#define __CLOG_H__
 
-#include <memory>
-#include "CNode.h"
+#include <stdio.h>
 
-class CFactory {
-public:
-    static CFactory& GetInstance();
-    std::shared_ptr<CNode> LoadJsonFile(const std::string& path);
-    std::shared_ptr<CNode> LoadJsonString(const std::string& str);
+#define CLOG_TAG "CLog"
 
-private:
-    CFactory();
-    ~CFactory();
-    int32_t ReadFile(const std::string& path, std::string& str);
-};
+#define CLOGD(fmt, args...) printf("%4d %s D: " fmt, __LINE__, CLOG_TAG, ##args)
+#define CLOGI(fmt, args...) printf("%4d %s I: " fmt, __LINE__, CLOG_TAG, ##args)
+#define CLOGW(fmt, args...) printf("%4d %s W: " fmt, __LINE__, CLOG_TAG, ##args)
+#define CLOGE(fmt, args...) printf("%4d %s E: " fmt, __LINE__, CLOG_TAG, ##args)
 
-#endif // __CFACTORY_H__
+#endif // __CLOG_H__

@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : CFactory.h
+ *  @file       : CJsonCodec.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,22 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __CFACTORY_H__
-#define __CFACTORY_H__
+#ifndef __CJSON_CODEC_H__
+#define __CJSON_CODEC_H__
 
-#include <memory>
-#include "CNode.h"
-
-class CFactory {
-public:
-    static CFactory& GetInstance();
-    std::shared_ptr<CNode> LoadJsonFile(const std::string& path);
-    std::shared_ptr<CNode> LoadJsonString(const std::string& str);
-
-private:
-    CFactory();
-    ~CFactory();
-    int32_t ReadFile(const std::string& path, std::string& str);
-};
-
-#endif // __CFACTORY_H__
+#endif // __CJSON_CODEC_H__
