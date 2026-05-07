@@ -38,19 +38,19 @@ CFactory& CFactory::GetInstance() {
     return factory;
 }
 
-std::shared_ptr<CNode> CFactory::LoadJsonFile(const std::string& path) {
+std::shared_ptr<CNode> CFactory::CreateParserWithJFile(const std::string& path) {
     std::string text;
     int32_t ret = ReadFile(path, text);
     if (ret <= 0) {
         return nullptr;
     }
 
-    return LoadJsonString(text);
+    return CreateParserWithJString(text);
 }
 
-std::shared_ptr<CNode> CFactory::LoadJsonString(const std::string& str) {
-    CJConfigParser parser(str);
-    return parser.CJsonToNode();
+std::shared_ptr<CNode> CFactory::CreateParserWithJString(const std::string& str) {
+    CJConfigParser theCfgParser(str);
+    return theCfgParser.CJsonToNode();
 }
 
 int32_t CFactory::ReadFile(const std::string& path, std::string& str) {
@@ -66,7 +66,7 @@ int32_t CFactory::ReadFile(const std::string& path, std::string& str) {
     str.resize(size);
     file.read(&str[0], size);
     if (!file.good() && !file.eof()) {
-        CLOGE("Read %s failed! (%s)", path.c_str(), strerror(errno));
+        CLOGE("Read %s failed! (%s) \n", path.c_str(), strerror(errno));
         file.close();
         return -1;
     }
@@ -77,6 +77,7 @@ int32_t CFactory::ReadFile(const std::string& path, std::string& str) {
 
 static void PrintNode(const std::shared_ptr<CNode>& pNode, int level) {
     if (!pNode) {
+        CLOGE("pNode is nullptr! \n");
         return;
     }
 

@@ -107,7 +107,7 @@ std::shared_ptr<CNode> CField::Clone() {
 int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
     int32_t ret = 0;
 
-    CLOGD("Decode static field %s[%d]", GetName().c_str(), (int32_t)mChildNodes.size());
+    CLOGD("Decode static field %s[%d] \n", GetName().c_str(), (int32_t)mChildNodes.size());
     for (auto& node : mChildNodes) {
         ret += node->Decode(bytes);
     }
@@ -118,30 +118,30 @@ int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
 int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
     std::shared_ptr<CField> pParentNode = std::dynamic_pointer_cast<CField>(GetParentNode());
     if (!pParentNode) {
-        CLOGE("pParentNode is nullptr! (name: %s)", GetName().c_str());
+        CLOGE("pParentNode is nullptr! (name: %s) \n", GetName().c_str());
         return -1;
     }
 
     std::shared_ptr<CNode> pLenNode = pParentNode->GetNode(GetLenReference());
     std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pLenNode);
     if (!pLenAtom) {
-        CLOGE("pLenAtom is nullptr! (name: %s)", GetName().c_str());
+        CLOGE("pLenAtom is nullptr! (name: %s) \n", GetName().c_str());
         return -1;
     }
 
     int32_t count = 0;
     int32_t ret = pLenAtom->GetIntValue(count);
     if (ret == -1) {
-        CLOGE("GetIntValue failed! (name: %s)", GetName().c_str());
+        CLOGE("GetIntValue failed! (name: %s) \n", GetName().c_str());
         return -1;
     }
 
     if (mChildNodes.empty()) {
-        CLOGE("mChildNodes is empty! (name: %s)", GetName().c_str());
+        CLOGE("mChildNodes is empty! (name: %s) \n", GetName().c_str());
         return -1;
     }
 
-    CLOGD("Decode dynamic field %s[%d]", GetName().c_str(), count);
+    CLOGD("Decode dynamic field %s[%d] \n", GetName().c_str(), count);
     auto& childNode = mChildNodes[0];
     for (int i = 0; i < count; i++) {
         ret += childNode->Decode(bytes);
@@ -159,11 +159,11 @@ int32_t CField::Decode(const std::vector<uint8_t>& bytes) {
     }
 
     if (GetType() == TEXT_TYPE_DFIELD) {
-        DecodeDynamicField(bytes);
+        ret += DecodeDynamicField(bytes);
     } else if (GetType() == TEXT_TYPE_SFIELD) {
-        DecodeStaticField(bytes);
+        ret += DecodeStaticField(bytes);
     } else {
-        CLOGE("Invalid type! (name: %s)", GetName().c_str());
+        CLOGE("Invalid type! (name: %s) \n", GetName().c_str());
     }
 
     return ret;

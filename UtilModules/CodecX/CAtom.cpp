@@ -59,7 +59,7 @@ std::shared_ptr<CNode> CAtom::Clone() {
 int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
     int32_t pos = GetDePos();
     if (pos < 0 || pos >= (int32_t)bytes.size()) {
-        CLOGE("Invalid pos! pos = %d, size = %d", pos, (int32_t)bytes.size());
+        CLOGE("Invalid pos! pos = %d, size = %d \n", pos, (int32_t)bytes.size());
         return -1;
     }
 
@@ -75,12 +75,12 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
     } else if (type == TEXT_TYPE_U64 || type == TEXT_TYPE_S64) {
         len = 8;
     } else {
-        CLOGE("Invalid type! type = %s", type.c_str());
+        CLOGE("Invalid type! type = %s \n", type.c_str());
         return len;
     }
 
     if (subBytes.size() < (size_t)len) {
-        CLOGE("Invalid subBytes size! len = %d, size = %d", len, (int32_t)subBytes.size());
+        CLOGE("Invalid subBytes size! len = %d, size = %d \n", len, (int32_t)subBytes.size());
         return len;
     }
 

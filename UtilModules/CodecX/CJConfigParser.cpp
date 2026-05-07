@@ -25,7 +25,7 @@ CJConfigParser::CJConfigParser(const std::string& jText) {
     mJText = jText;
     mpJRoot = cJSON_Parse(jText.c_str());
     if (!mpJRoot) {
-        CLOGE("Parse json failed! (%s)", cJSON_GetErrorPtr());
+        CLOGE("Parse json failed! (%s) \n", cJSON_GetErrorPtr());
     }
 }
 
@@ -49,7 +49,7 @@ std::shared_ptr<CNode> CJConfigParser::CreateNode(const std::string& type, const
 
 std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::shared_ptr<CNode>& pParent) {
     if (!pJson) {
-        CLOGE("pJson is nullptr!");
+        CLOGE("pJson is nullptr! \n");
         return nullptr;
     }
 
@@ -62,7 +62,7 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
     }
 
     if (!pCurNode) {
-        CLOGE("pCurNode is nullptr!");
+        CLOGE("pCurNode is nullptr! \n");
         return nullptr;
     }
 
@@ -113,7 +113,7 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
 
 std::shared_ptr<CNode> CJConfigParser::CJsonToNode() {
     if (!mpJRoot) {
-        CLOGE("mpJRootis nullptr!");
+        CLOGE("mpJRootis nullptr! \n");
         return nullptr;
     }
 

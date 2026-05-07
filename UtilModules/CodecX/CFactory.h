@@ -25,8 +25,8 @@
 class CFactory {
 public:
     static CFactory& GetInstance();
-    std::shared_ptr<CNode> LoadJsonFile(const std::string& path);
-    std::shared_ptr<CNode> LoadJsonString(const std::string& str);
+    std::shared_ptr<CNode> CreateParserWithJFile(const std::string& path);
+    std::shared_ptr<CNode> CreateParserWithJString(const std::string& str);
     void PrintAllNodes(const std::shared_ptr<CNode>& pNode);
 
 private:
