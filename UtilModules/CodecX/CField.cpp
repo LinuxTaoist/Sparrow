@@ -17,6 +17,9 @@
  *
  */
 #include <algorithm>
+#include "CLog.h"
+#include "CDefine.h"
+#include "CAtom.h"
 #include "CField.h"
 
 CField::CField(const std::shared_ptr<CNode>& parent)
@@ -83,14 +86,14 @@ int32_t CField::DelNode(const std::shared_ptr<CNode>& node) {
     return -1;
 }
 
-int32_t CField::GetNode(const std::string& name, std::shared_ptr<CNode>& node) {
+std::shared_ptr<CNode> CField::GetNode(const std::string& name) {
     const auto it = std::find_if(mChildNodes.begin(), mChildNodes.end(),
         [&](const std::shared_ptr<CNode>& ptr) {
         return (ptr->GetName() == name);
     });
 
-    node = (it != mChildNodes.end()) ? (*it) : nullptr;
-    return (it != mChildNodes.end()) ? 0 : -1;
+    std::shared_ptr<CNode> pNode = (it != mChildNodes.end()) ? (*it) : nullptr;
+    return pNode;
 }
 
 std::vector<std::shared_ptr<CNode>> CField::GetChildNodes() {
@@ -101,20 +104,66 @@ std::shared_ptr<CNode> CField::Clone() {
     return std::make_shared<CField>(*this);
 }
 
+int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
+    int32_t ret = 0;
+
+    CLOGD("Decode static field %s[%d]", GetName().c_str(), (int32_t)mChildNodes.size());
+    for (auto& node : mChildNodes) {
+        ret += node->Decode(bytes);
+    }
+
+    return ret;
+}
+
+int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
+    std::shared_ptr<CField> pParentNode = std::dynamic_pointer_cast<CField>(GetParentNode());
+    if (!pParentNode) {
+        CLOGE("pParentNode is nullptr! (name: %s)", GetName().c_str());
+        return -1;
+    }
+
+    std::shared_ptr<CNode> pLenNode = pParentNode->GetNode(GetLenReference());
+    std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pLenNode);
+    if (!pLenAtom) {
+        CLOGE("pLenAtom is nullptr! (name: %s)", GetName().c_str());
+        return -1;
+    }
+
+    int32_t count = 0;
+    int32_t ret = pLenAtom->GetIntValue(count);
+    if (ret == -1) {
+        CLOGE("GetIntValue failed! (name: %s)", GetName().c_str());
+        return -1;
+    }
+
+    if (mChildNodes.empty()) {
+        CLOGE("mChildNodes is empty! (name: %s)", GetName().c_str());
+        return -1;
+    }
+
+    CLOGD("Decode dynamic field %s[%d]", GetName().c_str(), count);
+    auto& childNode = mChildNodes[0];
+    for (int i = 0; i < count; i++) {
+        ret += childNode->Decode(bytes);
+    }
+
+    return ret;
+}
+
 int32_t CField::Decode(const std::vector<uint8_t>& bytes) {
     int32_t ret = 0;
 
     // 首次解码，重置起始位置
-    if (!mParentNode) {
+    if (!GetParentNode()) {
         ResetDePos();
     }
 
-    for (auto& node : mChildNodes) {
-        if (node->IsField()) {
-            continue;
-        }
-
-        ret += node->Decode(bytes);
+    if (GetType() == TEXT_TYPE_DFIELD) {
+        DecodeDynamicField(bytes);
+    } else if (GetType() == TEXT_TYPE_SFIELD) {
+        DecodeStaticField(bytes);
+    } else {
+        CLOGE("Invalid type! (name: %s)", GetName().c_str());
     }
 
     return ret;
@@ -124,7 +173,7 @@ int32_t CField::Encode(std::vector<uint8_t>& bytes) {
     int32_t ret = 0;
 
     // 首次编码，重置起始位置
-    if (!mParentNode) {
+    if (!GetParentNode()) {
         ResetEnPos();
     }
 

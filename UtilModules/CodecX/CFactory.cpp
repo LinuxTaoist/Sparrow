@@ -20,6 +20,7 @@
 #include <errno.h>
 #include <string.h>
 #include "CLog.h"
+#include "CAtom.h"
 #include "CField.h"
 #include "CFactory.h"
 #include "CJConfigParser.h"
@@ -83,11 +84,13 @@ static void PrintNode(const std::shared_ptr<CNode>& pNode, int level) {
     CLOGI("%s - name    : %s\n", indent.c_str(), pNode->GetName().c_str());
     CLOGI("%s - type    : %s\n", indent.c_str(), pNode->GetType().c_str());
     if (!pNode->IsField()) {
+        std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(pNode);
+        CLOGI("%s - value   : %s\n", indent.c_str(), pAtom->DumpHexValue().c_str());
         return;
     }
 
     std::shared_ptr<CField> pField = std::dynamic_pointer_cast<CField>(pNode);
-    if (pNode->GetType() == TEXT_DYNAMIC_FIELD) {
+    if (pNode->GetType() == TEXT_TYPE_DFIELD) {
         CLOGI("%s - len_ref : %s\n", indent.c_str(), pField->GetLenReference().c_str());
         CLOGI("%s - len_mode: %s\n", indent.c_str(), pField->GetLenMode().c_str());
     }

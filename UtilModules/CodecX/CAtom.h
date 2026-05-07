@@ -58,6 +58,8 @@ public:
     int32_t Decode(const std::vector<uint8_t>& bytes) override;
     int32_t Encode(std::vector<uint8_t>& bytes) override;
 
+    std::string DumpHexValue();
+
 private:
     std::vector<uint8_t> mValue;
 };

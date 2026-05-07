@@ -20,10 +20,11 @@
 #include "CLog.h"
 #include <utility>
 
+int32_t CNode::mDePos = -1;
+int32_t CNode::mEnPos = -1;
+
 CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
     : mIsField(isField)
-    , mDePos(-1)
-    , mEnPos(-1)
     , mSIndex(-1)
     , mEIndex(-1)
     , mLength(-1)
@@ -34,8 +35,6 @@ CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
 
 CNode::CNode(const CNode& node)
     : mIsField(node.mIsField)
-    , mDePos(node.mDePos)
-    , mEnPos(node.mEnPos)
     , mSIndex(node.mSIndex)
     , mEIndex(node.mEIndex)
     , mLength(node.mLength)
@@ -61,10 +60,6 @@ CNode& CNode::operator = (const CNode& node) {
 }
 
 CNode::~CNode() {
-}
-
-void CNode::SetField(bool isField) {
-    mIsField = isField;
 }
 
 bool CNode::IsField() {
@@ -141,4 +136,8 @@ void CNode::SetType(const std::string& type) {
 
 std::string CNode::GetType() {
     return mType;
+}
+
+std::shared_ptr<CNode> CNode::GetParentNode() {
+    return mParentNode;
 }

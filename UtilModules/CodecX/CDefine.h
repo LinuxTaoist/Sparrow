@@ -19,23 +19,28 @@
 #ifndef __CDEFINE_H__
 #define __CDEFINE_H__
 
-#define TEXT_TYPE_U8        "u8"
-#define TEXT_TYPE_U16       "u16"
-#define TEXT_TYPE_U32       "u32"
-#define TEXT_TYPE_U64       "u64"
-#define TEXT_TYPE_S8        "s8"
-#define TEXT_TYPE_S16       "s16"
-#define TEXT_TYPE_S32       "s32"
-#define TEXT_TYPE_S64       "s64"
+#define TEXT_NAME_TAG               "name"
+#define TEXT_LEN_REF_TAG            "len_ref"
+#define TEXT_CHILDREN_TAG           "children"
+#define TEXT_CHILD_TEMPLATE_TAG     "child_template"
 
-#define TEXT_NAME           "name"
-#define TEXT_TYPE           "type"
-#define TEXT_LEN_REF        "len_ref"
-#define TEXT_LEN_MODE       "len_mode"
-#define TEXT_CHILDREN       "children"
-#define TEXT_CHILD_TEMPLATE "child_template"
-#define TEXT_STATIC_FIELD   "static_field"
-#define TEXT_DYNAMIC_FIELD  "dynamic_field"
+#define TEXT_LEN_MODE_TAG           "len_mode"
+#define TEXT_LEN_MODE_COUNT         "count"
+#define TEXT_LEN_MODE_BYTE          "byte"
+#define TEXT_LEN_MODE_BIT           "bit"
+
+#define TEXT_TYPE_TAG               "type"
+#define TEXT_TYPE_U8                "u8"
+#define TEXT_TYPE_U16               "u16"
+#define TEXT_TYPE_U32               "u32"
+#define TEXT_TYPE_U64               "u64"
+#define TEXT_TYPE_S8                "s8"
+#define TEXT_TYPE_S16               "s16"
+#define TEXT_TYPE_S32               "s32"
+#define TEXT_TYPE_S64               "s64"
+#define TEXT_TYPE_SFIELD            "static_field"
+#define TEXT_TYPE_DFIELD            "dynamic_field"
+#define TEXT_TYPE_FIELD_SUFFIX      "_field"
 
 enum CEndianType {
     CENDIAN_LITTLE = 0,

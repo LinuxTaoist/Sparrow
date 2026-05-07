@@ -36,66 +36,79 @@ CJConfigParser::~CJConfigParser() {
     }
 }
 
-static std::shared_ptr<CNode> ParseJsonToNode(cJSON* pJson, std::shared_ptr<CNode> pParent) {
+std::shared_ptr<CNode> CJConfigParser::CreateNode(const std::string& type, const std::shared_ptr<CNode>& pParent) {
+    std::shared_ptr<CNode> pNode = nullptr;
+    if (type.find(TEXT_TYPE_FIELD_SUFFIX) != std::string::npos) {
+        pNode = std::make_shared<CField>(pParent);
+    } else {
+        pNode = std::make_shared<CAtom>(pParent);
+    }
+
+    return pNode;
+}
+
+std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::shared_ptr<CNode>& pParent) {
     if (!pJson) {
         CLOGE("pJson is nullptr!");
         return nullptr;
     }
 
-    std::shared_ptr<CField> pCurNode = std::make_shared<CField>(pParent);
+    std::shared_ptr<CNode> pCurNode = nullptr;
+    cJSON* pType = cJSON_GetObjectItem(pJson, TEXT_TYPE_TAG);
+    if (cJSON_IsString(pType)) {
+        std::string type = pType->valuestring;
+        pCurNode = CreateNode(type, pParent);
+        pCurNode->SetType(type);
+    }
+
     if (!pCurNode) {
         CLOGE("pCurNode is nullptr!");
         return nullptr;
     }
 
-    cJSON* pName = cJSON_GetObjectItem(pJson, TEXT_NAME);
+    cJSON* pName = cJSON_GetObjectItem(pJson, TEXT_NAME_TAG);
     if (cJSON_IsString(pName)) {
         pCurNode->SetName(pName->valuestring);
     }
 
-    cJSON* pType = cJSON_GetObjectItem(pJson, TEXT_TYPE);
-    if (cJSON_IsString(pType)) {
-        pCurNode->SetType(pType->valuestring);
-    }
-
-    if (pCurNode->GetType() != TEXT_DYNAMIC_FIELD
-     && pCurNode->GetType() != TEXT_STATIC_FIELD) {
-        pCurNode->SetField(false);
+    if (pCurNode->GetType() != TEXT_TYPE_DFIELD &&
+        pCurNode->GetType() != TEXT_TYPE_SFIELD) {
         return pCurNode;
     }
 
-    cJSON* pLenRef = cJSON_GetObjectItem(pJson, TEXT_LEN_REF);
+    std::shared_ptr<CField> pField = std::dynamic_pointer_cast<CField>(pCurNode);
+    cJSON* pLenRef = cJSON_GetObjectItem(pJson, TEXT_LEN_REF_TAG);
     if (cJSON_IsString(pLenRef)) {
-        pCurNode->SetLenReference(pLenRef->valuestring);
+        pField->SetLenReference(pLenRef->valuestring);
     }
 
-    cJSON* pLenMode = cJSON_GetObjectItem(pJson, TEXT_LEN_MODE);
+    cJSON* pLenMode = cJSON_GetObjectItem(pJson, TEXT_LEN_MODE_TAG);
     if (cJSON_IsString(pLenMode)) {
-        pCurNode->SetLenMode(pLenMode->valuestring);
+        pField->SetLenMode(pLenMode->valuestring);
     }
 
-    cJSON* pChildren = cJSON_GetObjectItem(pJson, TEXT_CHILDREN);
+    cJSON* pChildren = cJSON_GetObjectItem(pJson, TEXT_CHILDREN_TAG);
     if (cJSON_IsArray(pChildren)) {
         cJSON *pSubObj = nullptr;
-        pCurNode->SetChildNodesTag(TEXT_CHILDREN);
+        pField->SetChildNodesTag(TEXT_CHILDREN_TAG);
         cJSON_ArrayForEach(pSubObj, pChildren) {
-            std::shared_ptr<CNode> pChildNode = ParseJsonToNode(pSubObj, pCurNode);
+            std::shared_ptr<CNode> pChildNode = ParseJsonToNode(pSubObj, pField);
             if (pChildNode) {
-                pCurNode->AddNode(pChildNode);
+                pField->AddNode(pChildNode);
             }
         }
     }
 
-    cJSON* pChildTemplate = cJSON_GetObjectItem(pJson, TEXT_CHILD_TEMPLATE);
+    cJSON* pChildTemplate = cJSON_GetObjectItem(pJson, TEXT_CHILD_TEMPLATE_TAG);
     if (cJSON_IsObject(pChildTemplate)) {
-        pCurNode->SetChildNodesTag(TEXT_CHILD_TEMPLATE);
-        std::shared_ptr<CNode> pChildNode = ParseJsonToNode(pChildTemplate, pCurNode);
+        pField->SetChildNodesTag(TEXT_CHILD_TEMPLATE_TAG);
+        std::shared_ptr<CNode> pChildNode = ParseJsonToNode(pChildTemplate, pField);
         if (pChildNode) {
-            pCurNode->AddNode(pChildNode);
+            pField->AddNode(pChildNode);
         }
     }
 
-    return pCurNode;
+    return pField;
 }
 
 std::shared_ptr<CNode> CJConfigParser::CJsonToNode() {

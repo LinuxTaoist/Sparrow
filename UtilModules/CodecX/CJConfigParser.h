@@ -32,6 +32,10 @@ public:
     std::shared_ptr<CNode> CJsonToNode();
 
 private:
+    std::shared_ptr<CNode> CreateNode(const std::string& type, const std::shared_ptr<CNode>& pParent);
+    std::shared_ptr<CNode> ParseJsonToNode(cJSON* pJson, const std::shared_ptr<CNode>& pParent);
+
+private:
     std::string mJText;
     cJSON* mpJRoot;
 };

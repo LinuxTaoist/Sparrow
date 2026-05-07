@@ -38,12 +38,16 @@ public:
     std::string GetChildNodesTag();
     int32_t AddNode(const std::shared_ptr<CNode>& node);
     int32_t DelNode(const std::shared_ptr<CNode>& node);
-    int32_t GetNode(const std::string& name, std::shared_ptr<CNode>& node);
+    std::shared_ptr<CNode> GetNode(const std::string& name);
     std::vector<std::shared_ptr<CNode>> GetChildNodes();
 
     std::shared_ptr<CNode> Clone();
     int32_t Decode(const std::vector<uint8_t>& bytes) override;
     int32_t Encode(std::vector<uint8_t>& bytes) override;
+
+private:
+    int32_t DecodeStaticField(const std::vector<uint8_t>& bytes);
+    int32_t DecodeDynamicField(const std::vector<uint8_t>& bytes);
 
 private:
     std::string mLenReference;  // 容量引用

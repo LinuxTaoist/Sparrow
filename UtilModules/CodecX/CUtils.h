@@ -18,9 +18,11 @@
 
 #include <string>
 #include <vector>
-#include <type_traits>
-#include <algorithm>
 #include <limits>
+#include <sstream>
+#include <iomanip>
+#include <algorithm>
+#include <type_traits>
 #include "CDefine.h"
 
 namespace CUtils {
@@ -416,6 +418,37 @@ int32_t VToV(const std::vector<T>& in, std::vector<U>& out, CEndianType type = C
     }
 
     return convertedBytes;
+}
+
+template<typename T>
+std::string ToHexString(const std::vector<T>& vec)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (const auto& it : vec) {
+        for (size_t i = 0; i < sizeof(T); ++i) {
+            ss << std::setw(2) << static_cast<int32_t>((it >> ((sizeof(T) - 1 - i) * 8)) & 0xFF);
+        }
+    }
+    return ss.str();
+}
+
+/**
+ * @brief Vector to hex string with space
+ *
+ * @param vec  input vector
+ * @return  The string converted with space
+ */
+template<typename T>
+std::string ToHexStringWithSpace(const std::vector<T>& vec)
+{
+    std::stringstream ss;
+    ss << std::hex << std::setfill('0');
+    for (const auto& it : vec) {
+        ss << std::setw(sizeof(T) * 2) << static_cast<int32_t>(it) << " ";
+    }
+
+    return ss.str();
 }
 
 }; // namespace CUtils

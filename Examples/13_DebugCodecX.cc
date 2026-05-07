@@ -23,7 +23,7 @@
 #define SPR_LOGD(fmt, args...) printf("%d DebugCodecX D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d DebugCodecX E: " fmt, __LINE__, ##args)
 
-#define TEST_JSON_STR "{                                 \
+#define TEST_JSON_STR1 "{                                 \
     \"name\": \"iot_devices\",                           \
     \"type\": \"static_field\",                          \
     \"children\": [                                      \
@@ -81,14 +81,33 @@
 
 int main(int argc, char* argv[])
 {
-    CFactory& theFactory = CFactory::GetInstance();
-    std::shared_ptr<CNode> pRoot = theFactory.LoadJsonString(TEST_JSON_STR);
+    char val = 0;
+    bool run = true;
+    do {
+        SPR_LOGD("Input: ");
+        std::cin >> val;
+        switch(val) {
+            case '1': {
+                CFactory& theFactory = CFactory::GetInstance();
+                std::shared_ptr<CNode> pRoot = theFactory.LoadJsonString(TEST_JSON_STR1);
+                if (!pRoot)  {
+                    SPR_LOGE("LoadJsonString failed! \n");
+                    return -1;
+                }
 
-    if (!pRoot)  {
-        SPR_LOGE("LoadJsonString failed! \n");
-        return -1;
-    }
+                theFactory.PrintAllNodes(pRoot);
+                break;
+            }
+            case '2':
+                break;
+            case 'q':
+            case 'Q':
+                run = false;
+                break;
+            default:
+                break;
+        }
+    } while(run);
 
-    theFactory.PrintAllNodes(pRoot);
     return 0;
 }
