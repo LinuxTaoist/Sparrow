@@ -20,6 +20,9 @@
 #include <iostream>
 #include <memory>
 
+#define SPR_LOGD(fmt, args...) printf("%d DebugCodecX D: " fmt, __LINE__, ##args)
+#define SPR_LOGE(fmt, args...) printf("%d DebugCodecX E: " fmt, __LINE__, ##args)
+
 #define TEST_JSON_STR "{                                 \
     \"name\": \"iot_devices\",                           \
     \"type\": \"static_field\",                          \
@@ -78,17 +81,14 @@
 
 int main(int argc, char* argv[])
 {
-    std::cout << "=== Start Parsing JSON ===" << std::endl;
-    std::shared_ptr<CNode> pRoot = CFactory::GetInstance().LoadJsonString(TEST_JSON_STR);
+    CFactory& theFactory = CFactory::GetInstance();
+    std::shared_ptr<CNode> pRoot = theFactory.LoadJsonString(TEST_JSON_STR);
 
-    // 验证解析结果
-    if (pRoot) {
-        std::cout << "=== Parse JSON SUCCESS ===" << std::endl;
-        std::cout << "Root Name: " << pRoot->GetName() << std::endl;
-        std::cout << "Root Type: " << pRoot->GetType() << std::endl;
-    } else {
-        std::cout << "=== Parse JSON FAILED ===" << std::endl;
+    if (!pRoot)  {
+        SPR_LOGE("LoadJsonString failed! \n");
+        return -1;
     }
 
+    theFactory.PrintAllNodes(pRoot);
     return 0;
 }

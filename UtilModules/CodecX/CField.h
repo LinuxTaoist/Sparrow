@@ -34,9 +34,12 @@ public:
     std::string GetLenReference();
     void SetLenMode(const std::string& lenMode);
     std::string GetLenMode();
+    void SetChildNodesTag(const std::string& childNodesTag);
+    std::string GetChildNodesTag();
     int32_t AddNode(const std::shared_ptr<CNode>& node);
     int32_t DelNode(const std::shared_ptr<CNode>& node);
     int32_t GetNode(const std::string& name, std::shared_ptr<CNode>& node);
+    std::vector<std::shared_ptr<CNode>> GetChildNodes();
 
     std::shared_ptr<CNode> Clone();
     int32_t Decode(const std::vector<uint8_t>& bytes) override;
@@ -45,6 +48,7 @@ public:
 private:
     std::string mLenReference;  // 容量引用
     std::string mLenMode;       // 容量模式
+    std::string mChildNodesTag; // 子节点容器标签
     std::vector<std::shared_ptr<CNode>> mChildNodes;
 };
 

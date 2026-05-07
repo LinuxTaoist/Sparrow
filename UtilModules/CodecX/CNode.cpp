@@ -17,10 +17,13 @@
  *
  */
 #include "CNode.h"
+#include "CLog.h"
 #include <utility>
 
 CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
     : mIsField(isField)
+    , mDePos(-1)
+    , mEnPos(-1)
     , mSIndex(-1)
     , mEIndex(-1)
     , mLength(-1)
@@ -31,6 +34,8 @@ CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
 
 CNode::CNode(const CNode& node)
     : mIsField(node.mIsField)
+    , mDePos(node.mDePos)
+    , mEnPos(node.mEnPos)
     , mSIndex(node.mSIndex)
     , mEIndex(node.mEIndex)
     , mLength(node.mLength)
@@ -42,6 +47,8 @@ CNode::CNode(const CNode& node)
 CNode& CNode::operator = (const CNode& node) {
     if (this != &node) {
         mIsField = node.mIsField;
+        mDePos = node.mDePos;
+        mEnPos = node.mEnPos;
         mSIndex = node.mSIndex;
         mEIndex = node.mEIndex;
         mLength = node.mLength;
@@ -62,6 +69,30 @@ void CNode::SetField(bool isField) {
 
 bool CNode::IsField() {
     return mIsField;
+}
+
+void CNode::ResetDePos(int32_t val) {
+    mDePos = val;
+}
+
+void CNode::DePosAdd(int32_t offset) {
+    mDePos += offset;
+}
+
+int32_t CNode::GetDePos() {
+    return mDePos;
+}
+
+void CNode::ResetEnPos(int32_t val) {
+    mEnPos = val;
+}
+
+void CNode::EnPosAdd(int32_t offset) {
+    mEnPos += offset;
+}
+
+int32_t CNode::GetEnPos() {
+    return mEnPos;
 }
 
 void CNode::SetSIndex(int32_t sIndex) {
@@ -111,4 +142,3 @@ void CNode::SetType(const std::string& type) {
 std::string CNode::GetType() {
     return mType;
 }
-

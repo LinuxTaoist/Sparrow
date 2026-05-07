@@ -29,7 +29,6 @@ public:
     CJConfigParser(const std::string& jText);
     ~CJConfigParser();
 
-    void DumpDetails();
     std::shared_ptr<CNode> CJsonToNode();
 
 private:

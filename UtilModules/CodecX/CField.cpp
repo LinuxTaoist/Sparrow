@@ -54,6 +54,14 @@ std::string CField::GetLenMode() {
     return mLenMode;
 }
 
+void CField::SetChildNodesTag(const std::string& childNodesTag) {
+    mChildNodesTag = childNodesTag;
+}
+
+std::string CField::GetChildNodesTag() {
+    return mChildNodesTag;
+}
+
 int32_t CField::AddNode(const std::shared_ptr<CNode>& node) {
     mChildNodes.emplace_back(node);
     return 0;
@@ -85,13 +93,27 @@ int32_t CField::GetNode(const std::string& name, std::shared_ptr<CNode>& node) {
     return (it != mChildNodes.end()) ? 0 : -1;
 }
 
+std::vector<std::shared_ptr<CNode>> CField::GetChildNodes() {
+    return mChildNodes;
+}
+
 std::shared_ptr<CNode> CField::Clone() {
     return std::make_shared<CField>(*this);
 }
 
 int32_t CField::Decode(const std::vector<uint8_t>& bytes) {
     int32_t ret = 0;
+
+    // 首次解码，重置起始位置
+    if (!mParentNode) {
+        ResetDePos();
+    }
+
     for (auto& node : mChildNodes) {
+        if (node->IsField()) {
+            continue;
+        }
+
         ret += node->Decode(bytes);
     }
 
@@ -100,5 +122,19 @@ int32_t CField::Decode(const std::vector<uint8_t>& bytes) {
 
 int32_t CField::Encode(std::vector<uint8_t>& bytes) {
     int32_t ret = 0;
+
+    // 首次编码，重置起始位置
+    if (!mParentNode) {
+        ResetEnPos();
+    }
+
+    for (auto& node : mChildNodes) {
+        if (node->IsField()) {
+            continue;
+        }
+
+        ret += node->Encode(bytes);
+    }
+
     return ret;
 }

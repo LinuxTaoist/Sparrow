@@ -73,3 +73,41 @@ int32_t CFactory::ReadFile(const std::string& path, std::string& str) {
     file.close();
     return size;
 }
+
+static void PrintNode(const std::shared_ptr<CNode>& pNode, int level) {
+    if (!pNode) {
+        return;
+    }
+
+    std::string indent(level * 4, ' ');
+    CLOGI("%s - name    : %s\n", indent.c_str(), pNode->GetName().c_str());
+    CLOGI("%s - type    : %s\n", indent.c_str(), pNode->GetType().c_str());
+    if (!pNode->IsField()) {
+        return;
+    }
+
+    std::shared_ptr<CField> pField = std::dynamic_pointer_cast<CField>(pNode);
+    if (pNode->GetType() == TEXT_DYNAMIC_FIELD) {
+        CLOGI("%s - len_ref : %s\n", indent.c_str(), pField->GetLenReference().c_str());
+        CLOGI("%s - len_mode: %s\n", indent.c_str(), pField->GetLenMode().c_str());
+    }
+
+    std::vector<std::shared_ptr<CNode>> childNodes = pField->GetChildNodes();
+    if (!childNodes.empty()) {
+        CLOGI("%s - %s [%d]\n", indent.c_str(),
+            pField->GetChildNodesTag().c_str(),
+            static_cast<int32_t>(childNodes.size()));
+
+        int32_t i = 0;
+        for (auto& pChild : childNodes) {
+            CLOGI("  %s - %d     \n", indent.c_str(), i++);
+            PrintNode(pChild, level + 1);
+        }
+    }
+}
+
+void CFactory::PrintAllNodes(const std::shared_ptr<CNode>& pNode) {
+    CLOGI("----------------  Print All Nodes  ----------------\n");
+    PrintNode(pNode, 0);
+    CLOGI("---------------------------------------------------\n");
+}

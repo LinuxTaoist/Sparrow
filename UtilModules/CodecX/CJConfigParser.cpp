@@ -21,15 +21,6 @@
 #include "CField.h"
 #include "CJConfigParser.h"
 
-#define TEXT_NAME           "name"
-#define TEXT_TYPE           "type"
-#define TEXT_LEN_REF        "len_ref"
-#define TEXT_LEN_MODE       "len_mode"
-#define TEXT_CHILDREN       "children"
-#define TEXT_CHILD_TEMPLATE "child_template"
-#define TEXT_STATIC_FIELD   "static_field"
-#define TEXT_DYNAMIC_FIELD  "dynamic_field"
-
 CJConfigParser::CJConfigParser(const std::string& jText) {
     mJText = jText;
     mpJRoot = cJSON_Parse(jText.c_str());
@@ -86,6 +77,7 @@ static std::shared_ptr<CNode> ParseJsonToNode(cJSON* pJson, std::shared_ptr<CNod
     cJSON* pChildren = cJSON_GetObjectItem(pJson, TEXT_CHILDREN);
     if (cJSON_IsArray(pChildren)) {
         cJSON *pSubObj = nullptr;
+        pCurNode->SetChildNodesTag(TEXT_CHILDREN);
         cJSON_ArrayForEach(pSubObj, pChildren) {
             std::shared_ptr<CNode> pChildNode = ParseJsonToNode(pSubObj, pCurNode);
             if (pChildNode) {
@@ -96,6 +88,7 @@ static std::shared_ptr<CNode> ParseJsonToNode(cJSON* pJson, std::shared_ptr<CNod
 
     cJSON* pChildTemplate = cJSON_GetObjectItem(pJson, TEXT_CHILD_TEMPLATE);
     if (cJSON_IsObject(pChildTemplate)) {
+        pCurNode->SetChildNodesTag(TEXT_CHILD_TEMPLATE);
         std::shared_ptr<CNode> pChildNode = ParseJsonToNode(pChildTemplate, pCurNode);
         if (pChildNode) {
             pCurNode->AddNode(pChildNode);
@@ -113,8 +106,3 @@ std::shared_ptr<CNode> CJConfigParser::CJsonToNode() {
 
     return ParseJsonToNode(mpJRoot, nullptr);
 }
-
-void CJConfigParser::DumpDetails() {
-
-}
-
