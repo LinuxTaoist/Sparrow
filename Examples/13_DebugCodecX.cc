@@ -166,7 +166,7 @@ int main(int argc, char* argv[])
                     return -1;
                 }
 
-                theFactory.PrintAllNodes(pParser);
+                theFactory.PrintConfigDetails(pParser);
                 break;
             }
             case '2': {
@@ -177,9 +177,9 @@ int main(int argc, char* argv[])
                     return -1;
                 }
 
-                pParser->Decode(TEST_BIN_BYTES2);
-                // std::shared_ptr<CNode> pData = theFactory.DecodeWithParser(pParser, TEST_BIN_BYTES2);
-                theFactory.PrintAllNodes(pParser);
+                std::shared_ptr<CNode> pData = theFactory.DecodeWithParser(pParser, TEST_BIN_BYTES2);
+                theFactory.PrintConfigDetails(pParser);
+                theFactory.PrintDataDetails(pData);
                 break;
             }
             case 'q':

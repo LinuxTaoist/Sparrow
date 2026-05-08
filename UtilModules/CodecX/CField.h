@@ -46,6 +46,7 @@ public:
     int32_t Encode(std::vector<uint8_t>& bytes) override;
 
 private:
+    void RelinkChildren(const std::shared_ptr<CField>& pThisField);
     int32_t DecodeStaticField(const std::vector<uint8_t>& bytes);
     int32_t DecodeDynamicField(const std::vector<uint8_t>& bytes);
 

@@ -123,13 +123,34 @@ std::vector<std::shared_ptr<CNode>> CField::GetChildNodes() {
 }
 
 std::shared_ptr<CNode> CField::Clone() {
-    return std::make_shared<CField>(*this);
+    std::shared_ptr<CField> pClone = std::make_shared<CField>(*this);
+    if (!pClone) {
+        CLOGE("Node[%s] pClone is nullptr!\n", GetName().c_str());
+        return nullptr;
+    }
+
+    pClone->RelinkChildren(pClone);
+    return pClone;
+}
+
+void CField::RelinkChildren(const std::shared_ptr<CField>& pThisField) {
+    for (auto& child : mChildNodes) {
+        if (!child) {
+            continue;
+        }
+
+        child->SetParentNode(pThisField);
+        std::shared_ptr<CField> pChildField = std::dynamic_pointer_cast<CField>(child);
+        if (pChildField) {
+            pChildField->RelinkChildren(pChildField);
+        }
+    }
 }
 
 int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
     int32_t ret = 0;
 
-    CLOGD("Node[%s] Decode static field, size = %d \n", GetName().c_str(), (int32_t)mChildNodes.size());
+    // CLOGD("Node[%s] Decode static field, size = %d \n", GetName().c_str(), (int32_t)mChildNodes.size());
     for (auto& node : mChildNodes) {
         ret += node->Decode(bytes);
     }
@@ -166,7 +187,7 @@ int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
         return -1;
     }
 
-    CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
+    // CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
     std::shared_ptr<CNode> pTmpNode = mChildNodes[0];
     mChildNodes.clear();
     for (int i = 0; i < count; i++) {

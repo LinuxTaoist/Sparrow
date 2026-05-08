@@ -24,7 +24,8 @@ int32_t CNode::mDePos = -1;
 int32_t CNode::mEnPos = -1;
 
 CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
-    : mIsField(isField)
+    : std::enable_shared_from_this<CNode>()
+    , mIsField(isField)
     , mSIndex(-1)
     , mEIndex(-1)
     , mLength(-1)
@@ -35,7 +36,8 @@ CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
 }
 
 CNode::CNode(const CNode& node)
-    : mIsField(node.mIsField)
+    : std::enable_shared_from_this<CNode>()
+    , mIsField(node.mIsField)
     , mSIndex(node.mSIndex)
     , mEIndex(node.mEIndex)
     , mLength(node.mLength)
@@ -141,4 +143,8 @@ std::string CNode::GetType() {
 
 std::shared_ptr<CNode> CNode::GetParentNode() {
     return mParentNode;
+}
+
+void CNode::SetParentNode(const std::shared_ptr<CNode>& pParent) {
+    mParentNode = pParent;
 }

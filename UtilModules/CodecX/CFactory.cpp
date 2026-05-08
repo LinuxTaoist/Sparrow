@@ -57,6 +57,12 @@ std::shared_ptr<CNode> CFactory::CreateParserWithJString(const std::string& str)
 
 std::shared_ptr<CNode> CFactory::DecodeWithParser(const std::shared_ptr<CNode>& pParser, const std::vector<uint8_t>& bytes) {
     std::shared_ptr<CNode> pData = pParser->Clone();
+    if (!pData) {
+        CLOGE("Create parser failed!\n");
+        return nullptr;
+    }
+
+    pData->SetParentNode(nullptr);
     int32_t ret = pData->Decode(bytes);
     return (ret == -1) ? nullptr : pData;
 }
@@ -83,7 +89,7 @@ int32_t CFactory::ReadFile(const std::string& path, std::string& str) {
     return size;
 }
 
-static void PrintNode(const std::shared_ptr<CNode>& pNode, int level) {
+static void PrintCfgNode(const std::shared_ptr<CNode>& pNode, int level) {
     if (!pNode) {
         CLOGE("pNode is nullptr! \n");
         return;
@@ -113,13 +119,66 @@ static void PrintNode(const std::shared_ptr<CNode>& pNode, int level) {
         int32_t i = 0;
         for (auto& pChild : childNodes) {
             CLOGI("  %s - %d     \n", indent.c_str(), i++);
-            PrintNode(pChild, level + 1);
+            PrintCfgNode(pChild, level + 1);
         }
     }
 }
 
-void CFactory::PrintAllNodes(const std::shared_ptr<CNode>& pNode) {
-    CLOGI("----------------  Print All Nodes  ----------------\n");
-    PrintNode(pNode, 0);
+void CFactory::PrintConfigDetails(const std::shared_ptr<CNode>& pNode) {
+    CLOGI("--------------  Print Config Details  -------------\n");
+    PrintCfgNode(pNode, 0);
     CLOGI("---------------------------------------------------\n");
+}
+
+static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& offset) {
+    if (!pNode) {
+        return;
+    }
+
+    const std::string indent(level * 4, ' ');
+    const std::string& name = pNode->GetName();
+    const std::string& type = pNode->GetType();
+    int start = offset;
+
+    if (!pNode->IsField()) {
+        auto atom = std::dynamic_pointer_cast<CAtom>(pNode);
+        std::string hex = atom->DumpHexValue();
+        int size = hex.empty() ? 0 : (hex.size() + 1) / 3;
+
+        CLOGI("%s[%02d-%02d] %s: 0x%s\n", indent.c_str(), start, start+size-1, name.c_str(), hex.c_str());
+        offset += size;
+        return;
+    }
+
+    auto field = std::dynamic_pointer_cast<CField>(pNode);
+    auto children = field->GetChildNodes();
+    if (type == TEXT_TYPE_DFIELD) {
+        CLOGI("%s%s[%zu]\n", indent.c_str(), name.c_str(), children.size());
+        for (auto& child : children) {
+            PrintDataNode(child, level + 1, offset);
+        }
+        return;
+    }
+
+    CLOGI("%s[%02d] %s\n", indent.c_str(), start, name.c_str());
+    for (auto& child : children) {
+        PrintDataNode(child, level + 1, offset);
+    }
+}
+
+void CFactory::PrintDataDetails(const std::shared_ptr<CNode>& pNode) {
+    if (!pNode) {
+        return;
+    }
+
+    CLOGI("===================================================\n");
+    CLOGI("               Protocol Parse                      \n");
+    CLOGI("===================================================\n");
+
+    int offset = 0;
+    PrintDataNode(pNode, 0, offset);
+
+    CLOGI("===================================================\n");
+    CLOGI("Total size: %d bytes\n", offset);
+    CLOGI("===================================================\n");
 }

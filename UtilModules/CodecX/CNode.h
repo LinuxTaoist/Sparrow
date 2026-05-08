@@ -24,7 +24,7 @@
 #include <memory>
 #include "CDefine.h"
 
-class CNode {
+class CNode : public std::enable_shared_from_this<CNode> {
 public:
     explicit CNode(const std::shared_ptr<CNode>& pParent, bool isField = true);
     CNode(const CNode& node);
@@ -38,6 +38,8 @@ public:
     std::string GetName();
     void SetType(const std::string& type);
     std::string GetType();
+    std::shared_ptr<CNode> GetParentNode();
+    void SetParentNode(const std::shared_ptr<CNode>& pParent);
 
     virtual std::shared_ptr<CNode> Clone() = 0;
     virtual int32_t Decode(const std::vector<uint8_t>& bytes) = 0;
@@ -58,7 +60,6 @@ protected:
     int32_t GetLength();
     void    SetEndian(CEndianType endian);
     int32_t GetEndian();
-    std::shared_ptr<CNode> GetParentNode();
 
 private:
     bool mIsField;

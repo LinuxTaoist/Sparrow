@@ -28,7 +28,9 @@ public:
     std::shared_ptr<CNode> CreateParserWithJFile(const std::string& path);
     std::shared_ptr<CNode> CreateParserWithJString(const std::string& str);
     std::shared_ptr<CNode> DecodeWithParser(const std::shared_ptr<CNode>& pParser, const std::vector<uint8_t>& bytes);
-    void PrintAllNodes(const std::shared_ptr<CNode>& pNode);
+
+    void PrintConfigDetails(const std::shared_ptr<CNode>& pNode);
+    void PrintDataDetails(const std::shared_ptr<CNode>& pNode);
 
 private:
     CFactory();
