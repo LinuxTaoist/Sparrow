@@ -176,7 +176,9 @@ int main(int argc, char* argv[])
                     SPR_LOGE("CreateParserWithJString failed! \n");
                     return -1;
                 }
+
                 pParser->Decode(TEST_BIN_BYTES2);
+                // std::shared_ptr<CNode> pData = theFactory.DecodeWithParser(pParser, TEST_BIN_BYTES2);
                 theFactory.PrintAllNodes(pParser);
                 break;
             }

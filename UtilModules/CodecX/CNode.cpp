@@ -30,6 +30,7 @@ CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
     , mLength(-1)
     , mEndian(CENDIAN_BIG)
     , mName()
+    , mType()
     , mParentNode(pParent) {
 }
 
@@ -40,19 +41,19 @@ CNode::CNode(const CNode& node)
     , mLength(node.mLength)
     , mEndian(node.mEndian)
     , mName(node.mName)
+    , mType(node.mType)
     , mParentNode(node.mParentNode) {
 }
 
 CNode& CNode::operator = (const CNode& node) {
     if (this != &node) {
         mIsField = node.mIsField;
-        mDePos = node.mDePos;
-        mEnPos = node.mEnPos;
         mSIndex = node.mSIndex;
         mEIndex = node.mEIndex;
         mLength = node.mLength;
         mEndian = node.mEndian;
         mName = node.mName;
+        mType = node.mType;
         mParentNode = node.mParentNode;
     }
 

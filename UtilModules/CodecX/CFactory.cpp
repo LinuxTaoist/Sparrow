@@ -25,6 +25,8 @@
 #include "CFactory.h"
 #include "CJConfigParser.h"
 
+#define CLOG_TAG "CFactory"
+
 CFactory::CFactory() {
 
 }
@@ -51,6 +53,12 @@ std::shared_ptr<CNode> CFactory::CreateParserWithJFile(const std::string& path) 
 std::shared_ptr<CNode> CFactory::CreateParserWithJString(const std::string& str) {
     CJConfigParser theCfgParser(str);
     return theCfgParser.CJsonToNode();
+}
+
+std::shared_ptr<CNode> CFactory::DecodeWithParser(const std::shared_ptr<CNode>& pParser, const std::vector<uint8_t>& bytes) {
+    std::shared_ptr<CNode> pData = pParser->Clone();
+    int32_t ret = pData->Decode(bytes);
+    return (ret == -1) ? nullptr : pData;
 }
 
 int32_t CFactory::ReadFile(const std::string& path, std::string& str) {

@@ -21,8 +21,6 @@
 
 #include <stdio.h>
 
-#define CLOG_TAG "CLog"
-
 #define CLOGD(fmt, args...) printf("%4d %s D: " fmt, __LINE__, CLOG_TAG, ##args)
 #define CLOGI(fmt, args...) printf("%4d %s I: " fmt, __LINE__, CLOG_TAG, ##args)
 #define CLOGW(fmt, args...) printf("%4d %s W: " fmt, __LINE__, CLOG_TAG, ##args)

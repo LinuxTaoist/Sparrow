@@ -20,6 +20,8 @@
 #include "CUtils.h"
 #include "CAtom.h"
 
+#define CLOG_TAG "CAtom"
+
 CAtom::CAtom(const std::shared_ptr<CNode>& parent)
     : CNode(parent, false) {
 }
@@ -64,7 +66,6 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
     }
 
     int32_t len = -1;
-    std::string subBytes(bytes.begin() + pos, bytes.end());
     std::string type = GetType();
     if (type == TEXT_TYPE_U8 || type == TEXT_TYPE_S8) {
         len = 1;
@@ -79,13 +80,16 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
         return len;
     }
 
-    if (subBytes.size() < (size_t)len) {
-        CLOGE("Invalid subBytes size! len = %d, size = %d \n", len, (int32_t)subBytes.size());
+    if (pos + len > (int32_t)bytes.size()) {
+        CLOGE("Invalid size! size = %d, total = %d \n", pos + len, (int32_t)bytes.size());
         return len;
     }
 
-    mValue.assign(subBytes.begin(), subBytes.begin() + len);
+    std::vector<uint8_t> subBytes(bytes.begin() + pos, bytes.begin() + pos + len);
+    mValue.assign(subBytes.begin(), subBytes.end());
     DePosAdd(len);
+    CLOGD("Node[%s] [%s] %s -> %s\n", GetName().c_str(), GetType().c_str(),
+        CUtils::ToHexString(subBytes).c_str(), CUtils::ToHexString(mValue).c_str());
     return len;
 }
 
