@@ -21,7 +21,6 @@
 #include <string.h>
 #include <stdio.h>
 #include "CFactory.h"
-#include "FileUtils.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
@@ -36,25 +35,12 @@ int main(int argc, const char* argv[])
 
     std::string cfgPath = argv[1];
     CFactory& theFactory = CFactory::GetInstance();
-    std::shared_ptr<CNode> theParser = theFactory.CreateParserWithJFile(cfgPath);
     if (argc == 2) {
+        std::shared_ptr<CNode> theParser = theFactory.CreateParserWithCFile(cfgPath);
         theFactory.PrintConfigDetails(theParser);
     } else {
-        std::vector<uint8_t> bytes;
         std::string bytesPath = argv[2];
-        int ret = FileUtils::ReadCharTextToHexVector(bytesPath, bytes);
-        if (ret == -1) {
-            SPR_LOG("Read %s Failed! (%s)", bytesPath.c_str(), strerror(errno));
-            return -1;
-        }
-
-        std::shared_ptr<CNode> pData = theFactory.DecodeWithParser(theParser, bytes);
-        if (!pData) {
-            SPR_LOG("Decode %s Failed!", bytesPath.c_str());
-            return -1;
-        }
-
-        theFactory.PrintDataDetails(pData);
+        theFactory.DecodeWithCFileAndBFile(cfgPath, bytesPath);
     }
 
     return 0;

@@ -25,9 +25,10 @@
 class CFactory {
 public:
     static CFactory& GetInstance();
-    std::shared_ptr<CNode> CreateParserWithJFile(const std::string& path);
-    std::shared_ptr<CNode> CreateParserWithJString(const std::string& str);
+    std::shared_ptr<CNode> CreateParserWithCFile(const std::string& cfgPath);
+    std::shared_ptr<CNode> CreateParserWithCString(const std::string& cfgString);
     std::shared_ptr<CNode> DecodeWithParser(const std::shared_ptr<CNode>& pParser, const std::vector<uint8_t>& bytes);
+    int32_t DecodeWithCFileAndBFile(const std::string& cfgPath, const std::string& bytesPath);
 
     void PrintConfigDetails(const std::shared_ptr<CNode>& pNode);
     void PrintDataDetails(const std::shared_ptr<CNode>& pNode);

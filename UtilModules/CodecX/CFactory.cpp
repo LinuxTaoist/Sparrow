@@ -40,18 +40,18 @@ CFactory& CFactory::GetInstance() {
     return factory;
 }
 
-std::shared_ptr<CNode> CFactory::CreateParserWithJFile(const std::string& path) {
+std::shared_ptr<CNode> CFactory::CreateParserWithCFile(const std::string& cfgPath) {
     std::string text;
-    int32_t ret = ReadFile(path, text);
+    int32_t ret = ReadFile(cfgPath, text);
     if (ret <= 0) {
         return nullptr;
     }
 
-    return CreateParserWithJString(text);
+    return CreateParserWithCString(text);
 }
 
-std::shared_ptr<CNode> CFactory::CreateParserWithJString(const std::string& str) {
-    CJConfigParser theCfgParser(str);
+std::shared_ptr<CNode> CFactory::CreateParserWithCString(const std::string& cfgString) {
+    CJConfigParser theCfgParser(cfgString);
     return theCfgParser.CJsonToNode();
 }
 
@@ -65,6 +65,21 @@ std::shared_ptr<CNode> CFactory::DecodeWithParser(const std::shared_ptr<CNode>& 
     pData->SetParentNode(nullptr);
     int32_t ret = pData->Decode(bytes);
     return (ret == -1) ? nullptr : pData;
+}
+
+int32_t CFactory::DecodeWithCFileAndBFile(const std::string& cfgPath, const std::string& bytesPath) {
+    std::shared_ptr<CNode> pParser = CreateParserWithCFile(cfgPath);
+    if (!pParser) {
+        CLOGE("pParser is nullptr!\n");
+        return -1;
+    }
+
+    std::vector<uint8_t> hexBytes;
+    CUtils::ReadTextToHexVector(bytesPath, hexBytes);
+
+    std::shared_ptr<CNode> pData = DecodeWithParser(pParser, hexBytes);
+    PrintDataDetails(pData);
+    return 0;
 }
 
 int32_t CFactory::ReadFile(const std::string& path, std::string& str) {

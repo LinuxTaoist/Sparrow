@@ -19,6 +19,7 @@
 #include <string>
 #include <vector>
 #include <limits>
+#include <fstream>
 #include <sstream>
 #include <iomanip>
 #include <algorithm>
@@ -27,15 +28,6 @@
 
 namespace CUtils {
 
-/**
- * @brief  string（输入容器）转换为单个整数
- * @param [in]  in          待转换的输入string（源容器）
- * @param [out] out         输出整数
- * @param [in]  type        输入string的字节序
- * @param [in]  inOffset    输入string的起始字节偏移（基于源容器）
- * @param [in]  inMaxLen    输入string中从inOffset开始的最大转换字节数（0表示读取剩余所有字节）
- * @return int32_t          成功返回实际读取的字节数，失败返回-1
- */
 template <typename T>
 int32_t SToI(const std::string& in, T& out, CEndianType type = CENDIAN_BIG, int32_t inOffset = 0, int32_t inMaxLen = 0) {
     static_assert(std::is_integral<T>::value && !std::is_same<T, bool>::value, "T must be non-bool integer");
@@ -87,15 +79,6 @@ int32_t SToI(const std::string& in, T& out, CEndianType type = CENDIAN_BIG, int3
     return static_cast<int32_t>(readLen);
 }
 
-/**
- * @brief  string（输入容器）转换为整数vector
- * @param [in]  in          待转换的输入string（源容器）
- * @param [out] out         输出整数vector
- * @param [in]  type        输入string的字节序
- * @param [in]  inOffset    输入string的起始字节偏移（基于源容器）
- * @param [in]  inMaxLen    输入string中从inOffset开始的最大转换字节数（0表示不限制）
- * @return int32_t          成功返回实际转换的字节数，失败返回-1
- */
 template <typename T>
 int32_t SToV(const std::string& in, std::vector<T>& out, CEndianType type = CENDIAN_BIG, int32_t inOffset = 0, int32_t inMaxLen = 0) {
     static_assert(std::is_integral<T>::value && !std::is_same<T, bool>::value, "T must be non-bool integer");
@@ -139,13 +122,6 @@ int32_t SToV(const std::string& in, std::vector<T>& out, CEndianType type = CEND
     return convertedBytes;
 }
 
-/**
- * @brief  单个整数转换为string
- * @param [in]  in          输入整数
- * @param [out] out         输出string
- * @param [in]  type        输出string的字节序
- * @return int32_t          成功返回sizeof(T)，失败返回-1
- */
 template <typename T>
 int32_t IToS(const T& in, std::string& out, CEndianType type = CENDIAN_BIG) {
     static_assert(std::is_integral<T>::value && !std::is_same<T, bool>::value, "T must be non-bool integer");
@@ -168,13 +144,6 @@ int32_t IToS(const T& in, std::string& out, CEndianType type = CENDIAN_BIG) {
     return static_cast<int32_t>(elemSize);
 }
 
-/**
- * @brief  整数转换为vector<U>
- * @param [in]  in          待转换的整数
- * @param [out] out         输出vector
- * @param [in]  type        转换字节序
- * @return int32_t          成功返回实际转换的字节数，失败返回-1
- */
 template <typename T, typename U>
 int32_t IToV(const T& in, std::vector<U>& out, CEndianType type = CENDIAN_BIG) {
     static_assert(std::is_integral<T>::value && !std::is_same<T, bool>::value, "T must be non-bool integer");
@@ -208,15 +177,6 @@ int32_t IToV(const T& in, std::vector<U>& out, CEndianType type = CENDIAN_BIG) {
     return static_cast<int32_t>(srcSize);
 }
 
-/**
- * @brief  字节vector转换为整数
- * @param [in]  in          待转换的字节vector（源容器，需整数类型）
- * @param [out] out         输出整数
- * @param [in]  type        转换字节序
- * @param [in]  inOffset    输入vector的起始字节偏移（基于源容器，即vector转字节流后的偏移）
- * @param [in]  inMaxLen    输入vector中从inOffset开始的最大转换字节数（0表示读取剩余所有字节）
- * @return int32_t          成功返回实际读取的字节数，失败返回-1
- */
 template <typename T, typename U>
 int32_t VToI(const std::vector<T>& in, U& out, CEndianType type = CENDIAN_BIG, int32_t inOffset = 0, int32_t inMaxLen = 0) {
     static_assert(std::is_integral<T>::value && !std::is_same<T, bool>::value, "T must be non-bool integer");
@@ -294,16 +254,6 @@ int32_t VToI(const std::vector<T>& in, U& out, CEndianType type = CENDIAN_BIG, i
     return static_cast<int32_t>(readLen);
 }
 
-/**
- * @brief  整数vector（输入容器）转换为string
- * @param [in]  in              待转换的整数vector（源容器）
- * @param [out] out             输出string
- * @param [in]  type            转换字节序
- * @param [in]  inOffset        输入vector的起始字节偏移（基于源容器，即vector转字节流后的偏移）
- * @param [in]  inMaxLen        输入vector中从inOffset开始的最大转换字节数（0表示不限制）
- * @param [in]  strWriteOffset  输出string的写入起始偏移（默认-1=追加到末尾）
- * @return int32_t              成功返回实际转换的字节数，失败返回-1
- */
 template <typename T>
 int32_t VToS(const std::vector<T>& in, std::string& out, CEndianType type = CENDIAN_BIG,
              int32_t inOffset = 0, int32_t inMaxLen = 0, int32_t strWriteOffset = -1) {
@@ -354,15 +304,6 @@ int32_t VToS(const std::vector<T>& in, std::string& out, CEndianType type = CEND
     return static_cast<int32_t>(remainSrcBytes);
 }
 
-/**
- * @brief  vector<T> 转换为 vector<U>
- * @param [in]  in          待转换的vector<T>
- * @param [out] out         输出的vector<U>
- * @param [in]  type        转换字节序
- * @param [in]  inOffset    输入vector的起始字节偏移（基于源容器，即vector转字节流后的偏移）
- * @param [in]  inMaxLen    输入vector中从inOffset开始最大转换字节数（0表示不限制）
- * @return int32_t          成功返回实际转换的字节数，失败返回-1
- */
 template <typename T, typename U>
 int32_t VToV(const std::vector<T>& in, std::vector<U>& out, CEndianType type = CENDIAN_BIG,
             int32_t inOffset = 0, int32_t inMaxLen = 0) {
@@ -450,6 +391,8 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
 
     return ss.str();
 }
+
+ssize_t ReadTextToHexVector(const std::string& path, std::vector<uint8_t>& out);
 
 }; // namespace CUtils
 

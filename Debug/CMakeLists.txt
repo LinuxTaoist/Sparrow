@@ -48,9 +48,8 @@ target_link_libraries       (BinRShellX c epollevent sprlog rt pthread dl util)
 add_dependencies            (BinRShellX LibEpollEvent LibSprLog)
 
 # Bin propdump
-set(UTIL_SRC_FILES          ${PROJECT_PATH}/Util/FileUtils.cpp)
 aux_source_directory        (${SRC_DEBUG_PATH}/ProtoDump        SRC_PROTO_DUMP_PATH)
 aux_source_directory        (${PROJECT_PATH}/UtilModules/CodecX SRC_PROTO_DUMP_PATH)
-add_executable              (BinPropDump ${SRC_PROTO_DUMP_PATH} ${UTIL_SRC_FILES})
+add_executable              (BinPropDump ${SRC_PROTO_DUMP_PATH})
 target_include_directories  (BinPropDump PRIVATE ${PROJECT_PATH}/UtilModules/CodecX)
 set_target_properties       (BinPropDump PROPERTIES OUTPUT_NAME "propdump")

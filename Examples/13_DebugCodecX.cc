@@ -160,9 +160,9 @@ int main(int argc, char* argv[])
         switch(val) {
             case '1': {
                 CFactory& theFactory = CFactory::GetInstance();
-                std::shared_ptr<CNode> pParser = theFactory.CreateParserWithJString(TEST_JSON_STR1);
+                std::shared_ptr<CNode> pParser = theFactory.CreateParserWithCString(TEST_JSON_STR1);
                 if (!pParser)  {
-                    SPR_LOGE("CreateParserWithJString failed! \n");
+                    SPR_LOGE("CreateParserWithCString failed! \n");
                     return -1;
                 }
 
@@ -171,9 +171,9 @@ int main(int argc, char* argv[])
             }
             case '2': {
                 CFactory& theFactory = CFactory::GetInstance();
-                std::shared_ptr<CNode> pParser = theFactory.CreateParserWithJString(TEST_JSON_STR2);
+                std::shared_ptr<CNode> pParser = theFactory.CreateParserWithCString(TEST_JSON_STR2);
                 if (!pParser)  {
-                    SPR_LOGE("CreateParserWithJString failed! \n");
+                    SPR_LOGE("CreateParserWithCString failed! \n");
                     return -1;
                 }
 
