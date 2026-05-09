@@ -73,7 +73,7 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
         pCurNode->SetName(pName->valuestring);
     }
 
-    CLOGD("Node[%s]: type = %s \n", pCurNode->GetName().c_str(), pCurNode->GetType().c_str());
+    // CLOGD("Node[%s]: type = %s \n", pCurNode->GetName().c_str(), pCurNode->GetType().c_str());
     if (pCurNode->GetType() != TEXT_TYPE_DFIELD &&
         pCurNode->GetType() != TEXT_TYPE_SFIELD) {
         return pCurNode;
@@ -88,8 +88,8 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
     cJSON* pLenMode = cJSON_GetObjectItem(pJson, TEXT_LEN_MODE_TAG);
     if (cJSON_IsString(pLenMode)) {
         pField->SetLenMode(pLenMode->valuestring);
-        CLOGD("Node[%s]: lenRef = %s, lenMode = %s \n", pCurNode->GetName().c_str(),
-                        pField->GetLenReference().c_str(), pField->GetLenMode().c_str());
+        // CLOGD("Node[%s]: lenRef = %s, lenMode = %s \n", pCurNode->GetName().c_str(),
+        //                 pField->GetLenReference().c_str(), pField->GetLenMode().c_str());
     }
 
     cJSON* pChildren = cJSON_GetObjectItem(pJson, TEXT_CHILDREN_TAG);

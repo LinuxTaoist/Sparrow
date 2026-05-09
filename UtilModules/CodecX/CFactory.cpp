@@ -156,11 +156,11 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
     int start = offset;
 
     if (!pNode->IsField()) {
-        auto atom = std::dynamic_pointer_cast<CAtom>(pNode);
-        std::string hex = atom->DumpHexValue();
+        auto pAtom = std::dynamic_pointer_cast<CAtom>(pNode);
+        std::string hex = pAtom->DumpHexValue();
         int size = hex.empty() ? 0 : (hex.size() + 1) / 3;
 
-        CLOGI("%s[%02d-%02d] %s: 0x%s\n", indent.c_str(), start, start+size-1, name.c_str(), hex.c_str());
+        CLOGI("%s[%02d-%02d] %s: %s\n", indent.c_str(), start, start+size-1, name.c_str(), hex.c_str());
         offset += size;
         return;
     }
