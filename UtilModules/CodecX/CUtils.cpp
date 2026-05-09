@@ -41,4 +41,25 @@ ssize_t ReadTextToHexVector(const std::string& path, std::vector<uint8_t>& out) 
     return static_cast<ssize_t>(out.size());
 }
 
+int32_t ReadFile(const std::string& path, std::string& str) {
+    std::ifstream file(path, std::ios::in | std::ios::binary);
+    if (!file) {
+        return -1;
+    }
+
+    file.seekg(0, std::ios::end);
+    int32_t size = static_cast<int32_t>(file.tellg());
+    file.seekg(0, std::ios::beg);
+
+    str.resize(size);
+    file.read(&str[0], size);
+    if (!file.good() && !file.eof()) {
+        file.close();
+        return -1;
+    }
+
+    file.close();
+    return size;
+}
+
 } // namespace CUtils

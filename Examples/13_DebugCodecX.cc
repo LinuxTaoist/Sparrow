@@ -160,26 +160,26 @@ int main(int argc, char* argv[])
         switch(val) {
             case '1': {
                 CFactory& theFactory = CFactory::GetInstance();
-                std::shared_ptr<CNode> pParser = theFactory.CreateParserWithCString(TEST_JSON_STR1);
-                if (!pParser)  {
-                    SPR_LOGE("CreateParserWithCString failed! \n");
+                std::shared_ptr<CNode> pCfgParser = theFactory.CreateCfgParserByCfgString(TEST_JSON_STR1);
+                if (!pCfgParser)  {
+                    SPR_LOGE("CreateCfgParserByCfgString failed! \n");
                     return -1;
                 }
 
-                theFactory.PrintConfigDetails(pParser);
+                theFactory.PrintConfigDetails(pCfgParser);
                 break;
             }
             case '2': {
                 CFactory& theFactory = CFactory::GetInstance();
-                std::shared_ptr<CNode> pParser = theFactory.CreateParserWithCString(TEST_JSON_STR2);
-                if (!pParser)  {
-                    SPR_LOGE("CreateParserWithCString failed! \n");
+                std::shared_ptr<CNode> pCfgParser = theFactory.CreateCfgParserByCfgString(TEST_JSON_STR2);
+                if (!pCfgParser)  {
+                    SPR_LOGE("CreateCfgParserByCfgString failed! \n");
                     return -1;
                 }
 
-                std::shared_ptr<CNode> pData = theFactory.DecodeWithParser(pParser, TEST_BIN_BYTES2);
-                theFactory.PrintConfigDetails(pParser);
-                theFactory.PrintDataDetails(pData);
+                std::shared_ptr<CNode> pDataParser = theFactory.CreateDataParserByCfgParser(pCfgParser, TEST_BIN_BYTES2);
+                theFactory.PrintConfigDetails(pCfgParser);
+                theFactory.PrintDataDetails(pDataParser);
                 break;
             }
             case 'q':

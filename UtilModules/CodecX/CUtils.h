@@ -392,6 +392,7 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
     return ss.str();
 }
 
+int32_t ReadFile(const std::string& path, std::string& str);
 ssize_t ReadTextToHexVector(const std::string& path, std::vector<uint8_t>& out);
 
 }; // namespace CUtils

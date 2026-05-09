@@ -36,11 +36,11 @@ int main(int argc, const char* argv[])
     std::string cfgPath = argv[1];
     CFactory& theFactory = CFactory::GetInstance();
     if (argc == 2) {
-        std::shared_ptr<CNode> theParser = theFactory.CreateParserWithCFile(cfgPath);
-        theFactory.PrintConfigDetails(theParser);
+        std::shared_ptr<CNode> theCfgParser = theFactory.CreateCfgParserByCfgFile(cfgPath);
+        theFactory.PrintConfigDetails(theCfgParser);
     } else {
         std::string bytesPath = argv[2];
-        theFactory.DecodeWithCFileAndBFile(cfgPath, bytesPath);
+        theFactory.PrintDataDetailsByFiles(cfgPath, bytesPath);
     }
 
     return 0;

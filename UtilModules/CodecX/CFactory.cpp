@@ -22,6 +22,7 @@
 #include "CLog.h"
 #include "CAtom.h"
 #include "CField.h"
+#include "CUtils.h"
 #include "CFactory.h"
 #include "CJConfigParser.h"
 
@@ -40,68 +41,45 @@ CFactory& CFactory::GetInstance() {
     return factory;
 }
 
-std::shared_ptr<CNode> CFactory::CreateParserWithCFile(const std::string& cfgPath) {
+std::shared_ptr<CNode> CFactory::CreateCfgParserByCfgFile(const std::string& cfgPath) {
     std::string text;
-    int32_t ret = ReadFile(cfgPath, text);
+    int32_t ret = CUtils::ReadFile(cfgPath, text);
     if (ret <= 0) {
         return nullptr;
     }
 
-    return CreateParserWithCString(text);
+    return CreateCfgParserByCfgString(text);
 }
 
-std::shared_ptr<CNode> CFactory::CreateParserWithCString(const std::string& cfgString) {
+std::shared_ptr<CNode> CFactory::CreateCfgParserByCfgString(const std::string& cfgString) {
     CJConfigParser theCfgParser(cfgString);
     return theCfgParser.CJsonToNode();
 }
 
-std::shared_ptr<CNode> CFactory::DecodeWithParser(const std::shared_ptr<CNode>& pParser, const std::vector<uint8_t>& bytes) {
-    std::shared_ptr<CNode> pData = pParser->Clone();
-    if (!pData) {
+std::shared_ptr<CNode> CFactory::CreateDataParserByCfgParser(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes) {
+    std::shared_ptr<CNode> pDataParser = pCfgParser->Clone();
+    if (!pDataParser) {
         CLOGE("Create parser failed!\n");
         return nullptr;
     }
 
-    pData->SetParentNode(nullptr);
-    int32_t ret = pData->Decode(bytes);
-    return (ret == -1) ? nullptr : pData;
+    pDataParser->SetParentNode(nullptr);
+    int32_t ret = pDataParser->Decode(bytes);
+    return (ret == -1) ? nullptr : pDataParser;
 }
 
-int32_t CFactory::DecodeWithCFileAndBFile(const std::string& cfgPath, const std::string& bytesPath) {
-    std::shared_ptr<CNode> pParser = CreateParserWithCFile(cfgPath);
-    if (!pParser) {
-        CLOGE("pParser is nullptr!\n");
-        return -1;
+void CFactory::PrintDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath) {
+    std::shared_ptr<CNode> pCfgParser = CreateCfgParserByCfgFile(cfgPath);
+    if (!pCfgParser) {
+        CLOGE("pCfgParser is nullptr!\n");
+        return;
     }
 
     std::vector<uint8_t> hexBytes;
     CUtils::ReadTextToHexVector(bytesPath, hexBytes);
 
-    std::shared_ptr<CNode> pData = DecodeWithParser(pParser, hexBytes);
-    PrintDataDetails(pData);
-    return 0;
-}
-
-int32_t CFactory::ReadFile(const std::string& path, std::string& str) {
-    std::ifstream file(path, std::ios::in | std::ios::binary);
-    if (!file) {
-        return -1;
-    }
-
-    file.seekg(0, std::ios::end);
-    int32_t size = static_cast<int32_t>(file.tellg());
-    file.seekg(0, std::ios::beg);
-
-    str.resize(size);
-    file.read(&str[0], size);
-    if (!file.good() && !file.eof()) {
-        CLOGE("Read %s failed! (%s) \n", path.c_str(), strerror(errno));
-        file.close();
-        return -1;
-    }
-
-    file.close();
-    return size;
+    std::shared_ptr<CNode> pDataParser = CreateDataParserByCfgParser(pCfgParser, hexBytes);
+    PrintDataDetails(pDataParser);
 }
 
 static void PrintCfgNode(const std::shared_ptr<CNode>& pNode, int level) {

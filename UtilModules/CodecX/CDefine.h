@@ -28,6 +28,7 @@
 #define TEXT_LEN_MODE_COUNT         "count"
 #define TEXT_LEN_MODE_BYTE          "byte"
 #define TEXT_LEN_MODE_BIT           "bit"
+#define TEXT_LEN_MODE_REMAIN        "remain"
 
 #define TEXT_TYPE_TAG               "type"
 #define TEXT_TYPE_U8                "u8"
