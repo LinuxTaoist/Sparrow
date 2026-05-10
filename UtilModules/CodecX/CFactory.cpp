@@ -148,13 +148,32 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
 
     std::string lenMode = field->GetLenMode();
     if (lenMode == TEXT_LEN_MODE_BYTES) {
+        const size_t TRUNCATE_THRESHOLD = 10;  // 超过此字节数自动截断
+        const size_t LEADING_BYTES    = 4;  // 显示前N个字节
+        const size_t TRAILING_BYTES   = 2;   // 显示后N个字节
+
+        size_t totalBytes = children.size();
         std::string hexString;
-        for (auto& child : children) {
-            auto pAtom = std::dynamic_pointer_cast<CAtom>(child);
-            hexString += pAtom->DumpHexValue() + " ";
+        auto appendHexRange = [&](size_t start, size_t end) {
+            for (size_t i = start; i < end; i++) {
+                auto pAtom = std::dynamic_pointer_cast<CAtom>(children[i]);
+                hexString += pAtom->DumpHexValue() + " ";
+            }
+        };
+
+        if (totalBytes <= TRUNCATE_THRESHOLD) {
+            appendHexRange(0, totalBytes);
+        } else {
+            appendHexRange(0, LEADING_BYTES);
+            hexString += "... ";
+            appendHexRange(totalBytes - TRAILING_BYTES, totalBytes);
+            hexString += "(" + std::to_string(totalBytes) + " bytes)";
         }
-        CLOGI("%s[%02d - %02d] %s: %s\n", indent.c_str(), start, (int32_t)(start + children.size() - 1), name.c_str(), hexString.c_str());
-        offset += children.size();
+
+        CLOGI("%s[%02d - %02d] %s: %s\n",
+            indent.c_str(), start, (int32_t)(start + totalBytes - 1),
+            name.c_str(), hexString.c_str());
+        offset += totalBytes;
         return;
     }
 

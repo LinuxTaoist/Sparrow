@@ -32,8 +32,8 @@
                         "name": "sensor_data",
                         "type": "dynamic_field",
                         "len_ref": "data_len",
-                        "len_mode": "count",
-                        "child_template": {"name": "data_byte", "type": "u8"}
+                        "len_mode": "bytes",
+                        "child_template": {"name": " ", "type": "u8"}
                     }
                 ]
             }
