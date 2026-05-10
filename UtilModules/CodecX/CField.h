@@ -34,6 +34,8 @@ public:
     std::string GetLenReference();
     void SetLenMode(const std::string& lenMode);
     std::string GetLenMode();
+    void SetLenFormula(const std::string& lenFormula);
+    std::string GetLenFormula();
     void SetChildNodesTag(const std::string& childNodesTag);
     std::string GetChildNodesTag();
     int32_t AddNode(const std::shared_ptr<CNode>& node);
@@ -54,6 +56,7 @@ private:
 private:
     std::string mLenReference;  // 容量引用
     std::string mLenMode;       // 容量模式
+    std::string mLenFormula;    // 容量公式
     std::string mChildNodesTag; // 子节点容器标签
     std::vector<std::shared_ptr<CNode>> mChildNodes;
 };

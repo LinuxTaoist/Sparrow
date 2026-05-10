@@ -92,6 +92,12 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
         //                 pField->GetLenReference().c_str(), pField->GetLenMode().c_str());
     }
 
+    cJSON* pLenFormula = cJSON_GetObjectItem(pJson, TEXT_LEN_FORMULA_TAG);
+    if (cJSON_IsString(pLenFormula)) {
+        pField->SetLenFormula(pLenFormula->valuestring);
+        // CLOGD("Node[%s]: lenFormula = %s \n", pCurNode->GetName().c_str(), pField->GetLenFormula().c_str());
+    }
+
     cJSON* pChildren = cJSON_GetObjectItem(pJson, TEXT_CHILDREN_TAG);
     if (cJSON_IsArray(pChildren)) {
         cJSON *pSubObj = nullptr;

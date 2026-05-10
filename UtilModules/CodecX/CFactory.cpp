@@ -97,9 +97,10 @@ static void PrintCfgNode(const std::shared_ptr<CNode>& pNode, int level) {
     }
 
     std::shared_ptr<CField> pField = std::dynamic_pointer_cast<CField>(pNode);
-    if (pNode->GetType() == TEXT_TYPE_DFIELD) {
+    if (pField->GetType() == TEXT_TYPE_DFIELD) {
         CLOGI("%s - len_ref : %s\n", indent.c_str(), pField->GetLenReference().c_str());
         CLOGI("%s - len_mode: %s\n", indent.c_str(), pField->GetLenMode().c_str());
+        CLOGI("%s - len_formula: %s\n", indent.c_str(), pField->GetLenFormula().c_str());
     }
 
     std::vector<std::shared_ptr<CNode>> childNodes = pField->GetChildNodes();
@@ -144,6 +145,19 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
 
     auto field = std::dynamic_pointer_cast<CField>(pNode);
     auto children = field->GetChildNodes();
+
+    std::string lenMode = field->GetLenMode();
+    if (lenMode == TEXT_LEN_MODE_BYTES) {
+        std::string hexString;
+        for (auto& child : children) {
+            auto pAtom = std::dynamic_pointer_cast<CAtom>(child);
+            hexString += pAtom->DumpHexValue() + " ";
+        }
+        CLOGI("%s[%02d - %02d] %s: %s\n", indent.c_str(), start, (int32_t)(start + children.size() - 1), name.c_str(), hexString.c_str());
+        offset += children.size();
+        return;
+    }
+
     if (type == TEXT_TYPE_DFIELD) {
         CLOGI("%s%s[%zu]\n", indent.c_str(), name.c_str(), children.size());
         for (auto& child : children) {

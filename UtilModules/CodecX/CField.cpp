@@ -33,6 +33,7 @@ CField::CField(const CField& field)
     : CNode(field)
     , mLenReference(field.mLenReference)
     , mLenMode(field.mLenMode)
+    , mLenFormula(field.mLenFormula)
     , mChildNodesTag(field.mChildNodesTag) {
     for (const auto& child : field.mChildNodes) {
         if (child) {
@@ -49,6 +50,7 @@ CField& CField::operator = (const CField& field) {
     CNode::operator = (field);
     mLenReference = field.mLenReference;
     mLenMode = field.mLenMode;
+    mLenFormula = field.mLenFormula;
     mChildNodesTag = field.mChildNodesTag;
 
     mChildNodes.clear();
@@ -78,6 +80,14 @@ void CField::SetLenMode(const std::string& lenMode) {
 
 std::string CField::GetLenMode() {
     return mLenMode;
+}
+
+void CField::SetLenFormula(const std::string& lenFormula) {
+    mLenFormula = lenFormula;
+}
+
+std::string CField::GetLenFormula() {
+    return mLenFormula;
 }
 
 void CField::SetChildNodesTag(const std::string& childNodesTag) {
@@ -167,58 +177,59 @@ int32_t CField::CalculateDynamicFieldSize() {
     }
 
     int32_t len = 0;
-    std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pParentNode->GetNode(GetLenReference()));
-    if (pLenAtom) {
-        int32_t ret = pLenAtom->GetIntValue(len);
-        if (ret == -1) {
-            CLOGE("Node[%s] GetIntValue failed!\n", pLenAtom->GetName().c_str());
+    std::string lenRef = GetLenReference();
+    std::string lenMode = GetLenMode();
+    std::string lenFormula = GetLenFormula();
+    if (lenRef.compare(0, strlen(TEXT_LEN_REF_FIXED), TEXT_LEN_REF_FIXED) == 0) {
+        len = atoi(lenRef.substr(strlen(TEXT_LEN_REF_FIXED)).c_str());
+        if (len < 0) {
+            CLOGE("Node[%s] Invalid fixed value: %s\n", GetName().c_str(), lenRef.c_str());
             return -1;
+        }
+    } else {
+        std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pParentNode->GetNode(GetLenReference()));
+        if (pLenAtom) {
+            int32_t ret = pLenAtom->GetIntValue(len);
+            if (ret == -1) {
+                CLOGE("Node[%s] GetIntValue failed!\n", pLenAtom->GetName().c_str());
+                return -1;
+            }
         }
     }
 
-    std::string lenMode = GetLenMode();
-    if (lenMode == TEXT_LEN_MODE_COUNT) {
-        // Do nothing
-    } else if (lenMode.compare(0, strlen(TEXT_LEN_MODE_FIXED), TEXT_LEN_MODE_FIXED) == 0) {
-        int32_t fixedVal = atoi(lenMode.substr(strlen(TEXT_LEN_MODE_FIXED)).c_str());
-        if (fixedVal < 0) {
-            CLOGE("Node[%s] Invalid fixed value: %s\n", GetName().c_str(), lenMode.c_str());
-            return -1;
-        }
-        len = fixedVal;
-    } else if (lenMode == TEXT_LEN_MODE_BIT) {
-        len = len / 8;
-    } else if (lenMode.find(TEXT_LEN_MODE_REMAIN) != std::string::npos) {
+    if (!lenFormula.empty()) {
         std::string numExpr;
         size_t pos = 0;
-        while (pos < lenMode.size()) {
-            if (lenMode.compare(pos, 7, TEXT_LEN_MODE_CUR_POS) == 0) {
+        while (pos < lenFormula.size()) {
+            int32_t curPosTextLen = strlen(TEXT_LEN_FORMULA_CURPOS);
+            int32_t lenRefTextLen = strlen(TEXT_LEN_REF_TAG);
+            if (lenFormula.compare(pos, curPosTextLen, TEXT_LEN_FORMULA_CURPOS) == 0) {
                 numExpr += std::to_string(GetDePos());
-                pos += 7;
-            } else if (lenMode.compare(pos, 6, TEXT_LEN_MODE_REMAIN) == 0) {
+                pos += curPosTextLen;
+            } else if (lenFormula.compare(pos, lenRefTextLen, TEXT_LEN_REF_TAG) == 0) {
                 numExpr += std::to_string(len);
-                pos += 6;
+                pos += lenRefTextLen;
             } else {
-                numExpr += lenMode[pos];
+                numExpr += lenFormula[pos];
                 pos++;
             }
         }
 
         int32_t exprResult = 0;
         int32_t ret = CUtils::CalculateFromString(numExpr, exprResult);
-        CLOGD("Node[%s] len_mode: %s, calc: %s = %d\n",
-              GetName().c_str(), lenMode.c_str(), numExpr.c_str(), exprResult);
+        CLOGD("Node[%s] lenFormula: %s, calc: %s = %d\n",
+                GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), exprResult);
 
         if (ret < 0 || exprResult < 0) {
             CLOGE("Node[%s] Expression failed! ret = %d, result = %d\n",
-                  GetName().c_str(), ret, exprResult);
+                    GetName().c_str(), ret, exprResult);
             return -1;
         }
-
         len = exprResult;
-    } else {
-        CLOGE("Node[%s] Unsupported len_mode: %s\n", GetName().c_str(), lenMode.c_str());
-        return -1;
+    }
+
+    if (lenMode == TEXT_LEN_MODE_BIT) {
+        len = len / 8;
     }
 
     return len;
@@ -236,7 +247,7 @@ int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
         return -1;
     }
 
-    // CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
+    CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
     int32_t ret = 0;
     std::shared_ptr<CNode> pTmpNode = mChildNodes[0];
     mChildNodes.clear();

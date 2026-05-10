@@ -20,16 +20,19 @@
 #define __CDEFINE_H__
 
 #define TEXT_NAME_TAG               "name"
-#define TEXT_LEN_REF_TAG            "len_ref"
 #define TEXT_CHILDREN_TAG           "children"
 #define TEXT_CHILD_TEMPLATE_TAG     "child_template"
+
+#define TEXT_LEN_REF_TAG            "len_ref"
+#define TEXT_LEN_REF_FIXED          "fixed_"
 
 #define TEXT_LEN_MODE_TAG           "len_mode"
 #define TEXT_LEN_MODE_COUNT         "count"
 #define TEXT_LEN_MODE_BIT           "bit"
-#define TEXT_LEN_MODE_REMAIN        "remind"
-#define TEXT_LEN_MODE_FIXED         "fixed_"
-#define TEXT_LEN_MODE_CUR_POS       "cur_pos"
+#define TEXT_LEN_MODE_BYTES         "bytes"
+
+#define TEXT_LEN_FORMULA_TAG        "len_formula"
+#define TEXT_LEN_FORMULA_CURPOS     "curpos"
 
 #define TEXT_TYPE_TAG               "type"
 #define TEXT_TYPE_U8                "u8"
