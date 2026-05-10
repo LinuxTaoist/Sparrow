@@ -17,6 +17,7 @@
  *
  */
 #include <algorithm>
+#include <string.h>
 #include "CLog.h"
 #include "CDefine.h"
 #include "CAtom.h"
@@ -158,36 +159,85 @@ int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
     return ret;
 }
 
-int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
+int32_t CField::CalculateDynamicFieldSize() {
     std::shared_ptr<CField> pParentNode = std::dynamic_pointer_cast<CField>(GetParentNode());
     if (!pParentNode) {
         CLOGE("Node[%s] pParentNode is nullptr!\n", GetName().c_str());
         return -1;
     }
 
-    std::shared_ptr<CNode> pLenNode = pParentNode->GetNode(GetLenReference());
-    std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pLenNode);
-    if (!pLenAtom) {
-        CLOGE("Node[%s] pLenAtom is nullptr!\n", GetName().c_str());
+    int32_t len = 0;
+    std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pParentNode->GetNode(GetLenReference()));
+    if (pLenAtom) {
+        int32_t ret = pLenAtom->GetIntValue(len);
+        if (ret == -1) {
+            CLOGE("Node[%s] GetIntValue failed!\n", pLenAtom->GetName().c_str());
+            return -1;
+        }
+    }
+
+    std::string lenMode = GetLenMode();
+    if (lenMode == TEXT_LEN_MODE_COUNT) {
+        // Do nothing
+    } else if (lenMode.compare(0, strlen(TEXT_LEN_MODE_FIXED), TEXT_LEN_MODE_FIXED) == 0) {
+        int32_t fixedVal = atoi(lenMode.substr(strlen(TEXT_LEN_MODE_FIXED)).c_str());
+        if (fixedVal < 0) {
+            CLOGE("Node[%s] Invalid fixed value: %s\n", GetName().c_str(), lenMode.c_str());
+            return -1;
+        }
+        len = fixedVal;
+    } else if (lenMode == TEXT_LEN_MODE_BIT) {
+        len = len / 8;
+    } else if (lenMode.find(TEXT_LEN_MODE_REMAIN) != std::string::npos) {
+        std::string numExpr;
+        size_t pos = 0;
+        while (pos < lenMode.size()) {
+            if (lenMode.compare(pos, 7, TEXT_LEN_MODE_CUR_POS) == 0) {
+                numExpr += std::to_string(GetDePos());
+                pos += 7;
+            } else if (lenMode.compare(pos, 6, TEXT_LEN_MODE_REMAIN) == 0) {
+                numExpr += std::to_string(len);
+                pos += 6;
+            } else {
+                numExpr += lenMode[pos];
+                pos++;
+            }
+        }
+
+        int32_t exprResult = 0;
+        int32_t ret = CUtils::CalculateFromString(numExpr, exprResult);
+        CLOGD("Node[%s] len_mode: %s, calc: %s = %d\n",
+              GetName().c_str(), lenMode.c_str(), numExpr.c_str(), exprResult);
+
+        if (ret < 0 || exprResult < 0) {
+            CLOGE("Node[%s] Expression failed! ret = %d, result = %d\n",
+                  GetName().c_str(), ret, exprResult);
+            return -1;
+        }
+
+        len = exprResult;
+    } else {
+        CLOGE("Node[%s] Unsupported len_mode: %s\n", GetName().c_str(), lenMode.c_str());
         return -1;
     }
 
-    int32_t count = 0;
-    int32_t ret = pLenAtom->GetIntValue(count);
-    if (ret == -1) {
-        std::vector<uint8_t> orginBytes;
-        pLenAtom->GetVecValue(orginBytes);
-        CLOGE("Node[%s] GetIntValue failed! (orgin[%d]: %s) \n", GetName().c_str(),
-                    (int32_t)orginBytes.size(), CUtils::ToHexString(orginBytes).c_str());
-        return -1;
-    }
+    return len;
+}
 
+int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
     if (mChildNodes.empty()) {
         CLOGE("Node[%s] mChildNodes is empty!\n", GetName().c_str());
         return -1;
     }
 
+    int32_t count = CalculateDynamicFieldSize();
+    if (count < 0) {
+        CLOGE("Node[%s] CalculateDynamicFieldSize failed!\n", GetName().c_str());
+        return -1;
+    }
+
     // CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
+    int32_t ret = 0;
     std::shared_ptr<CNode> pTmpNode = mChildNodes[0];
     mChildNodes.clear();
     for (int i = 0; i < count; i++) {

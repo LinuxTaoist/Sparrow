@@ -63,7 +63,6 @@ std::shared_ptr<CNode> CFactory::CreateDataParserByCfgParser(const std::shared_p
         return nullptr;
     }
 
-    pDataParser->SetParentNode(nullptr);
     int32_t ret = pDataParser->Decode(bytes);
     return (ret == -1) ? nullptr : pDataParser;
 }

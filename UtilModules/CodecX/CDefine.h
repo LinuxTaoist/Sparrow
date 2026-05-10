@@ -26,9 +26,10 @@
 
 #define TEXT_LEN_MODE_TAG           "len_mode"
 #define TEXT_LEN_MODE_COUNT         "count"
-#define TEXT_LEN_MODE_BYTE          "byte"
 #define TEXT_LEN_MODE_BIT           "bit"
-#define TEXT_LEN_MODE_REMAIN        "remain"
+#define TEXT_LEN_MODE_REMAIN        "remind"
+#define TEXT_LEN_MODE_FIXED         "fixed_"
+#define TEXT_LEN_MODE_CUR_POS       "cur_pos"
 
 #define TEXT_TYPE_TAG               "type"
 #define TEXT_TYPE_U8                "u8"

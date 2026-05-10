@@ -39,13 +39,14 @@
 - **len_ref**: 表示动态容器中元素个数或元素总字节数的引用字段
 - **len_mode**:
     - `count`:      \
-      表示 `len_ref` 是一个计数器，表示动态容器中元素个数
-    - `byte`:     \
-      表示 `len_ref` 是一个字节长度，表示动态容器中元素总字节数
+      表示 `len_ref` 是一个计数器，`size = len_ref`
     - `bit` (扩展):   \
-      表示 `len_ref` 是一个位长度，表示动态容器中元素总位长度
-    - `remain` (扩展):   \
-      表示 `len_ref` 是一个剩余长度，表示动态容器中元素总字节数
+      表示 `len_ref` 是一个位长度，`size = len_ref / 8`
+    - `(remain - a) / b`    \
+      表示一个计算公式，`size = (len_ref - a) / b`
+    - `fixed_x`:   \
+      表示使用x字节的固定长度，`size = x`
+
 - **child_template**: 表示动态容器中元素的模板
 
 ## 配置
