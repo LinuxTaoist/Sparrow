@@ -19,6 +19,7 @@
 #ifndef __CDEFINE_H__
 #define __CDEFINE_H__
 
+#define TEXT_HEAD_FLAG_TAG          "head_flag"
 #define TEXT_NAME_TAG               "name"
 #define TEXT_CHILDREN_TAG           "children"
 #define TEXT_CHILD_TEMPLATE_TAG     "child_template"

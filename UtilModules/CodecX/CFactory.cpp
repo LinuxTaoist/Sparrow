@@ -67,20 +67,6 @@ std::shared_ptr<CNode> CFactory::CreateDataParserByCfgParser(const std::shared_p
     return (ret == -1) ? nullptr : pDataParser;
 }
 
-void CFactory::PrintDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath) {
-    std::shared_ptr<CNode> pCfgParser = CreateCfgParserByCfgFile(cfgPath);
-    if (!pCfgParser) {
-        CLOGE("pCfgParser is nullptr!\n");
-        return;
-    }
-
-    std::vector<uint8_t> hexBytes;
-    CUtils::ReadTextToHexVector(bytesPath, hexBytes);
-
-    std::shared_ptr<CNode> pDataParser = CreateDataParserByCfgParser(pCfgParser, hexBytes);
-    PrintDataDetails(pDataParser);
-}
-
 static void PrintCfgNode(const std::shared_ptr<CNode>& pNode, int level) {
     if (!pNode) {
         CLOGE("pNode is nullptr! \n");
@@ -148,9 +134,9 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
 
     std::string lenMode = field->GetLenMode();
     if (lenMode == TEXT_LEN_MODE_BYTES) {
-        const size_t TRUNCATE_THRESHOLD = 10;  // 超过此字节数自动截断
-        const size_t LEADING_BYTES    = 4;  // 显示前N个字节
-        const size_t TRAILING_BYTES   = 2;   // 显示后N个字节
+        const size_t TRUNCATE_THRESHOLD = 10;   // 超过此字节数自动截断
+        const size_t LEADING_BYTES    = 4;      // 显示前N个字节
+        const size_t TRAILING_BYTES   = 2;      // 显示后N个字节
 
         size_t totalBytes = children.size();
         std::string hexString;
@@ -206,4 +192,135 @@ void CFactory::PrintDataDetails(const std::shared_ptr<CNode>& pNode) {
     CLOGI("===================================================\n");
     CLOGI("Total size: %d bytes\n", offset);
     CLOGI("===================================================\n");
+}
+
+void CFactory::PrintDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath) {
+    std::shared_ptr<CNode> pCfgParser = CreateCfgParserByCfgFile(cfgPath);
+    if (!pCfgParser) {
+        CLOGE("Load %s Failed!\n", cfgPath.c_str());
+        return;
+    }
+
+    std::vector<uint8_t> hexBytes;
+    int32_t ret = CUtils::ReadTextToHexVector(bytesPath, hexBytes);
+    if (ret < 0) {
+        CLOGE("Read %s failed!\n", bytesPath.c_str());
+        return;
+    }
+
+    std::shared_ptr<CNode> pDataParser = CreateDataParserByCfgParser(pCfgParser, hexBytes);
+    PrintDataDetails(pDataParser);
+}
+
+bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vector<uint8_t>& headers) {
+  std::shared_ptr<CField> pCfgRootField = std::dynamic_pointer_cast<CField>(pCfgParser);
+    if (!pCfgRootField) {
+        CLOGE("pCfgRootField is nullptr!\n");
+        return false;
+    }
+
+    std::shared_ptr<CNode> pHeadFlagNode = pCfgRootField->GetNode(TEXT_HEAD_FLAG_TAG);
+    if (!pHeadFlagNode && !(pHeadFlagNode->IsField())) {
+        CLOGE("pHeadFlagNode[%p] is invalid!\n", pHeadFlagNode.get());
+        return false;
+    }
+
+    std::shared_ptr<CAtom> pHeadFlagAtom = std::dynamic_pointer_cast<CAtom>(pHeadFlagNode);
+    if (!pHeadFlagAtom) {
+        CLOGE("pHeadFlagAtom[%p] is invalid!\n", pHeadFlagAtom.get());
+        return false;
+    }
+
+    std::vector<uint8_t> frameHeader;
+    int32_t ret = pHeadFlagAtom->GetVecValue(frameHeader);
+    if (ret < 0 || frameHeader.empty()) {
+        CLOGE("Get frame header(%s) failed! ret = %d, size = %d\n", ret, (int32_t)frameHeader.size());
+        return false;
+    }
+
+    headers.assign(frameHeader.begin(), frameHeader.end());
+    return true;
+}
+
+void CFactory::PrintMultiDataDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes) {
+    if (bytes.empty()) {
+        CLOGE("Input bytes is empty!\n");
+        return;
+    }
+
+    std::vector<uint8_t> frameHeader;
+    bool hasFrameHeader = GetFrameHeader(pCfgParser, frameHeader);
+    if (!hasFrameHeader || frameHeader.empty()) {
+        std::shared_ptr<CNode> pFrame = CreateDataParserByCfgParser(pCfgParser, bytes);
+        PrintDataDetails(pFrame);
+        return;
+    }
+
+    int32_t frameCount = 0;
+    auto currentIt = bytes.begin();
+    const auto endIt = bytes.end();
+    const size_t headerLen = frameHeader.size();
+
+    while (currentIt != endIt) {
+        auto frameIt = std::search(currentIt, endIt, frameHeader.begin(), frameHeader.end());
+        if (frameIt == endIt) {
+            break;
+        }
+
+        size_t offset = std::distance(bytes.begin(), frameIt);
+        size_t remaining = std::distance(frameIt, endIt);
+        if (remaining < headerLen) {
+            break;
+        }
+
+        std::vector<uint8_t> frameBuf(frameIt, endIt);
+        std::shared_ptr<CNode> pFrame = CreateDataParserByCfgParser(pCfgParser, frameBuf);
+        if (pFrame) {
+            frameCount++;
+            int frameSize = 0;
+            CLOGI("===================================================\n");
+            CLOGI("               Frame %03d Parse                    \n", frameCount);
+            CLOGI("Offset: 0x%04zx (%zu bytes)\n", offset, offset);
+            CLOGI("===================================================\n");
+
+            PrintDataNode(pFrame, 0, frameSize);
+
+            CLOGI("===================================================\n");
+            CLOGI("Frame %03d size: %d bytes\n", frameCount, frameSize);
+            CLOGI("===================================================\n\n");
+
+            currentIt = frameIt + frameSize;
+        } else {
+            CLOGD("Invalid frame at offset 0x%04zx, skipping header\n", offset);
+            currentIt = frameIt + headerLen;
+        }
+    }
+
+    CLOGI("===================================================\n");
+    CLOGI("          Multi-Frame Parsing Complete             \n");
+    CLOGI("Total valid frames: %d\n", frameCount);
+    CLOGI("Total processed bytes: %zu/%zu\n", std::distance(bytes.begin(), currentIt), bytes.size());
+    if (currentIt != endIt) {
+        CLOGI("Remaining unparsed bytes: %zu\n", std::distance(currentIt, endIt));
+    }
+
+    CLOGI("===================================================\n");
+    return;
+}
+
+void CFactory::PrintMultiDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath) {
+    std::shared_ptr<CNode> pCfgParser = CreateCfgParserByCfgFile(cfgPath);
+    if (!pCfgParser) {
+        CLOGE("Load %s Failed!\n", cfgPath.c_str());
+        return;
+    }
+
+    std::vector<uint8_t> hexBytes;
+    int32_t ret = CUtils::ReadTextToHexVector(bytesPath, hexBytes);
+    if (ret <= 0) {
+        CLOGE("Read %s Failed!\n", bytesPath.c_str());
+        return;
+    }
+
+    PrintMultiDataDetails(pCfgParser, hexBytes);
 }

@@ -20,7 +20,9 @@ namespace CUtils {
 ssize_t ReadTextToHexVector(const std::string& path, std::vector<uint8_t>& out) {
     out.clear();
     std::ifstream f(path);
-    if (!f) return -1;
+    if (!f) {
+        return -1;
+    }
 
     std::stringstream ss;
     ss << f.rdbuf();

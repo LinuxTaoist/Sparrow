@@ -32,10 +32,13 @@ public:
     void PrintConfigDetails(const std::shared_ptr<CNode>& pNode);
     void PrintDataDetails(const std::shared_ptr<CNode>& pNode);
     void PrintDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath);
+    void PrintMultiDataDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
+    void PrintMultiDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath);
 
 private:
     CFactory();
     ~CFactory();
+    bool GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vector<uint8_t>& headers);
 };
 
 #endif // __CFACTORY_H__
