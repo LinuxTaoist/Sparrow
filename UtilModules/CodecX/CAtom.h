@@ -61,6 +61,9 @@ public:
     std::string DumpHexValue();
 
 private:
+    int32_t DecodeLeb128(const std::vector<uint8_t>& bytes, int32_t& offset, int32_t limitLen = 4);
+
+private:
     std::vector<uint8_t> mValue;
 };
 

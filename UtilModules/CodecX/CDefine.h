@@ -45,6 +45,7 @@
 #define TEXT_TYPE_S16               "s16"
 #define TEXT_TYPE_S32               "s32"
 #define TEXT_TYPE_S64               "s64"
+#define TEXT_TYPE_LEB128            "leb128"
 #define TEXT_TYPE_SFIELD            "static_field"
 #define TEXT_TYPE_DFIELD            "dynamic_field"
 #define TEXT_TYPE_FIELD_SUFFIX      "_field"

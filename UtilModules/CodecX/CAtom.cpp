@@ -75,6 +75,12 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
         len = 4;
     } else if (type == TEXT_TYPE_U64 || type == TEXT_TYPE_S64) {
         len = 8;
+    } else if (type == TEXT_TYPE_LEB128) {
+        int32_t ret = DecodeLeb128(bytes, len);
+        if (ret < 0) {
+            CLOGE("Invalid LEB128 value! \n");
+            return ret;
+        }
     } else {
         CLOGE("Invalid type! type = %s \n", type.c_str());
         return len;
@@ -96,6 +102,36 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
 int32_t CAtom::Encode(std::vector<uint8_t>& bytes) {
     bytes.insert(bytes.end(), mValue.begin(), mValue.end());
     return 0;
+}
+
+int32_t CAtom::DecodeLeb128(const std::vector<uint8_t>& bytes, int32_t& offset, int32_t limitLen = 4) {
+    if (offset >= bytes.size()) {
+        CLOGE("Invalid offset! offset = %d, size = %d \n", offset, (int32_t)bytes.size());
+        return -1;
+    }
+
+    int32_t value = 0;
+    int32_t multiplier = 1;
+    int32_t bytesRead = 0;
+
+    while (offset + bytesRead < bytes.size() && bytesRead < 4) {
+        uint8_t byte = bytes[offset + bytesRead];
+        value += (byte & 0x7F) * multiplier;
+        multiplier *= 128;
+        bytesRead++;
+
+        if (!(byte & 0x80)) {
+            break;
+        }
+    }
+
+    if (bytesRead == limitLen && (bytes[offset + 3] & 0x80)) {
+        CLOGE("Invalid LEB128 value! value = %d \n", value);
+        return -1;
+    }
+
+    offset += bytesRead;
+    return value;
 }
 
 std::string CAtom::DumpHexValue() {
