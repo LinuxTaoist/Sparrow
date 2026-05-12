@@ -1,24 +1,7 @@
-/**
- *---------------------------------------------------------------------------------------------------------------------
- *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
- *
- *  @file       : CFactory.cpp
- *  @author     : Xiang.D (dx_65535@163.com)
- *  @version    : 1.0
- *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2026/05/05
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
- *---------------------------------------------------------------------------------------------------------------------
- *  2026/05/05 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
- */
 #include <fstream>
 #include <errno.h>
 #include <string.h>
+#include <algorithm>
 #include "CLog.h"
 #include "CAtom.h"
 #include "CField.h"
@@ -156,7 +139,7 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
             hexString += "(" + std::to_string(totalBytes) + " bytes)";
         }
 
-        CLOGI("%s[%02d - %02d] %s: %s\n",
+        CLOGI("%s[%02d-%02d] %s: %s\n",
             indent.c_str(), start, (int32_t)(start + totalBytes - 1),
             name.c_str(), hexString.c_str());
         offset += totalBytes;
@@ -177,57 +160,43 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
     }
 }
 
-void CFactory::PrintDataDetails(const std::shared_ptr<CNode>& pNode) {
-    if (!pNode) {
-        return;
+static int32_t PrintFrameDetails(const std::shared_ptr<CNode>& pFrame, int32_t frameNum, size_t offset) {
+    if (!pFrame) {
+        CLOGE("Frame is nullptr!\n");
+        return -1;
     }
 
-    CLOGI("===================================================\n");
-    CLOGI("               Protocol Parse                      \n");
-    CLOGI("===================================================\n");
+    int32_t frameSize = 0;
+    CLOGI("\n");
+    CLOGI("Frame %03d | Offset: %zu\n", frameNum, offset);
+    CLOGI("---------------------------------------------------\n");
+    PrintDataNode(pFrame, 0, frameSize);
+    CLOGI("---------------------------------------------------\n");
 
-    int offset = 0;
-    PrintDataNode(pNode, 0, offset);
-
-    CLOGI("===================================================\n");
-    CLOGI("Total size: %d bytes\n", offset);
-    CLOGI("===================================================\n");
-}
-
-void CFactory::PrintDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath) {
-    std::shared_ptr<CNode> pCfgParser = CreateCfgParserByCfgFile(cfgPath);
-    if (!pCfgParser) {
-        CLOGE("Load %s Failed!\n", cfgPath.c_str());
-        return;
-    }
-
-    std::vector<uint8_t> hexBytes;
-    int32_t ret = CUtils::ReadTextToHexVector(bytesPath, hexBytes);
-    if (ret < 0) {
-        CLOGE("Read %s failed!\n", bytesPath.c_str());
-        return;
-    }
-
-    std::shared_ptr<CNode> pDataParser = CreateDataParserByCfgParser(pCfgParser, hexBytes);
-    PrintDataDetails(pDataParser);
+    return frameSize;
 }
 
 bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vector<uint8_t>& headers) {
-  std::shared_ptr<CField> pCfgRootField = std::dynamic_pointer_cast<CField>(pCfgParser);
+    if (!pCfgParser) {
+        CLOGE("pCfgParser is nullptr!\n");
+        return false;
+    }
+
+    std::shared_ptr<CField> pCfgRootField = std::dynamic_pointer_cast<CField>(pCfgParser);
     if (!pCfgRootField) {
         CLOGE("pCfgRootField is nullptr!\n");
         return false;
     }
 
     std::shared_ptr<CNode> pHeadFlagNode = pCfgRootField->GetNode(TEXT_HEAD_FLAG_TAG);
-    if (!pHeadFlagNode && !(pHeadFlagNode->IsField())) {
-        CLOGE("pHeadFlagNode[%p] is invalid!\n", pHeadFlagNode.get());
+    if (!pHeadFlagNode || pHeadFlagNode->IsField()) {
+        // CLOGW("pHeadFlagNode is invalid!\n");
         return false;
     }
 
     std::shared_ptr<CAtom> pHeadFlagAtom = std::dynamic_pointer_cast<CAtom>(pHeadFlagNode);
     if (!pHeadFlagAtom) {
-        CLOGE("pHeadFlagAtom[%p] is invalid!\n", pHeadFlagAtom.get());
+        CLOGE("pHeadFlagAtom is nullptr!\n");
         return false;
     }
 
@@ -238,89 +207,84 @@ bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vec
         return false;
     }
 
+    headers.clear();
     headers.assign(frameHeader.begin(), frameHeader.end());
     return true;
 }
 
-void CFactory::PrintMultiDataDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes) {
-    if (bytes.empty()) {
-        CLOGE("Input bytes is empty!\n");
+void CFactory::PrintProtocolDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes) {
+    if (!pCfgParser || bytes.empty()) {
+        CLOGE("Invalid param! pCfgParser = %p, bytes.size() = %d\n", pCfgParser.get(), (int32_t)bytes.size());
         return;
     }
 
-    std::vector<uint8_t> frameHeader;
-    bool hasFrameHeader = GetFrameHeader(pCfgParser, frameHeader);
-    if (!hasFrameHeader || frameHeader.empty()) {
-        std::shared_ptr<CNode> pFrame = CreateDataParserByCfgParser(pCfgParser, bytes);
-        PrintDataDetails(pFrame);
-        return;
-    }
+    std::string protocolName = pCfgParser->GetName().empty() ? "customer" : pCfgParser->GetName();
+    CLOGI("===================================================\n");
+    CLOGI("Protocol Parsing | %s | Total: %zu bytes\n", protocolName.c_str(), bytes.size());
+    CLOGI("===================================================\n");
 
     int32_t frameCount = 0;
-    auto currentIt = bytes.begin();
-    const auto endIt = bytes.end();
-    const size_t headerLen = frameHeader.size();
+    int32_t proccedCount = 0;
+    std::vector<uint8_t> frameHeader;
+    bool hasFrameHeader = GetFrameHeader(pCfgParser, frameHeader);
+    if (hasFrameHeader && !frameHeader.empty()) {
+        auto currentIt = bytes.begin();
+        const auto endIt = bytes.end();
+        const size_t headerLen = frameHeader.size();
 
-    while (currentIt != endIt) {
-        auto frameIt = std::search(currentIt, endIt, frameHeader.begin(), frameHeader.end());
-        if (frameIt == endIt) {
-            break;
+        while (currentIt != endIt) {
+            auto frameIt = std::search(currentIt, endIt, frameHeader.begin(), frameHeader.end());
+            if (frameIt == endIt) {
+                break;
+            }
+
+            size_t offset = std::distance(bytes.begin(), frameIt);
+            size_t remaining = std::distance(frameIt, endIt);
+            if (remaining < headerLen) {
+                break;
+            }
+
+            std::vector<uint8_t> frameBuf(frameIt, endIt);
+            std::shared_ptr<CNode> pFrame = CreateDataParserByCfgParser(pCfgParser, frameBuf);
+            if (pFrame) {
+                frameCount++;
+                int32_t frameSize = PrintFrameDetails(pFrame, frameCount, offset);
+                if (frameSize > 0 && static_cast<size_t>(frameSize) <= remaining) {
+                    currentIt = frameIt + frameSize;
+                } else {
+                    CLOGD("Frame %d size invalid (%d bytes), skipping header\n", frameCount, frameSize);
+                    currentIt = frameIt + headerLen;
+                }
+            }
         }
 
-        size_t offset = std::distance(bytes.begin(), frameIt);
-        size_t remaining = std::distance(frameIt, endIt);
-        if (remaining < headerLen) {
-            break;
+        proccedCount = (int32_t)std::distance(bytes.begin(), currentIt);
+        if (currentIt != endIt) {
+            CLOGI("Remaining unparsed bytes: %zu\n", std::distance(currentIt, endIt));
         }
-
-        std::vector<uint8_t> frameBuf(frameIt, endIt);
-        std::shared_ptr<CNode> pFrame = CreateDataParserByCfgParser(pCfgParser, frameBuf);
-        if (pFrame) {
-            frameCount++;
-            int frameSize = 0;
-            CLOGI("===================================================\n");
-            CLOGI("               Frame %03d Parse                    \n", frameCount);
-            CLOGI("Offset: 0x%04zx (%zu bytes)\n", offset, offset);
-            CLOGI("===================================================\n");
-
-            PrintDataNode(pFrame, 0, frameSize);
-
-            CLOGI("===================================================\n");
-            CLOGI("Frame %03d size: %d bytes\n", frameCount, frameSize);
-            CLOGI("===================================================\n\n");
-
-            currentIt = frameIt + frameSize;
-        } else {
-            CLOGD("Invalid frame at offset 0x%04zx, skipping header\n", offset);
-            currentIt = frameIt + headerLen;
-        }
+    } else {
+        std::shared_ptr<CNode> pFrame = CreateDataParserByCfgParser(pCfgParser, bytes);
+        proccedCount = PrintFrameDetails(pFrame, 0, 0);
     }
 
     CLOGI("===================================================\n");
-    CLOGI("          Multi-Frame Parsing Complete             \n");
-    CLOGI("Total valid frames: %d\n", frameCount);
-    CLOGI("Total processed bytes: %zu/%zu\n", std::distance(bytes.begin(), currentIt), bytes.size());
-    if (currentIt != endIt) {
-        CLOGI("Remaining unparsed bytes: %zu\n", std::distance(currentIt, endIt));
-    }
-
+    CLOGI("Summary | Frame: %d | Processed: %d/%zu\n", frameCount, proccedCount, bytes.size());
     CLOGI("===================================================\n");
-    return;
 }
 
-void CFactory::PrintMultiDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath) {
+void CFactory::PrintProtocolDetails(const std::string& cfgPath, const std::string& bytesPath) {
     std::shared_ptr<CNode> pCfgParser = CreateCfgParserByCfgFile(cfgPath);
     if (!pCfgParser) {
-        CLOGE("Load %s Failed!\n", cfgPath.c_str());
+        CLOGE("Load config failed: %s\n", cfgPath.c_str());
         return;
     }
 
     std::vector<uint8_t> hexBytes;
     int32_t ret = CUtils::ReadTextToHexVector(bytesPath, hexBytes);
     if (ret <= 0) {
-        CLOGE("Read %s Failed!\n", bytesPath.c_str());
+        CLOGE("Read bytes failed: %s\n", bytesPath.c_str());
         return;
     }
 
-    PrintMultiDataDetails(pCfgParser, hexBytes);
+    PrintProtocolDetails(pCfgParser, hexBytes);
 }

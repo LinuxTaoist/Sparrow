@@ -179,7 +179,7 @@ int main(int argc, char* argv[])
 
                 std::shared_ptr<CNode> pDataParser = theFactory.CreateDataParserByCfgParser(pCfgParser, TEST_BIN_BYTES2);
                 theFactory.PrintConfigDetails(pCfgParser);
-                theFactory.PrintDataDetails(pDataParser);
+                theFactory.PrintProtocolDetails(pDataParser, TEST_BIN_BYTES2);
                 break;
             }
             case 'q':

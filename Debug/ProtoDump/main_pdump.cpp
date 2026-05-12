@@ -40,7 +40,7 @@ int main(int argc, const char* argv[])
         theFactory.PrintConfigDetails(theCfgParser);
     } else {
         std::string bytesPath = argv[2];
-        theFactory.PrintDataDetailsByFiles(cfgPath, bytesPath);
+        theFactory.PrintProtocolDetails(cfgPath, bytesPath);
     }
 
     return 0;

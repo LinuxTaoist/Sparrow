@@ -217,8 +217,8 @@ int32_t CField::CalculateDynamicFieldSize() {
 
         int32_t exprResult = 0;
         int32_t ret = CUtils::CalculateFromString(numExpr, exprResult);
-        CLOGD("Node[%s] lenFormula: %s, calc: %s = %d\n",
-                GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), exprResult);
+        // CLOGD("Node[%s] lenFormula: %s, calc: %s = %d\n",
+        //         GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), exprResult);
 
         if (ret < 0 || exprResult < 0) {
             CLOGE("Node[%s] Expression failed! ret = %d, result = %d\n",
@@ -247,7 +247,7 @@ int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
         return -1;
     }
 
-    CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
+    // CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
     int32_t ret = 0;
     std::shared_ptr<CNode> pTmpNode = mChildNodes[0];
     mChildNodes.clear();

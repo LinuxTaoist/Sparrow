@@ -30,10 +30,8 @@ public:
     std::shared_ptr<CNode> CreateDataParserByCfgParser(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
 
     void PrintConfigDetails(const std::shared_ptr<CNode>& pNode);
-    void PrintDataDetails(const std::shared_ptr<CNode>& pNode);
-    void PrintDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath);
-    void PrintMultiDataDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
-    void PrintMultiDataDetailsByFiles(const std::string& cfgPath, const std::string& bytesPath);
+    void PrintProtocolDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
+    void PrintProtocolDetails(const std::string& cfgPath, const std::string& bytesPath);
 
 private:
     CFactory();
