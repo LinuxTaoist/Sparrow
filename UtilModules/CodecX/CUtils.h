@@ -393,6 +393,7 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
 int32_t ReadFile(const std::string& path, std::string& str);
 ssize_t ReadHexTextToHexVector(const std::string& path, std::vector<uint8_t>& out);
 int32_t CalculateFromString(const std::string& expr, int32_t& result);
+int32_t DecodeLeb128(const std::vector<uint8_t>& bytes, int32_t& offset, int32_t limitLen = 4);
 
 }; // namespace CUtils
 

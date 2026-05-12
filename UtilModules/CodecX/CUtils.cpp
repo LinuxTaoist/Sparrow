@@ -195,7 +195,7 @@ int32_t CalculateFromString(const std::string& expr, int32_t& result) {
             }
 
             if (!hasNumber) {
-                return -2; // 无效表达式：运算符前无数字
+                return -2;
             }
 
             numStack.push_back(current);
@@ -214,10 +214,9 @@ int32_t CalculateFromString(const std::string& expr, int32_t& result) {
             continue;
         }
 
-        return -2; // 无效字符
+        return -2;
     }
 
-    // 处理最后一个数字
     if (hasNumber) {
         numStack.push_back(current);
     }
@@ -235,11 +234,40 @@ int32_t CalculateFromString(const std::string& expr, int32_t& result) {
     }
 
     if (numStack.size() != 1) {
-        return -2; // 无效表达式
+        return -2;
     }
 
     result = numStack[0];
     return 0;
+}
+
+int32_t DecodeLeb128(const std::vector<uint8_t>& bytes, int32_t& offset, int32_t limitLen) {
+    if (offset >= (int32_t)bytes.size()) {
+        return -1;
+    }
+
+    int32_t value = 0;
+    int32_t multiplier = 1;
+    int32_t bytesRead = 0;
+
+    while ((bytesRead < limitLen) &&
+           ((offset + bytesRead) < (int32_t)bytes.size()) ) {
+        uint8_t byte = bytes[offset + bytesRead];
+        value += (byte & 0x7F) * multiplier;
+        multiplier *= 128;
+        bytesRead++;
+
+        if (!(byte & 0x80)) {
+            break;
+        }
+    }
+
+    if ((bytesRead == limitLen) && (bytes[offset + 3] & 0x80)) {
+        return -1;
+    }
+
+    offset += bytesRead;
+    return value;
 }
 
 } // namespace CUtils
