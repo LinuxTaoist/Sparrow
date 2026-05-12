@@ -73,6 +73,19 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
         pCurNode->SetName(pName->valuestring);
     }
 
+    cJSON* pValue = cJSON_GetObjectItem(pJson, TEXT_VALUE_TAG);
+    if (pValue && !pCurNode->IsField()) {
+        std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(pCurNode);
+        if (pAtom) {
+            if (cJSON_IsString(pValue)) {
+                pAtom->SetStrValue(pValue->valuestring);
+            } else if (cJSON_IsNumber(pValue)) {
+                uint64_t numVal = static_cast<uint64_t>(pValue->valuedouble);
+                pAtom->SetIntValue(numVal);
+            }
+        }
+    }
+
     // CLOGD("Node[%s]: type = %s \n", pCurNode->GetName().c_str(), pCurNode->GetType().c_str());
     if (pCurNode->GetType() != TEXT_TYPE_DFIELD &&
         pCurNode->GetType() != TEXT_TYPE_SFIELD) {

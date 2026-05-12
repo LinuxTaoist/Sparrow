@@ -234,7 +234,7 @@ bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vec
     std::vector<uint8_t> frameHeader;
     int32_t ret = pHeadFlagAtom->GetVecValue(frameHeader);
     if (ret < 0 || frameHeader.empty()) {
-        CLOGE("Get frame header(%s) failed! ret = %d, size = %d\n", ret, (int32_t)frameHeader.size());
+        CLOGE("Get frame header failed! ret = %d, size = %d\n", ret, (int32_t)frameHeader.size());
         return false;
     }
 
