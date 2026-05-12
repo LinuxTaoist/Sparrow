@@ -173,11 +173,9 @@ int32_t CalculateFromString(const std::string& expr, int32_t& result) {
             }
 
             if (!opStack.empty()) {
-                opStack.pop_back(); // 弹出左括号
+                opStack.pop_back();
             }
 
-            // ===================== 核心修复 =====================
-            // 括号计算结果作为当前数字，使后续运算符能正常识别
             if (!numStack.empty()) {
                 current = numStack.back();
                 numStack.pop_back();
