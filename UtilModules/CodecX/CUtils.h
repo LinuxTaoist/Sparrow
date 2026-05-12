@@ -19,10 +19,8 @@
 #include <string>
 #include <vector>
 #include <limits>
-#include <fstream>
 #include <sstream>
 #include <iomanip>
-#include <algorithm>
 #include <type_traits>
 #include "CDefine.h"
 
@@ -393,7 +391,7 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
 }
 
 int32_t ReadFile(const std::string& path, std::string& str);
-ssize_t ReadTextToHexVector(const std::string& path, std::vector<uint8_t>& out);
+ssize_t ReadHexTextToHexVector(const std::string& path, std::vector<uint8_t>& out);
 int32_t CalculateFromString(const std::string& expr, int32_t& result);
 
 }; // namespace CUtils

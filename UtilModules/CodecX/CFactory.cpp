@@ -280,7 +280,7 @@ void CFactory::PrintProtocolDetails(const std::string& cfgPath, const std::strin
     }
 
     std::vector<uint8_t> hexBytes;
-    int32_t ret = CUtils::ReadTextToHexVector(bytesPath, hexBytes);
+    int32_t ret = CUtils::ReadHexTextToHexVector(bytesPath, hexBytes);
     if (ret <= 0) {
         CLOGE("Read bytes failed: %s\n", bytesPath.c_str());
         return;

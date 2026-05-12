@@ -13,35 +13,11 @@
  *  2025/12/19 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <fstream>
+#include <algorithm>
 #include "CUtils.h"
 
 namespace CUtils {
-
-ssize_t ReadTextToHexVector(const std::string& path, std::vector<uint8_t>& out) {
-    out.clear();
-    std::ifstream f(path);
-    if (!f) {
-        return -1;
-    }
-
-    std::stringstream ss;
-    ss << f.rdbuf();
-    std::string content = ss.str();
-
-    std::string hexChars;
-    for (char c : content) {
-        if (isxdigit(static_cast<unsigned char>(c))) {
-            hexChars += c;
-        }
-    }
-
-    for (size_t i = 0; i + 1 < hexChars.size(); i += 2) {
-        uint8_t byte = static_cast<uint8_t>(std::stoi(hexChars.substr(i, 2), nullptr, 16));
-        out.push_back(byte);
-    }
-
-    return static_cast<ssize_t>(out.size());
-}
 
 int32_t ReadFile(const std::string& path, std::string& str) {
     std::ifstream file(path, std::ios::in | std::ios::binary);
@@ -62,6 +38,47 @@ int32_t ReadFile(const std::string& path, std::string& str) {
 
     file.close();
     return size;
+}
+
+ssize_t ReadHexTextToHexVector(const std::string& path, std::vector<uint8_t>& out) {
+    out.clear();
+    std::ifstream f(path, std::ios::binary | std::ios::ate);
+    if (!f) return -1;
+
+    const auto fileSize = f.tellg();
+    if (fileSize == 0) return 0;
+
+    const size_t detectSize = std::min(static_cast<size_t>(fileSize), 1024UL);
+    std::vector<char> buf(detectSize);
+    f.seekg(0);
+    if (!f.read(buf.data(), detectSize)) return -1;
+
+    size_t hexCount = 0;
+    for (unsigned char c : buf)
+        if (isxdigit(c)) hexCount++;
+
+    const bool isTextHex = (static_cast<double>(hexCount) / detectSize) >= 0.9;
+    f.seekg(0);
+
+    if (isTextHex) {
+        std::string content((std::istreambuf_iterator<char>(f)), {});
+        std::string hexStr;
+        hexStr.reserve(content.size());
+
+        for (unsigned char c : content)
+            if (isxdigit(c)) hexStr += c;
+
+        out.reserve(hexStr.size() / 2);
+        for (size_t i = 0; i + 1 < hexStr.size(); i += 2)
+            out.push_back(static_cast<uint8_t>(std::stoi(hexStr.substr(i, 2), nullptr, 16)));
+
+        return static_cast<ssize_t>(out.size());
+    } else {
+        out.resize(static_cast<size_t>(fileSize));
+        return f.read(reinterpret_cast<char*>(out.data()), fileSize)
+            ? static_cast<ssize_t>(fileSize)
+            : -1;
+    }
 }
 
 // 通用四则运算计算器（纯函数，无副作用）
