@@ -48,7 +48,7 @@ public:
     int32_t Encode(std::vector<uint8_t>& bytes) override;
 
 private:
-    void RelinkChildren(const std::shared_ptr<CField>& pThisField);
+    void RelinkChildren(const std::shared_ptr<CField>& pParentField);
     int32_t CalculateDynamicFieldSize();
     int32_t CalculateChildNodesValueSum(int32_t& sum);
     int32_t DecodeStaticField(const std::vector<uint8_t>& bytes);

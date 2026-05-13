@@ -144,13 +144,13 @@ std::shared_ptr<CNode> CField::Clone() {
     return pClone;
 }
 
-void CField::RelinkChildren(const std::shared_ptr<CField>& pThisField) {
+void CField::RelinkChildren(const std::shared_ptr<CField>& pParentField) {
     for (auto& child : mChildNodes) {
         if (!child) {
             continue;
         }
 
-        child->SetParentNode(pThisField);
+        child->SetParentNode(pParentField);
         std::shared_ptr<CField> pChildField = std::dynamic_pointer_cast<CField>(child);
         if (pChildField) {
             pChildField->RelinkChildren(pChildField);
