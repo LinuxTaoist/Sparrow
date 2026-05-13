@@ -148,3 +148,7 @@ std::shared_ptr<CNode> CNode::GetParentNode() {
 void CNode::SetParentNode(const std::shared_ptr<CNode>& pParent) {
     mParentNode = pParent;
 }
+
+std::shared_ptr<CNode> GetNodeByPath(const std::string& path) {
+    return nullptr;
+}

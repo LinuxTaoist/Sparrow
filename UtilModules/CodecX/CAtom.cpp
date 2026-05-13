@@ -58,6 +58,10 @@ std::shared_ptr<CNode> CAtom::Clone() {
     return std::make_shared<CAtom>(*this);
 }
 
+std::shared_ptr<CNode> CAtom::GetNodeByPath(const std::string& path) {
+    return nullptr;
+}
+
 int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
     int32_t pos = GetDePos();
     if (pos < 0 || pos >= (int32_t)bytes.size()) {

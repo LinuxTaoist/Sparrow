@@ -42,6 +42,7 @@ public:
     void SetParentNode(const std::shared_ptr<CNode>& pParent);
 
     virtual std::shared_ptr<CNode> Clone() = 0;
+    virtual std::shared_ptr<CNode> GetNodeByPath(const std::string& path) = 0;
     virtual int32_t Decode(const std::vector<uint8_t>& bytes) = 0;
     virtual int32_t Encode(std::vector<uint8_t>& bytes) = 0;
 

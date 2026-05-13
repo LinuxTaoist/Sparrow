@@ -19,7 +19,7 @@
         {
             "name": "sensor_list",
             "type": "dynamic_field",
-            "len_ref": "sensor_cnt",
+            "len_ref": "../sensor_cnt",
             "len_mode": "count",
             "child_template": {
                 "name": "single_sensor",
@@ -31,7 +31,7 @@
                     {
                         "name": "sensor_data",
                         "type": "dynamic_field",
-                        "len_ref": "data_len",
+                        "len_ref": "../data_len",
                         "len_mode": "bytes",
                         "child_template": {"name": " ", "type": "u8"}
                     }

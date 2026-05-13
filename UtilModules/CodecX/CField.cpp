@@ -144,6 +144,60 @@ std::shared_ptr<CNode> CField::Clone() {
     return pClone;
 }
 
+std::shared_ptr<CNode> CField::GetNodeByPath(const std::string& path) {
+    if (path.empty()) {
+        CLOGE("Node[%s] path is empty!\n", GetName().c_str());
+        return nullptr;
+    }
+
+    size_t start = 0;
+    size_t end = path.find('/');
+    std::vector<std::string> parts;
+    while (end != std::string::npos) {
+        std::string part = path.substr(start, end - start);
+        if (!part.empty() && part != ".") { // 忽略空段和当前节点标记
+            parts.push_back(part);
+        }
+        start = end + 1;
+        end = path.find('/', start);
+    }
+    std::string lastPart = path.substr(start);
+    if (!lastPart.empty() && lastPart != ".") {
+        parts.push_back(lastPart);
+    }
+
+    if (parts.empty()) {
+        CLOGE("Node[%s] path is empty!\n", GetName().c_str());
+        return nullptr;
+    }
+
+    std::shared_ptr<CNode> pNode = nullptr;
+    for (const std::string& part : parts) {
+        if (part == "..") {
+            pNode = pNode ? pNode->GetParentNode() : GetParentNode();
+        } else {
+            if (pNode) {
+                std::shared_ptr<CField> pFieldNode = std::dynamic_pointer_cast<CField>(pNode);
+                if (!pFieldNode) {
+                    CLOGE("Node[%s] is not a container, cannot find child: %s\n",
+                          pNode->GetName().c_str(), part.c_str());
+                    return nullptr;
+                }
+                pNode = pFieldNode->GetNode(part);
+            } else {
+                pNode = GetNode(part);
+            }
+        }
+
+        if (!pNode) {
+            CLOGE("Node[%s] Node found: %s in path %s\n", GetName().c_str(), part.c_str(), path.c_str());
+            return nullptr;
+        }
+    }
+
+    return pNode;
+}
+
 void CField::RelinkChildren(const std::shared_ptr<CField>& pParentField) {
     for (auto& child : mChildNodes) {
         if (!child) {
@@ -170,12 +224,6 @@ int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
 }
 
 int32_t CField::CalculateDynamicFieldSize() {
-    std::shared_ptr<CField> pParentNode = std::dynamic_pointer_cast<CField>(GetParentNode());
-    if (!pParentNode) {
-        CLOGE("Node[%s] pParentNode is nullptr!\n", GetName().c_str());
-        return -1;
-    }
-
     int32_t len = 0;
     std::string lenRef = GetLenReference();
     std::string lenMode = GetLenMode();
@@ -197,7 +245,7 @@ int32_t CField::CalculateDynamicFieldSize() {
         }
     } else {
         // 模式2: 引用其他节点长度模式
-        std::shared_ptr<CNode> pLenNode = pParentNode->GetNode(lenRef);
+        std::shared_ptr<CNode> pLenNode = GetNodeByPath(lenRef);
         if (!pLenNode) {
             CLOGE("Node[%s] pLenNode is nullptr!\n", GetName().c_str());
             return -1;
