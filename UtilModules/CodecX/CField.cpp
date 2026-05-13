@@ -181,20 +181,80 @@ int32_t CField::CalculateDynamicFieldSize() {
     std::string lenMode = GetLenMode();
     std::string lenFormula = GetLenFormula();
     if (lenRef.compare(0, strlen(TEXT_LEN_REF_FIXED), TEXT_LEN_REF_FIXED) == 0) {
+        // 模式1: 固定长度模式 (len_ref = "fixed_N")
+        // 配置示例:
+        // {
+        //     "name": "msg_time",
+        //     "type": "dynamic_field",
+        //     "len_ref": "fixed_8",
+        //     "len_mode": "bytes",
+        //     "child_template": {"name": " ", "type": "u8"}
+        // }
         len = atoi(lenRef.substr(strlen(TEXT_LEN_REF_FIXED)).c_str());
         if (len < 0) {
             CLOGE("Node[%s] Invalid fixed value: %s\n", GetName().c_str(), lenRef.c_str());
             return -1;
         }
     } else {
-        std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pParentNode->GetNode(GetLenReference()));
-        if (pLenAtom) {
+        // 模式2: 引用其他节点长度模式
+        std::shared_ptr<CNode> pLenNode = pParentNode->GetNode(lenRef);
+        if (!pLenNode) {
+            CLOGE("Node[%s] pLenNode is nullptr!\n", GetName().c_str());
+            return -1;
+        }
+
+        if (pLenNode->IsField()) {
+            // 子模式2.1: 引用Filed节点 (计算其所有子节点数值之和)
+            // 配置示例:
+            // {"name": "bms_count", "type": "u8"},
+            // {
+            //     "name": "bms_pack_counts",
+            //     "type": "dynamic_field",
+            //     "len_ref": "bms_count",
+            //     "len_mode": "bytes",
+            //     "child_template": {"name": "pack_count", "type": "u8"}
+            // },
+            // {
+            //     "name": "battery_pack_codes",
+            //     "type": "dynamic_field",
+            //     "len_ref": "bms_pack_counts",
+            //     "len_mode": "bytes",
+            //     "len_formula": "len_ref * 24",
+            //     "child_template": {"name": "pack_code", "type": "u8"}
+            // }
+            std::shared_ptr<CField> pLenField = std::dynamic_pointer_cast<CField>(pLenNode);
+            int32_t ret = pLenField->CalculateChildNodesValueSum(len);
+            if (ret == -1) {
+                CLOGE("Node[%s] CalculateChildNodesValueSum failed!\n", pLenField->GetName().c_str());
+                return -1;
+            }
+        } else {
+            // 子模式2.2: 引用Atom节点 (直接获取数值)
+            // 配置示例:
+            // {"name": "vin_len", "type": "u16"},
+            // {
+            //     "name": "vin_code",
+            //     "type": "dynamic_field",
+            //     "len_ref": "vin_len",
+            //     "len_mode": "bytes",
+            //     "child_template": {"name": " ", "type": "u8"}
+            // }
+            std::shared_ptr<CAtom> pLenAtom = std::dynamic_pointer_cast<CAtom>(pLenNode);
+            if (!pLenAtom) {
+                CLOGE("Node[%s] pLenAtom is nullptr!\n", GetName().c_str());
+                return -1;
+            }
+
             int32_t ret = pLenAtom->GetIntValue(len);
             if (ret == -1) {
                 CLOGE("Node[%s] GetIntValue failed!\n", pLenAtom->GetName().c_str());
                 return -1;
             }
         }
+    }
+
+    if (lenMode == TEXT_LEN_MODE_BIT) {
+        len = len / 8;
     }
 
     if (!lenFormula.empty()) {
@@ -217,22 +277,34 @@ int32_t CField::CalculateDynamicFieldSize() {
 
         int32_t exprResult = 0;
         int32_t ret = CUtils::CalculateFromString(numExpr, exprResult);
-        // CLOGD("Node[%s] lenFormula: %s, calc: %s = %d\n",
-        //         GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), exprResult);
-
         if (ret < 0 || exprResult < 0) {
-            CLOGE("Node[%s] Expression failed! [%s -> %s] ret = %d, result = %d\n",
+            CLOGE("Node[%s] Calculate failed! [%s -> %s] ret = %d, result = %d\n",
                     GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), ret, exprResult);
             return -1;
         }
         len = exprResult;
     }
 
-    if (lenMode == TEXT_LEN_MODE_BIT) {
-        len = len / 8;
+    return len;
+}
+
+int32_t CField::CalculateChildNodesValueSum(int32_t& sum) {
+    for (auto& childNode : mChildNodes) {
+        std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(childNode);
+        if (!pAtom) {
+            continue;
+        }
+
+        int32_t value = 0;
+        int32_t ret = pAtom->GetIntValue(value);
+        if (ret == -1) {
+            CLOGE("Node[%s] GetIntValue failed!\n", pAtom->GetName().c_str());
+            return -1;
+        }
+        sum += value;
     }
 
-    return len;
+    return 0;
 }
 
 int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {

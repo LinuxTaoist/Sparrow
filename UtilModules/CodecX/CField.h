@@ -50,6 +50,7 @@ public:
 private:
     void RelinkChildren(const std::shared_ptr<CField>& pThisField);
     int32_t CalculateDynamicFieldSize();
+    int32_t CalculateChildNodesValueSum(int32_t& sum);
     int32_t DecodeStaticField(const std::vector<uint8_t>& bytes);
     int32_t DecodeDynamicField(const std::vector<uint8_t>& bytes);
 

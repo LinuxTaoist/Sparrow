@@ -80,7 +80,7 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
             if (cJSON_IsString(pValue)) {
                 pAtom->SetStrValue(pValue->valuestring);
             } else if (cJSON_IsNumber(pValue)) {
-                uint64_t numVal = static_cast<uint64_t>(pValue->valuedouble);
+                uint64_t numVal = static_cast<uint64_t>(pValue->valueint);
                 pAtom->SetIntValue(numVal);
             }
         }
