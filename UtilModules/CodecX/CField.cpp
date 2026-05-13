@@ -221,8 +221,8 @@ int32_t CField::CalculateDynamicFieldSize() {
         //         GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), exprResult);
 
         if (ret < 0 || exprResult < 0) {
-            CLOGE("Node[%s] Expression failed! ret = %d, result = %d\n",
-                    GetName().c_str(), ret, exprResult);
+            CLOGE("Node[%s] Expression failed! [%s -> %s] ret = %d, result = %d\n",
+                    GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), ret, exprResult);
             return -1;
         }
         len = exprResult;
