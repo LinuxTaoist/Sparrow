@@ -53,7 +53,7 @@
 | --           | -- |
 |name          |  容器名称 |
 |type          |  固定为 `dynamic_field` |
-|len_ref       |  长度引用，支持：同级字段名 / `fixed_n`（固定 n 字节） |
+|len_ref       |  长度引用，支持相对路径（`同级:`../字段名/ 子节点字段名  `多级:`../../字段名）、fixed_n (固定 n 字节) |
 |len_mode      |  长度解析模式：`count`（元素个数）/ `bytes`（总字节数）/ `bit`（位长）|
 |len_formula (可选) |  可选，长度计算公式，支持变量 len_ref（引用值）和 cur_pos（当前偏移） |
 |child_template|  单个子元素的结构模板 |
@@ -63,11 +63,138 @@
 {
     "name": "battery_pack_codes",
     "type": "dynamic_field",
-    "len_ref": "bms_pack_counts",
+    "len_ref": "../bms_pack_counts",
     "len_mode": "bytes",
     "len_formula": "len_ref * 24",
     "child_template": {"name": "pack_code", "type": "u8"}
 }
+```
+
+## 使用方法
+`CodecX` 提供开箱即用的命令行工具 `propdump`，支持配置校验、协议解析与结果可视化，无需编写任何代码即可快速验证协议定义。
+
+### 命令总览
+```shell
+./propdump <配置文件> [数据文件]
+```
+- 仅传配置文件：打印协议结构树，校验配置合法性
+- 传配置 + 数据文件：解析二进制 / 十六进制数据，输出结构化结果
+
+### 打印协议配置（校验配置合法性）
+功能：解析 JSON 配置文件，输出完整的协议层级结构，自动检查语法错误与字段冲突。
+
+```shell
+$ ./propdump proto_config.json
+ 102 CFactory I: --------------  Print Config Details  -------------
+ 103 CFactory I: - name    : simple_device
+ 104 CFactory I: - type    : static_field
+ 113 CFactory I: - children [7]
+  64 CFactory I:   ├─ dev_id (u32)
+  64 CFactory I:   ├─ dev_type (u8)
+  64 CFactory I:   ├─ status (u8)
+  64 CFactory I:   ├─ voltage (u16)
+  70 CFactory I:   ├─ base_info (static_field)
+  64 CFactory I:   │   ├─ hw_ver (u16)
+  64 CFactory I:   │   ├─ sw_ver (u16)
+  64 CFactory I:   │   └─ chip_id (u32)
+  64 CFactory I:   ├─ sensor_cnt (u8)
+  70 CFactory I:   └─ sensor_list (dynamic_field)
+  76 CFactory I:       ├─ len_ref : ../sensor_cnt
+  77 CFactory I:       ├─ len_mode: count
+  90 CFactory I:       └─ child_template: single_sensor (static_field)
+  70 CFactory I:           └─ single_sensor (static_field)
+  64 CFactory I:               ├─ sensor_id (u8)
+  64 CFactory I:               ├─ sensor_type (u8)
+  64 CFactory I:               ├─ data_len (u8)
+  70 CFactory I:               └─ sensor_data (dynamic_field)
+  76 CFactory I:                   ├─ len_ref : ../data_len
+  77 CFactory I:                   ├─ len_mode: bytes
+  90 CFactory I:                   └─ child_template:   (u8)
+  64 CFactory I:                       └─   (u8)
+ 119 CFactory I: ---------------------------------------------------
+```
+
+###  解析协议数据
+支持两种数据格式输入，输出格式完全一致：
+- 十六进制文本文件（每行一个报文，空格分隔字节）
+- 原始二进制文件（连续二进制流，自动拆帧）
+```shell
+# 解析十六进制文本文件
+./propdump proto_config.json proto_bytes.txt
+
+# 解析原始二进制文件
+./propdump proto_config.json proto_bytes.bin
+```
+
+```shell
+ $ ./propdump proto_config.json proto_bytes.txt
+ 222 CFactory I: ===================================================
+ 223 CFactory I: Protocol Parsing | simple_device | Total: 29 bytes
+ 224 CFactory I: ===================================================
+ 170 CFactory I:
+ 171 CFactory I: Frame 000 | Offset: 0
+ 172 CFactory I: ---------------------------------------------------
+ 157 CFactory I: [00] simple_device
+ 110 CFactory I:     [00-03] dev_id: 78 56 34 12
+ 110 CFactory I:     [04-04] dev_type: 05
+ 110 CFactory I:     [05-05] status: 01
+ 110 CFactory I:     [06-07] voltage: b8 0b
+ 157 CFactory I:     [08] base_info
+ 110 CFactory I:         [08-09] hw_ver: 00 01
+ 110 CFactory I:         [10-11] sw_ver: 01 02
+ 110 CFactory I:         [12-15] chip_id: dd cc bb aa
+ 110 CFactory I:     [16-16] sensor_cnt: 02
+ 150 CFactory I:     sensor_list[2]
+ 157 CFactory I:         [17] single_sensor
+ 110 CFactory I:             [17-17] sensor_id: 01
+ 110 CFactory I:             [18-18] sensor_type: 03
+ 110 CFactory I:             [19-19] data_len: 04
+ 142 CFactory I:             [20-23] sensor_data: 10  20  30  40
+ 157 CFactory I:         [24] single_sensor
+ 110 CFactory I:             [24-24] sensor_id: 02
+ 110 CFactory I:             [25-25] sensor_type: 05
+ 110 CFactory I:             [26-26] data_len: 02
+ 142 CFactory I:             [27-28] sensor_data: 50  60
+ 174 CFactory I: ---------------------------------------------------
+ 270 CFactory I: ===================================================
+ 271 CFactory I: Summary | Frame: 0 | Processed: 29/29
+ 272 CFactory I: ===================================================
+```
+
+- 解析二进制文件字节流
+```shell
+$ ./propdump proto_config.json proto_bytes.bin
+ 222 CFactory I: ===================================================
+ 223 CFactory I: Protocol Parsing | simple_device | Total: 29 bytes
+ 224 CFactory I: ===================================================
+ 170 CFactory I:
+ 171 CFactory I: Frame 000 | Offset: 0
+ 172 CFactory I: ---------------------------------------------------
+ 157 CFactory I: [00] simple_device
+ 110 CFactory I:     [00-03] dev_id: 78 56 34 12
+ 110 CFactory I:     [04-04] dev_type: 05
+ 110 CFactory I:     [05-05] status: 01
+ 110 CFactory I:     [06-07] voltage: b8 0b
+ 157 CFactory I:     [08] base_info
+ 110 CFactory I:         [08-09] hw_ver: 00 01
+ 110 CFactory I:         [10-11] sw_ver: 01 02
+ 110 CFactory I:         [12-15] chip_id: dd cc bb aa
+ 110 CFactory I:     [16-16] sensor_cnt: 02
+ 150 CFactory I:     sensor_list[2]
+ 157 CFactory I:         [17] single_sensor
+ 110 CFactory I:             [17-17] sensor_id: 01
+ 110 CFactory I:             [18-18] sensor_type: 03
+ 110 CFactory I:             [19-19] data_len: 04
+ 142 CFactory I:             [20-23] sensor_data: 10  20  30  40
+ 157 CFactory I:         [24] single_sensor
+ 110 CFactory I:             [24-24] sensor_id: 02
+ 110 CFactory I:             [25-25] sensor_type: 05
+ 110 CFactory I:             [26-26] data_len: 02
+ 142 CFactory I:             [27-28] sensor_data: 50  60
+ 174 CFactory I: ---------------------------------------------------
+ 270 CFactory I: ===================================================
+ 271 CFactory I: Summary | Frame: 0 | Processed: 29/29
+ 272 CFactory I: ===================================================
 ```
 
 ## 典型场景示例
@@ -108,7 +235,7 @@
 {
     "name": "sensor_data",
     "type": "dynamic_field",
-    "len_ref": "data_len",
+    "len_ref": "../data_len",
     "len_mode": "bytes",
     "child_template": {"name": " ", "type": "u8"}
 }
@@ -123,9 +250,9 @@
 {
     "name": "battery_pack_codes",
     "type": "dynamic_field",
-    "len_ref": "data_length",
+    "len_ref": "../data_length",
     "len_mode": "bytes",
-    "len_formula": "(data_length - curpos - 1) / 1",
+    "len_formula": "(len_ref - cur_pos - 1) / 1",
     "child_template": {"name": "pack_code", "type": "bytes"}
 }
 ```
@@ -138,11 +265,11 @@
 ```json
 // 一级：设备数量
 {"name": "device_cnt", "type": "u8"},
-// 二级：设备列表
+// 二级：设备列表（引用父级同级字段）
 {
     "name": "device_list",
     "type": "dynamic_field",
-    "len_ref": "device_cnt",
+    "len_ref": "../device_cnt",
     "len_mode": "count",
     "child_template": {
         "name": "device",
@@ -151,11 +278,11 @@
             {"name": "dev_id", "type": "u16"},
             // 三级：每个设备的传感器数量
             {"name": "sensor_cnt", "type": "u8"},
-            // 四级：每个设备的传感器列表
+            // 四级：每个设备的传感器列表（引用当前父级子字段）
             {
                 "name": "sensor_list",
                 "type": "dynamic_field",
-                "len_ref": "sensor_cnt",
+                "len_ref": "../sensor_cnt",
                 "len_mode": "count",
                 "child_template": {
                     "name": "sensor",
@@ -178,7 +305,7 @@
 {
     "name": "payload",
     "type": "dynamic_field",
-    "len_ref": "total_length",
+    "len_ref": "../total_length",
     "len_mode": "bytes",
 
     // 总长度减去当前已解析的位置，得到剩余所有字节
@@ -193,3 +320,28 @@
 // 直接使用内置的leb128类型，自动解析变长整数
 {"name": "varint_length", "type": "leb128"},
 ```
+
+### 场景 7： 分包/多帧协议
+适用场景：大数据分包传输（如固件升级、日志上报），每个包包含包序号和总包数。
+```json
+{
+    "name": "fragment_frame",
+    "type": "static_field",
+    "children": [
+        {"name": "head_flag", "type": "u16", "value": 43605},  // 0xAA 0x55
+        {"name": "total_packets", "type": "u16"},
+        {"name": "packet_seq", "type": "u16"},
+        {"name": "data_len", "type": "u8"},
+        {
+            "name": "fragment_data",
+            "type": "dynamic_field",
+            "len_ref": "../data_len",
+            "len_mode": "bytes",
+            "child_template": {"name": "byte", "type": "u8"}
+        },
+        {"name": "crc8", "type": "u8"}
+    ]
+}
+```
+
+

@@ -43,21 +43,30 @@ int32_t ReadFile(const std::string& path, std::string& str) {
 ssize_t ReadHexTextToHexVector(const std::string& path, std::vector<uint8_t>& out) {
     out.clear();
     std::ifstream f(path, std::ios::binary | std::ios::ate);
-    if (!f) return -1;
+    if (!f) {
+        printf("ReadFile: %s failed\n", path.c_str());
+        return -1;
+    }
 
     const auto fileSize = f.tellg();
-    if (fileSize == 0) return 0;
+    if (fileSize == 0) {
+        return 0;
+    }
 
-    const size_t detectSize = std::min(static_cast<size_t>(fileSize), 1024UL);
-    std::vector<char> buf(detectSize);
+    std::vector<char> buf(fileSize);
     f.seekg(0);
-    if (!f.read(buf.data(), detectSize)) return -1;
+    if (!f.read(buf.data(), fileSize)) {
+        return -2;
+    }
 
     size_t hexCount = 0;
-    for (unsigned char c : buf)
-        if (isxdigit(c)) hexCount++;
+    for (unsigned char c : buf) {
+        if (isxdigit(c)) {
+            hexCount++;
+        }
+    }
 
-    const bool isTextHex = (static_cast<double>(hexCount) / detectSize) >= 0.9;
+    const bool isTextHex = (static_cast<double>(hexCount) / fileSize) >= 0.9;
     f.seekg(0);
 
     if (isTextHex) {
@@ -65,19 +74,23 @@ ssize_t ReadHexTextToHexVector(const std::string& path, std::vector<uint8_t>& ou
         std::string hexStr;
         hexStr.reserve(content.size());
 
-        for (unsigned char c : content)
-            if (isxdigit(c)) hexStr += c;
+        for (unsigned char c : content) {
+            if (isxdigit(c)) {
+                hexStr += c;
+            }
+        }
 
         out.reserve(hexStr.size() / 2);
-        for (size_t i = 0; i + 1 < hexStr.size(); i += 2)
+        for (size_t i = 0; i + 1 < hexStr.size(); i += 2) {
             out.push_back(static_cast<uint8_t>(std::stoi(hexStr.substr(i, 2), nullptr, 16)));
+        }
 
         return static_cast<ssize_t>(out.size());
     } else {
         out.resize(static_cast<size_t>(fileSize));
         return f.read(reinterpret_cast<char*>(out.data()), fileSize)
             ? static_cast<ssize_t>(fileSize)
-            : -1;
+            : -3;
     }
 }
 

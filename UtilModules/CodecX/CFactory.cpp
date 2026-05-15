@@ -50,45 +50,69 @@ std::shared_ptr<CNode> CFactory::CreateDataParserByCfgParser(const std::shared_p
     return (ret == -1) ? nullptr : pDataParser;
 }
 
-static void PrintCfgNode(const std::shared_ptr<CNode>& pNode, int level) {
-    if (!pNode) {
-        CLOGE("pNode is nullptr! \n");
+static void PrintCfgNode(const std::shared_ptr<CNode>& node, bool isLast, const std::string& prefix) {
+    if (!node) return;
+
+    std::string connector = isLast ? "└─ " : "├─ ";
+    std::string line = prefix + connector;
+
+    if (!node->IsField()) {
+        auto atom = std::dynamic_pointer_cast<CAtom>(node);
+        line += node->GetName() + " (" + node->GetType() + ")";
+        std::string value = atom->DumpHexValue();
+        if (!value.empty()) line += " = " + value;
+        CLOGI("%s\n", line.c_str());
         return;
     }
 
-    std::string indent(level * 4, ' ');
-    CLOGI("%s - name    : %s\n", indent.c_str(), pNode->GetName().c_str());
-    CLOGI("%s - type    : %s\n", indent.c_str(), pNode->GetType().c_str());
-    if (!pNode->IsField()) {
-        std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(pNode);
-        CLOGI("%s - value   : %s\n", indent.c_str(), pAtom->DumpHexValue().c_str());
-        return;
+    auto field = std::dynamic_pointer_cast<CField>(node);
+    line += node->GetName() + " (" + node->GetType() + ")";
+    CLOGI("%s\n", line.c_str());
+
+    std::string subPrefix = prefix + (isLast ? "    " : "│   ");
+    bool isDynamic = (field->GetType() == TEXT_TYPE_DFIELD);
+    if (isDynamic) {
+        CLOGI("%s├─ %s : %s\n", subPrefix.c_str(), TEXT_LEN_REF_TAG, field->GetLenReference().c_str());
+        CLOGI("%s├─ %s: %s\n", subPrefix.c_str(), TEXT_LEN_MODE_TAG, field->GetLenMode().c_str());
+        std::string formula = field->GetLenFormula();
+        if (!formula.empty()) {
+            CLOGI("%s├─ %s: %s\n", subPrefix.c_str(), TEXT_LEN_FORMULA_TAG, formula.c_str());
+        }
     }
 
-    std::shared_ptr<CField> pField = std::dynamic_pointer_cast<CField>(pNode);
-    if (pField->GetType() == TEXT_TYPE_DFIELD) {
-        CLOGI("%s - len_ref : %s\n", indent.c_str(), pField->GetLenReference().c_str());
-        CLOGI("%s - len_mode: %s\n", indent.c_str(), pField->GetLenMode().c_str());
-        CLOGI("%s - len_formula: %s\n", indent.c_str(), pField->GetLenFormula().c_str());
-    }
-
-    std::vector<std::shared_ptr<CNode>> childNodes = pField->GetChildNodes();
-    if (!childNodes.empty()) {
-        CLOGI("%s - %s [%d]\n", indent.c_str(),
-            pField->GetChildNodesTag().c_str(),
-            static_cast<int32_t>(childNodes.size()));
-
-        int32_t i = 0;
-        for (auto& pChild : childNodes) {
-            CLOGI("  %s - %d     \n", indent.c_str(), i++);
-            PrintCfgNode(pChild, level + 1);
+    auto children = field->GetChildNodes();
+    if (children.empty()) return;
+    for (size_t i = 0; i < children.size(); ++i) {
+        bool childIsLast = (i == children.size() - 1);
+        if (isDynamic) {
+            CLOGI("%s└─ %s \n", subPrefix.c_str(), TEXT_CHILD_TEMPLATE_TAG);
+            PrintCfgNode(children[i], true, subPrefix + "    ");
+        } else {
+            PrintCfgNode(children[i], childIsLast, subPrefix);
         }
     }
 }
 
-void CFactory::PrintConfigDetails(const std::shared_ptr<CNode>& pNode) {
+void CFactory::PrintConfigDetails(const std::shared_ptr<CNode>& root) {
+    if (!root) return;
+
     CLOGI("--------------  Print Config Details  -------------\n");
-    PrintCfgNode(pNode, 0);
+    CLOGI("- %s    : %s\n", TEXT_NAME_TAG, root->GetName().c_str());
+    CLOGI("- %s    : %s\n", TEXT_TYPE_TAG, root->GetType().c_str());
+
+    auto rootField = std::dynamic_pointer_cast<CField>(root);
+    if (!rootField) {
+        CLOGI("---------------------------------------------------\n");
+        return;
+    }
+
+    auto children = rootField->GetChildNodes();
+    CLOGI("- %s [%d]\n", TEXT_CHILDREN_TAG, static_cast<int>(children.size()));
+
+    for (size_t i = 0; i < children.size(); ++i) {
+        PrintCfgNode(children[i], i == children.size() - 1, "  ");
+    }
+
     CLOGI("---------------------------------------------------\n");
 }
 
@@ -114,7 +138,6 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
 
     auto field = std::dynamic_pointer_cast<CField>(pNode);
     auto children = field->GetChildNodes();
-
     std::string lenMode = field->GetLenMode();
     if (lenMode == TEXT_LEN_MODE_BYTES) {
         const size_t TRUNCATE_THRESHOLD = 10;   // 超过此字节数自动截断
@@ -282,7 +305,7 @@ void CFactory::PrintProtocolDetails(const std::string& cfgPath, const std::strin
     std::vector<uint8_t> hexBytes;
     int32_t ret = CUtils::ReadHexTextToHexVector(bytesPath, hexBytes);
     if (ret <= 0) {
-        CLOGE("Read bytes failed: %s\n", bytesPath.c_str());
+        CLOGE("Read %s failed! ret = %d\n", bytesPath.c_str(), ret);
         return;
     }
 
