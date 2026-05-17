@@ -302,7 +302,9 @@ int32_t CField::CalculateDynamicFieldSize() {
     }
 
     if (lenMode == TEXT_LEN_MODE_BIT) {
-        len = len / 8;
+        len = (len + 7) / 8;
+    } else if (lenMode == TEXT_LEN_MODE_CONDITION) {
+        len = (len != 0) ? 1 : 0;
     }
 
     if (!lenFormula.empty()) {

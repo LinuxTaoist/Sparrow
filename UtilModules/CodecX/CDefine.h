@@ -32,6 +32,7 @@
 #define TEXT_LEN_MODE_COUNT         "count"
 #define TEXT_LEN_MODE_BIT           "bit"
 #define TEXT_LEN_MODE_BYTES         "bytes"
+#define TEXT_LEN_MODE_CONDITION     "condition"
 
 #define TEXT_LEN_FORMULA_TAG        "len_formula"
 #define TEXT_LEN_FORMULA_CURPOS     "curpos"
