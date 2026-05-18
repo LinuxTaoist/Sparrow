@@ -100,14 +100,14 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
     std::vector<uint8_t> subBytes(bytes.begin() + pos, bytes.begin() + pos + len);
     mValue.assign(subBytes.begin(), subBytes.end());
     DePosAdd(len);
-    // CLOGD("Node[%s] [%s] %s -> %s\n", GetName().c_str(), GetType().c_str(),
-    //     CUtils::ToHexString(subBytes).c_str(), CUtils::ToHexString(mValue).c_str());
+    CLOGD("Node[%s] [%s] %s -> %s\n", GetName().c_str(), GetType().c_str(),
+        CUtils::ToHexString(subBytes).c_str(), CUtils::ToHexString(mValue).c_str());
     return len;
 }
 
 int32_t CAtom::Encode(std::vector<uint8_t>& bytes) {
     bytes.insert(bytes.end(), mValue.begin(), mValue.end());
-    return 0;
+    return (int32_t)mValue.size();
 }
 
 std::string CAtom::DumpHexValue() {

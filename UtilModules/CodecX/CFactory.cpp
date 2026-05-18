@@ -47,7 +47,11 @@ std::shared_ptr<CNode> CFactory::CreateDataParserByCfgParser(const std::shared_p
     }
 
     int32_t ret = pDataParser->Decode(bytes);
-    return (ret == -1) ? nullptr : pDataParser;
+    if (ret < 0) {
+        CLOGE("Decode failed!\n");
+    }
+
+    return pDataParser;
 }
 
 static void PrintCfgNode(const std::shared_ptr<CNode>& node, bool isLast, const std::string& prefix) {
@@ -121,10 +125,10 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
         return;
     }
 
+    int start = offset;
     const std::string indent(level * 4, ' ');
     const std::string& name = pNode->GetName();
     const std::string& type = pNode->GetType();
-    int start = offset;
 
     if (!pNode->IsField()) {
         auto pAtom = std::dynamic_pointer_cast<CAtom>(pNode);
@@ -136,9 +140,9 @@ static void PrintDataNode(const std::shared_ptr<CNode>& pNode, int level, int& o
         return;
     }
 
-    auto field = std::dynamic_pointer_cast<CField>(pNode);
-    auto children = field->GetChildNodes();
-    std::string lenMode = field->GetLenMode();
+    auto pField = std::dynamic_pointer_cast<CField>(pNode);
+    auto children = pField->GetChildNodes();
+    std::string lenMode = pField->GetLenMode();
     if (lenMode == TEXT_LEN_MODE_BYTES) {
         const size_t TRUNCATE_THRESHOLD = 10;   // 超过此字节数自动截断
         const size_t LEADING_BYTES    = 4;      // 显示前N个字节

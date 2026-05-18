@@ -217,7 +217,11 @@ int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
 
     // CLOGD("Node[%s] Decode static field, size = %d \n", GetName().c_str(), (int32_t)mChildNodes.size());
     for (auto& node : mChildNodes) {
-        ret += node->Decode(bytes);
+        int32_t len = node->Decode(bytes);
+        if (len < 0) {
+            CLOGE("Node[%s] Decode failed, ret = %d\n", node->GetName().c_str(), len);
+            return -1;
+        }
     }
 
     return ret;
@@ -304,35 +308,39 @@ int32_t CField::CalculateDynamicFieldSize() {
     if (lenMode == TEXT_LEN_MODE_BIT) {
         len = (len + 7) / 8;
     } else if (lenMode == TEXT_LEN_MODE_CONDITION) {
-        len = (len != 0) ? 1 : 0;
+        len = (len == 0) ? 0 : 1;
     }
 
     if (!lenFormula.empty()) {
-        std::string numExpr;
-        size_t pos = 0;
-        while (pos < lenFormula.size()) {
-            int32_t curPosTextLen = strlen(TEXT_LEN_FORMULA_CURPOS);
-            int32_t lenRefTextLen = strlen(TEXT_LEN_REF_TAG);
-            if (lenFormula.compare(pos, curPosTextLen, TEXT_LEN_FORMULA_CURPOS) == 0) {
-                numExpr += std::to_string(GetDePos());
-                pos += curPosTextLen;
-            } else if (lenFormula.compare(pos, lenRefTextLen, TEXT_LEN_REF_TAG) == 0) {
-                numExpr += std::to_string(len);
-                pos += lenRefTextLen;
-            } else {
-                numExpr += lenFormula[pos];
-                pos++;
+        if (lenFormula == TEXT_LEN_FORMULA_INVERT) {    // len_formula = "!"
+            len = !len;
+        } else {
+            std::string numExpr;
+            size_t pos = 0;
+            while (pos < lenFormula.size()) {
+                int32_t curPosTextLen = strlen(TEXT_LEN_FORMULA_CURPOS);
+                int32_t lenRefTextLen = strlen(TEXT_LEN_REF_TAG);
+                if (lenFormula.compare(pos, curPosTextLen, TEXT_LEN_FORMULA_CURPOS) == 0) {
+                    numExpr += std::to_string(GetDePos());
+                    pos += curPosTextLen;
+                } else if (lenFormula.compare(pos, lenRefTextLen, TEXT_LEN_REF_TAG) == 0) {
+                    numExpr += std::to_string(len);
+                    pos += lenRefTextLen;
+                } else {
+                    numExpr += lenFormula[pos];
+                    pos++;
+                }
             }
-        }
 
-        int32_t exprResult = 0;
-        int32_t ret = CUtils::CalculateFromString(numExpr, exprResult);
-        if (ret < 0 || exprResult < 0) {
-            CLOGE("Node[%s] Calculate failed! [%s -> %s] ret = %d, result = %d\n",
-                    GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), ret, exprResult);
-            return -1;
+            int32_t exprResult = 0;
+            int32_t ret = CUtils::CalculateFromString(numExpr, exprResult);
+            if (ret < 0 || exprResult < 0) {
+                CLOGE("Node[%s] Calculate failed! [%s -> %s] ret = %d, result = %d\n",
+                        GetName().c_str(), lenFormula.c_str(), numExpr.c_str(), ret, exprResult);
+                return -1;
+            }
+            len = exprResult;
         }
-        len = exprResult;
     }
 
     return len;
@@ -397,9 +405,9 @@ int32_t CField::Decode(const std::vector<uint8_t>& bytes) {
     }
 
     if (GetType() == TEXT_TYPE_DFIELD) {
-        ret += DecodeDynamicField(bytes);
+        ret = DecodeDynamicField(bytes);
     } else if (GetType() == TEXT_TYPE_SFIELD) {
-        ret += DecodeStaticField(bytes);
+        ret = DecodeStaticField(bytes);
     } else {
         CLOGE("Node[%s] Invalid type %s!\n", GetName().c_str(), GetType().c_str());
     }
@@ -416,11 +424,13 @@ int32_t CField::Encode(std::vector<uint8_t>& bytes) {
     }
 
     for (auto& node : mChildNodes) {
-        if (node->IsField()) {
-            continue;
+        int32_t len = node->Encode(bytes);
+        if (len < 0) {
+            CLOGE("Node[%s] Encode failed! len = %d\n", node->GetName().c_str(), len);
+            break;
         }
 
-        ret += node->Encode(bytes);
+        ret += len;
     }
 
     return ret;

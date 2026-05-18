@@ -36,6 +36,7 @@
 
 #define TEXT_LEN_FORMULA_TAG        "len_formula"
 #define TEXT_LEN_FORMULA_CURPOS     "curpos"
+#define TEXT_LEN_FORMULA_INVERT     "!"
 
 #define TEXT_TYPE_TAG               "type"
 #define TEXT_TYPE_U8                "u8"

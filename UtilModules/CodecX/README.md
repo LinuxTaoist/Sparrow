@@ -53,10 +53,9 @@
 | --           | -- |
 |name          |  容器名称 |
 |type          |  固定为 `dynamic_field` |
-|len_ref       |  长度引用，支持相对路径（`同级:`../字段名/ 子节点字段名  `多级:`../../字段名）、fixed_n (固定 n 字节) |
-|len_mode      |  长度解析模式：`count`（元素个数）/ `bytes`（总字节数）/ `bit`（位长）|
-|len_formula (可选) |  可选，长度计算公式，支持变量 len_ref（引用值）和 cur_pos（当前偏移） |
-|child_template|  单个子元素的结构模板 |
+| len_ref | 长度引用，支持：<br>- 相对路径：同级`../字段名`、多级`../../字段名`<br>- 固定长度：`fixed_n`（n为字节数） |
+|len_mode      |  长度模式，支持：<br> - `count`: 元素个数 <br> - `bytes`:  总字节数 <br> - `bit`:  位长 <br> - `condition`: 条件模式（非 0 解析，为 0 跳过）|
+| len_formula (可选) | 长度计算公式，支持：<br> - 变量：`len_ref`（引用值）、`cur_pos`（当前偏移）<br>- 特殊值：`!` 表示对`len_ref`取反 |
 
 示例：
 ```json
@@ -344,4 +343,48 @@ $ ./propdump proto_config.json proto_bytes.bin
 }
 ```
 
+### 场景 8：条件可选容器
+适用场景：根据前置标志位决定是否解析可选结构，如 `"是否包含扩展协议头"`、`"是否携带附加元数据"` 等二选一逻辑。
+```json
+{
+    "name": "standard_message",
+    "type": "static_field",
+    "children": [
+        {"name": "start_flag", "type": "u16", "value": 43605}, // 0xAA55
+        {"name": "has_ext_header", "type": "u8"}, // 条件标志位
 
+        // 条件1：有扩展头时解析
+        {
+            "name": "with_ext_header",
+            "type": "dynamic_field",
+            "len_ref": "../has_ext_header",
+            "len_mode": "condition",
+            "child_template": {
+                "name": "ext_header",
+                "type": "static_field",
+                "children": [
+                    {"name": "ext_version", "type": "u8"},
+                    {"name": "timestamp", "type": "u32"},
+                    {"name": "priority", "type": "u8"}
+                ]
+            }
+        },
+
+        // 条件2：无扩展头时解析（可放默认值或空结构）
+        {
+            "name": "without_ext_header",
+            "type": "dynamic_field",
+            "len_ref": "../has_ext_header",
+            "len_mode": "condition",
+            "len_formula": "!", // 条件取反
+            "child_template": {
+                "name": "default_header",
+                "type": "static_field",
+                "children": [
+                    {"name": "default_priority", "type": "u8", "value": "02"}
+                ]
+            }
+        }
+    ]
+}
+```
