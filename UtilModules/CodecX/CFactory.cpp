@@ -234,7 +234,6 @@ bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vec
         return false;
     }
 
-    headers.clear();
     headers.assign(frameHeader.begin(), frameHeader.end());
     return true;
 }
