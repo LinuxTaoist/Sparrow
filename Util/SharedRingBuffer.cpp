@@ -62,7 +62,12 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
 
     mRoot = reinterpret_cast<Root*>(mapMemory);
     mDataCapacity = mMapCapacity - sizeof(Root);
-    mRoot->rp = mRoot->wp;
+
+    memset(mRoot, 0, sizeof(Root));
+    mRoot->rp = 0;
+    mRoot->wp = 0;
+    mRoot->rwStatus = CMD_WRITEABLE;
+
     mData = reinterpret_cast<uint8_t*>(mRoot) + sizeof(Root);
 }
 
@@ -96,6 +101,16 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     if (mRoot == nullptr) {
         SPR_LOGE("mRoot is nullptr!\n");
         mEnable = false;
+    }
+
+    // Initialize Root structure if it's a new file or corrupted
+    // Check if the rwStatus field has a valid value
+    if (mRoot->rwStatus != CMD_WRITEABLE && mRoot->rwStatus != CMD_READABLE) {
+        SPR_LOGW("SharedRingBuffer: Invalid rwStatus (%u), reinitializing...\n", mRoot->rwStatus);
+        memset(mRoot, 0, sizeof(Root));
+        mRoot->rp = 0;
+        mRoot->wp = 0;
+        mRoot->rwStatus = CMD_WRITEABLE;
     }
 
     mData = reinterpret_cast<uint8_t*>(mapMemory) + sizeof(Root);

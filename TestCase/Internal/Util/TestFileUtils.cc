@@ -32,7 +32,7 @@ protected:
         f16.write(reinterpret_cast<char*>(data16), sizeof(data16));
 
         // 3. 空二进制文件（修复语法）
-        std::ofstream fEmptyBin(kBinEmpty, std::ios::binary);
+        // std::ofstream fEmptyBin(kBinEmpty, std::ios::binary);
 
         // 4. 超MAX_FILE_SIZE二进制文件
         std::ofstream f_large_bin(kBinLarge, std::ios::binary);
@@ -49,7 +49,7 @@ protected:
         std::ofstream fHexMix(kHexMix);
         fHexMix << "12\n34\t56 AB";
 
-        std::ofstream fHexEmpty(kHexEmpty);
+        // std::ofstream fHexEmpty(kHexEmpty);
 
         std::ofstream fHexLarge(kHexLarge);
         fHexLarge << std::string(MAX_FILE_SIZE + 1, 'F');
@@ -92,6 +92,7 @@ TEST_F(Util_FileUtilsTest, ReadFileToVector_Uint16Endian) {
     // 小端
     out.clear();
     ret = ReadFileToVector(kBinUint16, out, false);
+    EXPECT_EQ(ret, 2);
     EXPECT_EQ(out[0], 0x3412);
 }
 
@@ -106,7 +107,7 @@ TEST_F(Util_FileUtilsTest, ReadFileToVector_FileTooLarge) {
 TEST_F(Util_FileUtilsTest, ReadFileToVector_EmptyFile) {
     std::vector<uint8_t> out;
     ssize_t ret = ReadFileToVector(kBinEmpty, out);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
     EXPECT_TRUE(out.empty());
 }
 
@@ -138,6 +139,7 @@ TEST_F(Util_FileUtilsTest, ReadCharTextToHexVector_Uint16Endian) {
     // 小端
     out.clear();
     ret = ReadCharTextToHexVector(kHexUint16, out, false);
+    EXPECT_EQ(ret, 4);
     EXPECT_EQ(out[0], 0x3412);
 }
 
@@ -160,7 +162,7 @@ TEST_F(Util_FileUtilsTest, ReadCharTextToHexVector_FileTooLarge) {
 TEST_F(Util_FileUtilsTest, ReadCharTextToHexVector_EmptyFile) {
     std::vector<uint8_t> out;
     ssize_t ret = ReadCharTextToHexVector(kHexEmpty, out);
-    EXPECT_EQ(ret, 0);
+    EXPECT_EQ(ret, -1);
     EXPECT_TRUE(out.empty());
 }
 

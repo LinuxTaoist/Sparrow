@@ -26,7 +26,7 @@
 
 class CJConfigParser {
 public:
-    CJConfigParser(const std::string& jText);
+    explicit CJConfigParser(const std::string& jText);
     ~CJConfigParser();
 
     std::shared_ptr<CNode> CJsonToNode();

@@ -57,15 +57,10 @@ SprLog::SprLog()
 SprLog::~SprLog()
 {
     // refer comment in SprLog::GetInstance()
-    // if (SEM_FAILED != mWriteSem) {
-    //     sem_close(mWriteSem);
-    //     sem_unlink(SEMAPHORE_NAME);
-    // }
-
-    // if (pLogSCacheMem != nullptr) {
-    //     delete pLogSCacheMem;
-    //     pLogSCacheMem = nullptr;
-    // }
+    if (SEM_FAILED != mWriteSem) {
+        sem_close(mWriteSem);
+        // sem_unlink(SEMAPHORE_NAME);
+    }
 }
 
 SprLog* SprLog::GetInstance()

@@ -92,6 +92,8 @@ CPPCHECK_OPTS=(
 CHECK_IGNORE=(
     "--suppress=*:${PROJECT_ROOT}/Util/cJSON.c"
     "--suppress=*:${PROJECT_ROOT}/Util/cJSON.h"
+    "--suppress=*:${PROJECT_ROOT}/UtilModules/CodecX/cJSON.c"
+    "--suppress=*:${PROJECT_ROOT}/UtilModules/CodecX/cJSON.h"
 )
 
 #######################################
