@@ -43,10 +43,10 @@ public:
     std::shared_ptr<CNode> GetNode(const std::string& name);
     std::vector<std::shared_ptr<CNode>> GetChildNodes();
 
-    std::shared_ptr<CNode> Clone() override;
-    std::shared_ptr<CNode> GetNodeByPath(const std::string& path) override;
     int32_t Decode(const std::vector<uint8_t>& bytes) override;
     int32_t Encode(std::vector<uint8_t>& bytes) override;
+    std::shared_ptr<CNode> Clone() override;
+    std::shared_ptr<CNode> GetNodeByPath(const std::string& path) override;
 
 private:
     void RelinkChildren(const std::shared_ptr<CField>& pParentField);

@@ -54,10 +54,10 @@ public:
     int32_t SetStrValue(const std::string& value);
     int32_t GetStrValue(std::string& value);
 
-    std::shared_ptr<CNode> Clone() override;
-    std::shared_ptr<CNode> GetNodeByPath(const std::string& path);
     int32_t Decode(const std::vector<uint8_t>& bytes) override;
     int32_t Encode(std::vector<uint8_t>& bytes) override;
+    std::shared_ptr<CNode> Clone() override;
+    std::shared_ptr<CNode> GetNodeByPath(const std::string& path) override;
 
     std::string DumpHexValue();
 
