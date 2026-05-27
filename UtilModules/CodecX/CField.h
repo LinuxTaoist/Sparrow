@@ -54,6 +54,10 @@ private:
     int32_t CalculateChildNodesValueSum(int32_t& sum);
     int32_t DecodeStaticField(const std::vector<uint8_t>& bytes);
     int32_t DecodeDynamicField(const std::vector<uint8_t>& bytes);
+    std::vector<std::string> SplitPath(const std::string& path);
+    std::shared_ptr<CNode> GetChildNode(const std::shared_ptr<CField>& pFieldNode, const std::string& childName);
+    std::shared_ptr<CNode> GetNodeByAbsolutePath(const std::vector<std::string>& parts);
+    std::shared_ptr<CNode> GetNodeByRelativePath(const std::vector<std::string>& parts);
 
 private:
     std::string mLenReference;  // 容量引用

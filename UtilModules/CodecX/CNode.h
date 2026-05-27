@@ -39,6 +39,7 @@ public:
     void SetType(const std::string& type);
     std::string GetType();
     std::shared_ptr<CNode> GetParentNode();
+    std::shared_ptr<CNode> GetRootNode();
     void SetParentNode(const std::shared_ptr<CNode>& pParent);
 
     virtual std::shared_ptr<CNode> Clone() = 0;

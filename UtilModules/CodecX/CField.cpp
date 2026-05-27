@@ -144,58 +144,143 @@ std::shared_ptr<CNode> CField::Clone() {
     return pClone;
 }
 
+std::vector<std::string> CField::SplitPath(const std::string& path) {
+    std::vector<std::string> parts;
+    size_t start = 0;
+    size_t end = path.find('/');
+    while (end != std::string::npos) {
+        std::string part = path.substr(start, end - start);
+        if (!part.empty() && part != ".") {
+            parts.push_back(part);
+        }
+        start = end + 1;
+        end = path.find('/', start);
+    }
+
+    std::string lastPart = path.substr(start);
+    if (!lastPart.empty() && lastPart != ".") {
+        parts.push_back(lastPart);
+    }
+
+    return parts;
+}
+
+std::shared_ptr<CNode> CField::GetChildNode(const std::shared_ptr<CField>& pFieldNode, const std::string& childName) {
+    if (!pFieldNode || childName.empty()) {
+        return nullptr;
+    }
+
+    if (pFieldNode->GetType() != TEXT_TYPE_DFIELD) {
+        return pFieldNode->GetNode(childName);
+    }
+
+    std::shared_ptr<CNode> pParentNode = GetParentNode();
+    std::shared_ptr<CNode> pBranchNode = pParentNode;
+    while (pParentNode && pParentNode != pFieldNode) {
+        pBranchNode = pParentNode;
+        pParentNode = pParentNode->GetParentNode();
+    }
+
+    if (pParentNode && pBranchNode && pBranchNode->GetName() == childName) {
+        return pBranchNode;
+    }
+
+    return pFieldNode->GetNode(childName);
+}
+
+std::shared_ptr<CNode> CField::GetNodeByAbsolutePath(const std::vector<std::string>& parts) {
+    std::shared_ptr<CNode> pRootNode = GetRootNode();
+
+    size_t index = 0;
+    std::shared_ptr<CNode> pNode = nullptr;
+    if (!pRootNode) {
+        if (!parts.empty() && parts[0] == GetName()) {
+            index = 1;
+        }
+
+        if (index >= parts.size()) {
+            CLOGE("Node[%s] absolute path missing child node!\n", GetName().c_str());
+            return nullptr;
+        }
+
+        pNode = GetNode(parts[index++]);
+    } else {
+        if (!parts.empty() && parts[0] == pRootNode->GetName()) {
+            index = 1;
+        }
+
+        if (index >= parts.size()) {
+            return pRootNode;
+        }
+
+        std::shared_ptr<CField> pRootField = std::dynamic_pointer_cast<CField>(pRootNode);
+        if (!pRootField) {
+            CLOGE("Node[%s] root node is not a container!\n", GetName().c_str());
+            return nullptr;
+        }
+
+        pNode = GetChildNode(pRootField, parts[index]);
+        index++;
+    }
+
+    for (; index < parts.size(); ++index) {
+        std::shared_ptr<CField> pFieldNode = std::dynamic_pointer_cast<CField>(pNode);
+        if (!pFieldNode) {
+            CLOGE("Node[%s] is not a container, cannot find child: %s\n",
+                  pNode ? pNode->GetName().c_str() : GetName().c_str(), parts[index].c_str());
+            return nullptr;
+        }
+
+        pNode = GetChildNode(pFieldNode, parts[index]);
+        if (!pNode) {
+            CLOGE("Node[%s] Node found: %s in absolute path\n", GetName().c_str(), parts[index].c_str());
+            return nullptr;
+        }
+    }
+
+    return pNode;
+}
+
+std::shared_ptr<CNode> CField::GetNodeByRelativePath(const std::vector<std::string>& parts) {
+    std::shared_ptr<CNode> pNode = nullptr;
+    for (const std::string& part : parts) {
+        if (part == "..") {
+            pNode = pNode ? pNode->GetParentNode() : GetParentNode();
+        } else if (pNode) {
+            std::shared_ptr<CField> pFieldNode = std::dynamic_pointer_cast<CField>(pNode);
+            if (!pFieldNode) {
+                CLOGE("Node[%s] is not a container, cannot find child: %s\n",
+                      pNode->GetName().c_str(), part.c_str());
+                return nullptr;
+            }
+
+            pNode = GetChildNode(pFieldNode, part);
+        } else {
+            pNode = GetNode(part);
+        }
+
+        if (!pNode) {
+            CLOGE("Node[%s] Node found: %s in relative path\n", GetName().c_str(), part.c_str());
+            return nullptr;
+        }
+    }
+
+    return pNode;
+}
+
 std::shared_ptr<CNode> CField::GetNodeByPath(const std::string& path) {
     if (path.empty()) {
         CLOGE("Node[%s] path is empty!\n", GetName().c_str());
         return nullptr;
     }
 
-    size_t start = 0;
-    size_t end = path.find('/');
-    std::vector<std::string> parts;
-    while (end != std::string::npos) {
-        std::string part = path.substr(start, end - start);
-        if (!part.empty() && part != ".") { // 忽略空段和当前节点标记
-            parts.push_back(part);
-        }
-        start = end + 1;
-        end = path.find('/', start);
-    }
-    std::string lastPart = path.substr(start);
-    if (!lastPart.empty() && lastPart != ".") {
-        parts.push_back(lastPart);
-    }
-
+    std::vector<std::string> parts = SplitPath(path);
     if (parts.empty()) {
         CLOGE("Node[%s] path is empty!\n", GetName().c_str());
         return nullptr;
     }
 
-    std::shared_ptr<CNode> pNode = nullptr;
-    for (const std::string& part : parts) {
-        if (part == "..") {
-            pNode = pNode ? pNode->GetParentNode() : GetParentNode();
-        } else {
-            if (pNode) {
-                std::shared_ptr<CField> pFieldNode = std::dynamic_pointer_cast<CField>(pNode);
-                if (!pFieldNode) {
-                    CLOGE("Node[%s] is not a container, cannot find child: %s\n",
-                          pNode->GetName().c_str(), part.c_str());
-                    return nullptr;
-                }
-                pNode = pFieldNode->GetNode(part);
-            } else {
-                pNode = GetNode(part);
-            }
-        }
-
-        if (!pNode) {
-            CLOGE("Node[%s] Node found: %s in path %s\n", GetName().c_str(), part.c_str(), path.c_str());
-            return nullptr;
-        }
-    }
-
-    return pNode;
+    return (path[0] == '/') ? GetNodeByAbsolutePath(parts) : GetNodeByRelativePath(parts);
 }
 
 void CField::RelinkChildren(const std::shared_ptr<CField>& pParentField) {

@@ -145,6 +145,15 @@ std::shared_ptr<CNode> CNode::GetParentNode() {
     return mParentNode;
 }
 
+std::shared_ptr<CNode> CNode::GetRootNode() {
+    std::shared_ptr<CNode> pRootNode = GetParentNode();
+    while (pRootNode && pRootNode->GetParentNode()) {
+        pRootNode = pRootNode->GetParentNode();
+    }
+
+    return pRootNode;
+}
+
 void CNode::SetParentNode(const std::shared_ptr<CNode>& pParent) {
     mParentNode = pParent;
 }
