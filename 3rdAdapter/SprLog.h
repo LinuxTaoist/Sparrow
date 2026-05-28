@@ -86,6 +86,10 @@ public:
 private:
     SprLog();
     ~SprLog();
+    SprLog(const SprLog&) = delete;
+    SprLog& operator = (const SprLog&) = delete;
+    SprLog(SprLog&&) = delete;
+    SprLog& operator = (SprLog&&) = delete;
 
     /**
      * @brief LogImpl

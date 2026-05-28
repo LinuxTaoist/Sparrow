@@ -43,24 +43,31 @@ using namespace InternalDefs;
 static std::unique_ptr<SharedRingBuffer> pLogSCacheMem = nullptr;
 
 SprLog::SprLog()
+    : mWriteSem(SEM_FAILED)
+    , mLevel(LOG_LEVEL_BUTT)
+    , mLength(LOG_BUFFER_SIZE_DEFAULT)
 {
     mWriteSem = sem_open(SEMAPHORE_NAME, O_CREAT, 0644, 1);
     if (SEM_FAILED == mWriteSem) {
         perror("sem_open failed");
     }
 
-    mLevel = LOG_LEVEL_BUTT;
-    mLength = LOG_BUFFER_SIZE_DEFAULT;
-    pLogSCacheMem = std::unique_ptr<SharedRingBuffer>(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH));
+    pLogSCacheMem.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH));
 }
 
 SprLog::~SprLog()
 {
     // refer comment in SprLog::GetInstance()
-    if (SEM_FAILED != mWriteSem) {
-        sem_close(mWriteSem);
-        // sem_unlink(SEMAPHORE_NAME);
-    }
+    // if (SEM_FAILED != mWriteSem) {
+    //     sem_close(mWriteSem);
+    //     sem_unlink(SEMAPHORE_NAME);
+    //     mWriteSem = SEM_FAILED;
+    // }
+
+    // if (pLogSCacheMem != nullptr) {
+    //     delete pLogSCacheMem;
+    //     pLogSCacheMem = nullptr;
+    // }
 }
 
 SprLog* SprLog::GetInstance()
@@ -83,7 +90,12 @@ int32_t SprLog::GetLevel()
 
 int32_t SprLog::SetLength(int32_t length)
 {
-    mLength = length;
+    if (length <= 0) {
+        mLength = LOG_BUFFER_SIZE_DEFAULT;
+    } else {
+        mLength = std::min(length, static_cast<int32_t>(LOG_BUFFER_SIZE_LIMIT));
+    }
+
     return 0;
 }
 
@@ -221,9 +233,12 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
 
 int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
 {
-    unsigned char buffer[len + sizeof(int32_t)] = {0};
+    if (!pLogSCacheMem || !logs || len <= 0) {
+        return -1;
+    }
 
-    memcpy(buffer, &len, sizeof(int32_t));
-    memcpy(buffer + sizeof(int32_t), logs, len);
-    return pLogSCacheMem->Write(buffer, sizeof(int32_t) + len);
+    std::vector<unsigned char> buffer(static_cast<size_t>(len) + sizeof(int32_t), 0);
+    memcpy(buffer.data(), &len, sizeof(int32_t));
+    memcpy(buffer.data() + sizeof(int32_t), logs, len);
+    return pLogSCacheMem->Write(buffer.data(), sizeof(int32_t) + len);
 }

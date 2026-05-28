@@ -95,7 +95,7 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
                 return -1;
             }
         } else if (nread == 0) {
-            SPR_LOGE("Read EOF! %d\n", int(size - nleft));
+            SPR_LOGW("Read EOF! %d\n", int(size - nleft));
             break;
         }
 

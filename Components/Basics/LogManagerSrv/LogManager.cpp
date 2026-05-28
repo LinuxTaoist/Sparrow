@@ -21,8 +21,11 @@
  */
 #include <memory>
 #include <algorithm>
+#include <sstream>
+#include <time.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <semaphore.h>
 #include <dirent.h>
 #include <string.h>
 #include <sys/stat.h>
@@ -45,21 +48,40 @@ using namespace GeneralUtils;
 #define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
 #define DEFAULT_BASE_LOG_FILE_NAME  "sprlog.log"
 #define LOG_CONFIGURE_FILE_PATH     "sprlog.conf"
+#define LOG_WRITE_SEMAPHORE_NAME    "/SprLogSem"
+#define LOG_FLUSH_COUNT_LIMIT       64
+#define LOG_FLUSH_INTERVAL_SEC      1
 
-static std::shared_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
+static std::unique_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
 bool LogManager::mRunning = true;
 
-LogManager::LogManager()
+static uint64_t GetMonotonicTickSec()
 {
-    mLogLevelLimit      = InternalDefs::LOG_LEVEL_BUTT;
-    mOutputMode         = LOG_OUTPUT_FILE;
-    mLogFrameLength     = DEFAULT_FRAME_LEN_LIMIT;
-    mLogFileNum         = DEFAULT_LOG_FILE_NUM_LIMIT;
-    mLogFileCapacity    = DEFAULT_LOG_FILE_MAX_SIZE;
-    mLogFileName        = DEFAULT_BASE_LOG_FILE_NAME;
-    mLogsFilePath       = DEFAULT_DEBUG_ROOT_DIR + std::string("/") + DEFAULT_BASE_LOG_FILE_NAME;
-    mCurrentLogFile     = DEFAULT_BASE_LOG_FILE_NAME;
+    struct timespec ts {};
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
+        return 0;
+    }
+
+    return static_cast<uint64_t>(ts.tv_sec);
+}
+
+LogManager::LogManager()
+    : mLogLevelLimit(InternalDefs::LOG_LEVEL_BUTT)
+    , mOutputMode(LOG_OUTPUT_FILE)
+    , mLogFrameLength(DEFAULT_FRAME_LEN_LIMIT)
+    , mLogFileNum(DEFAULT_LOG_FILE_NUM_LIMIT)
+    , mLogFileCapacity(DEFAULT_LOG_FILE_MAX_SIZE)
+    , mPendingFlushCount(0)
+    , mLastFlushTickSec(GetMonotonicTickSec())
+    , mLogFileName(DEFAULT_BASE_LOG_FILE_NAME)
+    , mLogsFilePath(DEFAULT_DEBUG_ROOT_DIR + std::string("/") + DEFAULT_BASE_LOG_FILE_NAME)
+    , mCurrentLogFile(DEFAULT_BASE_LOG_FILE_NAME)
+    , mReadSem(sem_open(LOG_WRITE_SEMAPHORE_NAME, O_CREAT, 0644, 1))
+    , mLogFileStream()
+    , mLogFilePaths()
+    , mLoadAttrMap()
+{
 
     mLoadAttrMap.insert(std::make_pair("logging.output",        &LogManager::LoadAttrOutputMode));
     mLoadAttrMap.insert(std::make_pair("logging.level",         &LogManager::LoadAttrLevelLimit));
@@ -78,7 +100,7 @@ LogManager::LogManager()
         }
     }
 
-    pLogMCacheMem = std::make_shared<SharedRingBuffer>(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE);
+    pLogMCacheMem.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE));
     mLogFilePaths = GetSortedLogFiles(mLogsFilePath, mLogFileName);
     EnvReady(SRV_NAME_LOG);
 
@@ -88,6 +110,9 @@ LogManager::LogManager()
 
 LogManager::~LogManager()
 {
+    if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
+        sem_close(mReadSem);
+    }
 }
 
 int LogManager::EnvReady(const std::string& srvName)
@@ -145,17 +170,24 @@ void LogManager::LoadAttrLevelLimit(const std::string& value)
 
 void LogManager::LoadAttrFrameLengthLimit(const std::string& value)
 {
-    mLogFrameLength = atoi(value.c_str());
+    int32_t frameLength = atoi(value.c_str());
+    mLogFrameLength = (frameLength > static_cast<int32_t>(sizeof(int32_t)))
+                    ? static_cast<uint32_t>(frameLength)
+                    : DEFAULT_FRAME_LEN_LIMIT;
 }
 
 void LogManager::LoadAttrFileNumLimit(const std::string& value)
 {
-    mLogFileNum = atoi(value.c_str());
+    int32_t fileNum = atoi(value.c_str());
+    mLogFileNum = (fileNum > 0) ? static_cast<uint32_t>(fileNum) : DEFAULT_LOG_FILE_NUM_LIMIT;
 }
 
 void LogManager::LoadAttrFileCapacityLimit(const std::string& value)
 {
-    mLogFileCapacity = atoi(value.c_str()) * 1024 * 1024;
+    int32_t fileCapacityMb = atoi(value.c_str());
+    mLogFileCapacity = (fileCapacityMb > 0)
+                     ? static_cast<uint32_t>(fileCapacityMb) * 1024 * 1024
+                     : DEFAULT_LOG_FILE_MAX_SIZE;
 }
 
 void LogManager::LoadAttrFileName(const std::string& value)
@@ -200,6 +232,21 @@ int LogManager::LoadLogCfgFile(const std::string& cfgPath)
     return 0;
 }
 
+int LogManager::OpenCurrentLogFile()
+{
+    if (mLogFileStream.is_open()) {
+        return 0;
+    }
+
+    mLogFileStream.open(mLogsFilePath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
+    if (!mLogFileStream.is_open()) {
+        SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
+        return -1;
+    }
+
+    return 0;
+}
+
 int LogManager::UpdateSuffixOfAllFiles()
 {
     while (mLogFilePaths.size() >= mLogFileNum) {
@@ -219,9 +266,10 @@ int LogManager::UpdateSuffixOfAllFiles()
         std::string suffix;
 
         // Add 1 to the suffix of an existing file
-        auto pos = oldPath.find(".log.");
+        std::string suffixTag = mLogFileName + ".";
+        auto pos = oldPath.rfind(suffixTag);
         if (pos != std::string::npos) {
-            suffix = oldPath.substr(pos + 5, 1);
+            suffix = oldPath.substr(pos + suffixTag.size());
             int version = atoi(suffix.c_str()) + 1;
             suffix = std::to_string(version);
         } else {
@@ -245,18 +293,55 @@ int LogManager::UpdateSuffixOfAllFiles()
     return 0;
 }
 
+int LogManager::FlushLogFileIfNecessary(bool force)
+{
+    if (!mLogFileStream.is_open()) {
+        return 0;
+    }
+
+    if (!force && mPendingFlushCount == 0) {
+        return 0;
+    }
+
+    uint64_t now = GetMonotonicTickSec();
+    bool needFlush = force
+                  || (mPendingFlushCount >= LOG_FLUSH_COUNT_LIMIT)
+                  || (now >= mLastFlushTickSec + LOG_FLUSH_INTERVAL_SEC);
+    if (!needFlush) {
+        return 0;
+    }
+
+    mLogFileStream.flush();
+    if (!mLogFileStream.good()) {
+        SPR_LOGE("Flush %s failed!\n", mCurrentLogFile.c_str());
+        return -1;
+    }
+
+    mPendingFlushCount = 0;
+    mLastFlushTickSec = now;
+    return 0;
+}
+
 // E.g: sparrow.log sparrow.log.1 sparrow.log.2 ...
 int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
 {
-    uint32_t curFileSize = static_cast<uint32_t>(mLogFileStream.tellp());
+    if (OpenCurrentLogFile() != 0) {
+        return -1;
+    }
+
+    std::streampos pos = mLogFileStream.tellp();
+    uint32_t curFileSize = (pos >= 0) ? static_cast<uint32_t>(pos) : 0;
     if (curFileSize + logDataSize > mLogFileCapacity) {
+        FlushLogFileIfNecessary(true);
         mLogFileStream.close();
 
         UpdateSuffixOfAllFiles();
-        mLogFileStream.open(mLogsFilePath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
-        if (!mLogFileStream.is_open()) {
-            SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
+        if (OpenCurrentLogFile() != 0) {
+            return -1;
         }
+
+        mPendingFlushCount = 0;
+        mLastFlushTickSec = GetMonotonicTickSec();
     }
 
     return 0;
@@ -288,22 +373,40 @@ int LogManager::GetLevelFromLogStrs(const std::string& logData)
 
 int LogManager::WriteToLogFile(const std::string& logData)
 {
-    if (logData.size() > DEFAULT_FRAME_LEN_LIMIT) {
-        SPR_LOGE("Out of length limit [%d %d]!\n", (int)logData.size(), DEFAULT_FRAME_LEN_LIMIT);
+    if (logData.size() > mLogFrameLength) {
+        SPR_LOGE("Out of length limit [%d %u]!\n", (int)logData.size(), mLogFrameLength);
         return -1;
     }
 
-    if (!mLogFileStream.is_open()) {
-        mLogFileStream.open(mLogsFilePath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
-        if (!mLogFileStream.is_open()) {
-            SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
-            return -1;
-        }
+    if (OpenCurrentLogFile() != 0) {
+        return -1;
     }
 
     mLogFileStream.write(logData.c_str(), logData.size());
-    mLogFileStream.flush();
-    return 0;
+    if (!mLogFileStream.good()) {
+        SPR_LOGE("Write %s failed!\n", mCurrentLogFile.c_str());
+        return -1;
+    }
+
+    mPendingFlushCount++;
+    return FlushLogFileIfNecessary(false);
+}
+
+int LogManager::WriteLog(const std::string& logData, int level)
+{
+    if (mOutputMode == LOG_OUTPUT_STDOUT) {
+        fputs(logData.c_str(), stdout);
+        if (level <= InternalDefs::LOG_LEVEL_ERROR) {
+            fflush(stdout);
+        }
+        return 0;
+    }
+
+    if (RotateLogsIfNecessary(logData.size()) != 0) {
+        return -1;
+    }
+
+    return WriteToLogFile(logData);
 }
 
 std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileNamePrefix)
@@ -322,7 +425,7 @@ std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, con
         std::string currentFile(entry->d_name);
 
         // Check if the file name starts with the given prefix
-        if (currentFile.find(fileNamePrefix) != string::npos) {
+        if (currentFile.rfind(fileNamePrefix, 0) == 0) {
             matchingFiles.insert(mLogsFilePath + '/' + currentFile);
         }
     }
@@ -344,14 +447,23 @@ int LogManager::MainLoop()
     }
 
     while (mRunning) {
-        if (pLogMCacheMem->AvailData() < 10) {
+        if (pLogMCacheMem->AvailData() < static_cast<int32_t>(sizeof(int32_t))) {
+            FlushLogFileIfNecessary(false);
             usleep(10000);
             continue;
         }
 
+        if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
+            sem_wait(mReadSem);
+        }
+
         int32_t len = 0;
         int ret = pLogMCacheMem->Read(&len, sizeof(int32_t));
-        if (ret != 0 || len < 0 || len > DEFAULT_FRAME_LEN_LIMIT) {
+        if (ret != 0 || len < 0 || len > static_cast<int32_t>(mLogFrameLength)) {
+            if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
+                sem_post(mReadSem);
+            }
+
             SPR_LOGE("Read memory failed! len = %d, ret = %d\n", len, ret);
             usleep(10000);
             continue;
@@ -361,6 +473,10 @@ int LogManager::MainLoop()
         value.resize(len);
         char* data = const_cast<char*>(value.c_str());
         ret = pLogMCacheMem->Read(data, len);
+        if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
+            sem_post(mReadSem);
+        }
+
         if (ret != 0) {
             SPR_LOGE("Read failed! len = %d\n", len);
         }
@@ -368,10 +484,10 @@ int LogManager::MainLoop()
         // Write the log if level less than the limit
         int level = GetLevelFromLogStrs(value);
         if (level <= mLogLevelLimit) {
-            RotateLogsIfNecessary(len);
-            WriteToLogFile(value);
+            WriteLog(value, level);
         }
     }
 
+    FlushLogFileIfNecessary(true);
     return 0;
 }

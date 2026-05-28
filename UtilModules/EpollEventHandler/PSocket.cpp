@@ -273,6 +273,11 @@ void* PTcpServer::EpollEvent(int fd, EpollType eType, void* arg)
 PTcpClient::PTcpClient(int fd, const std::function<void(int, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
 {
+    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    if (flags >= 0) {
+        fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
+    }
+
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
@@ -284,6 +289,11 @@ PTcpClient::PTcpClient(int fd, const std::function<void(int, void*)>& cb, void* 
 PTcpClient::PTcpClient(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb)
 {
+    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    if (flags >= 0) {
+        fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
+    }
+
     int op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));

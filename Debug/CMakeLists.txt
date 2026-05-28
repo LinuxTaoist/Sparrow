@@ -7,6 +7,7 @@ include_directories         (${PROJECT_PATH}/3rdAdapter)
 include_directories         (${PROJECT_PATH}/PrivateAPIs)
 include_directories         (${PROJECT_PATH}/PublicAPIs)
 include_directories         (${PROJECT_PATH}/UtilModules/EpollEventHandler)
+include_directories         (${PROJECT_PATH}/UtilModules/HTTP)
 
 # Bin logshow
 aux_source_directory        (${PROJECT_PATH}/Util               SRC_BIN_LOGSHOW)
@@ -53,3 +54,12 @@ aux_source_directory        (${PROJECT_PATH}/UtilModules/CodecX SRC_PROTO_DUMP_P
 add_executable              (BinPropDump ${SRC_PROTO_DUMP_PATH})
 target_include_directories  (BinPropDump PRIVATE ${PROJECT_PATH}/UtilModules/CodecX)
 set_target_properties       (BinPropDump PROPERTIES OUTPUT_NAME "propdump")
+
+# Bin HttpUISrv
+aux_source_directory        (${PROJECT_PATH}/Util               SRC_HTTP_DEBUG_PATH)
+aux_source_directory        (${SRC_DEBUG_PATH}/HttpUISrv        SRC_HTTP_DEBUG_PATH)
+aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP   SRC_HTTP_DEBUG_PATH)
+add_executable              (BinHttpUISrv ${SRC_HTTP_DEBUG_PATH})
+set_target_properties       (BinHttpUISrv PROPERTIES OUTPUT_NAME "huisrv")
+target_link_libraries       (BinHttpUISrv sprcore epollevent mediatorapi sprlog rt pthread dl)
+add_dependencies            (BinHttpUISrv LibSprCore LibEpollEvent LibMediatorAPI LibSprLog)
