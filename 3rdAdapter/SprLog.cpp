@@ -57,7 +57,7 @@ SprLog::SprLog()
 
 SprLog::~SprLog()
 {
-    // refer comment in SprLog::GetInstance()
+    // Refer comment in SprLog::GetInstance()
     // if (SEM_FAILED != mWriteSem) {
     //     sem_close(mWriteSem);
     //     sem_unlink(SEMAPHORE_NAME);
