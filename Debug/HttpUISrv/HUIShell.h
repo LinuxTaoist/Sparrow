@@ -50,6 +50,30 @@ std::string GetPrompt();
 int ExecuteCommand(const std::string& cmd, std::string& output, int timeoutMs = 5000);
 
 /**
+ * @brief Send one command line into the persistent PTY shell.
+ * @param cmd Raw command text.
+ * @param promptBefore Prompt before writing the command.
+ * @return 0 if success, -1 if failed.
+ */
+int SendCommand(const std::string& cmd, std::string& promptBefore);
+
+/**
+ * @brief Read available PTY output without blocking for command completion.
+ * @param output Newly available terminal output.
+ * @param promptAfter Latest prompt when the shell returns to idle.
+ * @param promptReady Whether a fresh prompt was observed in this read.
+ * @param waitMs Long-poll wait time in milliseconds.
+ * @return 0 if success, -1 if failed.
+ */
+int ReadOutput(std::string& output, std::string& promptAfter, bool& promptReady, int waitMs = 200);
+
+/**
+ * @brief Send Ctrl+C into the persistent PTY shell.
+ * @return 0 if success, -1 if failed.
+ */
+int Interrupt();
+
+/**
  * @brief Get device profile info (hostname, uptime, kernel version)
  * @param profile JSON string containing device info
  * @return 0 if success, -1 if failed

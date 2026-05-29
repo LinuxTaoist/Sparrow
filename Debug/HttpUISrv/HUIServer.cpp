@@ -17,6 +17,7 @@
  */
 #include <stdio.h>
 #include <list>
+#include <iomanip>
 #include <memory>
 #include <sstream>
 #include "PSocket.h"
@@ -83,7 +84,14 @@ std::string EscapeJson(const std::string& input)
                 oss << "\\t";
                 break;
             default:
-                oss << c;
+                if (static_cast<unsigned char>(c) < 0x20) {
+                    oss << "\\u"
+                        << std::hex << std::setw(4) << std::setfill('0')
+                        << static_cast<int>(static_cast<unsigned char>(c))
+                        << std::dec << std::setfill(' ');
+                } else {
+                    oss << c;
+                }
                 break;
         }
     }
@@ -163,9 +171,9 @@ std::string GetQueueDetails()
     return oss.str();
 }
 
-std::string GetHtmlPage()
+std::string GetHtmlPage(const std::string& activePage)
 {
-    return HUIRender::HTML_PAGE;
+    return HUIRender::BuildHtmlPage(activePage);
 }
 
 std::string GetDeviceProfile()
@@ -186,7 +194,7 @@ std::string ExecuteShellCommand(const std::string& cmd)
 {
     if (cmd.empty()) {
         std::ostringstream oss;
-        oss << "{\"prompt\":\"" << EscapeJson(HUIShell::GetPrompt()) << "\",\"error\":\"Empty command\"}";
+        oss << "{\"prompt\":\"" << EscapeJson(HUIShell::GetPrompt()) << "\",\"output\":\"\",\"exitCode\":0}";
         return oss.str();
     }
 
@@ -200,25 +208,56 @@ std::string ExecuteShellCommand(const std::string& cmd)
     oss << "{"
         << "\"promptBefore\":\"" << EscapeJson(promptBefore) << "\","
         << "\"command\":\"" << EscapeJson(cmd) << "\","
-        << "\"output\":\"";
-
-    // Escape output
-    for (const auto c : output) {
-        switch (c) {
-            case '"': oss << "\\\""; break;
-            case '\\': oss << "\\\\"; break;
-            case '\n': oss << "\\n"; break;
-            case '\r': oss << "\\r"; break;
-            case '\t': oss << "\\t"; break;
-            default: oss << c; break;
-        }
-    }
-
-    oss << "\","
+        << "\"output\":\"" << EscapeJson(output) << "\","
         << "\"promptAfter\":\"" << EscapeJson(promptAfter) << "\","
         << "\"exitCode\":" << (ret == 0 ? 0 : 1)
         << "}";
 
+    return oss.str();
+}
+
+std::string BuildShellInitResponse()
+{
+    std::ostringstream oss;
+    oss << "{\"prompt\":\"" << EscapeJson(HUIShell::GetPrompt()) << "\"}";
+    return oss.str();
+}
+
+std::string BuildShellWriteResponse(const std::string& cmd)
+{
+    std::string promptBefore;
+    int ret = HUIShell::SendCommand(cmd, promptBefore);
+
+    std::ostringstream oss;
+    oss << "{"
+        << "\"promptBefore\":\"" << EscapeJson(promptBefore) << "\","
+        << "\"accepted\":" << (ret == 0 ? "true" : "false")
+        << "}";
+    return oss.str();
+}
+
+std::string BuildShellReadResponse()
+{
+    std::string output;
+    std::string promptAfter;
+    bool promptReady = false;
+    int ret = HUIShell::ReadOutput(output, promptAfter, promptReady, 250);
+
+    std::ostringstream oss;
+    oss << "{"
+        << "\"output\":\"" << EscapeJson(output) << "\","
+        << "\"promptAfter\":\"" << EscapeJson(promptAfter) << "\","
+        << "\"promptReady\":" << (promptReady ? "true" : "false") << ","
+        << "\"ok\":" << (ret == 0 ? "true" : "false")
+        << "}";
+    return oss.str();
+}
+
+std::string BuildShellInterruptResponse()
+{
+    int ret = HUIShell::Interrupt();
+    std::ostringstream oss;
+    oss << "{\"ok\":" << (ret == 0 ? "true" : "false") << "}";
     return oss.str();
 }
 
@@ -228,9 +267,13 @@ void BuildHttpResponse(const std::string& uri, std::string& body, int32_t& statu
     isHtmlResponse = false;
     body.clear();
 
-    if (uri == "/" || uri.empty()) {
+    if (uri == "/" || uri == "/dashboard" || uri.empty()) {
         statusCode = HTTP_STATUS_200;
-        body = GetHtmlPage();
+        body = GetHtmlPage("dashboard");
+        isHtmlResponse = true;
+    } else if (uri == "/terminal") {
+        statusCode = HTTP_STATUS_200;
+        body = GetHtmlPage("terminal");
         isHtmlResponse = true;
     } else if (uri == "/api/status") {
         statusCode = HTTP_STATUS_200;
@@ -244,6 +287,26 @@ void BuildHttpResponse(const std::string& uri, std::string& body, int32_t& statu
     } else if (uri == "/api/resources") {
         statusCode = HTTP_STATUS_200;
         body = GetResourceUsage();
+    } else if (uri == "/api/shell/init") {
+        statusCode = HTTP_STATUS_200;
+        body = BuildShellInitResponse();
+    } else if (uri.substr(0, 17) == "/api/shell/write?") {
+        statusCode = HTTP_STATUS_200;
+        std::string query = uri.substr(17);
+        size_t cmdPos = query.find("cmd=");
+        if (cmdPos != std::string::npos) {
+            std::string encodedCmd = query.substr(cmdPos + 4);
+            std::string cmd = UrlDecode(encodedCmd);
+            body = BuildShellWriteResponse(cmd);
+        } else {
+            body = "{\"accepted\":false}";
+        }
+    } else if (uri == "/api/shell/read") {
+        statusCode = HTTP_STATUS_200;
+        body = BuildShellReadResponse();
+    } else if (uri == "/api/shell/interrupt") {
+        statusCode = HTTP_STATUS_200;
+        body = BuildShellInterruptResponse();
     } else if (uri.substr(0, 11) == "/api/shell?") {
         statusCode = HTTP_STATUS_200;
         std::string query = uri.substr(11);
