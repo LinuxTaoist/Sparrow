@@ -20,7 +20,10 @@
 #define __CFACTORY_H__
 
 #include <memory>
+#include <functional>
 #include "CNode.h"
+
+using LogCallback = std::function<void(int level, int line, const char* tag, const char* fmt, va_list ap)>;
 
 class CFactory {
 public:
@@ -29,6 +32,7 @@ public:
     std::shared_ptr<CNode> CreateCfgParserByCfgString(const std::string& cfgString);
     std::shared_ptr<CNode> CreateDataParserByCfgParser(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
 
+    void RegisterPrintCallback(const LogCallback& callback);
     void PrintConfigDetails(const std::shared_ptr<CNode>& pNode);
     void PrintProtocolDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
     void PrintProtocolDetails(const std::string& cfgPath, const std::string& bytesPath);

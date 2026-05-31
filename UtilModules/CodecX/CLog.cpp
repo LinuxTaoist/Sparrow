@@ -37,6 +37,10 @@ CLogLevel CLog::GetLevel() {
     return mLevel;
 }
 
+void CLog::RegisterPrintCallback(const CLogCallback& callback) {
+    mCallback = callback;
+}
+
 void CLog::Print(CLogLevel level, int line, const char* tag, const char* fmt, ...) {
     if (level < mLevel) {
         return;
@@ -63,6 +67,13 @@ void CLog::Print(CLogLevel level, int line, const char* tag, const char* fmt, ..
 
     va_list ap;
     va_start(ap, fmt);
+
+    if (mCallback) {
+        mCallback((int)level, line, tag, fmt, ap);
+        va_end(ap);
+        return;
+    }
+
     printf("%4d %s %s: ", line, tag, levelStr.c_str());
     vprintf(fmt, ap);
     va_end(ap);

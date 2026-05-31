@@ -97,6 +97,10 @@ static void PrintCfgNode(const std::shared_ptr<CNode>& node, bool isLast, const 
     }
 }
 
+ void CFactory::RegisterPrintCallback(const LogCallback& callback) {
+    CLog::GetInstance().RegisterPrintCallback(callback);
+ }
+
 void CFactory::PrintConfigDetails(const std::shared_ptr<CNode>& root) {
     if (!root) return;
 

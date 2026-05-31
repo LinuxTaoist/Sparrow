@@ -20,6 +20,7 @@
 #define __CLOG_H__
 
 #include <atomic>
+#include <functional>
 #include <stdio.h>
 
 #define CLOGD(fmt, args...) CLog::GetInstance().Print(CLOG_LEVEL_DEBUG, __LINE__, CLOG_TAG, fmt, ##args)
@@ -35,12 +36,15 @@ enum CLogLevel {
     CLOG_LEVEL_BUTT
 };
 
+using CLogCallback = std::function<void(int level, int line, const char* tag, const char* fmt, va_list args)>;
+
 class CLog {
 public:
     static CLog& GetInstance();
     void SetLevel(CLogLevel level);
     CLogLevel GetLevel();
 
+    void RegisterPrintCallback(const CLogCallback& callback);
     void Print(CLogLevel level, int line, const char* tag, const char* fmt, ...);
 
 private:
@@ -49,6 +53,7 @@ private:
 
 private:
     std::atomic<CLogLevel> mLevel;
+    CLogCallback mCallback;
 };
 
 #endif // __CLOG_H__
