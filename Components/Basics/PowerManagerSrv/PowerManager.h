@@ -134,11 +134,11 @@ private:
     int32_t mStandbyTimerCnt;
     uint32_t mCurNotifyStartupEvent;
     uint32_t mCurNotifyStandbyEvent;
+    EPowerLev1State mCurLev1State;
+    EPowerLev2State mCurLev2State;
     InternalDefs::EStartupType mStartupType;
     InternalDefs::EWakeupSourceType mWakeupSourceType;
     InternalDefs::EStandbyReasonType mStandbyReason;
-    EPowerLev1State mCurLev1State;
-    EPowerLev2State mCurLev2State;
     std::map<uint32_t, StandbyDetail> mStandbyObservers;  // key: module id
 };
 

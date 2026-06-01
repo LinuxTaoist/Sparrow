@@ -171,11 +171,11 @@ PowerManager::PowerManager(ModuleIDType id, const std::string& name)
                             mStandbyTimerCnt(0),
                             mCurNotifyStartupEvent(SIG_ID_ANY),
                             mCurNotifyStandbyEvent(SIG_ID_ANY),
+                            mCurLev1State(LEV1_POWER_INIT),
+                            mCurLev2State(LEV2_POWER_ANY),
                             mStartupType(STARTUP_BUTT),
                             mWakeupSourceType(WAKEUP_SOURCE_BUTT),
-                            mStandbyReason(STANDBY_REASON_BUTT),
-                            mCurLev1State(LEV1_POWER_INIT),
-                            mCurLev2State(LEV2_POWER_ANY)
+                            mStandbyReason(STANDBY_REASON_BUTT)
 {
 }
 

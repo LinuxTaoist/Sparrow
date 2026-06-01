@@ -29,7 +29,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "PluginMgr"
 
-#define DEFAULT_HOT_PLUG_ENABLE true
+#define DEFAULT_HOT_PLUG_ENABLE false
 #define OWNER_PLUGINMGR         "PluginManager"
 
 PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE)

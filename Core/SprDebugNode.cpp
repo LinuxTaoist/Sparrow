@@ -204,6 +204,7 @@ void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
 {
     SPR_LOGI("=============================   Version About   ==============================\n");
     SPR_LOGI("\n");
+    SPR_LOGI("  Build Time      : %s %s\n", __DATE__, __TIME__);
     SPR_LOGI("  CommonTypeDefs.h: %s\n", COMMON_TYPE_DEFS_VERSION);
     SPR_LOGI("  CommonMacros.h  : %s\n", COMMON_MACROS_VERSION);
     SPR_LOGI("  CoreTypeDefs.h  : %s\n", CORE_TYPE_DEFS_VERSION);
