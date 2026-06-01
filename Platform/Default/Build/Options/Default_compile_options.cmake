@@ -10,18 +10,27 @@ set(MODULE_CONFIG_VERSION "DEFAULT_MCONFIG_1002")
 ## 设置链接选项
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
 
-## 可选功能模块配置
-# 非核心模块，编译时默认禁用
-# 启用方法：取消对应行的注释符号(#)
-set(BUILD_DEBUG ON)       # 调试工具集（含调试符号与增强日志）
-set(BUILD_EXAMPLES ON)    # 示例程序（演示API用法，非生产环境）
-set(BUILD_TESTCASE ON)    # 单元测试套件（依赖gtest库）
-
 # 拷贝第三方库gtest
 if(BUILD_TESTCASE)
-    message(STATUS "BUILD_TESTCASE 已启用，开始拷贝 googletest 库文件...")
     set(GTEST_SRC_LIB "${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/3rdParty/googletest/lib")
     set(GTEST_DST_LIB "${PROJECT_PATH}/3rdParty/googletest/lib/${PROJECT_PLATFORM}")
+
+    if(NOT EXISTS "${GTEST_SRC_LIB}/libgtest.a" OR NOT EXISTS "${GTEST_SRC_LIB}/libgtest_main.a")
+        message(STATUS "googletest 库缺失，开始自动构建: ${PROJECT_PLATFORM}")
+        execute_process(
+            COMMAND bash ${PROJECT_PATH}/3rdParty/googletest/build.sh
+                    --project-path ${PROJECT_PATH}
+                    --platform ${PROJECT_PLATFORM}
+                    --c-compiler ${CMAKE_C_COMPILER}
+                    --cxx-compiler ${CMAKE_CXX_COMPILER}
+            RESULT_VARIABLE gtest_build_result
+        )
+        if(NOT gtest_build_result EQUAL 0)
+            message(FATAL_ERROR "googletest 自动构建失败，平台: ${PROJECT_PLATFORM}")
+        endif()
+    endif()
+
+    message(STATUS "BUILD_TESTCASE 已启用，开始拷贝 googletest 库文件...")
 
     file(MAKE_DIRECTORY ${GTEST_DST_LIB})
     file(COPY ${GTEST_SRC_LIB}/libgtest_main.a DESTINATION ${GTEST_DST_LIB}/)
