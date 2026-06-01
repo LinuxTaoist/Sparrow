@@ -1,12 +1,13 @@
 # Sparrow Change Log
 
-## v1.8.2-alpha (2026-05-29)
+## v1.8.2 (2026-05-29)
 ### 新增
 - 增加通用协议解析模块CodecX
 - 增加调试Web界面HttpUISrv
 - 增加sprrow main框架SprMain
 ### 变更
 - 去除冗余内部消息ID
+- 更新 Docs/版本管理.md
 
 ## v1.7.0 (2025-09-28)
 ### 新增
