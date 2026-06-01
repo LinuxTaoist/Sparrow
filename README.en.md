@@ -1,46 +1,48 @@
 # Sparrow: Linux C++ Embedded Middleware
+
 👉 [[中文]](README.md)
 
-## 📌 Project Overview
-`Sparrow` is a Linux C++ embedded middleware framework based on the **epoll event-driven model**.
-Adopting a **microservice & plug-in architecture** with full multi-platform adaptation capability, it delivers a high-performance, stable and extensible development foundation for smart devices and vehicle-mounted systems.
+## 📌 Project Positioning
+`Sparrow` is a `Linux C++` embedded middleware framework based on the **epoll event-driven model**. It uses a **microservice + plugin architecture**, supports seamless migration across multiple hardware platforms, and provides an efficient, stable, and extensible foundation for scenarios such as smart devices and in-vehicle systems.
 
-## 🌟 Key Features
-- **Out-of-the-box**: Core framework with minimal third-party dependencies, one-click compilation and rapid deployment
-- **Multi-platform Support**: Natively adapts to Default platform, Quectel AG35 / AR590 and other modules with separated code & configuration
-- **Service Orchestration**: Built-in system service cluster, supporting process daemon, status monitoring and auto-restart for high availability
-- **Remote O&M**: Integrated `rshellx` for remote shell access and file transmission to accelerate field troubleshooting
-- **Real-time Debugging**: Debug node, dynamic property access and log real-time viewing to improve development efficiency
-- **Crash Tracing**: Automatic stack capture for program exceptions and hierarchical logging for fast issue locating
-- **Code Quality Assurance**: Integrated cppcheck static analysis, Valgrind memory detection and GoogleTest unit testing
-- **High-efficiency Communication**: Binder IPC RPC, message subscription & broadcast for low-coupling and high-concurrency module interaction
-- **Ecosystem Extensibility**: Native SQLite / HTTP / MQTT protocol stack, supporting third-party adaptation and dynamic plugin loading
+## 🌟 Core Highlights
+- **Out of the box**: The core framework has no hard third-party dependency. It supports one-click multi-platform build for fast deployment.
+- **Easy multi-platform migration**: Code and configuration are separated. Embedded Linux platforms can be adapted quickly with lower migration cost.
+- **High service availability**: Built-in service cluster supports process guarding, status monitoring, and automatic restart on exceptions.
+- **Lightweight remote O&M**: Integrated `rshellx` supports remote `Shell` capabilities for remote troubleshooting.
+- **Web visual debugging**: Built-in `huisrv` lightweight HTTP UI addresses the common pain point of no GUI and difficult middleware debugging.
+- **Generic protocol codec**: Built-in `CodecX` can adapt multiple protocol parsing requirements via configuration, avoiding repetitive development.
+- **One-stop real-time debugging**: Supports debug nodes, dynamic property read/write, and real-time log viewing to improve debugging efficiency end to end.
+- **Automatic exception tracing**: Program crashes are automatically captured with stack logs. Combined with hierarchical logs, issues can be located quickly.
+- **R&D quality assurance**: Integrates `cppcheck` static analysis and `googletest` unit tests for strict code quality control.
+- **Plugin-based design**: Supports dynamic loading and unloading of shared libraries.
 
-## 🚀 3 Minutes Quick Start
-### 1. Environment Requirements
-- C++11 or higher
-- Linux System
+## 🚀 Quick Start in 3 Minutes
+### 1. Requirements
+- C++11 or later
+- Linux
 
-### 2. Build Project
+### 2. Build the project
 ```bash
-# Enter build directory and execute build script
+# Go to the build directory and run the script
 $ cd Sparrow/Build
 $ ./rebuild_default.sh
 
-# All outputs are located in Release folder
+# Build outputs are in the Release directory
 $ cd Release
 $ ls
 Bin  Cache  Include  Lib
 ```
 
-### 3. Start Core Services
+### 3. Start services
 ```bash
-# Enter binary directory, launch service manager to auto start core services
+# Go to binary directory and start service manager
+# (it launches all core services automatically)
 $ cd Release/Bin
 $ ./servicemanagersrv
 ```
 
-### 4. Real-time Log Viewing
+### 4. View logs in real time
 ```bash
 $ tail -f /tmp/sprlog/sparrow.log
 07-20 10:12:59.104  70543      BinderM D:   80 Add service info(8336, powermanagersrv)
@@ -55,92 +57,93 @@ $ tail -f /tmp/sprlog/sparrow.log
 07-20 10:12:59.113  70550   SprObsBase D:  255 [DebugM] Register Successfully!
 ```
 
-## 📢 Function Introduction
-### Core Functions
-| Function | Key Features | Description |
-|---------|-------------|-------------|
-| Process Management | Process launching, daemon, status monitor & auto restart | Ensure long-term stable operation of core services |
-| Log Management | Graded log, dynamic level adjustment, formatting & persistence | Standardized log system for efficient troubleshooting |
-| Binder RPC | Sync/async communication, service registration & discovery | High-performance cross-process communication core |
-| Message Dispatch | Message broadcast, subscribe-publish & message queue | Decouple modules for asynchronous interaction |
-| Property Service | Property read/write, change notification & configuration persistence | Unified system configuration management |
-| Power Management | Power state control, event notification & low-power adaptation | Full lifecycle power management for embedded devices |
-| Plugin Management | Dynamic loading/unloading and modular extension | Flexible feature expansion with low coupling |
-| Timer Scheduler | Scheduled tasks, periodic tasks and callback trigger | High-precision timing task management |
-| Status Monitor | Timeout detection, device status collection & exception recording | Full-link runtime status monitoring |
-| Thread Pool | Thread reuse, async task scheduling & callback | High-concurrency task processing |
-| Event-driven Core | Epoll multiplexing for IO/timer/signal unified scheduling | Low-power & high-concurrency runtime foundation |
-| Debug Node | Custom debug entry registration, trigger and response | Online simulation and debugging without reboot |
-| Crash Capture | Automatic exception stack recording | Rapid crash root cause analysis |
-| Unit Test | GoogleTest integration for core module verification | Reduce regression risks and ensure code quality |
-| Static Analysis | Cppcheck code scan & Valgrind memory leak detection | Early warning of potential code defects |
-| Multi-platform Migration | Isolated platform config & cross-compilation switching | Rapid porting for diverse hardware |
+## 📢 Feature Overview
+### Core Features
+| Feature | Key Capabilities | Description |
+|---------------|-----------------------------------------|----------------------------|
+| Process Management | Process launch, guarding, status monitoring, exception restart | Ensures stable 24x7 operation of core services |
+| Log Management | Hierarchical logs, dynamic level adjustment, formatted output, persistence | Standardized log system for efficient troubleshooting |
+| Binder RPC | Sync/async communication, service registration and discovery | High-performance cross-process communication core |
+| Message Relay | Message broadcast, publish-subscribe, message queue | Decoupled modules and asynchronous communication |
+| Property Management | Property read/write, change notification, config export, persistence | Unified configuration management center |
+| Power Management | Power state control, event notification, low-power adaptation | Power lifecycle management for embedded devices |
+| Plugin Management | Dynamic load/unload, modular extension | Flexible feature plug-in and lower coupling |
+| Timer Management | Scheduled tasks, periodic tasks, callback triggering | High-precision task scheduling |
+| Status Monitoring | API timeout, device status, exception event collection and storage | Full-dimensional runtime status monitoring |
+| Thread Pool | Thread reuse, async task submission, callback notification | High-concurrency task processing |
+| Event-driven Core | Epoll event loop, unified management of IO/timer/signal events | Core for high concurrency and low power |
+| Debug Node | Debug entry registration/trigger/response | Online simulation debugging without device reboot |
+| Crash Capture | Automatic exception stack recording | Fast root-cause location for crashes |
+| Automated Testing | Integrated gtest, unit/integration tests for core modules | Ensures code quality and reduces change risk |
+| Static Analysis | cppcheck risk detection, valgrind memory detection | Prevents defects early |
+| Multi-platform Adaptation | Isolated platform config, one-click cross-build switch | Fast migration to different hardware platforms |
 
 ### Auxiliary Tools
-| Tool | Key Features | Description |
-|------|-------------|-------------|
-| rshellx | Remote shell execution & file transmission | Remote maintenance for headless embedded devices |
-| infrawatch | Service monitoring, real-time log & interactive debug | One-stop online diagnosis for embedded devices |
-| logshow | Log filtering and real-time viewing | Lightweight log analysis tool |
+| Tool | Key Capabilities | Description |
+|---------------|-----------------------------------------|----------------------------|
+| rshellx | Remote shell execution | Remote O&M for devices without displays |
+| huisrv | Lightweight Web UI, supports device data view and shell execution | Online device data presentation |
+| infrawatch | Service status monitoring, real-time logs, remote debug interaction | One-stop online diagnostics |
+| logshow | Real-time log viewing, filtering and search | Lightweight log viewer |
 | getprop/setprop | Fast system property read/write | Dynamic configuration debugging |
 
-## 🎯 Application Scenarios
-- Smart Hardware: IP cameras, robot control systems, industrial sensors and intelligent terminals
-- Vehicle-mounted System: T-Box, intelligent cockpit and vehicle networking gateway
-- Consumer Electronics: Wearable devices, health monitors and smart home appliances
+## 🎯 Scenarios
+- Smart hardware: smart cameras, robot control systems, industrial sensors, smart terminals, and other embedded devices
+- In-vehicle systems: T-Box, intelligent cockpit, vehicle networking gateways, and other automotive terminals
+- Consumer electronics: smart wearables, health monitors, smart home appliances, and other lightweight smart products
 
-## 📂 Source Code Structure
+## 📂 Source Tree at a Glance
 ```
 Sparrow/
-├── 3rdAdapter                // Third-party library adaptation layer (SQLite / Log wrapper)
-├── 3rdParty                  // Third-party dependencies (gtest / libgo / sqlite)
-├── Build                     // Entry of build & rebuild scripts
-├── CMakeLists.txt            // Top-level project CMake config
-├── Components                // Business & system service components
-│   ├── Basics                // Core system services (Binder / Log / Power / Property)
-│   └── Business              // Business components (OneNet MQTT)
-├── Configs                   // Global system configuration files
-├── Core                      // Framework core (Binder / Epoll / ThreadPool / Message)
-├── Debug                     // Debug toolset (infrawatch / rshellx / logshow)
-├── Docs                      // Official documents & specifications
-├── Examples                  // Practical demo codes for API usage
-├── Hardware                  // Hardware adaptation interface
-├── LICENSE                   // Open-source license file
-├── Platform                  // Multi-platform adaptation config (Default / AG35 / AR590)
-├── PrivateAPIs               // Internal framework private interfaces
-├── PublicAPIs                // External open business interfaces
+├── 3rdAdapter                // Third-party library adaptation layer (SQLite/log wrapper)
+├── 3rdParty                  // Third-party dependencies (gtest/libgo/sqlite)
+├── Build                     // Build script entry
+├── CMakeLists.txt            // Top-level build config
+├── Components                // Service component set
+│   ├── Basics                // Core system services (Binder/log/power/property, etc.)
+│   └── Business              // Business components (OneNet MQTT cloud integration)
+├── Configs                   // Global config files
+├── Core                      // Framework core (Binder/event scheduler/thread pool/message mechanism)
+├── Debug                     // Debug tools (infrawatch/rshellx/logshow)
+├── Docs                      // Project docs (specs/guides/architecture/troubleshooting)
+├── Examples                  // Feature usage examples
+├── Hardware                  // Hardware adaptation interfaces
+├── LICENSE                   // Open-source license
+├── Platform                  // Multi-platform adaptation config
+├── PrivateAPIs               // Internal framework APIs (Binder/debug/mediator)
+├── PublicAPIs                // Public business APIs (property/power/OneNet)
 ├── README.en.md
 ├── README.md
-├── Release                   // Build output (Bin / Lib / Include / Cache)
-├── TestCase                  // Unit test & integration test cases
-├── Tools                     // Quality inspection tools (cppcheck / valgrind)
-├── Util                      // General utilities (JSON / Backtrace / Algorithm)
-├── UtilModules               // Common middleware modules (Codec / HTTP / MQTT)
-├── modules_config.cmake      // Global module compilation config
-└── version.cmake             // Project version management
+├── Release                   // Build outputs (binaries/libraries/headers/cache)
+├── TestCase                  // Test cases (internal core/external extensions)
+├── Tools                     // Quality tools (cppcheck/valgrind)
+├── Util                      // Utility library (serialization/JSON/backtrace/algorithms)
+├── UtilModules               // Base modules (codec/epoll/HTTP/MQTT)
+├── modules_config.cmake      // Module build config
+└── version.cmake             // Version config
 ```
 
-## 📚 Documents & Resources
-- [User Manual](Docs/UserManual): Guidelines for debug node, timer, log, message dispatch and debugging functions.
-- [C++ Coding Specification](Docs/C++编程规范.md): Unified code style and project development standards.
-- [Version Management](Docs/版本管理.md): Iteration records and release notes.
-- [FAQ](Docs/疑难杂症.md): Collection of common problems and solutions.
+## 📚 Docs and Resources
+- [User Manual](Docs/UserManual): Usage guide for debug node, timer, log, and other features.
+- [Coding Specification](Docs/C++编程规范.md): Unified coding style. Follow the current project code first.
+- [Version Management](Docs/版本管理.md): Version release records, continuously updated.
+- [Troubleshooting](Docs/疑难杂症.md): Common issue solutions, continuously updated.
 
-## 🤝 Contribute & Contact
-- Issues: Submit bugs, feature requests or technical discussions.
-- Official Account: 开源519
-- WeChat: StopCoding (Note: Sparrow)
+## 🤝 Community
+- Issues: Submit bugs, suggestions, or join discussions.
+- WeChat Official Account: 开源519
+- WeChat: StopCoding (note: Sparrow)
 
 ## 📄 License
-This project is licensed under the **MIT License**, see the [LICENSE](LICENSE) file for details.
+This project is licensed under the MIT License. See [LICENSE](LICENSE).
 
 ---
 
 ## 💖 Support
-If this project helps you, please support us:
-- Star, Fork and Watch this repository
-- Participate in discussions via Issues
-- Follow and share our official technical articles
-- Join the technical communication group via WeChat
+If you find this project useful, you can support it in the following ways:
+- Triple support: Star, Fork, Watch
+- Join discussions: raise issues or suggestions in Issues
+- WeChat Official Account: 开源519, follow/share/like [official article](https://mp.weixin.qq.com/s/DHiZ4iQJAQVrN8z4kDTiLg)
+- WeChat: StopCoding, join the technical discussion group
 
-Keep improving in embedded development; every step leads to long-term progress.
+Once you step onto this path, keep refining your craft. Small steps lead far; small streams become rivers. Keep moving, and excellence follows.
