@@ -2,4 +2,4 @@
 set(VERSION_MAJOR 1)
 set(VERSION_MINOR 8)
 set(VERSION_REVISION 2)
-set(VERSION_PRELEASE "beta")
+set(VERSION_PRELEASE "alpha.feature-config-manager")
