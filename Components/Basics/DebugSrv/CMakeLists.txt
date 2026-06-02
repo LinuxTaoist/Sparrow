@@ -1,4 +1,5 @@
-## Business
+## DebugSrv
+
 # Bin debugsrv
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/DebugSrv DEBUG_SRV_PATH)
 add_executable              (BinDebugSrv ${DEBUG_SRV_PATH})

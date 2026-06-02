@@ -1,4 +1,6 @@
-## Bin propertiessrv
+## PropertiesSrv
+
+# Bin propertiessrv
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/PropertiesSrv        SRC_PROPERTIES_SRV_PATH)
 add_executable              (BinPropertySrv ${SRC_PROPERTIES_SRV_PATH})
 target_include_directories  (BinPropertySrv PRIVATE ${PROJECT_PATH}/Util
