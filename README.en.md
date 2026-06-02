@@ -146,4 +146,4 @@ If you find this project useful, you can support it in the following ways:
 - WeChat Official Account: 开源519, follow/share/like [official article](https://mp.weixin.qq.com/s/DHiZ4iQJAQVrN8z4kDTiLg)
 - WeChat: StopCoding, join the technical discussion group
 
-Once you step onto this path, keep refining your craft. Small steps lead far; small streams become rivers. Keep moving, and excellence follows.
+Once committed to this pursuit, hone your craft unremittingly.Progress stems from incremental steps, greatness from steady accumulation Persist, and excellence shall be attained.
