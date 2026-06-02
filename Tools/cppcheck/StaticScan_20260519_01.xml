@@ -1,0 +1,126 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<results version="2">
+    <cppcheck version="1.82"/>
+    <errors>
+        <error id="unusedPrivateFunction" severity="style" msg="Unused private function: &apos;PtyTerminal::EraseColor&apos;" verbose="Unused private function: &apos;PtyTerminal::EraseColor&apos;" cwe="398">
+            <location file0="/mnt/wsl/hdd1/gitee/Sparrow/Debug/RShellX/PtyTerminal.cpp" file="/mnt/wsl/hdd1/gitee/Sparrow/Debug/RShellX/PtyTerminal.h" line="39"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &apos;fEmptyBin&apos; is assigned a value that is never used." verbose="Variable &apos;fEmptyBin&apos; is assigned a value that is never used." cwe="563">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/TestCase/Internal/Util/TestFileUtils.cc" line="35"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &apos;fHexEmpty&apos; is assigned a value that is never used." verbose="Variable &apos;fHexEmpty&apos; is assigned a value that is never used." cwe="563">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/TestCase/Internal/Util/TestFileUtils.cc" line="52"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &apos;ret&apos; is assigned a value that is never used." verbose="Variable &apos;ret&apos; is assigned a value that is never used." cwe="563">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/TestCase/Internal/Util/TestFileUtils.cc" line="94"/>
+        </error>
+        <error id="unreadVariable" severity="style" msg="Variable &apos;ret&apos; is assigned a value that is never used." verbose="Variable &apos;ret&apos; is assigned a value that is never used." cwe="563">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/TestCase/Internal/Util/TestFileUtils.cc" line="140"/>
+        </error>
+        <error id="noExplicitConstructor" severity="style" msg="Class &apos;CJConfigParser&apos; has a constructor with 1 argument that is not explicit." verbose="Class &apos;CJConfigParser&apos; has a constructor with 1 argument that is not explicit. Such constructors should in general be explicit for type safety reasons. Using the explicit keyword in the constructor means some mistakes when using the class can be avoided." cwe="398">
+            <location file0="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/CFactory.cpp" file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/CJConfigParser.h" line="29"/>
+        </error>
+        <error id="noExplicitConstructor" severity="style" msg="Class &apos;CJConfigParser&apos; has a constructor with 1 argument that is not explicit." verbose="Class &apos;CJConfigParser&apos; has a constructor with 1 argument that is not explicit. Such constructors should in general be explicit for type safety reasons. Using the explicit keyword in the constructor means some mistakes when using the class can be avoided." cwe="398">
+            <location file0="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/CJConfigParser.cpp" file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/CJConfigParser.h" line="29"/>
+        </error>
+        <error id="toomanyconfigs" severity="information" msg="Too many #ifdef configurations - cppcheck only checks 12 of 14 configurations. Use --force to check all configurations." verbose="The checking of the file will be interrupted because there are too many #ifdef configurations. Checking of all #ifdef configurations can be forced by --force command line option or from GUI preferences. However that may increase the checking time." cwe="398">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="0"/>
+        </error>
+        <error id="uselessAssignmentPtrArg" severity="warning" msg="Assignment of function parameter has no effect outside the function. Did you forget dereferencing it?" verbose="Assignment of function parameter has no effect outside the function. Did you forget dereferencing it?" cwe="398">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="3142"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="783" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="784" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="789" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="798" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="813" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="819" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="820" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="890" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="891" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1678" info="Calling function &apos;parse_string&apos;, 2nd argument &apos;input_buffer&apos; value is 0"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;buffer!=NULL&apos; is redundant or there is possible null pointer dereference: buffer." verbose="Either the condition &apos;buffer!=NULL&apos; is redundant or there is possible null pointer dereference: buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1064" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1059" info="Assuming that condition &apos;buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1459" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1463" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1465" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1471" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1473" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1482" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1480" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1619" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1625" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1623" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1625" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1630" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1632" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1640" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1638" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="nullPointerRedundantCheck" severity="warning" msg="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." verbose="Either the condition &apos;input_buffer!=NULL&apos; is redundant or there is possible null pointer dereference: input_buffer." cwe="476">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1676" info="Null pointer dereference"/>
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="1688" info="Assuming that condition &apos;input_buffer!=NULL&apos; is not redundant"/>
+        </error>
+        <error id="wrongmathcall" severity="warning" msg="Passing value -1.0 to sqrt() leads to implementation-defined result." verbose="Passing value -1.0 to sqrt() leads to implementation-defined result." cwe="758">
+            <location file="/mnt/wsl/hdd1/gitee/Sparrow/UtilModules/CodecX/cJSON.c" line="113"/>
+        </error>
+        <error id="missingInclude" severity="information" msg="Cppcheck cannot find all the include files (use --check-config for details)" verbose="Cppcheck cannot find all the include files. Cppcheck can check the code without the include files found. But the results will probably be more accurate if all the include files are found. Please check your project&apos;s include directories and add all of them as include directories for Cppcheck. To see what files Cppcheck cannot find use --check-config."/>
+    </errors>
+</results>

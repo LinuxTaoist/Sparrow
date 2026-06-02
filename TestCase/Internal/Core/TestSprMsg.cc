@@ -20,7 +20,6 @@
 #include <vector>
 #include <stdint.h>
 #include "SprMsg.h"
-#include "SprMsg.h"
 #include "gtest/gtest.h"
 
 class Core_SprMsg : public ::testing::Test {
@@ -241,4 +240,37 @@ TEST_F(Core_SprMsg, I64VecTest) {
     for (size_t i = 0; i < expectedSize && i < actualSize; ++i) {
         EXPECT_EQ(testVec[i], actualVec[i]);
     }
+}
+
+TEST_F(Core_SprMsg, DecodeInvalidStringFailTest) {
+    expectMsg.SetString("Hello, Test String!");
+
+    std::string encoded;
+    expectMsg.Encode(encoded);
+    encoded.pop_back();
+
+    EXPECT_EQ(-1, actualMsg.Decode(encoded));
+    EXPECT_EQ("", actualMsg.GetString());
+}
+
+TEST_F(Core_SprMsg, DecodeFailShouldClearOldStringTest) {
+    expectMsg.SetString("Old Value");
+
+    std::string encoded;
+    expectMsg.Encode(encoded);
+    EXPECT_EQ(0, actualMsg.Decode(encoded));
+    EXPECT_EQ("Old Value", actualMsg.GetString());
+
+    SprMsg invalidMsg;
+    invalidMsg.SetFrom(1001);
+    invalidMsg.SetTo(2001);
+    invalidMsg.SetMsgId(0x1234);
+    invalidMsg.SetString("New Value");
+
+    std::string invalidEncoded;
+    invalidMsg.Encode(invalidEncoded);
+    invalidEncoded.pop_back();
+
+    EXPECT_EQ(-1, actualMsg.Decode(invalidEncoded));
+    EXPECT_EQ("", actualMsg.GetString());
 }

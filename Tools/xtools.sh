@@ -110,22 +110,45 @@ new_platform() {
     echo -e "${GREEN}开始搭建新项目...${NC}"
     platform_name="$1"
     cd ${project_path}
-    echo -e "${GREEN}touch ${project_path}/Build/${platform_name}/${platform_name}_build.sh ${NC}"
-    mkdir -p ${project_path}/Build/options/${platform_name}
-    touch ${project_path}/Build/options/${platform_name}/${platform_name}_compile_options.cmake
-    touch ${project_path}/Build/${platform_name}_build.sh
 
-    echo -e "${GREEN}touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop ${NC}"
-    mkdir -p ${project_path}/ProjectConfigs/Vendor/${platform_name}
-    touch ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
-    echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/ProjectConfigs/Vendor/${platform_name}/vendor.prop
+    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/${platform_name}_build.sh ${NC}"
+    mkdir -p ${project_path}/Platform/${platform_name}
+    mkdir -p ${project_path}/Platform/${platform_name}/Build
+    mkdir -p ${project_path}/Platform/${platform_name}/Build/Options
+    touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_compile_options.cmake
+    touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_modules_config.cmake
+    touch    ${project_path}/Platform/${platform_name}/Build/${platform_name}_build.sh
+    touch    ${project_path}/Platform/${platform_name}/Build/rebuild_${platform_name}.sh
+
+    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/Configs/vendor.prop ${NC}"
+    mkdir -p ${project_path}/Platform/${platform_name}/Configs
+    touch    ${project_path}/Platform/${platform_name}/Configs/vendor.prop
+    touch    ${project_path}/Platform/${platform_name}/Configs/sprlog.conf
+    echo "ro.vendor.platform.name=${platform_name}" > ${project_path}/Platform/${platform_name}/Configs/vendor.prop
+
+    echo -e "${GREEN}mkdir -p ${project_path}/Platform/${platform_name}/3rdParty ${NC}"
+    mkdir -p ${project_path}/Platform/${platform_name}/3rdParty
 }
 
-# cmd static_scan
+## cmd static_scan
 static_scan() {
     echo -e "${GREEN}开始静态代码扫描...${NC}"
-    cd $(pwd)/../StaticScans
+    cd $(pwd)/cppcheck
     ./RunCppcheck.sh
+}
+
+## start_valgrind
+start_valgrind() {
+    echo -e "${GREEN}开始启动valgrind...${NC}"
+    cd $(pwd)/valgrind
+    ./start_valgrind.sh
+}
+
+## stop_valgrind
+stop_valgrind() {
+    echo -e "${GREEN}开始停止valgrind...${NC}"
+    cd $(pwd)/valgrind
+    ./stop_valgrind.sh
 }
 
 # Function to print usage information with logo
@@ -159,6 +182,8 @@ usage() {
     echo -e "${PURPLE}  $0 build-3rd                编译依赖的第三方库${NC}"
     echo -e "${PURPLE}  $0 new-platform <platform>  创建新项目${NC}"
     echo -e "${PURPLE}  $0 staticscan               执行静态代码扫描${NC}"
+    echo -e "${PURPLE}  $0 start-valgrind           启动valgrind${NC}"
+    echo -e "${PURPLE}  $0 stop-valgrind            停止valgrind${NC}"
     echo -e "${PURPLE}  $0 help                     显示此帮助信息${NC}"
     echo -e ""
     echo -e "${PURPLE}================================================================================${NC}"
@@ -191,6 +216,12 @@ main() {
             new_platform "$2";;
         staticscan)
             static_scan
+            ;;
+        start-valgrind)
+            start_valgrind
+            ;;
+        stop-valgrind)
+            stop_valgrind
             ;;
         help|?)
             usage

@@ -209,9 +209,9 @@ TEST_F(TestSprComponents, TimerRegisterMultiUnregisterPart)
 // 测试多个定时器顺序启动和停止
 TEST_F(TestSprComponents, TimerMultipleTimersSeqStartStop)
 {
-    int32_t waitMs1 = 1010;
-    int32_t waitMs2 = 1010;
-    int32_t waitMs3 = 1010;
+    int32_t waitMs1 = 1100;
+    int32_t waitMs2 = 1100;
+    int32_t waitMs3 = 1100;
     int32_t expectVal200MS = 15;
     int32_t expectVal500MS = 4;
     int32_t expectVal1S = 1;

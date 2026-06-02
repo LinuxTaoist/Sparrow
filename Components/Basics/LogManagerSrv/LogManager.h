@@ -26,7 +26,7 @@
 #include <map>
 #include <string>
 #include <fstream>
-#include <sstream>
+#include <semaphore.h>
 #include "CoreTypeDefs.h"
 
 enum LogOutputMode
@@ -41,18 +41,26 @@ class LogManager
 {
 public:
     LogManager();
-    virtual ~LogManager();
+    ~LogManager();
     int MainLoop();
     static int StopWork();
 
 private:
+    LogManager(const LogManager&) = delete;
+    LogManager& operator = (const LogManager&) = delete;
+    LogManager(LogManager&&) = delete;
+    LogManager& operator = (LogManager&&) = delete;
+
     int EnvReady(const std::string& srvName);
     int DumpLogAttrs();
     int LoadLogCfgFile(const std::string& cfgPath);
+    int OpenCurrentLogFile();
     int UpdateSuffixOfAllFiles();
+    int FlushLogFileIfNecessary(bool force = false);
     int RotateLogsIfNecessary(uint32_t logDataSize);
     int GetLevelFromLogStrs(const std::string& logData);
     int WriteToLogFile(const std::string& logData);
+    int WriteLog(const std::string& logData, int level);
     std::set<std::string> GetSortedLogFiles(const std::string& path, const std::string& fileName);
 
     void LoadAttrOutputMode(const std::string& value);
@@ -70,9 +78,12 @@ private:
     uint32_t        mLogFrameLength;    // defined with "logging.frame_length"
     uint32_t        mLogFileNum;        // defined with "logging.file_num"
     uint32_t        mLogFileCapacity;   // defined with "logging.file_capacity"
+    uint32_t        mPendingFlushCount;
+    uint64_t        mLastFlushTickSec;
     std::string     mLogFileName;       // defined with "logging.file_name"
     std::string     mLogsFilePath;      // defined with "logging.file_path"
     std::string     mCurrentLogFile;
+    sem_t*          mReadSem;
     std::ofstream   mLogFileStream;
     std::set<std::string> mLogFilePaths;
 

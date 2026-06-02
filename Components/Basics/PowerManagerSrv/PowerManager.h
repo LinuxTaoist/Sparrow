@@ -39,6 +39,13 @@ namespace {
     ENUM_OR_STRING(LEV1_POWER_SLEEP),   \
     ENUM_OR_STRING(LEV1_POWER_BUTT)
 
+#define POWER_LEV2_MACROS                       \
+    ENUM_OR_STRING(LEV2_POWER_ANY),             \
+    ENUM_OR_STRING(LEV2_POWER_TO_ACTIVE_ING),   \
+    ENUM_OR_STRING(LEV2_POWER_TO_STANDBY_ING),  \
+    ENUM_OR_STRING(LEV2_POWER_TO_SLEEP_ING),    \
+    ENUM_OR_STRING(LEV2_POWER_BUTT)
+
 // 一级状态:
 enum EPowerLev1State
 {
@@ -48,7 +55,7 @@ enum EPowerLev1State
 //二级状态:
 enum EPowerLev2State
 {
-    LEV2_POWER_ANY      = 0x00
+    POWER_LEV2_MACROS
 };
 
 struct StandbyDetail
@@ -73,8 +80,9 @@ private:
     std::string GetLev1String(EPowerLev1State state);
 
     /* 更新二级状态 */
-    void SetLev2State(EPowerLev2State state) { mCurLev2State = state; }
+    void SetLev2State(EPowerLev2State state);
     EPowerLev2State GetLev2State() { return mCurLev2State; }
+    std::string GetLev2String(EPowerLev2State state);
 
     void DoBootBusiness();
     void DoResumeBusiness();
@@ -85,16 +93,21 @@ private:
     void NotifyAllWithStandby();
     void NotifyAllWithSleep();
     void NotifyEvent(uint32_t event);
+    void PostAEvent(uint32_t event, void* args = nullptr, int32_t size = 0);
     bool IsAllowStandbyWithAllObserver();
+    void ResetAllObserverPreStandbyAck();
 
     /* 消息响应函数 */
     void MsgRespondObserverRegister(const SprMsg& msg);
     void MsgRespondPowerOn(const SprMsg& msg);
     void MsgRespondStartupPollTimerEvent(const SprMsg& msg);
+    void MsgRespondStartupPollTimerEventUnexpected(const SprMsg& msg);
     void MsgRespondPowerOff(const SprMsg& msg);
     void MsgRespondPreStandbyResponse(const SprMsg& msg);
     void MsgRespondPreStandbyResponseTimeout(const SprMsg& msg);
+    void MsgRespondPreStandbyResponseUnexpected(const SprMsg& msg);
     void MsgRespondStandbyPollTimerEvent(const SprMsg& msg);
+    void MsgRespondStandbyPollTimerEventUnexpected(const SprMsg& msg);
     void MsgRespondEnterSleepTimerEvent(const SprMsg& msg);
     void MsgRespondUnexpectedState(const SprMsg& msg);
     void MsgRespondUnexpectedMsg(const SprMsg& msg);
@@ -121,11 +134,11 @@ private:
     int32_t mStandbyTimerCnt;
     uint32_t mCurNotifyStartupEvent;
     uint32_t mCurNotifyStandbyEvent;
+    EPowerLev1State mCurLev1State;
+    EPowerLev2State mCurLev2State;
     InternalDefs::EStartupType mStartupType;
     InternalDefs::EWakeupSourceType mWakeupSourceType;
     InternalDefs::EStandbyReasonType mStandbyReason;
-    EPowerLev1State mCurLev1State;
-    EPowerLev2State mCurLev2State;
     std::map<uint32_t, StandbyDetail> mStandbyObservers;  // key: module id
 };
 

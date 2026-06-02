@@ -24,50 +24,19 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CommonMacros.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define COMMON_MACROS_VERSION   "COMMON_MACROS_VERSION_M1001"
+#define COMMON_MACROS_VERSION   "COMMON_MACROS_VERSION_M1002"
 
 // --------------------------------------------------------------------------------------------------------------------
-// - Common macros for build information
+// - Common macros for environment path
 // --------------------------------------------------------------------------------------------------------------------
-#ifndef PROJECT_INFO
-    #define PROJECT_INFO    "Unknown"
-#endif
+#define SYS_TEMP_DIR        "/tmp"
+#define SYS_PROC_DIR        "/proc"
+#define SYS_DATA_DIR        "/data"
+#define SYS_SDCARD_DIR      "/sdcard"
 
-#ifndef CXX_STANDARD
-    #define CXX_STANDARD    "Unknown"
-#endif
-
-#ifndef GXX_VERSION
-    #define GXX_VERSION     "Unknown"
-#endif
-
-#ifndef GCC_VERSION
-    #define GCC_VERSION     "Unknown"
-#endif
-
-#ifndef PROJECT_PLATFORM
-    #define PROJECT_PLATFORM "Unknown"
-#endif
-
-#ifndef BUILD_TIME
-    #define BUILD_TIME      "Unknown"
-#endif
-
-#ifndef BUILD_TYPE
-    #define BUILD_TYPE      "Unknown"
-#endif
-
-#ifndef BUILD_HOST
-    #define BUILD_HOST      "Unknown"
-#endif
-
-#ifndef BUILD_PLATFORM
-    #define BUILD_PLATFORM  "Unknown"
-#endif
-
-#ifndef MODULE_CONFIG_VERSION
-    #define MODULE_CONFIG_VERSION   "Unknown"
-#endif
+// User path
+#define DEFAULT_DEBUG_ROOT_DIR      SYS_TEMP_DIR
+#define DEFAULT_MQS_DIR             SYS_TEMP_DIR "/mq_details"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for service and client
@@ -149,5 +118,48 @@
         return __err;                           \
     }                                           \
 } while(0)
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Common macros for build information
+// --------------------------------------------------------------------------------------------------------------------
+#ifndef PROJECT_INFO
+    #define PROJECT_INFO    "Unknown"
+#endif
+
+#ifndef CXX_STANDARD
+    #define CXX_STANDARD    "Unknown"
+#endif
+
+#ifndef GXX_VERSION
+    #define GXX_VERSION     "Unknown"
+#endif
+
+#ifndef GCC_VERSION
+    #define GCC_VERSION     "Unknown"
+#endif
+
+#ifndef PROJECT_PLATFORM
+    #define PROJECT_PLATFORM "Unknown"
+#endif
+
+#ifndef BUILD_TIME
+    #define BUILD_TIME      "Unknown"
+#endif
+
+#ifndef BUILD_TYPE
+    #define BUILD_TYPE      "Unknown"
+#endif
+
+#ifndef BUILD_HOST
+    #define BUILD_HOST      "Unknown"
+#endif
+
+#ifndef BUILD_PLATFORM
+    #define BUILD_PLATFORM  "Unknown"
+#endif
+
+#ifndef MODULE_CONFIG_VERSION
+    #define MODULE_CONFIG_VERSION   "Unknown"
+#endif
 
 #endif // __COMMON_MACROS_H__

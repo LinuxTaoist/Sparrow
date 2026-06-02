@@ -35,15 +35,15 @@ SprDirWatch::SprDirWatch()
 
 SprDirWatch::~SprDirWatch()
 {
-    for (int wd : mWatchFds) {
+    for (int32_t wd : mWatchFds) {
         DelDirWatch(wd);
     }
     close(mInotifyFd);
 }
 
-int SprDirWatch::AddDirWatch(const std::string& path, uint32_t mask)
+int32_t SprDirWatch::AddDirWatch(const std::string& path, uint32_t mask)
 {
-    int wd = inotify_add_watch(mInotifyFd, path.c_str(), mask);
+    int32_t wd = inotify_add_watch(mInotifyFd, path.c_str(), mask);
     if (wd == -1) {
         SPR_LOGE("Add watch %s failed! (%s)\n", path.c_str(), strerror(errno));
         return -1;
@@ -54,7 +54,7 @@ int SprDirWatch::AddDirWatch(const std::string& path, uint32_t mask)
     return wd;
 }
 
-int SprDirWatch::DelDirWatch(int wd)
+int32_t SprDirWatch::DelDirWatch(int32_t wd)
 {
     SPR_LOGD("Delete watch %d\n", wd);
     if (inotify_rm_watch(mInotifyFd, wd) == -1) {

@@ -36,7 +36,7 @@ int32_t SprObserverWithTimerfd::InitFramework()
     return 0;
 }
 
-void* SprObserverWithTimerfd::EpollEvent(int fd, EpollType eType, void* arg)
+void* SprObserverWithTimerfd::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != GetEvtFd()) {
         SPR_LOGW("fd is not timerfd!\n");

@@ -1,1 +1,2 @@
+add_subdirectory(CodecX)
 add_subdirectory(EpollEventHandler)

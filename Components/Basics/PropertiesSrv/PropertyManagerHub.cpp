@@ -61,7 +61,24 @@ void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, co
             break;
         }
         case PROPERTY_CMD_GET_PROPERTIES: {
-            mPropertyManager->GetProperties();
+            std::map<std::string, std::string> properties;
+            int ret = mPropertyManager->GetProperties(properties);
+
+            NONZERO_CHECK(pRspParcel->WriteInt(ret));
+            if (ret == 0) {
+                NONZERO_CHECK(pRspParcel->WriteInt(properties.size()));
+                for (auto& item : properties) {
+                    NONZERO_CHECK(pRspParcel->WriteString(item.first));
+                    NONZERO_CHECK(pRspParcel->WriteString(item.second));
+                }
+            }
+
+            NONZERO_CHECK(pRspParcel->Post());
+            break;
+        }
+
+        case PROPERTY_CMD_DUMP_PROPERTIES: {
+            mPropertyManager->DumpProperties();
             NONZERO_CHECK(pRspParcel->WriteInt(0));
             NONZERO_CHECK(pRspParcel->Post());
             break;

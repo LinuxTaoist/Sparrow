@@ -19,7 +19,9 @@
  */
 #include <atomic>
 #include <fcntl.h>
+#include <errno.h>
 #include <unistd.h>
+#include <string.h>
 #include "Parcel.h"
 #include "SprLog.h"
 #include "CommonMacros.h"
@@ -42,6 +44,7 @@ bool BinderManager::mRunning = false;
 
 BinderManager::BinderManager()
 {
+    mRootDir = DEFAULT_DEBUG_ROOT_DIR;
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BinderManager::BMsgRespondAddService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::BMsgRespondRemoveService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_GET_SERVICE,     &BinderManager::BMsgRespondGetService));
@@ -83,12 +86,14 @@ BinderManager* BinderManager::GetInstance()
 
 int32_t BinderManager::EnvReady(const std::string& srvName)
 {
-    std::string node = "/tmp/" + srvName;
-    int fd = creat(node.c_str(), 0644);
-    if (fd != -1) {
-        close(fd);
+    std::string node = mRootDir + "/" + srvName;
+    int32_t fd = creat(node.c_str(), 0644);
+    if (fd == -1) {
+        SPR_LOGE("Create %s failed! (%s)\n", node.c_str(), strerror(errno));
+        return -1;
     }
 
+    close(fd);
     return 0;
 }
 
@@ -148,7 +153,7 @@ int32_t BinderManager::StartWork()
 {
     mRunning = true;
     while (mRunning) {
-        int cmd = 0;
+        int32_t cmd = 0;
         NONZERO_CHECK_RET(pReqParcel->Wait());
         NONZERO_CHECK_RET(pReqParcel->ReadInt(cmd));
 

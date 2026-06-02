@@ -42,17 +42,15 @@ using namespace InternalDefs;
 #define SYSTEM_PROP_PATH        "system.prop"
 #define DEFAULT_PROP_PATH       "default.prop"
 #define VENDOR_PROP_PATH        "vendor.prop"
-
-#define SHARED_MEMORY_PATH      "/tmp/__property_shared_memory__"
-#define SHARED_PERSIST_PATH     "/tmp/__property_shared_persist__"
-
-#define SHARED_MEMORY_MAX_SIZE  (128 * 1024)
+#define SHARED_MEMORY_MAX_SIZE  (128 * 1024)    // 128KB
 
 static std::atomic<bool> gObjAlive(true);
 
 PropertyManager::PropertyManager(ModuleIDType id, const std::string& name)
     : SprObserverWithMQueue(id, name)
 {
+    mSharedMemoryPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "__property_shared_memory__";
+    mSharedPersistPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "__property_shared_persist__";
 }
 
 PropertyManager::~PropertyManager()
@@ -97,7 +95,18 @@ int32_t PropertyManager::GetProperty(const std::string& key, std::string& value,
     return ret;
 }
 
-int32_t PropertyManager::GetProperties()
+int32_t PropertyManager::GetProperties(std::map<std::string, std::string>& properties)
+{
+    if (mpSharedMemory == nullptr) {
+        SPR_LOGE("mpSharedMemory is nullptr!\n");
+        return -1;
+    }
+
+    mpSharedMemory->GetAllKeyValues(properties);
+    return 0;
+}
+
+int32_t PropertyManager::DumpProperties()
 {
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
@@ -109,8 +118,8 @@ int32_t PropertyManager::GetProperties()
 
 int32_t PropertyManager::Init()
 {
-    mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(SHARED_MEMORY_PATH, SHARED_MEMORY_MAX_SIZE));
-    mpPersistMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(SHARED_PERSIST_PATH, SHARED_MEMORY_MAX_SIZE, false));
+    mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(mSharedMemoryPath, SHARED_MEMORY_MAX_SIZE));
+    mpPersistMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(mSharedPersistPath, SHARED_MEMORY_MAX_SIZE, false));
 
     // load default property
     LoadPropertiesFromFile(DEFAULT_PROP_PATH);

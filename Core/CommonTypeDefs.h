@@ -21,7 +21,6 @@
 #ifndef __COMMON_TYPE_DEFS_H__
 #define __COMMON_TYPE_DEFS_H__
 
-#include <string>
 #include <stdint.h>
 #include <mqueue.h>
 
@@ -34,7 +33,7 @@
 // - Common defines for PowerManager
 // --------------------------------------------------------------------------------------------------------------------
 enum EPowerManagerEvent {
-    POWER_MGR_ACTIVE,
+    POWER_MGR_ACTIVE = 0,
     POWER_MGR_STANDBY,
     POWER_MGR_SLEEP,
     POWER_MGR_WAKEUP,

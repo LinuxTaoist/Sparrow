@@ -28,9 +28,6 @@ using namespace InternalDefs;
 
 #define LOG_TAG "SprBinderHub"
 
-static std::shared_ptr<Parcel> pReqParcel = nullptr;
-static std::shared_ptr<Parcel> pRspParcel = nullptr;
-
 bool SprBinderHub::mRun = false;
 
 SprBinderHub::SprBinderHub(const std::string& srvName) : mSrvName(srvName)
@@ -61,9 +58,9 @@ int32_t SprBinderHub::DestoryHub()
 {
     if (mRun) {
         mRun = false;
-        POINTER_CHECK_ERR(pReqParcel, -1);
-        NONZERO_CHECK_RET(pReqParcel->WriteInt(GENERAL_CMD_EXE_EXIT));
-        NONZERO_CHECK_RET(pReqParcel->Post());
+        POINTER_CHECK_ERR(mReqParcel, -1);
+        NONZERO_CHECK_RET(mReqParcel->WriteInt(GENERAL_CMD_EXE_EXIT));
+        NONZERO_CHECK_RET(mReqParcel->Post());
     }
     return 0;
 }
@@ -71,7 +68,7 @@ int32_t SprBinderHub::DestoryHub()
 void SprBinderHub::BinderLoop(void* pData)
 {
     SprBinderHub* mSelf = reinterpret_cast<SprBinderHub*>(pData);
-    bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSelf->mSrvName, pReqParcel, pRspParcel);
+    bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSelf->mSrvName, mSelf->mReqParcel, mSelf->mRspParcel);
     if (!rs) {
         SPR_LOGE("Binder init failed!\n");
         return;
@@ -79,9 +76,9 @@ void SprBinderHub::BinderLoop(void* pData)
 
     SPR_LOGD("Start %s binder loop!\n", mSelf->mSrvName.c_str());
     do {
-        int cmd = 0;
-        pReqParcel->Wait();
-        int ret = pReqParcel->ReadInt(cmd);
+        int32_t cmd = 0;
+        mSelf->mReqParcel->Wait();
+        int32_t ret = mSelf->mReqParcel->ReadInt(cmd);
         if (ret != 0) {
             SPR_LOGE("ReadInt failed!\n");
             continue;
@@ -93,19 +90,19 @@ void SprBinderHub::BinderLoop(void* pData)
             break;
         } else if (cmd == GENERAL_REGISTER_CALLBACK) {
             std::string name;
-            ret = pReqParcel->ReadString(name);
+            ret = mSelf->mReqParcel->ReadString(name);
 
-            int rc = -1;
+            int32_t rc = -1;
             if (ret == 0) {
                 rc = AsyncEvent::GetInstance()->AsWriter(name);
                 SPR_LOGD("Register callback %s, ret = %d\n", name.c_str(), ret);
             }
 
-            pRspParcel->WriteInt(rc);
-            pRspParcel->Post();
+            mSelf->mRspParcel->WriteInt(rc);
+            mSelf->mRspParcel->Post();
         }
 
-        mSelf->handleCmd(pReqParcel, pRspParcel, cmd);
+        mSelf->handleCmd(mSelf->mReqParcel, mSelf->mRspParcel, cmd);
     } while(mRun);
 
     SPR_LOGD("Exit %s binder loop!\n", mSelf->mSrvName.c_str());

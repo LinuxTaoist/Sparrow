@@ -33,14 +33,16 @@ public:
 
     int32_t InitializeHub();
 
-    static int32_t DestoryHub();
+    int32_t DestoryHub();
     static void BinderLoop(void* pData);
-    virtual void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) = 0;
+    virtual void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int32_t cmd) = 0;
 
 private:
     static bool mRun;
     std::string mSrvName;
     std::thread mBindThread;
+    std::shared_ptr<Parcel> mReqParcel;
+    std::shared_ptr<Parcel> mRspParcel;
 };
 
 #endif // __SPR_BINDER_HUB_H__

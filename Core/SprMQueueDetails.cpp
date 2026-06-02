@@ -24,20 +24,21 @@
 #include <unistd.h>
 #include <fstream>
 #include "SprLog.h"
+#include "CommonMacros.h"
 #include "SprMQueueDetails.h"
 
 #define LOG_TAG "SprMQDetails"
-#define SPR_ROOT_PATH "/tmp/spr_details"
 
 SprMQueueDetails::SprMQueueDetails(const std::string& mqName, bool create) : mIsCreator(create), mMqName(mqName) {
     int32_t fd = -1;
+    mRootDir = DEFAULT_MQS_DIR;
     mpDetails = nullptr;
-    std::string filePath = std::string(SPR_ROOT_PATH) + "/" + mqName;
+    std::string filePath = mRootDir + "/" + mqName;
 
-    if (access(SPR_ROOT_PATH, F_OK) != 0) {
-        int ret = mkdir(SPR_ROOT_PATH, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
+    if (access(mRootDir.c_str(), F_OK) != 0) {
+        int32_t ret = mkdir(mRootDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
-            SPR_LOGE("mkdir %s failed! (%s)\n", SPR_ROOT_PATH, strerror(errno));
+            SPR_LOGE("mkdir %s failed! (%s)\n", mRootDir.c_str(), strerror(errno));
         }
     }
 
@@ -91,7 +92,7 @@ SprMQueueDetails::~SprMQueueDetails() {
     }
 
     if (mIsCreator) {
-        std::string filePath = std::string(SPR_ROOT_PATH) + "/" + mMqName;
+        std::string filePath = mRootDir + "/" + mMqName;
         if (remove(filePath.c_str()) != 0) {
             SPR_LOGE("Failed to remove file: %s", filePath.c_str());
         }

@@ -20,7 +20,7 @@
 #include <unistd.h>
 #include <string.h>
 #include "SprLog.h"
-#include "CoreTypeDefs.h"
+#include "CommonMacros.h"
 #include "SprProcInfo.h"
 
 #define LOG_TAG "SprProcInfo"
@@ -140,5 +140,5 @@ std::string SprProcInfo::GetProcName()
 
 std::string SprProcInfo::GetDebugPath()
 {
-    return mEnable ? std::string(DEBUG_NODE_ROOT_PATH) + "/" + GetProcName() : "";
+    return mEnable ? std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + GetProcName() : "";
 }

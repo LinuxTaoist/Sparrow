@@ -58,11 +58,19 @@ public:
 
     /**
      * @brief GetProperties
+     *
+     * @param properties
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t GetProperties(std::map<std::string, std::string>& properties);
+
+    /**
+     * @brief GetProperties
      * @return 0 on success, or -1 if an error occurred
      *
      * Dump all properties to logs, only used for debug.
      */
-    int32_t GetProperties();
+    int32_t DumpProperties();
 
 private:
     PropertyManager(ModuleIDType id, const std::string& name);
@@ -95,6 +103,8 @@ private:
 
 private:
     std::string mDevName;
+    std::string mSharedMemoryPath;
+    std::string mSharedPersistPath;
     std::unique_ptr<SharedBinaryTree> mpSharedMemory;
     std::unique_ptr<SharedBinaryTree> mpPersistMemory;
 };

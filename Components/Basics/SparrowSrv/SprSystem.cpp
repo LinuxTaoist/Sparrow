@@ -35,13 +35,13 @@ using namespace InternalDefs;
 
 #define LOG_TAG "SprSystem"
 
-#define LOCAL_PATH_VERSION  "/tmp/sparrow_version"
 #define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
 
 static std::atomic<bool> gObjAlive(true);
 
 SprSystem::SprSystem()
 {
+    mVersionPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "sparrow_version";
 }
 
 SprSystem::~SprSystem()
@@ -95,13 +95,13 @@ void SprSystem::LoadReleaseInformation()
     releaseInfo += "Build Platform : " + buildPlatform + "\n";
     releaseInfo += "Module Config  : " + moduleConfig + "\n";
 
-    std::ofstream file(LOCAL_PATH_VERSION);
+    std::ofstream file(mVersionPath);
     if (file) {
-        SPR_LOGD("Load system version information to %s\n", LOCAL_PATH_VERSION);
+        SPR_LOGD("Load system version information to %s\n", mVersionPath.c_str());
         file << releaseInfo;
         file.close();
     } else {
-        SPR_LOGE("Open %s fail!\n", LOCAL_PATH_VERSION);
+        SPR_LOGE("Open %s fail!\n", mVersionPath.c_str());
     }
 }
 
@@ -113,15 +113,15 @@ void SprSystem::Init()
 
     InitEnv();
 
-    TTP(8, "TimeManager->Initialize()");
-    TimeManager::GetInstance(MODULE_TIMEM, "TimeM")->Initialize();
-
-    TTP(9, "pSystemTimer->Initialize()");
+    TTP(8, "pSystemTimer->Initialize()");
     shared_ptr<SprSystemTimer> pSystemTimer = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
     pSystemTimer->Initialize();
 
-    TTP(10, "TimerManager->Initialize()");
+    TTP(9, "TimerManager->Initialize()");
     SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", pSystemTimer)->Initialize();
+
+    TTP(10, "TimeManager->Initialize()");
+    TimeManager::GetInstance(MODULE_TIMEM, "TimeM")->Initialize();
 
     SprContext ctx;
     mPluginMgr.Init();

@@ -36,18 +36,21 @@ using namespace InternalDefs;
 
 #define LOG_TAG "TimeMgr"
 #define DEFAULT_NTP_PORT            0
-#define TIME_ADJUST_SMALL_SEC       4
-#define TIME_ADJUST_LARGE_SEC       120
-#define DEFAULT_SYNC_TIMEOUT        4000    // 4 sec
-#define DEFAULT_SYNC_POLL_TIMEOUT   600000  // 10 min
+#define TIME_ADJUST_SMALL_NSEC      50000000    // 50ms
+#define TIME_ADJUST_LARGE_NSEC      10000000000 // 10s
+#define DEFAULT_SYNC_TIMEOUT        4000        // 4s
+#define DEFAULT_SYNC_POLL_TIMEOUT   600000      // 10 min
 
 static std::atomic<bool> gObjAlive(true);
 
 TimeManager::TimeManager(ModuleIDType id, const std::string& name)
             : SprObserverWithMQueue(id, name)
 {
+    mSyncPollerTimer = false;
     mSyncTimeFinished = false;
-    mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
+    mSAdjustCnt = 0;
+    mJAdjustCnt = 0;
+    mReqPriority = TIME_SOURCE_PRIORITY_BUTT;
     mCurTimeSource = TIME_SOURCE_TYPE_BUTT;
     mSyncTimeOutMs = DEFAULT_SYNC_TIMEOUT;
     mSyncPollTimeOutMs = DEFAULT_SYNC_POLL_TIMEOUT;
@@ -72,11 +75,18 @@ TimeManager* TimeManager::GetInstance(ModuleIDType id, const std::string& name)
     return &instance;
 }
 
+int32_t TimeManager::Init()
+{
+    RegisterDebugFuncs();
+    InitNtpSource();
+    return 0;
+}
+
 int32_t TimeManager::InitNtpSource()
 {
     if (!mpNtpSource) {
-        mpNtpSource = make_shared<NtpSource>(DEFAULT_NTP_PORT, [&](uint64_t timestamp, void* arg) {
-            SPR_LOGD("Receive ntp time: %llu.%llu", (timestamp >> 32) & 0xFFFFFFFF, timestamp & 0xFFFFFFFF);
+        mpNtpSource = make_shared<NtpSource>(DEFAULT_NTP_PORT, [&](int64_t diffNsec, void* arg) {
+            SPR_LOGD("Receive ntp time: %lld", diffNsec);
 
             TimeManager* mySelf = static_cast<TimeManager*>(arg);
             if (!mySelf) {
@@ -86,7 +96,7 @@ int32_t TimeManager::InitNtpSource()
 
             SprMsg msg(SIG_ID_TIMEM_SYNC_SYSTEM_TIME);
             msg.SetI32Value((int32_t)TIME_SOURCE_TYPE_NTP);
-            msg.SetU64Value(timestamp);
+            msg.SetI64Value(diffNsec);
             mySelf->SendMsg(msg);
         }, this);
     }
@@ -98,140 +108,6 @@ int32_t TimeManager::InitNtpSource()
 
     mpNtpSource->AddNtpServer("ntp.tencent.com", 123);
     mpNtpSource->AddNtpServer("ntp1.aliyun.com", 123);
-    return 0;
-}
-
-int32_t TimeManager::GetDiffWithLocalTime(uint64_t timestamp, int64_t& diffNs)
-{
-    const int32_t NS_PER_SEC = 1000000000LL;
-    struct timespec ts;
-    if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
-        SPR_LOGE("Get time failed! (%s)\n", strerror(errno));
-        return -1;
-    }
-
-    uint64_t targetNs = ((timestamp >> 32) & 0xFFFFFFFF) * NS_PER_SEC + (timestamp & 0xFFFFFFFF) / NS_PER_SEC;
-    uint64_t currentNs = (uint64_t)ts.tv_sec * NS_PER_SEC + ts.tv_nsec;
-
-    diffNs = std::abs(static_cast<int64_t>(targetNs - currentNs));
-    SPR_LOGD("Time diff: %lld ns", diffNs);
-    return 0;
-}
-
-int32_t TimeManager::StartSyncTime()
-{
-    SPR_LOGD("Start sync time\n");
-
-    // sync time from first priority configured
-    mSyncTimeFinished = false;
-    mCurPriority = mTimeSourceMap.empty() ? TIME_SOURCE_PRIORITY_BUTT : mTimeSourceMap.begin()->first;
-    return RegisterTimer(0, mSyncTimeOutMs,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 0);
-}
-
-int32_t TimeManager::StopSyncTime()
-{
-    SPR_LOGD("Stop sync time\n");
-    mCurPriority = TIME_SOURCE_PRIORITY_BUTT;
-    return UnregisterTimer(SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT);
-}
-
-int32_t TimeManager::StartSyncTimePoller()
-{
-    return RegisterTimer(0, mSyncPollTimeOutMs, SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT, 0);
-}
-
-int32_t TimeManager::StopSyncTimePoller()
-{
-    return UnregisterTimer(SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT);
-}
-
-int32_t TimeManager::SmoothAdjustSystemTime(int64_t ns)
-{
-    int32_t us = static_cast<int32_t>(ns / 1000);
-    struct timex tx = {};
-    tx.modes = ADJ_OFFSET;
-    tx.offset = static_cast<int32_t>(us);
-
-    int32_t ret = adjtimex(&tx);
-    if (ret == -1) {
-        SPR_LOGE("Smooth adjust %dus failed! (%s)\n", us, strerror(errno));
-        return -1;
-    }
-
-    SPR_LOGI("Smooth adjust %dus successfully\n", us);
-    return 0;
-}
-
-int32_t TimeManager::JumpAdjustSystemTime(uint64_t timestamp)
-{
-    struct timespec ts;
-    ts.tv_sec = (timestamp >> 32) & 0xFFFFFFFF;
-    ts.tv_nsec = timestamp & 0xFFFFFFFF;
-
-    int32_t ret = clock_settime(CLOCK_REALTIME, &ts);
-    if (ret == -1) {
-        SPR_LOGE("Jump adjust %d.%lds failed! (%s)\n", ts.tv_sec, ts.tv_nsec, strerror(errno));
-        return -1;
-    }
-
-    SPR_LOGI("Jump adjust %d.%lds successfully\n", ts.tv_sec, ts.tv_nsec);
-    return 0;
-}
-
-int32_t TimeManager::SyncSystemTime(int32_t source, uint64_t timestamp)
-{
-    if (source < TIME_SOURCE_TYPE_NTP || source >= TIME_SOURCE_TYPE_BUTT) {
-        SPR_LOGE("Invalid time source: %d\n", source);
-        return -1;
-    }
-
-    int64_t diffNs = 0;
-    int32_t ret = GetDiffWithLocalTime(timestamp, diffNs);
-    if (ret == -1) {
-        return -1;
-    }
-
-    int64_t diffSec = diffNs / 1000000000LL;
-    if (diffSec <= TIME_ADJUST_SMALL_SEC)    {
-        SPR_LOGI("Not need sync time! (small time difference %lld sec)\n", diffSec);
-    } else if (diffSec <= TIME_ADJUST_LARGE_SEC) {
-        SmoothAdjustSystemTime(diffNs);
-    } else {
-        JumpAdjustSystemTime(timestamp);
-    }
-
-    mSyncTimeFinished = true;
-    mCurTimeSource = (InternalDefs::TimeSourceType)source;
-    return ret;
-}
-
-TimeSourcePriority TimeManager::GetTimeSourcePriority(InternalDefs::TimeSourceType source)
-{
-    TimeSourcePriority ret = TIME_SOURCE_PRIORITY_BUTT;
-    for (auto it = mTimeSourceMap.begin(); it != mTimeSourceMap.end(); it++) {
-        if (it->second == source) {
-            ret = it->first;
-            break;
-        }
-    }
-
-    return ret;
-}
-
-InternalDefs::TimeSourceType TimeManager::GetTimeSource(TimeSourcePriority priority)
-{
-    auto it = mTimeSourceMap.find(priority);
-    if (it != mTimeSourceMap.end()) {
-        return it->second;
-    }
-
-    return TIME_SOURCE_TYPE_BUTT;
-}
-
-int32_t TimeManager::Init()
-{
-    RegisterDebugFuncs();
-    InitNtpSource();
     return 0;
 }
 
@@ -258,6 +134,122 @@ int32_t TimeManager::RequestGnssTime()
     return -1;
 }
 
+int32_t TimeManager::StartSyncTime()
+{
+    SPR_LOGD("Start sync time\n");
+
+    // sync time from first priority configured
+    mSyncTimeFinished = false;
+    mReqPriority = TIME_SOURCE_PRIORITY_NONE;
+    return RegisterTimer(0, mSyncTimeOutMs,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 1);
+}
+
+int32_t TimeManager::StartSyncTimePoller()
+{
+    if (mSyncPollerTimer) {
+        SPR_LOGD("Sync time poller already started!\n");
+        return 0;
+    }
+
+    mSyncPollerTimer = true;
+    return RegisterTimer(0, mSyncPollTimeOutMs, SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT, 0);
+}
+
+int32_t TimeManager::StopSyncTimePoller()
+{
+    if (!mSyncPollerTimer) {
+        SPR_LOGD("Sync time poller already stopped!\n");
+        return 0;
+    }
+
+    mSyncPollerTimer = false;
+    return UnregisterTimer(SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT);
+}
+
+int32_t TimeManager::SmoothAdjustSystemTime(int64_t ns)
+{
+    int32_t us = static_cast<int32_t>(ns / 1000);
+    struct timex tx = {};
+    tx.modes = ADJ_OFFSET;
+    tx.offset = static_cast<int32_t>(us);
+
+    int32_t ret = adjtimex(&tx);
+    if (ret == -1) {
+        SPR_LOGE("Smooth adjust %dus failed! (%s)\n", us, strerror(errno));
+        return -1;
+    }
+
+    mSAdjustCnt++;
+    SPR_LOGI("Smooth adjust %dus successfully\n", us);
+    return 0;
+}
+
+int32_t TimeManager::JumpAdjustSystemTime(int64_t diffNsec)
+{
+    struct timespec curTs;
+    clock_gettime(CLOCK_REALTIME, &curTs);
+
+    uint64_t curTimeNs = (uint64_t)curTs.tv_sec * 1000000000ULL + (uint64_t)curTs.tv_nsec;
+    uint64_t targetTimeNs = curTimeNs + diffNsec;
+
+    struct timespec ts;
+    ts.tv_sec = (time_t)(targetTimeNs / 1000000000ULL);
+    ts.tv_nsec = (long)(targetTimeNs % 1000000000ULL);
+
+    int32_t ret = clock_settime(CLOCK_REALTIME, &ts);
+    if (ret == -1) {
+        SPR_LOGE("Jump adjust %ld.%lds failed! (%s)\n", ts.tv_sec, ts.tv_nsec, strerror(errno));
+        return -1;
+    }
+
+    mJAdjustCnt++;
+    SPR_LOGI("Jump adjust %ld.%lds successfully\n", ts.tv_sec, ts.tv_nsec);
+    return 0;
+}
+
+int32_t TimeManager::SyncSystemTime(int32_t source, int64_t diffNsec)
+{
+    if (source < TIME_SOURCE_TYPE_NTP || source >= TIME_SOURCE_TYPE_BUTT) {
+        SPR_LOGE("Invalid time source: %d\n", source);
+        return -1;
+    }
+
+    if (std::abs(diffNsec) <= TIME_ADJUST_SMALL_NSEC)    {
+        SPR_LOGI("Not need sync time! (small time difference %lld ns)\n", diffNsec);
+    } else if (std::abs(diffNsec) <= TIME_ADJUST_LARGE_NSEC) {
+        SmoothAdjustSystemTime(diffNsec);
+    } else {
+        JumpAdjustSystemTime(diffNsec);
+    }
+
+    mSyncTimeFinished = true;
+    mCurTimeSource = (InternalDefs::TimeSourceType)source;
+    return 0;
+}
+
+TimeSourcePriority TimeManager::GetTimeSourcePriority(InternalDefs::TimeSourceType source)
+{
+    TimeSourcePriority ret = TIME_SOURCE_PRIORITY_BUTT;
+    for (auto it = mTimeSourceMap.begin(); it != mTimeSourceMap.end(); it++) {
+        if (it->second == source) {
+            ret = it->first;
+            break;
+        }
+    }
+
+    return ret;
+}
+
+InternalDefs::TimeSourceType TimeManager::GetTimeSource(TimeSourcePriority priority)
+{
+    auto it = mTimeSourceMap.find(priority);
+    if (it != mTimeSourceMap.end()) {
+        return it->second;
+    }
+
+    return TIME_SOURCE_TYPE_BUTT;
+}
+
 int32_t TimeManager::ProcessMsg(const SprMsg& msg)
 {
     switch(msg.GetMsgId())
@@ -265,14 +257,17 @@ int32_t TimeManager::ProcessMsg(const SprMsg& msg)
         case SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT:
             MsgRespondSyncTimeTimerEvent(msg);
             break;
-        case SIG_ID_TIMEM_REQ_NTP_TIME:
-            MsgRespondRequestNtpTime(msg);
-            break;
         case SIG_ID_TIMEM_SYNC_SYSTEM_TIME:
             MsgRespondSyncSystemTime(msg);
             break;
         case SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT:
             MsgRespondSyncTimePollerTimerEvent(msg);
+            break;
+        case SIG_ID_POWER_STARTUP_HIGH:
+            MsgRespondPowerStartupHigh(msg);
+            break;
+        case SIG_ID_POWER_STANDBY_LOW:
+            MsgRespondPowerStandbyLow(msg);
             break;
         default:
             break;
@@ -289,14 +284,20 @@ int32_t TimeManager::ProcessMsg(const SprMsg& msg)
  */
 void TimeManager::MsgRespondSyncTimeTimerEvent(const SprMsg& msg)
 {
-    if (mSyncTimeFinished || mCurPriority >= TIME_SOURCE_PRIORITY_BUTT) {
-        UnregisterTimer(SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT);
-        SPR_LOGD("Sync time finished %d, priority %d\n", mSyncTimeFinished, mCurPriority);
+    mReqPriority++;
+    for (; mReqPriority < TIME_SOURCE_PRIORITY_BUTT; mReqPriority++) {
+        if (mTimeSourceMap.find((TimeSourcePriority)mReqPriority) != mTimeSourceMap.end()) {
+            break;
+        }
+    }
+
+    if (mSyncTimeFinished || mReqPriority >= TIME_SOURCE_PRIORITY_BUTT) {
+        SPR_LOGD("Sync time finished %d, priority %d\n", mSyncTimeFinished, mReqPriority);
         return;
     }
 
-    int32_t ret = -1;
-    InternalDefs::TimeSourceType source = GetTimeSource((TimeSourcePriority)mCurPriority);
+    int32_t ret = 0;
+    InternalDefs::TimeSourceType source = GetTimeSource((TimeSourcePriority)mReqPriority);
     switch(source) {
         case TIME_SOURCE_TYPE_NTP:
             ret = RequestNtpTime();
@@ -308,21 +309,9 @@ void TimeManager::MsgRespondSyncTimeTimerEvent(const SprMsg& msg)
             break;
     }
 
-    // if ret is -1, means the time source is not available, try next priority
-    mCurPriority = (ret == -1) ? mCurPriority + 1 : mCurPriority;
-    SPR_LOGD("Syncing time, priority = %d, source = %s\n", mCurPriority, GetSprTimeSourceTypeText(source).c_str());
-}
-
-/**
- * @brief Process SIG_ID_TIMEM_REQ_NTP_TIME
- *
- * @param[in] msg
- * @return none
- */
-void TimeManager::MsgRespondRequestNtpTime(const SprMsg& msg)
-{
-    SPR_LOGD("Request ntp time\n");
-    RequestNtpTime();
+    SPR_LOGD("Syncing (%d, %s) ret = %d\n", mReqPriority, GetSprTimeSourceTypeText(source).c_str(), ret);
+    int32_t delay = (ret == -1) ? 0 : mSyncTimeOutMs;
+    RegisterTimer(delay, mSyncTimeOutMs,  SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT, 1);
 }
 
 /**
@@ -334,8 +323,8 @@ void TimeManager::MsgRespondRequestNtpTime(const SprMsg& msg)
 void TimeManager::MsgRespondSyncSystemTime(const SprMsg& msg)
 {
     int32_t source = msg.GetI32Value();
-    uint64_t timestamp = msg.GetU64Value();
-    int32_t ret = SyncSystemTime(source, timestamp);
+    int64_t diffNsec = msg.GetI64Value();
+    int32_t ret = SyncSystemTime(source, diffNsec);
     SPR_LOGD("Sync time from %s %s\n", GetSprTimeSourceTypeText(source).c_str(), ret == -1 ? "failed" : "success");
 }
 
@@ -351,6 +340,30 @@ void TimeManager::MsgRespondSyncTimePollerTimerEvent(const SprMsg& msg)
     StartSyncTime();
 }
 
+/**
+ * @brief Process SIG_ID_POWER_STARTUP_HIGH
+ *
+ * @param[in] msg
+ * @return none
+ */
+void TimeManager::MsgRespondPowerStartupHigh(const SprMsg& msg)
+{
+    SPR_LOGD("Receive power startup high\n");
+    StartSyncTimePoller();
+}
+
+/**
+ * @brief Process SIG_ID_POWER_STANDBY_LOW
+ *
+ * @param[in] msg
+ * @return none
+ */
+void TimeManager::MsgRespondPowerStandbyLow(const SprMsg& msg)
+{
+    SPR_LOGD("Receive power standby low\n");
+    StopSyncTimePoller();
+}
+
 // --------------------------------------------------------------------------------------------------------------------
 // Debug functions
 // --------------------------------------------------------------------------------------------------------------------
@@ -362,12 +375,12 @@ void TimeManager::RegisterDebugFuncs()
         return;
     }
 
-    p->RegisterCmd(mModuleName, "DumpDetails",      "Dump details",           std::bind(&TimeManager::DebugDumpDetails,        this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "DumpDetails",      "Dump details",           std::bind(&TimeManager::DebugDumpDetails,           this, std::placeholders::_1));
+    p->RegisterCmd(mModuleName, "Reset",            "Reset",                  std::bind(&TimeManager::DebugResetDetails,          this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "ReqNtpTime",       "Request ntp time",       std::bind(&TimeManager::DebugRequestNtpTime,        this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "StartSyncTime",    "Start sync time",        std::bind(&TimeManager::DebugStartSyncTime,         this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "SetSyncTime",      "Set sync timeout (ms)",  std::bind(&TimeManager::DebugSetSyncTimeOutMs,      this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "SetPollTime",      "Set poll timeout (ms)",  std::bind(&TimeManager::DebugSetSyncPollTimeOutMs,  this, std::placeholders::_1));
-    p->RegisterCmd(mModuleName, "StopSyncTime",     "Stop sync time",         std::bind(&TimeManager::DebugStopSyncTime,          this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "StartPoll",        "Start time poll",        std::bind(&TimeManager::DebugStartSyncTimePoller,   this, std::placeholders::_1));
     p->RegisterCmd(mModuleName, "StopPoll",         "Stop time poll",         std::bind(&TimeManager::DebugStopSyncTimePoller,    this, std::placeholders::_1));
 }
@@ -388,22 +401,24 @@ void TimeManager::DebugDumpDetails(const std::vector<std::string>& args)
 {
     SPR_LOGI("                           Dump TimeManager Details                                            \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
-    SPR_LOGI("- mSyncTimeFinished: %d\n", mSyncTimeFinished);
-    SPR_LOGI("- mCurPriority: %d\n", mCurPriority);
+    SPR_LOGI("- mSyncTimeFinished: %d (SCnt:%d JCnt:%d)\n", mSyncTimeFinished, mSAdjustCnt, mJAdjustCnt);
+    SPR_LOGI("- mReqPriority: %d\n", mReqPriority);
     SPR_LOGI("- mCurTimeSource: %s\n", GetSprTimeSourceTypeText(mCurTimeSource).c_str());
     SPR_LOGI("- mSyncTimeOutMs: %d\n", mSyncTimeOutMs);
     SPR_LOGI("- mSyncPollTimeOutMs: %d\n", mSyncPollTimeOutMs);
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
 }
 
+void TimeManager::DebugResetDetails(const std::vector<std::string>& args)
+{
+    SPR_LOGI("Reset details\n");
+    mSAdjustCnt = 0;
+    mJAdjustCnt = 0;
+}
+
 void TimeManager::DebugStartSyncTime(const std::vector<std::string>& args)
 {
     StartSyncTime();
-}
-
-void TimeManager::DebugStopSyncTime(const std::vector<std::string>& args)
-{
-    StopSyncTime();
 }
 
 void TimeManager::DebugStartSyncTimePoller(const std::vector<std::string>& args)
@@ -438,8 +453,6 @@ void TimeManager::DebugSetSyncTimeOutMs(const std::vector<std::string>& args)
 
     SPR_LOGI("mSyncTimeOutMs: %d -> %d ms\n", mSyncTimeOutMs, ms);
     mSyncTimeOutMs = ms;
-    StopSyncTime();
-    StartSyncTime();
 }
 
 void TimeManager::DebugSetSyncPollTimeOutMs(const std::vector<std::string>& args)

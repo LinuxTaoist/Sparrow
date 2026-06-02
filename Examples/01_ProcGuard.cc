@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : DebugBinder.cc
+ *  @file       : 01_ProcGuard.cc
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -60,7 +60,7 @@ int main()
     const int CRASH_PROCESS_ID  = 1;  // 指定崩溃的进程ID
 
     SPR_LOG("=== 跨进程互斥锁演示程序启动 ===       \n"
-            "演示内容:                              \n"
+            "演示内容:                             \n"
             "1. %d个进程竞争同一个共享资源          \n"
             "2. 进程 %d: 在持有锁时异常退出         \n"
             "3. 验证其他进程能否检测并恢复锁状态    \n\n", NUM_PROCESSES, CRASH_PROCESS_ID);

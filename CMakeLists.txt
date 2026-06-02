@@ -7,10 +7,15 @@ cmake_policy(SET CMP0046 OLD)
 ## 保存工程路径
 set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
 
+## 定制模块选项
+set(BUSINESS_MODULES "")
+set(PLATFORM_OPTIONS_PATH ${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/Build/Options)
+
 ## 包含配置文件
 include(${PROJECT_PATH}/version.cmake)
-include(${PROJECT_PATH}/modules_configs.cmake)
-include(${PROJECT_PATH}/Build/options/${PROJECT_PLATFORM}/${PROJECT_PLATFORM}_compile_options.cmake)
+include(${PROJECT_PATH}/modules_config.cmake)
+include(${PLATFORM_OPTIONS_PATH}/${PROJECT_PLATFORM}_modules_config.cmake)
+include(${PLATFORM_OPTIONS_PATH}/${PROJECT_PLATFORM}_compile_options.cmake)
 
 ## 设置全局位置无关代码标志
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -29,12 +34,13 @@ message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
 
-## 打开编译警告
-set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
-
-set(CMAKE_CXX_STANDARD  11)
-set(CMAKE_C_FLAGS       "${CMAKE_C_FLAGS} -Wall -g3  -rdynamic")
-set(CMAKE_CXX_FLAGS     "${CMAKE_CXX_FLAGS} -Wall -g3 -rdynamic")
+## 设置编译选项
+set(CMAKE_CXX_STANDARD          11)
+set(CMAKE_WARNING_FLAGS         "-Wextra -Werror -Wno-unused-parameter -Wno-ignored-qualifiers")
+set(CMAKE_C_FLAGS               "${CMAKE_C_FLAGS} -Wall -g3 ${CMAKE_WARNING_FLAGS}")
+set(CMAKE_CXX_FLAGS             "${CMAKE_CXX_FLAGS} -Wall -g3 ${CMAKE_WARNING_FLAGS}")
+set(CMAKE_EXE_LINKER_FLAGS      "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link=${LIBRARY_OUTPUT_PATH}")
+set(CMAKE_SHARED_LINKER_FLAGS   "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath-link=${LIBRARY_OUTPUT_PATH}")
 
 ## 工程信息
 string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")

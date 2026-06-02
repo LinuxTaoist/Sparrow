@@ -109,13 +109,20 @@ int32_t PtyTerminal::BashProcess()
     struct termios term;
     int32_t rc = tcgetattr(STDIN_FILENO, &term);
     if (rc == 0) {
-        term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL);
-        term.c_lflag |= (ICANON | ISIG | IEXTEN);
+        term.c_lflag &= ~(ECHO | ECHOE | ECHOK | ECHONL | ICANON | ISIG | IEXTEN);
+        term.c_iflag &= ~(IGNBRK | BRKINT | PARMRK | ISTRIP | INLCR | IGNCR | ICRNL | IXON);
+        term.c_oflag &= ~OPOST;
+        term.c_cflag &= ~(CSIZE | PARENB);
+        term.c_cflag |= CS8;
         tcsetattr(STDIN_FILENO, TCSANOW, &term);
     }
 
     // No Color Output
     setenv("TERM", "dumb", 1);
+    unsetenv("LS_COLORS");
+    unsetenv("GREP_COLORS");
+    unsetenv("COLORTERM");
+
     std::string shell = GetCurShell();  // /bin/sh
     execl(shell.c_str(), shell.c_str(), "-l", nullptr);
     SPR_LOGE("execl %s failed! (%s)", shell.c_str(), strerror(errno));

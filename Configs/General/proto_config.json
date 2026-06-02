@@ -1,0 +1,42 @@
+{
+    "name": "simple_device",
+    "type": "static_field",
+    "children": [
+        {"name": "dev_id", "type": "u32"},
+        {"name": "dev_type", "type": "u8"},
+        {"name": "status", "type": "u8"},
+        {"name": "voltage", "type": "u16"},
+        {
+            "name": "base_info",
+            "type": "static_field",
+            "children": [
+                {"name": "hw_ver", "type": "u16"},
+                {"name": "sw_ver", "type": "u16"},
+                {"name": "chip_id", "type": "u32"}
+            ]
+        },
+        {"name": "sensor_cnt", "type": "u8"},
+        {
+            "name": "sensor_list",
+            "type": "dynamic_field",
+            "len_ref": "/simple_device/sensor_cnt",
+            "len_mode": "count",
+            "child_template": {
+                "name": "single_sensor",
+                "type": "static_field",
+                "children": [
+                    {"name": "sensor_id", "type": "u8"},
+                    {"name": "sensor_type", "type": "u8"},
+                    {"name": "data_len", "type": "u8"},
+                    {
+                        "name": "sensor_data",
+                        "type": "dynamic_field",
+                        "len_ref": "/simple_device/sensor_list/single_sensor/data_len",
+                        "len_mode": "bytes",
+                        "child_template": {"name": " ", "type": "u8"}
+                    }
+                ]
+            }
+        }
+    ]
+}

@@ -27,12 +27,12 @@
 #endif
 #define ENUM_OR_STRING(x) #x
 
-const int MAX_LENGTH_MSG = 50;
+const int32_t MAX_LENGTH_MSG = 50;
 const char sigIdString[][MAX_LENGTH_MSG] = {
     #include "SprSigList.gen"
 };
 
-const char* GetSigName(int msgID)
+const char* GetSigName(int32_t msgID)
 {
     return (msgID < InternalDefs::SIG_ID_BUTT) ? sigIdString[msgID] : "UNDEFINED";
 }

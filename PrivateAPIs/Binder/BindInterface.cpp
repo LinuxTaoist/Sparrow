@@ -28,8 +28,8 @@ using namespace InternalDefs;
 static std::atomic<bool> gObjAlive(true);
 static std::mutex gTMutex;
 static ProcMutex gPMutex("IBinderMutex");
-Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
-Parcel iRspParcel("BinderM",  KEY_BINDER_MANAGER,  false);
+static Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
+static Parcel iRspParcel("BinderM",  KEY_BINDER_MANAGER,  false);
 
 BindInterface::~BindInterface()
 {

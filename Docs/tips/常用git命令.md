@@ -11,6 +11,7 @@
 3. 添加和提交更改：
     - git add \<file> 或 git add .：将文件添加到暂存区。
     - git commit -m "message"：提交暂存区的更改，并附上一条提交信息。
+
 ## 分支管理
 1. 创建、切换和合并分支：
     - git branch：列出所有分支。
@@ -19,20 +20,28 @@
     - git checkout -b \<branch> 或 git switch -c \<branch>：创建并切换到新分支。
     - git merge \<branch>：合并指定分支到当前分支。
     - git rebase \<branch>：将当前分支的更改应用到指定分支之后。
+
 ## 远程仓库交互
 1. 获取和推送更新：
     - git fetch：从远程仓库下载数据但不自动合并或修改当前工作。
     - git pull：从远程仓库获取最新更改并自动合并到当前分支。
     - git push：将本地提交推送到远程仓库。
+
 ## 检查和比较
 1. 差异检查：
     - git diff：显示已修改但尚未暂存的文件更改。
     - git show：显示某次提交的具体信息。
+
 ## 撤销操作
 1. 撤销更改：
     - git reset：回退版本到指定状态，可以是软回退（保留工作目录更改）或硬回退（放弃工作目录更改）。
     - git revert \<commit>：创建新的提交以撤销指定的提交。
     - git clean：删除未追踪的文件。
+
+## 提交编辑 (Vim 操作)
+1. 编辑器配置：
+    - git config --global core.editor vim：全局指定 Vim 为 Git 默认提交编辑器。
+    - git config core.editor vim：仅当前仓库指定 Vim 为提交编辑器。
 
 ## 常见场景
 1. 恢复未推送的本地提交：

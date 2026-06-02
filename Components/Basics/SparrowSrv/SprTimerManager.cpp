@@ -91,7 +91,7 @@ int32_t SprTimerManager::ProcessMsg(const SprMsg& msg)
             MsgRespondAddTimer(msg);
             break;
         }
-        case SIG_ID_TIMER_DEL_TIMER: {
+        case SIG_ID_TIMER_DEL_CUSTOM_TIMER: {
             MsgRespondDelTimer(msg);
             break;
         }

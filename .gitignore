@@ -1,5 +1,9 @@
+.repo/
 .vscode/
 Release/
-3rdParty/googletest/googletest/
+3rdParty/googletest/
 3rdParty/libgo/libgo/
 3rdParty/sqlite/sqlite-autoconf-3450300/
+
+Platform/*
+!/Platform/Default

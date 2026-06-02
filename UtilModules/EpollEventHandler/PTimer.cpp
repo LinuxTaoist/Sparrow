@@ -37,9 +37,10 @@ PTimer::~PTimer()
     DestoryTimer();
 }
 
-int32_t PTimer::InitTimer()
+int32_t PTimer::InitTimer(bool isWakeup)
 {
-    mEvtFd = timerfd_create(CLOCK_REALTIME, 0);
+    int32_t type = isWakeup ? CLOCK_BOOTTIME_ALARM : CLOCK_MONOTONIC;
+    mEvtFd = timerfd_create(type, 0);
     if (mEvtFd == -1) {
         SPR_LOGE("timerfd_create failed! (%s)\n", strerror(errno));
         return -1;

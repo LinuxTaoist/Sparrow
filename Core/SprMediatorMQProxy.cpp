@@ -58,7 +58,7 @@ SprMediatorMQProxy* SprMediatorMQProxy::GetInstance()
     return &instance;
 }
 
-int SprMediatorMQProxy::ConnectMediator()
+int32_t SprMediatorMQProxy::ConnectMediator()
 {
     mq_attr mqAttr;
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
@@ -73,12 +73,12 @@ int SprMediatorMQProxy::ConnectMediator()
     return 0;
 }
 
-int SprMediatorMQProxy::SendMsg(const SprMsg& msg)
+int32_t SprMediatorMQProxy::SendMsg(const SprMsg& msg)
 {
     std::string datas;
 
     msg.Encode(datas);
-    int ret = mq_send(mMdtFd, datas.c_str(), datas.size(), 1);
+    int32_t ret = mq_send(mMdtFd, datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));
     }
@@ -86,13 +86,13 @@ int SprMediatorMQProxy::SendMsg(const SprMsg& msg)
     return ret;
 }
 
-int SprMediatorMQProxy::NotifyObserver(const SprMsg& msg)
+int32_t SprMediatorMQProxy::NotifyObserver(const SprMsg& msg)
 {
     SendMsg(msg);
     return 0;
 }
 
-int SprMediatorMQProxy::NotifyAllObserver(const SprMsg& msg)
+int32_t SprMediatorMQProxy::NotifyAllObserver(const SprMsg& msg)
 {
     // The default value of mTo in SprMsg is MODULE_NONE.
     // If you want to notify all, do not modify the mTo value in SprMsg when using

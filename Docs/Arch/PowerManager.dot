@@ -1,0 +1,23 @@
+#@startdot
+
+digraph PowerManager {
+    rankdir=LR;
+    nodesep=1.2;  // 节点水平间距 0.5 -> 1.2
+    ranksep=1.0;  // 层级垂直间距 1.0
+
+    node [shape=ellipse, fontsize=11, height=0.6];
+    edge [fontsize=9, color="#666666"];
+
+    // 状态节点
+    {rank = same; LEV1_POWER_INIT LEV1_POWER_ACTIVE};
+    {rank = same; LEV1_POWER_STANDBY LEV1_POWER_SLEEP};
+
+    // 状态转换
+    LEV1_POWER_INIT -> LEV1_POWER_ACTIVE [label="SIG_ID_POWER_ON", style=dashed];
+    LEV1_POWER_ACTIVE -> LEV1_POWER_STANDBY [label="SIG_ID_POWER_OFF \n -> SIG_ID_POWER_STANDBY_POLL_TIMER_EVENT \n (SIG_ID_POWER_STANDBY_LOWEST)", style=dashed];
+    LEV1_POWER_STANDBY -> LEV1_POWER_SLEEP [label="SIG_ID_POWER_ENTER_SLEEP_TIMER_EVENT \n (5s timeout)", style=dashed];
+    LEV1_POWER_STANDBY -> LEV1_POWER_ACTIVE [label="SIG_ID_POWER_ON", style=dashed];
+    LEV1_POWER_SLEEP -> LEV1_POWER_ACTIVE [label="SIG_ID_POWER_ON", style=dashed];
+}
+
+#@enddot

@@ -1,0 +1,1 @@
+../Platform/Default/Build/build_default.sh

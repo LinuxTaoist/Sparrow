@@ -50,6 +50,7 @@ private:
 private:
     bool mIsCreator;
     std::string mMqName; // mq name
+    std::string mRootDir;
     SMQueueDetails* mpDetails;
 };
 

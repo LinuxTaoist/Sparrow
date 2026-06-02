@@ -18,10 +18,12 @@
  */
 #include <atomic>
 #include <memory>
+#include <unistd.h>
 #include "Parcel.h"
 #include "AsyncEvent.h"
 
 #define     KEY_EVENT_NOTIFY        99999
+#define     AEVENT_NAME_SUFFIX      "_event"
 
 static std::atomic<bool> gObjAlive(true);
 std::shared_ptr<Parcel> pEventParcel = nullptr;
@@ -54,20 +56,22 @@ AsyncEvent::~AsyncEvent()
 int AsyncEvent::AsWriter(const std::string& name)
 {
     mName = name;
-    pEventParcel = std::make_shared<Parcel>(mName + "_event", KEY_EVENT_NOTIFY, true);
+    pEventParcel = std::make_shared<Parcel>(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, true);
     return pEventParcel ? 0 : -1;
 }
 
 int AsyncEvent::AsReader(const std::string& name)
 {
     mName = name;
-    pEventParcel = std::make_shared<Parcel>(mName + "_event", KEY_EVENT_NOTIFY, false);
+    pEventParcel = std::make_shared<Parcel>(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, false);
     return pEventParcel ? 0 : -1;
 }
 
 int AsyncEvent::UnregisterEventCallback()
 {
     mCb = nullptr;
+    mRunning = false;
+    mCbThread.join();
     return 0;
 }
 
@@ -82,18 +86,15 @@ int AsyncEvent::RegisterEventCallback(const EventCallback& callback)
         while (mRunning) {
             int32_t event = 0;
             int32_t size = 0;
-            char* pData = nullptr;
             pEventParcel->Wait();
             pEventParcel->ReadInt(event);
             pEventParcel->ReadInt(size);
+            unsigned char data[size] = {};
             if (size > 0) {
-                pData = new (std::nothrow) char[size];
-                pEventParcel->ReadData((void*)pData, size);
+                pEventParcel->ReadData(data, size);
             }
-            if (mCb) {
-                mCb(event, pData, size);
-            }
-            delete[] pData;
+
+            mCb(event, data, size);
         }
     });
 
@@ -108,7 +109,7 @@ int AsyncEvent::EventNotify(int32_t event, void* data, int32_t size)
 
     pEventParcel->WriteInt(event);
     pEventParcel->WriteInt(size);
-    if (size != 0 ) {
+    if (size != 0) {
         pEventParcel->WriteData(data, size);
     }
     pEventParcel->Post();

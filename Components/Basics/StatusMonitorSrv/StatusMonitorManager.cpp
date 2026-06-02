@@ -242,7 +242,7 @@ void StatusMonitorManager::DebugDisplayUTCTimeAsLocalString(const std::vector<st
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DisplayUTCTimeAsLocalString {utc} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DisplayUTCTimeAsLocalString {utc} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -265,7 +265,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithModuleID(const std::vector<s
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DumpWithID {moduleID} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DumpWithID {moduleID} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -283,7 +283,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithLevel(const std::vector<std:
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DumpWithLevel {level} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DumpWithLevel {level} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -301,7 +301,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithErrorCode(const std::vector<
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DumpWithErrCode {errCode} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DumpWithErrCode {errCode} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -319,7 +319,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithText(const std::vector<std::
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DumpWithText {text} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DumpWithText {text} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -337,7 +337,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithModuleID(const std::vector<st
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DelWithID {moduleID} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DelWithID {moduleID} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -355,7 +355,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithLevel(const std::vector<std::
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DelWithLevel {level} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DelWithLevel {level} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -373,7 +373,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithErrorCode(const std::vector<s
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DelWithErrCode {errCode} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DelWithErrCode {errCode} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 
@@ -391,7 +391,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::s
 {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
-        SPR_LOGE("Usage: echo DelWithText {text} > /tmp/statusmonitorsrv\n");
+        SPR_LOGE("Usage: echo DelWithText {text} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
         return;
     }
 

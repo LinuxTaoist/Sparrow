@@ -65,12 +65,12 @@ TEST(Core_SprThreadPool, SubmitTaskNoReturnExecutesWithoutLoss) {
     SprThreadPool* pool = SprThreadPool::GetInstance(2);
     ASSERT_TRUE(pool != NULL) << "Thread pool instance is null";
 
-    std::atomic<int> taskCount(0);
-    const int kTestTaskNum = 5;
+    std::atomic<int32_t> taskCount(0);
+    const int32_t kTestTaskNum = 5;
     const uint64_t kTimeoutUs = 1000000;  // 1秒超时
 
     // 提交5个无返回值任务
-    for (int i = 0; i < kTestTaskNum; ++i) {
+    for (int32_t i = 0; i < kTestTaskNum; ++i) {
         pool->SubmitTask([&taskCount]() {
             usleep(10000);  // 10ms模拟任务耗时
             taskCount++;
@@ -90,10 +90,10 @@ TEST(Core_SprThreadPool, TaskResultViaSharedVariable) {
     SprThreadPool* pool = SprThreadPool::GetInstance(2);
     ASSERT_TRUE(pool != NULL) << "Thread pool instance is null";
 
-    const int kA = 32;
-    const int kB = 48;
-    const int kExpectResult = kA + kB;
-    std::atomic<int> actualResult(0);
+    const int32_t kA = 32;
+    const int32_t kB = 48;
+    const int32_t kExpectResult = kA + kB;
+    std::atomic<int32_t> actualResult(0);
     std::atomic<bool> taskDone(false);
     const uint64_t kTimeoutUs = 1000000;
 
@@ -162,7 +162,7 @@ TEST(Core_SprThreadPool, SubmitTaskWithStructParamPassesCorrectly) {
 
     // 定义自定义结构体
     struct TestStruct {
-        int id;
+        int32_t id;
         std::string name;
         bool isValid;
         uint64_t timestamp;
@@ -256,13 +256,13 @@ TEST(Core_SprThreadPool, TasksQueueNormallyWhenPoolIsFull) {
     SprThreadPool* pool = SprThreadPool::GetInstance(2);
     ASSERT_TRUE(pool != NULL) << "Thread pool instance is null";
 
-    const int kMaxWorkers = SPR_THREAD_POOL_MAX_WORKERS;
-    const int kTestTaskNum = kMaxWorkers + 5;  // 超过最大线程数5个任务
-    std::atomic<int> taskCount(0);
+    const int32_t kMaxWorkers = SPR_THREAD_POOL_MAX_WORKERS;
+    const int32_t kTestTaskNum = kMaxWorkers + 5;  // 超过最大线程数5个任务
+    std::atomic<int32_t> taskCount(0);
     const uint64_t kTimeoutUs = 3000000;  // 3秒超时
 
     // 提交大量耗时任务
-    for (int i = 0; i < kTestTaskNum; ++i) {
+    for (int32_t i = 0; i < kTestTaskNum; ++i) {
         pool->SubmitTask([&taskCount]() {
             usleep(100000);  // 100ms模拟任务耗时
             taskCount++;
@@ -290,17 +290,17 @@ TEST(Core_SprThreadPool, ConcurrentSubmitTasksWithoutRace) {
     SprThreadPool* pool = SprThreadPool::GetInstance(4);
     ASSERT_TRUE(pool != NULL) << "Thread pool instance is null";
 
-    const int kSubmitThreadNum = 3;   // 3个线程同时提交任务
-    const int kTaskPerThread = 10;    // 每个线程提交10个任务
-    const int kTotalTaskNum = kSubmitThreadNum * kTaskPerThread;
-    std::atomic<int> taskCount(0);
+    const int32_t kSubmitThreadNum = 3;   // 3个线程同时提交任务
+    const int32_t kTaskPerThread = 10;    // 每个线程提交10个任务
+    const int32_t kTotalTaskNum = kSubmitThreadNum * kTaskPerThread;
+    std::atomic<int32_t> taskCount(0);
     std::vector<std::thread> submitThreads;
     const uint64_t kTimeoutUs = 2000000;  // 2秒超时
 
     // 启动多个线程并发提交任务
-    for (int i = 0; i < kSubmitThreadNum; ++i) {
+    for (int32_t i = 0; i < kSubmitThreadNum; ++i) {
         submitThreads.emplace_back([&taskCount, kTaskPerThread, pool]() {
-            for (int j = 0; j < kTaskPerThread; ++j) {
+            for (int32_t j = 0; j < kTaskPerThread; ++j) {
                 pool->SubmitTask([&taskCount]() {
                     usleep(5000);  // 5ms模拟任务耗时
                     taskCount++;
@@ -390,12 +390,12 @@ TEST(Core_SprThreadPool, TasksCompleteBeforePoolDestruction) {
         SprThreadPool* pool = SprThreadPool::GetInstance(2);
         ASSERT_TRUE(pool != NULL) << "Thread pool instance is null";
 
-        std::atomic<int> taskCount(0);
-        const int kTestTaskNum = 4;
+        std::atomic<int32_t> taskCount(0);
+        const int32_t kTestTaskNum = 4;
         const uint64_t kTimeoutUs = 1000000;
 
         // 提交任务后，等待所有任务完成
-        for (int i = 0; i < kTestTaskNum; ++i) {
+        for (int32_t i = 0; i < kTestTaskNum; ++i) {
             pool->SubmitTask([&taskCount]() {
                 usleep(10000);  // 10ms模拟任务耗时
                 taskCount++;

@@ -34,7 +34,7 @@ using namespace std;
 #define NTP_UNIX_EPOCH_OFFSET   2208988800ULL   // 1970-1900
 
 NtpSource::NtpSource(uint16_t port, const TimeCallback& cb, void* arg)
-    : mArg(arg), mIsReady(false), mCb(cb), mLocalPort(port), mCurSrvIndex(0)
+    : mArg(arg), mIsReady(false), mCb(cb), mLocalPort(port)
 {
     InitSocket();
 }
@@ -45,57 +45,11 @@ NtpSource::~NtpSource()
 
 int32_t NtpSource::SendTimeRequest()
 {
-    int32_t ret = -1;
-    if (!mIsReady) {
-        SPR_LOGD("Creating UDP socket on port %d\n", mLocalPort);
-        ret = mpSocket->AsUdp(mLocalPort);
-        if (ret == -1) {
-            SPR_LOGE("Failed to create UDP socket on port %d\n", mLocalPort);
-            return ret;
-        }
-        mIsReady = true;
+    for (auto& srv : mNtpServers) {
+        SendTimeRequest(srv);
     }
 
-    if (!mpSocket) {
-        SPR_LOGE("mpSocket is nullptr\n");
-        return -1;
-    }
-
-    SPR_LOGD("Sending time request to %d NTP servers\n", mNtpServers.size());
-    if (mCurSrvIndex >= (int32_t)mNtpServers.size()) {
-        mCurSrvIndex = 0;
-        mIsReady = false;
-        mpSocket->Close();
-        SPR_LOGW("All NTP servers have been tried, sync failed!\n");
-        return -1;
-    }
-
-    std::string srvAddr = mNtpServers[mCurSrvIndex].addr;
-    uint16_t srvPort = mNtpServers[mCurSrvIndex].port;
-    std::string ip = SocketCommon::ResolveHostToIP(srvAddr);    // Warn: long time-consuming interface
-    SPR_LOGD("[%d/%u] Resolve %s to %s\n", mCurSrvIndex + 1, mNtpServers.size(), srvAddr.c_str(), ip.c_str());
-
-    if (!ip.empty()) {
-        std::string bytes;
-        NtpProtocol ntpPacket("");
-        ntpPacket.Encode(bytes);
-        mNtpServers[mCurSrvIndex].ip = ip;
-        mNtpServers[mCurSrvIndex].sendTs = GetCurTimeStamp();
-
-        if (!mIsReady) {
-            SPR_LOGD("Sync time finished, not request again!");
-            mCurSrvIndex++;
-            return 0;
-        }
-        ret = mpSocket->Write(bytes, ip, srvPort);
-        SPR_LOGD("[%d/%u] Request to %s:%u %d bytes %s\n", mCurSrvIndex + 1, mNtpServers.size(),
-                ip.c_str(), srvPort, bytes.size(), ret == -1 ? "failed" : "success");
-    } else {
-        SPR_LOGE("Resolve host %s failed! (%s)\n", srvAddr.c_str(), strerror(errno));
-    }
-
-    mCurSrvIndex++;
-    return ret;
+    return 0;
 }
 
 int32_t NtpSource::InitSocket()
@@ -139,6 +93,43 @@ int32_t NtpSource::AddNtpServer(const std::string& addr, uint16_t port)
     return 0;
 }
 
+int32_t NtpSource::SendTimeRequest(NtpServer& srv)
+{
+    int32_t ret = -1;
+    if (!mIsReady) {
+        SPR_LOGD("Creating UDP socket on port %d\n", mLocalPort);
+        ret = mpSocket->AsUdp(mLocalPort);
+        if (ret == -1 || !mpSocket) {
+            SPR_LOGE("Create UDP failed! port %d \n", mLocalPort);
+            return ret;
+        }
+        mIsReady = true;
+    }
+
+    std::string srvAddr = srv.addr;
+    uint16_t srvPort = srv.port;
+    std::string ip = SocketCommon::ResolveHostToIP(srvAddr);    // Warn: long time-consuming interface
+    if (ip.empty()) {
+        SPR_LOGE("Resolve host %s failed! (%s)\n", srvAddr.c_str(), strerror(errno));
+        return -1;
+    }
+
+    std::string bytes;
+    NtpProtocol ntpPacket("");
+    ntpPacket.Encode(bytes);
+    srv.ip = ip;
+    srv.sendTs = GetCurTimeStampWithNtp();
+
+    // mutiple thread request
+    // if other thread request success, the socket will be closed
+    if (mIsReady) {
+        ret = mpSocket->Write(bytes, ip, srvPort);
+        SPR_LOGD("Request to %s:%u %d bytes %s\n", ip.c_str(), srvPort, bytes.size(), ret == -1 ? "failed" : "success");
+    }
+
+    return 0;
+}
+
 int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& srcAddr)
 {
     NtpProtocol ntpPacket(bytes);
@@ -153,27 +144,23 @@ int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& s
         return -1;
     }
 
-    uint64_t t4 = GetCurTimeStamp();
-    uint64_t syncTime = CalculateTime(ntpSrv->sendTs, ntpPacket.GetReceiveTimestamp(),
-                                      ntpPacket.GetTransmitTimestamp(), t4);
-
-    uint32_t sec = (syncTime >> 32) & 0xFFFFFFFF;
-    if (sec < NTP_TIMESTAMP_CHECK) {
-        SPR_LOGE("Invalid NTP time %u\n", sec);
+    int64_t offsetNsec = 0;
+    uint64_t t4 = GetCurTimeStampWithNtp();
+    int32_t ret = GetOffsetNsec(ntpSrv->sendTs, ntpPacket.GetReceiveTimestamp(),
+                    ntpPacket.GetTransmitTimestamp(), t4, offsetNsec);
+    if (ret != 0) {
+        SPR_LOGE("GetOffsetNsec failed!\n");
         return -1;
     }
 
     if (mCb) {
-        mCb(syncTime, mArg);
+        mCb(offsetNsec, mArg);
     }
 
-    // Has received normal response from NTP server
-    // reset the index to 0
-    mCurSrvIndex = 0;
     return 0;
 }
 
-uint64_t NtpSource::GetCurTimeStamp()
+uint64_t NtpSource::GetCurTimeStampWithNtp()
 {
     struct timespec ts;
     if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
@@ -181,21 +168,35 @@ uint64_t NtpSource::GetCurTimeStamp()
         return 0;
     }
 
-    uint64_t ntpSec = (uint64_t)ts.tv_sec;
+    uint64_t ntpSec = (uint64_t)ts.tv_sec + NTP_UNIX_EPOCH_OFFSET;
     uint64_t ntpFrac = ts.tv_nsec * 4294967296ULL / 1000000000ULL;
-    return (ntpSec << 32) | ntpFrac;
+    return (ntpSec * 4294967296ULL) | ntpFrac;
 }
 
-uint64_t NtpSource::CalculateTime(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4)
+int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, int64_t& ns)
 {
-    #define NTPTIME_TO_NSEC(x) ( (((x >> 32) & MASK) * 1000000000ULL) + (x & MASK) )
+    #define NTPTIME_TO_NSEC(x) ( \
+        (int64_t)(((x >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET) * 1000000000ULL + \
+        (int64_t)(( (x & 0xFFFFFFFF) * 1000000000ULL ) / 4294967296ULL) \
+    )
 
-    const int32_t MASK = 0xFFFFFFFF;
-    uint64_t utc = ((t3 >> 32) & MASK) - NTP_UNIX_EPOCH_OFFSET;
-    uint64_t offset = ( (NTPTIME_TO_NSEC(t4) - NTPTIME_TO_NSEC(t1)) +
-                        (NTPTIME_TO_NSEC(t3) - NTPTIME_TO_NSEC(t2)) ) / 2;
-    uint64_t offsetSec = offset / 1000000000ULL;
-    uint64_t offsetFrac = offset % 1000000000ULL;
+    uint32_t utc = (uint32_t)(t3 >> 32) & 0xFFFFFFFF;
+    if (utc < NTP_TIMESTAMP_CHECK) {
+        SPR_LOGE("Invalid NTP time %d\n", utc);
+        return -1;
+    }
 
-    return ((utc + offsetSec) << 32) | offsetFrac;
+    int64_t cliTranNs = NTPTIME_TO_NSEC(t1);
+    int64_t srvRecvNs = NTPTIME_TO_NSEC(t2);
+    int64_t srvTranNs = NTPTIME_TO_NSEC(t3);
+    int64_t cliRecvNs = NTPTIME_TO_NSEC(t4);
+
+    ns = ((srvRecvNs - cliTranNs) + (srvTranNs - cliRecvNs)) / 2;
+
+    SPR_LOGD("t1: (%llu.%llu), t2: (%llu.%llu), t3: (%llu.%llu), t4: (%llu.%llu), offset: %lldns\n",
+        cliTranNs / 1000000000, cliTranNs % 1000000000, srvRecvNs / 1000000000, srvRecvNs % 1000000000,
+        srvTranNs / 1000000000, srvTranNs % 1000000000, cliRecvNs / 1000000000, cliRecvNs % 1000000000, ns);
+
+    return 0;
 }
+
