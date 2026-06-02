@@ -15,12 +15,8 @@ file(COPY ${GENERAL_CONFIGURE_PATH}/system.prop         DESTINATION ${EXECUTABLE
 file(COPY ${VENDOR_CONFIGURE_PATH}/vendor.prop          DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 file(COPY ${VENDOR_CONFIGURE_PATH}/sprlog.conf          DESTINATION ${EXECUTABLE_OUTPUT_PATH}/)
 
-add_subdirectory(BinderManagerSrv)
-add_subdirectory(DebugSrv)
-add_subdirectory(LogManagerSrv)
-add_subdirectory(MediatorSrv)
-add_subdirectory(PowerManagerSrv)
-add_subdirectory(PropertiesSrv)
-add_subdirectory(ServiceManagerSrv)
-add_subdirectory(SparrowSrv)
-add_subdirectory(StatusMonitorSrv)
+# 动态加载, 配置文件modules_configs.cmake
+foreach(module IN LISTS BASIC_MODULES)
+    message(STATUS "Add Business Module: ${module}")
+    add_subdirectory(${module})
+endforeach()

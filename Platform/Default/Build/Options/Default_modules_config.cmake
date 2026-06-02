@@ -5,7 +5,21 @@ set(MODULE_CONFIG_VERSION "DEFAULT_MCONFIG_1002")
 # 增加变量名对应Components/Business路径下的文件夹名
 # 启用方法：
 #   - 修改路径： 当前文件
-#   - 修改方式： BUSINESS_MODULES增加Business路径下文件夹名
+#   - 修改方式： BASIC_MODULES增加对应文件夹名
+#               BUSINESS_MODULES增加对应文件夹名
+
+# 基础模块配置
+list(APPEND BASIC_MODULES BinderManagerSrv)
+list(APPEND BASIC_MODULES DebugSrv)
+list(APPEND BASIC_MODULES LogManagerSrv)
+list(APPEND BASIC_MODULES MediatorSrv)
+list(APPEND BASIC_MODULES PowerManagerSrv)
+list(APPEND BASIC_MODULES PropertiesSrv)
+list(APPEND BASIC_MODULES ServiceManagerSrv)
+list(APPEND BASIC_MODULES SparrowSrv)
+list(APPEND BASIC_MODULES StatusMonitorSrv)
+
+# 定制模块选项
 list(APPEND BUSINESS_MODULES OneNetMqtt)
 
 ## 可选功能模块配置

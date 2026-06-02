@@ -4,11 +4,8 @@ project(Sparrow)
 # 兼容CMAKE旧版本
 cmake_policy(SET CMP0046 OLD)
 
-## 保存工程路径
+## 路径设置
 set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-
-## 定制模块选项
-set(BUSINESS_MODULES "")
 set(PLATFORM_OPTIONS_PATH ${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/Build/Options)
 
 ## 包含配置文件
