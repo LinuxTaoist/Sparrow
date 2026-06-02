@@ -58,7 +58,8 @@ git fetch --prune
 
 3. 添加提交模板：
 ```shell
-git config --global commit.template <gitmessage.txt>
+git config --global commit.template <gitmessage.txt>    # 全局配置
+git config commit.template <gitmessage.txt>             # 当前仓库配置
 ```
 
 4. 查看分支：
