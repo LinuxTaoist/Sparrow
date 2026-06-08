@@ -27,32 +27,32 @@ class PMsgQueue : public IEpollEvent
 {
 public:
     explicit PMsgQueue(const std::string& name, long maxmsg,
-              const std::function<void(int, const std::string&, void*)>& cb = nullptr,
+              const std::function<void(int32_t, const std::string&, void*)>& cb = nullptr,
               void* arg = nullptr);
 
     virtual ~PMsgQueue();
 
     virtual int32_t Clear();
-    virtual int32_t Send(int fd, const char* data, size_t size, uint32_t prio = 1);
+    virtual int32_t Send(int32_t fd, const char* data, size_t size, uint32_t prio = 1);
     virtual int32_t Send(const std::string& msg, uint32_t prio = 1);
-    virtual int32_t Recv(int fd, char* data, size_t size, uint32_t& prio);
+    virtual int32_t Recv(int32_t fd, char* data, size_t size, uint32_t& prio);
     virtual int32_t Recv(std::string& msg, uint32_t& prio);
-    virtual ssize_t Write(int fd, const char* data, size_t size) override;
-    virtual ssize_t Read(int fd, char* data, size_t size) override;
+    virtual ssize_t Write(int32_t fd, const char* data, size_t size) override;
+    virtual ssize_t Read(int32_t fd, char* data, size_t size) override;
 
     virtual void  Close() final;
-    virtual void* EpollEvent(int fd, EpollType eType, void* arg) override;
+    virtual void* EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
     std::string GetMQDevName() const { return mDevName; }
     long GetMQMaxMsg() const { return mMaxMsg; }
 
 protected:
-    int InitMsgQueue();
+    int32_t InitMsgQueue();
 
 private:
     long mMaxMsg;
     std::string mDevName;
-    std::function<void(int, std::string, void*)> mCb;
+    std::function<void(int32_t, std::string, void*)> mCb;
 };
 
 #endif // __PMSG_QUEUE_H__

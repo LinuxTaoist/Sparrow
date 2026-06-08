@@ -161,3 +161,23 @@ void CNode::SetParentNode(const std::shared_ptr<CNode>& pParent) {
 std::shared_ptr<CNode> GetNodeByPath(const std::string& path) {
     return nullptr;
 }
+
+int32_t CNode::SetStrValue(const std::string& name, const std::string& value) {
+    std::vector<uint8_t> tmpValue;
+    int32_t ret = CUtils::SToV(value, tmpValue);
+    if (ret != -1) {
+        ret = SetValue(name, tmpValue);
+    }
+
+    return ret;
+}
+
+int32_t CNode::GetStrValue(const std::string& name, std::string& value) {
+    std::vector<uint8_t> tmpValue;
+    int32_t ret = GetValue(name, tmpValue);
+    if (ret != -1) {
+        ret = CUtils::VToS(tmpValue, value);
+    }
+
+    return ret;
+}

@@ -33,8 +33,9 @@ SprMQueueDetails::SprMQueueDetails(const std::string& mqName, bool create) : mIs
     int32_t fd = -1;
     mRootDir = DEFAULT_MQS_DIR;
     mpDetails = nullptr;
-    std::string filePath = mRootDir + "/" + mqName;
 
+    std::string delimiter = (mqName.find('/') != std::string::npos) ?  "" : "/";
+    std::string filePath = mRootDir + delimiter + mqName;
     if (access(mRootDir.c_str(), F_OK) != 0) {
         int32_t ret = mkdir(mRootDir.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
@@ -58,7 +59,7 @@ SprMQueueDetails::SprMQueueDetails(const std::string& mqName, bool create) : mIs
     } else {
         fd = open(filePath.c_str(), O_RDWR);
         if (fd == -1) {
-            SPR_LOGE("Failed to open file: %s", filePath.c_str());
+            SPR_LOGE("Open %s failed! (%s)\n", filePath.c_str(), strerror(errno));
             mpDetails = nullptr;
             return;
         }

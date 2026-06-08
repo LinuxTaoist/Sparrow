@@ -26,18 +26,18 @@
 class PTimer : public IEpollEvent
 {
 public:
-    PTimer(const std::function<void(int, uint64_t, void*)>& cb = nullptr, void* arg = nullptr);
+    PTimer(const std::function<void(int32_t, uint64_t, void*)>& cb = nullptr, void* arg = nullptr);
     virtual ~PTimer();
 
     int32_t InitTimer(bool isWakeup = false);
     int32_t StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec = 0);
     int32_t StopTimer();
     int32_t DestoryTimer();
-    ssize_t Read(int fd, std::string& bytes) override;
-    void* EpollEvent(int fd, EpollType eType, void* arg) override;
+    ssize_t Read(int32_t fd, std::string& bytes) override;
+    void* EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    std::function<void(int, uint64_t, void*)> mCb;
+    std::function<void(int32_t, uint64_t, void*)> mCb;
 };
 
 #endif // __PTIMER_H__

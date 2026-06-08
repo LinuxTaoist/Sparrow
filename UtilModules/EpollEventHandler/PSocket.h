@@ -55,7 +55,7 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 自定义数据，供回调使用
      */
-    explicit PUdp(const std::function<void(int fd, void*)>& cb, void* arg = nullptr)
+    explicit PUdp(const std::function<void(int32_t fd, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {}
     explicit PUdp(const std::function<void(ssize_t, std::string, std::string addr, uint16_t port, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {}
@@ -98,10 +98,10 @@ public:
     int32_t Read(std::string& bytes, std::string& addr, uint16_t& port);
     int32_t Read(void* data, size_t size, std::string& addr, uint16_t& port);
 
-    void*   EpollEvent(int fd, EpollType eType, void* arg) override;
+    void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    std::function<void(int fd, void*)> mCb1;
+    std::function<void(int32_t fd, void*)> mCb1;
     std::function<void(ssize_t, std::string, std::string addr, uint16_t port, void*)> mCb2;
 };
 
@@ -117,7 +117,7 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 自定义数据，供回调使用
      */
-    explicit PTcpServer(const std::function<void(int, void*)>& cb, void* arg = nullptr)
+    explicit PTcpServer(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb) {}
     virtual ~PTcpServer();
 
@@ -131,10 +131,10 @@ public:
      * @return int32_t
      */
     int32_t AsTcpServer(uint16_t port, int32_t backlog, const std::string& addr = "");
-    void*   EpollEvent(int fd, EpollType eType, void* arg) override;
+    void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    std::function<void(int, void*)> mCb;
+    std::function<void(int32_t, void*)> mCb;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -155,8 +155,8 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 传递给回调函数的参数
      */
-    PTcpClient(int fd, const std::function<void(int, void*)>& cb, void* arg = nullptr);
-    PTcpClient(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
+    PTcpClient(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg = nullptr);
+    PTcpClient(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
 
     /**
      * @brief 用于创建一个新的客户端对象，初始化一个新的套接字
@@ -166,17 +166,17 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 传递给回调函数的参数
      */
-    explicit PTcpClient(const std::function<void(int, void*)>& cb, void* arg = nullptr);
+    explicit PTcpClient(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr);
     explicit PTcpClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
     virtual ~PTcpClient();
 
     int32_t AsTcpClient(bool con = false, const std::string& srvAddr = "", uint16_t srvPort = 0,
                         int32_t rcvLen = DEFAULT_BUFFER_LIMIT, int32_t sndLen = DEFAULT_BUFFER_LIMIT);
 
-    void*   EpollEvent(int fd, EpollType eType, void* arg) override;
+    void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    std::function<void(int, void*)> mCb1;
+    std::function<void(int32_t, void*)> mCb1;
     std::function<void(ssize_t, std::string, void*)> mCb2;
 };
 
@@ -197,7 +197,7 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 自定义数据，供回调使用
      */
-    explicit PUnixDgram(const std::function<void(int, void*)>& cb, void* arg = nullptr)
+    explicit PUnixDgram(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {}
     explicit PUnixDgram(const std::function<void(ssize_t, std::string, std::string, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {}
@@ -238,10 +238,10 @@ public:
     int32_t Read(std::string& bytes, std::string& dstPath);
     int32_t Read(void* data, size_t size, std::string& dstPath);
 
-    void*   EpollEvent(int fd, EpollType eType, void* arg) override;
+    void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    std::function<void(int, void*)> mCb1;
+    std::function<void(int32_t, void*)> mCb1;
     std::function<void(ssize_t, std::string, std::string, void*)> mCb2;
 };
 
@@ -251,7 +251,7 @@ private:
 class PUnixStreamServer : public IEpollEvent
 {
 public:
-    explicit PUnixStreamServer(const std::function<void(int, void*)>& cb, void* arg = nullptr)
+    explicit PUnixStreamServer(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb) {}
     virtual ~PUnixStreamServer();
 
@@ -263,10 +263,10 @@ public:
      * @return int32_t
      */
     int32_t AsUnixStreamServer(const std::string& srvPath, int32_t backlog);
-    void*   EpollEvent(int fd, EpollType eType, void* arg) override;
+    void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    std::function<void(int, void*)> mCb;
+    std::function<void(int32_t, void*)> mCb;
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -287,8 +287,8 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 传递给回调函数的参数
      */
-    explicit PUnixStreamClient(int fd, const std::function<void(int, void*)>& cb = nullptr, void* arg = nullptr);
-    PUnixStreamClient(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
+    explicit PUnixStreamClient(int32_t fd, const std::function<void(int32_t, void*)>& cb = nullptr, void* arg = nullptr);
+    PUnixStreamClient(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
 
     /**
      * @brief 用于创建一个新的客户端对象，初始化一个新的套接字
@@ -298,15 +298,15 @@ public:
      * @param cb 回调函数，当有数据到达时调用
      * @param arg 传递给回调函数的参数
      */
-    explicit PUnixStreamClient(const std::function<void(int, void*)>& cb, void* arg = nullptr);
+    explicit PUnixStreamClient(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr);
     explicit PUnixStreamClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
     virtual ~PUnixStreamClient();
 
     int32_t AsUnixStreamClient(bool con = false, const std::string& srvPath = "", const std::string& cliPath = "");
-    void*   EpollEvent(int fd, EpollType eType, void* arg) override;
+    void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    std::function<void(int, void*)> mCb1;
+    std::function<void(int32_t, void*)> mCb1;
     std::function<void(ssize_t, std::string, void*)> mCb2;
 };
 

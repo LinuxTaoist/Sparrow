@@ -97,9 +97,9 @@ static void PrintCfgNode(const std::shared_ptr<CNode>& node, bool isLast, const 
     }
 }
 
- void CFactory::RegisterPrintCallback(const LogCallback& callback) {
+void CFactory::RegisterPrintCallback(const LogCallback& callback) {
     CLog::GetInstance().RegisterPrintCallback(callback);
- }
+}
 
 void CFactory::PrintConfigDetails(const std::shared_ptr<CNode>& root) {
     if (!root) return;
@@ -213,26 +213,8 @@ bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vec
         return false;
     }
 
-    std::shared_ptr<CField> pCfgRootField = std::dynamic_pointer_cast<CField>(pCfgParser);
-    if (!pCfgRootField) {
-        CLOGE("pCfgRootField is nullptr!\n");
-        return false;
-    }
-
-    std::shared_ptr<CNode> pHeadFlagNode = pCfgRootField->GetNode(TEXT_HEAD_FLAG_TAG);
-    if (!pHeadFlagNode || pHeadFlagNode->IsField()) {
-        // CLOGW("pHeadFlagNode is invalid!\n");
-        return false;
-    }
-
-    std::shared_ptr<CAtom> pHeadFlagAtom = std::dynamic_pointer_cast<CAtom>(pHeadFlagNode);
-    if (!pHeadFlagAtom) {
-        CLOGE("pHeadFlagAtom is nullptr!\n");
-        return false;
-    }
-
     std::vector<uint8_t> frameHeader;
-    int32_t ret = pHeadFlagAtom->GetVecValue(frameHeader);
+    int32_t ret = pCfgParser->GetVecValue(TEXT_HEAD_FLAG_TAG, frameHeader);
     if (ret < 0 || frameHeader.empty()) {
         CLOGE("Get frame header failed! ret = %d, size = %d\n", ret, (int32_t)frameHeader.size());
         return false;
@@ -242,7 +224,17 @@ bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vec
     return true;
 }
 
-void CFactory::PrintProtocolDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes) {
+void CFactory::PrintDataDetails(const std::shared_ptr<CNode>& pDataParser) {
+    if (!pDataParser) {
+        CLOGE("Invalid param! pDataParser = nullptr\n");
+        return;
+    }
+
+    CLOGI("--------------  Print Protocol Details  -------------\n");
+    PrintFrameDetails(pDataParser, 0, 0);
+}
+
+void CFactory::PrintDataDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes) {
     if (!pCfgParser || bytes.empty()) {
         CLOGE("Invalid param! pCfgParser = %p, bytes.size() = %d\n", pCfgParser.get(), (int32_t)bytes.size());
         return;
@@ -302,7 +294,7 @@ void CFactory::PrintProtocolDetails(const std::shared_ptr<CNode>& pCfgParser, co
     CLOGI("===================================================\n");
 }
 
-void CFactory::PrintProtocolDetails(const std::string& cfgPath, const std::string& bytesPath) {
+void CFactory::PrintDataDetails(const std::string& cfgPath, const std::string& bytesPath) {
     std::shared_ptr<CNode> pCfgParser = CreateCfgParserByCfgFile(cfgPath);
     if (!pCfgParser) {
         CLOGE("Load config failed: %s\n", cfgPath.c_str());
@@ -316,5 +308,5 @@ void CFactory::PrintProtocolDetails(const std::string& cfgPath, const std::strin
         return;
     }
 
-    PrintProtocolDetails(pCfgParser, hexBytes);
+    PrintDataDetails(pCfgParser, hexBytes);
 }

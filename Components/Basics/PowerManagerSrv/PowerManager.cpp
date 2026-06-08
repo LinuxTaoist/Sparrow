@@ -316,7 +316,7 @@ bool PowerManager::IsAllowStandbyWithAllObserver()
     bool ret = true;
     for (const auto &obs : mStandbyObservers) {
         if (obs.second.preStandbyAck != PRE_STANDBY_ACK_ALLOW) {
-            SPR_LOGD("%s not allow standby (%s)!\n", GetSprModuleIDText(static_cast<ModuleIDType>(obs.first)).c_str(),
+            SPR_LOGD("%s standby state = %s!\n", GetSprModuleIDText(static_cast<ModuleIDType>(obs.first)).c_str(),
                 GetSprPreStandbyAckText(obs.second.preStandbyAck).c_str());
             ret = false;
             break;

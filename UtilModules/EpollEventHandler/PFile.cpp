@@ -27,18 +27,18 @@
 #define SPR_LOGD(fmt, args...) printf("%4d PFile D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PFile E: " fmt, __LINE__, ##args)
 
-PFile::PFile(int fd, const std::function<void(int, void*)>& cb, void* arg)
+PFile::PFile(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_FILE, arg), mFd(-1), mCb1(cb), mCb2(nullptr)
 {
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 }
 
 // Note: See epoll_ctl(2) for further details.
 // EPERM  The target file fd does not support epoll.
 // This error can occur if fd refers to, for example, a regular file or a directory.
-PFile::PFile(const std::string& fileName, const std::function<void(int, ssize_t, std::string, void*)>& cb,
-    void* arg, int flags, mode_t mode)
+PFile::PFile(const std::string& fileName, const std::function<void(int32_t, ssize_t, std::string, void*)>& cb,
+    void* arg, int32_t flags, mode_t mode)
     : IEpollEvent(-1, EPOLL_TYPE_FILE, arg), mCb1(nullptr), mCb2(cb)
 {
     mFd = open(fileName.c_str(), flags | O_NONBLOCK, mode);
@@ -55,7 +55,7 @@ PFile::~PFile()
     mFd = -1;
 }
 
-void* PFile::EpollEvent(int fd, EpollType eType, void* arg)
+void* PFile::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != mEvtFd) {
         SPR_LOGE("Invalid fd (%d)!\n", fd);

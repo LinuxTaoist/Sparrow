@@ -129,7 +129,7 @@ std::shared_ptr<CNode> CField::GetNode(const std::string& name) {
     return pNode;
 }
 
-std::vector<std::shared_ptr<CNode>> CField::GetChildNodes() {
+std::vector<std::shared_ptr<CNode>>& CField::GetChildNodes() {
     return mChildNodes;
 }
 
@@ -300,7 +300,7 @@ void CField::RelinkChildren(const std::shared_ptr<CField>& pParentField) {
 int32_t CField::DecodeStaticField(const std::vector<uint8_t>& bytes) {
     int32_t ret = 0;
 
-    // CLOGD("Node[%s] Decode static field, size = %d \n", GetName().c_str(), (int32_t)mChildNodes.size());
+    CLOGD("Node[%s] Decode static field, size = %d \n", GetName().c_str(), (int32_t)mChildNodes.size());
     for (auto& node : mChildNodes) {
         int32_t len = node->Decode(bytes);
         if (len < 0) {
@@ -382,7 +382,7 @@ int32_t CField::CalculateDynamicFieldSize() {
                 return -1;
             }
 
-            int32_t ret = pLenAtom->GetIntValue(len);
+            int32_t ret = pLenAtom->GetIntValue("", len);
             if (ret == -1) {
                 CLOGE("Node[%s] GetIntValue failed!\n", pLenAtom->GetName().c_str());
                 return -1;
@@ -439,7 +439,7 @@ int32_t CField::CalculateChildNodesValueSum(int32_t& sum) {
         }
 
         int32_t value = 0;
-        int32_t ret = pAtom->GetIntValue(value);
+        int32_t ret = pAtom->GetIntValue("", value);
         if (ret == -1) {
             CLOGE("Node[%s] GetIntValue failed!\n", pAtom->GetName().c_str());
             return -1;
@@ -462,7 +462,7 @@ int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
         return -1;
     }
 
-    // CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
+    CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
     int32_t ret = 0;
     std::shared_ptr<CNode> pTmpNode = mChildNodes[0];
     mChildNodes.clear();
@@ -479,6 +479,75 @@ int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
     }
 
     return ret;
+}
+
+int32_t CField::SetValue(const std::string& name, const std::vector<uint8_t>& value) {
+    if (name.empty()) {
+        CLOGE("Node[%s] name is empty!\n", GetName().c_str());
+        return -1;
+    }
+
+    std::shared_ptr<CNode> pChildNode = GetNode(name);
+    if (!pChildNode) {
+        CLOGE("Node[%s] pChildNode[%s] is nullptr!\n", GetName().c_str(), name.c_str());
+        return -1;
+    }
+
+    std::string type = pChildNode->GetType();
+
+    // Atom child
+    if (type.find(TEXT_TYPE_FIELD_SUFFIX) == std::string::npos) {
+        std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(pChildNode);
+        if (!pAtom) {
+            CLOGE("Node[%s] pAtom[%s] is nullptr!\n", GetName().c_str(), name.c_str());
+            return -1;
+        }
+
+        return pAtom->SetValue(name, value);
+    }
+
+    // Field child (仅支持单层, bytes类型容器设置)
+    std::shared_ptr<CField> pField = std::dynamic_pointer_cast<CField>(pChildNode);
+    if (!pField) {
+        CLOGE("Node[%s] pField[%s] invalid!\n", GetName().c_str(), name.c_str());
+        return -1;
+    }
+
+    if (pField->GetLenMode() != TEXT_LEN_MODE_BYTES) {
+        CLOGE("Node[%s] pField[%s] invalid type %s!\n", GetName().c_str(), name.c_str(), pField->GetLenMode().c_str());
+        return -1;
+    }
+
+    auto& childNodes = pField->GetChildNodes();
+    if (childNodes.empty()) {
+        CLOGE("Node[%s] pField[%s] has no child node!\n", GetName().c_str(), name.c_str());
+        return -1;
+    }
+
+    std::shared_ptr<CNode> pTmpNode = childNodes[0];
+    childNodes.clear();
+    for (auto& v : value) {
+        std::shared_ptr<CNode> pCloneNode = pTmpNode->Clone();
+        pCloneNode->SetIntValue("", v);
+        childNodes.emplace_back(pCloneNode);
+    }
+
+    return 0;
+}
+
+int32_t CField::GetValue(const std::string& name, std::vector<uint8_t>& value) {
+    if (name.empty()) {
+        CLOGE("Node[%s] name is empty!\n", GetName().c_str());
+        return -1;
+    }
+
+    std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(GetNode(name));
+    if (!pAtom) {
+        CLOGE("Node[%s] pAtom[%s] is nullptr!\n", GetName().c_str(), name.c_str());
+        return -1;
+    }
+
+    return pAtom->GetValue(name, value);
 }
 
 int32_t CField::Decode(const std::vector<uint8_t>& bytes) {

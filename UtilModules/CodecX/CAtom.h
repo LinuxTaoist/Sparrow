@@ -31,29 +31,10 @@ public:
     CAtom(const std::shared_ptr<CNode>& parent, const std::string& name, const std::vector<uint8_t>& value);
     ~CAtom();
 
-    template <typename T>
-    int32_t SetIntValue(T value) {
-        return CUtils::IToV(value, mValue);
-    }
-
-    template <typename T>
-    int32_t GetIntValue(T& value) {
-        return CUtils::VToI(mValue, value);
-    }
-
-    template <typename T>
-    int32_t SetVecValue(const std::vector<T>& value) {
-        return CUtils::VToV(value, mValue);
-    }
-
-    template <typename T>
-    int32_t GetVecValue(std::vector<T>& value) {
-        return CUtils::VToV(mValue, value);
-    }
-
-    int32_t SetStrValue(const std::string& value);
-    int32_t GetStrValue(std::string& value);
-
+    int32_t SetValue(const std::vector<uint8_t>& value);
+    int32_t GetValue(std::vector<uint8_t>& value);
+    int32_t SetValue(const std::string& name, const std::vector<uint8_t>& value) override;
+    int32_t GetValue(const std::string& name, std::vector<uint8_t>& value) override;
     int32_t Decode(const std::vector<uint8_t>& bytes) override;
     int32_t Encode(std::vector<uint8_t>& bytes) override;
     std::shared_ptr<CNode> Clone() override;

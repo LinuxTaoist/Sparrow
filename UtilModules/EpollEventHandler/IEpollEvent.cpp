@@ -31,7 +31,7 @@ IEpollEvent::~IEpollEvent() {
     // Close();
 }
 
-ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)
+ssize_t IEpollEvent::Write(int32_t fd, const char* data, size_t size)
 {
     const char* ptr = data;
     size_t nleft = size;
@@ -61,7 +61,7 @@ ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)
     return (size - nleft);
 }
 
-ssize_t IEpollEvent::Write(int fd, const std::string& bytes)
+ssize_t IEpollEvent::Write(int32_t fd, const std::string& bytes)
 {
     return Write(fd, bytes.c_str(), bytes.size());
 }
@@ -76,7 +76,7 @@ ssize_t IEpollEvent::Write(const std::string& bytes)
     return Write(mEvtFd, bytes.c_str(), bytes.size());
 }
 
-ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
+ssize_t IEpollEvent::Read(int32_t fd, char* data, size_t size)
 {
     char* ptr = data;
     size_t nleft = size;
@@ -96,7 +96,7 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
             }
         } else if (nread == 0) {
             if (size != nleft) {
-                SPR_LOGD("Read EOF after %d bytes\n", int(size - nleft));
+                SPR_LOGD("Read EOF after %d bytes\n", int32_t(size - nleft));
             }
             break;
         }
@@ -108,7 +108,7 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
     return (size - nleft);
 }
 
-ssize_t IEpollEvent::Read(int fd, std::string& bytes) {
+ssize_t IEpollEvent::Read(int32_t fd, std::string& bytes) {
     bytes.clear();
     ssize_t totalBytesRead = 0;
     const size_t bufferSize = 4096;

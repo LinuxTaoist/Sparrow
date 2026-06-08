@@ -32,7 +32,7 @@
 #define SPR_LOGE(fmt, args...) printf("%6d PMsgQueue E: %4d [%s] " fmt, getpid(), __LINE__, mDevName.c_str(), ##args)
 
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
-            const std::function<void(int, const std::string&, void*)>& cb,
+            const std::function<void(int32_t, const std::string&, void*)>& cb,
             void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mCb(cb)
 {
@@ -43,7 +43,7 @@ PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
 
     mDevName = (name[0] == '/') ? name : "/" + name;
     mMaxMsg = maxmsg;
-    int rc = InitMsgQueue();
+    int32_t rc = InitMsgQueue();
     if (rc == -1) {
         SetReady(false);
     }
@@ -57,7 +57,7 @@ PMsgQueue::~PMsgQueue()
     }
 }
 
-int PMsgQueue::InitMsgQueue()
+int32_t PMsgQueue::InitMsgQueue()
 {
     if (mDevName.empty()) {
         SPR_LOGE("mDevName is empty!\n");
@@ -78,7 +78,7 @@ int PMsgQueue::InitMsgQueue()
             mqAttr.__pad[1] = 0;
             mqAttr.__pad[2] = 0;
             mqAttr.__pad[3] = 0;
-            mEvtFd = (int)mq_open(mDevName.c_str(), O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL, 0666, &mqAttr);
+            mEvtFd = (int32_t)mq_open(mDevName.c_str(), O_RDWR | O_NONBLOCK | O_CREAT | O_EXCL, 0666, &mqAttr);
             if (mEvtFd == (mqd_t)-1) {
                 SPR_LOGE("mq_open %s failed! (%s)\n", mDevName.c_str(), strerror(errno));
                 return -1;
@@ -110,7 +110,7 @@ int32_t PMsgQueue::Clear()
     return 0;
 }
 
-int32_t PMsgQueue::Send(int fd, const char* data, size_t size, uint32_t prio)
+int32_t PMsgQueue::Send(int32_t fd, const char* data, size_t size, uint32_t prio)
 {
     int32_t ret = mq_send(fd, data, size, prio);
     if (ret < 0) {
@@ -126,7 +126,7 @@ int32_t PMsgQueue::Send(const std::string& msg, uint32_t prio)
     return Send(mEvtFd, msg.c_str(), msg.size(), prio);
 }
 
-int32_t PMsgQueue::Recv(int fd, char* data, size_t size, uint32_t& prio)
+int32_t PMsgQueue::Recv(int32_t fd, char* data, size_t size, uint32_t& prio)
 {
     if (!data || size == 0) {
         return -1;
@@ -170,18 +170,18 @@ void PMsgQueue::Close()
     mEvtFd = -1;
 }
 
-ssize_t PMsgQueue::Write(int fd, const char* data, size_t size)
+ssize_t PMsgQueue::Write(int32_t fd, const char* data, size_t size)
 {
     return Send(fd, data, size);
 }
 
-ssize_t PMsgQueue::Read(int fd, char* data, size_t size)
+ssize_t PMsgQueue::Read(int32_t fd, char* data, size_t size)
 {
     uint32_t prio = 0;
     return Recv(fd, data, size, prio);
 }
 
-void* PMsgQueue::EpollEvent(int fd, EpollType eType, void* arg)
+void* PMsgQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     std::string msg;
     uint32_t prio = 0;

@@ -27,10 +27,10 @@
 #define SPR_LOGD(fmt, args...) printf("%4d PPipe D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PPipe E: " fmt, __LINE__, ##args)
 
-PPipe::PPipe(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
+PPipe::PPipe(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mCb(cb)
 {
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 }
 
@@ -78,14 +78,14 @@ bool PPipe::IsExistFifo(const std::string& path) {
     return S_ISFIFO(buffer.st_mode);
 }
 
-void* PPipe::EpollEvent(int fd, EpollType eType, void* arg)
+void* PPipe::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != mEvtFd) {
         SPR_LOGE("Invalid fd (%d)!\n", fd);
     }
 
     std::string buf;
-    int ret = Read(fd, buf);
+    int32_t ret = Read(fd, buf);
     if (ret < 0) {
         SPR_LOGE("Read error!\n");
     }

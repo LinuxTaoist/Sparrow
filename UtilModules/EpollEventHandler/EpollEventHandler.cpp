@@ -30,7 +30,7 @@
 
 static std::atomic<bool> gObjAlive(true);
 
-EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
+EpollEventHandler::EpollEventHandler(int32_t size, int32_t blockTimeOut)
 {
     if (size) {
         mHandle = epoll_create(size);
@@ -52,7 +52,7 @@ EpollEventHandler::~EpollEventHandler()
     ExitLoop();
 }
 
-EpollEventHandler* EpollEventHandler::GetInstance(int size, int blockTimeOut)
+EpollEventHandler* EpollEventHandler::GetInstance(int32_t size, int32_t blockTimeOut)
 {
     if (!gObjAlive) {
         return nullptr;
@@ -74,8 +74,8 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
-    int fd = p->GetEvtFd();
-    int ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
+    int32_t fd = p->GetEvtFd();
+    int32_t ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret == -1) {
         SPR_LOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
         return ;
@@ -92,7 +92,7 @@ void EpollEventHandler::DelPoll(IEpollEvent* p)
         return ;
     }
 
-    int ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEvtFd(), nullptr);
+    int32_t ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEvtFd(), nullptr);
     if (ret != 0) {
         SPR_LOGE("epoll_ctl %d fail. (%s)\n", p->GetEvtFd(), strerror(errno));
     }
@@ -112,12 +112,12 @@ void EpollEventHandler::EpollLoop()
     mRun = true;
     while(mRun) {
         // 无事件时, epoll_wait阻塞, 等待
-        int count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), mTimeOut);
+        int32_t count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), mTimeOut);
         if (count <= 0) {
             continue;
         }
 
-        for (int i = 0; i < count; i++) {
+        for (int32_t i = 0; i < count; i++) {
             IEpollEvent* p = reinterpret_cast<IEpollEvent*>(ep[i].data.ptr);
             if (p == nullptr) {
                 continue;

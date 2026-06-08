@@ -55,7 +55,7 @@ class SprMsg
 public:
     SprMsg();
     SprMsg(const SprMsg& srcMsg);
-    explicit SprMsg(uint32_t msgId);
+    SprMsg(uint32_t msgId);
     SprMsg(uint32_t to, uint32_t msgId);
     SprMsg(uint32_t to, const SprMsg& srcMsg);
     SprMsg(uint32_t from, uint32_t to, uint32_t msgId);

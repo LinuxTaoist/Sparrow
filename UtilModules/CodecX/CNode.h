@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include "CUtils.h"
 #include "CDefine.h"
 
 class CNode : public std::enable_shared_from_this<CNode> {
@@ -47,6 +48,52 @@ public:
     virtual int32_t Decode(const std::vector<uint8_t>& bytes) = 0;
     virtual int32_t Encode(std::vector<uint8_t>& bytes) = 0;
 
+    int32_t SetStrValue(const std::string& name, const std::string& value);
+    int32_t GetStrValue(const std::string& name, std::string& value);
+
+    template <typename T>
+    int32_t SetIntValue(const std::string& name, T value) {
+        std::vector<uint8_t> tmpValue;
+        int32_t ret = CUtils::IToV(value, tmpValue);
+        if (ret != -1) {
+            ret = SetValue(name, tmpValue);
+        }
+
+        return ret;
+    }
+
+    template <typename T>
+    int32_t GetIntValue(const std::string& name, T& value) {
+        std::vector<uint8_t> tmpValue;
+        int32_t ret = GetValue(name, tmpValue);
+        if (ret != -1) {
+            ret = CUtils::VToI(tmpValue, value);
+        }
+
+        return ret;
+    }
+
+    template <typename T>
+    int32_t SetVecValue(const std::string& name, const std::vector<T>& value) {
+        std::vector<uint8_t> tmpValue;
+        int32_t ret = CUtils::VToV(value, tmpValue);
+        if (ret != -1) {
+            ret = SetValue(name, tmpValue);
+        }
+
+        return ret;
+    }
+
+    template <typename T>
+    int32_t GetVecValue(const std::string& name, std::vector<T>& value) {
+        std::vector<uint8_t> tmpValue;
+        int32_t ret = GetValue(name, tmpValue);
+        if (ret != -1) {
+            ret = CUtils::VToV(tmpValue, value);
+        }
+        return ret;
+    }
+
 protected:
     void    ResetDePos(int32_t val = 0);
     void    DePosAdd(int32_t offset);
@@ -62,6 +109,9 @@ protected:
     int32_t GetLength();
     void    SetEndian(CEndianType endian);
     int32_t GetEndian();
+
+    virtual int32_t SetValue(const std::string& name, const std::vector<uint8_t>& value) = 0;
+    virtual int32_t GetValue(const std::string& name, std::vector<uint8_t>& value) = 0;
 
 private:
     bool mIsField;

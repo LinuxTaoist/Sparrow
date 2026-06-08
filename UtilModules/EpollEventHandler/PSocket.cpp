@@ -49,7 +49,7 @@ std::string SocketCommon::ResolveHostToIP(const std::string& host)
         return host;
     }
 
-    int status = 0;
+    int32_t status = 0;
     char ipstr[INET6_ADDRSTRLEN] = {0};
     struct addrinfo hints, *res;
 
@@ -92,10 +92,10 @@ int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
         return -1;
     }
 
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -189,7 +189,7 @@ int32_t PUdp::Read(void* data, size_t size, std::string& addr, uint16_t& port)
     return ret;
 }
 
-void* PUdp::EpollEvent(int fd, EpollType eType, void* arg)
+void* PUdp::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     arg = arg ? arg : this;
     if (mCb1) {
@@ -223,7 +223,7 @@ int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::strin
         return -1;
     }
 
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 
     struct sockaddr_in myAddr;
@@ -231,7 +231,7 @@ int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::strin
     myAddr.sin_family = AF_INET;
     myAddr.sin_addr.s_addr = addr.empty() ? htonl(INADDR_ANY) : inet_addr(addr.c_str());
     myAddr.sin_port = htons(port);
-    int ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(myAddr));
+    int32_t ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(myAddr));
     if (ret < 0) {
         SPR_LOGE("bind failed! (%s)\n", strerror(errno));
         Close();
@@ -249,11 +249,11 @@ int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::strin
     return ret;
 }
 
-void* PTcpServer::EpollEvent(int fd, EpollType eType, void* arg)
+void* PTcpServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     struct sockaddr_in client;
     socklen_t len = (socklen_t)sizeof(client);
-    int cliFd = accept(fd, (struct sockaddr *)&client, &len);
+    int32_t cliFd = accept(fd, (struct sockaddr *)&client, &len);
     if (cliFd < 0) {
         SPR_LOGE("accept failed! (%s)\n", strerror(errno));
         return nullptr;
@@ -270,15 +270,15 @@ void* PTcpServer::EpollEvent(int fd, EpollType eType, void* arg)
 //---------------------------------------------------------------------------------------------------------------------
 // PTcpClient: TCP client
 //---------------------------------------------------------------------------------------------------------------------
-PTcpClient::PTcpClient(int fd, const std::function<void(int, void*)>& cb, void* arg)
+PTcpClient::PTcpClient(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
 {
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     if (flags >= 0) {
         fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
     }
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -286,15 +286,15 @@ PTcpClient::PTcpClient(int fd, const std::function<void(int, void*)>& cb, void* 
     }
 }
 
-PTcpClient::PTcpClient(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
+PTcpClient::PTcpClient(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb)
 {
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     if (flags >= 0) {
         fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
     }
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -302,7 +302,7 @@ PTcpClient::PTcpClient(int fd, const std::function<void(ssize_t, std::string, vo
     }
 }
 
-PTcpClient::PTcpClient(const std::function<void(int, void*)>& cb, void* arg)
+PTcpClient::PTcpClient(const std::function<void(int32_t, void*)>& cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
 {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
@@ -311,7 +311,7 @@ PTcpClient::PTcpClient(const std::function<void(int, void*)>& cb, void* arg)
         SetReady(false);
     }
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -328,7 +328,7 @@ PTcpClient::PTcpClient(const std::function<void(ssize_t, std::string, void*)>& c
         SetReady(false);
     }
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -343,7 +343,7 @@ PTcpClient::~PTcpClient()
 
 int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t srvPort, int32_t rcvLen, int32_t sndLen)
 {
-    int flags, op;
+    int32_t flags, op;
     struct linger so_linger;
     struct sockaddr_in server;
 
@@ -381,22 +381,49 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
         server.sin_addr.s_addr = inet_addr(srvAddr.c_str());
         server.sin_port = htons(srvPort);
 
+        flags = fcntl(mEvtFd, F_GETFL, 0);
+        fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
+
         // Linux TCP repeat connect directly return EISCONN.
-        int ret = connect(mEvtFd, (struct sockaddr*)&server, sizeof(server));
+        int32_t ret = connect(mEvtFd, (struct sockaddr*)&server, sizeof(server));
         if (ret < 0 && errno != EISCONN) {
-            SPR_LOGE("connect %s failed! (%s)\n", srvAddr.c_str(), strerror(errno));
-            Close();
-            return -1;
+            if (errno == EINPROGRESS) {
+                // Non-blocking connect in progress, wait for it to complete
+                fd_set writefds;
+                struct timeval tv;
+
+                FD_ZERO(&writefds);
+                FD_SET(mEvtFd, &writefds);
+                tv.tv_sec = 5; // 5 seconds timeout
+                tv.tv_usec = 0;
+
+                ret = select(mEvtFd + 1, nullptr, &writefds, nullptr, &tv);
+                if (ret <= 0) {
+                    SPR_LOGE("connect %s:%d timed out or failed! (%s)\n", srvAddr.c_str(), srvPort, strerror(errno));
+                    Close();
+                    return -1;
+                }
+
+                int32_t err;
+                socklen_t len = sizeof(err);
+                if (getsockopt(mEvtFd, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0) {
+                    SPR_LOGE("connect %s:%d failed after %ds! (%s)\n", srvAddr.c_str(), srvPort, (int32_t)tv.tv_sec, strerror(err));
+                    Close();
+                    return -1;
+                }
+            } else {
+                SPR_LOGE("connect %s:%d failed! (%s)\n", srvAddr.c_str(), srvPort, strerror(errno));
+                Close();
+                return -1;
+            }
         }
     }
 
-    flags = fcntl(mEvtFd, F_GETFL, 0);
-    fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
     AddToPoll();
     return 0;
 }
 
-void* PTcpClient::EpollEvent(int fd, EpollType eType, void* arg)
+void* PTcpClient::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     arg = arg ? arg : this;
     if (mCb1) {
@@ -429,7 +456,7 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
         return -1;
     }
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -439,7 +466,7 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
     // bind self socket path
     struct sockaddr_un myAddr;
     if (srcPath.size() > sizeof(myAddr.sun_path) - 1) {
-        SPR_LOGE("srcPath too long! len = %d, limit = %d\n", (int)srcPath.size(), (int)sizeof(myAddr.sun_path));
+        SPR_LOGE("srcPath too long! len = %d, limit = %d\n", (int32_t)srcPath.size(), (int32_t)sizeof(myAddr.sun_path));
         Close();
         return -1;
     }
@@ -447,7 +474,7 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
     bzero(&myAddr, sizeof(struct sockaddr_un));
     strncpy(myAddr.sun_path, srcPath.c_str(), srcPath.size());
     myAddr.sun_family = AF_UNIX;
-    int ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(struct sockaddr_un));
+    int32_t ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(struct sockaddr_un));
     if (ret < 0) {
         SPR_LOGE("bind failed! (%s)\n", strerror(errno));
         return ret;
@@ -527,7 +554,7 @@ int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath)
 
     struct sockaddr_un dstAddr;
     socklen_t addrSize = sizeof(struct sockaddr_un);
-    int ret = recvfrom(mEvtFd, data, size, 0, (struct sockaddr *)&dstAddr, &addrSize);
+    int32_t ret = recvfrom(mEvtFd, data, size, 0, (struct sockaddr *)&dstAddr, &addrSize);
     if (ret == -1) {
         SPR_LOGE("recvfrom failed! (%s)\n", strerror(errno));
         return -1;
@@ -537,7 +564,7 @@ int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath)
     return ret;
 }
 
-void* PUnixDgram::EpollEvent(int fd, EpollType eType, void* arg)
+void* PUnixDgram::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     arg = arg ? arg : this;
     if (mCb1) {
@@ -571,7 +598,7 @@ int32_t PUnixStreamServer::AsUnixStreamServer(const std::string& srvPath, int32_
         return -1;
     }
 
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 
     struct sockaddr_un myAddr;
@@ -598,11 +625,11 @@ int32_t PUnixStreamServer::AsUnixStreamServer(const std::string& srvPath, int32_
     return ret;
 }
 
-void* PUnixStreamServer::EpollEvent(int fd, EpollType eType, void* arg)
+void* PUnixStreamServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     struct sockaddr_un client;
     socklen_t len = (socklen_t)sizeof(client);
-    int cliFd = accept(fd, (struct sockaddr *)&client, &len);
+    int32_t cliFd = accept(fd, (struct sockaddr *)&client, &len);
     if (cliFd < 0) {
         SPR_LOGE("accept failed! (%s)\n", strerror(errno));
         return nullptr;
@@ -619,10 +646,10 @@ void* PUnixStreamServer::EpollEvent(int fd, EpollType eType, void* arg)
 //---------------------------------------------------------------------------------------------------------------------
 // PUnixStreamClient : Unix stream client
 //---------------------------------------------------------------------------------------------------------------------
-PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(int, void*)>& cb, void* arg)
+PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
 {
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -630,10 +657,10 @@ PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(int, void*
     }
 }
 
-PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
+PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb)
 {
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -641,7 +668,7 @@ PUnixStreamClient::PUnixStreamClient(int fd, const std::function<void(ssize_t, s
     }
 }
 
-PUnixStreamClient::PUnixStreamClient(const std::function<void(int, void*)>& cb, void* arg)
+PUnixStreamClient::PUnixStreamClient(const std::function<void(int32_t, void*)>& cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
 {
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -650,7 +677,7 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(int, void*)>& cb, 
         SetReady(false);
     }
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -667,7 +694,7 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(ssize_t, std::stri
         SetReady(false);
     }
 
-    int op = 1;
+    int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
@@ -682,8 +709,11 @@ PUnixStreamClient::~PUnixStreamClient()
 
 int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPath, const std::string& cliPath)
 {
+    int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
+    fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
+
     if (con) {
-        int ret = 0;
+        int32_t ret = 0;
         struct sockaddr_un mySelf;
         mySelf.sun_family = AF_UNIX;
         snprintf(mySelf.sun_path, 108, "%s", cliPath.c_str());  // 108 see <sys/un.h>
@@ -698,20 +728,45 @@ int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPa
         struct sockaddr_un server;
         server.sun_family = AF_UNIX;
         snprintf(server.sun_path, 108, "%s", srvPath.c_str());  // 108 see <sys/un.h>
-        if (connect(mEvtFd, (struct sockaddr *)&server, sizeof(server)) < 0) {
-            SPR_LOGE("connect %s failed! (%s)\n", server.sun_path, strerror(errno));
-            Close();
-            return -1;
+        ret = connect(mEvtFd, (struct sockaddr *)&server, sizeof(server));
+        if (ret < 0 && errno != EISCONN) {
+            if (errno == EINPROGRESS) {
+                // Non-blocking connect in progress, wait for it to complete
+                fd_set writefds;
+                struct timeval tv;
+
+                FD_ZERO(&writefds);
+                FD_SET(mEvtFd, &writefds);
+                tv.tv_sec = 5; // 5 seconds timeout
+                tv.tv_usec = 0;
+
+                ret = select(mEvtFd + 1, nullptr, &writefds, nullptr, &tv);
+                if (ret <= 0) {
+                    SPR_LOGE("connect %s timed out or failed! (%s)\n", srvPath.c_str(), strerror(errno));
+                    Close();
+                    return -1;
+                }
+
+                int32_t err;
+                socklen_t len = sizeof(err);
+                if (getsockopt(mEvtFd, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0) {
+                    SPR_LOGE("connect %s failed after %ds! (%s)\n", srvPath.c_str(), (int32_t)tv.tv_sec, strerror(err));
+                    Close();
+                    return -1;
+                }
+            } else {
+                SPR_LOGE("connect %s failed! (%s)\n", srvPath.c_str(), strerror(errno));
+                Close();
+                return -1;
+            }
         }
     }
 
-    int flags = fcntl(mEvtFd, F_GETFL, 0);
-    fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
     AddToPoll();
     return 0;
 }
 
-void* PUnixStreamClient::EpollEvent(int fd, EpollType eType, void* arg)
+void* PUnixStreamClient::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     arg = arg ? arg : this;
     if (mCb1) {

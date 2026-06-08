@@ -26,7 +26,7 @@
 #define SPR_LOGW(fmt, args...) printf("%4d PTimer W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d PTimer E: " fmt, __LINE__, ##args)
 
-PTimer::PTimer(const std::function<void(int, uint64_t, void*)>& cb, void* arg)
+PTimer::PTimer(const std::function<void(int32_t, uint64_t, void*)>& cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_TIMERFD, arg), mCb(cb)
 {
     InitTimer();
@@ -93,7 +93,7 @@ int32_t PTimer::DestoryTimer()
     return 0;
 }
 
-ssize_t PTimer::Read(int fd, std::string& bytes)
+ssize_t PTimer::Read(int32_t fd, std::string& bytes)
 {
     uint64_t exp;
     ssize_t rc = read(fd, &exp, sizeof(exp));
@@ -113,7 +113,7 @@ ssize_t PTimer::Read(int fd, std::string& bytes)
     return rc;
 }
 
-void* PTimer::EpollEvent(int fd, EpollType eType, void* arg)
+void* PTimer::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != mEvtFd) {
         SPR_LOGE("Invalid fd (%d)!\n", fd);
