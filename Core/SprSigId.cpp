@@ -32,7 +32,12 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
     #include "SprSigList.gen"
 };
 
-const char* GetSigName(int32_t msgID)
+const char* GetSigName(uint32_t msgID)
 {
-    return (msgID < InternalDefs::SIG_ID_BUTT) ? sigIdString[msgID] : "UNDEFINED";
+    std::string WarnText;
+    if (msgID > InternalDefs::SIG_ID_PUBLIC_END) {
+        WarnText = "CUSTOMER SIGNAL ID: " + std::to_string(msgID);
+    }
+
+    return (msgID < InternalDefs::SIG_ID_PUBLIC_END) ? sigIdString[msgID] : WarnText.c_str();
 }
