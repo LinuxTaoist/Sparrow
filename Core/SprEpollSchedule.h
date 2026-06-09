@@ -55,7 +55,13 @@ private:
      */
     virtual ~SprEpollSchedule();
 
+    /**
+     * @brief Init plog
+     */
+    static void InitPLog();
+
 private:
+    static bool mEnablePLog;
     bool mEnableCoroutine;
 };
 

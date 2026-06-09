@@ -21,11 +21,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include "PLog.h"
 #include "PFile.h"
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) printf("%4d PFile D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d PFile E: " fmt, __LINE__, ##args)
+#define PLOG_TAG "PFile"
 
 PFile::PFile(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg)
     : IEpollEvent(fd, EPOLL_TYPE_FILE, arg), mFd(-1), mCb1(cb), mCb2(nullptr)
@@ -43,7 +43,7 @@ PFile::PFile(const std::string& fileName, const std::function<void(int32_t, ssiz
 {
     mFd = open(fileName.c_str(), flags | O_NONBLOCK, mode);
     if (mFd < 0) {
-        SPR_LOGE("open %s failed! (%s)\n", fileName.c_str(), strerror(errno));
+        PLOGE("open %s failed! (%s)\n", fileName.c_str(), strerror(errno));
         SetReady(false);
     }
     mEvtFd = mFd;
@@ -58,7 +58,7 @@ PFile::~PFile()
 void* PFile::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != mEvtFd) {
-        SPR_LOGE("Invalid fd (%d)!\n", fd);
+        PLOGE("Invalid fd (%d)!\n", fd);
     }
 
     arg = arg ? arg : this;

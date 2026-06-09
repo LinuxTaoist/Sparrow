@@ -22,21 +22,25 @@
 #include <string.h>
 #include <sys/epoll.h>
 #include "SprLog.h"
+#include "PLog.h"   // EpollEventHandler
 // #include "LibgoAdapter.h"
 #include "SprEpollSchedule.h"
 
 #define LOG_TAG "SprEpollSch"
 
 const uint32_t EPOLL_FD_NUM = 10;
+bool SprEpollSchedule::mEnablePLog = false;
 
 SprEpollSchedule::SprEpollSchedule(int32_t size, int32_t timeout, bool enableCoroutine)
-    : EpollEventHandler(size, timeout), mEnableCoroutine(enableCoroutine)
+    : EpollEventHandler(size, timeout),
+      mEnableCoroutine(enableCoroutine)
 {
     // if (enableCoroutine) {
     //     mCoPool.InitCoroutinePool(1024);
     //     mCoPool.Start(10, 128);
     // }
 
+    InitPLog();
     SPR_LOGD("%s coroutine schedule!\n", enableCoroutine ? "Enable" : "Disable");
 }
 
@@ -46,7 +50,39 @@ SprEpollSchedule::~SprEpollSchedule()
 
 EpollEventHandler* SprEpollSchedule::GetInstance(int32_t size, int32_t timeout, bool enableCoroutine)
 {
+    if (!mEnablePLog) {
+        mEnablePLog = true;
+        InitPLog();
+    }
+
     return EpollEventHandler::GetInstance(size, timeout);
+}
+
+void SprEpollSchedule::InitPLog()
+{
+    SPR_LOGD("Init epoll event handler!\n");
+    PLog& theLog = PLog::GetInstance();
+    theLog.RegisterPrintCallback([](int level, int line, const char* tag, const char* fmt, va_list ap) {
+        char logBuf[1024] = {0};
+        vsnprintf(logBuf, sizeof(logBuf), fmt, ap);
+        switch (level) {
+            case PLogLevel::PLOG_LEVEL_DEBUG:
+                SprLog::GetInstance()->d(tag, "%4d %s", line, logBuf);
+                break;
+            case PLogLevel::PLOG_LEVEL_INFO:
+                SprLog::GetInstance()->i(tag, "%4d %s", line, logBuf);
+                break;
+            case PLogLevel::PLOG_LEVEL_ERROR:
+                SprLog::GetInstance()->e(tag, "%4d %s", line, logBuf);
+                break;
+            case PLogLevel::PLOG_LEVEL_WARN:
+                SprLog::GetInstance()->w(tag, "%4d %s", line, logBuf);
+                break;
+            default:
+                SprLog::GetInstance()->i(tag, "%4d %s", line, logBuf);
+                break;
+        }
+    });
 }
 
 void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)

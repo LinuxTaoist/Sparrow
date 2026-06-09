@@ -22,11 +22,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include "PLog.h"
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) // printf("%4d EpEvtHandler D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%4d EpEvtHandler W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d EpEvtHandler E: " fmt, __LINE__, ##args)
+#define PLOG_TAG "EpEvtHandler"
 
 static std::atomic<bool> gObjAlive(true);
 
@@ -39,7 +38,7 @@ EpollEventHandler::EpollEventHandler(int32_t size, int32_t blockTimeOut)
     }
 
     if (mHandle < 0) {
-        SPR_LOGE("epoll_create fail! (%s)\n", strerror(errno));
+        PLOGE("epoll_create fail! (%s)\n", strerror(errno));
     }
 
     mRun = false;
@@ -77,28 +76,28 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     int32_t fd = p->GetEvtFd();
     int32_t ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret == -1) {
-        SPR_LOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
+        PLOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
         return ;
     }
 
     mEpollMap[fd] = p;
-    SPR_LOGD("Add epoll fd %d\n", fd);
+    PLOGD("Add epoll fd %d\n", fd);
 }
 
 void EpollEventHandler::DelPoll(IEpollEvent* p)
 {
     if (p == nullptr) {
-        SPR_LOGE("p is null\n");
+        PLOGE("p is null\n");
         return ;
     }
 
     int32_t ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEvtFd(), nullptr);
     if (ret != 0) {
-        SPR_LOGE("epoll_ctl %d fail. (%s)\n", p->GetEvtFd(), strerror(errno));
+        PLOGE("epoll_ctl %d fail. (%s)\n", p->GetEvtFd(), strerror(errno));
     }
 
     mEpollMap.erase(p->GetEvtFd());
-    SPR_LOGD("Delete epoll fd %d\n", p->GetEvtFd());
+    PLOGD("Delete epoll fd %d\n", p->GetEvtFd());
 }
 
 void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
@@ -127,7 +126,7 @@ void EpollEventHandler::EpollLoop()
         }
     }
 
-    SPR_LOGD("EpollLoop exit\n");
+    PLOGD("EpollLoop exit\n");
 }
 
 void EpollEventHandler::ExitLoop()

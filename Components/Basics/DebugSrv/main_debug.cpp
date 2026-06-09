@@ -53,6 +53,7 @@ int main(int argc, const char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     DebugModule theDebugModule(MODULE_DEBUG, "DebugM");
     DebugModuleHub theDebugModuleHub(SRV_NAME_DEBUG_MODULE, &theDebugModule);
 

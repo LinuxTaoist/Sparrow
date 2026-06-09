@@ -20,11 +20,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/timerfd.h>
+#include "PLog.h"
 #include "PTimer.h"
 
-#define SPR_LOGD(fmt, args...) printf("%4d PTimer D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%4d PTimer W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d PTimer E: " fmt, __LINE__, ##args)
+#define PLOG_TAG "PTimer"
 
 PTimer::PTimer(const std::function<void(int32_t, uint64_t, void*)>& cb, void* arg)
     : IEpollEvent(-1, EPOLL_TYPE_TIMERFD, arg), mCb(cb)
@@ -42,7 +41,7 @@ int32_t PTimer::InitTimer(bool isWakeup)
     int32_t type = isWakeup ? CLOCK_BOOTTIME_ALARM : CLOCK_MONOTONIC;
     mEvtFd = timerfd_create(type, 0);
     if (mEvtFd == -1) {
-        SPR_LOGE("timerfd_create failed! (%s)\n", strerror(errno));
+        PLOGE("timerfd_create failed! (%s)\n", strerror(errno));
         return -1;
     }
 
@@ -57,11 +56,11 @@ int32_t PTimer::StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec)
     its.it_interval.tv_sec = intervalInMSec / 1000;
     its.it_interval.tv_nsec = (intervalInMSec % 1000) * 1000000;
     if (timerfd_settime(mEvtFd, 0, &its, nullptr) == -1) {
-        SPR_LOGE("timerfd_settime fail! (%s)\n", strerror(errno));
+        PLOGE("timerfd_settime fail! (%s)\n", strerror(errno));
         return -1;
     }
 
-    // SPR_LOGD("Start system timer (%d %d)!\n", delayInMSec, intervalInMSec);
+    // PLOGD("Start system timer (%d %d)!\n", delayInMSec, intervalInMSec);
     return 0;
 }
 
@@ -74,11 +73,11 @@ int32_t PTimer::StopTimer()
     its.it_interval.tv_nsec = 0;
 
     if (timerfd_settime(mEvtFd, 0, &its, nullptr) == -1) {
-        SPR_LOGE("timerfd_settime fail! fd = %d (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("timerfd_settime fail! fd = %d (%s)\n", mEvtFd, strerror(errno));
         return -1;
     }
 
-    SPR_LOGD("Stop system timer!\n");
+    PLOGD("Stop system timer!\n");
     return 0;
 }
 
@@ -89,7 +88,7 @@ int32_t PTimer::DestoryTimer()
         mEvtFd = -1;
     }
 
-    SPR_LOGD("Destory system timer!\n");
+    PLOGD("Destory system timer!\n");
     return 0;
 }
 
@@ -98,7 +97,7 @@ ssize_t PTimer::Read(int32_t fd, std::string& bytes)
     uint64_t exp;
     ssize_t rc = read(fd, &exp, sizeof(exp));
     if (rc != sizeof(uint64_t)) {
-        SPR_LOGE("read fail! (%s)\n", strerror(errno));
+        PLOGE("read fail! (%s)\n", strerror(errno));
         return rc;
     }
 
@@ -116,13 +115,13 @@ ssize_t PTimer::Read(int32_t fd, std::string& bytes)
 void* PTimer::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != mEvtFd) {
-        SPR_LOGE("Invalid fd (%d)!\n", fd);
+        PLOGE("Invalid fd (%d)!\n", fd);
     }
 
     uint64_t exp;
     ssize_t rc = read(fd, &exp, sizeof(exp));
     if (rc != sizeof(uint64_t)) {
-        SPR_LOGE("read fail! (%s)\n", strerror(errno));
+        PLOGE("read fail! (%s)\n", strerror(errno));
         return nullptr;
     }
 

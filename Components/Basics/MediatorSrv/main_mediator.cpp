@@ -50,6 +50,7 @@ int main(int argc, const char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     SprMediator *pMedObj = SprMediator::GetInstance();
     SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pMedObj);
 

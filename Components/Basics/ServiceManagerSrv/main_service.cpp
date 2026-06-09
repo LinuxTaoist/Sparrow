@@ -42,9 +42,9 @@ int main(int argc, char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     ServiceManager theServiceManager;
     theServiceManager.WorkLoop();
-
     SPR_LOGI("Main exit!\n");
     return 0;
 }

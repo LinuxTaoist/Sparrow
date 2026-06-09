@@ -60,6 +60,7 @@ int main(int argc, const char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     theLogManager.MainLoop();
     SPR_LOGI("Main exit!\n");
     return 0;

@@ -25,12 +25,12 @@
 #include <sys/un.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include "PLog.h"
 #include "PSocket.h"
 
 using namespace std;
 
-#define SPR_LOGD(fmt, args...) printf("%4d PSocket D: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d PSocket E: " fmt, __LINE__, ##args)
+#define PLOG_TAG "PSocket"
 
 //---------------------------------------------------------------------------------------------------------------------
 // SocketCommon: Socket common functions
@@ -57,7 +57,7 @@ std::string SocketCommon::ResolveHostToIP(const std::string& host)
     hints.ai_family = AF_UNSPEC;     // 不限制 IPv4 或 IPv6
     hints.ai_socktype = SOCK_STREAM; // TCP
     if ((status = getaddrinfo(host.c_str(), nullptr, &hints, &res)) != 0) {
-        SPR_LOGE("getaddrinfo %s failed! status = %d (%s)\n", host.c_str(), status, strerror(errno));
+        PLOGE("getaddrinfo %s failed! status = %d (%s)\n", host.c_str(), status, strerror(errno));
         return "";
     }
 
@@ -88,7 +88,7 @@ int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
 {
     mEvtFd = socket(AF_INET, SOCK_DGRAM, 0);
     if (mEvtFd == -1) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         return -1;
     }
 
@@ -97,19 +97,19 @@ int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
 
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_RCVBUF, &rcvLen, sizeof(rcvLen)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
 
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_SNDBUF, &sndLen, sizeof(sndLen)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -122,7 +122,7 @@ int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
     int32_t ret = bind(mEvtFd, (struct sockaddr*)&myAddr, sizeof(myAddr));
     if (ret == -1) {
         Close();
-        SPR_LOGE("bind failed! (%s)\n", strerror(errno));
+        PLOGE("bind failed! (%s)\n", strerror(errno));
         return ret;
     }
 
@@ -138,7 +138,7 @@ int32_t PUdp::Write(const std::string& bytes, const std::string& addr, uint16_t 
 int32_t PUdp::Write(const void* data, size_t size, const std::string& addr, uint16_t port)
 {
     if (!data || size == 0) {
-        SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
+        PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }
 
@@ -149,7 +149,7 @@ int32_t PUdp::Write(const void* data, size_t size, const std::string& addr, uint
     dstAddr.sin_port = htons(port);
     int32_t ret = sendto(mEvtFd, data, size, 0, (struct sockaddr*)&dstAddr, sizeof(dstAddr));
     if (ret == -1) {
-        SPR_LOGE("sendto failed! (%s)\n", strerror(errno));
+        PLOGE("sendto failed! (%s)\n", strerror(errno));
     }
 
     return ret;
@@ -173,7 +173,7 @@ int32_t PUdp::Read(std::string& bytes, std::string& addr, uint16_t& port)
 int32_t PUdp::Read(void* data, size_t size, std::string& addr, uint16_t& port)
 {
     if (!data || size == 0) {
-        SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
+        PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }
 
@@ -181,7 +181,7 @@ int32_t PUdp::Read(void* data, size_t size, std::string& addr, uint16_t& port)
     socklen_t addrSize = sizeof(dstAddr);
     int32_t ret = recvfrom(mEvtFd, data, size, 0, (struct sockaddr*)&dstAddr, &addrSize);
     if (ret == -1) {
-        SPR_LOGE("recvfrom failed! (%s)\n", strerror(errno));
+        PLOGE("recvfrom failed! (%s)\n", strerror(errno));
     }
 
     addr = inet_ntoa(dstAddr.sin_addr);
@@ -219,7 +219,7 @@ int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::strin
 {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         return -1;
     }
 
@@ -233,14 +233,14 @@ int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::strin
     myAddr.sin_port = htons(port);
     int32_t ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(myAddr));
     if (ret < 0) {
-        SPR_LOGE("bind failed! (%s)\n", strerror(errno));
+        PLOGE("bind failed! (%s)\n", strerror(errno));
         Close();
         return ret;
     }
 
     ret = listen(mEvtFd, backlog);
     if (ret < 0) {
-        SPR_LOGE("bind failed! (%s)\n", strerror(errno));
+        PLOGE("bind failed! (%s)\n", strerror(errno));
         Close();
         return ret;
     }
@@ -255,7 +255,7 @@ void* PTcpServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
     socklen_t len = (socklen_t)sizeof(client);
     int32_t cliFd = accept(fd, (struct sockaddr *)&client, &len);
     if (cliFd < 0) {
-        SPR_LOGE("accept failed! (%s)\n", strerror(errno));
+        PLOGE("accept failed! (%s)\n", strerror(errno));
         return nullptr;
     }
 
@@ -280,7 +280,7 @@ PTcpClient::PTcpClient(int32_t fd, const std::function<void(int32_t, void*)>& cb
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -296,7 +296,7 @@ PTcpClient::PTcpClient(int32_t fd, const std::function<void(ssize_t, std::string
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -307,13 +307,13 @@ PTcpClient::PTcpClient(const std::function<void(int32_t, void*)>& cb, void* arg)
 {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         SetReady(false);
     }
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -324,13 +324,13 @@ PTcpClient::PTcpClient(const std::function<void(ssize_t, std::string, void*)>& c
 {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         SetReady(false);
     }
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -349,14 +349,14 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
 
     op = rcvLen;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_RCVBUF, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
 
     op = sndLen;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_SNDBUF, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -364,14 +364,14 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
     so_linger.l_onoff = 1; /* when send to sock and it close, keep time */
     so_linger.l_linger = 0; /* keep time second */
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_LINGER, &so_linger, sizeof(so_linger)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
 
     op = 1; // disable Nagle, TCP_NODELAY is the only used IPPROTO_TCP layer.
     if (setsockopt(mEvtFd, IPPROTO_TCP, 1, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -399,7 +399,7 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
 
                 ret = select(mEvtFd + 1, nullptr, &writefds, nullptr, &tv);
                 if (ret <= 0) {
-                    SPR_LOGE("connect %s:%d timed out or failed! (%s)\n", srvAddr.c_str(), srvPort, strerror(errno));
+                    PLOGE("connect %s:%d timed out or failed! (%s)\n", srvAddr.c_str(), srvPort, strerror(errno));
                     Close();
                     return -1;
                 }
@@ -407,12 +407,12 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
                 int32_t err;
                 socklen_t len = sizeof(err);
                 if (getsockopt(mEvtFd, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0) {
-                    SPR_LOGE("connect %s:%d failed after %ds! (%s)\n", srvAddr.c_str(), srvPort, (int32_t)tv.tv_sec, strerror(err));
+                    PLOGE("connect %s:%d failed after %ds! (%s)\n", srvAddr.c_str(), srvPort, (int32_t)tv.tv_sec, strerror(err));
                     Close();
                     return -1;
                 }
             } else {
-                SPR_LOGE("connect %s:%d failed! (%s)\n", srvAddr.c_str(), srvPort, strerror(errno));
+                PLOGE("connect %s:%d failed! (%s)\n", srvAddr.c_str(), srvPort, strerror(errno));
                 Close();
                 return -1;
             }
@@ -452,13 +452,13 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
     unlink(srcPath.c_str());
     mEvtFd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (mEvtFd < 0) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         return -1;
     }
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         return -1;
     }
@@ -466,7 +466,7 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
     // bind self socket path
     struct sockaddr_un myAddr;
     if (srcPath.size() > sizeof(myAddr.sun_path) - 1) {
-        SPR_LOGE("srcPath too long! len = %d, limit = %d\n", (int32_t)srcPath.size(), (int32_t)sizeof(myAddr.sun_path));
+        PLOGE("srcPath too long! len = %d, limit = %d\n", (int32_t)srcPath.size(), (int32_t)sizeof(myAddr.sun_path));
         Close();
         return -1;
     }
@@ -476,7 +476,7 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
     myAddr.sun_family = AF_UNIX;
     int32_t ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(struct sockaddr_un));
     if (ret < 0) {
-        SPR_LOGE("bind failed! (%s)\n", strerror(errno));
+        PLOGE("bind failed! (%s)\n", strerror(errno));
         return ret;
     }
 
@@ -492,7 +492,7 @@ int32_t PUnixDgram::Write(const std::string& bytes, const std::string& dstPath)
 int32_t PUnixDgram::Write(const void* data, size_t size, const std::string& dstPath)
 {
     if (!data || size == 0) {
-        SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
+        PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }
 
@@ -503,7 +503,7 @@ int32_t PUnixDgram::Write(const void* data, size_t size, const std::string& dstP
 
     int32_t ret = sendto(mEvtFd, data, size, 0, (struct sockaddr*)&dstAddr, sizeof(dstAddr));
     if (ret == -1) {
-        SPR_LOGE("sendto %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("sendto %d failed! (%s)\n", mEvtFd, strerror(errno));
     }
 
     return ret;
@@ -524,7 +524,7 @@ int32_t PUnixDgram::Read(std::string& bytes, std::string& dstPath)
             if (errno == EAGAIN || errno == EWOULDBLOCK) {
                 break;
             } else {
-                SPR_LOGE("Read failed! (%s)\n", strerror(errno));
+                PLOGE("Read failed! (%s)\n", strerror(errno));
                 return -1;
             }
         } else if (bytesRead == 0) {
@@ -548,7 +548,7 @@ int32_t PUnixDgram::Read(std::string& bytes, std::string& dstPath)
 int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath)
 {
     if (!data || size == 0) {
-        SPR_LOGE("Invalid params! data = %p, size = %zu\n", data, size);
+        PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
     }
 
@@ -556,7 +556,7 @@ int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath)
     socklen_t addrSize = sizeof(struct sockaddr_un);
     int32_t ret = recvfrom(mEvtFd, data, size, 0, (struct sockaddr *)&dstAddr, &addrSize);
     if (ret == -1) {
-        SPR_LOGE("recvfrom failed! (%s)\n", strerror(errno));
+        PLOGE("recvfrom failed! (%s)\n", strerror(errno));
         return -1;
     }
 
@@ -594,7 +594,7 @@ int32_t PUnixStreamServer::AsUnixStreamServer(const std::string& srvPath, int32_
     unlink(srvPath.c_str());
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         return -1;
     }
 
@@ -609,14 +609,14 @@ int32_t PUnixStreamServer::AsUnixStreamServer(const std::string& srvPath, int32_
 
     int32_t ret = bind(mEvtFd, (struct sockaddr *)&myAddr, sizeof(myAddr));
     if (ret == -1){
-        SPR_LOGE("bind failed! (%s)\n", strerror(errno));
+        PLOGE("bind failed! (%s)\n", strerror(errno));
         Close();
         return -1;
     }
 
     ret = listen(mEvtFd, backlog);
     if (ret == -1){
-        SPR_LOGE("listen failed! (%s)\n", strerror(errno));
+        PLOGE("listen failed! (%s)\n", strerror(errno));
         Close();
         return -1;
     }
@@ -631,7 +631,7 @@ void* PUnixStreamServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
     socklen_t len = (socklen_t)sizeof(client);
     int32_t cliFd = accept(fd, (struct sockaddr *)&client, &len);
     if (cliFd < 0) {
-        SPR_LOGE("accept failed! (%s)\n", strerror(errno));
+        PLOGE("accept failed! (%s)\n", strerror(errno));
         return nullptr;
     }
 
@@ -651,7 +651,7 @@ PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(int32_
 {
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -662,7 +662,7 @@ PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(ssize_
 {
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -673,13 +673,13 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(int32_t, void*)>& 
 {
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         SetReady(false);
     }
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -690,13 +690,13 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(ssize_t, std::stri
 {
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
-        SPR_LOGE("socket failed! (%s)\n", strerror(errno));
+        PLOGE("socket failed! (%s)\n", strerror(errno));
         SetReady(false);
     }
 
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
-        SPR_LOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
+        PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
         Close();
         SetReady(false);
     }
@@ -742,7 +742,7 @@ int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPa
 
                 ret = select(mEvtFd + 1, nullptr, &writefds, nullptr, &tv);
                 if (ret <= 0) {
-                    SPR_LOGE("connect %s timed out or failed! (%s)\n", srvPath.c_str(), strerror(errno));
+                    PLOGE("connect %s timed out or failed! (%s)\n", srvPath.c_str(), strerror(errno));
                     Close();
                     return -1;
                 }
@@ -750,12 +750,12 @@ int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPa
                 int32_t err;
                 socklen_t len = sizeof(err);
                 if (getsockopt(mEvtFd, SOL_SOCKET, SO_ERROR, &err, &len) < 0 || err != 0) {
-                    SPR_LOGE("connect %s failed after %ds! (%s)\n", srvPath.c_str(), (int32_t)tv.tv_sec, strerror(err));
+                    PLOGE("connect %s failed after %ds! (%s)\n", srvPath.c_str(), (int32_t)tv.tv_sec, strerror(err));
                     Close();
                     return -1;
                 }
             } else {
-                SPR_LOGE("connect %s failed! (%s)\n", srvPath.c_str(), strerror(errno));
+                PLOGE("connect %s failed! (%s)\n", srvPath.c_str(), strerror(errno));
                 Close();
                 return -1;
             }
