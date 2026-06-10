@@ -26,7 +26,6 @@
 #include "RunningTiming.h"
 #include "GeneralConversions.h"
 #include "GeneralUtils.h"
-#include "OneNetSigId.h"
 #include "SprEpollSchedule.h"
 #include "SprObserverWithMQueue.h"
 #include "PowerManagerInterface.h"
