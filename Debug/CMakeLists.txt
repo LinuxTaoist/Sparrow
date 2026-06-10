@@ -6,6 +6,7 @@ include_directories         (${PROJECT_PATH}/Util)
 include_directories         (${PROJECT_PATH}/3rdAdapter)
 include_directories         (${PROJECT_PATH}/PrivateAPIs)
 include_directories         (${PROJECT_PATH}/PublicAPIs)
+include_directories         (${PROJECT_PATH}/Components/Business/OneNetMqtt/APIs)
 include_directories         (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 include_directories         (${PROJECT_PATH}/UtilModules/HTTP)
 

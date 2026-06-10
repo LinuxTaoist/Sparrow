@@ -18,8 +18,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <string>
-#include <vector>
+#include <stdio.h>
+#include <stdint.h>
 #include "SprSigId.h"
 
 #ifdef ENUM_OR_STRING
@@ -34,10 +34,11 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
 
 const char* GetSigName(uint32_t msgID)
 {
-    std::string warnText;
-    if (msgID > InternalDefs::SIG_ID_PUBLIC_END) {
-        warnText = "CUSTOMER SIGNAL ID: " + std::to_string(msgID);
+    if (msgID < InternalDefs::SIG_ID_PUBLIC_END) {
+        return sigIdString[msgID];
     }
 
-    return (msgID < InternalDefs::SIG_ID_PUBLIC_END) ? sigIdString[msgID] : warnText.c_str();
+    static char warnText[64] = {};
+    snprintf(warnText, sizeof(warnText), "SIGID_0X%X", msgID);
+    return warnText;
 }

@@ -51,7 +51,7 @@ typedef void(*PluginExitFunc) (std::map<int32_t, SprObserver*>& modules, SprCont
 #define     MAIN_EXIT_SIGNUM            SIGUSR1
 #define     MEDIATOR_INET_PORT          1126
 #define     MSG_BUF_MAX_LENGTH          1024
-#define     MODULE_ID_OFFSET              24
+#define     MODULE_ID_OFFSET              16
 
 namespace InternalDefs {
 

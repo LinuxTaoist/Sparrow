@@ -17,6 +17,7 @@
  *
  */
 #include <vector>
+#include <stdio.h>
 #include "CoreTypeDefs.h"
 #include "CommonErrorCodes.h"
 #include "SprEnumHelper.h"
@@ -58,8 +59,14 @@ TEST(Core_SprEnumHelper, GetSprModuleIDText) {
     EXPECT_EQ(GetSprModuleIDText(MODULE_NONE), "MODULE_NONE");
     EXPECT_EQ(GetSprModuleIDText(MODULE_GENERAL), "MODULE_GENERAL");
     EXPECT_EQ(GetSprModuleIDText(MODULE_PUBLIC_END), "MODULE_PUBLIC_END");
-    EXPECT_EQ(GetSprModuleIDText(-1), "UNDEFINED");
-    EXPECT_EQ(GetSprModuleIDText(MODULE_PUBLIC_END + 100), "UNDEFINED");
+
+    char negModuleExpected[32] = {};
+    char overflowModuleExpected[32] = {};
+    snprintf(negModuleExpected, sizeof(negModuleExpected), "MODULE_0X%X", static_cast<uint32_t>(-1));
+    snprintf(overflowModuleExpected, sizeof(overflowModuleExpected), "MODULE_0X%X", static_cast<uint32_t>(MODULE_PUBLIC_END + 100));
+
+    EXPECT_EQ(std::string(GetSprModuleIDText(-1)), std::string(negModuleExpected));
+    EXPECT_EQ(std::string(GetSprModuleIDText(MODULE_PUBLIC_END + 100)), std::string(overflowModuleExpected));
 }
 
 TEST(Core_SprEnumHelper, GetSprProxyBinderCmdText) {

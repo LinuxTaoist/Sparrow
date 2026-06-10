@@ -119,7 +119,8 @@ std::string GetSprModuleIDText(int32_t moduleID)
         SPR_MODULE_ID_MACROS
     };
 
-    std::string warnText = "Custom moduleID: " + std::to_string(moduleID);
+    static char warnText[64] = {};
+    snprintf(warnText, sizeof(warnText), "MODULE_0X%X", moduleID);
     return ( (moduleID >= 0) &&
              (moduleID < (int32_t)moduleIDs.size()) ) ?
         moduleIDs[moduleID] : warnText;
