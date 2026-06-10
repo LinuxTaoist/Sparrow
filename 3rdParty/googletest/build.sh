@@ -120,4 +120,5 @@ mkdir -p "$OUTPUT_LIB_DIR"
 cp -f "$GTEST_LIB" "$OUTPUT_LIB_DIR/libgtest.a"
 cp -f "$GTEST_MAIN_LIB" "$OUTPUT_LIB_DIR/libgtest_main.a"
 
+rm -rf "$WORK_DIR"
 echo "gtest build done: ${OUTPUT_LIB_DIR}"
