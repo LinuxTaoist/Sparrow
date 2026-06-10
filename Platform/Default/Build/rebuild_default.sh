@@ -8,13 +8,14 @@ SCRIPT_REAL_DIR=$(dirname "${SCRIPT_REAL_PATH}")
 PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
 
 cd $PROJECT_PATH/Build/
+PROJECT_PLATFORM="Default"
 rm -rf $PROJECT_PATH/Release/*
+rm -rf $PROJECT_PATH/3rdParty/googletest/lib/$PROJECT_PLATFORM
 mkdir -p $PROJECT_PATH/Release/Cache
 mkdir -p $PROJECT_PATH/Release/Include
 mkdir -p $PROJECT_PATH/Release/Lib
 
 BUILD_TYPE="Release"
-PROJECT_PLATFORM="Default"
 
 mkdir -p $PROJECT_PATH/Release/Cache
 mkdir -p $PROJECT_PATH/Release/Include
