@@ -57,9 +57,9 @@ TEST(Core_SprEnumHelper, GetSprProxTypeText) {
 TEST(Core_SprEnumHelper, GetSprModuleIDText) {
     EXPECT_EQ(GetSprModuleIDText(MODULE_NONE), "MODULE_NONE");
     EXPECT_EQ(GetSprModuleIDText(MODULE_GENERAL), "MODULE_GENERAL");
-    EXPECT_EQ(GetSprModuleIDText(MODULE_MAX), "MODULE_MAX");
+    EXPECT_EQ(GetSprModuleIDText(MODULE_PUBLIC_END), "MODULE_PUBLIC_END");
     EXPECT_EQ(GetSprModuleIDText(-1), "UNDEFINED");
-    EXPECT_EQ(GetSprModuleIDText(MODULE_MAX + 100), "UNDEFINED");
+    EXPECT_EQ(GetSprModuleIDText(MODULE_PUBLIC_END + 100), "UNDEFINED");
 }
 
 TEST(Core_SprEnumHelper, GetSprProxyBinderCmdText) {

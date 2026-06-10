@@ -72,7 +72,7 @@ int32_t SprObserver::NotifyObserver(SprMsg& msg)
     return mpMsgMediator->NotifyObserver(msg);
 }
 
-int32_t SprObserver::NotifyObserver(ModuleIDType id, SprMsg& msg)
+int32_t SprObserver::NotifyObserver(uint32_t id, SprMsg& msg)
 {
     if (!mpMsgMediator) {
         SPR_LOGE("mpMsgMediator is nullptr!\n");

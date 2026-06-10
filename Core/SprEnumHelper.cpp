@@ -119,9 +119,10 @@ std::string GetSprModuleIDText(int32_t moduleID)
         SPR_MODULE_ID_MACROS
     };
 
+    std::string warnText = "Custom moduleID: " + std::to_string(moduleID);
     return ( (moduleID >= 0) &&
              (moduleID < (int32_t)moduleIDs.size()) ) ?
-        moduleIDs[moduleID] : "UNDEFINED";
+        moduleIDs[moduleID] : warnText;
 }
 
 std::string GetSprProxyBinderCmdText(int32_t proxyBinderCmd)

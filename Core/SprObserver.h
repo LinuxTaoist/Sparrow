@@ -69,7 +69,7 @@ public:
      * @return 0 on success, or -1 if an error occurred
      */
     virtual int32_t NotifyObserver(SprMsg& msg);
-    virtual int32_t NotifyObserver(ModuleIDType id, SprMsg& msg);
+    virtual int32_t NotifyObserver(uint32_t id, SprMsg& msg);
 
     /**
      * @brief  Notify msg to all modules

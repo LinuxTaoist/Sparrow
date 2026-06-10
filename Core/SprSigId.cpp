@@ -34,10 +34,10 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
 
 const char* GetSigName(uint32_t msgID)
 {
-    std::string WarnText;
+    std::string warnText;
     if (msgID > InternalDefs::SIG_ID_PUBLIC_END) {
-        WarnText = "CUSTOMER SIGNAL ID: " + std::to_string(msgID);
+        warnText = "CUSTOMER SIGNAL ID: " + std::to_string(msgID);
     }
 
-    return (msgID < InternalDefs::SIG_ID_PUBLIC_END) ? sigIdString[msgID] : WarnText.c_str();
+    return (msgID < InternalDefs::SIG_ID_PUBLIC_END) ? sigIdString[msgID] : warnText.c_str();
 }

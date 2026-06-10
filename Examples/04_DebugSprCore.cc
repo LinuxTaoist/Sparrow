@@ -146,35 +146,35 @@ int main(int argc, const char* argv[])
                     SprEpollSchedule::GetInstance()->ExitLoop();
                     break;
                 }
-                case '8': {
-                    SprMsg msg(MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case '9': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("MQTT-OneJson01");
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case 'a': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("MQTT-DEV01");
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case 'b': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("PC_TEST_01");
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case 'c': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("PC_TEST_02");
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
+                // case '8': {
+                //     SprMsg msg(MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
+                //     theDebug.NotifyObserver(msg);
+                //     break;
+                // }
+                // case '9': {
+                //     SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                //     msg.SetString("MQTT-OneJson01");
+                //     theDebug.NotifyObserver(msg);
+                //     break;
+                // }
+                // case 'a': {
+                //     SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                //     msg.SetString("MQTT-DEV01");
+                //     theDebug.NotifyObserver(msg);
+                //     break;
+                // }
+                // case 'b': {
+                //     SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                //     msg.SetString("PC_TEST_01");
+                //     theDebug.NotifyObserver(msg);
+                //     break;
+                // }
+                // case 'c': {
+                //     SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
+                //     msg.SetString("PC_TEST_02");
+                //     theDebug.NotifyObserver(msg);
+                //     break;
+                // }
                 case 'q': {
                     run = false;
                     SprEpollSchedule::GetInstance()->ExitLoop();
