@@ -541,13 +541,57 @@ int32_t CField::GetValue(const std::string& name, std::vector<uint8_t>& value) {
         return -1;
     }
 
-    std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(GetNode(name));
-    if (!pAtom) {
-        CLOGE("Node[%s] pAtom[%s] is nullptr!\n", GetName().c_str(), name.c_str());
+    std::shared_ptr<CNode> pChildNode = GetNode(name);
+    if (!pChildNode) {
+        CLOGE("Node[%s] pChildNode[%s] is nullptr!\n", GetName().c_str(), name.c_str());
         return -1;
     }
 
-    return pAtom->GetValue(name, value);
+    std::string type = pChildNode->GetType();
+
+    // Atom child
+    if (type.find(TEXT_TYPE_FIELD_SUFFIX) == std::string::npos) {
+        std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(pChildNode);
+        if (!pAtom) {
+            CLOGE("Node[%s] pAtom[%s] is nullptr!\n", GetName().c_str(), name.c_str());
+            return -1;
+        }
+
+        return pAtom->GetValue(name, value);
+    }
+
+    // Field child (仅支持单层, bytes类型容器获取)
+    std::shared_ptr<CField> pField = std::dynamic_pointer_cast<CField>(pChildNode);
+    if (!pField) {
+        CLOGE("Node[%s] pField[%s] invalid!\n", GetName().c_str(), name.c_str());
+        return -1;
+    }
+
+    if (pField->GetLenMode() != TEXT_LEN_MODE_BYTES) {
+        CLOGE("Node[%s] pField[%s] invalid type %s!\n", GetName().c_str(), name.c_str(), pField->GetLenMode().c_str());
+        return -1;
+    }
+
+    auto& childNodes = pField->GetChildNodes();
+    value.clear();
+    for (auto& childNode : childNodes) {
+        std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(childNode);
+        if (!pAtom) {
+            CLOGE("Node[%s] pAtom[%s] is nullptr!\n", GetName().c_str(), childNode ? childNode->GetName().c_str() : "");
+            return -1;
+        }
+
+        int32_t atomValue = 0;
+        int32_t ret = pAtom->GetIntValue("", atomValue);
+        if (ret == -1 || atomValue < 0 || atomValue > 0xFF) {
+            CLOGE("Node[%s] GetIntValue failed! value = %d\n", pAtom->GetName().c_str(), atomValue);
+            return -1;
+        }
+
+        value.emplace_back((uint8_t)atomValue);
+    }
+
+    return 0;
 }
 
 int32_t CField::Decode(const std::vector<uint8_t>& bytes) {
