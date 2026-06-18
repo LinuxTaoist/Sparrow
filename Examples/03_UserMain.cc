@@ -21,4 +21,5 @@
 
 SPR_ENTRY() {
     printf("test user entry\n");
+    _SprRunLoop();
 }

@@ -22,8 +22,8 @@ aux_source_directory        (${PROJECT_PATH}/Util               SRC_INFRA_WATCH_
 aux_source_directory        (${SRC_DEBUG_PATH}/InfraWatch       SRC_INFRA_WATCH_PATH)
 add_executable              (BinInfraWatch ${SRC_INFRA_WATCH_PATH})
 set_target_properties       (BinInfraWatch PROPERTIES OUTPUT_NAME "infrawatch")
-target_link_libraries       (BinInfraWatch sprcore mediatorapi powermanagerapi onenetapi debugapi rt pthread dl)
-add_dependencies            (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibOneNetAPI LibDebugAPI)
+target_link_libraries       (BinInfraWatch sprcore mediatorapi powermanagerapi debugapi rt pthread dl)
+add_dependencies            (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibDebugAPI)
 
 ## Bin getprop
 set(SRC_BIN_PROPERTY_GET    ${SRC_DEBUG_PATH}/Property/GetProperty.cpp)

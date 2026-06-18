@@ -71,7 +71,9 @@ int AsyncEvent::UnregisterEventCallback()
 {
     mCb = nullptr;
     mRunning = false;
-    mCbThread.join();
+    if (mCbThread.joinable()) {
+        mCbThread.join();
+    }
     return 0;
 }
 
