@@ -3,7 +3,7 @@
 Release/
 3rdParty/googletest/
 3rdParty/libgo/libgo/
-3rdParty/sqlite/sqlite-autoconf-3450300/
+3rdParty/sqlite/lib/
 
 Platform/*
 !/Platform/Default

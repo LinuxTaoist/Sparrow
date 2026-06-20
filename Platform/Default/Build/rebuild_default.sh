@@ -1,4 +1,6 @@
 #!/bin/bash
+
+set -e
 # 记录开始时间
 START_TIME=$(date +%s)
 START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
@@ -9,8 +11,17 @@ PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
 
 cd $PROJECT_PATH/Build/
 PROJECT_PLATFORM="Default"
-rm -rf $PROJECT_PATH/Release/*
+
+# 清理第三方编译产物，确保每次 rebuild 都是从干净状态重新构建。
 rm -rf $PROJECT_PATH/3rdParty/googletest/lib/$PROJECT_PLATFORM
+rm -rf $PROJECT_PATH/3rdParty/sqlite/lib/$PROJECT_PLATFORM
+rm -f  $PROJECT_PATH/3rdParty/sqlite/include/sqlite3.h
+rm -f  $PROJECT_PATH/3rdParty/sqlite/include/sqlite3ext.h
+rm -rf $PROJECT_PATH/3rdParty/sqlite/.sqlite_build_$PROJECT_PLATFORM
+rm -rf $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/googletest/.gtest_build
+rm -rf $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/sqlite/.sqlite_build
+
+rm -rf $PROJECT_PATH/Release/*
 mkdir -p $PROJECT_PATH/Release/Cache
 mkdir -p $PROJECT_PATH/Release/Include
 mkdir -p $PROJECT_PATH/Release/Lib
