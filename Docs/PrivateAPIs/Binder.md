@@ -1,63 +1,130 @@
 # Binder
 
 ## 1. 这是做什么的
-PrivateAPIs/Binder 提供 Sparrow 进程间 RPC 的底层通信能力。
+PrivateAPIs/Binder 提供跨进程 RPC 的底层通信接口。
 
 它主要做两件事：
-- 服务侧注册服务名并创建请求/响应通信通道。
-- 客户侧按服务名查找服务并建立请求/响应通信通道。
+- 服务侧注册服务并创建通信通道。
+- 客户侧按服务名发现服务并建立通信通道。
 
-核心入口是 `BindInterface`：
-- `InitializeServiceBinder`：服务侧初始化。
-- `InitializeClientBinder`：客户端初始化。
+核心入口是 BindInterface：
+- InitializeServiceBinder：给服务侧用。
+- InitializeClientBinder：给客户端用。
 
 ## 2. 什么时候会用到
-当模块之间需要跨进程调用并传递结构化请求/响应数据时会用到。
+当模块之间需要跨进程 RPC 通信时会用到。
 
 ## 3. 怎么用
 **依赖**
 
 | 类型 | 依赖项 | 说明 |
 |------|--------|------|
-| 头文件 | `BindInterface.h` <br> `Parcel.h` | Binder 接口入口 <br> 请求响应数据容器 |
-| 库文件 | `libsprbinder.so` | Binder 与 Event 聚合库 |
+| 头文件 | `#include "BindInterface.h"` <br> `#include "Parcel.h"` | 跨进程通信接口 <br> 数据打包接口 |
+| 库文件 | 内部服务：`libsprcore.so` <br> 外部服务：`libbinder.so` | Sparrow 核心库 <br> 独立 Binder 库 |
 
 **典型流程**
 
 1. 服务侧初始化 Binder
-	- 调用 `InitializeServiceBinder(serviceName, reqParcel, rspParcel)` 注册服务并获取通道。
-	- 进入请求循环：`Wait()` 等待请求，处理后 `Post()` 响应。
+	- 启动时调用 `InitializeServiceBinder(serviceName, reqParcel, rspParcel)` 注册服务。
+	- 进入请求循环，通过 `Parcel::Wait()` 等待请求，处理命令后通过 `Parcel::Post()` 响应。
 
-2. 客户侧初始化 Binder
-	- 调用 `InitializeClientBinder(serviceName, reqParcel, rspParcel)` 连接目标服务。
-	- 写入请求后 `Post()` 发送，`TimedWait()` 等待响应。
-
-3. 处理返回值与错误
-	- 初始化失败直接返回 false。
-	- 请求/响应读写失败由调用方按返回值处理。
+2. 客户侧初始化并发送请求
+	- 调用 `InitializeClientBinder(serviceName, reqParcel, rspParcel)` 建立连接。
+	- 写入请求数据通过 `Parcel::Post()` 发送，通过 `Parcel::TimedWait()` 等待响应。
 
 **简单示例**
 
+服务端主要代码（参考[06_DebugBinder.cc](../../../Examples/06_DebugBinder.cc)）
+
 ```cpp
-std::shared_ptr<Parcel> req = nullptr;
-std::shared_ptr<Parcel> rsp = nullptr;
+#define SERVICE_NAME "DebugBinder"
 
-if (!BindInterface::GetInstance()->InitializeClientBinder("power_manager", req, rsp)) {
-    return -1;
+enum TestBinderCmd {
+	CMD_TEST = 0,
+	CMD_SUM,
+	CMD_CUMSUM,
+	CMD_VEC,
+	CMD_CUST_VEC,
+	CMD_MAX
+};
+
+int Server()
+{
+	std::shared_ptr<Parcel> pReqParcel = nullptr;
+	std::shared_ptr<Parcel> pRspParcel = nullptr;
+
+	BindInterface::GetInstance()->InitializeServiceBinder(SERVICE_NAME, pReqParcel, pRspParcel);
+	if (pReqParcel == nullptr || pRspParcel == nullptr) {
+		return -1;
+	}
+
+	do {
+		int cmd = 0;
+		NONZERO_CHECK_RET(pReqParcel->Wait());
+		NONZERO_CHECK_RET(pReqParcel->ReadInt(cmd));
+		switch(cmd) {
+			case CMD_TEST: {
+				NONZERO_CHECK_RET(pRspParcel->WriteInt(0));
+				NONZERO_CHECK_RET(pRspParcel->Post());
+				break;
+			}
+			case CMD_SUM: {
+				int a = 0, b = 0;
+				NONZERO_CHECK_RET(pReqParcel->ReadInt(a));
+				NONZERO_CHECK_RET(pReqParcel->ReadInt(b));
+
+				int sum = a + b;
+				NONZERO_CHECK_RET(pRspParcel->WriteInt(sum));
+				NONZERO_CHECK_RET(pRspParcel->WriteInt(0));
+				NONZERO_CHECK_RET(pRspParcel->Post());
+				break;
+			}
+			default:
+				break;
+		}
+	} while(1);
+
+	return 0;
 }
-
-req->WriteInt(1001);
-req->Post();
-rsp->TimedWait();
 ```
 
-**参考代码**
-- 接口定义: [BindInterface.h](../../PrivateAPIs/Binder/BindInterface.h)
-- 接口实现: [BindInterface.cpp](../../PrivateAPIs/Binder/BindInterface.cpp)
-- 使用示例: [PowerManagerInterface.cpp](../../PublicAPIs/PowerManagerInterface.cpp)
+客户端主要代码（参考[06_DebugBinder.cc](../../../Examples/06_DebugBinder.cc)）
+
+```cpp
+int Client()
+{
+	std::shared_ptr<Parcel> pReqParcel = nullptr;
+	std::shared_ptr<Parcel> pRspParcel = nullptr;
+
+	BindInterface::GetInstance()->InitializeClientBinder(SERVICE_NAME, pReqParcel, pRspParcel);
+	if (pReqParcel == nullptr || pRspParcel == nullptr) {
+		return -1;
+	}
+
+	NONZERO_CHECK_RET(pReqParcel->WriteInt(CMD_SUM));
+	NONZERO_CHECK_RET(pReqParcel->WriteInt(10));
+	NONZERO_CHECK_RET(pReqParcel->WriteInt(20));
+	NONZERO_CHECK_RET(pReqParcel->Post());
+
+	int sum = 0, ret = 0;
+	NONZERO_CHECK_RET(pRspParcel->TimedWait());
+	NONZERO_CHECK_RET(pRspParcel->ReadInt(sum));
+	NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
+
+	return (ret == 0) ? sum : -1;
+}
+```
+
+参考代码：
+- Binder接口定义: [BindInterface.h](../../../PrivateAPIs/Binder/BindInterface.h)
+- 客户端示例: [PowerManagerInterface.cpp](../../../PublicAPIs/PowerManagerInterface.cpp)
+- 服务端示例: [PowerManagerHub.cpp](../../../Components/Basics/PowerManagerSrv/PowerManagerHub.cpp)
 
 ## 4. 要注意什么
-- Binder 管理请求使用固定管理通道 `IBinderM/BinderM` 与 key（`KEY_IBINDER_MANAGER`、`KEY_BINDER_MANAGER`），参考 [BindInterface.cpp:31](../../PrivateAPIs/Binder/BindInterface.cpp#L31)
-- 服务侧初始化本质上是 `AddService` 后再 `GetParcel`，任一步失败都返回 false，参考 [BindInterface.cpp:49](../../PrivateAPIs/Binder/BindInterface.cpp#L49)
-- 客户侧初始化本质上是 `GetService` 后再 `GetParcel`，服务不存在时返回 false，参考 [BindInterface.cpp:65](../../PrivateAPIs/Binder/BindInterface.cpp#L65)
+- 服务名必须一致：服务侧注册名与客户端查询名要完全相同。
+- 请求响应要成对：每次请求都要有对应响应，避免调用端阻塞。
+- 命令号要统一：客户端写入的 cmd 要与服务端处理分支一致。
+- 该层是通信层，不放业务逻辑。
 
+相关文档：
+- [BinderManagerSrv.md](../Basics/BinderManagerSrv.md)

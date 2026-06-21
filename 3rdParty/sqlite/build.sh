@@ -86,7 +86,9 @@ fi
 HOST_TRIPLET=""
 if [[ -n "$C_COMPILER" ]]; then
     COMPILER_BASE="$(basename "$C_COMPILER")"
-    HOST_TRIPLET="${COMPILER_BASE%-gcc}"
+    if [[ "$COMPILER_BASE" == *-gcc ]]; then
+        HOST_TRIPLET="${COMPILER_BASE%-gcc}"
+    fi
 fi
 
 if [[ -n "$SYSROOT" ]]; then

@@ -20,3 +20,11 @@ set_target_properties(LibPropertyAPI PROPERTIES OUTPUT_NAME "propertyapi")
 set_target_properties(LibPropertyAPI PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries(LibPropertyAPI stdc++ rt dl sprbinder)
 add_dependencies     (LibPropertyAPI LibBinder)
+
+## Build libconfigapi.so
+set (SRC_CONFIG_API_PATH  ${PROJECT_PATH}/PublicAPIs/Config.cpp)
+add_library          (LibConfigAPI SHARED ${SRC_CONFIG_API_PATH})
+set_target_properties(LibConfigAPI PROPERTIES OUTPUT_NAME "configapi")
+set_target_properties(LibConfigAPI PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries(LibConfigAPI stdc++ rt dl sprbinder)
+add_dependencies     (LibConfigAPI LibBinder)

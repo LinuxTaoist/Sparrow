@@ -20,6 +20,7 @@
 #include "InfraCommon.h"
 #include "ManagersWatch.h"
 #include "PowerManagerWatch.h"
+#include "ConfigManagerWatch.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
@@ -32,6 +33,7 @@ char ManagersWatch::MenuEntry()
     SPR_LOG("============================   Manager's  Entrance   ============================\n"
             "\n"
             "    1. PowerManager \n"
+            "    2. ConfigManager \n"
             "\n"
             "    [Q] Quit \n"
             "\n"
@@ -47,6 +49,10 @@ char ManagersWatch::HandleInputInMenu(char input)
     switch(input) {
         case '1': {
             CONTINUE_ON_NONQUIT(thePowerManagerWatch.MenuEntry);
+            break;
+        }
+        case '2': {
+            CONTINUE_ON_NONQUIT(theConfigManagerWatch.MenuEntry);
             break;
         }
         case 'q': {

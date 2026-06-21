@@ -19,6 +19,8 @@
 #include <limits>
 #include <iostream>
 #include <stdio.h>
+#include <ctype.h>
+#include <string>
 #include "GeneralUtils.h"
 #include "InfraCommon.h"
 
@@ -53,19 +55,34 @@ void InfraWatch::ClearScreen()
 
 int InfraWatch::ReadIntFromUserInput(int& input)
 {
-    char buffer[100];
-    long result;
-    char* endptr;
-
-    if (fgets(buffer, sizeof(buffer), stdin) == NULL) {
+    std::string line;
+    if (ReadLineFromUserInput(line) != 0) {
         return -1;
     }
 
-    result = strtol(buffer, &endptr, 10);
-    if (endptr == buffer || (*endptr != '\n' && *endptr != '\0')) {
+    const char* text = line.c_str();
+    char* endPtr = nullptr;
+    long result = strtol(text, &endPtr, 10);
+    if (endPtr == text) {
+        return -1;
+    }
+
+    while (*endPtr != '\0' && isspace(static_cast<unsigned char>(*endPtr))) {
+        endPtr++;
+    }
+    if (*endPtr != '\0') {
         return -1;
     }
 
     input = (int)result;
+    return 0;
+}
+
+int InfraWatch::ReadLineFromUserInput(std::string& input)
+{
+    if (!std::getline(std::cin, input)) {
+        return -1;
+    }
+
     return 0;
 }

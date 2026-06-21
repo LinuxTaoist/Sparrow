@@ -2,35 +2,38 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : InfraCommon.h
+ *  @file       : ConfigManagerHub.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/04/23
+ *  @date       : 2026/06/20
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/23 | 1.0.0.1   | Xiang.D        | Create file
+ *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __INFRA_COMMON_H__
-#define __INFRA_COMMON_H__
+#ifndef __CONFIG_MANAGER_HUB_H__
+#define __CONFIG_MANAGER_HUB_H__
 
-#include <iostream>
 #include <string>
+#include "ConfigManager.h"
+#include "SprBinderHub.h"
 
-namespace InfraWatch {
+class ConfigManagerHub : public SprBinderHub
+{
+public:
+    ConfigManagerHub(const std::string& srvName, ConfigManager* pManager);
+    virtual ~ConfigManagerHub();
 
-#define CONTINUE_ON_NONQUIT(handle) while(toupper((handle())) != 'Q')
+    void handleCmd(const std::shared_ptr<Parcel>& pReqParcel,
+                   const std::shared_ptr<Parcel>& pRspParcel, int32_t cmd) override;
 
-void ClearScreen();
-char WaitUserInputUntilEnter();
-char WaitUserInputWithoutEnter();
-int  ReadLineFromUserInput(std::string& input);
-int  ReadIntFromUserInput(int& input);
+private:
+    ConfigManager* mConfigManager;
 };
 
-#endif // __INFRA_COMMON_H__
+#endif // __CONFIG_MANAGER_HUB_H__

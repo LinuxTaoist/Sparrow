@@ -31,3 +31,21 @@ if(BUILD_TESTCASE)
 
     message(STATUS "BUILD_TESTCASE 已启用，googletest 库路径: ${GTEST_DST_LIB}")
 endif()
+
+# 构建第三方库sqlite
+set(SQLITE_DST_LIB "${PROJECT_PATH}/3rdParty/sqlite/lib/${PROJECT_PLATFORM}")
+if(NOT EXISTS "${SQLITE_DST_LIB}/libsqlite3.a")
+    message(STATUS "sqlite 库缺失，开始自动构建: ${PROJECT_PLATFORM}")
+    execute_process(
+        COMMAND bash ${PROJECT_PATH}/3rdParty/sqlite/build.sh
+                --project-path ${PROJECT_PATH}
+                --platform ${PROJECT_PLATFORM}
+                --c-compiler ${CMAKE_C_COMPILER}
+        RESULT_VARIABLE sqlite_build_result
+    )
+    if(NOT sqlite_build_result EQUAL 0)
+        message(FATAL_ERROR "sqlite 自动构建失败，平台: ${PROJECT_PLATFORM}")
+    endif()
+endif()
+
+message(STATUS "sqlite 库路径: ${SQLITE_DST_LIB}")

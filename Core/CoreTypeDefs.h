@@ -134,6 +134,26 @@ enum EPropertyBinderCmd
 };
 
 //---------------------------------------------------------------------------------------------------------------------
+// - EConfigBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
+#define CONFIG_BINDER_CMD_MACROS \
+    ENUM_OR_STRING(CONFIG_CMD_SET_VALUE),        \
+    ENUM_OR_STRING(CONFIG_CMD_GET_VALUE),        \
+    ENUM_OR_STRING(CONFIG_CMD_SET_TYPED_VALUE),  \
+    ENUM_OR_STRING(CONFIG_CMD_GET_TYPED_VALUE),  \
+    ENUM_OR_STRING(CONFIG_CMD_DELETE_VALUE),     \
+    ENUM_OR_STRING(CONFIG_CMD_LIST_NAMESPACE),   \
+    ENUM_OR_STRING(CONFIG_CMD_GET_META),         \
+    ENUM_OR_STRING(CONFIG_CMD_BACKUP),           \
+    ENUM_OR_STRING(CONFIG_CMD_BUTT)
+
+enum EConfigBinderCmd
+{
+    CONFIG_CMD_BEGIN = MODULE_CONFIG << MODULE_ID_OFFSET | 1,
+    CONFIG_BINDER_CMD_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
 // - EPowerBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 #define POWER_BINDER_CMD_MACROS \
