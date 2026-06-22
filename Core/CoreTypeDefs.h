@@ -204,21 +204,6 @@ enum ELogLevel
 };
 
 //---------------------------------------------------------------------------------------------------------------------
-// - EOneNetBinderCmd
-// --------------------------------------------------------------------------------------------------------------------
-#define ONENET_BINDER_CMD_MACROS \
-    ENUM_OR_STRING(ONENET_CMD_ACTIVE_DEVICE),   \
-    ENUM_OR_STRING(ONENET_CMD_DEACTIVE_DEVICE), \
-    ENUM_OR_STRING(ONENET_CMD_BUTT)
-
-enum EOneNetBinderCmd
-{
-    // dx_debug
-    ONENET_CMD_BEGIN = MODULE_ID_OFFSET | 1,
-    ONENET_BINDER_CMD_MACROS
-};
-
-//---------------------------------------------------------------------------------------------------------------------
 // - EGeneralBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 #define GENERAL_BINDER_CMD_MACROS \

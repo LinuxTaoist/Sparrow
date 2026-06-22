@@ -97,13 +97,6 @@ TEST(Core_SprEnumHelper, GetSprDebugMBinderCmdText) {
     EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_MSG_BUTT + 100), "UNDEFINED");
 }
 
-TEST(Core_SprEnumHelper, GetSprOneNetBinderCmdText) {
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_ACTIVE_DEVICE), "ONENET_CMD_ACTIVE_DEVICE");
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_BUTT), "ONENET_CMD_BUTT");
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_ACTIVE_DEVICE - 10), "UNDEFINED");
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_BUTT + 100), "UNDEFINED");
-}
-
 TEST(Core_SprEnumHelper, GetSprGeneralBinderCmdText) {
     EXPECT_EQ(GetSprGeneralBinderCmdText(GENERAL_CMD_EXE_EXIT), "GENERAL_CMD_EXE_EXIT");
     EXPECT_EQ(GetSprGeneralBinderCmdText(GENERAL_CMD_BUTT), "GENERAL_CMD_BUTT");
