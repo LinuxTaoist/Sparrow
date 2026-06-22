@@ -6,8 +6,6 @@ include_directories (${PROJECT_PATH}/3rdAdapter)
 include_directories (${PROJECT_PATH}/PublicAPIs)
 include_directories (${PROJECT_PATH}/PrivateAPIs)
 include_directories (${PROJECT_PATH}/UtilModules/EpollEventHandler)
-include_directories (${PROJECT_PATH}/Components/Business/Common)
-include_directories (${PROJECT_PATH}/Components/Business/OneNetMqtt)
 
 ## Bin 01_proc_guard
 set(SRC_BIN_01_PROC_GUARD    01_ProcGuard.cc)

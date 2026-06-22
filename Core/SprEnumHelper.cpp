@@ -89,11 +89,6 @@ std::string GetSprErrorText(int32_t errorCode)
         case ERR_TIMEM_UNKOWN_ERROR:          return "Time manager unknown error";
         case ERR_SYSTEM_TIMER_UNKOWN_ERROR:   return "System timer unknown error";
         case ERR_POWERM_UNKOWN_ERROR:         return "Power manager unknown error";
-        case ERR_ONENET_MANAGER_UNKOWN_ERROR: return "OneNet manager unknown error";
-        case ERR_ONENET_MANAGER_OFFLINE:      return "OneNet manager is offline";
-        case ERR_ONENET_MANAGER_ONLINE:       return "OneNet manager is online";
-        case ERR_ONENET_DEV_UNKOWN_ERROR:     return "OneNet device unknown error";
-        case ERR_ONENET_DRIVER_UNKOWN_ERROR:  return "OneNet driver unknown error";
         case ERR_DEBUG_UNKNOW_ERROR:          return "Debug unknown error";
         default:                              return "Unknown error code";
     }
