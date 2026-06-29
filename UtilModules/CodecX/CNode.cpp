@@ -142,7 +142,7 @@ std::string CNode::GetType() {
 }
 
 std::shared_ptr<CNode> CNode::GetParentNode() {
-    return mParentNode;
+    return mParentNode.lock();
 }
 
 std::shared_ptr<CNode> CNode::GetRootNode() {

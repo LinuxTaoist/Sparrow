@@ -129,6 +129,8 @@ class ParsedNode:
     value: bytes = b""
     children: List["ParsedNode"] = field(default_factory=list)
     sibling_index: int = 0
+    error: bool = False
+    error_msg: str = ""
 
     def add_child(self, child: "ParsedNode") -> None:
         same = sum(1 for x in self.children if x.name == child.name)
@@ -243,6 +245,12 @@ class CodecXDecoder:
                 cur = offset
                 for child_schema in children:
                     child = self._decode_node(child_schema, node, data, cur)
+                    if child.error:
+                        # Stop processing further siblings on first error
+                        node.error = True
+                        node.error_msg = f"子字段解析失败: {child.error_msg}"
+                        # Don't break - let end be set based on what we have
+                        break
                     cur = child.end + 1 if child.end >= child.start else child.start
                 node.end = cur - 1 if cur > offset else offset - 1
             else:
@@ -253,6 +261,10 @@ class CodecXDecoder:
                 cur = offset
                 for _ in range(count):
                     child = self._decode_node(template, node, data, cur)
+                    if child.error:
+                        node.error = True
+                        node.error_msg = f"子元素解析失败: {child.error_msg}"
+                        break
                     cur = child.end + 1 if child.end >= child.start else child.start
                 node.end = cur - 1 if cur > offset else offset - 1
 
@@ -267,17 +279,23 @@ class CodecXDecoder:
             )
             return node
 
-        value, size = self._decode_atom(node_type, data, offset, node.path())
-        node.value = value
-        node.end = offset + size - 1
+        # --- atom type ---
+        try:
+            value, size = self._decode_atom(node_type, data, offset, node.path())
+            node.value = value
+            node.end = offset + size - 1
+        except ParseError as exc:
+            node.error = True
+            node.error_msg = str(exc)
+            node.end = offset - 1  # consumed nothing
 
-        int_text = self._to_int_text(node_type, value)
+        int_text = self._to_int_text(node_type, node.value) if not node.error else ""
         self.rows.append(
             FieldRow(
                 path=node.path(),
                 node_type=node_type,
-                offset=f"{node.start}-{node.end}",
-                hex_value=_bytes_to_hex(value),
+                offset=f"{node.start}-{node.end}" if not node.error else f"{node.start}(ERR)",
+                hex_value=_bytes_to_hex(node.value) if not node.error else "",
                 int_value=int_text,
             )
         )
@@ -439,6 +457,7 @@ class CodecXDecoder:
             if child.name == child_name:
                 return child
         return None
+
 
 
 def _bytes_to_hex(data: bytes) -> str:
@@ -712,21 +731,28 @@ class PropShowApp:
         self.bytes_stack = ttk.Frame(bytes_frame)
         self.bytes_stack.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
         self.bytes_stack.rowconfigure(0, weight=1)
-        self.bytes_stack.columnconfigure(0, weight=1)
+        self.bytes_stack.columnconfigure(1, weight=1)
 
         self.bytes_editor_frame = ttk.Frame(self.bytes_stack)
-        self.bytes_editor_frame.grid(row=0, column=0, sticky="nsew")
+        self.bytes_editor_frame.grid(row=0, column=1, sticky="nsew")
+        self.bytes_editor_frame.rowconfigure(0, weight=1)
+        self.bytes_editor_frame.columnconfigure(1, weight=1)
+
+        # Gutter for bytes editor (error markers)
+        self.bytes_gutter = tk.Canvas(self.bytes_editor_frame, width=52, highlightthickness=0, background="#eef2f7")
+        self.bytes_gutter.grid(row=0, column=0, sticky="ns")
+        self.bytes_gutter.bind("<Button-1>", lambda _event: None)
+
         self.bytes_text = tk.Text(self.bytes_editor_frame, wrap=tk.WORD, font=("Consolas", 11))
-        self.bytes_text.pack(fill=tk.BOTH, expand=True)
+        self.bytes_text.grid(row=0, column=1, sticky="nsew")
         self.bytes_text.configure(background="#fbfcfe", foreground="#102a43", insertbackground="#102a43", relief=tk.FLAT)
 
-        self.guide_editor_frame = ttk.Frame(self.bytes_stack)
-        self.guide_editor_frame.grid(row=0, column=0, sticky="nsew")
-        self.guide_text = tk.Text(self.guide_editor_frame, wrap=tk.WORD, font=("Consolas", 10))
-        self.guide_text.pack(fill=tk.BOTH, expand=True)
-        self.guide_text.configure(background="#f4f7fb", foreground="#203040", relief=tk.FLAT)
-        self.guide_text.insert("1.0", CONFIG_GUIDE_TEXT)
-        self.guide_text.configure(state=tk.DISABLED)
+        self.bytes_scrollbar = ttk.Scrollbar(self.bytes_editor_frame, orient=tk.VERTICAL)
+        self.bytes_scrollbar.grid(row=0, column=2, sticky="ns")
+        self.bytes_scrollbar.configure(command=self._sync_bytes_scroll)
+        self.bytes_text.configure(yscrollcommand=self._on_bytes_text_scroll)
+        self.bytes_text.bind("<KeyRelease>", lambda _event: self._refresh_bytes_gutter())
+        self.bytes_text.bind("<Configure>", lambda _event: self._refresh_bytes_gutter())
 
         self.show_bytes_editor()
         self._refresh_config_gutter()
@@ -1100,6 +1126,7 @@ class PropShowApp:
 
     def parse_now(self) -> None:
         self.clear_result()
+        self._clear_byte_highlight()
         cfg_text = self.config_text.get("1.0", tk.END)
         bytes_text = self.bytes_text.get("1.0", tk.END)
 
@@ -1115,45 +1142,89 @@ class PropShowApp:
                 header = maybe_build_head_flag_bytes(cfg) if self.auto_split_var.get() else None
                 frame_results = decode_frames_with_header(cfg, payload, header)
 
-            frame_ok = 0
-            consumed_total = 0
-            tree_lines: List[str] = []
-
-            for frame_idx, global_offset, root, rows, consumed, frame_input_len in frame_results:
-                frame_ok += 1
-                consumed_total += consumed
-                tree_lines.append(f"Frame {frame_idx}: offset={global_offset}, consumed={consumed}/{frame_input_len}")
-                self._append_tree(root, tree_lines, "")
-                tree_lines.append("")
-
-                frame_item = self.table.insert(
-                    "",
-                    tk.END,
-                    text=f"Frame {frame_idx}",
-                    values=("", f"global:{global_offset}", f"{consumed}/{frame_input_len} bytes", ""),
-                    open=True,
-                )
-                self._insert_protocol_node(frame_item, root)
-
-            if frame_ok == 0:
-                raise ParseError("没有可成功解析的帧")
-
-            self.tree_text.insert("1.0", "\n".join(tree_lines))
-            if payload:
-                status_text = f"解析完成: 成功帧 {frame_ok}, 输入 {len(payload)} bytes, 累计消费 {consumed_total} bytes"
-            else:
-                status_text = "解析完成: 未输入字节流，仅显示配置结构"
-            self.status_var.set(status_text)
+            self._display_frame_results(frame_results, payload)
         except ParseError as exc:
             self._refresh_config_gutter(getattr(exc, "line", None))
+            self._refresh_bytes_gutter()
             self.status_var.set("解析失败")
             messagebox.showerror("解析失败", str(exc))
         except Exception as exc:
             self._refresh_config_gutter()
+            self._refresh_bytes_gutter()
             self.status_var.set("解析失败")
             messagebox.showerror("异常", str(exc))
 
+    def _check_tree_error(self, node: ParsedNode) -> bool:
+        """Check if any node in the tree has an error."""
+        if node.error:
+            return True
+        for child in node.children:
+            if self._check_tree_error(child):
+                return True
+        return False
+
+    def _display_frame_results(self, frame_results, payload, partial_error=None):
+        """Display frame results (possibly partial) in the tree and table views."""
+        frame_ok = 0
+        consumed_total = 0
+        tree_lines: list = []
+
+        if partial_error:
+            tree_lines.append("\u26a0 部分解析结果 (解析过程出错: " + partial_error + ")")
+            tree_lines.append("")
+
+        for frame_idx, global_offset, root, rows, consumed, frame_input_len in frame_results:
+            frame_ok += 1
+            consumed_total += consumed
+            tree_lines.append(f"Frame {frame_idx}: offset={global_offset}, consumed={consumed}/{frame_input_len}")
+            self._append_tree(root, tree_lines, "")
+            tree_lines.append("")
+
+            frame_item = self.table.insert(
+                "",
+                tk.END,
+                text=f"Frame {frame_idx}",
+                values=("", f"global:{global_offset}", f"{consumed}/{frame_input_len} bytes", ""),
+                open=True,
+            )
+            self._insert_protocol_node(frame_item, root)
+
+            # Check for errors in tree and highlight bytes
+            if self._check_tree_error(root):
+                self._highlight_byte_error(0)  # highlight start
+                self._refresh_bytes_gutter(0)
+                # Find the first error node for better offset
+                def find_first_error(n):
+                    if n.error:
+                        return n.start
+                    for c in n.children:
+                        r = find_first_error(c)
+                        if r >= 0:
+                            return r
+                    return -1
+                err_offset = find_first_error(root)
+                if err_offset >= 0:
+                    self._highlight_byte_error(err_offset)
+                    self._refresh_bytes_gutter(err_offset)
+
+        if frame_ok == 0:
+            raise ParseError("没有可成功解析的帧")
+
+        self.tree_text.insert("1.0", "\n".join(tree_lines))
+        if partial_error:
+            status_text = f"部分解析: {frame_ok} 帧 (含错误), {len(payload)} bytes"
+        elif payload:
+            status_text = f"解析完成: 成功帧 {frame_ok}, 输入 {len(payload)} bytes, 累计消费 {consumed_total} bytes"
+        else:
+            status_text = "解析完成: 未输入字节流，仅显示配置结构"
+        self.status_var.set(status_text)
     def _append_tree(self, node: ParsedNode, out: List[str], indent: str) -> None:
+        if node.error:
+            marker = " ❌ ERROR"
+            out.append(f"{indent}[{node.start}] {node.display_name()} ({node.node_type}){marker}")
+            out.append(f"{indent}     原因: {node.error_msg}")
+            return
+
         if node.node_type in ("static_field", "dynamic_field"):
             rng = f"[{node.start}-{node.end}]" if node.end >= node.start else f"[{node.start}]"
             out.append(f"{indent}{rng} {node.display_name()} ({node.node_type})")
@@ -1175,12 +1246,16 @@ class PropShowApp:
         except Exception:
             int_text = ""
 
-        out.append(
-            f"{indent}[{node.start}-{node.end}] {node.display_name()} ({node.node_type}) = {_bytes_to_hex(node.value)}"
-            + (f" | {int_text}" if int_text else "")
-        )
+        line = f"{indent}[{node.start}-{node.end}] {node.display_name()} ({node.node_type}) = {_bytes_to_hex(node.value)}"
+        if int_text:
+            line += f" | {int_text}"
+        if node.error:
+            line += " ❌"
+        out.append(line)
 
     def _node_range_text(self, node: ParsedNode) -> str:
+        if node.error:
+            return f"{node.start}(ERR)"
         return f"{node.start}-{node.end}" if node.end >= node.start else str(node.start)
 
     def _node_desc_text(self, node: ParsedNode) -> str:
@@ -1250,24 +1325,143 @@ class PropShowApp:
         return "".join(chars)
 
     def _insert_protocol_node(self, parent_item: str, node: ParsedNode) -> None:
+        values = (
+            self._node_value_text(node),
+            self._node_range_text(node),
+            self._node_ascii_text(node),
+            self._node_int_text(node),
+        )
         item = self.table.insert(
             parent_item,
             tk.END,
             text=self._node_desc_text(node),
-            values=(
-                self._node_value_text(node),
-                self._node_range_text(node),
-                self._node_ascii_text(node),
-                self._node_int_text(node),
-            ),
+            values=values,
             open=True,
         )
 
+        if node.error:
+            # Apply error styling: red text
+            self.table.tag_configure("err_tag", foreground="#d32f2f", font=("Consolas", 10, "bold"))
+            self.table.item(item, tags=("err_tag",))
+            # Insert child error indicator
+            err_text = f"⚠ {node.error_msg}"
+            self.table.insert(
+                item,
+                tk.END,
+                text="",
+                values=(err_text, "", "", ""),
+                tags=("err_tag",),
+            )
+
+        if node.error:
+            return
         if self._is_bytes_field(node):
             return
 
         for child in node.children:
             self._insert_protocol_node(item, child)
+
+
+    def _refresh_bytes_gutter(self, error_byte_offset=None):
+        """Draw error markers on the bytes editor gutter."""
+        self.bytes_gutter.delete('all')
+        try:
+            total_lines = max(1, int(self.bytes_text.index("end-1c").split(".")[0]))
+        except Exception:
+            total_lines = 1
+        if total_lines <= 0:
+            return
+
+        line_height = 20
+        for i in range(1, total_lines + 1):
+            bbox = self.bytes_text.dlineinfo(f"{i}.0")
+            if not bbox:
+                continue
+            y = bbox[1]
+            self.bytes_gutter.create_text(
+                40, y + line_height // 2,
+                text=f"{i}",
+                fill="#8a94a3",
+                font=("Consolas", 11),
+                anchor="e",
+            )
+
+            if error_byte_offset is not None:
+                err_line = self._bytes_offset_to_line(error_byte_offset)
+                if err_line == i:
+                    self._draw_error_badge(8, y + 3, 20, y + 15)
+
+    def _on_bytes_text_scroll(self, first, last):
+        self.bytes_scrollbar.set(first, last)
+        self._refresh_bytes_gutter()
+
+    def _sync_bytes_scroll(self, *args):
+        self.bytes_text.yview(*args)
+        self._refresh_bytes_gutter()
+
+    def _bytes_offset_to_line(self, byte_offset):
+        """Map a byte offset in the decoded data to a line number in the hex editor."""
+        text = self.bytes_text.get("1.0", tk.END)
+        line_num = 1
+        byte_count = 0
+        for line in text.split('\n'):
+            if line == '':
+                continue
+            cleaned = line.replace(',', ' ').replace('\t', ' ')
+            cleaned = re.sub(r'0x', '', cleaned, flags=re.IGNORECASE)
+            tokens = [t for t in cleaned.split() if t]
+            for t in tokens:
+                if not re.fullmatch(r'[0-9a-fA-F]{1,2}', t):
+                    continue
+                if byte_count >= byte_offset:
+                    return line_num
+                byte_count += 1
+            if byte_count > byte_offset:
+                return line_num
+            line_num += 1
+        return line_num
+
+    def _highlight_byte_error(self, error_byte_offset):
+        """Highlight the byte at the given offset with a red background."""
+        self.bytes_text.tag_remove("byte_err", "1.0", tk.END)
+        self.bytes_text.tag_remove("byte_err_range", "1.0", tk.END)
+
+        if error_byte_offset < 0:
+            return
+
+        text = self.bytes_text.get("1.0", tk.END)
+        byte_count = 0
+        found = False
+        for row, line in enumerate(text.split('\n')):
+            cleaned = line.replace(',', ' ').replace('\t', ' ').replace('0x', ' ')
+            words = cleaned.split()
+            col_in_line = 0
+            for w in words:
+                if re.fullmatch(r'[0-9a-fA-F]{1,2}', w):
+                    if byte_count == error_byte_offset:
+                        tag_start = f'{row + 1}.{col_in_line}'
+                        tag_end = f'{row + 1}.{col_in_line + 2}'
+                        self.bytes_text.tag_add("byte_err", tag_start, tag_end)
+                        self.bytes_text.tag_config("byte_err", background="#ff6b6b", foreground="#ffffff")
+                        range_start_col = max(0, col_in_line - 6)
+                        range_end_col = col_in_line + 8
+                        range_start = f'{row + 1}.{range_start_col}'
+                        range_end = f'{row + 1}.{min(range_end_col, len(line))}'
+                        self.bytes_text.tag_add("byte_err_range", range_start, range_end)
+                        self.bytes_text.tag_config("byte_err_range", background="#ffd0d0")
+                        found = True
+                        break
+                    byte_count += 1
+                    col_in_line += len(w) + 1
+                else:
+                    col_in_line += len(w) + 1
+            if found:
+                break
+
+    def _clear_byte_highlight(self):
+        """Remove all byte error highlighting."""
+        self.bytes_text.tag_remove("byte_err", "1.0", tk.END)
+        self.bytes_text.tag_remove("byte_err_range", "1.0", tk.END)
 
 
 def main() -> None:
@@ -1279,5 +1473,5 @@ def main() -> None:
     root.mainloop()
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()

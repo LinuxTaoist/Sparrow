@@ -26,7 +26,7 @@
 #define     AEVENT_NAME_SUFFIX      "_event"
 
 static std::atomic<bool> gObjAlive(true);
-std::shared_ptr<Parcel> pEventParcel = nullptr;
+static std::shared_ptr<Parcel> pEventParcel = nullptr;
 
 AsyncEvent* AsyncEvent::GetInstance()
 {

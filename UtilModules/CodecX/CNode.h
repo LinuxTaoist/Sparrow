@@ -123,7 +123,7 @@ private:
     CEndianType mEndian;
     std::string mName;
     std::string mType;
-    std::shared_ptr<CNode> mParentNode;
+    std::weak_ptr<CNode> mParentNode;
 };
 
 #endif // __CNODE_H__
