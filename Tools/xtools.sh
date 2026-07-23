@@ -202,7 +202,7 @@ main() {
             show_env
             ;;
         adb-push)
-            adb_push "$2" $3
+            adb_push "$2" "$3"
             ;;
         commit-template)
             config_commit_template
