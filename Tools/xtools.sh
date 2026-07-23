@@ -65,15 +65,15 @@ show_env() {
 
 # cmd adb_push
 adb_push() {
-    if [ -z "$1" ]; then
-        echo -e "${PURPLE}错误: 未提供路径! 用法: ./xtool.sh <path>${NC}"
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo -e "${PURPLE}错误: 未提供必要的参数! 用法: ./xtool.sh <platform> <path>${NC}"
         return 1
     fi
 
     echo -e "${PURPLE} 开始推送文件 ${NC}"
-    adb shell mkdir -p $1/Release
-    adb push ../Release/Bin  $1/Release/
-    adb push ../Release/Lib  $1/Release/
+    adb shell mkdir -p $2/Release
+    adb push ../Release/$1/Bin  $2/Release/
+    adb push ../Release/$1/Lib  $2/Release/
 }
 
 # cmd commit-template
@@ -202,7 +202,7 @@ main() {
             show_env
             ;;
         adb-push)
-            adb_push "$2"
+            adb_push "$2" $3
             ;;
         commit-template)
             config_commit_template

@@ -11,6 +11,7 @@ PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
 
 cd $PROJECT_PATH/Build/
 PROJECT_PLATFORM="Default"
+OUTPUT_PATH="${PROJECT_PATH}/Release/${PROJECT_PLATFORM}"
 
 # 清理第三方编译产物，确保每次 rebuild 都是从干净状态重新构建。
 rm -rf $PROJECT_PATH/3rdParty/googletest/lib/$PROJECT_PLATFORM
@@ -21,22 +22,23 @@ rm -rf $PROJECT_PATH/3rdParty/sqlite/.sqlite_build_$PROJECT_PLATFORM
 rm -rf $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/googletest/.gtest_build
 rm -rf $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/sqlite/.sqlite_build
 
-rm -rf $PROJECT_PATH/Release/*
-mkdir -p $PROJECT_PATH/Release/Cache
-mkdir -p $PROJECT_PATH/Release/Include
-mkdir -p $PROJECT_PATH/Release/Lib
+rm -rf $OUTPUT_PATH/*
+mkdir -p $OUTPUT_PATH/Cache
+mkdir -p $OUTPUT_PATH/Include
+mkdir -p $OUTPUT_PATH/Lib
 
 BUILD_TYPE="Release"
 
-mkdir -p $PROJECT_PATH/Release/Cache
-mkdir -p $PROJECT_PATH/Release/Include
-mkdir -p $PROJECT_PATH/Release/Lib
+mkdir -p $OUTPUT_PATH/Cache
+mkdir -p $OUTPUT_PATH/Include
+mkdir -p $OUTPUT_PATH/Lib
 
-cd $PROJECT_PATH/Release/Cache/
+cd $OUTPUT_PATH/Cache/
 cmake $PROJECT_PATH \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
-    -DCMAKE_INSTALL_PREFIX=$PROJECT_PATH/Release/
+    -DCMAKE_INSTALL_PREFIX=$OUTPUT_PATH     \
+    -DOUTPUT_PATH=$OUTPUT_PATH
 
 make -j16
 

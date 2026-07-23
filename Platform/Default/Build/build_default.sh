@@ -9,16 +9,18 @@ PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
 
 BUILD_TYPE="Release"
 PROJECT_PLATFORM="Default"
+OUTPUT_PATH="${PROJECT_PATH}/Release/${PROJECT_PLATFORM}"
 
-mkdir -p $PROJECT_PATH/Release/Cache
-mkdir -p $PROJECT_PATH/Release/Include
-mkdir -p $PROJECT_PATH/Release/Lib
+mkdir -p $OUTPUT_PATH/Cache
+mkdir -p $OUTPUT_PATH/Include
+mkdir -p $OUTPUT_PATH/Lib
 
-cd $PROJECT_PATH/Release/Cache/
+cd $OUTPUT_PATH/Cache/
 cmake $PROJECT_PATH \
     -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
     -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
-    -DCMAKE_INSTALL_PREFIX=$PROJECT_PATH/Release/
+    -DCMAKE_INSTALL_PREFIX=$OUTPUT_PATH     \
+    -DOUTPUT_PATH=$OUTPUT_PATH
 
 make -j8
 
