@@ -152,6 +152,7 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
 
     mCurUsedSize += sizeof(Node);
     if (mCurUsedSize > mSize) {
+        mCurUsedSize -= sizeof(Node);
         SPR_LOGE("Resource ou of limit! mCurUsedSize = %zu, mSize = %zu\n", mCurUsedSize, mSize);
         sem_post(&mSemaphore);
         return -1;
@@ -202,7 +203,9 @@ int SharedBinaryTree::OpenMapFile(const string& filename, size_t size, bool crea
 
 Node* SharedBinaryTree::CreateNode(const string& key, const string& value)
 {
-    Node* newNode = (Node*)((char*)mRoot + mCurUsedSize);
+    // mCurUsedSize was already incremented by sizeof(Node) in SetValue(),
+    // so the new node starts at mCurUsedSize - sizeof(Node).
+    Node* newNode = (Node*)((char*)mRoot + mCurUsedSize - sizeof(Node));
 
     strncpy(newNode->key, key.c_str(), SHARED_BTREE_KEY_MAX_LEN - 1);
     newNode->key[SHARED_BTREE_KEY_MAX_LEN - 1] = '\0';

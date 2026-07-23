@@ -19,9 +19,11 @@
 #ifndef __SHARED_RING_BUFFER_H__
 #define __SHARED_RING_BUFFER_H__
 
-#include <mutex>
 #include <string>
 #include <stdint.h>
+#include <mutex>
+
+class ProcMutex;
 
 struct Root
 {
@@ -82,9 +84,10 @@ private:
     bool        mEnable;
     Root*       mRoot;
     void*       mData;
+    ProcMutex*  mMutex;         // Cross-process mutex (via ProcMutex)
+    std::mutex  mTMutex;            // In-process thread mutex for ProcLockGuard
     uint32_t    mMapCapacity;       // Mapped memory capacity
     uint32_t    mDataCapacity;      // Data buffer capacity
-    std::mutex  mMutex;
     std::string mShmPath;
 };
 

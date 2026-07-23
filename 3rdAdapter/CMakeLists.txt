@@ -1,6 +1,7 @@
 ## 3rdAdapter
-set(SPRLOG_SRC_FILES         ${PROJECT_PATH}/Util/SharedRingBuffer.cpp
-                             ${PROJECT_PATH}/3rdAdapter/SprLog.cpp)
+set(SPRLOG_SRC_FILES        ${PROJECT_PATH}/Util/ProcMutex.cpp
+                            ${PROJECT_PATH}/Util/SharedRingBuffer.cpp
+                            ${PROJECT_PATH}/3rdAdapter/SprLog.cpp)
 
 ## Build libspradapter.so
 add_library                 (LibSprLog SHARED ${SPRLOG_SRC_FILES})

@@ -25,6 +25,7 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include "SharedRingBuffer.h"
+#include "ProcMutex.h"
 
 #define SPR_LOG(fmt, args...)   printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...)  printf("%4d RingBuf D: " fmt, __LINE__, ##args)
@@ -34,6 +35,18 @@
 const int RETRY_TIMES       = 10;
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 const int RESERVER_SIZE     = 1024;
+
+// Sanitize a file path into a valid shm_open name (only leading '/' allowed)
+static std::string SanitizeShmName(const std::string& path)
+{
+    std::string name = path;
+    for (auto& ch : name) {
+        if (ch == '/') {
+            ch = '_';
+        }
+    }
+    return name;
+}
 
 SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
     : mEnable(true), mRoot(nullptr), mData(nullptr), mMapCapacity(capacity), mShmPath(path) {
@@ -67,6 +80,12 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
     mRoot->rp = 0;
     mRoot->wp = 0;
     mRoot->rwStatus = CMD_WRITEABLE;
+
+    mMutex = new (std::nothrow) ProcMutex("RingBuf" + SanitizeShmName(mShmPath));
+    if (mMutex == nullptr) {
+        SPR_LOGE("Create ProcMutex failed!\n");
+        mEnable = false;
+    }
 
     mData = reinterpret_cast<uint8_t*>(mRoot) + sizeof(Root);
 }
@@ -120,10 +139,20 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     }
 
     close(fd);
+
+    mMutex = new (std::nothrow) ProcMutex("RingBuf" + SanitizeShmName(mShmPath));
+    if (mMutex == nullptr) {
+        SPR_LOGE("Create ProcMutex failed!\n");
+        mEnable = false;
+    }
 }
 
 SharedRingBuffer::~SharedRingBuffer()
 {
+    if (mMutex != nullptr) {
+        delete mMutex;
+        mMutex = nullptr;
+    }
     munmap(mRoot, mMapCapacity);
 }
 
@@ -141,7 +170,8 @@ int SharedRingBuffer::Write(const void* data, int32_t len)
     // Although post after it is written in the shared memory, synchronization still might not be timely,
     // and the AvailSpace() returns 0. Only add a retry to avoid it
     while (retry > 0) {
-        std::lock_guard<std::mutex> lock(mMutex);
+        ProcLockGuard guard(*mMutex, mTMutex);
+
         int32_t avail = AvailSpace();
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->wp, len);
@@ -173,7 +203,8 @@ int SharedRingBuffer::Read(void* data, int32_t len)
 
     // Refer to write comments
     while (retry > 0) {
-        std::lock_guard<std::mutex> lock(mMutex);
+        ProcLockGuard guard(*mMutex, mTMutex);
+
         int32_t avail = AvailData();
         if (avail >= len) {
             AdjustPosIfOverflow(&mRoot->rp, len);
@@ -181,7 +212,6 @@ int SharedRingBuffer::Read(void* data, int32_t len)
             mRoot->rp = (mRoot->rp + len) % mDataCapacity;
             SetRWStatus(CMD_WRITEABLE);
             ret = 0;
-
             break;
         } else {
             SPR_LOGW("AvailData invalid! avail = %d, len = %d. (%d)\n", avail, len, retry);
