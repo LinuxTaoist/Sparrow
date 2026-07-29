@@ -16,5 +16,5 @@ target_include_directories  (BinMainSpr PRIVATE ${TIME_MANAGER_PATH}
                                                 ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 
 set_target_properties       (BinMainSpr PROPERTIES OUTPUT_NAME "sparrowsrv")
-target_link_libraries       (BinMainSpr sprcore epollevent dl rt sprlog pthread)
-add_dependencies            (BinMainSpr LibSprCore LibEpollEvent LibSprLog)
+target_link_libraries       (BinMainSpr LibSprCore dl rt pthread)
+add_dependencies            (BinMainSpr LibSprCore)

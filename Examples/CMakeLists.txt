@@ -26,7 +26,7 @@ add_dependencies            (dir_watch LibSprCore)
 set(SRC_BIN_03_USER_MAIN     03_UserMain.cc)
 add_executable              (user_main ${SRC_BIN_03_USER_MAIN})
 set_target_properties       (user_main PROPERTIES OUTPUT_NAME "03_user_main")
-target_link_libraries       (user_main c LibSprMain)
+target_link_libraries       (user_main c LibSprMain rt pthread)
 add_dependencies            (user_main LibSprMain)
 
 ## Bin 04_debug_core
@@ -40,8 +40,8 @@ add_dependencies            (debug_core LibSprCore LibPowerManagerAPI)
 set(SRC_BIN_05_DMSG          05_DebugMsg.cc)
 add_executable              (debug_msg ${SRC_BIN_05_DMSG})
 set_target_properties       (debug_msg PROPERTIES OUTPUT_NAME "05_debug_msg")
-target_link_libraries       (debug_msg c LibSprLog pthread LibSprCore)
-add_dependencies            (debug_msg LibSprLog LibSprCore)
+target_link_libraries       (debug_msg c pthread LibSprCore)
+add_dependencies            (debug_msg LibSprCore)
 
 ## Bin 06_debug_binder
 set(SRC_BIN_06_DBINDER       06_DebugBinder.cc)

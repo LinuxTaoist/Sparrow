@@ -42,5 +42,5 @@ target_include_directories  (LibSprMain PRIVATE ${PROJECT_PATH}/3rdAdapter
                                                 ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 set_target_properties       (LibSprMain PROPERTIES OUTPUT_NAME "sprmain")
 set_target_properties       (LibSprMain PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries       (LibSprMain stdc++ LibSprCore LibSprLog rt dl)
-add_dependencies            (LibSprMain LibSprCore LibSprLog)
+target_link_libraries       (LibSprMain stdc++ LibSprCore rt dl)
+add_dependencies            (LibSprMain LibSprCore)

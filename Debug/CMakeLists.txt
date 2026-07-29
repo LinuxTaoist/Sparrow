@@ -61,5 +61,5 @@ aux_source_directory        (${SRC_DEBUG_PATH}/HttpUISrv        SRC_HTTP_DEBUG_P
 aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP   SRC_HTTP_DEBUG_PATH)
 add_executable              (BinHttpUISrv ${SRC_HTTP_DEBUG_PATH})
 set_target_properties       (BinHttpUISrv PROPERTIES OUTPUT_NAME "huisrv")
-target_link_libraries       (BinHttpUISrv LibSprCore LibMediatorAPI LibSprLog rt pthread dl util)
-add_dependencies            (BinHttpUISrv LibSprCore LibMediatorAPI LibSprLog)
+target_link_libraries       (BinHttpUISrv LibSprCore LibMediatorAPI rt pthread dl util)
+add_dependencies            (BinHttpUISrv LibSprCore LibMediatorAPI)

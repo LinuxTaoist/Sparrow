@@ -9,5 +9,5 @@ target_include_directories  (BinMediatorSrv PRIVATE ${PROJECT_PATH}/Core
                                             ${PROJECT_PATH}/PrivateAPIs/Binder
                                             ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 set_target_properties       (BinMediatorSrv PROPERTIES OUTPUT_NAME "mediatorsrv")
-target_link_libraries       (BinMediatorSrv rt pthread LibSprCore LibBinder LibSprLog)
-add_dependencies            (BinMediatorSrv LibSprCore LibBinder LibSprLog)
+target_link_libraries       (BinMediatorSrv rt pthread LibSprCore LibBinder)
+add_dependencies            (BinMediatorSrv LibSprCore LibBinder)
