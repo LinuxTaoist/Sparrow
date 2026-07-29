@@ -164,24 +164,24 @@ int64_t ModularInverse(int64_t a, int64_t m)
 {
     int64_t m0 = m;
     int64_t x0 = 0, x1 = 1;
-    
+
     if (m == 1) return 0;
-    
+
     a = a % m;
     if (a < 0) a += m;
-    
+
     while (a > 1) {
         int64_t q = a / m;
         int64_t t = m;
-        
+
         m = a % m;
         a = t;
         t = x0;
-        
+
         x0 = x1 - q * x0;
         x1 = t;
     }
-    
+
     if (x1 < 0) x1 += m0;
     return x1;
 }
@@ -190,36 +190,36 @@ int64_t ModularInverse(int64_t a, int64_t m)
 int ComputePublicKey(uint64_t d, std::vector<uint8_t>& publicKey)
 {
     static const ECCurve curve = {251, 1, 1, 2};
-    
+
     if (d == 0) {
         return -1;
     }
-    
+
     InternalECPoint& g = GetBasePointG();
     if (g.inf) {
         return -1;
     }
-    
+
     // Compute P = d * G
     InternalECPoint pub = PointMul(curve, static_cast<int>(d % 251), g);
     if (pub.inf) {
         return -1;
     }
-    
+
     // Encode public key as 32 bytes: 16 bytes for x, 16 bytes for y
     publicKey.clear();
     publicKey.resize(32, 0);
-    
+
     // Store x coordinate (lower 4 bytes)
     for (int i = 0; i < 4; ++i) {
         publicKey[i] = static_cast<uint8_t>((pub.x >> (i * 8)) & 0xFF);
     }
-    
+
     // Store y coordinate (upper 4 bytes, offset 16)
     for (int i = 0; i < 4; ++i) {
         publicKey[16 + i] = static_cast<uint8_t>((pub.y >> (i * 8)) & 0xFF);
     }
-    
+
     return 0;
 }
 
@@ -227,21 +227,21 @@ int ComputePublicKey(uint64_t d, std::vector<uint8_t>& publicKey)
 int ScalarMultiplyPoint(uint64_t k, ECPoint& result)
 {
     static const ECCurve curve = {251, 1, 1, 2};
-    
+
     if (k == 0) {
         return -1;
     }
-    
+
     InternalECPoint& g = GetBasePointG();
     if (g.inf) {
         return -1;
     }
-    
+
     InternalECPoint pt = PointMul(curve, static_cast<int>(k % 251), g);
     if (pt.inf) {
         return -1;
     }
-    
+
     result.x = pt.x;
     result.y = pt.y;
     result.inf = false;
@@ -252,17 +252,17 @@ int ScalarMultiplyPoint(uint64_t k, ECPoint& result)
 int ScalarMultiplyPoint(uint64_t k, const ECPoint& p, ECPoint& result)
 {
     static const ECCurve curve = {251, 1, 1, 2};
-    
+
     if (k == 0 || p.inf) {
         return -1;
     }
-    
+
     InternalECPoint internalP{p.x, p.y, false};
     InternalECPoint pt = PointMul(curve, static_cast<int>(k % 251), internalP);
     if (pt.inf) {
         return -1;
     }
-    
+
     result.x = pt.x;
     result.y = pt.y;
     result.inf = false;
@@ -273,15 +273,15 @@ int ScalarMultiplyPoint(uint64_t k, const ECPoint& p, ECPoint& result)
 int AddECPoints(const ECPoint& p1, const ECPoint& p2, ECPoint& result)
 {
     static const ECCurve curve = {251, 1, 1, 2};
-    
+
     InternalECPoint internal1{p1.x, p1.y, p1.inf};
     InternalECPoint internal2{p2.x, p2.y, p2.inf};
-    
+
     InternalECPoint sum = PointAdd(curve, internal1, internal2);
     if (sum.inf) {
         return -1;
     }
-    
+
     result.x = sum.x;
     result.y = sum.y;
     result.inf = false;
@@ -294,18 +294,18 @@ int BytesToECPoint(const std::vector<uint8_t>& bytes, ECPoint& pt)
     if (bytes.size() < 8) {
         return -1;
     }
-    
+
     int x = 0;
     int y = 0;
-    
-    for (int i = 0; i < 4 && i < static_cast<int>(bytes.size()); ++i) {
+
+    for (int i = 0; i < 4; ++i) {
         x = (x << 8) | static_cast<int>(bytes[i]);
     }
-    
-    for (int i = 0; i < 4 && (4 + i) < static_cast<int>(bytes.size()); ++i) {
+
+    for (int i = 0; i < 4; ++i) {
         y = (y << 8) | static_cast<int>(bytes[4 + i]);
     }
-    
+
     pt.x = x % 251;
     pt.y = y % 251;
     pt.inf = false;

@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <algorithm>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -40,11 +41,7 @@ const int RESERVER_SIZE     = 1024;
 static std::string SanitizeShmName(const std::string& path)
 {
     std::string name = path;
-    for (auto& ch : name) {
-        if (ch == '/') {
-            ch = '_';
-        }
-    }
+    std::replace(name.begin(), name.end(), '/', '_');
     return name;
 }
 
@@ -96,31 +93,50 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     mEnable = true;
     int fd = open(path.c_str(), O_RDWR);
     if (fd == -1) {
-        SPR_LOGE("open %s failed! (%s)\n", mShmPath.c_str(), strerror(errno));
+        SPR_LOGE("open %s failed! (%s)\n", path.c_str(), strerror(errno));
         mEnable = false;
+        mRoot = nullptr;
+        mData = nullptr;
+        mMutex = nullptr;
+        mMapCapacity = 0;
+        mDataCapacity = 0;
+        mShmPath = path;
+        return;
     }
 
     struct stat fileStat;
     if (fstat(fd, &fileStat) == -1) {
         SPR_LOGE("fstat failed! (%s)\n", strerror(errno));
+        close(fd);
         mEnable = false;
+        mRoot = nullptr;
+        mData = nullptr;
+        mMutex = nullptr;
+        mMapCapacity = 0;
+        mDataCapacity = 0;
+        mShmPath = path;
+        return;
     }
 
     off_t fileSize = fileStat.st_size;
     void* mapMemory = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    close(fd);
     if (mapMemory == MAP_FAILED) {
         SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
         mEnable = false;
+        mRoot = nullptr;
+        mData = nullptr;
+        mMutex = nullptr;
+        mMapCapacity = 0;
+        mDataCapacity = 0;
+        mShmPath = path;
+        return;
     }
 
     mShmPath = path;
     mMapCapacity = fileSize;
     mDataCapacity = mMapCapacity - sizeof(Root);
     mRoot = reinterpret_cast<Root*>(mapMemory);
-    if (mRoot == nullptr) {
-        SPR_LOGE("mRoot is nullptr!\n");
-        mEnable = false;
-    }
 
     // Initialize Root structure if it's a new file or corrupted
     // Check if the rwStatus field has a valid value
@@ -133,12 +149,6 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     }
 
     mData = reinterpret_cast<uint8_t*>(mapMemory) + sizeof(Root);
-    if (mData == nullptr) {
-        SPR_LOGE("mData is nullptr!\n");
-        mEnable = false;
-    }
-
-    close(fd);
 
     mMutex = new (std::nothrow) ProcMutex("RingBuf" + SanitizeShmName(mShmPath));
     if (mMutex == nullptr) {

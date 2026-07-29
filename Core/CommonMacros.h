@@ -163,4 +163,8 @@
     #define MODULE_CONFIG_VERSION   "Unknown"
 #endif
 
+#ifndef HAL_FAMILY
+    #define HAL_FAMILY      "Unknown"
+#endif
+
 #endif // __COMMON_MACROS_H__

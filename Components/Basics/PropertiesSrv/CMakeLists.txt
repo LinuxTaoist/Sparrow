@@ -9,5 +9,5 @@ target_include_directories  (BinPropertySrv PRIVATE ${PROJECT_PATH}/Util
                                                     ${PROJECT_PATH}/PrivateAPIs/Binder
                                                     ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 set_target_properties       (BinPropertySrv PROPERTIES OUTPUT_NAME "propertiessrv")
-target_link_libraries       (BinPropertySrv pthread rt sprcore sprbinder sprlog epollevent dl)
-add_dependencies            (BinPropertySrv LibSprCore LibBinder LibSprLog LibEpollEvent)
+target_link_libraries       (BinPropertySrv pthread rt LibSprCore LibBinder LibSprLog dl)
+add_dependencies            (BinPropertySrv LibSprCore LibBinder LibSprLog)

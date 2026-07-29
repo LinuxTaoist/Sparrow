@@ -21,8 +21,7 @@ aux_source_directory        (${PROJECT_PATH}/Util               SRC_INFRA_WATCH_
 aux_source_directory        (${SRC_DEBUG_PATH}/InfraWatch       SRC_INFRA_WATCH_PATH)
 add_executable              (BinInfraWatch ${SRC_INFRA_WATCH_PATH})
 set_target_properties       (BinInfraWatch PROPERTIES OUTPUT_NAME "infrawatch")
-target_link_libraries       (BinInfraWatch sprcore mediatorapi powermanagerapi debugapi rt pthread dl)
-target_link_libraries       (BinInfraWatch configapi)
+target_link_libraries       (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibDebugAPI LibConfigAPI rt pthread dl)
 add_dependencies            (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibDebugAPI LibConfigAPI)
 
 ## Bin getprop
@@ -30,7 +29,7 @@ set(SRC_BIN_PROPERTY_GET    ${SRC_DEBUG_PATH}/Property/GetProperty.cpp)
 add_executable              (property_get ${SRC_BIN_PROPERTY_GET})
 target_include_directories  (property_get PRIVATE ${PROJECT_PATH}/PublicAPIs)
 set_target_properties       (property_get PROPERTIES OUTPUT_NAME "getprop")
-target_link_libraries       (property_get c propertyapi)
+target_link_libraries       (property_get c LibPropertyAPI)
 add_dependencies            (property_get LibPropertyAPI)
 
 ## Bin setprop
@@ -38,7 +37,7 @@ set(SRC_BIN_PROPERTY_SET    ${SRC_DEBUG_PATH}/Property/SetProperty.cpp)
 add_executable              (property_set ${SRC_BIN_PROPERTY_SET})
 target_include_directories  (property_set PRIVATE ${PROJECT_PATH}/PublicAPIs)
 set_target_properties       (property_set PROPERTIES OUTPUT_NAME "setprop")
-target_link_libraries       (property_set c propertyapi)
+target_link_libraries       (property_set c LibPropertyAPI)
 add_dependencies            (property_set LibPropertyAPI)
 
 # Bin rshellx
@@ -46,7 +45,7 @@ aux_source_directory        (${PROJECT_PATH}/Util               SRC_RSHELLX_PATH
 aux_source_directory        (${SRC_DEBUG_PATH}/RShellX          SRC_RSHELLX_PATH)
 add_executable              (BinRShellX ${SRC_RSHELLX_PATH})
 set_target_properties       (BinRShellX PROPERTIES OUTPUT_NAME  "rshellx")
-target_link_libraries       (BinRShellX c epollevent sprlog rt pthread dl util)
+target_link_libraries       (BinRShellX c LibEpollEvent LibSprLog rt pthread dl util)
 add_dependencies            (BinRShellX LibEpollEvent LibSprLog)
 
 # Bin propdump
@@ -62,5 +61,5 @@ aux_source_directory        (${SRC_DEBUG_PATH}/HttpUISrv        SRC_HTTP_DEBUG_P
 aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP   SRC_HTTP_DEBUG_PATH)
 add_executable              (BinHttpUISrv ${SRC_HTTP_DEBUG_PATH})
 set_target_properties       (BinHttpUISrv PROPERTIES OUTPUT_NAME "huisrv")
-target_link_libraries       (BinHttpUISrv sprcore epollevent mediatorapi sprlog rt pthread dl util)
-add_dependencies            (BinHttpUISrv LibSprCore LibEpollEvent LibMediatorAPI LibSprLog)
+target_link_libraries       (BinHttpUISrv LibSprCore LibMediatorAPI LibSprLog rt pthread dl util)
+add_dependencies            (BinHttpUISrv LibSprCore LibMediatorAPI LibSprLog)

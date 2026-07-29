@@ -64,6 +64,10 @@ public:
     explicit SharedRingBuffer(const std::string& path);
     ~SharedRingBuffer();
 
+    // Non-copyable due to raw resource management (mmap, ProcMutex)
+    SharedRingBuffer(const SharedRingBuffer&) = delete;
+    SharedRingBuffer& operator=(const SharedRingBuffer&) = delete;
+
     bool    IsReadable()    const noexcept;
     bool    IsWriteable()   const noexcept;
     int     Write(const void* data, int32_t len);

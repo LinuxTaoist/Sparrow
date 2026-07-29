@@ -82,6 +82,7 @@ void SprSystem::LoadReleaseInformation()
     std::string buildHost       = BUILD_HOST;
     std::string buildPlatform   = BUILD_PLATFORM;
     std::string moduleConfig    = MODULE_CONFIG_VERSION;
+    std::string halFamily       = HAL_FAMILY;
 
     std::string releaseInfo;
     releaseInfo += "System Version : " + projectInfo + "\n";
@@ -89,6 +90,7 @@ void SprSystem::LoadReleaseInformation()
     releaseInfo += "G++ Version    : " + gxxStandard + "\n";
     releaseInfo += "Gcc Version    : " + gccVersion + "\n";
     releaseInfo += "Run Platform   : " + runPlatform + "\n";
+    releaseInfo += "Hal Family     : " + halFamily + "\n";
     releaseInfo += "Build Time     : " + buildTime + "\n";
     releaseInfo += "Build Type     : " + buildType + "\n";
     releaseInfo += "Build Host     : " + buildHost + "\n";

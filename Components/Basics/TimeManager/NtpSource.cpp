@@ -99,7 +99,7 @@ int32_t NtpSource::SendTimeRequest(NtpServer& srv)
     if (!mIsReady) {
         SPR_LOGD("Creating UDP socket on port %d\n", mLocalPort);
         ret = mpSocket->AsUdp(mLocalPort);
-        if (ret == -1 || !mpSocket) {
+        if (ret == -1) {
             SPR_LOGE("Create UDP failed! port %d \n", mLocalPort);
             return ret;
         }

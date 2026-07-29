@@ -54,7 +54,7 @@ private:
     int32_t CalculateChildNodesValueSum(int32_t& sum);
     int32_t DecodeStaticField(const std::vector<uint8_t>& bytes);
     int32_t DecodeDynamicField(const std::vector<uint8_t>& bytes);
-    int32_t SetValue(const std::string& name, const std::vector<uint8_t>& value);
+    int32_t SetValue(const std::string& name, const std::vector<uint8_t>& value) override;
     int32_t GetValue(const std::string& name, std::vector<uint8_t>& value);
 
     std::vector<std::string> SplitPath(const std::string& path);

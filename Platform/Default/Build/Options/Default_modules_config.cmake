@@ -7,6 +7,9 @@ set(MODULE_CONFIG_VERSION "DEFAULT_MCONFIG_1002")
 #   - 修改路径： 当前文件
 #   - 修改方式： BASIC_MODULES增加对应文件夹名
 
+# Hardware 平台
+set(HAL_FAMILY "Default")
+
 # 基础模块配置
 list(APPEND BASIC_MODULES BinderManagerSrv)
 list(APPEND BASIC_MODULES ConfigManagerSrv)

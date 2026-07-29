@@ -10,5 +10,5 @@ target_include_directories  (BinPowerManagerSrv PRIVATE ${PROJECT_PATH}/Util
                                                         ${PROJECT_PATH}/3rdAdapter
                                                         ${PROJECT_PATH}/PrivateAPIs/Event
                                                         ${PROJECT_PATH}/UtilModules/EpollEventHandler)
-target_link_libraries       (BinPowerManagerSrv pthread sprcore epollevent sprlog)
-add_dependencies            (BinPowerManagerSrv LibSprCore LibSprLog LibEpollEvent)
+target_link_libraries       (BinPowerManagerSrv pthread LibSprCore LibSprLog)
+add_dependencies            (BinPowerManagerSrv LibSprCore LibSprLog)

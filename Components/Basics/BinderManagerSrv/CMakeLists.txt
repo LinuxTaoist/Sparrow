@@ -14,5 +14,5 @@ target_include_directories (BinBinderSrv PRIVATE    ${PROJECT_PATH}/Util
                                                     ${PROJECT_PATH}/PrivateAPIs/Binder)
 
 set_target_properties   (BinBinderSrv PROPERTIES OUTPUT_NAME "bindermanagersrv")
-target_link_libraries   (BinBinderSrv pthread sprlog rt dl)
+target_link_libraries   (BinBinderSrv pthread LibSprLog rt dl)
 add_dependencies        (BinBinderSrv LibSprLog)

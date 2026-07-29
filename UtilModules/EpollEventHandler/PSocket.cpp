@@ -343,7 +343,7 @@ PTcpClient::~PTcpClient()
 
 int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t srvPort, int32_t rcvLen, int32_t sndLen)
 {
-    int32_t flags, op;
+    int32_t op;
     struct linger so_linger;
     struct sockaddr_in server;
 
@@ -381,7 +381,7 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
         server.sin_addr.s_addr = inet_addr(srvAddr.c_str());
         server.sin_port = htons(srvPort);
 
-        flags = fcntl(mEvtFd, F_GETFL, 0);
+        int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
         fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 
         // Linux TCP repeat connect directly return EISCONN.

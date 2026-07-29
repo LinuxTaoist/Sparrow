@@ -8,5 +8,5 @@ target_include_directories  (BinSrvMgr PRIVATE  ${PROJECT_PATH}/Util
                                                 ${PROJECT_PATH}/3rdAdapter
                                                 ${PROJECT_PATH}/Core)
 set_target_properties       (BinSrvMgr PROPERTIES OUTPUT_NAME                       "servicemanagersrv")
-target_link_libraries       (BinSrvMgr pthread sprlog rt c dl)
+target_link_libraries       (BinSrvMgr pthread LibSprLog rt c dl)
 add_dependencies            (BinSrvMgr LibSprLog)

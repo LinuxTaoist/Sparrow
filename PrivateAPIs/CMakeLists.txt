@@ -22,7 +22,7 @@ set(SRC_MEDIATOR_API_FILES ${PRIVATE_APIS_PATH}/SprMediatorInterface.cpp)
 add_library             (LibMediatorAPI SHARED ${SRC_MEDIATOR_API_FILES})
 set_target_properties   (LibMediatorAPI PROPERTIES OUTPUT_NAME "mediatorapi")
 set_target_properties   (LibMediatorAPI PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries   (LibMediatorAPI stdc++ rt dl sprbinder)
+target_link_libraries   (LibMediatorAPI stdc++ rt dl LibBinder)
 add_dependencies        (LibMediatorAPI LibBinder)
 
 ## Build libdebug.so
@@ -30,7 +30,7 @@ set(SRC_DEBUG_API_FILES ${PRIVATE_APIS_PATH}/DebugInterface.cpp)
 add_library             (LibDebugAPI SHARED ${SRC_DEBUG_API_FILES})
 set_target_properties   (LibDebugAPI PROPERTIES OUTPUT_NAME "debugapi")
 set_target_properties   (LibDebugAPI PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries   (LibDebugAPI stdc++ rt dl sprbinder)
+target_link_libraries   (LibDebugAPI stdc++ rt dl LibBinder)
 add_dependencies        (LibDebugAPI LibBinder)
 
 set(SRC_SPR_MAIN_FILES  ${PROJECT_PATH}/Util/Backtrace.cpp
@@ -42,5 +42,5 @@ target_include_directories  (LibSprMain PRIVATE ${PROJECT_PATH}/3rdAdapter
                                                 ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 set_target_properties       (LibSprMain PROPERTIES OUTPUT_NAME "sprmain")
 set_target_properties       (LibSprMain PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries       (LibSprMain stdc++ sprcore sprlog epollevent rt dl)
-add_dependencies            (LibSprMain LibSprCore LibSprLog LibEpollEvent)
+target_link_libraries       (LibSprMain stdc++ LibSprCore LibSprLog rt dl)
+add_dependencies            (LibSprMain LibSprCore LibSprLog)

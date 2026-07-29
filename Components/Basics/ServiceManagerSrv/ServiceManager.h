@@ -13,41 +13,52 @@
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
  *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
+ *  2026/07/24 | 1.0.0.2   | Xiang.D        | Slim down: restart backoff, stop timeout, SIGKILL fallback
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
 #ifndef __SERVICE_MANAGER_H__
 #define __SERVICE_MANAGER_H__
 
-#include <map>
+#include <time.h>
 #include <string>
-#include <thread>
+#include <vector>
 #include <stdint.h>
 
-class ServiceManager
-{
+struct SvcInfo {
+    int32_t pid;
+    int32_t restartCount;
+    int32_t failStreak;
+    time_t  lastRestart;
+    std::string path;
+
+    SvcInfo() = default;
+    SvcInfo(const std::string& p, int32_t id)
+        : pid(id), restartCount(1), failStreak(0), lastRestart(time(nullptr)), path(p) {
+    }
+};
+
+class ServiceManager {
 public:
     ServiceManager();
     ~ServiceManager();
 
     int32_t WorkLoop();
     static int32_t ExitLoop();
-    int32_t DumpPidMapInfo();
 
 private:
-    bool IsExeAliveByProc(int32_t pid);
     int32_t InitEnv();
-    int32_t InitMsgQueueLimit();
-    int32_t StartAllExesFromConfigure(const std::string& cfgPath);
-    int32_t StartExe(const std::string& exePath);
-    int32_t StopAllSubExes();
-    int32_t ClearExeEnvNode(const std::string& exeName);
-    int32_t WaitLastExeFinished(const std::string& exeName);
+    int32_t StartAllFromConfig(const std::string& cfgPath);
+    int32_t StartOne(const std::string& exePath);
+    int32_t ForkExec(const std::string& exePath);
+    int32_t StopAll();
+    int32_t TryRestart(size_t idx);
+    int32_t DumpPidMapInfo();
+    bool    ShouldRestart(const SvcInfo& svc) const;
 
 private:
     static bool mRunning;
-    std::string mRootDir;
-    std::map<int, std::pair<std::string, int>> mPidMap;     // key: pid, value: exePath, times
+    std::vector<SvcInfo> mSvcs;
 };
 
 #endif // __SERVICE_MANAGER_H__
