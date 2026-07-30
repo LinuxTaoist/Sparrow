@@ -52,7 +52,24 @@ SprLog::SprLog()
         perror("sem_open failed");
     }
 
-    pLogSCacheMem.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH));
+    // Retry: wait for the master (LogManagerSrv) to create /tmp/SprLogShm.
+    // On cold boot the tmpfs is empty; without a retry the slave constructor
+    // fails permanently because open(path, O_RDWR) returns ENOENT.
+    const int MAX_RETRY_CNT = 50;   // 50 × 100 ms = 5 s
+    for (int i = 0; i < MAX_RETRY_CNT; i++) {
+        pLogSCacheMem.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH));
+        if (pLogSCacheMem && pLogSCacheMem->IsEnabled()) {
+            break;
+        }
+        pLogSCacheMem.reset();
+        usleep(100000); // 100 ms
+    }
+
+    // Last attempt — if still failing, accept the disabled buffer rather than
+    // blocking the process forever. Log output degrades gracefully.
+    if (!pLogSCacheMem || !pLogSCacheMem->IsEnabled()) {
+        pLogSCacheMem.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH));
+    }
 }
 
 SprLog::~SprLog()
@@ -62,11 +79,6 @@ SprLog::~SprLog()
     //     sem_close(mWriteSem);
     //     sem_unlink(SEMAPHORE_NAME);
     //     mWriteSem = SEM_FAILED;
-    // }
-
-    // if (pLogSCacheMem != nullptr) {
-    //     delete pLogSCacheMem;
-    //     pLogSCacheMem = nullptr;
     // }
 }
 

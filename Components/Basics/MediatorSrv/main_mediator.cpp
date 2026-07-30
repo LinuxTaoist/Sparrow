@@ -34,6 +34,7 @@ int main(int argc, const char* argv[])
         SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {
             case MAIN_EXIT_SIGNUM:
+            case SIGTERM:
                 EpollEventHandler::GetInstance()->ExitLoop();
                 break;
             case SIGSEGV:

@@ -8,5 +8,5 @@ target_include_directories  (BinDebugSrv PRIVATE    ${PROJECT_PATH}/Util
                                                     ${PROJECT_PATH}/3rdAdapter
                                                     ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 set_target_properties       (BinDebugSrv PROPERTIES OUTPUT_NAME "debugsrv")
-target_link_libraries       (BinDebugSrv LibSprCore LibBinder pthread LibSprLog dl)
-add_dependencies            (BinDebugSrv LibSprCore LibBinder LibSprLog)
+target_link_libraries       (BinDebugSrv LibSprCore LibBinder pthread dl)
+add_dependencies            (BinDebugSrv LibSprCore LibBinder)

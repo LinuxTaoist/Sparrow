@@ -26,7 +26,6 @@
 #include <sys/types.h>
 #include <sys/mman.h>
 #include "SharedRingBuffer.h"
-#include "ProcMutex.h"
 
 #define SPR_LOG(fmt, args...)   printf(fmt, ##args)
 #define SPR_LOGD(fmt, args...)  printf("%4d RingBuf D: " fmt, __LINE__, ##args)
@@ -36,14 +35,6 @@
 const int RETRY_TIMES       = 10;
 const int RETRY_INTERVAL_US = 10000;    // 10ms
 const int RESERVER_SIZE     = 1024;
-
-// Sanitize a file path into a valid shm_open name (only leading '/' allowed)
-static std::string SanitizeShmName(const std::string& path)
-{
-    std::string name = path;
-    std::replace(name.begin(), name.end(), '/', '_');
-    return name;
-}
 
 SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
     : mEnable(true), mRoot(nullptr), mData(nullptr), mMapCapacity(capacity), mShmPath(path) {
@@ -73,17 +64,9 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
     mRoot = reinterpret_cast<Root*>(mapMemory);
     mDataCapacity = mMapCapacity - sizeof(Root);
 
-    memset(mRoot, 0, sizeof(Root));
     mRoot->rp = 0;
     mRoot->wp = 0;
     mRoot->rwStatus = CMD_WRITEABLE;
-
-    mMutex = new (std::nothrow) ProcMutex("RingBuf" + SanitizeShmName(mShmPath));
-    if (mMutex == nullptr) {
-        SPR_LOGE("Create ProcMutex failed!\n");
-        mEnable = false;
-    }
-
     mData = reinterpret_cast<uint8_t*>(mRoot) + sizeof(Root);
 }
 
@@ -97,7 +80,6 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
         mEnable = false;
         mRoot = nullptr;
         mData = nullptr;
-        mMutex = nullptr;
         mMapCapacity = 0;
         mDataCapacity = 0;
         mShmPath = path;
@@ -111,7 +93,6 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
         mEnable = false;
         mRoot = nullptr;
         mData = nullptr;
-        mMutex = nullptr;
         mMapCapacity = 0;
         mDataCapacity = 0;
         mShmPath = path;
@@ -126,7 +107,6 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
         mEnable = false;
         mRoot = nullptr;
         mData = nullptr;
-        mMutex = nullptr;
         mMapCapacity = 0;
         mDataCapacity = 0;
         mShmPath = path;
@@ -141,28 +121,17 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     // Initialize Root structure if it's a new file or corrupted
     // Check if the rwStatus field has a valid value
     if (mRoot->rwStatus != CMD_WRITEABLE && mRoot->rwStatus != CMD_READABLE) {
-        SPR_LOGW("SharedRingBuffer: Invalid rwStatus (%u), reinitializing...\n", mRoot->rwStatus);
-        memset(mRoot, 0, sizeof(Root));
+        SPR_LOGW("Invalid rwStatus (%u), reinitializing...\n", mRoot->rwStatus.load());
         mRoot->rp = 0;
         mRoot->wp = 0;
         mRoot->rwStatus = CMD_WRITEABLE;
     }
 
     mData = reinterpret_cast<uint8_t*>(mapMemory) + sizeof(Root);
-
-    mMutex = new (std::nothrow) ProcMutex("RingBuf" + SanitizeShmName(mShmPath));
-    if (mMutex == nullptr) {
-        SPR_LOGE("Create ProcMutex failed!\n");
-        mEnable = false;
-    }
 }
 
 SharedRingBuffer::~SharedRingBuffer()
 {
-    if (mMutex != nullptr) {
-        delete mMutex;
-        mMutex = nullptr;
-    }
     munmap(mRoot, mMapCapacity);
 }
 
@@ -180,13 +149,19 @@ int SharedRingBuffer::Write(const void* data, int32_t len)
     // Although post after it is written in the shared memory, synchronization still might not be timely,
     // and the AvailSpace() returns 0. Only add a retry to avoid it
     while (retry > 0) {
-        ProcLockGuard guard(*mMutex, mTMutex);
-
-        int32_t avail = AvailSpace();
+        // SPSC: writer only reads rp (reader owns it), acquires to see reader's progress
+        uint32_t curWp = mRoot->wp.load(std::memory_order_relaxed);
+        uint32_t curRp = mRoot->rp.load(std::memory_order_acquire);
+        int32_t avail = (curWp >= curRp) ? (mDataCapacity - curWp + curRp) : (curRp - curWp);
         if (avail >= len) {
-            AdjustPosIfOverflow(&mRoot->wp, len);
-            memmove(reinterpret_cast<uint8_t*>(mData) + mRoot->wp, data, len);
-            mRoot->wp = (mRoot->wp + (uint32_t)len) % mDataCapacity;
+            if (curWp + (uint32_t)len >= mDataCapacity ||
+                curWp >= (mDataCapacity - RESERVER_SIZE)) {
+                curWp = 0;
+            }
+            memmove(reinterpret_cast<uint8_t*>(mData) + curWp, data, len);
+            curWp = (curWp + (uint32_t)len) % mDataCapacity;
+            // release: make data visible to reader before reader sees new wp
+            mRoot->wp.store(curWp, std::memory_order_release);
             SetRWStatus(CMD_READABLE);
             ret = 0;
             break;
@@ -213,13 +188,20 @@ int SharedRingBuffer::Read(void* data, int32_t len)
 
     // Refer to write comments
     while (retry > 0) {
-        ProcLockGuard guard(*mMutex, mTMutex);
-
-        int32_t avail = AvailData();
+        // SPSC: reader only reads wp (writer owns it), acquires to see writer's data
+        uint32_t curWp = mRoot->wp.load(std::memory_order_acquire);
+        uint32_t curRp = mRoot->rp.load(std::memory_order_relaxed);
+        int32_t diff = curWp - curRp;
+        int32_t avail = (diff + ((diff < 0) ? (int32_t)mDataCapacity : 0)) % (int32_t)mDataCapacity;
         if (avail >= len) {
-            AdjustPosIfOverflow(&mRoot->rp, len);
-            memcpy(data, reinterpret_cast<uint8_t*>(mData) + mRoot->rp, len);
-            mRoot->rp = (mRoot->rp + len) % mDataCapacity;
+            if (curRp + (uint32_t)len >= mDataCapacity ||
+                curRp >= (mDataCapacity - RESERVER_SIZE)) {
+                curRp = 0;
+            }
+            memcpy(data, reinterpret_cast<uint8_t*>(mData) + curRp, len);
+            curRp = (curRp + (uint32_t)len) % mDataCapacity;
+            // release: make space visible to writer before writer sees new rp
+            mRoot->rp.store(curRp, std::memory_order_release);
             SetRWStatus(CMD_WRITEABLE);
             ret = 0;
             break;
@@ -241,7 +223,9 @@ int32_t SharedRingBuffer::AvailSpace() const noexcept
         return -1;
     }
 
-    return (mRoot->wp >= mRoot->rp) ? (mDataCapacity - mRoot->wp + mRoot->rp) : (mRoot->rp - mRoot->wp);
+    uint32_t wp = mRoot->wp.load(std::memory_order_acquire);
+    uint32_t rp = mRoot->rp.load(std::memory_order_acquire);
+    return (wp >= rp) ? (mDataCapacity - wp + rp) : (rp - wp);
 }
 
 int32_t SharedRingBuffer::AvailData() const noexcept
@@ -251,7 +235,9 @@ int32_t SharedRingBuffer::AvailData() const noexcept
         return -1;
     }
 
-    int32_t diff = mRoot->wp - mRoot->rp;
+    uint32_t wp = mRoot->wp.load(std::memory_order_acquire);
+    uint32_t rp = mRoot->rp.load(std::memory_order_acquire);
+    int32_t diff = wp - rp;
     return (diff + ((diff < 0) ? mDataCapacity : 0)) % mDataCapacity;
 }
 
@@ -294,6 +280,11 @@ bool SharedRingBuffer::IsWriteable() const noexcept
     return ((mRoot->rwStatus == CMD_WRITEABLE && AvailSpace() != 0));
 }
 
+bool SharedRingBuffer::IsEnabled() const noexcept
+{
+    return mEnable;
+}
+
 void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept
 {
     if (!mEnable) {
@@ -318,7 +309,7 @@ void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
         return;
     }
 
-    mRoot->rwStatus = type;
+    mRoot->rwStatus.store(type, std::memory_order_release);
 }
 
 // void SharedRingBuffer::DumpMemory(const char* pAddr, uint32_t size)
@@ -335,5 +326,8 @@ void SharedRingBuffer::DumpErrorInfo()
         return ;
     }
 
-    SPR_LOGD("rp: %u, wp: %u, dataCapacity: %u\n", mRoot->rp, mRoot->wp, mDataCapacity);
+    SPR_LOGD("rp: %u, wp: %u, dataCapacity: %u\n",
+             mRoot->rp.load(std::memory_order_relaxed),
+             mRoot->wp.load(std::memory_order_relaxed),
+             mDataCapacity);
 }

@@ -36,15 +36,16 @@ ProcMutex::ProcMutex(const std::string& mutexName)
 
 ProcMutex::~ProcMutex() {
     if (mSharedData) {
-        // Always just unmap; never destroy the shared mutex.
-        // refCnt/waitCnt only reflect current lock holders/waiters,
-        // not how many processes still use this mutex.
-        // Destroying here would break other processes that hold
-        // the same named mutex (ProcMutex lifecycle known issue).
-        munmap(mSharedData, sizeof(SharedData));
-        close(mShmFd);
-        mSharedData = nullptr;
-        mShmFd = -1;
+        if (mSharedData->refCnt == 0 && mSharedData->waitCnt == 0) {
+            DeInit();
+        } else {
+            munmap(mSharedData, sizeof(SharedData));
+            mSharedData = nullptr;
+            if (mShmFd != -1) {
+                close(mShmFd);
+                mShmFd = -1;
+            }
+        }
     }
 }
 

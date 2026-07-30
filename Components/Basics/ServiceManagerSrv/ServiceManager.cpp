@@ -13,7 +13,6 @@
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
  *  2024/03/26 | 1.0.0.1   | Xiang.D        | Create file
- *  2026/07/24 | 1.0.0.2   | Xiang.D        | Slim down: restart backoff, stop timeout, SIGKILL fallback
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
@@ -37,14 +36,11 @@ using namespace GeneralUtils;
 #define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 
-#define SRV_MAX_CONTINUOUS_FAILURES      5
-#define SRV_RESTART_INITIAL_DELAY_SEC    1
-#define SRV_RESTART_MAX_DELAY_SEC        60
+#define SRV_RESTART_DELAY_US             500000   // 500ms delay before restart to avoid flooding
 #define SRV_GRACEFUL_STOP_POLL_CNT       10
 #define SRV_DEPENDENCY_START_GAP_US      100000   // 100ms
 
 const char INIT_CONFIGURE_PATH[] = "init.conf";
-
 bool ServiceManager::mRunning = false;
 
 ServiceManager::ServiceManager() {
@@ -72,16 +68,19 @@ int32_t ServiceManager::WorkLoop() {
     mRunning = true;
 
     while (mRunning) {
+        // reap newly exited children
         int32_t pid = 0, status = 0;
         while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
             for (size_t i = 0; i < mSvcs.size(); i++) {
                 if (mSvcs[i].pid == pid) {
                     SPR_LOGW("%s (pid %d) exited, status %d\n", mSvcs[i].path.c_str(), pid, status);
+                    mSvcs[i].pid = -1;       // mark dead, TryRestart will re-fork
                     TryRestart(i);
                     break;
                 }
             }
         }
+
         sleep(1);
     }
 
@@ -111,8 +110,8 @@ int32_t ServiceManager::StartAllFromConfig(const std::string& cfgPath) {
         if (start == string::npos) {
             continue;
         }
-        line = line.substr(start);
 
+        line = line.substr(start);
         if (line.empty() || line[0] == '#') {
             continue;
         }
@@ -188,7 +187,13 @@ int32_t ServiceManager::StopAll() {
     while (waitpid(-1, &status, WNOHANG) > 0);
 
     for (auto it = mSvcs.rbegin(); it != mSvcs.rend(); ++it) {
-        // 2. Guard against PID recycling: skip entries whose PID already gone
+        // Skip services that are already dead (marked by WorkLoop)
+        if (it->pid <= 0) {
+            SPR_LOGI("%s already dead\n", it->path.c_str());
+            continue;
+        }
+
+        // Guard against PID recycling: skip entries whose PID already gone
         if (kill(it->pid, 0) == -1 && errno == ESRCH) {
             SPR_LOGI("%s (pid %d) already gone\n", it->path.c_str(), it->pid);
             continue;
@@ -223,60 +228,39 @@ int32_t ServiceManager::StopAll() {
     return 0;
 }
 
-bool ServiceManager::ShouldRestart(const SvcInfo& svc) const {
-    int32_t backoff = SRV_RESTART_INITIAL_DELAY_SEC;
-    for (int32_t i = 0; i < svc.failStreak && backoff < SRV_RESTART_MAX_DELAY_SEC; i++) {
-        backoff *= 2;
-    }
-    if (backoff > SRV_RESTART_MAX_DELAY_SEC) {
-        backoff = SRV_RESTART_MAX_DELAY_SEC;
-    }
-
-    time_t elapsed = time(nullptr) - svc.lastRestart;
-    return elapsed >= backoff;
-}
-
 int32_t ServiceManager::TryRestart(size_t idx) {
     if (idx >= mSvcs.size()) {
         return -1;
     }
 
-    // Reset failure streak if the service ran stably beyond the max backoff window
     SvcInfo& svc = mSvcs[idx];
-    time_t uptime = time(nullptr) - svc.lastRestart;
-    if (uptime > SRV_RESTART_MAX_DELAY_SEC) {
-        svc.failStreak = 0;
-    }
+    usleep(SRV_RESTART_DELAY_US);
 
-    svc.failStreak++;
-    if (!ShouldRestart(svc)) {
-        SPR_LOGD("%s restart deferred (streak %d)\n", svc.path.c_str(), svc.failStreak);
-        return 0;
-    }
-
-    SPR_LOGI("Restarting %s (attempt %d, streak %d)\n",
-             svc.path.c_str(), svc.restartCount + 1, svc.failStreak);
-
+    SPR_LOGI("Restarting %s (attempt %d)\n", svc.path.c_str(), svc.restartCount + 1);
     int32_t pid = ForkExec(svc.path);
     if (pid == -1) {
-        svc.failStreak--;  // rollback: fork failed, not a crash
         SPR_LOGE("ForkExec %s failed\n", svc.path.c_str());
         return -1;
     }
 
     svc.pid = pid;
     svc.restartCount++;
-    svc.lastRestart = time(nullptr);
+    string name = GetSubstringAfterLastDelimiter(svc.path, '/');
+    SPR_LOGD("service: %-20s pid: %6d [cnt: %d]\n", name.c_str(), pid, svc.restartCount);
     return 0;
 }
 
 int32_t ServiceManager::DumpPidMapInfo() {
-    SPR_LOGD("PID     PATH                RESTARTS  FAILS\n");
-    SPR_LOGD("-----------------------------------------------\n");
+    SPR_LOGD("PID     PATH                RESTARTS\n");
+    SPR_LOGD("-----------------------------------------\n");
     for (const auto& svc : mSvcs) {
-        SPR_LOGD("%6d  %-20s %2d        %2d\n", svc.pid, svc.path.c_str(), svc.restartCount, svc.failStreak);
+        if (svc.pid > 0) {
+            SPR_LOGD("%6d  %-20s %2d\n", svc.pid, svc.path.c_str(), svc.restartCount);
+        } else {
+            SPR_LOGD("  DEAD  %-20s %2d\n", svc.path.c_str(), svc.restartCount);
+        }
     }
-    SPR_LOGD("-----------------------------------------------\n");
+    SPR_LOGD("-----------------------------------------\n");
     return 0;
 }
 

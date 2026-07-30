@@ -21,18 +21,16 @@
 
 #include <string>
 #include <stdint.h>
-#include <mutex>
-
-class ProcMutex;
+#include <atomic>
 
 struct Root
 {
-    uint8_t  cmd;       // 使能状态
-    uint8_t  busy;      // 忙碌状态
-    uint8_t  rwStatus;  // 可读状态
-    uint8_t  reserved;  // 预留
-    uint32_t wp;        // 写入位置
-    uint32_t rp;        // 读取位置
+    std::atomic<uint8_t>  cmd;        // 使能状态
+    std::atomic<uint8_t>  busy;       // 忙碌状态
+    std::atomic<uint8_t>  rwStatus;   // 可读状态
+    std::atomic<uint8_t>  reserved;   // 预留
+    std::atomic<uint32_t> wp;         // 写入位置
+    std::atomic<uint32_t> rp;         // 读取位置
 };
 
 enum ECmdType
@@ -64,12 +62,14 @@ public:
     explicit SharedRingBuffer(const std::string& path);
     ~SharedRingBuffer();
 
-    // Non-copyable due to raw resource management (mmap, ProcMutex)
+    // Non-copyable due to raw resource management (mmap, shared memory)
     SharedRingBuffer(const SharedRingBuffer&) = delete;
     SharedRingBuffer& operator=(const SharedRingBuffer&) = delete;
 
     bool    IsReadable()    const noexcept;
     bool    IsWriteable()   const noexcept;
+    bool    IsEnabled()     const noexcept;
+
     int     Write(const void* data, int32_t len);
     int     Read(void* data, int32_t len);
     // int     DumpBuffer(void* data, int32_t len) const noexcept;
@@ -88,8 +88,6 @@ private:
     bool        mEnable;
     Root*       mRoot;
     void*       mData;
-    ProcMutex*  mMutex;         // Cross-process mutex (via ProcMutex)
-    std::mutex  mTMutex;            // In-process thread mutex for ProcLockGuard
     uint32_t    mMapCapacity;       // Mapped memory capacity
     uint32_t    mDataCapacity;      // Data buffer capacity
     std::string mShmPath;

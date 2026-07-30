@@ -26,7 +26,7 @@ add_dependencies            (dir_watch LibSprCore)
 set(SRC_BIN_03_USER_MAIN     03_UserMain.cc)
 add_executable              (user_main ${SRC_BIN_03_USER_MAIN})
 set_target_properties       (user_main PROPERTIES OUTPUT_NAME "03_user_main")
-target_link_libraries       (user_main c LibSprMain rt pthread)
+target_link_libraries       (user_main c LibSprMain pthread rt)
 add_dependencies            (user_main LibSprMain)
 
 ## Bin 04_debug_core

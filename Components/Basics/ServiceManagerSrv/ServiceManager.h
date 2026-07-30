@@ -13,29 +13,24 @@
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
  *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *  2026/07/24 | 1.0.0.2   | Xiang.D        | Slim down: restart backoff, stop timeout, SIGKILL fallback
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
 #ifndef __SERVICE_MANAGER_H__
 #define __SERVICE_MANAGER_H__
 
-#include <time.h>
 #include <string>
 #include <vector>
 #include <stdint.h>
 
 struct SvcInfo {
-    int32_t pid;
+    int32_t pid;            // > 0 running, -1 dead
     int32_t restartCount;
-    int32_t failStreak;
-    time_t  lastRestart;
     std::string path;
 
     SvcInfo() = default;
     SvcInfo(const std::string& p, int32_t id)
-        : pid(id), restartCount(1), failStreak(0), lastRestart(time(nullptr)), path(p) {
-    }
+        : pid(id), restartCount(1), path(p) {}
 };
 
 class ServiceManager {
@@ -54,7 +49,6 @@ private:
     int32_t StopAll();
     int32_t TryRestart(size_t idx);
     int32_t DumpPidMapInfo();
-    bool    ShouldRestart(const SvcInfo& svc) const;
 
 private:
     static bool mRunning;
