@@ -16,6 +16,7 @@ This script uses only Python standard library so it can run on Windows directly.
 from __future__ import annotations
 
 import ast
+import copy
 import json
 import re
 from datetime import datetime
@@ -46,6 +47,9 @@ ATOM_FIXED_SIZE = {
     "u64": 8,
     "s64": 8,
 }
+
+ATOM_TYPES = ["u8", "u16", "u32", "u64", "s8", "s16", "s32", "s64", "leb128"]
+LEN_MODES = ["count", "bytes", "bit", "condition"]
 
 
 CONFIG_GUIDE_TEXT = """Propshow 配置规则说明
@@ -566,6 +570,638 @@ def maybe_build_head_flag_bytes(cfg: Dict[str, Any]) -> Optional[bytes]:
     return None
 
 
+def _strip_schema_meta(node: Dict[str, Any]) -> Dict[str, Any]:
+    out: Dict[str, Any] = {}
+    for key, val in node.items():
+        if key.startswith("__"):
+            continue
+        if key == "children" and isinstance(val, list):
+            out[key] = [_strip_schema_meta(v) for v in val if isinstance(v, dict)]
+            continue
+        if key == "child_template" and isinstance(val, dict):
+            out[key] = _strip_schema_meta(val)
+            continue
+        out[key] = val
+    return out
+
+
+class VisualSchemaBuilder:
+    def __init__(self, parent: "PropShowApp"):
+        self.parent = parent
+        self.win = tk.Toplevel(parent.root)
+        self.win.title("可视化配置面板")
+        self.win.geometry("1120x760")
+        self.win.minsize(960, 620)
+        self.win.configure(bg="#eef2f7")
+
+        self.schema: Dict[str, Any] = self._default_root()
+        self._uid_seed = 0
+        self._uid_to_node: Dict[str, Dict[str, Any]] = {}
+        self._updating_props = False
+        self.current_file_path: str = ""
+        self._lt_two_rows: Optional[bool] = None
+
+        self.name_var = tk.StringVar(value="")
+        self.type_var = tk.StringVar(value="u8")
+        self.value_var = tk.StringVar(value="")
+        self.len_ref_var = tk.StringVar(value="")
+        self.len_mode_var = tk.StringVar(value="bytes")
+        self.len_formula_var = tk.StringVar(value="")
+        self.editor_status_var = tk.StringVar(value="点击字段即可编辑属性")
+
+        self._build_ui()
+        self.load_from_text(self.parent.config_text.get("1.0", tk.END), silent=True)
+        self.win.protocol("WM_DELETE_WINDOW", self._on_close)
+
+    def _default_root(self) -> Dict[str, Any]:
+        return {
+            "name": "root",
+            "type": "static_field",
+            "children": [],
+        }
+
+    def _on_close(self) -> None:
+        self.parent.visual_builder = None
+        self.win.destroy()
+
+    def focus(self) -> None:
+        self.win.deiconify()
+        self.win.lift()
+        self.win.focus_force()
+
+    def _build_ui(self) -> None:
+        # ── 主体：水平分割面板 ────────────────────────────────────────
+        body = ttk.Panedwindow(self.win, orient=tk.HORIZONTAL)
+        body.pack(fill=tk.BOTH, expand=True, padx=10, pady=(10, 8))
+
+        # ── 左侧：配置/文件工具栏 + 协议结构树 ───────────────────────
+        left_outer = ttk.Frame(body, style="App.TFrame")
+        body.add(left_outer, weight=3)
+
+        # 自动换行的配置工具栏（宽度不足时折成两行）
+        self._left_toolbar_frame = ttk.Frame(left_outer, style="App.TFrame")
+        self._left_toolbar_frame.pack(fill=tk.X, pady=(0, 6))
+        self._left_btns: List[ttk.Button] = []
+        for _text, _cmd, _style in [
+            ("加载配置文件",   self.load_from_file,   "Toolbar.TButton"),
+            ("从解析配置加载", self.load_from_parent, "Toolbar.TButton"),
+            ("重置为空协议",   self.reset_root,       "Toolbar.TButton"),
+        ]:
+            self._left_btns.append(
+                ttk.Button(self._left_toolbar_frame, text=_text, command=_cmd, style=_style)
+            )
+        self._left_toolbar_frame.bind("<Configure>", self._reflow_left_toolbar)
+        self.win.after(80, self._reflow_left_toolbar)
+
+        # 协议结构树
+        left_lf = ttk.Labelframe(left_outer, text="协议结构", style="TLabelframe")
+        left_lf.pack(fill=tk.BOTH, expand=True)
+        self.schema_tree = ttk.Treeview(left_lf, columns=("type",), show="tree headings")
+        self.schema_tree.heading("#0", text="字段名", anchor=tk.W)
+        self.schema_tree.heading("type", text="类型", anchor=tk.W)
+        self.schema_tree.column("#0", width=260, anchor=tk.W)
+        self.schema_tree.column("type", width=140, anchor=tk.W)
+        self.schema_tree.pack(side=tk.LEFT, fill=tk.BOTH, expand=True, padx=(6, 0), pady=6)
+        left_scroll = ttk.Scrollbar(left_lf, orient=tk.VERTICAL, command=self.schema_tree.yview)
+        self.schema_tree.configure(yscrollcommand=left_scroll.set)
+        left_scroll.pack(side=tk.RIGHT, fill=tk.Y, padx=(0, 6), pady=6)
+        self.schema_tree.bind("<<TreeviewSelect>>", self._on_tree_select)
+
+        # ── 右侧：字段操作工具栏 + 属性面板 + JSON 预览 ──────────────
+        right_outer = ttk.Frame(body, style="App.TFrame")
+        body.add(right_outer, weight=2)
+
+        # 字段编辑工具栏（始终左对齐，不换行）
+        edit_toolbar = ttk.Frame(right_outer, style="App.TFrame")
+        edit_toolbar.pack(fill=tk.X, pady=(0, 6), anchor=tk.W)
+        for _text, _cmd in [
+            ("添加子字段",   self.add_child),
+            ("添加兄弟字段", self.add_sibling),
+            ("删除字段",     self.delete_node),
+        ]:
+            ttk.Button(edit_toolbar, text=_text, command=_cmd, style="Toolbar.TButton").pack(side=tk.LEFT, padx=(0, 4), pady=2)
+        ttk.Separator(edit_toolbar, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=8)
+        ttk.Button(edit_toolbar, text="上移", command=lambda: self.move_node(-1), style="Toolbar.TButton").pack(side=tk.LEFT, padx=(0, 4), pady=2)
+        ttk.Button(edit_toolbar, text="下移", command=lambda: self.move_node(1),  style="Toolbar.TButton").pack(side=tk.LEFT, pady=2)
+
+        # 垂直分割：字段属性 + JSON 预览
+        right_paned = ttk.Panedwindow(right_outer, orient=tk.VERTICAL)
+        right_paned.pack(fill=tk.BOTH, expand=True)
+        prop_panel = ttk.Labelframe(right_paned, text="字段属性", style="TLabelframe")
+        right_paned.add(prop_panel, weight=1)
+        self._build_property_panel(prop_panel)
+        preview_panel = ttk.Labelframe(right_paned, text="实时 JSON 预览", style="TLabelframe")
+        right_paned.add(preview_panel, weight=2)
+        self.preview_text = tk.Text(preview_panel, wrap=tk.NONE, font=("Consolas", 10))
+        self.preview_text.pack(fill=tk.BOTH, expand=True, padx=6, pady=6)
+        self.preview_text.configure(background="#fbfcfe", foreground="#102a43", relief=tk.FLAT)
+
+        # ── 底部：状态条 + 保存/应用操作按鈕 ────────────────────────────
+        bottom = ttk.Frame(self.win, style="App.TFrame")
+        bottom.pack(fill=tk.X, padx=10, pady=(0, 10))
+        ttk.Separator(bottom, orient=tk.HORIZONTAL).pack(fill=tk.X, pady=(0, 6))
+        bottom_row = ttk.Frame(bottom, style="App.TFrame")
+        bottom_row.pack(fill=tk.X)
+        ttk.Label(bottom_row, textvariable=self.editor_status_var, style="Status.TLabel", anchor=tk.W).pack(side=tk.LEFT, fill=tk.X, expand=True)
+        ttk.Button(bottom_row, text="应用到解析配置", command=self.apply_to_parent, style="Primary.TButton").pack(side=tk.RIGHT)
+        ttk.Separator(bottom_row, orient=tk.VERTICAL).pack(side=tk.RIGHT, fill=tk.Y, padx=8)
+        ttk.Button(bottom_row, text="另存为", command=self.save_as_file, style="Toolbar.TButton").pack(side=tk.RIGHT)
+        ttk.Button(bottom_row, text="保存", command=self.save_to_file, style="Toolbar.TButton").pack(side=tk.RIGHT, padx=(0, 6))
+
+    def _reflow_left_toolbar(self, event=None) -> None:
+        """在宽度不足时将左侧配置工具栏折叠为两行，否则保持单行。"""
+        if not hasattr(self, "_left_btns") or not self._left_btns:
+            return
+
+        frame = self._left_toolbar_frame
+        frame.update_idletasks()
+        avail_w = frame.winfo_width()
+        if avail_w <= 1:
+            # 窗口尚未完全渲染，稍后重试
+            self.win.after(80, self._reflow_left_toolbar)
+            return
+
+        for btn in self._left_btns:
+            btn.update_idletasks()
+
+        gap = 4
+        total_w = sum(btn.winfo_reqwidth() for btn in self._left_btns) + gap * len(self._left_btns)
+        want_two = total_w > avail_w
+
+        if want_two == self._lt_two_rows:
+            return  # 布局无需变化
+
+        self._lt_two_rows = want_two
+
+        # 清除旧布局
+        for btn in self._left_btns:
+            btn.grid_forget()
+
+        if not want_two:
+            # 单行：全部排在第 0 行
+            for col, btn in enumerate(self._left_btns):
+                btn.grid(row=0, column=col, padx=(0, gap), pady=2, sticky="w")
+        else:
+            # 两行：前 2 个在第 0 行，第 3 个在第 1 行
+            for col, btn in enumerate(self._left_btns[:2]):
+                btn.grid(row=0, column=col, padx=(0, gap), pady=2, sticky="w")
+            for col, btn in enumerate(self._left_btns[2:]):
+                btn.grid(row=1, column=col, padx=(0, gap), pady=(4, 2), sticky="w")
+
+    def _build_property_panel(self, parent: ttk.Labelframe) -> None:
+        wrap = ttk.Frame(parent, style="Panel.TFrame")
+        wrap.pack(fill=tk.BOTH, expand=True, padx=8, pady=8)
+
+        for i in range(2):
+            wrap.columnconfigure(i, weight=1 if i == 1 else 0)
+
+        row = 0
+        ttk.Label(wrap, text="name", style="Status.TLabel").grid(row=row, column=0, sticky="w", pady=4)
+        self.name_entry = ttk.Entry(wrap, textvariable=self.name_var)
+        self.name_entry.grid(row=row, column=1, sticky="ew", pady=4)
+
+        row += 1
+        ttk.Label(wrap, text="type", style="Status.TLabel").grid(row=row, column=0, sticky="w", pady=4)
+        self.type_combo = ttk.Combobox(
+            wrap,
+            textvariable=self.type_var,
+            values=["static_field", "dynamic_field"] + ATOM_TYPES,
+            state="readonly",
+        )
+        self.type_combo.grid(row=row, column=1, sticky="ew", pady=4)
+
+        row += 1
+        self.value_label = ttk.Label(wrap, text="value(可选)", style="Status.TLabel")
+        self.value_label.grid(row=row, column=0, sticky="w", pady=4)
+        self.value_entry = ttk.Entry(wrap, textvariable=self.value_var)
+        self.value_entry.grid(row=row, column=1, sticky="ew", pady=4)
+
+        row += 1
+        self.len_ref_label = ttk.Label(wrap, text="len_ref", style="Status.TLabel")
+        self.len_ref_label.grid(row=row, column=0, sticky="w", pady=4)
+        self.len_ref_entry = ttk.Entry(wrap, textvariable=self.len_ref_var)
+        self.len_ref_entry.grid(row=row, column=1, sticky="ew", pady=4)
+
+        row += 1
+        self.len_mode_label = ttk.Label(wrap, text="len_mode", style="Status.TLabel")
+        self.len_mode_label.grid(row=row, column=0, sticky="w", pady=4)
+        self.len_mode_combo = ttk.Combobox(wrap, textvariable=self.len_mode_var, values=LEN_MODES, state="readonly")
+        self.len_mode_combo.grid(row=row, column=1, sticky="ew", pady=4)
+
+        row += 1
+        self.len_formula_label = ttk.Label(wrap, text="len_formula", style="Status.TLabel")
+        self.len_formula_label.grid(row=row, column=0, sticky="w", pady=4)
+        self.len_formula_entry = ttk.Entry(wrap, textvariable=self.len_formula_var)
+        self.len_formula_entry.grid(row=row, column=1, sticky="ew", pady=4)
+
+        row += 1
+        ttk.Button(wrap, text="应用属性", command=self._apply_properties_to_selected, style="Toolbar.TButton").grid(row=row, column=1, sticky="e", pady=(8, 0))
+
+        self.name_entry.bind("<KeyRelease>", lambda _e: self._apply_properties_to_selected())
+        self.value_entry.bind("<KeyRelease>", lambda _e: self._apply_properties_to_selected())
+        self.len_ref_entry.bind("<KeyRelease>", lambda _e: self._apply_properties_to_selected())
+        self.len_formula_entry.bind("<KeyRelease>", lambda _e: self._apply_properties_to_selected())
+        self.type_combo.bind("<<ComboboxSelected>>", lambda _e: self._apply_properties_to_selected())
+        self.len_mode_combo.bind("<<ComboboxSelected>>", lambda _e: self._apply_properties_to_selected())
+
+    def _assign_uid_recursive(self, node: Dict[str, Any]) -> None:
+        if "__uid" not in node:
+            self._uid_seed += 1
+            node["__uid"] = f"n{self._uid_seed}"
+
+        children = node.get("children", [])
+        if isinstance(children, list):
+            for c in children:
+                if isinstance(c, dict):
+                    self._assign_uid_recursive(c)
+
+        template = node.get("child_template")
+        if isinstance(template, dict):
+            self._assign_uid_recursive(template)
+
+    def _selected_uid(self) -> Optional[str]:
+        selected = self.schema_tree.selection()
+        return selected[0] if selected else None
+
+    def _find_node(self, uid: str, cur: Optional[Dict[str, Any]] = None) -> Optional[Dict[str, Any]]:
+        node = cur if cur is not None else self.schema
+        if node.get("__uid") == uid:
+            return node
+
+        children = node.get("children", [])
+        if isinstance(children, list):
+            for c in children:
+                if isinstance(c, dict):
+                    found = self._find_node(uid, c)
+                    if found is not None:
+                        return found
+
+        template = node.get("child_template")
+        if isinstance(template, dict):
+            found = self._find_node(uid, template)
+            if found is not None:
+                return found
+        return None
+
+    def _find_parent(
+        self,
+        uid: str,
+        cur: Optional[Dict[str, Any]] = None,
+    ) -> Tuple[Optional[Dict[str, Any]], Optional[str], int]:
+        node = cur if cur is not None else self.schema
+
+        children = node.get("children", [])
+        if isinstance(children, list):
+            for idx, c in enumerate(children):
+                if isinstance(c, dict) and c.get("__uid") == uid:
+                    return node, "children", idx
+                if isinstance(c, dict):
+                    p, rel, i = self._find_parent(uid, c)
+                    if p is not None:
+                        return p, rel, i
+
+        template = node.get("child_template")
+        if isinstance(template, dict):
+            if template.get("__uid") == uid:
+                return node, "child_template", 0
+            p, rel, i = self._find_parent(uid, template)
+            if p is not None:
+                return p, rel, i
+
+        return None, None, -1
+
+    def _new_atom_node(self, name: str = "field", node_type: str = "u8") -> Dict[str, Any]:
+        self._uid_seed += 1
+        return {
+            "__uid": f"n{self._uid_seed}",
+            "name": name,
+            "type": node_type,
+        }
+
+    def _refresh_tree(self, select_uid: Optional[str] = None) -> None:
+        self._uid_to_node.clear()
+        for item in self.schema_tree.get_children():
+            self.schema_tree.delete(item)
+
+        def insert_rec(parent_item: str, node: Dict[str, Any], is_template: bool = False) -> None:
+            uid = node.get("__uid", "")
+            if not uid:
+                return
+            self._uid_to_node[uid] = node
+            name = node.get("name", "")
+            label = f"[template] {name}" if is_template else name
+            item = self.schema_tree.insert(parent_item, tk.END, iid=uid, text=label, values=(node.get("type", ""),), open=True)
+
+            children = node.get("children", [])
+            if isinstance(children, list):
+                for c in children:
+                    if isinstance(c, dict):
+                        insert_rec(item, c, False)
+
+            template = node.get("child_template")
+            if isinstance(template, dict):
+                insert_rec(item, template, True)
+
+        insert_rec("", self.schema)
+
+        chosen = select_uid if select_uid and self.schema_tree.exists(select_uid) else self.schema.get("__uid")
+        if chosen and self.schema_tree.exists(chosen):
+            self.schema_tree.selection_set(chosen)
+            self.schema_tree.focus(chosen)
+            self.schema_tree.see(chosen)
+
+        self._refresh_preview()
+
+    def _refresh_preview(self) -> None:
+        data = _strip_schema_meta(self.schema)
+        text = json.dumps(data, indent=4, ensure_ascii=False)
+        self.preview_text.configure(state=tk.NORMAL)
+        self.preview_text.delete("1.0", tk.END)
+        self.preview_text.insert("1.0", text)
+        self.preview_text.configure(state=tk.DISABLED)
+
+    def _on_tree_select(self, _event=None) -> None:
+        uid = self._selected_uid()
+        if not uid:
+            return
+        node = self._find_node(uid)
+        if not node:
+            return
+
+        self._updating_props = True
+        self.name_var.set(str(node.get("name", "")))
+        self.type_var.set(str(node.get("type", "u8")))
+        self.value_var.set(str(node.get("value", "")) if "value" in node else "")
+        self.len_ref_var.set(str(node.get("len_ref", "")))
+        self.len_mode_var.set(str(node.get("len_mode", "bytes")))
+        self.len_formula_var.set(str(node.get("len_formula", "")) if "len_formula" in node else "")
+        self._updating_props = False
+
+        self._refresh_property_visibility(node)
+
+    def _refresh_property_visibility(self, node: Dict[str, Any]) -> None:
+        node_type = node.get("type", "")
+        is_dynamic = node_type == "dynamic_field"
+        is_atom = node_type in ATOM_TYPES
+
+        def set_row(widget: Any, show: bool) -> None:
+            if show:
+                widget.grid()
+            else:
+                widget.grid_remove()
+
+        set_row(self.value_label, is_atom)
+        set_row(self.value_entry, is_atom)
+        set_row(self.len_ref_label, is_dynamic)
+        set_row(self.len_ref_entry, is_dynamic)
+        set_row(self.len_mode_label, is_dynamic)
+        set_row(self.len_mode_combo, is_dynamic)
+        set_row(self.len_formula_label, is_dynamic)
+        set_row(self.len_formula_entry, is_dynamic)
+
+    def _apply_properties_to_selected(self) -> None:
+        if self._updating_props:
+            return
+
+        uid = self._selected_uid()
+        if not uid:
+            return
+        node = self._find_node(uid)
+        if not node:
+            return
+
+        node["name"] = self.name_var.get().strip() or "field"
+        new_type = self.type_var.get().strip() or "u8"
+        old_type = node.get("type", "")
+        node["type"] = new_type
+
+        if new_type == "static_field":
+            node.pop("child_template", None)
+            node.pop("len_ref", None)
+            node.pop("len_mode", None)
+            node.pop("len_formula", None)
+            node.pop("value", None)
+            if not isinstance(node.get("children"), list):
+                node["children"] = []
+
+        elif new_type == "dynamic_field":
+            node.pop("children", None)
+            node.pop("value", None)
+            node["len_ref"] = self.len_ref_var.get().strip() or "fixed_1"
+            node["len_mode"] = self.len_mode_var.get().strip() or "bytes"
+            if self.len_formula_var.get().strip():
+                node["len_formula"] = self.len_formula_var.get().strip()
+            else:
+                node.pop("len_formula", None)
+
+            if not isinstance(node.get("child_template"), dict):
+                node["child_template"] = self._new_atom_node("item", "u8")
+
+        else:
+            node.pop("children", None)
+            node.pop("child_template", None)
+            node.pop("len_ref", None)
+            node.pop("len_mode", None)
+            node.pop("len_formula", None)
+            value_text = self.value_var.get().strip()
+            if value_text:
+                node["value"] = value_text
+            else:
+                node.pop("value", None)
+
+        # 从 dynamic 切换回原子/静态时，避免属性残留
+        if old_type == "dynamic_field" and new_type != "dynamic_field":
+            node.pop("len_ref", None)
+            node.pop("len_mode", None)
+            node.pop("len_formula", None)
+
+        self._refresh_tree(select_uid=uid)
+        self._on_tree_select()
+
+    def add_child(self) -> None:
+        uid = self._selected_uid()
+        node = self._find_node(uid) if uid else self.schema
+        if not node:
+            return
+
+        node_type = node.get("type", "")
+        new_node = self._new_atom_node("field", "u8")
+
+        if node_type == "static_field":
+            children = node.setdefault("children", [])
+            if isinstance(children, list):
+                children.append(new_node)
+        elif node_type == "dynamic_field":
+            node["child_template"] = new_node
+        else:
+            messagebox.showinfo("提示", "当前字段不是容器类型，请先把 type 改为 static_field 或 dynamic_field")
+            return
+
+        self._refresh_tree(select_uid=new_node.get("__uid"))
+        self.editor_status_var.set("已添加子字段")
+
+    def add_sibling(self) -> None:
+        uid = self._selected_uid()
+        if not uid:
+            return
+
+        parent, relation, idx = self._find_parent(uid)
+        if parent is None or relation is None:
+            messagebox.showinfo("提示", "根节点不能添加兄弟字段")
+            return
+
+        if relation != "children":
+            messagebox.showinfo("提示", "模板字段不能添加兄弟，请在父节点下操作")
+            return
+
+        children = parent.get("children", [])
+        if not isinstance(children, list):
+            return
+
+        new_node = self._new_atom_node("field", "u8")
+        children.insert(idx + 1, new_node)
+        self._refresh_tree(select_uid=new_node.get("__uid"))
+        self.editor_status_var.set("已添加兄弟字段")
+
+    def delete_node(self) -> None:
+        uid = self._selected_uid()
+        if not uid:
+            return
+        if uid == self.schema.get("__uid"):
+            messagebox.showinfo("提示", "根节点不允许删除")
+            return
+
+        parent, relation, idx = self._find_parent(uid)
+        if parent is None or relation is None:
+            return
+
+        if relation == "children":
+            children = parent.get("children", [])
+            if isinstance(children, list) and 0 <= idx < len(children):
+                children.pop(idx)
+        else:
+            parent.pop("child_template", None)
+
+        self._refresh_tree(select_uid=parent.get("__uid"))
+        self.editor_status_var.set("已删除字段")
+
+    def move_node(self, direction: int) -> None:
+        uid = self._selected_uid()
+        if not uid:
+            return
+
+        parent, relation, idx = self._find_parent(uid)
+        if parent is None or relation != "children":
+            messagebox.showinfo("提示", "当前节点不支持移动")
+            return
+
+        children = parent.get("children", [])
+        if not isinstance(children, list):
+            return
+
+        new_idx = idx + direction
+        if new_idx < 0 or new_idx >= len(children):
+            return
+
+        children[idx], children[new_idx] = children[new_idx], children[idx]
+        self._refresh_tree(select_uid=uid)
+        self.editor_status_var.set("已调整字段顺序")
+
+    def reset_root(self) -> None:
+        self.schema = self._default_root()
+        self._uid_seed = 0
+        self._assign_uid_recursive(self.schema)
+        self._refresh_tree(select_uid=self.schema.get("__uid"))
+        self._on_tree_select()
+        self.editor_status_var.set("已重置为空协议")
+
+    def _load_schema_dict(self, cfg: Dict[str, Any], silent: bool = False) -> None:
+        self.schema = copy.deepcopy(cfg)
+        self._uid_seed = 0
+        self._assign_uid_recursive(self.schema)
+        self._refresh_tree(select_uid=self.schema.get("__uid"))
+        self._on_tree_select()
+        if not silent:
+            self.editor_status_var.set("已加载配置")
+
+    def load_from_text(self, text: str, silent: bool = False) -> None:
+        try:
+            cfg = parse_config_json(text)
+        except ParseError as exc:
+            if not silent:
+                messagebox.showerror("加载失败", str(exc))
+            if silent:
+                self.reset_root()
+            return
+        self._load_schema_dict(cfg, silent=silent)
+
+    def load_from_parent(self) -> None:
+        self.load_from_text(self.parent.config_text.get("1.0", tk.END), silent=False)
+        self.current_file_path = ""
+        self.focus()
+
+    def load_from_file(self) -> None:
+        path = filedialog.askopenfilename(
+            title="选择配置 JSON",
+            filetypes=[("JSON", "*.json"), ("All Files", "*.*")],
+        )
+        if not path:
+            return
+
+        try:
+            with open(path, "r", encoding="utf-8") as f:
+                text = f.read()
+            self.load_from_text(text, silent=False)
+            self.current_file_path = path
+            self.editor_status_var.set(f"已加载文件配置: {path}")
+            self.focus()
+        except Exception as exc:
+            messagebox.showerror("加载失败", str(exc))
+
+    def save_to_file(self) -> None:
+        if not self.current_file_path:
+            self.save_as_file()
+            return
+
+        try:
+            cfg = _strip_schema_meta(self.schema)
+            with open(self.current_file_path, "w", encoding="utf-8") as f:
+                f.write(json.dumps(cfg, indent=4, ensure_ascii=False))
+                f.write("\n")
+            self.editor_status_var.set(f"已保存配置: {self.current_file_path}")
+        except Exception as exc:
+            messagebox.showerror("保存失败", str(exc))
+
+    def save_as_file(self) -> None:
+        path = filedialog.asksaveasfilename(
+            title="另存为配置 JSON",
+            defaultextension=".json",
+            filetypes=[("JSON", "*.json"), ("All Files", "*.*")],
+            initialfile="propshow_config.json",
+        )
+        if not path:
+            return
+
+        try:
+            cfg = _strip_schema_meta(self.schema)
+            with open(path, "w", encoding="utf-8") as f:
+                f.write(json.dumps(cfg, indent=4, ensure_ascii=False))
+                f.write("\n")
+            self.current_file_path = path
+            self.editor_status_var.set(f"已另存配置: {path}")
+        except Exception as exc:
+            messagebox.showerror("另存失败", str(exc))
+
+    def apply_to_parent(self) -> None:
+        cfg = _strip_schema_meta(self.schema)
+        text = json.dumps(cfg, indent=4, ensure_ascii=False)
+        self.parent.config_text.delete("1.0", tk.END)
+        self.parent.config_text.insert("1.0", text)
+        self.parent._refresh_config_gutter()
+        self.parent.status_var.set("已从可视化面板同步配置 JSON")
+        self.editor_status_var.set("已应用到解析配置")
+
+
 def decode_frames_with_header(
     cfg: Dict[str, Any],
     payload: bytes,
@@ -615,7 +1251,7 @@ class PropShowApp:
     def __init__(self, root: tk.Tk):
         self.root = root
         self.root.title("PropShow")
-        self.root.geometry("1280x820")
+        self.root.geometry("1480x860")
         self.root.minsize(980, 640)
         self._setup_styles()
 
@@ -624,6 +1260,7 @@ class PropShowApp:
         self.result_view_var = tk.StringVar(value="protocol")
         self.status_var = tk.StringVar(value="准备就绪")
         self.bytes_view_mode = "bytes"
+        self.visual_builder: Optional[VisualSchemaBuilder] = None
 
         self._build_ui()
 
@@ -646,9 +1283,15 @@ class PropShowApp:
 
         style.configure("Toolbar.TButton", padding=(10, 6), font=("Segoe UI", 10))
         style.configure("Primary.TButton", padding=(12, 6), font=("Segoe UI", 10, "bold"))
+        style.configure("Builder.TButton", padding=(10, 6), font=("Segoe UI", 10))
         style.map(
             "Primary.TButton",
             background=[("active", "#1f5c8b"), ("!disabled", "#2d79b5")],
+            foreground=[("!disabled", "#ffffff")],
+        )
+        style.map(
+            "Builder.TButton",
+            background=[("active", "#1a6b5a"), ("!disabled", "#2a8a74")],
             foreground=[("!disabled", "#ffffff")],
         )
         style.map(
@@ -675,32 +1318,32 @@ class PropShowApp:
             style="HeaderSub.TLabel",
         ).pack(anchor=tk.W, padx=12, pady=(0, 10))
 
-        top = ttk.Frame(root_wrap, style="App.TFrame")
-        top.pack(fill=tk.X, padx=12, pady=(0, 8))
+        # 主工具栏（不放在任何输入框内），并与下方输入区分割线同步
+        self.top_split = ttk.Panedwindow(root_wrap, orient=tk.HORIZONTAL)
+        self.top_split.pack(fill=tk.X, padx=12, pady=(0, 8))
 
-        io_group = ttk.Frame(top, style="App.TFrame")
-        io_group.pack(side=tk.LEFT)
-        ttk.Button(io_group, text="加载配置", command=self.load_config_file, style="Toolbar.TButton").pack(side=tk.LEFT)
-        ttk.Button(io_group, text="导出配置", command=self.export_config_file, style="Toolbar.TButton").pack(side=tk.LEFT, padx=6)
-        ttk.Button(io_group, text="加载字节流", command=self.load_bytes_file, style="Toolbar.TButton").pack(side=tk.LEFT, padx=(10, 0))
-        ttk.Button(io_group, text="导出字节流", command=self.export_bytes_file, style="Toolbar.TButton").pack(side=tk.LEFT, padx=6)
-        ttk.Button(io_group, text="导出协议视图", command=self.export_protocol_view, style="Toolbar.TButton").pack(side=tk.LEFT, padx=(10, 0))
-        ttk.Button(io_group, text="示例", command=self.fill_sample, style="Toolbar.TButton").pack(side=tk.LEFT, padx=6)
+        left_top = ttk.Frame(self.top_split, style="App.TFrame")
+        self.top_split.add(left_top, weight=1)
+        cfg_group = ttk.Frame(left_top, style="App.TFrame")
+        cfg_group.pack(side=tk.LEFT)
+        ttk.Button(cfg_group, text="加载配置", command=self.load_config_file, style="Toolbar.TButton").pack(side=tk.LEFT)
+        ttk.Button(cfg_group, text="导出配置", command=self.export_config_file, style="Toolbar.TButton").pack(side=tk.LEFT, padx=6)
+        ttk.Button(cfg_group, text="示例", command=self.fill_sample, style="Toolbar.TButton").pack(side=tk.LEFT, padx=(10, 0))
+        ttk.Button(cfg_group, text="可视化配置 ▶", command=self.open_visual_builder, style="Builder.TButton").pack(side=tk.LEFT, padx=6)
 
-        ttk.Separator(top, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=12)
-
-        option_group = ttk.Frame(top, style="App.TFrame")
+        right_top = ttk.Frame(self.top_split, style="App.TFrame")
+        self.top_split.add(right_top, weight=1)
+        option_group = ttk.Frame(right_top, style="App.TFrame")
         option_group.pack(side=tk.LEFT)
         ttk.Label(option_group, text="显示:", style="Status.TLabel").pack(side=tk.LEFT)
         ttk.Radiobutton(option_group, text="字节流", variable=self.bytes_view_var, value="bytes", command=self.on_bytes_view_change).pack(side=tk.LEFT, padx=(6, 0))
         ttk.Radiobutton(option_group, text="配置说明", variable=self.bytes_view_var, value="guide", command=self.on_bytes_view_change).pack(side=tk.LEFT, padx=(8, 0))
-
         ttk.Separator(option_group, orient=tk.VERTICAL).pack(side=tk.LEFT, fill=tk.Y, padx=12)
         ttk.Label(option_group, text="自动分帧:", style="Status.TLabel").pack(side=tk.LEFT)
         ttk.Radiobutton(option_group, text="开", variable=self.auto_split_var, value=True).pack(side=tk.LEFT, padx=(6, 0))
         ttk.Radiobutton(option_group, text="关", variable=self.auto_split_var, value=False).pack(side=tk.LEFT, padx=(8, 0))
 
-        action_group = ttk.Frame(top, style="App.TFrame")
+        action_group = ttk.Frame(right_top, style="App.TFrame")
         action_group.pack(side=tk.RIGHT)
         ttk.Button(action_group, text="解析", command=self.parse_now, style="Primary.TButton").pack(side=tk.RIGHT)
         ttk.Button(action_group, text="清空结果", command=self.clear_result, style="Toolbar.TButton").pack(side=tk.RIGHT, padx=8)
@@ -709,7 +1352,11 @@ class PropShowApp:
         paned.pack(fill=tk.BOTH, expand=True, padx=12, pady=(0, 8))
 
         input_wrap = ttk.Panedwindow(paned, orient=tk.HORIZONTAL)
+        self.input_wrap = input_wrap
         paned.add(input_wrap, weight=3)
+
+        self.root.after(50, self._sync_top_split_with_input)
+        self.input_wrap.bind("<Configure>", self._sync_top_split_with_input)
 
         config_frame = ttk.Labelframe(input_wrap, text="配置 JSON", style="TLabelframe")
         bytes_frame = ttk.Labelframe(input_wrap, text="协议字节流 (Hex)", style="TLabelframe")
@@ -768,6 +1415,9 @@ class PropShowApp:
         ttk.Label(result_toolbar, text="结果视图:", style="Status.TLabel").pack(side=tk.LEFT)
         ttk.Radiobutton(result_toolbar, text="协议视图", variable=self.result_view_var, value="protocol", command=self.on_result_view_change).pack(side=tk.LEFT, padx=(8, 0))
         ttk.Radiobutton(result_toolbar, text="解析树", variable=self.result_view_var, value="tree", command=self.on_result_view_change).pack(side=tk.LEFT, padx=(10, 0))
+        ttk.Button(result_toolbar, text="导出协议视图", command=self.export_protocol_view, style="Toolbar.TButton").pack(side=tk.RIGHT)
+        ttk.Button(result_toolbar, text="导出字节流", command=self.export_bytes_file, style="Toolbar.TButton").pack(side=tk.RIGHT, padx=6)
+        ttk.Button(result_toolbar, text="加载字节流", command=self.load_bytes_file, style="Toolbar.TButton").pack(side=tk.RIGHT)
 
         result_stack = ttk.Frame(result_panel, style="Panel.TFrame")
         result_stack.pack(fill=tk.BOTH, expand=True, padx=0, pady=0)
@@ -823,6 +1473,21 @@ class PropShowApp:
             self.show_guide_editor()
         else:
             self.show_bytes_editor()
+
+    def _sync_top_split_with_input(self, _event=None) -> None:
+        """让顶部工具栏分割线与输入区分割线保持一致。"""
+        if not hasattr(self, "top_split") or not hasattr(self, "input_wrap"):
+            return
+
+        try:
+            sash_x = self.input_wrap.sashpos(0)
+        except Exception:
+            return
+
+        try:
+            self.top_split.sashpos(0, sash_x)
+        except Exception:
+            pass
 
     def _line_count(self) -> int:
         try:
@@ -1120,6 +1785,12 @@ class PropShowApp:
         self.bytes_text.delete("1.0", tk.END)
         self.bytes_text.insert("1.0", "AA 55 01 02 10 03 11 22 33 20 02 FE EF")
         self.status_var.set("已填充示例配置和字节流")
+
+    def open_visual_builder(self) -> None:
+        if self.visual_builder and self.visual_builder.win.winfo_exists():
+            self.visual_builder.focus()
+            return
+        self.visual_builder = VisualSchemaBuilder(self)
 
     def clear_result(self) -> None:
         self.tree_text.delete("1.0", tk.END)
