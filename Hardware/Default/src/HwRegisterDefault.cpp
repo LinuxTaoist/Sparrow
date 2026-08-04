@@ -35,39 +35,39 @@ namespace {
 struct HwRegisterDefault {
     HwRegisterDefault() {
         HwInterfaceHub::RegisterPower(
-            []() -> IHwPower& {
+            []() -> IHwPower* {
                 static HwPowerDefault instance;
-                return instance;
+                return &instance;
             });
 
         HwInterfaceHub::RegisterGpio(
-            []() -> IHwGpio& {
+            []() -> IHwGpio* {
                 static HwGpioDefault instance;
-                return instance;
+                return &instance;
             });
 
         HwInterfaceHub::RegisterUart(
-            []() -> IHwUart& {
+            []() -> IHwUart* {
                 static HwUartDefault instance;
-                return instance;
+                return &instance;
             });
 
         HwInterfaceHub::RegisterWatchdog(
-            []() -> IHwWatchdog& {
+            []() -> IHwWatchdog* {
                 static HwWatchdogDefault instance;
-                return instance;
+                return &instance;
             });
 
         HwInterfaceHub::RegisterRtc(
-            []() -> IHwRtc& {
+            []() -> IHwRtc* {
                 static HwRtcDefault instance;
-                return instance;
+                return &instance;
             });
 
         HwInterfaceHub::RegisterNetwork(
-            []() -> IHwNetwork& {
+            []() -> IHwNetwork* {
                 static HwNetworkDefault instance;
-                return instance;
+                return &instance;
             });
     }
 } HwRegisterDefault;

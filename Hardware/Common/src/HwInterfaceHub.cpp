@@ -73,25 +73,25 @@ void HwInterfaceHub::UnregisterNetwork() {
 }
 
 IHwPower* HwInterfaceHub::GetPower() {
-    return mPowerCreator ? &mPowerCreator() : nullptr;
+    return mPowerCreator ? mPowerCreator() : nullptr;
 }
 
 IHwGpio* HwInterfaceHub::GetGpio() {
-    return mGpioCreator ? &mGpioCreator() : nullptr;
+    return mGpioCreator ? mGpioCreator() : nullptr;
 }
 
 IHwUart* HwInterfaceHub::GetUart() {
-    return mUartCreator ? &mUartCreator() : nullptr;
+    return mUartCreator ? mUartCreator() : nullptr;
 }
 
 IHwWatchdog* HwInterfaceHub::GetWatchdog() {
-    return mWatchdogCreator ? &mWatchdogCreator() : nullptr;
+    return mWatchdogCreator ? mWatchdogCreator() : nullptr;
 }
 
 IHwRtc* HwInterfaceHub::GetRtc() {
-    return mRtcCreator ? &mRtcCreator() : nullptr;
+    return mRtcCreator ? mRtcCreator() : nullptr;
 }
 
 IHwNetwork* HwInterfaceHub::GetNetwork() {
-    return mNetworkCreator ? &mNetworkCreator() : nullptr;
+    return mNetworkCreator ? mNetworkCreator() : nullptr;
 }

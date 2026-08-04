@@ -44,12 +44,12 @@ public:
     HwInterfaceHub(const HwInterfaceHub&) = delete;
     HwInterfaceHub& operator=(const HwInterfaceHub&) = delete;
 
-    using PowerCreator    = std::function<IHwPower&()>;
-    using GpioCreator     = std::function<IHwGpio&()>;
-    using UartCreator     = std::function<IHwUart&()>;
-    using WatchdogCreator = std::function<IHwWatchdog&()>;
-    using RtcCreator      = std::function<IHwRtc&()>;
-    using NetworkCreator  = std::function<IHwNetwork&()>;
+    using PowerCreator    = std::function<IHwPower*()>;
+    using GpioCreator     = std::function<IHwGpio*()>;
+    using UartCreator     = std::function<IHwUart*()>;
+    using WatchdogCreator = std::function<IHwWatchdog*()>;
+    using RtcCreator      = std::function<IHwRtc*()>;
+    using NetworkCreator  = std::function<IHwNetwork*()>;
 
     static void RegisterPower(PowerCreator c);
     static void RegisterGpio(GpioCreator c);
