@@ -29,18 +29,13 @@ public:
 
     virtual std::string GetVersion() const = 0;
     virtual int32_t Init() = 0;
-    virtual int32_t Release() = 0;
+    virtual int32_t Deinit() = 0;
     virtual int32_t SetMode(EHwPowerMode mode) = 0;
     virtual int32_t GetMode(EHwPowerMode& mode) = 0;
     virtual int32_t GetWakeupSource(EHwWakeupSource& source) = 0;
-    /**
-     * @brief Register a callback for wake-up source changes.
-     *
-     * @param  handler   callback object
-     * @return HW_OK on success
-     */
-    virtual int32_t RegisterWakeupHandler(HwPowerWakeupHandler handler) = 0;
     virtual int32_t Reboot(const std::string& reason) = 0;
+    virtual int32_t RegisterWakeupSourceHandler(HwPowerWakeupSourceHandler handler) = 0;
+    virtual int32_t RegisterWakeupEdgeHandler(HwPowerWakeupEdgeHandler handler) = 0;
     virtual std::string GetPlatformName() const = 0;
 };
 

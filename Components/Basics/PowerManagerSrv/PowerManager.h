@@ -84,6 +84,8 @@ private:
     EPowerLev2State GetLev2State() { return mCurLev2State; }
     std::string GetLev2String(EPowerLev2State state);
 
+    void HWPowerInit();
+    void HWPowerSetMode(int32_t mode);
     void DoBootBusiness();
     void DoResumeBusiness();
     void EnterActive();

@@ -66,10 +66,20 @@ enum EHwErrorCode {
 };
 
 enum EHwPowerMode {
-    HW_POWER_NORMAL   = 0,
+    HW_POWER_ACTIVE   = 0,
     HW_POWER_STANDBY  = 1,
     HW_POWER_SLEEP    = 2,
     HW_POWER_SHUTDOWN = 3,
+};
+
+enum EHwLpmEdge {
+    HW_LPM_EDGE_FALLING                  = 0,
+    HW_LPM_EDGE_RISING                   = 1,
+    HW_LPM_EDGE_TTY_WAKEUP               = 2,
+    HW_LPM_EDGE_CUSTOMIZED_FIRST_FALLING = 3,
+    HW_LPM_EDGE_CUSTOMIZED_FIRST_RISING  = 4,
+    HW_LPM_EDGE_CUSTOMIZED_SEC_FALLING   = 5,
+    HW_LPM_EDGE_CUSTOMIZED_SEC_RISING    = 6,
 };
 
 enum EHwWakeupSource {
@@ -186,6 +196,7 @@ struct SHwCellInfo {
 using HwGpioIrqHandler = std::function<void(int32_t pin)>;
 using HwUartRecvHandler = std::function<void(const uint8_t* data, int32_t len)>;
 using HwRtcAlarmHandler = std::function<void()>;
-using HwPowerWakeupHandler = std::function<void(EHwWakeupSource source)>;
+using HwPowerWakeupSourceHandler = std::function<void(EHwWakeupSource source)>;
+using HwPowerWakeupEdgeHandler   = std::function<void(EHwLpmEdge edge)>;
 
 #endif // __HW_COMMON_TYPES_H__

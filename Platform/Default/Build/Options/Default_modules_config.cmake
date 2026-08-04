@@ -1,16 +1,14 @@
 # modules_config.cmake
 set(MODULE_CONFIG_VERSION "DEFAULT_MCONFIG_1002")
 
+# Hardware 平台
+set(HAL_FAMILY "Default")
+
 ## 基础模块配置
 # 增加变量名对应Components/Basics路径下的文件夹名
 # 启用方法：
 #   - 修改路径： 当前文件
 #   - 修改方式： BASIC_MODULES增加对应文件夹名
-
-# Hardware 平台
-set(HAL_FAMILY "Default")
-
-# 基础模块配置
 list(APPEND BASIC_MODULES BinderManagerSrv)
 list(APPEND BASIC_MODULES ConfigManagerSrv)
 list(APPEND BASIC_MODULES DebugSrv)

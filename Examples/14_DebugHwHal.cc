@@ -67,7 +67,7 @@ void TestPower()
     }
 
     SPR_LOG("  Init     : %s\n", pwr->Init()   == HW_OK ? "OK" : "ERR");
-    SPR_LOG("  Release  : %s\n", pwr->Release() == HW_OK ? "OK" : "ERR");
+    SPR_LOG("  Deinit   : %s\n", pwr->Deinit() == HW_OK ? "OK" : "ERR");
 }
 
 void TestGpio()

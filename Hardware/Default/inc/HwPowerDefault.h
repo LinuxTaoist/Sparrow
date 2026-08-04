@@ -31,12 +31,13 @@ public:
 
     std::string GetVersion() const override;
     int32_t Init() override;
-    int32_t Release() override;
+    int32_t Deinit() override;
     int32_t SetMode(EHwPowerMode mode) override;
     int32_t GetMode(EHwPowerMode& mode) override;
     int32_t GetWakeupSource(EHwWakeupSource& source) override;
-    int32_t RegisterWakeupHandler(HwPowerWakeupHandler handler) override;
     int32_t Reboot(const std::string& reason) override;
+    int32_t RegisterWakeupSourceHandler(HwPowerWakeupSourceHandler handler) override;
+    int32_t RegisterWakeupEdgeHandler(HwPowerWakeupEdgeHandler handler) override;
     std::string GetPlatformName() const override;
 };
 

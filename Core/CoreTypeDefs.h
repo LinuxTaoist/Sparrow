@@ -271,7 +271,8 @@ enum EPreStandbyAck
 // - EStandbySourceType
 // --------------------------------------------------------------------------------------------------------------------
 #define STANDBY_REASON_TYPE_MACROS \
-    ENUM_OR_STRING(STANDBY_REASON_USER), \
+    ENUM_OR_STRING(STANDBY_REASON_USER),        \
+    ENUM_OR_STRING(STANDBY_REASON_WAKEUPIN),    \
     ENUM_OR_STRING(STANDBY_REASON_BUTT)
 
 enum EStandbyReasonType

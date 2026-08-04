@@ -24,6 +24,8 @@
 #include "PowerManager.h"
 #include "SprEnumHelper.h"
 #include "CommonErrorCodes.h"
+#include "HwInterfaceHub.h"
+#include "IHwPower.h"
 
 using namespace std;
 using namespace InternalDefs;
@@ -40,8 +42,7 @@ vector <StateTransition <   EPowerLev1State,
                             ESprSigId,
                             PowerManager,
                             SprMsg> >
-PowerManager::mStateTable =
-{
+PowerManager::mStateTable = {
     // =============================================================
     // All States for SIG_ID_POWER_OBSERVER_REGISTER
     // =============================================================
@@ -175,23 +176,20 @@ PowerManager::PowerManager(ModuleIDType id, const std::string& name)
                             mCurLev2State(LEV2_POWER_ANY),
                             mStartupType(STARTUP_BUTT),
                             mWakeupSourceType(WAKEUP_SOURCE_BUTT),
-                            mStandbyReason(STANDBY_REASON_BUTT)
-{
+                            mStandbyReason(STANDBY_REASON_BUTT) {
 }
 
-PowerManager::~PowerManager()
-{
+PowerManager::~PowerManager() {
     UnregisterDebugFuncs();
 }
 
-int32_t PowerManager::Init()
-{
+int32_t PowerManager::Init() {
     RegisterDebugFuncs();
+    HWPowerInit();
     return 0;
 }
 
-std::string PowerManager::GetLev1String(EPowerLev1State state)
-{
+std::string PowerManager::GetLev1String(EPowerLev1State state) {
     #ifdef ENUM_OR_STRING
     #undef ENUM_OR_STRING
     #endif
@@ -204,8 +202,7 @@ std::string PowerManager::GetLev1String(EPowerLev1State state)
     return (Lev1Strings.size() > state) ? Lev1Strings[state] : "UNDEFINED";
 }
 
-std::string PowerManager::GetLev2String(EPowerLev2State state)
-{
+std::string PowerManager::GetLev2String(EPowerLev2State state) {
     #ifdef ENUM_OR_STRING
     #undef ENUM_OR_STRING
     #endif
@@ -218,34 +215,67 @@ std::string PowerManager::GetLev2String(EPowerLev2State state)
     return (Lev2Strings.size() > state) ? Lev2Strings[state] : "UNDEFINED";
 }
 
-void PowerManager::SetLev1State(EPowerLev1State state)
-{
+void PowerManager::SetLev1State(EPowerLev1State state) {
     SPR_LOGD("Lev1 state changed: %s -> %s\n",
         GetLev1String(mCurLev1State).c_str(), GetLev1String(state).c_str());
 
     mCurLev1State = state;
 }
 
-void PowerManager::SetLev2State(EPowerLev2State state)
-{
+void PowerManager::SetLev2State(EPowerLev2State state) {
     SPR_LOGD("Lev2 state changed: %s -> %s\n",
         GetLev2String(mCurLev2State).c_str(), GetLev2String(state).c_str());
 
     mCurLev2State = state;
 }
 
-void PowerManager::DoBootBusiness()
-{
+void PowerManager::HWPowerInit() {
+    IHwPower *pHwPower = HwInterfaceHub::GetPower();
+    if (!pHwPower) {
+        SPR_LOGE("pHwPower is nullptr!\n");
+        return;
+    }
+
+    SPR_LOGD("Init hardware!\n");
+    pHwPower->RegisterWakeupSourceHandler([this](EHwWakeupSource source) {
+        SPR_LOGD("Receive wakeup source: 0x%x\n", source);
+        mWakeupSourceType = (EWakeupSourceType)source;
+        SetLev1State(LEV1_POWER_ACTIVE);
+        SetLev2State(LEV2_POWER_ANY);
+    });
+
+    pHwPower->RegisterWakeupEdgeHandler([this](EHwLpmEdge edge) {
+        SPR_LOGD("Receive wakeup in edge: 0x%x\n", edge);
+        if (edge == HW_LPM_EDGE_FALLING) {
+            SPR_LOGD("Send poweroff (With reason: WakeupIn)\n");
+            SprMsg msg(SIG_ID_POWER_OFF);
+            msg.SetI32Value(STANDBY_REASON_WAKEUPIN);
+            SendMsg(msg);
+        }
+    });
+
+    pHwPower->Init();
+}
+
+void PowerManager::HWPowerSetMode(int32_t mode) {
+    IHwPower *pHwPower = HwInterfaceHub::GetPower();
+    if (!pHwPower) {
+        SPR_LOGE("pHwPower is nullptr!\n");
+        return;
+    }
+
+    pHwPower->SetMode((EHwPowerMode)mode);
+}
+
+void PowerManager::DoBootBusiness() {
     SPR_LOGD("Do boot business!\n");
 }
 
-void PowerManager::DoResumeBusiness()
-{
+void PowerManager::DoResumeBusiness() {
     SPR_LOGD("Do resume business!\n");
 }
 
-void PowerManager::EnterActive()
-{
+void PowerManager::EnterActive() {
     SPR_LOGD("Enter active!\n");
     SetLev1State(LEV1_POWER_ACTIVE);
     SetLev2State(LEV2_POWER_ANY);
@@ -253,10 +283,12 @@ void PowerManager::EnterActive()
 
     // Post active event to external
     PostAEvent(POWER_MGR_ACTIVE);
+
+    SPR_LOGD("Call hardware to active!\n");
+    HWPowerSetMode(HW_POWER_ACTIVE);
 }
 
-void PowerManager::EnterStandby()
-{
+void PowerManager::EnterStandby() {
     SPR_LOGD("Enter standby!\n");
     SetLev1State(LEV1_POWER_STANDBY);
     SetLev2State(LEV2_POWER_TO_SLEEP_ING);
@@ -266,10 +298,12 @@ void PowerManager::EnterStandby()
 
     // Enter sleep after 5s in standby state
     RegisterTimer(STANDBY_ENTER_SLEEP_TIMEOUT, STANDBY_ENTER_SLEEP_TIMEOUT, SIG_ID_POWER_ENTER_SLEEP_TIMER_EVENT, 1);
+
+    SPR_LOGD("Call hardware to standby!\n");
+    HWPowerSetMode(HW_POWER_STANDBY);
 }
 
-void PowerManager::EnterSleep()
-{
+void PowerManager::EnterSleep() {
     SPR_LOGD("Enter sleep!\n");
     SetLev1State(LEV1_POWER_SLEEP);
     SetLev2State(LEV2_POWER_ANY);
@@ -277,42 +311,39 @@ void PowerManager::EnterSleep()
 
     // Post sleep event to external
     PostAEvent(POWER_MGR_SLEEP);
+
+    SPR_LOGD("Call hardware to sleep!\n");
+    HWPowerSetMode(HW_POWER_SLEEP);
 }
 
-void PowerManager::NotifyAllWithStartup()
-{
+void PowerManager::NotifyAllWithStartup() {
     // Notify startup event with priority
     mCurNotifyStartupEvent = SIG_ID_POWER_STARTUP_HIGHEST - 1;
     RegisterTimer(0, STANDBY_POLL_EVENT_400MS, SIG_ID_POWER_STARTUP_POLL_TIMER_EVENT, 0);
 }
 
-void PowerManager::NotifyAllWithStandby()
-{
+void PowerManager::NotifyAllWithStandby() {
     // Notify stanby event with priority
     mCurNotifyStandbyEvent = SIG_ID_POWER_STANDBY_HIGHEST - 1;
     RegisterTimer(0, STANDBY_POLL_EVENT_400MS, SIG_ID_POWER_STANDBY_POLL_TIMER_EVENT, 0);
 }
 
-void PowerManager::NotifyAllWithSleep()
-{
+void PowerManager::NotifyAllWithSleep() {
     NotifyEvent(SIG_ID_POWER_SLEEP);
 }
 
-void PowerManager::NotifyEvent(uint32_t event)
-{
+void PowerManager::NotifyEvent(uint32_t event) {
     SprMsg msg(event);
     NotifyAllObserver(msg);
     SPR_LOGD("Broadcast power event: %s\n", GetSigName(event));
 }
 
-void PowerManager::PostAEvent(uint32_t event, void* args, int32_t size)
-{
+void PowerManager::PostAEvent(uint32_t event, void* args, int32_t size) {
     int32_t ret = POST_AEVENT(event, args, size);
     SPR_LOGI("Post event (%u) %s!\n", event, (ret == 0) ? "success" : "failed");
 }
 
-bool PowerManager::IsAllowStandbyWithAllObserver()
-{
+bool PowerManager::IsAllowStandbyWithAllObserver() {
     bool ret = true;
     for (const auto &obs : mStandbyObservers) {
         if (obs.second.preStandbyAck != PRE_STANDBY_ACK_ALLOW) {
@@ -326,8 +357,7 @@ bool PowerManager::IsAllowStandbyWithAllObserver()
     return ret;
 }
 
-void PowerManager::ResetAllObserverPreStandbyAck()
-{
+void PowerManager::ResetAllObserverPreStandbyAck() {
     for (auto& observer : mStandbyObservers) {
         observer.second.preStandbyAck = PRE_STANDBY_ACK_BUTT;
     }
@@ -339,8 +369,7 @@ void PowerManager::ResetAllObserverPreStandbyAck()
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondObserverRegister(const SprMsg& msg)
-{
+void PowerManager::MsgRespondObserverRegister(const SprMsg& msg) {
     StandbyDetail detail;
     detail.preStandbyAck = PRE_STANDBY_ACK_BUTT;
     detail.priority = (EModuleBootPriority)msg.GetI32Value();
@@ -357,8 +386,7 @@ void PowerManager::MsgRespondObserverRegister(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondPowerOn(const SprMsg& msg)
-{
+void PowerManager::MsgRespondPowerOn(const SprMsg& msg) {
     if (mCurLev1State == LEV1_POWER_ACTIVE && mCurLev2State == LEV2_POWER_TO_STANDBY_ING) {
         mPreStandbyResponseTimer = false;
         ResetAllObserverPreStandbyAck();
@@ -385,8 +413,7 @@ void PowerManager::MsgRespondPowerOn(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondStartupPollTimerEvent(const SprMsg& msg)
-{
+void PowerManager::MsgRespondStartupPollTimerEvent(const SprMsg& msg) {
     // Why mCurNotifyStartupEvent++ first, then send event:
     // When dump mCurNotifyStartupEvent, the value is the same as the event to be sent.
     mCurNotifyStartupEvent++;
@@ -410,8 +437,7 @@ void PowerManager::MsgRespondStartupPollTimerEvent(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondStartupPollTimerEventUnexpected(const SprMsg& msg)
-{
+void PowerManager::MsgRespondStartupPollTimerEventUnexpected(const SprMsg& msg) {
     SPR_LOGD("Unregister %s on <Lev1: %s, Lev2: %s>\n",
         GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str(), GetLev2String(mCurLev2State).c_str());
     UnregisterTimer(SIG_ID_POWER_STARTUP_POLL_TIMER_EVENT);
@@ -423,8 +449,7 @@ void PowerManager::MsgRespondStartupPollTimerEventUnexpected(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondPowerOff(const SprMsg& msg)
-{
+void PowerManager::MsgRespondPowerOff(const SprMsg& msg) {
     // 1. Send SIG_ID_POWER_PRE_STANDBY_REQUEST to all modules
     // 2. Wait SIG_ID_POWER_STANDBY_RESPONSE from all modules with stanby allowed in 2s timeout
     // 3. Receive SIG_ID_POWER_STANDBY_RESPONSE
@@ -453,8 +478,7 @@ void PowerManager::MsgRespondPowerOff(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondPreStandbyResponse(const SprMsg& msg)
-{
+void PowerManager::MsgRespondPreStandbyResponse(const SprMsg& msg) {
     const uint32_t moduleID = msg.GetFrom();
     const int32_t ack = msg.GetI32Value();
     const string ackText = GetSprPreStandbyAckText(ack);
@@ -509,8 +533,7 @@ void PowerManager::MsgRespondPreStandbyResponse(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondPreStandbyResponseTimeout(const SprMsg& msg)
-{
+void PowerManager::MsgRespondPreStandbyResponseTimeout(const SprMsg& msg) {
     // 1. Request all observers to see if they are allowed to standby
     mStandbyTimerCnt++;
     const int32_t elapsedTimeout = mStandbyTimerCnt * STANDBY_RESPONSE_TIMEOUT;
@@ -535,8 +558,7 @@ void PowerManager::MsgRespondPreStandbyResponseTimeout(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondPreStandbyResponseUnexpected(const SprMsg& msg)
-{
+void PowerManager::MsgRespondPreStandbyResponseUnexpected(const SprMsg& msg) {
     SPR_LOGD("Unregister %s on <Lev1: %s, Lev2: %s>\n",
         GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str(), GetLev2String(mCurLev2State).c_str());
     UnregisterTimer(SIG_ID_POWER_PRE_STANDBY_RESPONSE_TIMEOUT);
@@ -548,8 +570,7 @@ void PowerManager::MsgRespondPreStandbyResponseUnexpected(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondStandbyPollTimerEvent(const SprMsg& msg)
-{
+void PowerManager::MsgRespondStandbyPollTimerEvent(const SprMsg& msg) {
     // Why mCurNotifyStandbyEvent++ first, then send event:
     // When dump mCurNotifyStandbyEvent, the value is the same as the event to be sent.
     mCurNotifyStandbyEvent++;
@@ -572,8 +593,7 @@ void PowerManager::MsgRespondStandbyPollTimerEvent(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondStandbyPollTimerEventUnexpected(const SprMsg& msg)
-{
+void PowerManager::MsgRespondStandbyPollTimerEventUnexpected(const SprMsg& msg) {
     SPR_LOGD("Unregister %s on <Lev1: %s Lev2: %s>", GetSigName(msg.GetMsgId()),
         GetLev1String(mCurLev1State).c_str(), GetLev2String(mCurLev2State).c_str());
     UnregisterTimer(SIG_ID_POWER_STANDBY_POLL_TIMER_EVENT);
@@ -584,8 +604,7 @@ void PowerManager::MsgRespondStandbyPollTimerEventUnexpected(const SprMsg& msg)
  *
  * @param msg
  */
-void PowerManager::MsgRespondEnterSleepTimerEvent(const SprMsg& msg)
-{
+void PowerManager::MsgRespondEnterSleepTimerEvent(const SprMsg& msg) {
     EnterSleep();
 }
 
@@ -595,8 +614,7 @@ void PowerManager::MsgRespondEnterSleepTimerEvent(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondUnexpectedState(const SprMsg& msg)
-{
+void PowerManager::MsgRespondUnexpectedState(const SprMsg& msg) {
     SPR_LOGW("Unexpected state: msg = %s on %s\n",
         GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
 }
@@ -607,14 +625,12 @@ void PowerManager::MsgRespondUnexpectedState(const SprMsg& msg)
  * @param[in] msg
  * @return none
  */
-void PowerManager::MsgRespondUnexpectedMsg(const SprMsg& msg)
-{
+void PowerManager::MsgRespondUnexpectedMsg(const SprMsg& msg) {
     SPR_LOGW("Unexpected msg: msg = %s on %s\n",
                 GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
 }
 
-int32_t PowerManager::ProcessMsg(const SprMsg& msg)
-{
+int32_t PowerManager::ProcessMsg(const SprMsg& msg) {
     // SPR_LOGD("Recv msg: %s on %s\n", GetSigName(msg.GetMsgId()), GetLev1String(mCurLev1State).c_str());
     auto stateEntry = std::find_if(mStateTable.begin(), mStateTable.end(),
         [this, &msg](const StateTransitionType& entry) {
@@ -630,8 +646,7 @@ int32_t PowerManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-void PowerManager::RegisterDebugFuncs()
-{
+void PowerManager::RegisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -644,8 +659,7 @@ void PowerManager::RegisterDebugFuncs()
     p->RegisterCmd(mModuleName, "DumpObservers",    "Dump observers",       std::bind(&PowerManager::DebugDumpObservers, this, std::placeholders::_1));
 }
 
-void PowerManager::UnregisterDebugFuncs()
-{
+void PowerManager::UnregisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -656,23 +670,20 @@ void PowerManager::UnregisterDebugFuncs()
     p->UnregisterCmd(mModuleName);
 }
 
-void PowerManager::DebugSendPowerOn(const std::vector<std::string>& args)
-{
+void PowerManager::DebugSendPowerOn(const std::vector<std::string>& args) {
     SprMsg msg(SIG_ID_POWER_ON);
     msg.SetI32Value(STARTUP_WARM_BOOT);
     msg.SetU32Value(WAKEUP_SOURCE_USER);
     SendMsg(msg);
 }
 
-void PowerManager::DebugSendPowerOff(const std::vector<std::string>& args)
-{
+void PowerManager::DebugSendPowerOff(const std::vector<std::string>& args) {
     SprMsg msg(SIG_ID_POWER_OFF);
     msg.SetI32Value(STANDBY_REASON_USER);
     SendMsg(msg);
 }
 
-void PowerManager::DebugDumpCurState(const std::vector<std::string>& args)
-{
+void PowerManager::DebugDumpCurState(const std::vector<std::string>& args) {
     SPR_LOGI("mCurLev1State    : %s\n", GetLev1String(mCurLev1State).c_str());
     SPR_LOGI("mCurLev2State    : %s\n", GetLev2String(mCurLev2State).c_str());
     SPR_LOGI("mStartupType     : %s\n", GetStartupTypeText(mStartupType).c_str());
@@ -680,8 +691,7 @@ void PowerManager::DebugDumpCurState(const std::vector<std::string>& args)
     SPR_LOGI("mStandbyReason   : %s\n", GetStandbyReasonTypeText(mStandbyReason).c_str());
 }
 
-void PowerManager::DebugDumpObservers(const std::vector<std::string>& args)
-{
+void PowerManager::DebugDumpObservers(const std::vector<std::string>& args) {
     SPR_LOGI("                   Show  Observers Details (%02d)                                              \n", mStandbyObservers.size());
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
     SPR_LOGI("  ID  PRIORITY               ACK                     MODULE                                    \n");
