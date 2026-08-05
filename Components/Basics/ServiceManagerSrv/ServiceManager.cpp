@@ -37,7 +37,7 @@ using namespace GeneralUtils;
 #define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 
 #define SRV_RESTART_DELAY_US             500000   // 500ms delay before restart to avoid flooding
-#define SRV_GRACEFUL_STOP_POLL_CNT       10
+#define SRV_GRACEFUL_STOP_POLL_CNT       50
 #define SRV_DEPENDENCY_START_GAP_US      100000   // 100ms
 
 const char INIT_CONFIGURE_PATH[] = "init.conf";
@@ -216,7 +216,7 @@ int32_t ServiceManager::StopAll() {
 
         // 4. Hard-kill fallback if still alive after timeout
         if (ret <= 0) {
-            SPR_LOGW("%s didn't exit, sending SIGKILL\n", it->path.c_str());
+            SPR_LOGW("%s didn't exit, sending SIGKILL, ret = %d\n", it->path.c_str(), ret);
             kill(it->pid, SIGKILL);
             waitpid(it->pid, &status, 0);
         }
