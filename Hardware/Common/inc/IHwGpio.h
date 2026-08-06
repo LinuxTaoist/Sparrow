@@ -11,7 +11,7 @@
  *  GPIO HAL interface.
  *
  *  Typical call sequence:
- *    1. Init(pinCfgs, count)             — export + configure all pins
+ *    1. Init(pinCfgs, count)              — export + configure all pins
  *    2. Read() / Write()                  — polling-style access
  *    3. RegisterIrqHandler()              — set up interrupt on edge
  *    4. EnableIrq() → handler fires       — interrupt-driven

@@ -1,21 +1,18 @@
-# Hardware/Default/CMakeLists.txt —— Default (stub) HAL implementation
-#
-# This is the fallback when no HAL_FAMILY is declared.
-# All methods return HW_ERR_NOT_IMPL.
-# Real platforms replace this with Hardware/<Family>/.
+# Hardware/Default
 
-add_library(LibSprHal SHARED
-    ../Common/src/HwInterfaceHub.cpp
-    src/HwPowerDefault.cpp
-    src/HwGpioDefault.cpp
-    src/HwUartDefault.cpp
-    src/HwWatchdogDefault.cpp
-    src/HwRtcDefault.cpp
-    src/HwNetworkDefault.cpp
-    src/HwRegisterDefault.cpp
-)
+## Build libsprhal.so
+set(DEFAULT_HAL_PATH        ${PROJECT_PATH}/Hardware/Default)
+set(DEFAULT_HAL_SRC_FILES   ${DEFAULT_HAL_PATH}/../Common/src/HwInterfaceHub.cpp
+                            ${DEFAULT_HAL_PATH}/src/HwPowerDefault.cpp
+                            ${DEFAULT_HAL_PATH}/src/HwGpioDefault.cpp
+                            ${DEFAULT_HAL_PATH}/src/HwUartDefault.cpp
+                            ${DEFAULT_HAL_PATH}/src/HwWatchdogDefault.cpp
+                            ${DEFAULT_HAL_PATH}/src/HwRtcDefault.cpp
+                            ${DEFAULT_HAL_PATH}/src/HwNetworkDefault.cpp
+                            ${DEFAULT_HAL_PATH}/src/HwRegisterDefault.cpp)
 
-target_include_directories(LibSprHal PRIVATE    ${CMAKE_CURRENT_SOURCE_DIR}/inc
-                                                ${CMAKE_CURRENT_SOURCE_DIR}/../Common/inc)
-set_target_properties(LibSprHal PROPERTIES OUTPUT_NAME "sprhal")
-set_target_properties(LibSprHal PROPERTIES LINKER_LANGUAGE CXX)
+add_library                 (LibSprHal SHARED   ${DEFAULT_HAL_SRC_FILES})
+target_include_directories  (LibSprHal PRIVATE  ${DEFAULT_HAL_PATH}/inc
+                                                ${DEFAULT_HAL_PATH}/../Common/inc)
+set_target_properties       (LibSprHal PROPERTIES OUTPUT_NAME "sprhal")
+set_target_properties       (LibSprHal PROPERTIES LINKER_LANGUAGE CXX)

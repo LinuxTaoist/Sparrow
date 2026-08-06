@@ -1,5 +1,6 @@
-## ConfigManagerSrv
+# ConfigManagerSrv
 
+## Bin configmanagersrv
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/ConfigManagerSrv        SRC_CONFIG_SRV_PATH)
 add_executable              (BinConfigManagerSrv ${SRC_CONFIG_SRV_PATH})
 target_include_directories  (BinConfigManagerSrv PRIVATE ${PROJECT_PATH}/Util

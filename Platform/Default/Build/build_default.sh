@@ -1,28 +1,38 @@
 #!/bin/bash
-# 记录开始时间
-START_TIME=$(date +%s)
-START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
+set -e
 
 SCRIPT_REAL_PATH=$(readlink -f "$0")
 SCRIPT_REAL_DIR=$(dirname "${SCRIPT_REAL_PATH}")
 PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
 
-BUILD_TYPE="Release"
+BUILD_TYPE="Debug"
 PROJECT_PLATFORM="Default"
 OUTPUT_PATH="${PROJECT_PATH}/Release/${PROJECT_PLATFORM}"
+BUILD_TARGETS=("$@")
 
-mkdir -p $OUTPUT_PATH/Cache
-mkdir -p $OUTPUT_PATH/Include
-mkdir -p $OUTPUT_PATH/Lib
+mkdir -p "$OUTPUT_PATH/Cache"
+mkdir -p "$OUTPUT_PATH/Include"
+mkdir -p "$OUTPUT_PATH/Lib"
 
-cd $OUTPUT_PATH/Cache/
-cmake $PROJECT_PATH \
-    -DCMAKE_BUILD_TYPE=$BUILD_TYPE          \
-    -DPROJECT_PLATFORM=$PROJECT_PLATFORM    \
-    -DCMAKE_INSTALL_PREFIX=$OUTPUT_PATH     \
-    -DOUTPUT_PATH=$OUTPUT_PATH
+# 记录开始时间
+START_TIME=$(date +%s)
+START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
 
-make -j8
+cd "$OUTPUT_PATH/Cache/"
+cmake "$PROJECT_PATH" \
+    -DCMAKE_BUILD_TYPE="$BUILD_TYPE"          \
+    -DPROJECT_PLATFORM="$PROJECT_PLATFORM"    \
+    -DCMAKE_INSTALL_PREFIX="$OUTPUT_PATH"     \
+    -DOUTPUT_PATH="$OUTPUT_PATH"
+
+if ((${#BUILD_TARGETS[@]} == 0)); then
+    echo "-- Build mode: Full build"
+    make -j8
+else
+    echo "-- Build mode: Module build"
+    echo "-- Build targets: ${BUILD_TARGETS[*]}"
+    make -j8 -- "${BUILD_TARGETS[@]}"
+fi
 
 # 记录结束时间并计算耗时
 END_TIME=$(date +%s)

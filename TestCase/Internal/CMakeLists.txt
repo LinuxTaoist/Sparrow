@@ -1,4 +1,4 @@
-## Bin test_internal
+# Internal
 set(TEST_INTERNAL_PATH      ${PROJECT_PATH}/TestCase/Internal)
 
 include_directories         (${PROJECT_PATH}/3rdAdapter)
@@ -19,6 +19,7 @@ aux_source_directory        (${TEST_INTERNAL_PATH}/3rdAdapter   SRC_TEST_INTERNA
 aux_source_directory        (${TEST_INTERNAL_PATH}/Components   SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules  SRC_TEST_INTERNAL_PATH)
 
+## Bin test_internal
 add_executable              (test_internal ${SRC_TEST_INTERNAL_PATH})
 target_include_directories  (test_internal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include)
 set_target_properties       (test_internal PROPERTIES OUTPUT_NAME "test_internal")

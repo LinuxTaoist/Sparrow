@@ -1,15 +1,11 @@
 #!/bin/bash
 
 set -e
-# 记录开始时间
-START_TIME=$(date +%s)
-START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
-
 SCRIPT_REAL_PATH=$(readlink -f "$0")
 SCRIPT_REAL_DIR=$(dirname "${SCRIPT_REAL_PATH}")
 PROJECT_PATH=$(readlink -f "${SCRIPT_REAL_DIR}/../../..")
 
-cd $PROJECT_PATH/Build/
+BUILD_TYPE="Release"
 PROJECT_PLATFORM="Default"
 OUTPUT_PATH="${PROJECT_PATH}/Release/${PROJECT_PLATFORM}"
 
@@ -21,17 +17,15 @@ rm -f  $PROJECT_PATH/3rdParty/sqlite/include/sqlite3ext.h
 rm -rf $PROJECT_PATH/3rdParty/sqlite/.sqlite_build_$PROJECT_PLATFORM
 rm -rf $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/googletest/.gtest_build
 rm -rf $PROJECT_PATH/Platform/$PROJECT_PLATFORM/3rdParty/sqlite/.sqlite_build
-
 rm -rf $OUTPUT_PATH/*
-mkdir -p $OUTPUT_PATH/Cache
-mkdir -p $OUTPUT_PATH/Include
-mkdir -p $OUTPUT_PATH/Lib
-
-BUILD_TYPE="Release"
 
 mkdir -p $OUTPUT_PATH/Cache
 mkdir -p $OUTPUT_PATH/Include
 mkdir -p $OUTPUT_PATH/Lib
+
+# 记录开始时间
+START_TIME=$(date +%s)
+START_TIME_HUMAN=$(date +"%Y-%m-%d %H:%M:%S")
 
 cd $OUTPUT_PATH/Cache/
 cmake $PROJECT_PATH \

@@ -1,6 +1,6 @@
-## MediatorSrv
+# MediatorSrv
 
-# Bin mediatorsrv
+## Bin mediatorsrv
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/MediatorSrv SRC_MEDIATOR_SRV_PATH)
 add_executable              (BinMediatorSrv ${SRC_MEDIATOR_SRV_PATH})
 target_include_directories  (BinMediatorSrv PRIVATE ${PROJECT_PATH}/Core

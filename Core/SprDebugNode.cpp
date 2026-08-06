@@ -212,7 +212,6 @@ void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
     SPR_LOGI("==============================================================================\n");
 }
 
-
 void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
 {
     auto pObj = SprProcInfo::GetInstance();

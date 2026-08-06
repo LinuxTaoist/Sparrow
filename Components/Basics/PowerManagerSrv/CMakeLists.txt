@@ -1,6 +1,6 @@
-## PowerManagerSrv
+# PowerManagerSrv
 
-# Bin powermanagersrv
+## Bin powermanagersrv
 aux_source_directory        (${PROJECT_PATH}/PrivateAPIs/Event                      SRC_POWER_MANAGER_PATH)
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/PowerManagerSrv      SRC_POWER_MANAGER_PATH)
 add_executable              (BinPowerManagerSrv ${SRC_POWER_MANAGER_PATH})

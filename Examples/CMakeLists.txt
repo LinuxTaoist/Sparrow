@@ -1,4 +1,4 @@
-## Examples
+# Examples
 
 include_directories (${PROJECT_PATH}/Core)
 include_directories (${PROJECT_PATH}/Util)
@@ -93,9 +93,9 @@ add_dependencies            (http_server LibEpollEvent)
 
 ## Bin 13_debug_codecx
 set(SRC_BIN_13_DCODECX      13_DebugCodecX.cc)
-set(DECODEX_UTIL_SOURCES    ${PROJECT_PATH}/Util/GeneralConversions.cpp)
+set(DECODECX_UTIL_SOURCES    ${PROJECT_PATH}/Util/GeneralConversions.cpp)
 aux_source_directory        (${PROJECT_PATH}/UtilModules/CodecX SRC_CODECX_PATH)
-add_executable              (debug_codecx ${SRC_BIN_13_DCODECX} ${SRC_CODECX_PATH} ${DECODEX_UTIL_SOURCES})
+add_executable              (debug_codecx ${SRC_BIN_13_DCODECX} ${SRC_CODECX_PATH} ${DECODECX_UTIL_SOURCES})
 target_include_directories  (debug_codecx PRIVATE ${PROJECT_PATH}/UtilModules/CodecX)
 set_target_properties       (debug_codecx PROPERTIES OUTPUT_NAME "13_debug_codecx")
 
