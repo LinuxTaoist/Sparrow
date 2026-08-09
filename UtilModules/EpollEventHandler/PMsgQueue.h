@@ -47,7 +47,7 @@ public:
     long GetMQMaxMsg() const { return mMaxMsg; }
 
 protected:
-    int32_t InitMsgQueue();
+    int32_t InitMsgQueue(long msgSize);
 
 private:
     long mMaxMsg;

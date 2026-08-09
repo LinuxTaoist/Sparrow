@@ -30,11 +30,10 @@ using namespace GeneralUtils;
 
 #define LOG_TAG "SprObsMQ"
 
-#define MSG_SIZE_MAX    1025
 #define RUNTIME_WARN_MS 2000
 
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
-    : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), MSG_SIZE_MAX), mConnected(false)
+    : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), 1024), mConnected(false)
 {
     mpDetails = std::make_shared<SprMQueueDetails>(GetMQDevName(), true);
 }
@@ -76,7 +75,10 @@ int32_t SprObserverWithMQueue::SendMsg(SprMsg& msg)
     std::string bytes;
     msg.SetFrom(mModuleID);
     msg.SetTo(mModuleID);
-    msg.Encode(bytes);
+    if (msg.Encode(bytes) != 0) {
+        SPR_LOGE("Encode failed!\n");
+        return -1;
+    }
 
     int32_t ret = Send(bytes);
     if (ret < 0) {
@@ -102,7 +104,12 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
         return -1;
     }
 
-    return msg.Decode(bytes);
+    if (msg.Decode(bytes) != 0) {
+        SPR_LOGE("Decode failed!");
+        return -1;
+    }
+
+    return 0;
 }
 
 int32_t SprObserverWithMQueue::MsgRespondSystemExit(const SprMsg& msg)

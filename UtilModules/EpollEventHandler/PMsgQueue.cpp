@@ -42,7 +42,7 @@ PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
 
     mDevName = (name[0] == '/') ? name : "/" + name;
     mMaxMsg = maxmsg;
-    int32_t rc = InitMsgQueue();
+    int32_t rc = InitMsgQueue(mMaxMsg);
     if (rc == -1) {
         SetReady(false);
     }
@@ -56,7 +56,7 @@ PMsgQueue::~PMsgQueue()
     }
 }
 
-int32_t PMsgQueue::InitMsgQueue()
+int32_t PMsgQueue::InitMsgQueue(long msgSize)
 {
     if (mDevName.empty()) {
         PLOGE("mDevName is empty!\n");
@@ -70,7 +70,7 @@ int32_t PMsgQueue::InitMsgQueue()
         if (errno == ENOENT) {
             struct mq_attr mqAttr;   // cat /proc/sys/fs/mqueue/msg_max
             mqAttr.mq_maxmsg = 10;
-            mqAttr.mq_msgsize = 1025;
+            mqAttr.mq_msgsize = msgSize;
             mqAttr.mq_flags = 0;
             mqAttr.mq_curmsgs = 0;
             mqAttr.__pad[0] = 0;
