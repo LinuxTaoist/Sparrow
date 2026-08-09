@@ -24,7 +24,6 @@
 #include "SprLog.h"
 #include "CoreTypeDefs.h"
 #include "SprObserver.h"
-#include "PMsgQueue.h"
 #include "SprMediatorMQProxy.h"
 
 using namespace std;
