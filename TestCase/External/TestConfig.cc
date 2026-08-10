@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : TestConfigManager.cc
+ *  @file       : TestConfig.cc
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -22,9 +22,7 @@
 #include <string>
 #include "gtest/gtest.h"
 #include "Config.h"
-#include "CoreTypeDefs.h"
 
-using namespace InternalDefs;
 
 namespace {
 
@@ -49,7 +47,7 @@ std::string MakeUniqueNamespace(const char* base)
 
 } // namespace
 
-class TestConfigManagerApi : public ::testing::Test
+class TestConfigApi : public ::testing::Test
 {
 public:
     static void SetUpTestCase()
@@ -60,7 +58,7 @@ public:
     }
 };
 
-TEST_F(TestConfigManagerApi, SetAndGetUserValue)
+TEST_F(TestConfigApi, SetAndGetUserValue)
 {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
@@ -79,7 +77,7 @@ TEST_F(TestConfigManagerApi, SetAndGetUserValue)
     EXPECT_EQ(queryRevision, revision);
 }
 
-TEST_F(TestConfigManagerApi, LayeredFallbackWorks)
+TEST_F(TestConfigApi, LayeredFallbackWorks)
 {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
@@ -100,7 +98,7 @@ TEST_F(TestConfigManagerApi, LayeredFallbackWorks)
     EXPECT_EQ(scope, CONFIG_SCOPE_USER);
 }
 
-TEST_F(TestConfigManagerApi, ListNamespaceReturnsEffectiveValues)
+TEST_F(TestConfigApi, ListNamespaceReturnsEffectiveValues)
 {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
@@ -116,7 +114,7 @@ TEST_F(TestConfigManagerApi, ListNamespaceReturnsEffectiveValues)
     EXPECT_EQ(items["mode"], "eco");
 }
 
-TEST_F(TestConfigManagerApi, BackupAndMetaWork)
+TEST_F(TestConfigApi, BackupAndMetaWork)
 {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
@@ -135,7 +133,7 @@ TEST_F(TestConfigManagerApi, BackupAndMetaWork)
     EXPECT_EQ(access("/tmp/config_manager.db.bak", F_OK), 0);
 }
 
-TEST_F(TestConfigManagerApi, TypedValueApisWork)
+TEST_F(TestConfigApi, TypedValueApisWork)
 {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);

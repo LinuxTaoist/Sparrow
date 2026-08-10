@@ -74,6 +74,16 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
     int32_t fd = p->GetEvtFd();
+    if (fd < 0) {
+        PLOGE("Invalid fd: %d\n", fd);
+        return;
+    }
+
+    // Detect duplicate registration (warn but allow overwrite)
+    if (mEpollMap.find(fd) != mEpollMap.end()) {
+        PLOGW("fd %d already in poll map, replacing\n", fd);
+    }
+
     int32_t ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret == -1) {
         PLOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
@@ -108,12 +118,21 @@ void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
 void EpollEventHandler::EpollLoop()
 {
     struct epoll_event ep[32];
+    const int32_t maxEvents = static_cast<int32_t>(sizeof(ep)/sizeof(ep[0]));
     mRun = true;
     while(mRun) {
         // 无事件时, epoll_wait阻塞, 等待
-        int32_t count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), mTimeOut);
+        int32_t count = epoll_wait(mHandle, ep, maxEvents, mTimeOut);
         if (count <= 0) {
+            if (count < 0 && errno != EINTR) {
+                PLOGE("epoll_wait fail! (%s)\n", strerror(errno));
+            }
             continue;
+        }
+
+        // Warn if event buffer is full (possible event loss)
+        if (count >= maxEvents) {
+            PLOGW("epoll_wait returned max %d events (possible overflow)\n", count);
         }
 
         for (int32_t i = 0; i < count; i++) {

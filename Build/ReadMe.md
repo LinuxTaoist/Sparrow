@@ -4,7 +4,7 @@
 
 ## 脚本区别
 
-- `build_default.sh`：Debug 增量编译，适合日常开发和调试。无参数时编译全部目标；带参数时只编译指定目标及其依赖。
+- `build_default.sh`：Debug 增量编译，适合日常开发和调试。无参数时编译全部目标；带参数时只编译指定模块目标及其依赖。
 - `rebuild_default.sh`：清理已有产物和第三方构建缓存后执行 Release 全量编译，适合发布版本。
 
 模块编译参数必须是有效的 CMake target，支持同时指定多个 target。

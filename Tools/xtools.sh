@@ -111,13 +111,13 @@ new_platform() {
     platform_name="$1"
     cd ${project_path}
 
-    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/${platform_name}_build.sh ${NC}"
+    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/build_${platform_name}.sh ${NC}"
     mkdir -p ${project_path}/Platform/${platform_name}
     mkdir -p ${project_path}/Platform/${platform_name}/Build
     mkdir -p ${project_path}/Platform/${platform_name}/Build/Options
     touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_compile_options.cmake
     touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_modules_config.cmake
-    touch    ${project_path}/Platform/${platform_name}/Build/${platform_name}_build.sh
+    touch    ${project_path}/Platform/${platform_name}/Build/build_${platform_name}.sh
     touch    ${project_path}/Platform/${platform_name}/Build/rebuild_${platform_name}.sh
 
     echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/Configs/vendor.prop ${NC}"

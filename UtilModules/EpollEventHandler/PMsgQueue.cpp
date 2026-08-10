@@ -22,6 +22,7 @@
 #include <mqueue.h>
 #include <string.h>
 #include <unistd.h>
+#include <vector>
 #include <sys/types.h>
 #include <sys/resource.h>
 #include "PLog.h"
@@ -29,6 +30,9 @@
 #include "EpollEventHandler.h"
 
 #define PLOG_TAG "PMsgQueue"
+
+// Safe stack buffer limit for mqueue messages (avoid VLA stack overflow)
+#define PMQ_STACK_BUF_SAFE_MAX 4096
 
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
             const std::function<void(int32_t, const std::string&, void*)>& cb,
@@ -147,12 +151,32 @@ int32_t PMsgQueue::Recv(int32_t fd, char* data, size_t size, uint32_t& prio)
 int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
 {
     mq_attr mqAttr;
-    mq_getattr(mEvtFd, &mqAttr);
-    char buf[mqAttr.mq_msgsize] = {0};
+    if (mq_getattr(mEvtFd, &mqAttr) < 0) {
+        PLOGE("mq_getattr failed! (%s)\n", strerror(errno));
+        return -1;
+    }
 
-    int32_t len = Recv(mEvtFd, buf, sizeof(buf), prio);
+    long msgSize = mqAttr.mq_msgsize;
+    if (msgSize <= 0) {
+        PLOGE("Invalid mq_msgsize: %ld\n", msgSize);
+        return -1;
+    }
+
+    // Use stack buffer for common small messages; fallback to heap for large ones
+    char stackBuf[PMQ_STACK_BUF_SAFE_MAX];
+    std::vector<char> heapBuf;
+    char* buf = stackBuf;
+    size_t bufSize = sizeof(stackBuf);
+
+    if (static_cast<size_t>(msgSize) > sizeof(stackBuf)) {
+        heapBuf.resize(static_cast<size_t>(msgSize));
+        buf = heapBuf.data();
+        bufSize = heapBuf.size();
+    }
+
+    int32_t len = Recv(mEvtFd, buf, bufSize, prio);
     if (len > 0) {
-        msg.assign(buf, len);
+        msg.assign(buf, static_cast<size_t>(len));
     }
     return len;
 }

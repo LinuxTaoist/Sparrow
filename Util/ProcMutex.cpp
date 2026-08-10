@@ -13,7 +13,6 @@
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
  *  2025/03/02 | 1.0.0.1   | Xiang.D        | Create file
- *  2025/08/17 | 1.0.0.2   | Xiang.D        | Adapt to atomic variables with minimal changes
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
@@ -104,10 +103,14 @@ void ProcMutex::Init() {
         return;
     }
 
-    if (mSharedData->refCnt == 0) {
+    // CAS ensures one-time mutex init across process restarts
+    int expected = 0;
+    if (mSharedData->initialized.compare_exchange_strong(expected, 1)) {
+        // First init: create mutex pair
         rc = pthread_mutex_init(&mSharedData->dataMutex, &mutexAttr);
         if (rc != 0) {
             SPR_LOGE("init data mutex failed! (%s)\n", strerror(rc));
+            mSharedData->initialized = 0;
             pthread_mutexattr_destroy(&mutexAttr);
             munmap(mSharedData, sizeof(SharedData));
             close(mShmFd);
@@ -120,6 +123,7 @@ void ProcMutex::Init() {
         if (rc != 0) {
             SPR_LOGE("init wait mutex failed! (%s)\n", strerror(rc));
             pthread_mutex_destroy(&mSharedData->dataMutex);
+            mSharedData->initialized = 0;
             pthread_mutexattr_destroy(&mutexAttr);
             munmap(mSharedData, sizeof(SharedData));
             close(mShmFd);
@@ -130,6 +134,27 @@ void ProcMutex::Init() {
 
         mSharedData->refCnt = 0;
         mSharedData->waitCnt = 0;
+    } else {
+        // Re-entry: recover EOWNERDEAD mutex from crashed previous owner
+        rc = pthread_mutex_trylock(&mSharedData->dataMutex);
+        if (rc == EOWNERDEAD) {
+            SPR_LOGW("dataMutex owner died on re-entry, recovering\n");
+            pthread_mutex_consistent(&mSharedData->dataMutex);
+            pthread_mutex_unlock(&mSharedData->dataMutex);
+            mSharedData->refCnt = 0;
+        } else if (rc == 0) {
+            pthread_mutex_unlock(&mSharedData->dataMutex);
+        }
+
+        rc = pthread_mutex_trylock(&mSharedData->waitMutex);
+        if (rc == EOWNERDEAD) {
+            SPR_LOGW("waitMutex owner died on re-entry, recovering\n");
+            pthread_mutex_consistent(&mSharedData->waitMutex);
+            pthread_mutex_unlock(&mSharedData->waitMutex);
+            mSharedData->waitCnt = 0;
+        } else if (rc == 0) {
+            pthread_mutex_unlock(&mSharedData->waitMutex);
+        }
     }
 
     pthread_mutexattr_destroy(&mutexAttr);
@@ -172,7 +197,7 @@ void ProcMutex::Lock() {
         AddWait();
         rc = pthread_mutex_lock(&mSharedData->dataMutex);
         if (rc == EOWNERDEAD) {
-            // 持有者崩溃, 恢复锁的一致性
+            // Owner died, restore mutex consistency
             SPR_LOGW("Mutex owner died, trying to recover\n");
             if (pthread_mutex_consistent(&mSharedData->dataMutex) != 0) {
                 SPR_LOGE("Failed to make mutex consistent\n");
@@ -212,6 +237,12 @@ void ProcMutex::AddWait() {
     }
 
     int rc = pthread_mutex_lock(&mSharedData->waitMutex);
+    if (rc == EOWNERDEAD) {
+        SPR_LOGW("waitMutex owner died in AddWait, recovering\n");
+        pthread_mutex_consistent(&mSharedData->waitMutex);
+        mSharedData->waitCnt = 0;
+        rc = 0;
+    }
     if (rc != 0) {
         SPR_LOGE("pthread_mutex_lock (waitMutex) failed: %s\n", strerror(rc));
         return;
@@ -230,6 +261,12 @@ void ProcMutex::DelWait() {
     }
 
     int rc = pthread_mutex_lock(&mSharedData->waitMutex);
+    if (rc == EOWNERDEAD) {
+        SPR_LOGW("waitMutex owner died in DelWait, recovering\n");
+        pthread_mutex_consistent(&mSharedData->waitMutex);
+        mSharedData->waitCnt = 0;
+        rc = 0;
+    }
     if (rc != 0) {
         SPR_LOGE("pthread_mutex_lock (waitMutex) failed: %s\n", strerror(rc));
         return;

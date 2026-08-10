@@ -39,7 +39,7 @@ PTimer::~PTimer()
 int32_t PTimer::InitTimer(bool isWakeup)
 {
     int32_t type = isWakeup ? CLOCK_BOOTTIME_ALARM : CLOCK_MONOTONIC;
-    mEvtFd = timerfd_create(type, 0);
+    mEvtFd = timerfd_create(type, TFD_NONBLOCK);
     if (mEvtFd == -1) {
         PLOGE("timerfd_create failed! (%s)\n", strerror(errno));
         return -1;
