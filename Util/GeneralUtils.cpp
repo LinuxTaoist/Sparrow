@@ -71,30 +71,13 @@ int InitSignalHandler(void (*signalHandler)(int))
     return 0;
 }
 
-int SystemCmd(const char* format, ...)
+static int SystemCmd(std::string& out, const char* format, va_list vlist)
 {
-    std::string out;
-
-    va_list vlist;
-    va_start(vlist, format);
-    int ret = SystemCmd(out, format, vlist);
-
-    va_end(vlist);
-    return ret;
-}
-
-int SystemCmd(std::string& out, const char* format, ...)
-{
-    va_list vlist;
-    va_start(vlist, format);
-
     char* fmt = nullptr;
     if (vasprintf(&fmt, format, vlist) == -1) {
-        va_end(vlist);
         return -1;
     }
 
-    va_end(vlist);
     if (fmt == nullptr) {
         return -1;
     }
@@ -114,6 +97,26 @@ int SystemCmd(std::string& out, const char* format, ...)
     free(fmt);
     int exitCode = pclose(fp);
     return (exitCode == 0) ? 0 : -1;
+}
+
+int SystemCmd(const char* format, ...)
+{
+    std::string out;
+
+    va_list vlist;
+    va_start(vlist, format);
+    int ret = SystemCmd(out, format, vlist);
+    va_end(vlist);
+    return ret;
+}
+
+int SystemCmd(std::string& out, const char* format, ...)
+{
+    va_list vlist;
+    va_start(vlist, format);
+    int ret = SystemCmd(out, format, vlist);
+    va_end(vlist);
+    return ret;
 }
 
 std::string GetRandomString(int width)
@@ -237,5 +240,4 @@ void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen)
 
     return nullptr;
 }
-
-}; // namespace GeneralUtils
+} // namespace GeneralUtils

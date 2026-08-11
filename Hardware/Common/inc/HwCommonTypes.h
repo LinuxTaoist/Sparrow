@@ -193,6 +193,64 @@ struct SHwCellInfo {
     std::string rat;
 };
 
+enum EHwPdnIpType {
+    HW_PDN_IP_V4 = 1,
+    HW_PDN_IP_V6 = 2,
+    HW_PDN_IP_V4V6 = 3,
+};
+
+struct SHwNetAddr {
+    std::string addr;
+    std::string netmask;
+    int32_t subnetBits;
+    std::string gateway;
+    std::string dnsp;
+    std::string dnss;
+};
+
+struct SHwNetAddr6 {
+    std::string addr;
+    std::string prefix;
+    int32_t prefixBits;
+    std::string gateway;
+    std::string dnsp;
+    std::string dnss;
+};
+
+struct SHwApnProfile {
+    int32_t callId;
+    int32_t simId;
+    int32_t apnId;
+    std::string apnName;
+    std::string userName;
+    std::string password;
+    int32_t authPref;
+    EHwPdnIpType ipType;
+    bool isBackground;
+    std::string ifaceName;
+};
+
+struct SHwPdnResult {
+    int32_t callId;
+    int32_t simId;
+    int32_t status;
+    std::string ifaceName;
+    bool hasIpv4;
+    SHwNetAddr ipv4;
+    bool hasIpv6;
+    SHwNetAddr6 ipv6;
+    int32_t endReasonType;
+    int32_t endReasonCode;
+};
+
+struct SHwRouteItem {
+    std::string destination;
+    std::string gateway;
+    std::string ifaceName;
+    int32_t metric;
+};
+
+using HwPdnStatusHandler = std::function<void(int32_t callId, const SHwPdnResult& result)>;
 using HwGpioIrqHandler = std::function<void(int32_t pin)>;
 using HwUartRecvHandler = std::function<void(const uint8_t* data, int32_t len)>;
 using HwRtcAlarmHandler = std::function<void()>;

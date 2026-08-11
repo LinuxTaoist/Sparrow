@@ -25,6 +25,7 @@
 
 #include <cstdint>
 #include <string>
+#include <vector>
 #include "HwCommonTypes.h"
 
 class IHwNetwork {
@@ -61,6 +62,39 @@ public:
      * @return HW_OK on success, HW_ERR_NET_NO_SERVICE if not camped
      */
     virtual int32_t GetCellInfo(SHwCellInfo& info) = 0;
+
+    virtual int32_t StartDataCall(const SHwApnProfile&) {
+        return HW_ERR_NOT_IMPL;
+    }
+
+    virtual int32_t StopDataCall(int32_t, int32_t) {
+        return HW_ERR_NOT_IMPL;
+    }
+
+    virtual int32_t QueryDataCall(int32_t, int32_t, SHwPdnResult&) {
+        return HW_ERR_NOT_IMPL;
+    }
+
+    virtual void SetPdnStatusHandler(HwPdnStatusHandler) {}
+    virtual int32_t SetDefaultRoute(const std::string&) {
+        return HW_ERR_NOT_IMPL;
+    }
+
+    virtual int32_t SetDefaultRoute(const std::string& ifaceName, const std::string& gateway) {
+        return HW_ERR_NOT_IMPL;
+    }
+
+    virtual int32_t ClearDefaultRoute(const std::string& ifaceName, const std::string& gateway) {
+        return HW_ERR_NOT_IMPL;
+    }
+
+    virtual int32_t AddRoute(const SHwRouteItem&) {
+        return HW_ERR_NOT_IMPL;
+    }
+
+    virtual int32_t UpdateDns(const std::string&, const std::string&) {
+        return HW_ERR_NOT_IMPL;
+    }
 };
 
 #endif // __IHW_NETWORK_H__

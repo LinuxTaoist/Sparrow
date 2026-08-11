@@ -8,4 +8,6 @@ Release/
 Platform/*
 !/Platform/Default
 Components/Business/
-Hardware/ql_ag59x
+Hardware/*
+!/Hardware/Default
+
