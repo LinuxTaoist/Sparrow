@@ -176,7 +176,7 @@ void TestRtc()
         SPR_LOG("  GetTime  : ERR(%d)\n", r);
     }
 
-    SPR_LOG("  SetAlarm : %s\n", rtc->SetAlarm(now + 3600, {}) == HW_OK ? "OK" : "ERR");
+    SPR_LOG("  RegisterAlarmCallback : %s\n", rtc->RegisterAlarmCallback(now + 3600, {}) == HW_OK ? "OK" : "ERR");
     SPR_LOG("  Cancel   : %s\n", rtc->CancelAlarm()             == HW_OK ? "OK" : "ERR");
 }
 

@@ -36,6 +36,8 @@ class IHwUart;
 class IHwWatchdog;
 class IHwRtc;
 class IHwNetwork;
+class IHwDevice;
+class IHwSim;
 
 class HwInterfaceHub {
 public:
@@ -50,6 +52,8 @@ public:
     using WatchdogCreator = std::function<IHwWatchdog*()>;
     using RtcCreator      = std::function<IHwRtc*()>;
     using NetworkCreator  = std::function<IHwNetwork*()>;
+    using DeviceCreator   = std::function<IHwDevice*()>;
+    using SimCreator      = std::function<IHwSim*()>;
 
     static void RegisterPower(PowerCreator c);
     static void RegisterGpio(GpioCreator c);
@@ -57,6 +61,8 @@ public:
     static void RegisterWatchdog(WatchdogCreator c);
     static void RegisterRtc(RtcCreator c);
     static void RegisterNetwork(NetworkCreator c);
+    static void RegisterDevice(DeviceCreator c);
+    static void RegisterSim(SimCreator c);
 
     static void UnregisterPower();
     static void UnregisterGpio();
@@ -64,6 +70,8 @@ public:
     static void UnregisterWatchdog();
     static void UnregisterRtc();
     static void UnregisterNetwork();
+    static void UnregisterDevice();
+    static void UnregisterSim();
 
     static IHwPower*     GetPower();
     static IHwGpio*      GetGpio();
@@ -71,6 +79,8 @@ public:
     static IHwWatchdog*  GetWatchdog();
     static IHwRtc*       GetRtc();
     static IHwNetwork*   GetNetwork();
+    static IHwDevice*    GetDevice();
+    static IHwSim*       GetSim();
 
 private:
     static PowerCreator    mPowerCreator;
@@ -79,6 +89,8 @@ private:
     static WatchdogCreator mWatchdogCreator;
     static RtcCreator      mRtcCreator;
     static NetworkCreator  mNetworkCreator;
+    static DeviceCreator   mDeviceCreator;
+    static SimCreator      mSimCreator;
 };
 
 #endif // __HW_INTERFACE_HUB_H__

@@ -23,6 +23,8 @@ HwInterfaceHub::UartCreator     HwInterfaceHub::mUartCreator     = nullptr;
 HwInterfaceHub::WatchdogCreator HwInterfaceHub::mWatchdogCreator = nullptr;
 HwInterfaceHub::RtcCreator      HwInterfaceHub::mRtcCreator      = nullptr;
 HwInterfaceHub::NetworkCreator  HwInterfaceHub::mNetworkCreator  = nullptr;
+HwInterfaceHub::DeviceCreator   HwInterfaceHub::mDeviceCreator   = nullptr;
+HwInterfaceHub::SimCreator      HwInterfaceHub::mSimCreator      = nullptr;
 
 void HwInterfaceHub::RegisterPower(PowerCreator c) {
     mPowerCreator = std::move(c);
@@ -46,6 +48,14 @@ void HwInterfaceHub::RegisterRtc(RtcCreator c) {
 
 void HwInterfaceHub::RegisterNetwork(NetworkCreator c) {
     mNetworkCreator = std::move(c);
+}
+
+void HwInterfaceHub::RegisterDevice(DeviceCreator c) {
+    mDeviceCreator = std::move(c);
+}
+
+void HwInterfaceHub::RegisterSim(SimCreator c) {
+    mSimCreator = std::move(c);
 }
 
 void HwInterfaceHub::UnregisterPower() {
@@ -72,6 +82,14 @@ void HwInterfaceHub::UnregisterNetwork() {
     mNetworkCreator = nullptr;
 }
 
+void HwInterfaceHub::UnregisterDevice() {
+    mDeviceCreator = nullptr;
+}
+
+void HwInterfaceHub::UnregisterSim() {
+    mSimCreator = nullptr;
+}
+
 IHwPower* HwInterfaceHub::GetPower() {
     return mPowerCreator ? mPowerCreator() : nullptr;
 }
@@ -94,4 +112,12 @@ IHwRtc* HwInterfaceHub::GetRtc() {
 
 IHwNetwork* HwInterfaceHub::GetNetwork() {
     return mNetworkCreator ? mNetworkCreator() : nullptr;
+}
+
+IHwDevice* HwInterfaceHub::GetDevice() {
+    return mDeviceCreator ? mDeviceCreator() : nullptr;
+}
+
+IHwSim* HwInterfaceHub::GetSim() {
+    return mSimCreator ? mSimCreator() : nullptr;
 }

@@ -30,8 +30,8 @@ public:
     std::string GetVersion() const override;
     int32_t GetTime(int64_t& timestampSec) override;
     int32_t SetTime(int64_t timestampSec) override;
-    int32_t SetAlarm(int64_t timestampSec, HwRtcAlarmHandler handler) override;
     int32_t CancelAlarm() override;
+    int32_t RegisterAlarmCallback(int64_t timestampSec, HwRtcAlarmCb cb) override;
 };
 
 #endif // __HW_RTC_DEFAULT_H__

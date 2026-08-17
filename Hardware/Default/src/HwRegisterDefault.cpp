@@ -29,6 +29,8 @@
 #include "HwWatchdogDefault.h"
 #include "HwRtcDefault.h"
 #include "HwNetworkDefault.h"
+#include "HwDeviceDefault.h"
+#include "HwSimDefault.h"
 
 namespace {
 
@@ -67,6 +69,18 @@ struct HwRegisterDefault {
         HwInterfaceHub::RegisterNetwork(
             []() -> IHwNetwork* {
                 static HwNetworkDefault instance;
+                return &instance;
+            });
+
+        HwInterfaceHub::RegisterDevice(
+            []() -> IHwDevice* {
+                static HwDeviceDefault instance;
+                return &instance;
+            });
+
+        HwInterfaceHub::RegisterSim(
+            []() -> IHwSim* {
+                static HwSimDefault instance;
                 return &instance;
             });
     }

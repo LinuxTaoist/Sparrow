@@ -237,14 +237,14 @@ void PowerManager::HWPowerInit() {
     }
 
     SPR_LOGD("Init hardware!\n");
-    pHwPower->RegisterWakeupSourceHandler([this](EHwWakeupSource source) {
+    pHwPower->RegisterWakeupSourceCallback([this](EHwWakeupSource source) {
         SPR_LOGD("Receive wakeup source: 0x%x\n", source);
         mWakeupSourceType = (EWakeupSourceType)source;
         SetLev1State(LEV1_POWER_ACTIVE);
         SetLev2State(LEV2_POWER_ANY);
     });
 
-    pHwPower->RegisterWakeupEdgeHandler([this](EHwLpmEdge edge) {
+    pHwPower->RegisterWakeupEdgeCallback([this](EHwLpmEdge edge) {
         SPR_LOGD("Receive wakeup in edge: 0x%x\n", edge);
         if (edge == HW_LPM_EDGE_FALLING) {
             SPR_LOGD("Send poweroff (With reason: WakeupIn)\n");

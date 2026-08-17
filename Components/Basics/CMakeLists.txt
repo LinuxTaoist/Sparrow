@@ -1,4 +1,4 @@
-## Basics
+# Basics
 
 ## Project configures path
 set (GENERAL_CONFIGURE_PATH ${PROJECT_PATH}/Configs/General)
@@ -22,6 +22,6 @@ endif()
 
 # 动态加载, 配置文件modules_configs.cmake
 foreach(module IN LISTS BASIC_MODULES)
-    message(STATUS "Add Business Module: ${module}")
+    message(STATUS "Add Basic Module: ${module}")
     add_subdirectory(${module})
 endforeach()

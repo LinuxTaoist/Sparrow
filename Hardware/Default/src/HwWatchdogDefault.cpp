@@ -22,7 +22,18 @@
 
 #define HW_WDT_DEFAULT_VERSION  "HW_WDT_DEFAULT_R1001"
 
-std::string HwWatchdogDefault::GetVersion() const  { return HW_WDT_DEFAULT_VERSION; }
-int32_t HwWatchdogDefault::Start(int32_t)          { return HW_ERR_NOT_IMPL; }
-int32_t HwWatchdogDefault::Feed()                  { return HW_ERR_NOT_IMPL; }
-int32_t HwWatchdogDefault::Stop()                  { return HW_ERR_NOT_IMPL; }
+std::string HwWatchdogDefault::GetVersion() const {
+    return HW_WDT_DEFAULT_VERSION;
+}
+
+int32_t HwWatchdogDefault::Start(int32_t) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwWatchdogDefault::Feed() {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwWatchdogDefault::Stop() {
+    return HW_ERR_NOT_IMPL;
+}

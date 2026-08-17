@@ -2,54 +2,56 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : HwGpioDefault.cpp
+ *  @file       : HwSimDefault.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2026/07/27
- *
+ *  @brief      : Default stub for IHwSim.
+ *  @date       : 2026/08/13
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
+ *  2026/08/13 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <string>
 #include "HwCommonTypes.h"
-#include "HwGpioDefault.h"
+#include "HwSimDefault.h"
 
-#define HW_GPIO_DEFAULT_VERSION  "HW_GPIO_DEFAULT_R1001"
+#define HW_SIM_DEFAULT_VERSION  "HW_SIM_DEFAULT_R1001"
 
-std::string HwGpioDefault::GetVersion() const {
-    return HW_GPIO_DEFAULT_VERSION;
+std::string HwSimDefault::GetVersion() const {
+    return HW_SIM_DEFAULT_VERSION;
 }
 
-int32_t HwGpioDefault::Init(const std::vector<SHwGpioPinConfig>&) {
+int32_t HwSimDefault::GetImsi(EHwSimSlot, std::string&) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwGpioDefault::Release() {
+int32_t HwSimDefault::GetIccid(EHwSimSlot, std::string&) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwGpioDefault::Read(int32_t, EHwGpioValue&) {
+int32_t HwSimDefault::GetPhoneNum(EHwSimSlot, std::string&) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwGpioDefault::Write(int32_t, EHwGpioValue) {
+int32_t HwSimDefault::GetCardInfo(EHwSimSlot, SHwSimCardInfo&) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwGpioDefault::RegisterIrqCallback(int32_t, HwGpioIrqCb) {
+int32_t HwSimDefault::RegisterCardStatusCallback(HwSimCardStatusCb) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwGpioDefault::EnableIrq(int32_t) {
+int32_t HwSimDefault::SwitchSlot(EHwSimSlot) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwGpioDefault::DisableIrq(int32_t) {
+int32_t HwSimDefault::PowerUp(EHwSimSlot) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwSimDefault::PowerDown(EHwSimSlot) {
     return HW_ERR_NOT_IMPL;
 }

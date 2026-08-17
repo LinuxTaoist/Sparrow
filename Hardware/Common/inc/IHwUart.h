@@ -12,7 +12,7 @@
  *
  *  Typical call sequence:
  *    1. Open(port, &config)                 — open and configure
- *    2. RegisterRecvHandler()               — set async receive callback
+ *    2. RegisterRecvCallback()               — set async receive callback
  *    3. Send(data, len)                     — transmit
  *    4. recvHandler fires on incoming data  — receive
  *    5. Flush() / Close()                   — tear down
@@ -34,6 +34,8 @@
 #include <cstdint>
 #include <string>
 #include "HwCommonTypes.h"
+
+using HwUartRecvCb = std::function<void(const uint8_t* data, int32_t len)>;
 
 class IHwUart {
 public:
@@ -77,7 +79,7 @@ public:
      * @param  handler   receive callback object
      * @return HW_OK on success
      */
-    virtual int32_t RegisterRecvHandler(HwUartRecvHandler handler) = 0;
+    virtual int32_t RegisterRecvCallback(HwUartRecvCb cb) = 0;
 
     /**
      * @brief Discard all buffered data (both TX and RX).

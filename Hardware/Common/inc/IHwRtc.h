@@ -12,7 +12,7 @@
  *
  *  Typical call sequence:
  *    1. GetTime() / SetTime()            — sync system ↔ hardware clock
- *    2. SetAlarm(ts, handler)            — schedule wake-up
+ *    2. RegisterAlarmCallback(ts, handler)            — schedule wake-up
  *    3. CancelAlarm()                    — clear
  *
  *  Change History:
@@ -28,6 +28,8 @@
 #include <cstdint>
 #include <string>
 #include "HwCommonTypes.h"
+
+using HwRtcAlarmCb = std::function<void()>;
 
 class IHwRtc {
 public:
@@ -52,6 +54,12 @@ public:
     virtual int32_t SetTime(int64_t timestampSec) = 0;
 
     /**
+     * @brief Cancel any pending alarm.
+     * @return HW_OK on success
+     */
+    virtual int32_t CancelAlarm() = 0;
+
+    /**
      * @brief Schedule a wake-up alarm.
      *
      * When the RTC reaches timestampSec, the platform wakes from sleep
@@ -64,13 +72,7 @@ public:
      * @param  handler       callback object; may be empty
      * @return HW_OK on success
      */
-    virtual int32_t SetAlarm(int64_t timestampSec, HwRtcAlarmHandler handler) = 0;
-
-    /**
-     * @brief Cancel any pending alarm.
-     * @return HW_OK on success
-     */
-    virtual int32_t CancelAlarm() = 0;
+    virtual int32_t RegisterAlarmCallback(int64_t timestampSec, HwRtcAlarmCb cb) = 0;
 };
 
 #endif // __IHW_RTC_H__

@@ -123,7 +123,12 @@ int32_t ServiceManager::StartAllFromConfig(const std::string& cfgPath) {
         size_t dpos = line.find("[d]");
         if (dpos != string::npos) {
             dep = true;
-            line = line.substr(0, dpos - 1);
+            // Strip "[d]" and any preceding whitespace
+            size_t end = dpos;
+            while (end > 0 && (line[end - 1] == ' ' || line[end - 1] == '\t')) {
+                end--;
+            }
+            line = line.substr(0, end);
         }
 
         if (dep && waitPrev) {

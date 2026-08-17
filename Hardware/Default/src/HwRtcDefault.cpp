@@ -22,8 +22,23 @@
 
 #define HW_RTC_DEFAULT_VERSION  "HW_RTC_DEFAULT_R1001"
 
-std::string HwRtcDefault::GetVersion() const                    { return HW_RTC_DEFAULT_VERSION; }
-int32_t HwRtcDefault::GetTime(int64_t&)                         { return HW_ERR_NOT_IMPL; }
-int32_t HwRtcDefault::SetTime(int64_t)                          { return HW_ERR_NOT_IMPL; }
-int32_t HwRtcDefault::SetAlarm(int64_t, HwRtcAlarmHandler)      { return HW_ERR_NOT_IMPL; }
-int32_t HwRtcDefault::CancelAlarm()                             { return HW_ERR_NOT_IMPL; }
+std::string HwRtcDefault::GetVersion() const {
+    return HW_RTC_DEFAULT_VERSION;
+}
+
+int32_t HwRtcDefault::GetTime(int64_t&) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwRtcDefault::SetTime(int64_t) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwRtcDefault::CancelAlarm() {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwRtcDefault::RegisterAlarmCallback(int64_t, HwRtcAlarmCb) {
+    return HW_ERR_NOT_IMPL;
+}
+

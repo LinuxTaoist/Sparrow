@@ -13,7 +13,7 @@
  *  Typical call sequence:
  *    1. Init(pinCfgs, count)              — export + configure all pins
  *    2. Read() / Write()                  — polling-style access
- *    3. RegisterIrqHandler()              — set up interrupt on edge
+ *    3. RegisterIrqCallback()              — set up interrupt on edge
  *    4. EnableIrq() → handler fires       — interrupt-driven
  *    5. DisableIrq() / Release()          — tear down
  *
@@ -31,6 +31,8 @@
 #include <string>
 #include <vector>
 #include "HwCommonTypes.h"
+
+using HwGpioIrqCb = std::function<void(int32_t pin)>;
 
 class IHwGpio {
 public:
@@ -87,7 +89,7 @@ public:
      * @param  handler  callback object
      * @return HW_OK on success
      */
-    virtual int32_t RegisterIrqHandler(int32_t pin, HwGpioIrqHandler handler) = 0;
+    virtual int32_t RegisterIrqCallback(int32_t pin, HwGpioIrqCb cb) = 0;
 
     /**
      * @brief Enable interrupt on a specific pin.

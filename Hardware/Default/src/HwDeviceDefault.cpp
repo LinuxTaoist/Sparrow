@@ -2,50 +2,42 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : HwUartDefault.cpp
+ *  @file       : HwDeviceDefault.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
- *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2026/07/27
- *
+ *  @brief      : Default stub for IHwDevice.
+ *  @date       : 2026/08/12
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
+ *  2026/08/12 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <string>
 #include "HwCommonTypes.h"
-#include "HwUartDefault.h"
+#include "HwDeviceDefault.h"
 
-#define HW_UART_DEFAULT_VERSION  "HW_UART_DEFAULT_R1001"
+#define HW_DEV_DEFAULT_VERSION  "HW_DEV_DEFAULT_R1001"
 
-std::string HwUartDefault::GetVersion() const {
-    return HW_UART_DEFAULT_VERSION;
+std::string HwDeviceDefault::GetVersion() const {
+    return HW_DEV_DEFAULT_VERSION;
 }
 
-int32_t HwUartDefault::Open(const std::string&, const SHwUartConfig&) {
+int32_t HwDeviceDefault::SetRadio(bool) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwUartDefault::Close() {
+int32_t HwDeviceDefault::SetAirplaneMode(bool) {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwUartDefault::Send(const uint8_t*, int32_t) {
+int32_t HwDeviceDefault::GetAirplaneMode(EHwAirplaneMode&) {
     return HW_ERR_NOT_IMPL;
 }
-
-int32_t HwUartDefault::RegisterRecvCallback(HwUartRecvCb) {
+int32_t HwDeviceDefault::GetModemState(EHwModemState&) {
     return HW_ERR_NOT_IMPL;
 }
-
-int32_t HwUartDefault::Flush() {
+int32_t HwDeviceDefault::RegisterAirPlaneModeCallback(HwAirPlaneModeCb) {
     return HW_ERR_NOT_IMPL;
-}
-
-bool HwUartDefault::IsOpen() const {
-    return false;
 }

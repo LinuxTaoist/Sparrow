@@ -23,6 +23,9 @@
 #include <string>
 #include "HwCommonTypes.h"
 
+using HwPowerWakeupSourceCb = std::function<void(EHwWakeupSource source)>;
+using HwPowerWakeupEdgeCb   = std::function<void(EHwLpmEdge edge)>;
+
 class IHwPower {
 public:
     virtual ~IHwPower() = default;
@@ -34,8 +37,8 @@ public:
     virtual int32_t GetMode(EHwPowerMode& mode) = 0;
     virtual int32_t GetWakeupSource(EHwWakeupSource& source) = 0;
     virtual int32_t Reboot(const std::string& reason) = 0;
-    virtual int32_t RegisterWakeupSourceHandler(HwPowerWakeupSourceHandler handler) = 0;
-    virtual int32_t RegisterWakeupEdgeHandler(HwPowerWakeupEdgeHandler handler) = 0;
+    virtual int32_t RegisterWakeupSourceCallback(HwPowerWakeupSourceCb cb) = 0;
+    virtual int32_t RegisterWakeupEdgeCallback(HwPowerWakeupEdgeCb cb) = 0;
     virtual std::string GetPlatformName() const = 0;
 };
 

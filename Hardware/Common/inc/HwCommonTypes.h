@@ -63,6 +63,9 @@ enum EHwErrorCode {
     HW_ERR_NET_NO_SERVICE           = -260,
     HW_ERR_NET_REGISTRATION_DENIED  = -261,
     HW_ERR_NET_QUERY_FAILED         = -262,
+
+    HW_ERR_SIM_QUERY_FAILED         = -310,
+    HW_ERR_SIM_NOT_PRESENT          = -311,
 };
 
 enum EHwPowerMode {
@@ -178,6 +181,18 @@ enum EHwNetRegState {
     HW_NET_REGISTERED_ROAMING  = 5,
 };
 
+enum EHwModemState {
+    HW_MODEM_OFFLINE = 0,
+    HW_MODEM_ONLINE  = 1,
+    HW_MODEM_UNKNOWN = 2,
+};
+
+enum EHwAirplaneMode {
+    HW_AIRPLANE_UNKNOWN = 0,
+    HW_AIRPLANE_ON      = 1,
+    HW_AIRPLANE_OFF     = 2,
+};
+
 struct SHwSignalStrength {
     int32_t rssi;
     int32_t rsrp;
@@ -250,11 +265,57 @@ struct SHwRouteItem {
     int32_t metric;
 };
 
-using HwPdnStatusHandler = std::function<void(int32_t callId, const SHwPdnResult& result)>;
-using HwGpioIrqHandler = std::function<void(int32_t pin)>;
-using HwUartRecvHandler = std::function<void(const uint8_t* data, int32_t len)>;
-using HwRtcAlarmHandler = std::function<void()>;
-using HwPowerWakeupSourceHandler = std::function<void(EHwWakeupSource source)>;
-using HwPowerWakeupEdgeHandler   = std::function<void(EHwLpmEdge edge)>;
+enum EHwSimSlot {
+    HW_SIM_SLOT_INVALID = 0,
+    HW_SIM_SLOT_1       = 1,
+    HW_SIM_SLOT_2       = 2,
+};
+
+enum EHwSimCardState {
+    HW_SIM_CARD_STATE_UNKNOWN                     = 0,
+    HW_SIM_CARD_STATE_ABSENT                      = 1,
+    HW_SIM_CARD_STATE_PRESENT                     = 2,
+    HW_SIM_CARD_STATE_ERROR_UNKNOWN               = 3,
+    HW_SIM_CARD_STATE_ERROR_POWER_DOWN            = 4,
+    HW_SIM_CARD_STATE_ERROR_POLL_ERROR            = 5,
+    HW_SIM_CARD_STATE_ERROR_NO_ATR_RECEIVED       = 6,
+    HW_SIM_CARD_STATE_ERROR_VOLT_MISMATCH         = 7,
+    HW_SIM_CARD_STATE_ERROR_PARITY_ERROR          = 8,
+    HW_SIM_CARD_STATE_ERROR_TECHNICAL_PROBLEMS    = 9,
+    HW_SIM_CARD_STATE_ERROR_POSSIBLY_REMOVED      = 10,
+    HW_SIM_CARD_STATE_ERROR_NULL_BYTES            = 11,
+    HW_SIM_CARD_STATE_ERROR_SAP_CONNECTED         = 12,
+    HW_SIM_CARD_STATE_ERROR_CMD_TIMEOUT           = 13,
+};
+
+enum EHwSimAppState {
+    HW_SIM_APP_STATE_UNKNOWN              = 0,
+    HW_SIM_APP_STATE_DETECTED             = 1,
+    HW_SIM_APP_STATE_PIN1_REQ             = 2,
+    HW_SIM_APP_STATE_PUK1_REQ             = 3,
+    HW_SIM_APP_STATE_INITIALIZING         = 4,
+    HW_SIM_APP_STATE_PERSO_CK_REQ         = 5,
+    HW_SIM_APP_STATE_PERSO_PUK_REQ        = 6,
+    HW_SIM_APP_STATE_PERSO_PERM_BLOCKED   = 7,
+    HW_SIM_APP_STATE_PIN1_PERM_BLOCKED    = 8,
+    HW_SIM_APP_STATE_ILLEGAL              = 9,
+    HW_SIM_APP_STATE_READY                = 10,
+};
+
+struct SHwSimAppInfo {
+    EHwSimAppState state;
+    int32_t pin1NumRetries;
+    int32_t puk1NumRetries;
+    int32_t pin2NumRetries;
+    int32_t puk2NumRetries;
+};
+
+struct SHwSimCardInfo {
+    EHwSimCardState state;
+    std::string imsi;
+    std::string iccid;
+    SHwSimAppInfo appInfo;
+};
+
 
 #endif // __HW_COMMON_TYPES_H__

@@ -22,13 +22,42 @@
 
 #define HW_POWER_DEFAULT_VERSION  "HW_POWER_DEFAULT_R1001"
 
-std::string HwPowerDefault::GetVersion() const                                  { return HW_POWER_DEFAULT_VERSION; }
-int32_t HwPowerDefault::Init()                                                  { return HW_ERR_NOT_IMPL; }
-int32_t HwPowerDefault::Deinit()                                                { return HW_ERR_NOT_IMPL; }
-int32_t HwPowerDefault::SetMode(EHwPowerMode)                                   { return HW_ERR_NOT_IMPL; }
-int32_t HwPowerDefault::GetMode(EHwPowerMode&)                                  { return HW_ERR_NOT_IMPL; }
-int32_t HwPowerDefault::GetWakeupSource(EHwWakeupSource&)                       { return HW_ERR_NOT_IMPL; }
-int32_t HwPowerDefault::Reboot(const std::string&)                              { return HW_ERR_NOT_IMPL; }
-int32_t HwPowerDefault::RegisterWakeupSourceHandler(HwPowerWakeupSourceHandler) { return HW_ERR_NOT_IMPL; }
-int32_t HwPowerDefault::RegisterWakeupEdgeHandler(HwPowerWakeupEdgeHandler)     { return HW_ERR_NOT_IMPL; }
-std::string HwPowerDefault::GetPlatformName() const                             { return "Default"; }
+std::string HwPowerDefault::GetVersion() const {
+    return HW_POWER_DEFAULT_VERSION;
+}
+
+std::string HwPowerDefault::GetPlatformName() const {
+    return "Default";
+}
+
+int32_t HwPowerDefault::Init() {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwPowerDefault::Deinit() {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwPowerDefault::SetMode(EHwPowerMode) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwPowerDefault::GetMode(EHwPowerMode&) {
+     return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwPowerDefault::GetWakeupSource(EHwWakeupSource&) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwPowerDefault::Reboot(const std::string&) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwPowerDefault::RegisterWakeupSourceCallback(HwPowerWakeupSourceCb) {
+    return HW_ERR_NOT_IMPL;
+}
+
+int32_t HwPowerDefault::RegisterWakeupEdgeCallback(HwPowerWakeupEdgeCb) {
+    return HW_ERR_NOT_IMPL;
+}

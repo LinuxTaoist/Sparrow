@@ -34,7 +34,7 @@ public:
     int32_t Release() override;
     int32_t Read(int32_t pin, EHwGpioValue& value) override;
     int32_t Write(int32_t pin, EHwGpioValue value) override;
-    int32_t RegisterIrqHandler(int32_t pin, HwGpioIrqHandler handler) override;
+    int32_t RegisterIrqCallback(int32_t pin, HwGpioIrqCb handler) override;
     int32_t EnableIrq(int32_t pin) override;
     int32_t DisableIrq(int32_t pin) override;
 };
