@@ -10,4 +10,5 @@ Platform/*
 Components/Business/
 Hardware/*
 !/Hardware/Default
+!/Hardware/Common
 
