@@ -9,6 +9,7 @@ Platform/*
 !/Platform/Default
 Components/Business/
 Hardware/*
+!/Hardware/CMakeLists.txt
 !/Hardware/Default
 !/Hardware/Common
 
