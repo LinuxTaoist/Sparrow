@@ -46,7 +46,7 @@ static int32_t ConfigValueTypeSize(int valueType)
 }
 
 ConfigManagerHub::ConfigManagerHub(const std::string& srvName, ConfigManager* pManager)
-    : SprBinderHub(srvName)
+    : BinderHub(srvName)
 {
     mConfigManager = pManager;
 }

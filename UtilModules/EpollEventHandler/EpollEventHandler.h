@@ -41,6 +41,7 @@ private:
     bool    mRun;
     int32_t     mHandle;
     int32_t     mTimeOut;
+    int32_t     mWakeFd;    // eventfd for waking up epoll_wait on ExitLoop
     std::map<int32_t, IEpollEvent*> mEpollMap;   // fd, type, IEpollEvent
 };
 

@@ -24,7 +24,7 @@
 #define LOG_TAG "PropertyHub"
 
 using namespace InternalDefs;
-PropertyManagerHub::PropertyManagerHub(const std::string& srvName, PropertyManager* powerManager) : SprBinderHub(srvName)
+PropertyManagerHub::PropertyManagerHub(const std::string& srvName, PropertyManager* powerManager) : BinderHub(srvName)
 {
     mPropertyManager = powerManager;
 }

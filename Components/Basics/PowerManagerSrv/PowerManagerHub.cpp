@@ -24,7 +24,7 @@
 #define LOG_TAG "PowerHub"
 
 using namespace InternalDefs;
-PowerManagerHub::PowerManagerHub(const std::string& srvName, PowerManager* powerManager) : SprBinderHub(srvName)
+PowerManagerHub::PowerManagerHub(const std::string& srvName, PowerManager* powerManager) : BinderHub(srvName)
 {
     mPowerManager = powerManager;
 }

@@ -22,6 +22,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
 #include "PLog.h"
 #include "EpollEventHandler.h"
 
@@ -43,12 +44,37 @@ EpollEventHandler::EpollEventHandler(int32_t size, int32_t blockTimeOut)
 
     mRun = false;
     mTimeOut = blockTimeOut;
+    mWakeFd = -1;
+
+    // eventfd used to reliably wake up a blocked epoll_wait on ExitLoop,
+    // even when mTimeOut is -1 (infinite blocking). Without it, close(mHandle)
+    // may not unblock epoll_wait and ExitLoop/join could hang forever.
+    mWakeFd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if (mWakeFd < 0) {
+        PLOGE("eventfd fail! (%s)\n", strerror(errno));
+        return;
+    }
+
+    struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
+    ev.events = EPOLLIN;
+    ev.data.ptr = nullptr;   // wake event, no IEpollEvent handler
+    if (epoll_ctl(mHandle, EPOLL_CTL_ADD, mWakeFd, &ev) != 0) {
+        PLOGE("epoll_ctl add wake fd fail! (%s)\n", strerror(errno));
+        close(mWakeFd);
+        mWakeFd = -1;
+    }
 }
 
 EpollEventHandler::~EpollEventHandler()
 {
     gObjAlive = false;
     ExitLoop();
+
+    if (mWakeFd != -1) {
+        close(mWakeFd);
+        mWakeFd = -1;
+    }
 }
 
 EpollEventHandler* EpollEventHandler::GetInstance(int32_t size, int32_t blockTimeOut)
@@ -136,6 +162,18 @@ void EpollEventHandler::EpollLoop()
         }
 
         for (int32_t i = 0; i < count; i++) {
+            // Wake-up event from ExitLoop, drain and re-check exit flag
+            if (ep[i].data.ptr == nullptr) {
+                uint64_t val = 0;
+                if (mWakeFd != -1) {
+                    ssize_t r = read(mWakeFd, &val, sizeof(val));
+                    if (r < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+                        PLOGE("read wake fd fail! (%s)\n", strerror(errno));
+                    }
+                }
+                continue;
+            }
+
             IEpollEvent* p = reinterpret_cast<IEpollEvent*>(ep[i].data.ptr);
             if (p == nullptr) {
                 continue;
@@ -151,6 +189,17 @@ void EpollEventHandler::EpollLoop()
 void EpollEventHandler::ExitLoop()
 {
     mRun = false;
+
+    // Wake up a possibly blocked epoll_wait in EpollLoop thread,
+    // so that it can observe mRun == false and exit promptly.
+    if (mWakeFd != -1) {
+        uint64_t val = 1;
+        ssize_t w = write(mWakeFd, &val, sizeof(val));
+        if (w < 0) {
+            PLOGE("write wake fd fail! (%s)\n", strerror(errno));
+        }
+    }
+
     if (mHandle != -1) {
         close(mHandle);
         mHandle = -1;

@@ -61,6 +61,19 @@ public:
      */
     virtual void* EpollEvent(int32_t fd, EpollType eType, void* arg) final override;
 
+    /**
+     * @brief  Handle received message (extension point)
+     *
+     * @param msg received message
+     * @return 0 on success, or -1 if an error occurred
+     *
+     * Called right after a message is received from the message queue in
+     * EpollEvent(). Default implementation dispatches the message immediately
+     * (i.e. calls DispatchSprMsg()). Derived classes (e.g. threaded observers)
+     * may override it to buffer the message and process it in another context.
+     */
+    virtual int32_t ProcessRecvMsg(SprMsg& msg);
+
 protected:
     /**
      * @brief Initialize function for derived class called in Initialize

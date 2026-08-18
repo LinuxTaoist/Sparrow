@@ -692,7 +692,7 @@ int32_t SprMsg::DecodeFrom(std::string& deDatas)
         return -1;
     }
 
-    deDatas = deDatas.substr(sizeof(mFrom));
+    deDatas.erase(0, sizeof(mFrom));
     return 0;
 }
 
@@ -703,7 +703,7 @@ int32_t SprMsg::DecodeTo(std::string& deDatas)
         return -1;
     }
 
-    deDatas = deDatas.substr(sizeof(mTo));
+    deDatas.erase(0, sizeof(mTo));
     return 0;
 }
 
@@ -714,7 +714,7 @@ int32_t SprMsg::DecodeMsgId(std::string& deDatas)
         return -1;
     }
 
-    deDatas = deDatas.substr(sizeof(mMsgId));
+    deDatas.erase(0, sizeof(mMsgId));
     return 0;
 }
 
@@ -725,7 +725,7 @@ int32_t SprMsg::DecodeTag(std::string& deDatas)
         return -1;
     }
 
-    deDatas = deDatas.substr(sizeof(mTag));
+    deDatas.erase(0, sizeof(mTag));
     return 0;
 }
 
@@ -737,7 +737,7 @@ int32_t SprMsg::DecodeBoolValue(std::string& deDatas)
     }
 
     mBoolValue = (deDatas[0] != 0);
-    deDatas = deDatas.substr(sizeof(bool));
+    deDatas.erase(0, sizeof(bool));
     return 0;
 }
 
@@ -749,7 +749,7 @@ int32_t SprMsg::DecodeU8Value(std::string& deDatas)
     }
 
     mU8Value = deDatas[0] & 0xFF;
-    deDatas = deDatas.substr(sizeof(uint8_t));
+    deDatas.erase(0, sizeof(uint8_t));
     return 0;
 }
 
@@ -761,7 +761,7 @@ int32_t SprMsg::DecodeI8Value(std::string& deDatas)
     }
 
     mI8Value = deDatas[0] & 0xFF;
-    deDatas = deDatas.substr(sizeof(int8_t));
+    deDatas.erase(0, sizeof(int8_t));
     return 0;
 }
 
@@ -774,7 +774,7 @@ int32_t SprMsg::DecodeU16Value(std::string& deDatas)
 
     mU16Value = ((deDatas[0] & 0xFF) << 8) |
                 (deDatas[1] & 0xFF) ;
-    deDatas = deDatas.substr(sizeof(uint16_t));
+    deDatas.erase(0, sizeof(uint16_t));
     return 0;
 }
 
@@ -787,7 +787,7 @@ int32_t SprMsg::DecodeI16Value(std::string& deDatas)
 
     mI16Value = ((deDatas[0] & 0xFF) << 8) |
                 (deDatas[1] & 0xFF);
-    deDatas = deDatas.substr(sizeof(int16_t));
+    deDatas.erase(0, sizeof(int16_t));
     return 0;
 }
 
@@ -804,7 +804,7 @@ int32_t SprMsg::DecodeU32Value(std::string& deDatas)
         value |= (deDatas[i] & 0xFF);
     }
     mU32Value = value;
-    deDatas = deDatas.substr(sizeof(mU32Value));
+    deDatas.erase(0, sizeof(mU32Value));
     return 0;
 }
 
@@ -821,7 +821,7 @@ int32_t SprMsg::DecodeI32Value(std::string& deDatas)
         value |= (deDatas[i] & 0xFF);
     }
     mI32Value = value;
-    deDatas = deDatas.substr(sizeof(mI32Value));
+    deDatas.erase(0, sizeof(mI32Value));
     return 0;
 }
 
@@ -838,7 +838,7 @@ int32_t SprMsg::DecodeU64Value(std::string& deDatas)
         value |= (deDatas[i] & 0xFF);
     }
     mU64Value = value;
-    deDatas = deDatas.substr(sizeof(mU64Value));
+    deDatas.erase(0, sizeof(mU64Value));
     return 0;
 }
 
@@ -855,7 +855,7 @@ int32_t SprMsg::DecodeI64Value(std::string& deDatas)
         value |= (deDatas[i] & 0xFF);
     }
     mI64Value = value;
-    deDatas = deDatas.substr(sizeof(mI64Value));
+    deDatas.erase(0, sizeof(mI64Value));
     return 0;
 }
 
@@ -872,7 +872,7 @@ int32_t SprMsg::DecodeString(std::string& deDatas)
     }
 
     mString = deDatas.substr(sizeof(mStringLength), mStringLength);
-    deDatas = deDatas.substr(sizeof(mStringLength) + mStringLength);
+    deDatas.erase(0, sizeof(mStringLength) + mStringLength);
     return 0;
 }
 
@@ -889,7 +889,7 @@ int32_t SprMsg::DecodeU8Vec(std::string& deDatas)
     }
 
     mU8Vec.assign(deDatas.begin() + sizeof(mU8VecLength), deDatas.begin() + sizeof(mU8VecLength) + mU8VecLength);
-    deDatas = deDatas.substr(sizeof(mU8VecLength) + mU8VecLength);
+    deDatas.erase(0, sizeof(mU8VecLength) + mU8VecLength);
     return 0;
 }
 
@@ -906,7 +906,7 @@ int32_t SprMsg::DecodeI8Vec(std::string& deDatas)
     }
 
     mI8Vec.assign(deDatas.begin() + sizeof(mI8VecLength), deDatas.begin() + sizeof(mI8VecLength) + mI8VecLength);
-    deDatas = deDatas.substr(sizeof(mI8VecLength) + mI8VecLength);
+    deDatas.erase(0, sizeof(mI8VecLength) + mI8VecLength);
     return 0;
 }
 
@@ -931,7 +931,7 @@ int32_t SprMsg::DecodeU16Vec(std::string& deDatas)
         mU16Vec.push_back(value);
     }
 
-    deDatas = deDatas.substr(sizeof(mU16VecLength) + mU16VecLength * sizeof(uint16_t));
+    deDatas.erase(0, sizeof(mU16VecLength) + mU16VecLength * sizeof(uint16_t));
     return 0;
 }
 
@@ -955,7 +955,7 @@ int32_t SprMsg::DecodeI16Vec(std::string& deDatas)
         mI16Vec.push_back(value);
     }
 
-    deDatas = deDatas.substr(sizeof(mI16VecLength) + mI16VecLength * sizeof(int16_t));
+    deDatas.erase(0, sizeof(mI16VecLength) + mI16VecLength * sizeof(int16_t));
     return 0;
 }
 
@@ -980,7 +980,7 @@ int32_t SprMsg::DecodeU32Vec(std::string& deDatas)
         mU32Vec.push_back(value);
     }
 
-    deDatas = deDatas.substr(sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t));
+    deDatas.erase(0, sizeof(mU32VecLength) + mU32VecLength * sizeof(uint32_t));
     return 0;
 }
 
@@ -1004,7 +1004,7 @@ int32_t SprMsg::DecodeI32Vec(std::string& deDatas)
         mI32Vec.push_back(value);
     }
 
-    deDatas = deDatas.substr(sizeof(mI32VecLength) + mI32VecLength * sizeof(int32_t));
+    deDatas.erase(0, sizeof(mI32VecLength) + mI32VecLength * sizeof(int32_t));
     return 0;
 }
 
@@ -1029,7 +1029,7 @@ int32_t SprMsg::DecodeU64Vec(std::string& deDatas)
         mU64Vec.push_back(value);
     }
 
-    deDatas = deDatas.substr(sizeof(mU64VecLength) + mU64VecLength * sizeof(uint64_t));
+    deDatas.erase(0, sizeof(mU64VecLength) + mU64VecLength * sizeof(uint64_t));
     return 0;
 }
 
@@ -1053,7 +1053,7 @@ int32_t SprMsg::DecodeI64Vec(std::string& deDatas)
         mI64Vec.push_back(value);
     }
 
-    deDatas = deDatas.substr(sizeof(mI64VecLength) + mI64VecLength * sizeof(int64_t));
+    deDatas.erase(0, sizeof(mI64VecLength) + mI64VecLength * sizeof(int64_t));
     return 0;
 }
 
@@ -1075,7 +1075,7 @@ int32_t SprMsg::DecodeDatas(std::string& deDatas)
     }
 
     mDatas.assign(deDatas.begin() + sizeof(mDataSize), deDatas.begin() + sizeof(mDataSize) + mDataSize);
-    deDatas = deDatas.substr(sizeof(mDataSize) + mDataSize);
+    deDatas.erase(0, sizeof(mDataSize) + mDataSize);
     return 0;
 }
 

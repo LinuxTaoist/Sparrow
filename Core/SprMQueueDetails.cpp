@@ -86,7 +86,7 @@ SprMQueueDetails::SprMQueueDetails(const std::string& mqName, bool create) : mIs
 }
 
 SprMQueueDetails::~SprMQueueDetails() {
-    if (mpDetails != MAP_FAILED && mpDetails != nullptr) {
+    if (mpDetails != MAP_FAILED || mpDetails != nullptr) {
         if (munmap(mpDetails, sizeof(SMQueueDetails)) == -1) {
             SPR_LOGE("Failed to unmap file");
         }
@@ -101,7 +101,7 @@ SprMQueueDetails::~SprMQueueDetails() {
 }
 
 int32_t SprMQueueDetails::SetHandle(int32_t handle) {
-    if (!mpDetails && !mIsCreator) {
+    if (!mpDetails || !mIsCreator) {
         SPR_LOGE("Set handle failed! mpDetails = %p, mIsCreator = %d", mpDetails, mIsCreator);
         return -1;
     }
@@ -111,7 +111,7 @@ int32_t SprMQueueDetails::SetHandle(int32_t handle) {
 }
 
 int32_t SprMQueueDetails::SetMsgLenPeak(int32_t msgLenPeak) {
-    if (!mpDetails && !mIsCreator) {
+    if (!mpDetails || !mIsCreator) {
         SPR_LOGE("Set msgLenPeak failed! mpDetails = %p, mIsCreator = %d", mpDetails, mIsCreator);
         return -1;
     }
@@ -121,7 +121,7 @@ int32_t SprMQueueDetails::SetMsgLenPeak(int32_t msgLenPeak) {
 }
 
 int32_t SprMQueueDetails::SetLastMsgID(uint32_t lastMsgID) {
-    if (!mpDetails && !mIsCreator) {
+    if (!mpDetails || !mIsCreator) {
         SPR_LOGE("Set lastMsgID failed! mpDetails = %p, mIsCreator = %d", mpDetails, mIsCreator);
         return -1;
     }
@@ -131,7 +131,7 @@ int32_t SprMQueueDetails::SetLastMsgID(uint32_t lastMsgID) {
 }
 
 int32_t SprMQueueDetails::SetUsedPeak(int32_t usedPeak) {
-    if (!mpDetails && !mIsCreator) {
+    if (!mpDetails || !mIsCreator) {
         SPR_LOGE("Set usedPeak failed! mpDetails = %p, mIsCreator = %d", mpDetails, mIsCreator);
         return -1;
     }
@@ -141,7 +141,7 @@ int32_t SprMQueueDetails::SetUsedPeak(int32_t usedPeak) {
 }
 
 int32_t SprMQueueDetails::IncrementMsgTotal() {
-    if (!mpDetails && !mIsCreator) {
+    if (!mpDetails || !mIsCreator) {
         SPR_LOGE("Increment msgTotal failed! mpDetails = %p, mIsCreator = %d", mpDetails, mIsCreator);
         return -1;
     }

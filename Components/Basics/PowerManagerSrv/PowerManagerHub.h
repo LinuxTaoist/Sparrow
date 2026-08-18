@@ -21,9 +21,9 @@
 
 #include <string>
 #include "PowerManager.h"
-#include "SprBinderHub.h"
+#include "BinderHub.h"
 
-class PowerManagerHub : public SprBinderHub
+class PowerManagerHub : public BinderHub
 {
 public:
     PowerManagerHub(const std::string& srvName, PowerManager* powerManager);

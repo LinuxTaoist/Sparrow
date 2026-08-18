@@ -249,6 +249,11 @@ void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
     }
 
     LoadMQDynamicInfo(fd, msg);
-    DispatchSprMsg(msg);
+    ProcessRecvMsg(msg);
     return nullptr;
+}
+
+int32_t SprObserverWithMQueue::ProcessRecvMsg(SprMsg& msg)
+{
+    return DispatchSprMsg(msg);
 }

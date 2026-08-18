@@ -9,7 +9,8 @@ target_include_directories  (BinPowerManagerSrv PRIVATE ${PROJECT_PATH}/Util
                                                         ${PROJECT_PATH}/Core
                                                         ${PROJECT_PATH}/3rdAdapter
                                                         ${PROJECT_PATH}/PrivateAPIs/Event
+                                                        ${PROJECT_PATH}/PrivateAPIs/Binder
                                                         ${PROJECT_PATH}/Hardware/Common/inc
                                                         ${PROJECT_PATH}/UtilModules/EpollEventHandler)
-target_link_libraries       (BinPowerManagerSrv pthread LibSprCore LibSprHal)
-add_dependencies            (BinPowerManagerSrv LibSprCore)
+target_link_libraries       (BinPowerManagerSrv pthread LibSprCore LibSprHal LibBinder)
+add_dependencies            (BinPowerManagerSrv LibSprCore LibBinder)

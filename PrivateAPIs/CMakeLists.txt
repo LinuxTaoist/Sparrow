@@ -3,6 +3,7 @@ set(PRIVATE_APIS_PATH       ${CMAKE_CURRENT_SOURCE_DIR})
 
 include_directories         (${PROJECT_PATH}/Core)
 include_directories         (${PROJECT_PATH}/Util)
+include_directories         (${PROJECT_PATH}/3rdAdapter)
 include_directories         (${PROJECT_PATH}/PrivateAPIs/Binder)
 include_directories         (${PROJECT_PATH}/PrivateAPIs/Event)
 include_directories         (${PROJECT_PATH}/Components/Basics/BindHubSrv)
@@ -14,7 +15,8 @@ aux_source_directory        (${PRIVATE_APIS_PATH}/Event     SRC_BINDER_LIB_PATH)
 add_library(LibBinder       SHARED  ${SRC_BINDER_LIB_PATH})
 set_target_properties       (LibBinder PROPERTIES OUTPUT_NAME "sprbinder")
 set_target_properties       (LibBinder PROPERTIES LINKER_LANGUAGE CXX)
-target_link_libraries       (LibBinder stdc++ pthread rt dl)
+target_link_libraries       (LibBinder stdc++ pthread rt dl LibSprLog)
+add_dependencies            (LibBinder LibSprLog)
 
 ## Build libmediatorapi.so
 set(SRC_MEDIATOR_API_FILES  ${PRIVATE_APIS_PATH}/SprMediatorInterface.cpp)

@@ -21,9 +21,9 @@
 
 #include <string>
 #include "ConfigManager.h"
-#include "SprBinderHub.h"
+#include "BinderHub.h"
 
-class ConfigManagerHub : public SprBinderHub
+class ConfigManagerHub : public BinderHub
 {
 public:
     ConfigManagerHub(const std::string& srvName, ConfigManager* pManager);

@@ -8,9 +8,9 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
  *
- * This header serves as a central repository for standardized definitions to enhance code clarity,
- * facilitate maintenance, and minimize duplication across various internal modules within the project.
- * It encapsulates fundamental data types ubiquitously understood and employed across different system components.
+ *  This header serves as a central repository for standardized definitions to enhance code clarity,
+ *  facilitate maintenance, and minimize duplication across various internal modules within the project.
+ *  It encapsulates fundamental data types ubiquitously understood and employed across different system components.
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>

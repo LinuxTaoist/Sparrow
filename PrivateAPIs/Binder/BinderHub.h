@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprBinderHub.h
+ *  @file       : BinderHub.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -16,8 +16,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __SPR_BINDER_HUB_H__
-#define __SPR_BINDER_HUB_H__
+#ifndef __BINDER_HUB_H__
+#define __BINDER_HUB_H__
 
 #include <thread>
 #include <string>
@@ -25,11 +25,11 @@
 #include <stdint.h>
 #include "Parcel.h"
 
-class SprBinderHub
+class BinderHub
 {
 public:
-    explicit SprBinderHub(const std::string& srvName);
-    virtual ~SprBinderHub();
+    explicit BinderHub(const std::string& srvName);
+    virtual ~BinderHub();
 
     int32_t InitializeHub();
 
@@ -45,4 +45,4 @@ private:
     std::shared_ptr<Parcel> mRspParcel;
 };
 
-#endif // __SPR_BINDER_HUB_H__
+#endif // __BINDER_HUB_H__

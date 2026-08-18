@@ -23,5 +23,5 @@ aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules  SRC_TEST_INTERNA
 add_executable              (test_internal ${SRC_TEST_INTERNAL_PATH})
 target_include_directories  (test_internal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include)
 set_target_properties       (test_internal PROPERTIES OUTPUT_NAME "test_internal")
-target_link_libraries       (test_internal c LibSprLog LibEpollEvent LibConfigAPI gtest gtest_main pthread rt dl)
-add_dependencies            (test_internal LibSprLog LibEpollEvent LibConfigAPI)
+target_link_libraries       (test_internal c LibSprLog LibEpollEvent gtest gtest_main pthread rt dl)
+add_dependencies            (test_internal LibSprLog LibEpollEvent)

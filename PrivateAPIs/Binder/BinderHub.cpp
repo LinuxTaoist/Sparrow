@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprBinderHub.cpp
+ *  @file       : BinderHub.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -18,7 +18,7 @@
  */
 #include "SprLog.h"
 #include "BindCommon.h"
-#include "SprBinderHub.h"
+#include "BinderHub.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BindInterface.h"
@@ -26,20 +26,20 @@
 
 using namespace InternalDefs;
 
-#define LOG_TAG "SprBinderHub"
+#define LOG_TAG "BinderHub"
 
-SprBinderHub::SprBinderHub(const std::string& srvName)
+BinderHub::BinderHub(const std::string& srvName)
     : mRun(false), mSrvName(srvName) {
 }
 
-SprBinderHub::~SprBinderHub() {
+BinderHub::~BinderHub() {
     DestroyHub();
     if (mBindThread.joinable()) {
         mBindThread.join();
     }
 }
 
-int32_t SprBinderHub::InitializeHub() {
+int32_t BinderHub::InitializeHub() {
     int32_t ret = -1;
     if (!mBindThread.joinable()) {
         mRun = true;
@@ -52,7 +52,7 @@ int32_t SprBinderHub::InitializeHub() {
     return ret;
 }
 
-int32_t SprBinderHub::DestroyHub() {
+int32_t BinderHub::DestroyHub() {
     if (mRun) {
         mRun = false;
         POINTER_CHECK_ERR(mReqParcel, -1);
@@ -62,7 +62,7 @@ int32_t SprBinderHub::DestroyHub() {
     return 0;
 }
 
-void SprBinderHub::BinderLoop() {
+void BinderHub::BinderLoop() {
     bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSrvName, mReqParcel, mRspParcel);
     if (!rs) {
         SPR_LOGE("Binder init failed!\n");
