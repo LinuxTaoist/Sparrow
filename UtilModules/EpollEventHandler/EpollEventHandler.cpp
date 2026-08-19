@@ -71,6 +71,11 @@ EpollEventHandler::~EpollEventHandler()
     gObjAlive = false;
     ExitLoop();
 
+    if (mHandle != -1) {
+        close(mHandle);
+        mHandle = -1;
+    }
+
     if (mWakeFd != -1) {
         close(mWakeFd);
         mWakeFd = -1;
@@ -143,6 +148,11 @@ void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
 
 void EpollEventHandler::EpollLoop()
 {
+    if (mRun) {
+        PLOGW("EpollLoop already running\n");
+        return;
+    }
+
     struct epoll_event ep[32];
     const int32_t maxEvents = static_cast<int32_t>(sizeof(ep)/sizeof(ep[0]));
     mRun = true;
@@ -192,16 +202,12 @@ void EpollEventHandler::ExitLoop()
 
     // Wake up a possibly blocked epoll_wait in EpollLoop thread,
     // so that it can observe mRun == false and exit promptly.
+    // Keep mHandle open: EpollLoop() may be entered again later.
     if (mWakeFd != -1) {
         uint64_t val = 1;
         ssize_t w = write(mWakeFd, &val, sizeof(val));
         if (w < 0) {
             PLOGE("write wake fd fail! (%s)\n", strerror(errno));
         }
-    }
-
-    if (mHandle != -1) {
-        close(mHandle);
-        mHandle = -1;
     }
 }

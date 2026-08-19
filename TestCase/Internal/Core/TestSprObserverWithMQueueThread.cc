@@ -14,165 +14,247 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  2026/08/18 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
- *
  */
+#include <string>
+#include <atomic>
 #include <thread>
 #include <chrono>
-#include <atomic>
+#include <vector>
+#include <memory>
+#include <functional>
 #include "SprMsg.h"
 #include "SprLog.h"
 #include "gtest/gtest.h"
+#include "SprEpollSchedule.h"
 #include "SprObserverWithMQueueThread.h"
 
 using namespace InternalDefs;
 
 #define LOG_TAG "ObsThdTest"
+#define TEST_WAIT_TIMEOUT_MS 2000
 
-// 测试组件：记录收到消息的计数、msgId 与处理线程 id
-class TestObserverMQThread : public SprObserverWithMQueueThread
-{
+const ModuleIDType TEST_MODULE_ID_A = static_cast<ModuleIDType>(MODULE_PUBLIC_END + 1000);
+const ModuleIDType TEST_MODULE_ID_B = static_cast<ModuleIDType>(MODULE_PUBLIC_END + 1001);
+
+// 测试组件：线程模式组件
+class TestObsThread : public SprObserverWithMQueueThread {
 public:
-    TestObserverMQThread()
-        : SprObserverWithMQueueThread(InternalDefs::MODULE_GTEST_INTERNAL, "TestObserverMQThread"),
-          mRecvCount(0),
-          mLastMsgId(0),
+    explicit TestObsThread(ModuleIDType id)
+        : SprObserverWithMQueueThread(id, "TestObsThread"),
           mProcessThreadId(std::thread::id()),
-          mSlowMs(0)
-    {
+          mIsRcved(false),
+          mRecvCount(0),
+          mSlowMs(0) {}
+
+    bool  IsRcved() const {
+        return mIsRcved.load();
     }
 
-    int32_t GetRecvCount() const { return mRecvCount.load(); }
-    uint32_t GetLastMsgId() const { return mLastMsgId.load(); }
-    std::thread::id GetProcessThreadId() const { return mProcessThreadId; }
-
-    // 开启慢处理：ProcessMsg 模拟耗时，验证线程隔离
-    void SetSlowProcessingMs(int32_t slowMs) { mSlowMs = slowMs; }
-
-    // 模拟 epoll 回调：MQ 取消息 → ProcessRecvMsg 入线程队列
-    int32_t TriggerRecv()
-    {
-        SprMsg msg;
-        if (RecvMsg(msg) < 0) {
-            SPR_LOGE("RecvMsg failed!\n");
-            return -1;
-        }
-
-        return ProcessRecvMsg(msg);
+    int32_t GetRecvCount() const {
+        return mRecvCount.load();
     }
 
-    // 直接向线程队列注入一条消息（验证 FIFO 与计数）
-    int32_t InjectMsg(uint32_t msgId)
-    {
-        SprMsg msg(msgId);
-        return ProcessRecvMsg(msg);
+    void  setSlowMs(int32_t slowMs) {
+        mSlowMs.store(slowMs);
+    }
+
+    SprMsg GetMsg() const {
+        std::lock_guard<std::mutex> lock(mRecvMutex);
+        return mMsg;
+    }
+
+    std::thread::id GetProcessThreadId() const {
+        std::lock_guard<std::mutex> lock(mRecvMutex);
+        return mProcessThreadId;
+    }
+
+    std::vector<uint32_t> GetRecvMsgIds() const {
+        std::lock_guard<std::mutex> lock(mRecvMutex);
+        return mRecvMsgIds;
     }
 
 private:
-    int32_t Init() override { return 0; }
-    int32_t ProcessMsg(const SprMsg& msg) override
-    {
-        mRecvCount++;
-        mLastMsgId = msg.GetMsgId();
-        mProcessThreadId = std::this_thread::get_id();
+    int32_t Init() override {
+        return 0;
+    }
 
-        int32_t slowMs = mSlowMs.load();
-        if (slowMs > 0) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(slowMs));
+    int32_t ProcessMsg(const SprMsg& msg) override {
+        SPR_LOGD("ProcessMsg: msgId: 0x%x", msg.GetMsgId());
+        {
+            std::lock_guard<std::mutex> lock(mRecvMutex);
+            mMsg = msg;
+            mRecvMsgIds.push_back(msg.GetMsgId());
+            mProcessThreadId = std::this_thread::get_id();
+        }
+        mRecvCount.fetch_add(1);
+        mIsRcved.store(true);
+
+        if (mSlowMs.load() > 0) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(mSlowMs.load()));
         }
 
         return 0;
     }
 
 private:
-    std::atomic<int32_t>  mRecvCount;
-    std::atomic<uint32_t> mLastMsgId;
+    SprMsg                mMsg;
+    mutable std::mutex    mRecvMutex;
+    std::vector<uint32_t> mRecvMsgIds;
     std::thread::id       mProcessThreadId;
+    std::atomic<bool>     mIsRcved;
+    std::atomic<int32_t>  mRecvCount;
     std::atomic<int32_t>  mSlowMs;
 };
 
-// 工具：等待条件满足（带超时）
-template <typename ConditionFunc>
-static bool WaitUntil(ConditionFunc condition, int32_t timeoutMs)
-{
-    auto start = std::chrono::steady_clock::now();
+class Core_SprObserverWithMQueueThread : public ::testing::Test {
+protected:
+    static void SetUpTestCase()
+    {
+        SPR_LOGD("SetUpTestCase enter!");
+        mCaseIndex = 0;
+        mThread = std::thread([&]() {
+            SprEpollSchedule::GetInstance(0, 2000)->EpollLoop();
+        });
+
+        SPR_LOGD("SetUpTestCase exit!");
+    }
+
+    static void TearDownTestCase()
+    {
+        SPR_LOGD("TearDownTestCase enter!");
+        SprEpollSchedule::GetInstance(0, 2000)->ExitLoop();
+        mThread.join();
+        SPR_LOGD("TearDownTestCase exit!");
+    }
+
+public:
+    static int32_t mCaseIndex;
+    static std::thread mThread;
+};
+
+int32_t Core_SprObserverWithMQueueThread::mCaseIndex = 0;
+std::thread Core_SprObserverWithMQueueThread::mThread;
+
+static bool waitUntil(std::function<bool()> condition, int32_t timeoutMs) {
+    const auto startTime = std::chrono::steady_clock::now();
     while (!condition()) {
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(
-                std::chrono::steady_clock::now() - start).count() > timeoutMs) {
-            return false;
+        if (std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - startTime).count() > timeoutMs) {
+            break;
         }
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
     }
-    return true;
+
+    return condition();
 }
 
-// 测试：ProcessRecvMsg 注入消息后，由独立线程异步处理（计数最终为 1）
-TEST(Core_SprObserverWithMQueueThread, InjectedMsgProcessedByDedicatedThread)
-{
-    TestObserverMQThread observer;
+// 测试：SendMsg 自收发，消息经 MQ 由独立线程处理，payload 保持一致
+TEST_F(Core_SprObserverWithMQueueThread, SendMsgSelfRoundTrip) {
+    SPR_LOGD("[  Case %02d  ] SendMsgSelfRoundTrip", ++mCaseIndex);
+    TestObsThread observer(TEST_MODULE_ID_A);
+    observer.Initialize();
+
     std::thread::id mainThreadId = std::this_thread::get_id();
-    const uint32_t testMsgId = 0x11110000U;
+    const uint32_t msgId = 0xCAFE0001U;
+    const std::string payload = "hello thread observer";
 
-    ASSERT_EQ(observer.InjectMsg(testMsgId), 0) << "InjectMsg failed";
-    bool processed = WaitUntil([&]() { return observer.GetRecvCount() >= 1; }, 2000);
-    ASSERT_TRUE(processed) << "Message not processed within timeout";
+    SprMsg sendMsg(msgId);
+    sendMsg.SetString(payload);
 
-    EXPECT_EQ(observer.GetLastMsgId(), testMsgId) << "MsgId mismatch";
-    // 关键：处理线程必须是组件专属线程，而非调用线程
-    EXPECT_NE(observer.GetProcessThreadId(), mainThreadId)
-        << "Message should be processed by the dedicated thread, not the caller";
+    EXPECT_TRUE(waitUntil([&]() { return observer.IsConnected(); }, 200));
+    EXPECT_EQ(0, observer.SendMsg(sendMsg));
+    EXPECT_TRUE(waitUntil([&]() { return observer.IsRcved(); }, TEST_WAIT_TIMEOUT_MS));
+
+    EXPECT_NE(mainThreadId, observer.GetProcessThreadId());
+    EXPECT_EQ(sendMsg.GetMsgId(), observer.GetMsg().GetMsgId());
+    EXPECT_EQ(sendMsg.GetString(), observer.GetMsg().GetString());
 }
 
-// 测试：FIFO 保序 —— 连续注入多条消息，处理顺序与注入顺序一致
-TEST(Core_SprObserverWithMQueueThread, MessagesProcessedInFifoOrder)
-{
-    TestObserverMQThread observer;
-    const uint32_t msgIds[] = {0xAA000001U, 0xAA000002U, 0xAA000003U, 0xAA000004U, 0xAA000005U};
+// 测试：多字段 payload 经 MQ 往返后数据保持一致
+TEST_F(Core_SprObserverWithMQueueThread, MultiFieldPayloadAccuracy) {
+    SPR_LOGD("[  Case %02d  ] MultiFieldPayloadAccuracy", ++mCaseIndex);
+    TestObsThread observer(TEST_MODULE_ID_A);
+    observer.Initialize();
 
-    for (uint32_t id : msgIds) {
-        ASSERT_EQ(observer.InjectMsg(id), 0) << "InjectMsg failed for id " << id;
+    const uint32_t msgId = 0xCAFE0021U;
+    const std::string payload = "accuracy-check-0123456789";
+
+    SprMsg sendMsg(msgId);
+    sendMsg.SetString(payload);
+    sendMsg.SetU32Value(0xDEADBEEFU);
+    sendMsg.SetI64Value(-0x1122334455667788LL);
+    EXPECT_EQ(0, observer.SendMsg(sendMsg)) << "SendMsg failed";
+
+    EXPECT_TRUE(waitUntil([&]() { return observer.IsRcved(); }, TEST_WAIT_TIMEOUT_MS))
+        << "Message not processed within timeout";
+
+    EXPECT_EQ(sendMsg.GetMsgId(), observer.GetMsg().GetMsgId()) << "MsgId mismatch";
+    EXPECT_EQ(sendMsg.GetString(), observer.GetMsg().GetString()) << "String mismatch";
+    EXPECT_EQ(sendMsg.GetU32Value(), observer.GetMsg().GetU32Value()) << "U32 mismatch";
+    EXPECT_EQ(sendMsg.GetI64Value(), observer.GetMsg().GetI64Value()) << "I64 mismatch";
+}
+
+// 测试：连续注入多条消息，按 FIFO 顺序处理
+TEST_F(Core_SprObserverWithMQueueThread, FifoOrderPreserved) {
+    SPR_LOGD("[  Case %02d  ] FifoOrderPreserved", ++mCaseIndex);
+    TestObsThread observer(TEST_MODULE_ID_A);
+    observer.Initialize();
+
+    const uint32_t msgIds[] = {0xCAF00001U, 0xCAF00002U, 0xCAF00003U, 0xCAF00004U, 0xCAF00005U};
+    const int32_t msgCount = static_cast<int32_t>(sizeof(msgIds) / sizeof(msgIds[0]));
+
+    for (int32_t i = 0; i < msgCount; i++) {
+        observer.SendMsg(msgIds[i]);
     }
 
-    bool done = WaitUntil([&]() { return observer.GetRecvCount() >= 5; }, 3000);
-    ASSERT_TRUE(done) << "Not all messages processed within timeout";
-    EXPECT_EQ(observer.GetLastMsgId(), msgIds[4])
-        << "Last processed msgId should be the last injected one (FIFO)";
+    EXPECT_TRUE(waitUntil([&]() { return observer.GetRecvCount() >= msgCount; }, TEST_WAIT_TIMEOUT_MS))
+        << "Messages not processed within timeout";
+
+    std::vector<uint32_t> recvIds = observer.GetRecvMsgIds();
+    ASSERT_EQ(msgCount, static_cast<int32_t>(recvIds.size())) << "Received count mismatch";
+    for (int32_t i = 0; i < msgCount; i++) {
+        EXPECT_EQ(msgIds[i], recvIds[i]) << "FIFO order broken at index " << i;
+    }
 }
 
-// 测试：线程隔离 —— 慢处理（200ms）不阻塞消息入队，多次注入立即可返回
-TEST(Core_SprObserverWithMQueueThread, SlowProcessingDoesNotBlockEnqueue)
-{
-    TestObserverMQThread observer;
-    observer.SetSlowProcessingMs(200);   // 每条消息处理 200ms
+// 测试：线程组件消息处理互不阻塞用例，A 慢处理不阻塞 B 的消息处理
+TEST_F(Core_SprObserverWithMQueueThread, SlowProcessingDoesNotBlockEnqueue) {
+    SPR_LOGD("[  Case %02d  ] SlowProcessingDoesNotBlockEnqueue", ++mCaseIndex);
+    TestObsThread observerA(TEST_MODULE_ID_A);
+    TestObsThread observerB(TEST_MODULE_ID_B);
+    observerA.Initialize();
+    observerB.Initialize();
+    observerA.setSlowMs(2000);
 
-    // 注入 3 条消息：若同步处理则 InjectMsg 会阻塞 200ms×3；线程模式应立即返回
-    auto start = std::chrono::steady_clock::now();
     for (int32_t i = 0; i < 3; i++) {
-        ASSERT_EQ(observer.InjectMsg(0xBB000000 + i), 0) << "InjectMsg failed";
+        observerA.SendMsg(0xCAF00001U + i);
     }
-    auto elapsedMs = std::chrono::duration_cast<std::chrono::milliseconds>(
-        std::chrono::steady_clock::now() - start).count();
+    observerB.SendMsg(0xCAF00010U);
 
-    // 入队耗时远小于 3×200ms=600ms（允许调度噪声，阈值取 300ms）
-    EXPECT_LT(elapsedMs, 300) << "Enqueue should not wait for slow processing, elapsed = " << elapsedMs << "ms";
-
-    // 等待全部处理完，验证独立线程真正执行了慢任务
-    bool done = WaitUntil([&]() { return observer.GetRecvCount() >= 3; }, 3000);
-    ASSERT_TRUE(done) << "Slow messages not fully processed within timeout";
+    EXPECT_TRUE(waitUntil([&]() { return observerB.IsRcved(); }, 1000))
+        << "ObserverB blocked by slow ObserverA";
+    EXPECT_EQ(0xCAF00010U, observerB.GetMsg().GetMsgId()) << "MsgId mismatch";
+    EXPECT_LT(observerA.GetRecvCount(), 3) << "ObserverA should still be processing";
 }
 
-// 测试：SendMsg → MQ → TriggerRecv → 线程消费 全链路
-TEST(Core_SprObserverWithMQueueThread, SendMsgRecvMsgThreadRoundTrip)
-{
-    TestObserverMQThread observer;
-    const uint32_t testMsgId = 0xCC00DEAD;
+// 测试：模块互发，A 经 NotifyObserver 接口发消息给 B，B 独立线程处理
+TEST_F(Core_SprObserverWithMQueueThread, ModuleMutualSendRecv) {
+    SPR_LOGD("[  Case %02d  ] ModuleMutualSendRecv", ++mCaseIndex);
+    TestObsThread observerA(TEST_MODULE_ID_A);
+    TestObsThread observerB(TEST_MODULE_ID_B);
+    observerA.Initialize();
+    observerB.Initialize();
 
-    SprMsg sendMsg(testMsgId);
-    sendMsg.SetU32Value(0xDEADBEEF);
-    ASSERT_EQ(observer.SendMsg(sendMsg), 0) << "SendMsg failed";
+    const uint32_t msgId = 0xCAFE0001U;
+    const std::string payload = "hello thread observer";
 
-    ASSERT_EQ(observer.TriggerRecv(), 0) << "TriggerRecv failed";
-    bool processed = WaitUntil([&]() { return observer.GetRecvCount() >= 1; }, 2000);
-    ASSERT_TRUE(processed) << "Message not processed within timeout";
+    SprMsg sendMsg(msgId);
+    sendMsg.SetString(payload);
+    observerA.NotifyObserver(observerB.GetModuleId(), sendMsg);
 
-    EXPECT_EQ(observer.GetLastMsgId(), testMsgId) << "MsgId mismatch after MQ round-trip";
+    EXPECT_TRUE(waitUntil([&]() { return observerB.IsRcved(); }, TEST_WAIT_TIMEOUT_MS))
+        << "Message not processed within timeout";
+
+    const SprMsg& recvMsg = observerB.GetMsg();
+    EXPECT_EQ(sendMsg.GetMsgId(), recvMsg.GetMsgId()) << "MsgId mismatch";
+    EXPECT_EQ(sendMsg.GetString(), recvMsg.GetString()) << "Payload mismatch";
 }

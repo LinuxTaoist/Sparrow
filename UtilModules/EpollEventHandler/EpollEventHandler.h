@@ -38,7 +38,7 @@ protected:
     virtual ~EpollEventHandler();
 
 private:
-    bool    mRun;
+    bool        mRun;
     int32_t     mHandle;
     int32_t     mTimeOut;
     int32_t     mWakeFd;    // eventfd for waking up epoll_wait on ExitLoop

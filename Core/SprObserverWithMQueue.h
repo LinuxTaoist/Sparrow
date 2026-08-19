@@ -39,6 +39,13 @@ public:
     virtual ~SprObserverWithMQueue();
 
     /**
+     * @brief  Check if the observer is connected to the mediator
+     *
+     * @retval true connected, false not connected
+     */
+    bool IsConnected();
+
+    /**
      * @brief SendMsg
      *
      * @param[in] msg

@@ -36,8 +36,8 @@
 
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
             const std::function<void(int32_t, const std::string&, void*)>& cb,
-            void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mCb(cb)
+            void* arg, bool clearOnOpen)
+    : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mClearOnOpen(clearOnOpen), mCb(cb)
 {
     if (name.empty()) {
         SetReady(false);
@@ -89,10 +89,10 @@ int32_t PMsgQueue::InitMsgQueue(long msgSize)
         }
     }
 
-    if (isExist) {
+    if (isExist && mClearOnOpen) {
         std::string msg;
-        ssize_t received = 0;
         uint32_t prio = 0;
+        ssize_t received = 0;
         while ((received = Recv(msg, prio)) > 0) {
             PLOGD("clear message from queue<%s> cnt = %ld\n", mDevName.c_str(), received);
         }

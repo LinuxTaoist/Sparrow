@@ -186,7 +186,9 @@ int SprMediator::MsgRespondRegister(const SprMsg& msg)
         SPR_LOGW("Already exist moduleId: 0x%x, reset it\n", moduleId);
     }
 
-    auto pModuleMQ = make_shared<PMsgQueue>(name, MSG_MAX_SIZE, nullptr);
+    // 打开模块队列时不清空：模块可能正在注册期间收发消息（如 REGISTER 前 SendMsg 的消息），
+    // 清空会误删正常消息。残留清理由模块侧（队列创建者）打开时负责。
+    auto pModuleMQ = make_shared<PMsgQueue>(name, MSG_MAX_SIZE, nullptr, nullptr, false);
     if (pModuleMQ->GetEvtFd() != -1) {
         result = true;
         mModuleMap[moduleId] = {monitored, {}, pModuleMQ};

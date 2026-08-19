@@ -28,7 +28,7 @@ class PMsgQueue : public IEpollEvent
 public:
     explicit PMsgQueue(const std::string& name, long maxmsg,
               const std::function<void(int32_t, const std::string&, void*)>& cb = nullptr,
-              void* arg = nullptr);
+              void* arg = nullptr, bool clearOnOpen = true);
 
     virtual ~PMsgQueue();
 
@@ -51,6 +51,7 @@ protected:
 
 private:
     long mMaxMsg;
+    bool mClearOnOpen;
     std::string mDevName;
     std::function<void(int32_t, std::string, void*)> mCb;
 };

@@ -9,8 +9,10 @@
  *  @date       : 2026/08/18
  *
  *  Threaded message processing observer based on SprObserverWithMQueue. Incoming messages are buffered
- *  into an internal queue and processed by a dedicated thread, so slow business processing never blocks
- *  other observers running on the shared epoll loop.
+ *  into an internal queue and processed by a dedicated thread in FIFO order, so slow business
+ *  processing never blocks other observers running on the shared epoll loop. The processing thread
+ *  is lazily started on the first message and stays alive until destruction, so each component
+ *  instance owns exactly one resident thread.
  *
  *  Interface is identical to SprObserverWithMQueue, components can switch between them by only changing
  *  the base class name.
@@ -63,6 +65,11 @@ private:
      * Dequeue messages in FIFO order and dispatch them via DispatchSprMsg().
      */
     void ThreadLoop();
+
+    /**
+     * @brief  Start the processing thread
+     */
+    void StartThread();
 
     /**
      * @brief  Stop the processing thread and wait for it to exit

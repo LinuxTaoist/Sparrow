@@ -43,9 +43,14 @@ SprObserverWithMQueue::~SprObserverWithMQueue()
     UnRegisterFromMediator();
 }
 
+bool SprObserverWithMQueue::IsConnected()
+{
+    return mConnected;
+}
+
 int32_t SprObserverWithMQueue::InitFramework()
 {
-    SPR_LOGD("Initlize MQueue framework!\n");
+    SPR_LOGD("Initlize MQueue framework!");
     AddToPoll();
     LoadMQStaticInfo(GetEvtFd(), GetMQDevName());
     return RegisterFromMediator();
@@ -76,13 +81,13 @@ int32_t SprObserverWithMQueue::SendMsg(SprMsg& msg)
     msg.SetFrom(mModuleID);
     msg.SetTo(mModuleID);
     if (msg.Encode(bytes) != 0) {
-        SPR_LOGE("Encode failed!\n");
+        SPR_LOGE("Encode failed!");
         return -1;
     }
 
     int32_t ret = Send(bytes);
     if (ret < 0) {
-        SPR_LOGE("Send failed!\n");
+        SPR_LOGE("Send failed!");
     }
 
     return ret;
@@ -104,17 +109,18 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
         return -1;
     }
 
-    if (msg.Decode(bytes) != 0) {
-        SPR_LOGE("Decode failed!");
+    ret = msg.Decode(bytes);
+    if (ret != 0) {
+        SPR_LOGE("Decode failed! size = %zu, mq = %s, ret = %d", bytes.size(), GetMQDevName().c_str(), ret);
         return -1;
     }
 
-    return 0;
+    return ret;
 }
 
 int32_t SprObserverWithMQueue::MsgRespondSystemExit(const SprMsg& msg)
 {
-    SPR_LOGD("System Exit!\n");
+    SPR_LOGD("System Exit!");
     return 0;
 }
 
@@ -122,14 +128,14 @@ int32_t SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
 {
     // 注册成功，连接状态为true
     mConnected = msg.GetU8Value();
-    SPR_LOGD("Register Successfully! mConnected = %d\n", mConnected);
+    SPR_LOGD("Register Successfully! mConnected = %d", mConnected);
     return 0;
 }
 
 int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
 {
     mConnected = !msg.GetU8Value();
-    SPR_LOGD("Unregister Successfully! mConnected = %d\n", mConnected);
+    SPR_LOGD("Unregister Successfully! mConnected = %d", mConnected);
     return 0;
 }
 
@@ -146,11 +152,11 @@ int32_t SprObserverWithMQueue::MsgRespondPropertyLogLengthChanged(const SprMsg& 
 int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::string& devName)
 {
     if (devName.length() >= MQ_NAME_MAX_LENGTH) {
-        SPR_LOGW("devName %s too long(max %d characters)\n", devName.c_str(), MQ_NAME_MAX_LENGTH);
+        SPR_LOGW("devName %s too long(max %d characters)", devName.c_str(), MQ_NAME_MAX_LENGTH);
     }
 
     if (!mpDetails) {
-        SPR_LOGE("mpDetails is nullptr!\n");
+        SPR_LOGE("mpDetails is nullptr!");
         return -1;
     }
 
@@ -161,14 +167,14 @@ int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::strin
 int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& msg)
 {
     if (!mpDetails) {
-        SPR_LOGE("mpDetails is nullptr!\n");
+        SPR_LOGE("mpDetails is nullptr!");
         return -1;
     }
 
     mq_attr tmpMQAttr = {};
     int32_t ret = mq_getattr(handle, &tmpMQAttr);
     if (ret != 0) {
-        SPR_LOGE("mq_getattr failed! (%s)\n", strerror(errno));
+        SPR_LOGE("mq_getattr failed! (%s)", strerror(errno));
         return -1;
     }
 
@@ -191,7 +197,7 @@ int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& m
 
 int32_t SprObserverWithMQueue::SendEventToMonitor(int32_t errcode, const std::string& text)
 {
-    SPR_LOGD("Send event to monitor, errcode: %d, text: %s\n", errcode, text.c_str());
+    SPR_LOGD("Send event to monitor, errcode: %d, text: %s", errcode, text.c_str());
     SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
     msg.SetI32Value(errcode);
     msg.SetString(text);
@@ -231,20 +237,22 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
         SendEventToMonitor(ERR_GENERAL_RUN_LONGTIME, description);
     }
 
-    // SPR_LOGD("Dispatch SprMsg %s time: %dms\n", GetSigName(msg.GetMsgId()), estime);
+    // SPR_LOGD("Dispatch SprMsg %s time: %dms", GetSigName(msg.GetMsgId()), estime);
     return 0;
 }
 
 void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
 {
     if (fd != GetEvtFd()) {
-        SPR_LOGW("fd is not match!\n");
+        SPR_LOGW("fd is not match!");
         return nullptr;
     }
 
     SprMsg msg;
-    if (RecvMsg(msg) < 0) {
-        SPR_LOGE("RecvMsg failed!\n");
+    int32_t ret = RecvMsg(msg);
+    if (ret < 0) {
+        // RecvMsg 成功时返回 Decode 的结果 0，仅 < 0 才是真正的失败（EAGAIN 返回 0 视为空队列）
+        SPR_LOGW("RecvMsg failed!");
         return nullptr;
     }
 
