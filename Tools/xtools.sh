@@ -153,6 +153,26 @@ stop_valgrind() {
     ./stop_valgrind.sh
 }
 
+## sync_code
+sync_code() {
+    echo -e "${PURPLE}开始同步代码仓库...${NC}"
+    cd ${project_path}
+
+    if [ -d ".repo" ]; then
+        echo -e "${GREEN}检测到 repo 管理环境，批量同步所有子仓库${NC}"
+        repo forall -p -c git pull --ff-only
+    else
+        echo -e "${GREEN}单仓库环境，同步当前仓库${NC}"
+        git pull --ff-only
+    fi
+
+    if [ $? -eq 0 ]; then
+        echo -e "${GREEN}代码同步完成${NC}"
+    else
+        echo -e "${RED}同步失败，请检查本地是否有未提交改动${NC}"
+    fi
+}
+
 # Function to print usage information with logo
 usage() {
     local logo="\
@@ -187,6 +207,7 @@ usage() {
     echo -e "${PURPLE}  $0 start-valgrind           启动valgrind${NC}"
     echo -e "${PURPLE}  $0 stop-valgrind            停止valgrind${NC}"
     echo -e "${PURPLE}  $0 help                     显示此帮助信息${NC}"
+    echo -e "${PURPLE}  $0 sync                     同步代码仓库${NC}"
     echo -e ""
     echo -e "${PURPLE}================================================================================${NC}"
 }
@@ -224,6 +245,9 @@ main() {
             ;;
         stop-valgrind)
             stop_valgrind
+            ;;
+        sync-code)
+            sync_code
             ;;
         help|?)
             usage

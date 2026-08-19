@@ -251,7 +251,6 @@ void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
     SprMsg msg;
     int32_t ret = RecvMsg(msg);
     if (ret < 0) {
-        // RecvMsg 成功时返回 Decode 的结果 0，仅 < 0 才是真正的失败（EAGAIN 返回 0 视为空队列）
         SPR_LOGW("RecvMsg failed!");
         return nullptr;
     }
