@@ -164,7 +164,7 @@ sync_code() {
 
     if [ -d ".repo" ]; then
         echo -e "${GREEN}检测到 repo 管理环境，批量同步所有子仓库${NC}"
-        repo forall -p -c git pull --ff-only
+        repo sync --current-branch
     else
         if [ ! -d ".git" ]; then
             echo -e "${RED}错误：${project_path} 不是 Git 仓库${NC}"
@@ -178,7 +178,7 @@ sync_code() {
     if [ ${sync_status} -eq 0 ]; then
         echo -e "${GREEN}代码同步完成${NC}"
     else
-        echo -e "${RED}同步失败，请检查上方具体仓库的错误信息（可能存在未提交改动或未完成的 rebase）${NC}"
+        echo -e "${RED}同步失败，请检查上方具体仓库的错误信息${NC}"
     fi
 
     return ${sync_status}
