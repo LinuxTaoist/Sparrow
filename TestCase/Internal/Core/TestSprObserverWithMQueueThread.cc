@@ -187,10 +187,10 @@ TEST_F(Core_SprObserverWithMQueueThread, MultiFieldPayloadAccuracy) {
     EXPECT_TRUE(waitUntil([&]() { return observer.IsRcved(); }, TEST_WAIT_TIMEOUT_MS))
         << "Message not processed within timeout";
 
-    EXPECT_EQ(sendMsg.GetMsgId(), observer.GetMsg().GetMsgId()) << "MsgId mismatch";
-    EXPECT_EQ(sendMsg.GetString(), observer.GetMsg().GetString()) << "String mismatch";
-    EXPECT_EQ(sendMsg.GetU32Value(), observer.GetMsg().GetU32Value()) << "U32 mismatch";
-    EXPECT_EQ(sendMsg.GetI64Value(), observer.GetMsg().GetI64Value()) << "I64 mismatch";
+    EXPECT_EQ(sendMsg.GetMsgId(), observer.GetMsg().GetMsgId());
+    EXPECT_EQ(sendMsg.GetString(), observer.GetMsg().GetString());
+    EXPECT_EQ(sendMsg.GetU32Value(), observer.GetMsg().GetU32Value());
+    EXPECT_EQ(sendMsg.GetI64Value(), observer.GetMsg().GetI64Value());
 }
 
 // 测试：连续注入多条消息，按 FIFO 顺序处理
@@ -210,9 +210,10 @@ TEST_F(Core_SprObserverWithMQueueThread, FifoOrderPreserved) {
         << "Messages not processed within timeout";
 
     std::vector<uint32_t> recvIds = observer.GetRecvMsgIds();
-    ASSERT_EQ(msgCount, static_cast<int32_t>(recvIds.size())) << "Received count mismatch";
-    for (int32_t i = 0; i < msgCount; i++) {
-        EXPECT_EQ(msgIds[i], recvIds[i]) << "FIFO order broken at index " << i;
+    EXPECT_EQ(msgCount, static_cast<int32_t>(recvIds.size()));
+    for (int32_t i = 0; i < msgCount && i < (int32_t)recvIds.size(); i++) {
+        EXPECT_EQ(msgIds[i], recvIds[i]) << "FIFO order broken at index "
+        << i << ": " << recvIds[i] << " != " << msgIds[i];
     }
 }
 

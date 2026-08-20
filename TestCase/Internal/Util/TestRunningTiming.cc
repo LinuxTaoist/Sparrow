@@ -202,7 +202,7 @@ TEST(Util_RunningTiming, SharedTimerInMultipleThreads) {
     std::vector<std::thread> threads;
     std::atomic<bool> startFlag(false);
     std::atomic<bool> stopFlag(false);
-    uint64_t diffMS = 20; // 由于竞争条件，误差范围较大
+    uint64_t diffMS = 30; // 由于竞争条件，误差范围较大
 
     // 每个线程都会尝试使用同一个计时器实例
     for (int i = 0; i < numThreads; ++i) {

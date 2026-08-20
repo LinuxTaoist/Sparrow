@@ -68,6 +68,9 @@ int32_t SprObserverWithMQueue::RegisterFromMediator()
 
 int32_t SprObserverWithMQueue::UnRegisterFromMediator()
 {
+    mConnected = false;
+    DelFromPoll();
+
     SprMsg msg(GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_UNREGISTER_REQUEST);
     msg.SetU32Value((uint32_t)MEDIATOR_PROXY_MQUEUE);
     msg.SetU16Value((uint16_t)GetModuleId());
@@ -171,6 +174,11 @@ int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& m
         return -1;
     }
 
+    if (handle < 0) {
+        SPR_LOGW("handle is invalid!");
+        return -1;
+    }
+
     mq_attr tmpMQAttr = {};
     int32_t ret = mq_getattr(handle, &tmpMQAttr);
     if (ret != 0) {
@@ -206,14 +214,12 @@ int32_t SprObserverWithMQueue::SendEventToMonitor(int32_t errcode, const std::st
 
 int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
 {
-    RunningTiming timer;
+    RunningTiming runTime;
+
+    LoadMQDynamicInfo(GetEvtFd(), msg);
     switch (msg.GetMsgId()) {
         case SIG_ID_PROXY_REGISTER_RESPONSE: {
             MsgRespondRegisterRsp(msg);
-            break;
-        }
-        case SIG_ID_PROXY_UNREGISTER_RESPONSE: {
-            MsgRespondUnregisterRsp(msg);
             break;
         }
         case SIG_ID_PROPERTY_LOG_LEVEL_CHANGED: {
@@ -230,7 +236,7 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
         }
     }
 
-    uint64_t estime = timer.GetElapsedTimeInMSec();
+    uint64_t estime = runTime.GetElapsedTimeInMSec();
     if (estime >= RUNTIME_WARN_MS) {
         std::string description = std::string(GetSigName(msg.GetMsgId())) + " took "
             + std::to_string(estime) + "ms" + " (limit: " + std::to_string(RUNTIME_WARN_MS) + "ms" + ")";
@@ -255,7 +261,6 @@ void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
         return nullptr;
     }
 
-    LoadMQDynamicInfo(fd, msg);
     ProcessRecvMsg(msg);
     return nullptr;
 }

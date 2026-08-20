@@ -47,7 +47,7 @@ public:
     virtual void    DelFromPoll();
     virtual void*   EpollEvent(int32_t fd, EpollType eType, void* arg) = 0;
 
-    int32_t         GetEvtFd()      { return mEvtFd; }
+    int32_t     GetEvtFd()      { return mEvtFd; }
     EpollType   GetEpollType()  { return mEpollType; }
     void*       GetArgs()       { return mArgs; }
 
@@ -56,7 +56,7 @@ protected:
 
 protected:
     bool        mReady;
-    int32_t         mEvtFd;
+    int32_t     mEvtFd;
     EpollType   mEpollType;
     void*       mArgs;
 };
