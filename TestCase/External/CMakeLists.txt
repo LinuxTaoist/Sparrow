@@ -13,3 +13,4 @@ target_include_directories  (test_external PRIVATE ${PROJECT_PATH}/3rdParty/goog
 set_target_properties       (test_external PROPERTIES OUTPUT_NAME "test_external")
 target_link_libraries       (test_external c LibSprLog LibConfigAPI gtest gtest_main pthread rt dl)
 add_dependencies            (test_external LibSprLog LibConfigAPI)
+add_test                    (NAME test_external COMMAND test_external)

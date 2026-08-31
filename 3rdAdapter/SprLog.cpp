@@ -21,6 +21,7 @@
 #include <iomanip>
 #include <sstream>
 #include <algorithm>
+#include <errno.h>
 #include <stdio.h>
 #include <stdarg.h>
 #include <time.h>
@@ -39,15 +40,57 @@ using namespace InternalDefs;
 #define PID_PRINT_WIDTH_LIMIT       6
 #define LOG_BUFFER_SIZE_DEFAULT     512
 #define SEMAPHORE_NAME              "/SprLogSem"
+#define LOG_SEM_WAIT_TIMEOUT_MS     1000
 
 static std::unique_ptr<SharedRingBuffer> pLogSCacheMem = nullptr;
+
+static int32_t WaitSemTimeout(sem_t* sem, int32_t timeoutMs)
+{
+    if (sem == nullptr || sem == SEM_FAILED) {
+        return -1;
+    }
+
+    if (timeoutMs <= 0) {
+        return sem_trywait(sem);
+    }
+
+    struct timespec startTs = {};
+    if (clock_gettime(CLOCK_MONOTONIC, &startTs) != 0) {
+        return sem_trywait(sem);
+    }
+
+    while (true) {
+        if (sem_trywait(sem) == 0) {
+            return 0;
+        }
+
+        if (errno != EAGAIN && errno != EINTR) {
+            return -1;
+        }
+
+        struct timespec nowTs = {};
+        if (clock_gettime(CLOCK_MONOTONIC, &nowTs) != 0) {
+            return -1;
+        }
+
+        long long elapsedMs = static_cast<long long>(nowTs.tv_sec - startTs.tv_sec) * 1000
+                    + static_cast<long long>(nowTs.tv_nsec - startTs.tv_nsec) / 1000000;
+        if (elapsedMs >= timeoutMs) {
+            return -1;
+        }
+
+        struct timespec sleepTs = {};
+        sleepTs.tv_nsec = 1000000;  // 1ms
+        nanosleep(&sleepTs, nullptr);
+    }
+}
 
 SprLog::SprLog()
     : mWriteSem(SEM_FAILED)
     , mLevel(LOG_LEVEL_BUTT)
     , mLength(LOG_BUFFER_SIZE_DEFAULT)
 {
-    mWriteSem = sem_open(SEMAPHORE_NAME, O_CREAT, 0644, 1);
+    mWriteSem = sem_open(SEMAPHORE_NAME, O_CREAT, 0600, 1);
     if (SEM_FAILED == mWriteSem) {
         perror("sem_open failed");
     }
@@ -235,7 +278,10 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
         return result;
     }
 
-    sem_wait(mWriteSem);
+    if (WaitSemTimeout(mWriteSem, LOG_SEM_WAIT_TIMEOUT_MS) != 0) {
+        fputs(log.c_str(), stdout);
+        return result;
+    }
     LogsToMemory(log.c_str(), (int32_t)log.length());
     sem_post(mWriteSem);
 

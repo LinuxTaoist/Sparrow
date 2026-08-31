@@ -68,6 +68,7 @@ protected:
         std::remove(kHexMix.c_str());
         std::remove(kHexEmpty.c_str());
         std::remove(kHexLarge.c_str());
+        std::remove(kHexProtocol.c_str());
     }
 };
 

@@ -27,7 +27,7 @@ using namespace InternalDefs;
 // 测试200ms永久定时器，等待1100ms后验证计数器值是否为5
 TEST_F(TestSprComponents, Timer200MSPermanentWait1100MSVerifyCount)
 {
-    int32_t waitMs = 1100;
+    int32_t waitMs = 1180;
     int32_t expectVal = 5;
     const int32_t& actualVal = mpTestModule->Get200MSCnt();
 

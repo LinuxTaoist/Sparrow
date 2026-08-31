@@ -23,6 +23,7 @@
 #include <algorithm>
 #include <sstream>
 #include <time.h>
+#include <errno.h>
 #include <fcntl.h>
 #include <unistd.h>
 #include <semaphore.h>
@@ -51,10 +52,52 @@ using namespace GeneralUtils;
 #define LOG_WRITE_SEMAPHORE_NAME    "/SprLogSem"
 #define LOG_FLUSH_COUNT_LIMIT       64
 #define LOG_FLUSH_INTERVAL_SEC      1
+#define LOG_SEM_WAIT_TIMEOUT_MS     100
 
 static std::unique_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
 bool LogManager::mRunning = true;
+
+static int WaitSemTimeout(sem_t* sem, int timeoutMs)
+{
+    if (sem == nullptr || sem == SEM_FAILED) {
+        return -1;
+    }
+
+    if (timeoutMs <= 0) {
+        return sem_trywait(sem);
+    }
+
+    struct timespec startTs = {};
+    if (clock_gettime(CLOCK_MONOTONIC, &startTs) != 0) {
+        return sem_trywait(sem);
+    }
+
+    while (true) {
+        if (sem_trywait(sem) == 0) {
+            return 0;
+        }
+
+        if (errno != EAGAIN && errno != EINTR) {
+            return -1;
+        }
+
+        struct timespec nowTs = {};
+        if (clock_gettime(CLOCK_MONOTONIC, &nowTs) != 0) {
+            return -1;
+        }
+
+        long long elapsedMs = static_cast<long long>(nowTs.tv_sec - startTs.tv_sec) * 1000
+                    + static_cast<long long>(nowTs.tv_nsec - startTs.tv_nsec) / 1000000;
+        if (elapsedMs >= timeoutMs) {
+            return -1;
+        }
+
+        struct timespec sleepTs = {};
+        sleepTs.tv_nsec = 1000000;
+        nanosleep(&sleepTs, nullptr);
+    }
+}
 
 static uint64_t GetMonotonicTickSec()
 {
@@ -77,7 +120,7 @@ LogManager::LogManager()
     , mLogFileName(DEFAULT_BASE_LOG_FILE_NAME)
     , mLogsFilePath(DEFAULT_DEBUG_ROOT_DIR + std::string("/") + DEFAULT_BASE_LOG_FILE_NAME)
     , mCurrentLogFile(DEFAULT_BASE_LOG_FILE_NAME)
-    , mReadSem(sem_open(LOG_WRITE_SEMAPHORE_NAME, O_CREAT, 0644, 1))
+    , mReadSem(sem_open(LOG_WRITE_SEMAPHORE_NAME, O_CREAT, 0600, 1))
     , mLogFileStream()
     , mLogFilePaths()
     , mLoadAttrMap()
@@ -454,7 +497,10 @@ int LogManager::MainLoop()
         }
 
         if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
-            sem_wait(mReadSem);
+            if (WaitSemTimeout(mReadSem, LOG_SEM_WAIT_TIMEOUT_MS) != 0) {
+                usleep(10000);
+                continue;
+            }
         }
 
         int32_t len = 0;

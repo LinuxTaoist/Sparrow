@@ -25,3 +25,4 @@ target_include_directories  (test_internal PRIVATE ${PROJECT_PATH}/3rdParty/goog
 set_target_properties       (test_internal PROPERTIES OUTPUT_NAME "test_internal")
 target_link_libraries       (test_internal c LibSprLog LibEpollEvent gtest gtest_main pthread rt dl)
 add_dependencies            (test_internal LibSprLog LibEpollEvent)
+add_test                    (NAME test_internal COMMAND test_internal)

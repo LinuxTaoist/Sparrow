@@ -23,3 +23,4 @@ target_include_directories  (test_benchmark PRIVATE ${PROJECT_PATH}/3rdParty/goo
 set_target_properties       (test_benchmark PROPERTIES OUTPUT_NAME "test_benchmark")
 target_link_libraries       (test_benchmark c LibSprLog LibEpollEvent LibConfigAPI gtest gtest_main pthread rt dl)
 add_dependencies            (test_benchmark LibSprLog LibEpollEvent LibConfigAPI)
+add_test                    (NAME test_benchmark COMMAND test_benchmark)
