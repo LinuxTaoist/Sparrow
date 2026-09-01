@@ -48,6 +48,7 @@
 // - Service name macro
 // --------------------------------------------------------------------------------------------------------------------
 #define SRV_NAME_BINDER             "bindermanagersrv"
+#define SRV_NAME_CONFIG_MANAGER     "configmanagersrv"
 #define SRV_NAME_PROPERTY           "propertiessrv"
 #define SRV_NAME_MEDIATOR           "mediatorsrv"
 #define SRV_NAME_LOG                "logmanagersrv"
@@ -160,6 +161,10 @@
 
 #ifndef MODULE_CONFIG_VERSION
     #define MODULE_CONFIG_VERSION   "Unknown"
+#endif
+
+#ifndef HAL_FAMILY
+    #define HAL_FAMILY      "Unknown"
 #endif
 
 #endif // __COMMON_MACROS_H__

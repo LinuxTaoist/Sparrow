@@ -202,7 +202,7 @@ int main(int argc, char* argv[])
 
                 std::shared_ptr<CNode> pDataParser = theFactory.CreateDataParserByCfgParser(pCfgParser, TEST_BIN_BYTES2);
                 theFactory.PrintConfigDetails(pCfgParser);
-                theFactory.PrintProtocolDetails(pDataParser, TEST_BIN_BYTES2);
+                theFactory.PrintDataDetails(pDataParser, TEST_BIN_BYTES2);
 
                 std::vector<uint8_t> enBytes;
                 pDataParser->Encode(enBytes);

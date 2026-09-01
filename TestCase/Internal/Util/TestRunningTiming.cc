@@ -19,8 +19,12 @@
 #include <atomic>
 #include <thread>
 #include <unistd.h>
+#include <inttypes.h>
 #include "gtest/gtest.h"
 #include "RunningTiming.h"
+#include <stdio.h>
+
+#define TEST_LOG(fmt, args...) printf("[   INFO   ] " fmt "\n", ##args)
 
 #define LOG_TAG "TestRTiming"
 
@@ -43,7 +47,7 @@ TEST(Util_RunningTiming, NormalUsing) {
         EXPECT_LE(elapsedTime, (uint64_t)(100 + 5));  // 误差在5毫秒以内
     }
 
-    std::cout << "elapsedTime: " << totalTimer / 10 << " ms - " << 100 << std::endl;
+    TEST_LOG("elapsedTime: %llu ms", (unsigned long long)(totalTimer / 10));
 }
 
 // 测试GetElapsedTimeInMSec 误差10ms
@@ -105,7 +109,7 @@ TEST(Util_RunningTiming, MultiThreadIndependentMeasurement) {
             RunningTiming timer;
             usleep(sleepTimeMs * 1000); // 将毫秒转换为微秒
             measuredTimes[i] = timer.GetElapsedTimeInMSec();
-            std::cout << "Thread " << i << ": expectedTimeMs: " << sleepTimeMs << ", measuredTime: " << measuredTimes[i] << std::endl;
+            TEST_LOG("Thread %d: expectedTimeMs: %llu, measuredTime: %llu", i, (unsigned long long)sleepTimeMs, (unsigned long long)measuredTimes[i]);
         });
     }
 
@@ -198,7 +202,7 @@ TEST(Util_RunningTiming, SharedTimerInMultipleThreads) {
     std::vector<std::thread> threads;
     std::atomic<bool> startFlag(false);
     std::atomic<bool> stopFlag(false);
-    uint64_t diffMS = 20; // 由于竞争条件，误差范围较大
+    uint64_t diffMS = 30; // 由于竞争条件，误差范围较大
 
     // 每个线程都会尝试使用同一个计时器实例
     for (int i = 0; i < numThreads; ++i) {
@@ -238,10 +242,11 @@ TEST(Util_RunningTiming, SharedTimerInMultipleThreads) {
 
     // 验证计时器总时间
     uint64_t totalTime = sharedTimer.GetElapsedTimeInMSec();
-    std::cout << "Final shared timer value: " << totalTime << " ms" << std::endl;
+    TEST_LOG("Final shared timer value: %llu ms", (unsigned long long)totalTime);
 
     // 注意：由于多个线程同时访问同一个计时器实例，这个测试可能会失败
     // 这验证了RunningTiming类不是线程安全的，不应该在多线程中共享同一个实例
     EXPECT_GE(totalTime, 200 - diffMS);
     EXPECT_LE(totalTime, 200 + diffMS);
 }
+

@@ -79,11 +79,6 @@ static void usage()
             "5: AddTimer (0, 0s, 20ms)\n"
             "6: PowerOn\n"
             "7: PowerOff\n"
-            "8: OneNetDrv socket connect\n"
-            "9: Active MQTT-OneJson01\n"
-            "a: Active MQTT-DEV01\n"
-            "b: Active PC_TEST_01\n"
-            "c: Active PC_TEST_02\n"
             "q: Quit\n"
             "------------------------------------------------------------------\n"
     );
@@ -143,35 +138,6 @@ int main(int argc, const char* argv[])
                 case '7': {
                     pPowerM->PowerOff();
                     SprEpollSchedule::GetInstance()->ExitLoop();
-                    break;
-                }
-                case '8': {
-                    SprMsg msg(MODULE_ONENET_DRIVER, SIG_ID_ONENET_DRV_SOCKET_CONNECT);
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case '9': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("MQTT-OneJson01");
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case 'a': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("MQTT-DEV01");
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case 'b': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("PC_TEST_01");
-                    theDebug.NotifyObserver(msg);
-                    break;
-                }
-                case 'c': {
-                    SprMsg msg(MODULE_ONENET_MANAGER, SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT);
-                    msg.SetString("PC_TEST_02");
-                    theDebug.NotifyObserver(msg);
                     break;
                 }
                 case 'q': {

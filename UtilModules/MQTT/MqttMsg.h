@@ -161,6 +161,9 @@ protected:
         return len;
     }
 
+private:
+    int32_t DecodeImpl(const std::string& bytes);
+
 protected:
     struct FixHeader
     {

@@ -24,7 +24,7 @@
 #define LOG_TAG "MediatorHub"
 
 using namespace InternalDefs;
-SprMediatorHub::SprMediatorHub(const std::string& srvName, SprMediator* SprMediator) : SprBinderHub(srvName)
+SprMediatorHub::SprMediatorHub(const std::string& srvName, SprMediator* SprMediator) : BinderHub(srvName)
 {
     mSprMediator = SprMediator;
 }

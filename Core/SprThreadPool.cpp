@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <chrono>
 #include "SprLog.h"
 #include "SprThreadPool.h"
 
@@ -43,9 +44,27 @@ SprThreadPool::SprThreadPool(int32_t initWorkerCount)
 SprThreadPool::~SprThreadPool()
 {
     gObjAlive = false;
+
+    // 1. Drain — wait for workers to finish all pending tasks
+    {
+        std::unique_lock<std::mutex> queueLock(mTaskQueueLock);
+        // Give workers a short window to pick up remaining tasks
+        auto drained = mTaskCond.wait_for(queueLock, std::chrono::milliseconds(500),
+            [this]() { return mTaskQueue.empty(); });
+        if (!drained || !mTaskQueue.empty()) {
+            size_t remaining = mTaskQueue.size();
+            SPR_LOGW("Destroy pool with %zu remaining tasks (will be discarded)", remaining);
+            while (!mTaskQueue.empty()) {
+                mTaskQueue.pop();
+            }
+        }
+    }
+
+    // 2. Stop — signal all workers to exit
     mIsPoolRunning = false;
     mTaskCond.notify_all();
 
+    // 3. Join — wait for all workers to finish
     for (std::thread& worker : mWorkers) {
         if (worker.joinable()) {
             worker.join();

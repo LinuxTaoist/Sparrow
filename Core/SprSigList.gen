@@ -5,7 +5,6 @@ ENUM_OR_STRING(SIG_ID_ANY),                                     \
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_REQUEST),                  \
 ENUM_OR_STRING(SIG_ID_PROXY_REGISTER_RESPONSE),                 \
 ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_REQUEST),                \
-ENUM_OR_STRING(SIG_ID_PROXY_UNREGISTER_RESPONSE),               \
 ENUM_OR_STRING(SIG_ID_PROXY_BROADCAST_EXIT_COMPONENT),          \
 
 //-----------------------------------------------------------------------------
@@ -87,48 +86,6 @@ ENUM_OR_STRING(SIG_ID_POWER_ENTER_SLEEP_TIMER_EVENT),           \
 ENUM_OR_STRING(SIG_ID_MONITOR_STATUS_EVENT),                    \
 
 //-----------------------------------------------------------------------------
-// ONENET_MANAGER
-//-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_ACTIVE_DEVICE_CONNECT),        \
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_DEACTIVE_DEVICE),              \
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_REACTIVE_CUR_DEVICE_CONNECT),  \
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_DEIVCE_DISCONNECT_PASSIVE),    \
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_SET_CONNECT_STATUS),           \
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_PING_TIMER_EVENT),             \
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_DATA_REPORT_TIMER_EVENT),      \
-ENUM_OR_STRING(SIG_ID_ONENET_MGR_DEBUG_ENABLE),                 \
-
-//-----------------------------------------------------------------------------
-// ONENET_DEVICE
-//-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_ONENET_DEV_SUBSCRIBE_TOPIC),              \
-
-//-----------------------------------------------------------------------------
-// ONENET_DRIVER
-//-----------------------------------------------------------------------------
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_CONNECT),               \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_RECONNECT),             \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_RECONNECT_TIMER_EVENT), \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_CONNECT_SUCCESS),       \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_CONNECT_FAIL),          \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_ACTIVE),     \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_SOCKET_DISCONNECT_PASSIVE),    \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_CONNECT),             \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_CONNACK),             \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBLISH),             \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBACK),              \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBREC),              \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBREL),              \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PUBCOMP),             \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_SUBSCRIBE),           \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_SUBACK),              \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_UNSUBSCRIBE),         \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_UNSUBACK),            \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGREQ),             \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_PINGRESP),            \
-ENUM_OR_STRING(SIG_ID_ONENET_DRV_MQTT_MSG_DISCONNECT),          \
-
-//-----------------------------------------------------------------------------
 // TEST_MODULE
 //-----------------------------------------------------------------------------
 ENUM_OR_STRING(SIG_ID_TEST_MODULE_200MS_TIMER_EVENT),           \
@@ -136,6 +93,4 @@ ENUM_OR_STRING(SIG_ID_TEST_MODULE_500MS_TIMER_EVENT),           \
 ENUM_OR_STRING(SIG_ID_TEST_MODULE_1S_TIMER_EVENT),              \
 ENUM_OR_STRING(SIG_ID_TEST_MODULE_2S_TIMER_EVENT),              \
 ENUM_OR_STRING(SIG_ID_TEST_MODULE_3S_TIMER_EVENT),              \
-ENUM_OR_STRING(SIG_ID_TEST_MODULE_5S_TIMER_EVENT),              \
-
-ENUM_OR_STRING(SIG_ID_BUTT)
+ENUM_OR_STRING(SIG_ID_TEST_MODULE_5S_TIMER_EVENT),

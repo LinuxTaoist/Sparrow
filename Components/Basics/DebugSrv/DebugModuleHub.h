@@ -21,9 +21,9 @@
 
 #include <string>
 #include "DebugModule.h"
-#include "SprBinderHub.h"
+#include "BinderHub.h"
 
-class DebugModuleHub : public SprBinderHub
+class DebugModuleHub : public BinderHub
 {
 public:
     DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule);

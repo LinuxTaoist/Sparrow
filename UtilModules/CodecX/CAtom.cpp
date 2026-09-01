@@ -45,13 +45,32 @@ CAtom::CAtom(const std::shared_ptr<CNode>& parent, const std::string& name, cons
 CAtom::~CAtom() {
 }
 
-
-int32_t CAtom::SetStrValue(const std::string& value) {
-    return CUtils::SToV(value, mValue);
+int32_t CAtom::SetValue(const std::vector<uint8_t>& value) {
+    return SetValue("", value);
 }
 
-int32_t CAtom::GetStrValue(std::string& value) {
-    return CUtils::VToS(mValue, value);
+int32_t CAtom::GetValue(std::vector<uint8_t>& value) {
+    return GetValue("", value);
+}
+
+int32_t CAtom::SetValue(const std::string& name, const std::vector<uint8_t>& value) {
+    if (!name.empty() && name != GetName()) {
+        CLOGE("Node[%s] Not support set %s\n", GetName().c_str(), name.c_str());
+        return -1;
+    }
+
+    mValue = value;
+    return 0;
+}
+
+int32_t CAtom::GetValue(const std::string& name, std::vector<uint8_t>& value) {
+    if (!name.empty() && name != GetName()) {
+        CLOGE("Node[%s] Not support get %s\n", GetName().c_str(), name.c_str());
+        return -1;
+    }
+
+    value = mValue;
+    return 0;
 }
 
 std::shared_ptr<CNode> CAtom::Clone() {
@@ -70,7 +89,8 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
     }
 
     int32_t len = -1;
-    std::string type = GetType();
+    std::string tmp = GetType();
+    std::string type = (GetName() == TEXT_CHECKSUM_TAG) ? tmp.substr(0, tmp.find('_')) : tmp;
     if (type == TEXT_TYPE_U8 || type == TEXT_TYPE_S8) {
         len = 1;
     } else if (type == TEXT_TYPE_U16 || type == TEXT_TYPE_S16) {
@@ -100,12 +120,13 @@ int32_t CAtom::Decode(const std::vector<uint8_t>& bytes) {
     std::vector<uint8_t> subBytes(bytes.begin() + pos, bytes.begin() + pos + len);
     mValue.assign(subBytes.begin(), subBytes.end());
     DePosAdd(len);
-    CLOGD("Node[%s] [%s] %s -> %s\n", GetName().c_str(), GetType().c_str(),
+    CLOGD("Node[%s] [%s] %s -> %s\n", GetName().c_str(), type.c_str(),
         CUtils::ToHexString(subBytes).c_str(), CUtils::ToHexString(mValue).c_str());
     return len;
 }
 
 int32_t CAtom::Encode(std::vector<uint8_t>& bytes) {
+    CLOGD("Node[%s] Encode [%s] = %s\n", GetName().c_str(), GetType().c_str(), CUtils::ToHexString(mValue).c_str());
     bytes.insert(bytes.end(), mValue.begin(), mValue.end());
     return (int32_t)mValue.size();
 }

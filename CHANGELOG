@@ -1,12 +1,24 @@
 # Sparrow Change Log
 
-## v1.8.2-alpha (2026-05-29)
+## v1.8.3 (2026-09-01)
+### 新增
+- 增加ConfigManager组件
+- 增加CMake指定模块编译
+- 增加Core测试用例
+- 增加Hardware接口Network、Device、SIM
+### 变更
+- HardWare平台实现与主框架解耦分离
+- 业务代码与主框架解耦分离
+- 调整BinderHub路径
+
+## v1.8.2 (2026-05-29)
 ### 新增
 - 增加通用协议解析模块CodecX
 - 增加调试Web界面HttpUISrv
 - 增加sprrow main框架SprMain
 ### 变更
 - 去除冗余内部消息ID
+- 更新 Docs/版本管理.md
 
 ## v1.7.0 (2025-09-28)
 ### 新增

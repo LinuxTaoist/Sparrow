@@ -41,7 +41,7 @@ public:
     int32_t AddNode(const std::shared_ptr<CNode>& node);
     int32_t DelNode(const std::shared_ptr<CNode>& node);
     std::shared_ptr<CNode> GetNode(const std::string& name);
-    std::vector<std::shared_ptr<CNode>> GetChildNodes();
+    std::vector<std::shared_ptr<CNode>>& GetChildNodes();
 
     int32_t Decode(const std::vector<uint8_t>& bytes) override;
     int32_t Encode(std::vector<uint8_t>& bytes) override;
@@ -54,6 +54,9 @@ private:
     int32_t CalculateChildNodesValueSum(int32_t& sum);
     int32_t DecodeStaticField(const std::vector<uint8_t>& bytes);
     int32_t DecodeDynamicField(const std::vector<uint8_t>& bytes);
+    int32_t SetValue(const std::string& name, const std::vector<uint8_t>& value) override;
+    int32_t GetValue(const std::string& name, std::vector<uint8_t>& value);
+
     std::vector<std::string> SplitPath(const std::string& path);
     std::shared_ptr<CNode> GetChildNode(const std::shared_ptr<CField>& pFieldNode, const std::string& childName);
     std::shared_ptr<CNode> GetNodeByAbsolutePath(const std::vector<std::string>& parts);

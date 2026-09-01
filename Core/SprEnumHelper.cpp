@@ -89,11 +89,6 @@ std::string GetSprErrorText(int32_t errorCode)
         case ERR_TIMEM_UNKOWN_ERROR:          return "Time manager unknown error";
         case ERR_SYSTEM_TIMER_UNKOWN_ERROR:   return "System timer unknown error";
         case ERR_POWERM_UNKOWN_ERROR:         return "Power manager unknown error";
-        case ERR_ONENET_MANAGER_UNKOWN_ERROR: return "OneNet manager unknown error";
-        case ERR_ONENET_MANAGER_OFFLINE:      return "OneNet manager is offline";
-        case ERR_ONENET_MANAGER_ONLINE:       return "OneNet manager is online";
-        case ERR_ONENET_DEV_UNKOWN_ERROR:     return "OneNet device unknown error";
-        case ERR_ONENET_DRIVER_UNKOWN_ERROR:  return "OneNet driver unknown error";
         case ERR_DEBUG_UNKNOW_ERROR:          return "Debug unknown error";
         default:                              return "Unknown error code";
     }
@@ -119,9 +114,11 @@ std::string GetSprModuleIDText(int32_t moduleID)
         SPR_MODULE_ID_MACROS
     };
 
+    static char warnText[64] = {};
+    snprintf(warnText, sizeof(warnText), "MODULE_0X%X", moduleID);
     return ( (moduleID >= 0) &&
              (moduleID < (int32_t)moduleIDs.size()) ) ?
-        moduleIDs[moduleID] : "UNDEFINED";
+        moduleIDs[moduleID] : warnText;
 }
 
 std::string GetSprProxyBinderCmdText(int32_t proxyBinderCmd)
@@ -181,18 +178,6 @@ std::string GetSprLogLevelText(int32_t level)
     return ( (level >= 0) &&
              (level < (int32_t)logLevels.size()) ) ?
         logLevels[level] : "UNDEFINED";
-}
-
-std::string GetSprOneNetBinderCmdText(int32_t oneNetBinderCmd)
-{
-    std::vector<std::string> oneNetBinderCmds = {
-        ONENET_BINDER_CMD_MACROS
-    };
-
-    int32_t index = oneNetBinderCmd - ONENET_CMD_BEGIN - 1;
-    return ( (index >= 0) &&
-             (index < (int32_t)oneNetBinderCmds.size()) ) ?
-        oneNetBinderCmds[index] : "UNDEFINED";
 }
 
 std::string GetSprGeneralBinderCmdText(int32_t generalBinderCmd)

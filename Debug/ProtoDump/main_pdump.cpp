@@ -34,7 +34,7 @@ int main(int argc, const char* argv[])
         return -1;
     }
 
-    for (int i = 1 ; i < argc; i++) {
+    for (int i = 1; i < argc; i++) {
         std::string arg = argv[i];
         if (arg == "-d" || arg == "--debug") {
             CLog::GetInstance().SetLevel(CLogLevel::CLOG_LEVEL_DEBUG);
@@ -48,7 +48,7 @@ int main(int argc, const char* argv[])
         theFactory.PrintConfigDetails(theCfgParser);
     } else {
         std::string bytesPath = argv[2];
-        theFactory.PrintProtocolDetails(cfgPath, bytesPath);
+        theFactory.PrintDataDetails(cfgPath, bytesPath);
     }
 
     return 0;

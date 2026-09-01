@@ -21,9 +21,9 @@
 
 #include <string>
 #include "SprMediator.h"
-#include "SprBinderHub.h"
+#include "BinderHub.h"
 
-class SprMediatorHub : public SprBinderHub
+class SprMediatorHub : public BinderHub
 {
 public:
     SprMediatorHub(const std::string& srvName, SprMediator* mediator);

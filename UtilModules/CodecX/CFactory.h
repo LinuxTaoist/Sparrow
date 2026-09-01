@@ -22,6 +22,7 @@
 #include <memory>
 #include <functional>
 #include "CNode.h"
+#include "CLog.h"
 
 using LogCallback = std::function<void(int level, int line, const char* tag, const char* fmt, va_list ap)>;
 
@@ -34,8 +35,9 @@ public:
 
     void RegisterPrintCallback(const LogCallback& callback);
     void PrintConfigDetails(const std::shared_ptr<CNode>& pNode);
-    void PrintProtocolDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
-    void PrintProtocolDetails(const std::string& cfgPath, const std::string& bytesPath);
+    void PrintDataDetails(const std::shared_ptr<CNode>& pCfgParser);
+    void PrintDataDetails(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes);
+    void PrintDataDetails(const std::string& cfgPath, const std::string& bytesPath);
 
 private:
     CFactory();

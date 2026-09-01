@@ -186,7 +186,8 @@ int SprMediator::MsgRespondRegister(const SprMsg& msg)
         SPR_LOGW("Already exist moduleId: 0x%x, reset it\n", moduleId);
     }
 
-    auto pModuleMQ = make_shared<PMsgQueue>(name, MSG_MAX_SIZE, nullptr);
+    // Create a new message queue for the module, but do not clear the queue on open to preserve messages.
+    auto pModuleMQ = make_shared<PMsgQueue>(name, MSG_MAX_SIZE, nullptr, nullptr, false);
     if (pModuleMQ->GetEvtFd() != -1) {
         result = true;
         mModuleMap[moduleId] = {monitored, {}, pModuleMQ};

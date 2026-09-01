@@ -1,47 +1,125 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-# Note: This script utilizes the system's default compilation toolchain.
-# For cross-compilation, ensure the appropriate cross-compilation toolchain
-# is configured beforehand.
+set -euo pipefail
 
-# platform
+PROJECT_PATH=""
 PLATFORM="Default"
+C_COMPILER=""
+SYSROOT=""
+C_FLAGS=""
 
-# Ensure the include directory exists
-if [[ ! -d "include" ]]; then
-    echo "Creating include directory..."
-    mkdir "include"
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --project-path)
+            PROJECT_PATH="$2"
+            shift 2
+            ;;
+        --platform)
+            PLATFORM="$2"
+            shift 2
+            ;;
+        --c-compiler)
+            C_COMPILER="$2"
+            shift 2
+            ;;
+        --sysroot)
+            SYSROOT="$2"
+            shift 2
+            ;;
+        --c-flags)
+            C_FLAGS="$2"
+            shift 2
+            ;;
+        *)
+            echo "unknown arg: $1" >&2
+            exit 1
+            ;;
+    esac
+done
+
+if [[ -z "$PROJECT_PATH" ]]; then
+    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+    PROJECT_PATH="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 fi
 
-# Ensure the lib/platform directory exists
-if [[ ! -d "lib/$PLATFORM" ]]; then
-    echo "Creating $PLATFORM directory..."
-    mkdir -p "lib/$PLATFORM"
+PLATFORM_SQLITE_DIR="${PROJECT_PATH}/Platform/${PLATFORM}/3rdParty/sqlite"
+ROOT_SQLITE_DIR="${PROJECT_PATH}/3rdParty/sqlite"
+OUTPUT_INCLUDE_DIR="${ROOT_SQLITE_DIR}/include"
+OUTPUT_LIB_DIR="${ROOT_SQLITE_DIR}/lib/${PLATFORM}"
+
+TARBALL="${PLATFORM_SQLITE_DIR}/sqlite-autoconf-3450300.tar.gz"
+if [[ ! -f "$TARBALL" ]]; then
+    TARBALL="${ROOT_SQLITE_DIR}/sqlite-autoconf-3450300.tar.gz"
 fi
 
-# Check for existing sqlite source directory
-if [[ ! -d "sqlite-autoconf-3450300" ]]; then
-    echo "sqlite source directory not found. Extracting..."
-    tar -zxvf sqlite-autoconf-3450300.tar.gz
+if [[ ! -f "$TARBALL" ]]; then
+    echo "sqlite tarball not found for platform ${PLATFORM}" >&2
+    exit 1
 fi
 
-# Enter the sqlite source directory
-cd sqlite-autoconf-3450300
-
-# Ensure the 'release' directory exists
-if [[ ! -d "release" ]]; then
-    echo "Creating release directory..."
-    mkdir release
+WORK_DIR="${PLATFORM_SQLITE_DIR}/.sqlite_build"
+if [[ ! -d "${PLATFORM_SQLITE_DIR}" ]]; then
+    WORK_DIR="${ROOT_SQLITE_DIR}/.sqlite_build_${PLATFORM}"
 fi
 
-# Configure, build, and install sqlite to the release directory
-CURRENT_DIR=$(pwd)
-./configure --host=arm-linux-gnueabihf --prefix="$CURRENT_DIR/release"
-make
-make install
+rm -rf "$WORK_DIR"
+mkdir -p "$WORK_DIR"
 
-# Copy the built sqlite libraries and headers to the ../include/ and ../lib/[platform]/
-cp -rf release/include/*    ../include/
-cp -rf release/lib/*        ../lib/$PLATFORM/
+TAR_LIST_FILE="${WORK_DIR}/tar.list"
+tar -tzf "$TARBALL" > "$TAR_LIST_FILE"
+TOP_DIR_NAME="$(head -n 1 "$TAR_LIST_FILE" | cut -d'/' -f1)"
+tar -xzf "$TARBALL" -C "$WORK_DIR"
 
-echo "sqlite compilation and installation completed."
+SRC_DIR="${WORK_DIR}/${TOP_DIR_NAME}"
+if [[ ! -d "$SRC_DIR" ]]; then
+    echo "invalid tarball layout: ${TARBALL}" >&2
+    exit 1
+fi
+
+INSTALL_DIR="${WORK_DIR}/install"
+mkdir -p "$INSTALL_DIR"
+
+if [[ -n "$C_COMPILER" ]]; then
+    export CC="$C_COMPILER"
+fi
+
+HOST_TRIPLET=""
+if [[ -n "$C_COMPILER" ]]; then
+    COMPILER_BASE="$(basename "$C_COMPILER")"
+    if [[ "$COMPILER_BASE" == *-gcc ]]; then
+        HOST_TRIPLET="${COMPILER_BASE%-gcc}"
+    fi
+fi
+
+if [[ -n "$SYSROOT" ]]; then
+    C_FLAGS="${C_FLAGS} --sysroot=${SYSROOT}"
+fi
+if [[ -n "$C_FLAGS" ]]; then
+    export CFLAGS="$C_FLAGS"
+fi
+
+CONFIGURE_ARGS=("--prefix=${INSTALL_DIR}" "--disable-shared" "--enable-static")
+if [[ -n "$HOST_TRIPLET" ]]; then
+    CONFIGURE_ARGS+=("--host=${HOST_TRIPLET}")
+fi
+
+(
+    cd "$SRC_DIR"
+    ./configure "${CONFIGURE_ARGS[@]}"
+    make -j"$(nproc)"
+    make install
+)
+
+SQLITE_LIB="${INSTALL_DIR}/lib/libsqlite3.a"
+if [[ ! -f "$SQLITE_LIB" ]]; then
+    echo "build success but libsqlite3.a not found" >&2
+    exit 1
+fi
+
+mkdir -p "$OUTPUT_INCLUDE_DIR" "$OUTPUT_LIB_DIR"
+cp -f "${INSTALL_DIR}/include/sqlite3.h" "$OUTPUT_INCLUDE_DIR/sqlite3.h"
+cp -f "${INSTALL_DIR}/include/sqlite3ext.h" "$OUTPUT_INCLUDE_DIR/sqlite3ext.h"
+cp -f "$SQLITE_LIB" "$OUTPUT_LIB_DIR/libsqlite3.a"
+
+rm -rf "$WORK_DIR"
+echo "sqlite build done: ${OUTPUT_LIB_DIR}"

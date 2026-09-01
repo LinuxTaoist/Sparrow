@@ -44,9 +44,16 @@ SprObserver::~SprObserver()
 int32_t SprObserver::Initialize()
 {
     SPR_LOGD("Initialize Module: [ID: %d Name: %s]\n", mModuleID, mModuleName.c_str());
-    mpMsgMediator = SprMediatorFactory::GetInstance()->GetMediatorProxy(mProxyType);
+
+    SprMediatorFactory* pFactory = SprMediatorFactory::GetInstance();
+    if (!pFactory) {
+        SPR_LOGE("SprMediatorFactory not available (post-shutdown?)!\n");
+        return -1;
+    }
+
+    mpMsgMediator = pFactory->GetMediatorProxy(mProxyType);
     if (!mpMsgMediator) {
-        SPR_LOGE("mpMsgMediator = nullptr! mProxyType = 0x%x\n", mProxyType);
+        SPR_LOGE("GetMediatorProxy failed! mProxyType = 0x%x\n", mProxyType);
         return -1;
     }
 
@@ -72,7 +79,7 @@ int32_t SprObserver::NotifyObserver(SprMsg& msg)
     return mpMsgMediator->NotifyObserver(msg);
 }
 
-int32_t SprObserver::NotifyObserver(ModuleIDType id, SprMsg& msg)
+int32_t SprObserver::NotifyObserver(uint32_t id, SprMsg& msg)
 {
     if (!mpMsgMediator) {
         SPR_LOGE("mpMsgMediator is nullptr!\n");

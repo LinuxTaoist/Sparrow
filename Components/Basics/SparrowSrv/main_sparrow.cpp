@@ -49,6 +49,7 @@ int main(int argc, const char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     SprSystem::GetInstance()->Init();
     SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");

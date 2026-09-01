@@ -10,12 +10,11 @@ set(MODULE_CONFIG_VERSION "DEFAULT_MCONFIG_1002")
 ## 设置链接选项
 set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -rdynamic")
 
-# 拷贝第三方库gtest
+# 构建第三方库gtest
 if(BUILD_TESTCASE)
-    set(GTEST_SRC_LIB "${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/3rdParty/googletest/lib")
     set(GTEST_DST_LIB "${PROJECT_PATH}/3rdParty/googletest/lib/${PROJECT_PLATFORM}")
 
-    if(NOT EXISTS "${GTEST_SRC_LIB}/libgtest.a" OR NOT EXISTS "${GTEST_SRC_LIB}/libgtest_main.a")
+    if(NOT EXISTS "${GTEST_DST_LIB}/libgtest.a" OR NOT EXISTS "${GTEST_DST_LIB}/libgtest_main.a")
         message(STATUS "googletest 库缺失，开始自动构建: ${PROJECT_PLATFORM}")
         execute_process(
             COMMAND bash ${PROJECT_PATH}/3rdParty/googletest/build.sh
@@ -30,10 +29,42 @@ if(BUILD_TESTCASE)
         endif()
     endif()
 
-    message(STATUS "BUILD_TESTCASE 已启用，开始拷贝 googletest 库文件...")
+    message(STATUS "BUILD_TESTCASE 已启用，googletest 库路径: ${GTEST_DST_LIB}")
+endif()
 
-    file(MAKE_DIRECTORY ${GTEST_DST_LIB})
-    file(COPY ${GTEST_SRC_LIB}/libgtest_main.a DESTINATION ${GTEST_DST_LIB}/)
-    file(COPY ${GTEST_SRC_LIB}/libgtest.a DESTINATION ${GTEST_DST_LIB}/)
-    message(STATUS "googletest 库拷贝完成：${GTEST_SRC_LIB} -> ${GTEST_DST_LIB}")
+# 构建第三方库sqlite
+set(SQLITE_DST_LIB "${PROJECT_PATH}/3rdParty/sqlite/lib/${PROJECT_PLATFORM}")
+if(NOT EXISTS "${SQLITE_DST_LIB}/libsqlite3.a")
+    message(STATUS "sqlite 库缺失，开始自动构建: ${PROJECT_PLATFORM}")
+    execute_process(
+        COMMAND bash ${PROJECT_PATH}/3rdParty/sqlite/build.sh
+                --project-path ${PROJECT_PATH}
+                --platform ${PROJECT_PLATFORM}
+                --c-compiler ${CMAKE_C_COMPILER}
+        RESULT_VARIABLE sqlite_build_result
+    )
+    if(NOT sqlite_build_result EQUAL 0)
+        message(FATAL_ERROR "sqlite 自动构建失败，平台: ${PROJECT_PLATFORM}")
+    endif()
+endif()
+
+message(STATUS "sqlite 库路径: ${SQLITE_DST_LIB}")
+
+if(BUILD_COVERAGE)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(STATUS "Coverage instrumentation enabled (Default platform)")
+        file(GLOB_RECURSE STALE_GCDA_FILES "${OUTPUT_PATH}/Cache/*.gcda")
+        if(STALE_GCDA_FILES)
+            message(STATUS "Clean stale coverage data")
+            file(REMOVE ${STALE_GCDA_FILES})
+        endif()
+        set(COVERAGE_FLAGS "-O0 -g --coverage -fprofile-arcs -ftest-coverage")
+        set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${COVERAGE_FLAGS}")
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${COVERAGE_FLAGS}")
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --coverage")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --coverage")
+        add_definitions(-DBUILD_COVERAGE=1)
+    else()
+        message(FATAL_ERROR "BUILD_COVERAGE requires GCC or Clang")
+    endif()
 endif()

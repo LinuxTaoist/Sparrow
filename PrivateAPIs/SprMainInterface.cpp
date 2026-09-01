@@ -31,6 +31,11 @@
 
 void (*pSprUserEntry)() = nullptr;
 
+void SprRunEventLoop()
+{
+    SprEpollSchedule::GetInstance()->EpollLoop();
+}
+
 static void SPR_ENTRY_IMPLEMENT_CHECK() {
     NOT_IMPLEMENT_SPR_ENTRY();
 }
@@ -63,7 +68,6 @@ int main(int argc, const char* argv[])
     std::string proc = SprProcInfo::GetInstance()->GetProcName();
     SprProcPrepare::GetInstance()->Init(proc);
     pSprUserEntry();
-    SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");
     return 0;
 }

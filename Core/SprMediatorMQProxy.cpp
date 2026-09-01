@@ -62,7 +62,7 @@ int32_t SprMediatorMQProxy::ConnectMediator()
 {
     mq_attr mqAttr;
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
-    mqAttr.mq_msgsize = 1025;
+    mqAttr.mq_msgsize = 1024;
 
     mMdtFd = mq_open(MEDIATOR_MSG_QUEUE, O_RDWR, 0666, &mqAttr);
     if(mMdtFd < 0) {
@@ -77,7 +77,11 @@ int32_t SprMediatorMQProxy::SendMsg(const SprMsg& msg)
 {
     std::string datas;
 
-    msg.Encode(datas);
+    if (msg.Encode(datas) != 0) {
+        SPR_LOGE("Encode failed!\n");
+        return -1;
+    }
+
     int32_t ret = mq_send(mMdtFd, datas.c_str(), datas.size(), 1);
     if (ret < 0) {
         SPR_LOGE("mq_send failed! (%s)\n", strerror(errno));

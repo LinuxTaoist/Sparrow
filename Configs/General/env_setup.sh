@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# usage: source ./env_setup.sh
+
 SCRIPT_PATH=$(pwd)
 RELEASE_PATH=$(dirname "$SCRIPT_PATH")
 BIN_PATH="$RELEASE_PATH/Bin"

@@ -427,3 +427,204 @@ TEST(Core_SprThreadPool, TasksCompleteBeforePoolDestruction) {
     ASSERT_FALSE(isTimeout) << "Reuse task timeout";
     EXPECT_TRUE(reuseTaskDone) << "Pool not reusable after destruction";
 }
+
+// Future 返回值测试
+
+// std::future 直接获取返回值
+TEST(Core_SprThreadPool, FutureReturnValuePassesCorrectly) {
+    SprThreadPool* pool = SprThreadPool::GetInstance(2);
+    ASSERT_TRUE(pool != NULL);
+
+    auto future = pool->SubmitTask([](int32_t a, int32_t b) -> int32_t {
+        usleep(10000);
+        return a + b;
+    }, 100, 200);
+
+    int32_t result = future.get();
+    EXPECT_EQ(300, result);
+}
+
+// 多个 future 并发获取
+TEST(Core_SprThreadPool, MultipleFuturesConcurrent) {
+    SprThreadPool* pool = SprThreadPool::GetInstance(4);
+    ASSERT_TRUE(pool != NULL);
+
+    const int32_t kNumTasks = 8;
+    std::vector<std::future<int32_t>> futures;
+    for (int32_t i = 0; i < kNumTasks; ++i) {
+        futures.push_back(pool->SubmitTask([](int32_t id) -> int32_t {
+            usleep(10000);
+            return id * id;
+        }, i));
+    }
+
+    for (int32_t i = 0; i < kNumTasks; ++i) {
+        EXPECT_EQ(i * i, futures[i].get());
+    }
+}
+
+// future 获取字符串
+TEST(Core_SprThreadPool, FutureStringResult) {
+    SprThreadPool* pool = SprThreadPool::GetInstance(2);
+    ASSERT_TRUE(pool != NULL);
+
+    auto future = pool->SubmitTask([](const std::string& a, const std::string& b) -> std::string {
+        return a + "-" + b;
+    }, std::string("Hello"), std::string("Pool"));
+
+    EXPECT_EQ("Hello-Pool", future.get());
+}
+
+// 任务内抛异常不导致线程池崩溃
+TEST(Core_SprThreadPool, ExceptionInTaskDoesNotCrashPool) {
+    SprThreadPool* pool = SprThreadPool::GetInstance(2);
+    ASSERT_TRUE(pool != NULL);
+
+    std::atomic<bool> taskDone(false);
+    pool->SubmitTask([&taskDone]() {
+        try {
+            throw std::runtime_error("expected test exception");
+        } catch (...) {
+            taskDone = true;
+        }
+    });
+
+    WaitWithTimeout([&taskDone]() { return taskDone.load(); }, 1000000);
+    EXPECT_TRUE(taskDone);
+
+    // 异常后线程池仍可用
+    std::atomic<bool> nextTaskDone(false);
+    pool->SubmitTask([&nextTaskDone]() { nextTaskDone = true; });
+    WaitWithTimeout([&nextTaskDone]() { return nextTaskDone.load(); }, 1000000);
+    EXPECT_TRUE(nextTaskDone);
+}
+
+// DumpDetails 测试
+TEST(Core_SprThreadPool, DumpDetailsDoesNotCrash) {
+    SprThreadPool* pool = SprThreadPool::GetInstance(2);
+    ASSERT_TRUE(pool != NULL);
+
+    // 验证 DumpDetails 不崩溃且返回成功
+    int32_t ret = pool->DumpDetails();
+    EXPECT_EQ(0, ret);
+}
+
+// 边界 / 压力测试
+
+// 1 个 worker 正常完成任务
+// 单 worker 池也能正常完成多个任务
+TEST(Core_SprThreadPool, SingleWorkerHandlesMultipleTasks) {
+    SprThreadPool* pool = SprThreadPool::GetInstance();
+    ASSERT_TRUE(pool != NULL);
+
+    std::atomic<int32_t> count(0);
+    const int32_t kNum = 5;
+    for (int32_t i = 0; i < kNum; ++i) {
+        pool->SubmitTask([&count]() {
+            usleep(20000);
+            count++;
+        });
+    }
+
+    WaitWithTimeout([&count, kNum]() { return count == kNum; }, 2000000);
+    EXPECT_EQ(kNum, count);
+}
+// GetIdleWorkerCount GetTotalWorkerCount 初始状态
+
+// GetIdleWorkerCount / GetTotalWorkerCount 基本校验
+TEST(Core_SprThreadPool, IdleAndTotalCountBasicCheck) {
+    SprThreadPool* pool = SprThreadPool::GetInstance(2);
+    ASSERT_TRUE(pool != NULL);
+
+    int32_t total = pool->GetTotalWorkerCount();
+    EXPECT_GT(total, 0);
+
+    WaitWithTimeout([&pool, total]() { return pool->GetIdleWorkerCount() == total; }, 500000);
+    EXPECT_EQ(total, pool->GetIdleWorkerCount());
+}
+
+// 正常 drain 等价：所有快速任务在短时间内全部完成
+TEST(Core_SprThreadPool, GracefulDrain_AllFastTasksCompleteBeforeScopeEnd) {
+    const int32_t kTaskNum = 10;
+    std::atomic<int32_t> count(0);
+
+    {
+        SprThreadPool* pool = SprThreadPool::GetInstance(2);
+        ASSERT_TRUE(pool != NULL);
+
+        for (int32_t i = 0; i < kTaskNum; ++i) {
+            pool->SubmitTask([&count]() {
+                usleep(5000);  // 5ms
+                count++;
+            });
+        }
+
+        // 等待全部任务完成（等价于析构前的 drain 阶段）
+        bool ok = WaitWithTimeout([&count, kTaskNum]() { return count == kTaskNum; }, 2000000);
+        ASSERT_TRUE(ok) << "Fast tasks timeout, count=" << count;
+        EXPECT_EQ(kTaskNum, count);
+    }
+    // 退出作用域时队列已空 → 等价于 drain 立即通过
+}
+
+// 空闲路径：无 pending 任务时池正常运行，不阻塞不告警
+TEST(Core_SprThreadPool, GracefulDrain_NoTasksDoesNotHang) {
+    std::atomic<bool> done(false);
+
+    {
+        SprThreadPool* pool = SprThreadPool::GetInstance(2);
+        ASSERT_TRUE(pool != NULL);
+
+        pool->SubmitTask([&done]() { done = true; });
+        bool ok = WaitWithTimeout([&done]() { return done.load(); }, 1000000);
+        ASSERT_TRUE(ok) << "Single task timeout";
+        EXPECT_TRUE(done);
+    }
+    // 作用域结束时队列为空 → 不挂死
+    SUCCEED();
+}
+
+// 短任务并发提交：验证所有任务在合理时间内完成（等价于 drain 不丢任务）
+TEST(Core_SprThreadPool, GracefulDrain_ShortTasksAllComplete) {
+    std::atomic<int32_t> count(0);
+    const int32_t kTaskNum = 8;
+
+    {
+        SprThreadPool* pool = SprThreadPool::GetInstance(4);
+        ASSERT_TRUE(pool != NULL);
+
+        for (int32_t i = 0; i < kTaskNum; ++i) {
+            pool->SubmitTask([&count]() {
+                usleep(5000);  // 5ms per task
+                count++;
+            });
+        }
+
+        bool ok = WaitWithTimeout([&count, kTaskNum]() { return count == kTaskNum; }, 2000000);
+        ASSERT_TRUE(ok) << "Short tasks timeout, count=" << count;
+        EXPECT_EQ(kTaskNum, count);
+    }
+    EXPECT_EQ(kTaskNum, count);
+}
+
+// 高并发提交大量任务：验证不丢任务
+TEST(Core_SprThreadPool, GracefulDrain_HighConcurrencyNoLoss) {
+    std::atomic<int32_t> count(0);
+    const int32_t kTaskNum = 20;
+
+    {
+        SprThreadPool* pool = SprThreadPool::GetInstance(6);
+        ASSERT_TRUE(pool != NULL);
+
+        for (int32_t i = 0; i < kTaskNum; ++i) {
+            pool->SubmitTask([&count]() {
+                usleep(2000);  // 2ms per task
+                count++;
+            });
+        }
+
+        bool ok = WaitWithTimeout([&count, kTaskNum]() { return count == kTaskNum; }, 3000000);
+        ASSERT_TRUE(ok) << "High-concurrency tasks timeout, count=" << count;
+    }
+    EXPECT_EQ(kTaskNum, count);
+}

@@ -20,6 +20,7 @@
 #define __INFRA_COMMON_H__
 
 #include <iostream>
+#include <string>
 
 namespace InfraWatch {
 
@@ -28,6 +29,7 @@ namespace InfraWatch {
 void ClearScreen();
 char WaitUserInputUntilEnter();
 char WaitUserInputWithoutEnter();
+int  ReadLineFromUserInput(std::string& input);
 int  ReadIntFromUserInput(int& input);
 };
 

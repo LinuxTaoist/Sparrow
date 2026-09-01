@@ -323,9 +323,12 @@ int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text)
         return 0;
     }
 
-    char* endptr;
-    const int32_t level = strtol(text.substr(eqPos + 1).c_str(), &endptr, 10);
-    if (*endptr != '\0' || level < (int32_t)InternalDefs::LOG_LEVEL_MIN || level > (int32_t)InternalDefs::LOG_LEVEL_BUTT) {
+    char* endptr = nullptr;
+    const std::string value = text.substr(eqPos + 1);
+    const int32_t level = strtol(value.c_str(), &endptr, 10);
+    if (*endptr != '\0' ||
+        level < (int32_t)InternalDefs::LOG_LEVEL_MIN ||
+        level > (int32_t)InternalDefs::LOG_LEVEL_BUTT) {
         SPR_LOGE("Invalid log level: %s\n", text.c_str());
         return -1;
     }
@@ -349,8 +352,9 @@ int32_t PropertyManager::HandlePropertyLogLength(const std::string& text)
         return 0;
     }
 
-    char* endptr;
-    const int32_t length = strtol(text.substr(eqPos + 1).c_str(), &endptr, 10);
+    char* endptr = nullptr;
+    const std::string value = text.substr(eqPos + 1);
+    const int32_t length = strtol(value.c_str(), &endptr, 10);
     if (*endptr != '\0' || length < 0 || length > LOG_BUFFER_SIZE_LIMIT) {
         SPR_LOGE("Invalid log length: %s\n", text.c_str());
         return -1;

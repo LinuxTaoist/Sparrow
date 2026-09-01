@@ -61,7 +61,7 @@ int32_t SessionManager::AsTcpServer(uint16_t port)
             return;
         }
 
-        auto tcpClient = make_shared<PTcpClient>(cli, [&](ssize_t ret, std::string bytes, void* arg) {
+        auto tcpClient = make_shared<PTcpClient>(cli, [&](ssize_t ret, const std::string& bytes, void* arg) {
             PTcpClient* pCliObj = (PTcpClient*)arg;
             if (pCliObj == nullptr) {
                 SPR_LOGE("pCliObj is nullptr!\n");
@@ -150,7 +150,7 @@ int32_t SessionManager::AsTcpClient(const std::string& ip, uint16_t port)
         }
     });
 
-    mpTcpClient = make_shared<PTcpClient>([&](ssize_t ret, std::string bytes, void* arg) {
+    mpTcpClient = make_shared<PTcpClient>([&](ssize_t ret, const std::string& bytes, void* arg) {
         PTcpClient* pCliObj = (PTcpClient*)arg;
         if (pCliObj == nullptr) {
             SPR_LOGE("pCliObj is nullptr!\n");

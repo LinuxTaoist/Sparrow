@@ -27,7 +27,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "DebugModule"
 
-DebugModuleHub::DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule) : SprBinderHub(srvName)
+DebugModuleHub::DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule) : BinderHub(srvName)
 {
     mpDebugModule = pDebugModule;
 }

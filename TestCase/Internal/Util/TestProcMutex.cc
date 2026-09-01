@@ -28,15 +28,24 @@
 
 const std::string mutexName = "test_mutex";
 
+class Util_ProcMutex : public ::testing::Test {
+protected:
+    void SetUp() override {
+        // 清理上次异常退出残留的共享内存，确保测试从干净状态开始
+        // 注：ProcMutex 框架层已支持进程崩溃后重入的 robust 恢复，此清理仅为测试隔离
+        shm_unlink("/test_mutex");
+    }
+};
+
 // 测试 ProcMutex 构造函数
-TEST(Util_ProcMutex, Constructor) {
+TEST_F(Util_ProcMutex, Constructor) {
     ProcMutex mutex(mutexName);
     std::mutex stdMutex;
     ProcLockGuard guard(mutex, stdMutex);
 }
 
 // 测试 ProcMutex 析构函数
-TEST(Util_ProcMutex, Destructor) {
+TEST_F(Util_ProcMutex, Destructor) {
     {
         ProcMutex mutex(mutexName);
     }
@@ -46,7 +55,7 @@ TEST(Util_ProcMutex, Destructor) {
 }
 
 // 测试 ProcMutex 的 Lock 和 Unlock 方法
-TEST(Util_ProcMutex, LockAndUnlock) {
+TEST_F(Util_ProcMutex, LockAndUnlock) {
     ProcMutex mutex(mutexName);
     std::mutex stdMutex;
     {
@@ -58,7 +67,7 @@ TEST(Util_ProcMutex, LockAndUnlock) {
 }
 
 // 测试 ProcMutex 多次加锁解锁
-TEST(Util_ProcMutex, MultipleLockAndUnlock) {
+TEST_F(Util_ProcMutex, MultipleLockAndUnlock) {
     ProcMutex mutex(mutexName);
     std::mutex stdMutex;
     const int times = 10;
@@ -68,7 +77,7 @@ TEST(Util_ProcMutex, MultipleLockAndUnlock) {
 }
 
 // 测试 ProcLockGuard 的 RAII 特性
-TEST(Util_ProcMutex, RAIIFeature) {
+TEST_F(Util_ProcMutex, RAIIFeature) {
     ProcMutex mutex(mutexName);
     std::mutex stdMutex;
     {
@@ -80,7 +89,7 @@ TEST(Util_ProcMutex, RAIIFeature) {
 }
 
 // 测试多线程环境下 ProcMutex 的功能
-TEST(Util_ProcMutex, MultiThreading) {
+TEST_F(Util_ProcMutex, MultiThreading) {
     ProcMutex mutex(mutexName);
     std::mutex stdMutex;
     int counter = 0;
@@ -109,7 +118,7 @@ TEST(Util_ProcMutex, MultiThreading) {
 }
 
 // 测试多进程环境下 ProcMutex 的功能
-TEST(Util_ProcMutex, MultiProcess) {
+TEST_F(Util_ProcMutex, MultiProcess) {
     ProcMutex mutex(mutexName);
     std::mutex stdMutex;
     const int numChildren = 10;
@@ -175,7 +184,7 @@ TEST(Util_ProcMutex, MultiProcess) {
 }
 
 // 测试持锁进程异常退出时，其他进程是否能正常获取锁
-TEST(Util_ProcMutex, MultiProcessCrashRecovery) {
+TEST_F(Util_ProcMutex, MultiProcessCrashRecovery) {
     const std::string DEMO_SHARED_MUTEX = "demo_shared_mutex";
     const int NUM_PROCESSES = 3;         // Total number of processes
     const int CRASH_PROCESS_ID = 1;      // ID of the process that will crash

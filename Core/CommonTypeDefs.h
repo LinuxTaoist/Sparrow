@@ -2,14 +2,14 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : CoreTypeDefs.h
+ *  @file       : CommonTypeDefs.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/04/25
  *
- * This header file serves as a repository for shared data structure types utilized by both client and server code.
- * All common data structure definitions intended for use across both client and server should be encapsulated herein.
+ *  This header file serves as a repository for shared data structure types utilized by both client and server code.
+ *  All common data structure definitions intended for use across both client and server should be encapsulated herein.
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
@@ -52,6 +52,25 @@ struct SMQueueDetails {
     int32_t usedPeak;
     char mqName[MQ_NAME_MAX_LENGTH];
     mq_attr mqAttr;
+};
+
+enum EConfigScope
+{
+    CONFIG_SCOPE_DEFAULT = 0,
+    CONFIG_SCOPE_FACTORY,
+    CONFIG_SCOPE_USER,
+    CONFIG_SCOPE_BUTT
+};
+
+enum EConfigValueType
+{
+    CONFIG_VALUE_TYPE_STRING = 0,
+    CONFIG_VALUE_TYPE_BOOL,
+    CONFIG_VALUE_TYPE_INT32,
+    CONFIG_VALUE_TYPE_INT64,
+    CONFIG_VALUE_TYPE_FLOAT,
+    CONFIG_VALUE_TYPE_DOUBLE,
+    CONFIG_VALUE_TYPE_BUTT
 };
 
 #endif // __COMMON_TYPE_DEFS_H__

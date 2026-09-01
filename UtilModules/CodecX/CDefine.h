@@ -25,6 +25,13 @@
 #define TEXT_CHILDREN_TAG           "children"
 #define TEXT_CHILD_TEMPLATE_TAG     "child_template"
 
+#define TEXT_CHECKSUM_TAG           "checksum"
+#define TEXT_CHECKSUM_CRC8          "crc8"
+#define TEXT_CHECKSUM_CRCC16        "crc16"
+#define TEXT_CHECKSUM_CRCC32        "crc32"
+#define TEXT_CHECKSUM_CRCC64        "crc64"
+#define TEXT_CHECKSUM_BCC8          "bcc8"
+
 #define TEXT_LEN_REF_TAG            "len_ref"
 #define TEXT_LEN_REF_FIXED          "fixed_"
 

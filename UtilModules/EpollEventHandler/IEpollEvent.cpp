@@ -20,18 +20,17 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include "PLog.h"
 #include "IEpollEvent.h"
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) // printf("%4d IEpEvt D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%4d IEpEvt W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d IEpEvt E: " fmt, __LINE__, ##args)
+#define PLOG_TAG "IEpollEvent"
 
 IEpollEvent::~IEpollEvent() {
     // Close();
 }
 
-ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)
+ssize_t IEpollEvent::Write(int32_t fd, const char* data, size_t size)
 {
     const char* ptr = data;
     size_t nleft = size;
@@ -40,17 +39,17 @@ ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)
         ssize_t nwritten = 0;
         if ( (nwritten = write(fd, ptr, nleft)) < 0) {
             if (errno == EINTR) {
-                SPR_LOGE("write failed! (%s)\n", strerror(errno));
+                PLOGE("write failed! (%s)\n", strerror(errno));
                 nwritten = 0;
             } else if (errno == EAGAIN) {
-                SPR_LOGE("write failed! (%s)\n", strerror(errno));
+                PLOGE("write failed! (%s)\n", strerror(errno));
                 return -1;
             } else {
-                SPR_LOGE("write failed! (%s)\n", strerror(errno));
+                PLOGE("write failed! (%s)\n", strerror(errno));
                 return -1;
             }
         } else if (nwritten == 0) {
-            SPR_LOGE("Write EOF, Client disconnect! (%s)\n", strerror(errno));
+            PLOGE("Write EOF, Client disconnect! (%s)\n", strerror(errno));
             break;
         }
 
@@ -61,7 +60,7 @@ ssize_t IEpollEvent::Write(int fd, const char* data, size_t size)
     return (size - nleft);
 }
 
-ssize_t IEpollEvent::Write(int fd, const std::string& bytes)
+ssize_t IEpollEvent::Write(int32_t fd, const std::string& bytes)
 {
     return Write(fd, bytes.c_str(), bytes.size());
 }
@@ -76,7 +75,7 @@ ssize_t IEpollEvent::Write(const std::string& bytes)
     return Write(mEvtFd, bytes.c_str(), bytes.size());
 }
 
-ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
+ssize_t IEpollEvent::Read(int32_t fd, char* data, size_t size)
 {
     char* ptr = data;
     size_t nleft = size;
@@ -85,19 +84,17 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
         ssize_t nread = 0;
         if ( (nread = read(fd, ptr, nleft)) < 0) {
             if (errno == EINTR) {
-                SPR_LOGE("read fail! (%s)\n", strerror(errno));
+                PLOGE("read fail! (%s)\n", strerror(errno));
                 continue;
             } else if (errno == EAGAIN) {
-                //SPR_LOGW("read retry.\n");
+                //PLOGW("read retry.\n");
                 break;
             } else {
-                SPR_LOGE("read %d fail! (%s)\n", fd, strerror(errno));
+                PLOGE("read %d fail! (%s)\n", fd, strerror(errno));
                 return -1;
             }
         } else if (nread == 0) {
-            if (size != nleft) {
-                SPR_LOGD("Read EOF after %d bytes\n", int(size - nleft));
-            }
+            PLOGD("Read EOF after %d bytes\n", int32_t(size - nleft));
             break;
         }
 
@@ -108,7 +105,7 @@ ssize_t IEpollEvent::Read(int fd, char* data, size_t size)
     return (size - nleft);
 }
 
-ssize_t IEpollEvent::Read(int fd, std::string& bytes) {
+ssize_t IEpollEvent::Read(int32_t fd, std::string& bytes) {
     bytes.clear();
     ssize_t totalBytesRead = 0;
     const size_t bufferSize = 4096;
@@ -149,7 +146,7 @@ bool IEpollEvent::IsReady()
 
 void IEpollEvent::Close()
 {
-    SPR_LOGD("Close fd: %d\n", mEvtFd);
+    PLOGD("Close fd: %d\n", mEvtFd);
     if (mEvtFd == -1) {
         return;
     }

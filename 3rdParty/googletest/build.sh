@@ -54,7 +54,7 @@ fi
 
 PLATFORM_GTEST_DIR="${PROJECT_PATH}/Platform/${PLATFORM}/3rdParty/googletest"
 ROOT_GTEST_DIR="${PROJECT_PATH}/3rdParty/googletest"
-OUTPUT_LIB_DIR="${PLATFORM_GTEST_DIR}/lib"
+OUTPUT_LIB_DIR="${ROOT_GTEST_DIR}/lib/${PLATFORM}"
 
 TARBALL="${PLATFORM_GTEST_DIR}/googletest-1.5.0.tar.gz"
 if [[ ! -f "$TARBALL" ]]; then
@@ -120,4 +120,5 @@ mkdir -p "$OUTPUT_LIB_DIR"
 cp -f "$GTEST_LIB" "$OUTPUT_LIB_DIR/libgtest.a"
 cp -f "$GTEST_MAIN_LIB" "$OUTPUT_LIB_DIR/libgtest_main.a"
 
+rm -rf "$WORK_DIR"
 echo "gtest build done: ${OUTPUT_LIB_DIR}"

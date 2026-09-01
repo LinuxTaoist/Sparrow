@@ -16,6 +16,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <algorithm>
 #include <fcntl.h>
 #include <unistd.h>
 #include <string.h>
@@ -63,11 +64,9 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
     mRoot = reinterpret_cast<Root*>(mapMemory);
     mDataCapacity = mMapCapacity - sizeof(Root);
 
-    memset(mRoot, 0, sizeof(Root));
     mRoot->rp = 0;
     mRoot->wp = 0;
     mRoot->rwStatus = CMD_WRITEABLE;
-
     mData = reinterpret_cast<uint8_t*>(mRoot) + sizeof(Root);
 }
 
@@ -77,49 +76,58 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     mEnable = true;
     int fd = open(path.c_str(), O_RDWR);
     if (fd == -1) {
-        SPR_LOGE("open %s failed! (%s)\n", mShmPath.c_str(), strerror(errno));
+        SPR_LOGE("open %s failed! (%s)\n", path.c_str(), strerror(errno));
         mEnable = false;
+        mRoot = nullptr;
+        mData = nullptr;
+        mMapCapacity = 0;
+        mDataCapacity = 0;
+        mShmPath = path;
+        return;
     }
 
     struct stat fileStat;
     if (fstat(fd, &fileStat) == -1) {
         SPR_LOGE("fstat failed! (%s)\n", strerror(errno));
+        close(fd);
         mEnable = false;
+        mRoot = nullptr;
+        mData = nullptr;
+        mMapCapacity = 0;
+        mDataCapacity = 0;
+        mShmPath = path;
+        return;
     }
 
     off_t fileSize = fileStat.st_size;
     void* mapMemory = mmap(NULL, fileSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    close(fd);
     if (mapMemory == MAP_FAILED) {
         SPR_LOGE("mmap failed! (%s)\n", strerror(errno));
         mEnable = false;
+        mRoot = nullptr;
+        mData = nullptr;
+        mMapCapacity = 0;
+        mDataCapacity = 0;
+        mShmPath = path;
+        return;
     }
 
     mShmPath = path;
     mMapCapacity = fileSize;
     mDataCapacity = mMapCapacity - sizeof(Root);
     mRoot = reinterpret_cast<Root*>(mapMemory);
-    if (mRoot == nullptr) {
-        SPR_LOGE("mRoot is nullptr!\n");
-        mEnable = false;
-    }
 
     // Initialize Root structure if it's a new file or corrupted
     // Check if the rwStatus field has a valid value
     if (mRoot->rwStatus != CMD_WRITEABLE && mRoot->rwStatus != CMD_READABLE) {
-        SPR_LOGW("SharedRingBuffer: Invalid rwStatus (%u), reinitializing...\n", mRoot->rwStatus);
-        memset(mRoot, 0, sizeof(Root));
+        SPR_LOGW("Invalid rwStatus (%u), reinitializing...\n", mRoot->rwStatus.load());
         mRoot->rp = 0;
         mRoot->wp = 0;
         mRoot->rwStatus = CMD_WRITEABLE;
     }
 
     mData = reinterpret_cast<uint8_t*>(mapMemory) + sizeof(Root);
-    if (mData == nullptr) {
-        SPR_LOGE("mData is nullptr!\n");
-        mEnable = false;
-    }
-
-    close(fd);
 }
 
 SharedRingBuffer::~SharedRingBuffer()
@@ -141,12 +149,19 @@ int SharedRingBuffer::Write(const void* data, int32_t len)
     // Although post after it is written in the shared memory, synchronization still might not be timely,
     // and the AvailSpace() returns 0. Only add a retry to avoid it
     while (retry > 0) {
-        std::lock_guard<std::mutex> lock(mMutex);
-        int32_t avail = AvailSpace();
+        // SPSC: writer only reads rp (reader owns it), acquires to see reader's progress
+        uint32_t curWp = mRoot->wp.load(std::memory_order_relaxed);
+        uint32_t curRp = mRoot->rp.load(std::memory_order_acquire);
+        int32_t avail = (curWp >= curRp) ? (mDataCapacity - curWp + curRp) : (curRp - curWp);
         if (avail >= len) {
-            AdjustPosIfOverflow(&mRoot->wp, len);
-            memmove(reinterpret_cast<uint8_t*>(mData) + mRoot->wp, data, len);
-            mRoot->wp = (mRoot->wp + (uint32_t)len) % mDataCapacity;
+            if (curWp + (uint32_t)len >= mDataCapacity ||
+                curWp >= (mDataCapacity - RESERVER_SIZE)) {
+                curWp = 0;
+            }
+            memmove(reinterpret_cast<uint8_t*>(mData) + curWp, data, len);
+            curWp = (curWp + (uint32_t)len) % mDataCapacity;
+            // release: make data visible to reader before reader sees new wp
+            mRoot->wp.store(curWp, std::memory_order_release);
             SetRWStatus(CMD_READABLE);
             ret = 0;
             break;
@@ -173,15 +188,22 @@ int SharedRingBuffer::Read(void* data, int32_t len)
 
     // Refer to write comments
     while (retry > 0) {
-        std::lock_guard<std::mutex> lock(mMutex);
-        int32_t avail = AvailData();
+        // SPSC: reader only reads wp (writer owns it), acquires to see writer's data
+        uint32_t curWp = mRoot->wp.load(std::memory_order_acquire);
+        uint32_t curRp = mRoot->rp.load(std::memory_order_relaxed);
+        int32_t diff = curWp - curRp;
+        int32_t avail = (diff + ((diff < 0) ? (int32_t)mDataCapacity : 0)) % (int32_t)mDataCapacity;
         if (avail >= len) {
-            AdjustPosIfOverflow(&mRoot->rp, len);
-            memcpy(data, reinterpret_cast<uint8_t*>(mData) + mRoot->rp, len);
-            mRoot->rp = (mRoot->rp + len) % mDataCapacity;
+            if (curRp + (uint32_t)len >= mDataCapacity ||
+                curRp >= (mDataCapacity - RESERVER_SIZE)) {
+                curRp = 0;
+            }
+            memcpy(data, reinterpret_cast<uint8_t*>(mData) + curRp, len);
+            curRp = (curRp + (uint32_t)len) % mDataCapacity;
+            // release: make space visible to writer before writer sees new rp
+            mRoot->rp.store(curRp, std::memory_order_release);
             SetRWStatus(CMD_WRITEABLE);
             ret = 0;
-
             break;
         } else {
             SPR_LOGW("AvailData invalid! avail = %d, len = %d. (%d)\n", avail, len, retry);
@@ -201,7 +223,9 @@ int32_t SharedRingBuffer::AvailSpace() const noexcept
         return -1;
     }
 
-    return (mRoot->wp >= mRoot->rp) ? (mDataCapacity - mRoot->wp + mRoot->rp) : (mRoot->rp - mRoot->wp);
+    uint32_t wp = mRoot->wp.load(std::memory_order_acquire);
+    uint32_t rp = mRoot->rp.load(std::memory_order_acquire);
+    return (wp >= rp) ? (mDataCapacity - wp + rp) : (rp - wp);
 }
 
 int32_t SharedRingBuffer::AvailData() const noexcept
@@ -211,7 +235,9 @@ int32_t SharedRingBuffer::AvailData() const noexcept
         return -1;
     }
 
-    int32_t diff = mRoot->wp - mRoot->rp;
+    uint32_t wp = mRoot->wp.load(std::memory_order_acquire);
+    uint32_t rp = mRoot->rp.load(std::memory_order_acquire);
+    int32_t diff = wp - rp;
     return (diff + ((diff < 0) ? mDataCapacity : 0)) % mDataCapacity;
 }
 
@@ -254,6 +280,11 @@ bool SharedRingBuffer::IsWriteable() const noexcept
     return ((mRoot->rwStatus == CMD_WRITEABLE && AvailSpace() != 0));
 }
 
+bool SharedRingBuffer::IsEnabled() const noexcept
+{
+    return mEnable;
+}
+
 void SharedRingBuffer::AdjustPosIfOverflow(uint32_t* pos, int32_t size) const noexcept
 {
     if (!mEnable) {
@@ -278,7 +309,7 @@ void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
         return;
     }
 
-    mRoot->rwStatus = type;
+    mRoot->rwStatus.store(type, std::memory_order_release);
 }
 
 // void SharedRingBuffer::DumpMemory(const char* pAddr, uint32_t size)
@@ -295,5 +326,8 @@ void SharedRingBuffer::DumpErrorInfo()
         return ;
     }
 
-    SPR_LOGD("rp: %u, wp: %u, dataCapacity: %u\n", mRoot->rp, mRoot->wp, mDataCapacity);
+    SPR_LOGD("rp: %u, wp: %u, dataCapacity: %u\n",
+             mRoot->rp.load(std::memory_order_relaxed),
+             mRoot->wp.load(std::memory_order_relaxed),
+             mDataCapacity);
 }

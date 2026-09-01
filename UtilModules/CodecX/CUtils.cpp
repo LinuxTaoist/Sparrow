@@ -281,4 +281,37 @@ int32_t DecodeLeb128(const std::vector<uint8_t>& bytes, int32_t& offset, int32_t
     return value;
 }
 
+uint8_t Crc8(const std::vector<uint8_t>& bytes) {
+    uint8_t crc = 0x00;
+    for (uint8_t byte : bytes) {
+        crc ^= byte;
+        for (int i = 0; i < 8; ++i) {
+            crc = (crc & 0x80) ? static_cast<uint8_t>((crc << 1) ^ 0x07) : static_cast<uint8_t>(crc << 1);
+        }
+    }
+
+    return crc;
+}
+
+uint16_t Crc16(const std::vector<uint8_t>& bytes) {
+    uint16_t crc = 0xFFFF;
+    for (uint8_t byte : bytes) {
+        crc ^= static_cast<uint16_t>(byte);
+        for (int i = 0; i < 8; ++i) {
+            crc = (crc & 0x0001) ? static_cast<uint16_t>((crc >> 1) ^ 0xA001) : static_cast<uint16_t>(crc >> 1);
+        }
+    }
+
+    return crc;
+}
+
+uint8_t Bcc8(const std::vector<uint8_t>& bytes) {
+    uint8_t bcc = 0x00;
+    for (uint8_t byte : bytes) {
+        bcc ^= byte;
+    }
+
+    return bcc;
+}
+
 } // namespace CUtils

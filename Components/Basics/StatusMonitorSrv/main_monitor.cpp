@@ -53,6 +53,7 @@ int main(int argc, const char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     StatusMonitorManager monitorMgr(MODULE_STATUS_MONITOR, "StatusM");
     SprProcPrepare::GetInstance()->Init(SRV_NAME_STATUS_MONITOR);
     monitorMgr.Initialize();

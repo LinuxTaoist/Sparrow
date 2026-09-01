@@ -78,10 +78,10 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
         std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(pCurNode);
         if (pAtom) {
             if (cJSON_IsString(pValue)) {
-                pAtom->SetStrValue(pValue->valuestring);
+                pAtom->SetStrValue("", pValue->valuestring);
             } else if (cJSON_IsNumber(pValue)) {
                 uint64_t numVal = static_cast<uint64_t>(pValue->valueint);
-                pAtom->SetIntValue(numVal);
+                pAtom->SetIntValue("", numVal);
             }
         }
     }

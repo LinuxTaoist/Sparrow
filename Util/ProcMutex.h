@@ -26,6 +26,7 @@
 #include <atomic>
 
 struct SharedData {
+    std::atomic<int> initialized; // 0=未初始化, 1=已初始化 (CAS 保证仅 init 一次)
     std::atomic<int> refCnt;
     std::atomic<int> waitCnt;
     pthread_mutex_t dataMutex;  // Mutex for critical section protection

@@ -18,8 +18,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <string>
-#include <vector>
+#include <stdio.h>
+#include <stdint.h>
 #include "SprSigId.h"
 
 #ifdef ENUM_OR_STRING
@@ -32,7 +32,13 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
     #include "SprSigList.gen"
 };
 
-const char* GetSigName(int32_t msgID)
+const char* GetSigName(uint32_t msgID)
 {
-    return (msgID < InternalDefs::SIG_ID_BUTT) ? sigIdString[msgID] : "UNDEFINED";
+    if (msgID < InternalDefs::SIG_ID_PUBLIC_END) {
+        return sigIdString[msgID];
+    }
+
+    static char warnText[64] = {};
+    snprintf(warnText, sizeof(warnText), "SIGID_0X%X", msgID);
+    return warnText;
 }

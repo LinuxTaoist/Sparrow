@@ -4,11 +4,8 @@ project(Sparrow)
 # 兼容CMAKE旧版本
 cmake_policy(SET CMP0046 OLD)
 
-## 保存工程路径
+## 路径设置
 set(PROJECT_PATH ${CMAKE_CURRENT_SOURCE_DIR})
-
-## 定制模块选项
-set(BUSINESS_MODULES "")
 set(PLATFORM_OPTIONS_PATH ${PROJECT_PATH}/Platform/${PROJECT_PLATFORM}/Build/Options)
 
 ## 包含配置文件
@@ -22,7 +19,6 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 ## 保存输出路径
-set(OUTPUT_PATH             ${PROJECT_PATH}/Release)
 set(LIBRARY_OUTPUT_PATH     ${OUTPUT_PATH}/Lib)
 set(EXECUTABLE_OUTPUT_PATH  ${OUTPUT_PATH}/Bin)
 
@@ -30,6 +26,7 @@ set(EXECUTABLE_OUTPUT_PATH  ${OUTPUT_PATH}/Bin)
 message(STATUS "BUILD_DEBUG    = ${BUILD_DEBUG}")
 message(STATUS "BUILD_TESTCASE = ${BUILD_TESTCASE}")
 message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
+message(STATUS "BUILD_COVERAGE = ${BUILD_COVERAGE}")
 
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
@@ -52,7 +49,8 @@ message("Project        : ${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VE
 message("C++ Standard   : ${CMAKE_CXX_STANDARD}")
 message("G++ Version    : ${CMAKE_CXX_COMPILER_VERSION}")
 message("Gcc Version    : ${CMAKE_C_COMPILER_VERSION}")
-message("Running Env    : ${PROJECT_PLATFORM}")
+message("Run Platform   : ${PROJECT_PLATFORM}")
+message("HAL Family     : ${HAL_FAMILY}")
 message("Build Time     : ${CURRENT_TIME}")
 message("Build Type     : ${CMAKE_BUILD_TYPE}")
 message("Build Host     : ${HOSTNAME}")
@@ -71,11 +69,13 @@ add_definitions(-DBUILD_TYPE="${CMAKE_BUILD_TYPE}")
 add_definitions(-DBUILD_HOST="${HOSTNAME}")
 add_definitions(-DBUILD_PLATFORM="${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION}")
 add_definitions(-DMODULE_CONFIG_VERSION="${MODULE_CONFIG_VERSION}")
+add_definitions(-DHAL_FAMILY="${HAL_FAMILY}")
 
 add_subdirectory(3rdParty)
 add_subdirectory(3rdAdapter)
 add_subdirectory(Components)
 add_subdirectory(Core)
+add_subdirectory(Hardware)
 add_subdirectory(PrivateAPIs)
 add_subdirectory(PublicAPIs)
 add_subdirectory(UtilModules)

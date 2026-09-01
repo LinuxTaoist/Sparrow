@@ -169,9 +169,10 @@ void PluginManager::UnloadPlugin(const std::string& path) {
     }
 
     pExit(mPluginModules, mContext);
+    std::string pathTmp = path;
     dlclose(pDlHandler);
-    int num = mPluginHandles.erase(path);
-    SPR_LOGD("Unload plugin %s %s!\n", path.c_str(), num > 0 ? "success" : "fail");
+    int num = mPluginHandles.erase(pathTmp);
+    SPR_LOGD("Unload plugin %s %s!\n", pathTmp.c_str(), num > 0 ? "success" : "fail");
 }
 
 void PluginManager::LoadAllPlugins()
@@ -193,11 +194,15 @@ void PluginManager::LoadAllPlugins()
 
 void PluginManager::UnloadAllPlugins()
 {
-    for (auto& handle : mPluginHandles) {
-        UnloadPlugin(handle.first);
-        handle.second = nullptr;
+    // Collect keys first to avoid iterator invalidation during erase
+    std::vector<std::string> paths;
+    for (const auto& handle : mPluginHandles) {
+        paths.push_back(handle.first);
     }
-    mPluginHandles.clear();
+
+    for (const auto& path : paths) {
+        UnloadPlugin(path);
+    }
 }
 
 void PluginManager::RegisterDebugFuncs()

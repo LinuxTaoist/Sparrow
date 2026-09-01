@@ -8,8 +8,8 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/04/25
  *
- * This header file serves as a repository for shared data structure types utilized by both client and server code.
- * All common data structure definitions intended for use across both client and server should be encapsulated herein.
+ *  This header file serves as a repository for shared data structure types utilized by both client and server code.
+ *  All common data structure definitions intended for use across both client and server should be encapsulated herein.
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>

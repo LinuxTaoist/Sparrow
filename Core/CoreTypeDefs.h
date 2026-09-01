@@ -8,9 +8,9 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
  *
- * This header serves as a central repository for standardized definitions to enhance code clarity,
- * facilitate maintenance, and minimize duplication across various internal modules within the project.
- * It encapsulates fundamental data types ubiquitously understood and employed across different system components.
+ *  This header serves as a central repository for standardized definitions to enhance code clarity,
+ *  facilitate maintenance, and minimize duplication across various internal modules within the project.
+ *  It encapsulates fundamental data types ubiquitously understood and employed across different system components.
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
@@ -51,7 +51,7 @@ typedef void(*PluginExitFunc) (std::map<int32_t, SprObserver*>& modules, SprCont
 #define     MAIN_EXIT_SIGNUM            SIGUSR1
 #define     MEDIATOR_INET_PORT          1126
 #define     MSG_BUF_MAX_LENGTH          1024
-#define     MODULE_ID_OFFSET              24
+#define     MODULE_ID_OFFSET              16
 
 namespace InternalDefs {
 
@@ -92,23 +92,13 @@ enum EProxyType
     ENUM_OR_STRING(MODULE_SYSTEM_TIMER),        \
     ENUM_OR_STRING(MODULE_POWERM),              \
     ENUM_OR_STRING(MODULE_STATUS_MONITOR),      \
-    ENUM_OR_STRING(MODULE_ONENET_MANAGER),      \
-    ENUM_OR_STRING(MODULE_ONENET_DEV01),        \
-    ENUM_OR_STRING(MODULE_ONENET_DEV02),        \
-    ENUM_OR_STRING(MODULE_ONENET_DEV03),        \
-    ENUM_OR_STRING(MODULE_ONENET_DEV04),        \
-    ENUM_OR_STRING(MODULE_ONENET_DEV05),        \
-    ENUM_OR_STRING(MODULE_ONENET_DRIVER),       \
-    ENUM_OR_STRING(MODULE_ONENET_SOCKET),       \
-    ENUM_OR_STRING(MODULE_ONENET_UNIX_PIPE0),   \
-    ENUM_OR_STRING(MODULE_ONENET_UNIX_PIPE1),   \
     ENUM_OR_STRING(MODULE_DEBUG),               \
     ENUM_OR_STRING(MODULE_DEBUG_WATCH),         \
     ENUM_OR_STRING(MODULE_GTEST_INTERNAL),      \
     ENUM_OR_STRING(MODULE_GENERAL),             \
-    ENUM_OR_STRING(MODULE_MAX)
+    ENUM_OR_STRING(MODULE_PUBLIC_END)
 
-enum ESprModuleID
+enum ESprModuleID : uint8_t
 {
     SPR_MODULE_ID_MACROS
 };
@@ -141,6 +131,26 @@ enum EPropertyBinderCmd
 {
     PROPERTY_CMD_BEGIN = MODULE_PROPERTYM << MODULE_ID_OFFSET | 1,
     PROPERTY_BINDER_CMD_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
+// - EConfigBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
+#define CONFIG_BINDER_CMD_MACROS \
+    ENUM_OR_STRING(CONFIG_CMD_SET_VALUE),        \
+    ENUM_OR_STRING(CONFIG_CMD_GET_VALUE),        \
+    ENUM_OR_STRING(CONFIG_CMD_SET_TYPED_VALUE),  \
+    ENUM_OR_STRING(CONFIG_CMD_GET_TYPED_VALUE),  \
+    ENUM_OR_STRING(CONFIG_CMD_DELETE_VALUE),     \
+    ENUM_OR_STRING(CONFIG_CMD_LIST_NAMESPACE),   \
+    ENUM_OR_STRING(CONFIG_CMD_GET_META),         \
+    ENUM_OR_STRING(CONFIG_CMD_BACKUP),           \
+    ENUM_OR_STRING(CONFIG_CMD_BUTT)
+
+enum EConfigBinderCmd
+{
+    CONFIG_CMD_BEGIN = MODULE_CONFIG << MODULE_ID_OFFSET | 1,
+    CONFIG_BINDER_CMD_MACROS
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -191,20 +201,6 @@ enum EDebugMBinderCmd
 enum ELogLevel
 {
     LOG_LEVEL_MACROS
-};
-
-//---------------------------------------------------------------------------------------------------------------------
-// - EOneNetBinderCmd
-// --------------------------------------------------------------------------------------------------------------------
-#define ONENET_BINDER_CMD_MACROS \
-    ENUM_OR_STRING(ONENET_CMD_ACTIVE_DEVICE),   \
-    ENUM_OR_STRING(ONENET_CMD_DEACTIVE_DEVICE), \
-    ENUM_OR_STRING(ONENET_CMD_BUTT)
-
-enum EOneNetBinderCmd
-{
-    ONENET_CMD_BEGIN = MODULE_ONENET_MANAGER << MODULE_ID_OFFSET | 1,
-    ONENET_BINDER_CMD_MACROS
 };
 
 //---------------------------------------------------------------------------------------------------------------------
@@ -275,7 +271,8 @@ enum EPreStandbyAck
 // - EStandbySourceType
 // --------------------------------------------------------------------------------------------------------------------
 #define STANDBY_REASON_TYPE_MACROS \
-    ENUM_OR_STRING(STANDBY_REASON_USER), \
+    ENUM_OR_STRING(STANDBY_REASON_USER),        \
+    ENUM_OR_STRING(STANDBY_REASON_WAKEUPIN),    \
     ENUM_OR_STRING(STANDBY_REASON_BUTT)
 
 enum EStandbyReasonType

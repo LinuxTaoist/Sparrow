@@ -33,9 +33,10 @@ namespace
 
 }
 
-enum ESprSigId
+enum ESprSigId : uint32_t
 {
     #include "SprSigList.gen"
+    ENUM_OR_STRING(SIG_ID_PUBLIC_END) = 0x10000,
 };
 
 }
@@ -46,6 +47,6 @@ enum ESprSigId
  * @param msgID
  * @return Signal description
  */
-const char* GetSigName(int32_t msgID);
+const char* GetSigName(uint32_t msgID);
 
 #endif

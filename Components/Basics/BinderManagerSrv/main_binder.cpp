@@ -49,6 +49,7 @@ int main(int argc, const char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     BinderManager::GetInstance()->StartWork();
     SPR_LOGI("Main Exit!\n");
     return 0;

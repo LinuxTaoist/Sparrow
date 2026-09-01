@@ -19,35 +19,40 @@
 #ifndef __SERVICE_MANAGER_H__
 #define __SERVICE_MANAGER_H__
 
-#include <map>
 #include <string>
-#include <thread>
+#include <vector>
 #include <stdint.h>
 
-class ServiceManager
-{
+struct SvcInfo {
+    int32_t pid;            // > 0 running, -1 dead
+    int32_t restartCount;
+    std::string path;
+
+    SvcInfo() = default;
+    SvcInfo(const std::string& p, int32_t id)
+        : pid(id), restartCount(1), path(p) {}
+};
+
+class ServiceManager {
 public:
     ServiceManager();
     ~ServiceManager();
 
     int32_t WorkLoop();
     static int32_t ExitLoop();
+
+private:
+    int32_t InitEnv();
+    int32_t StartAllFromConfig(const std::string& cfgPath);
+    int32_t StartOne(const std::string& exePath);
+    int32_t ForkExec(const std::string& exePath);
+    int32_t StopAll();
+    int32_t TryRestart(size_t idx);
     int32_t DumpPidMapInfo();
 
 private:
-    bool IsExeAliveByProc(int32_t pid);
-    int32_t InitEnv();
-    int32_t InitMsgQueueLimit();
-    int32_t StartAllExesFromConfigure(const std::string& cfgPath);
-    int32_t StartExe(const std::string& exePath);
-    int32_t StopAllSubExes();
-    int32_t ClearExeEnvNode(const std::string& exeName);
-    int32_t WaitLastExeFinished(const std::string& exeName);
-
-private:
     static bool mRunning;
-    std::string mRootDir;
-    std::map<int, std::pair<std::string, int>> mPidMap;     // key: pid, value: exePath, times
+    std::vector<SvcInfo> mSvcs;
 };
 
 #endif // __SERVICE_MANAGER_H__

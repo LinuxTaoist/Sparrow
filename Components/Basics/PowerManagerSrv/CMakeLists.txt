@@ -1,5 +1,6 @@
-## Business
-# Bin powermanagersrv
+# PowerManagerSrv
+
+## Bin powermanagersrv
 aux_source_directory        (${PROJECT_PATH}/PrivateAPIs/Event                      SRC_POWER_MANAGER_PATH)
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/PowerManagerSrv      SRC_POWER_MANAGER_PATH)
 add_executable              (BinPowerManagerSrv ${SRC_POWER_MANAGER_PATH})
@@ -8,6 +9,8 @@ target_include_directories  (BinPowerManagerSrv PRIVATE ${PROJECT_PATH}/Util
                                                         ${PROJECT_PATH}/Core
                                                         ${PROJECT_PATH}/3rdAdapter
                                                         ${PROJECT_PATH}/PrivateAPIs/Event
+                                                        ${PROJECT_PATH}/PrivateAPIs/Binder
+                                                        ${PROJECT_PATH}/Hardware/Common/inc
                                                         ${PROJECT_PATH}/UtilModules/EpollEventHandler)
-target_link_libraries       (BinPowerManagerSrv pthread sprcore epollevent sprlog)
-add_dependencies            (BinPowerManagerSrv LibSprCore LibSprLog LibEpollEvent)
+target_link_libraries       (BinPowerManagerSrv pthread LibSprCore LibSprHal LibBinder)
+add_dependencies            (BinPowerManagerSrv LibSprCore LibBinder)

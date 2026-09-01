@@ -22,15 +22,15 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/epoll.h>
+#include <sys/eventfd.h>
+#include "PLog.h"
 #include "EpollEventHandler.h"
 
-#define SPR_LOGD(fmt, args...) // printf("%4d EpEvtHandler D: " fmt, __LINE__, ##args)
-#define SPR_LOGW(fmt, args...) printf("%4d EpEvtHandler W: " fmt, __LINE__, ##args)
-#define SPR_LOGE(fmt, args...) printf("%4d EpEvtHandler E: " fmt, __LINE__, ##args)
+#define PLOG_TAG "EpEvtHandler"
 
 static std::atomic<bool> gObjAlive(true);
 
-EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
+EpollEventHandler::EpollEventHandler(int32_t size, int32_t blockTimeOut)
 {
     if (size) {
         mHandle = epoll_create(size);
@@ -39,20 +39,50 @@ EpollEventHandler::EpollEventHandler(int size, int blockTimeOut)
     }
 
     if (mHandle < 0) {
-        SPR_LOGE("epoll_create fail! (%s)\n", strerror(errno));
+        PLOGE("epoll_create fail! (%s)\n", strerror(errno));
     }
 
     mRun = false;
     mTimeOut = blockTimeOut;
+    mWakeFd = -1;
+
+    // eventfd used to reliably wake up a blocked epoll_wait on ExitLoop,
+    // even when mTimeOut is -1 (infinite blocking). Without it, close(mHandle)
+    // may not unblock epoll_wait and ExitLoop/join could hang forever.
+    mWakeFd = eventfd(0, EFD_NONBLOCK | EFD_CLOEXEC);
+    if (mWakeFd < 0) {
+        PLOGE("eventfd fail! (%s)\n", strerror(errno));
+        return;
+    }
+
+    struct epoll_event ev;
+    memset(&ev, 0, sizeof(ev));
+    ev.events = EPOLLIN;
+    ev.data.ptr = nullptr;   // wake event, no IEpollEvent handler
+    if (epoll_ctl(mHandle, EPOLL_CTL_ADD, mWakeFd, &ev) != 0) {
+        PLOGE("epoll_ctl add wake fd fail! (%s)\n", strerror(errno));
+        close(mWakeFd);
+        mWakeFd = -1;
+    }
 }
 
 EpollEventHandler::~EpollEventHandler()
 {
     gObjAlive = false;
     ExitLoop();
+
+    if (mHandle != -1) {
+        close(mHandle);
+        mHandle = -1;
+    }
+
+    if (mWakeFd != -1) {
+        close(mWakeFd);
+        mWakeFd = -1;
+    }
 }
 
-EpollEventHandler* EpollEventHandler::GetInstance(int size, int blockTimeOut)
+EpollEventHandler* EpollEventHandler::GetInstance(int32_t size, int32_t blockTimeOut)
 {
     if (!gObjAlive) {
         return nullptr;
@@ -74,31 +104,41 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     //EPOLL_CTL_ADD：注册新的fd到epfd中；
     //EPOLL_CTL_MOD：修改已经注册的fd的监听事件；
     //EPOLL_CTL_DEL：从epfd中删除一个fd；
-    int fd = p->GetEvtFd();
-    int ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
+    int32_t fd = p->GetEvtFd();
+    if (fd < 0) {
+        PLOGE("Invalid fd: %d\n", fd);
+        return;
+    }
+
+    // Detect duplicate registration (warn but allow overwrite)
+    if (mEpollMap.find(fd) != mEpollMap.end()) {
+        PLOGW("fd %d already in poll map, replacing\n", fd);
+    }
+
+    int32_t ret = epoll_ctl(mHandle, EPOLL_CTL_ADD, fd, &ep);
     if (ret == -1) {
-        SPR_LOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
+        PLOGE("epoll_ctl %d fail. (%s)\n", fd, strerror(errno));
         return ;
     }
 
     mEpollMap[fd] = p;
-    SPR_LOGD("Add epoll fd %d\n", fd);
+    PLOGD("Add epoll fd %d\n", fd);
 }
 
 void EpollEventHandler::DelPoll(IEpollEvent* p)
 {
     if (p == nullptr) {
-        SPR_LOGE("p is null\n");
+        PLOGE("p is null\n");
         return ;
     }
 
-    int ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEvtFd(), nullptr);
+    int32_t ret = epoll_ctl(mHandle, EPOLL_CTL_DEL, p->GetEvtFd(), nullptr);
     if (ret != 0) {
-        SPR_LOGE("epoll_ctl %d fail. (%s)\n", p->GetEvtFd(), strerror(errno));
+        PLOGE("epoll_ctl %d fail. (%s)\n", p->GetEvtFd(), strerror(errno));
     }
 
     mEpollMap.erase(p->GetEvtFd());
-    SPR_LOGD("Delete epoll fd %d\n", p->GetEvtFd());
+    PLOGD("Delete epoll fd %d\n", p->GetEvtFd());
 }
 
 void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
@@ -108,16 +148,42 @@ void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
 
 void EpollEventHandler::EpollLoop()
 {
+    if (mRun) {
+        PLOGW("EpollLoop already running\n");
+        return;
+    }
+
     struct epoll_event ep[32];
+    const int32_t maxEvents = static_cast<int32_t>(sizeof(ep)/sizeof(ep[0]));
     mRun = true;
     while(mRun) {
         // 无事件时, epoll_wait阻塞, 等待
-        int count = epoll_wait(mHandle, ep, sizeof(ep)/sizeof(ep[0]), mTimeOut);
+        int32_t count = epoll_wait(mHandle, ep, maxEvents, mTimeOut);
         if (count <= 0) {
+            if (count < 0 && errno != EINTR) {
+                PLOGE("epoll_wait fail! (%s)\n", strerror(errno));
+            }
             continue;
         }
 
-        for (int i = 0; i < count; i++) {
+        // Warn if event buffer is full (possible event loss)
+        if (count >= maxEvents) {
+            PLOGW("epoll_wait returned max %d events (possible overflow)\n", count);
+        }
+
+        for (int32_t i = 0; i < count; i++) {
+            // Wake-up event from ExitLoop, drain and re-check exit flag
+            if (ep[i].data.ptr == nullptr) {
+                uint64_t val = 0;
+                if (mWakeFd != -1) {
+                    ssize_t r = read(mWakeFd, &val, sizeof(val));
+                    if (r < 0 && errno != EAGAIN && errno != EWOULDBLOCK) {
+                        PLOGE("read wake fd fail! (%s)\n", strerror(errno));
+                    }
+                }
+                continue;
+            }
+
             IEpollEvent* p = reinterpret_cast<IEpollEvent*>(ep[i].data.ptr);
             if (p == nullptr) {
                 continue;
@@ -127,14 +193,21 @@ void EpollEventHandler::EpollLoop()
         }
     }
 
-    SPR_LOGD("EpollLoop exit\n");
+    PLOGD("EpollLoop exit\n");
 }
 
 void EpollEventHandler::ExitLoop()
 {
     mRun = false;
-    if (mHandle != -1) {
-        close(mHandle);
-        mHandle = -1;
+
+    // Wake up a possibly blocked epoll_wait in EpollLoop thread,
+    // so that it can observe mRun == false and exit promptly.
+    // Keep mHandle open: EpollLoop() may be entered again later.
+    if (mWakeFd != -1) {
+        uint64_t val = 1;
+        ssize_t w = write(mWakeFd, &val, sizeof(val));
+        if (w < 0) {
+            PLOGE("write wake fd fail! (%s)\n", strerror(errno));
+        }
     }
 }

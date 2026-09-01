@@ -54,6 +54,7 @@ int main(int argc, const char* argv[])
         }
     });
 
+    SPR_LOGI("Main start!\n");
     PowerManager thePowerManager(MODULE_POWERM, "PowerM");
     PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
 

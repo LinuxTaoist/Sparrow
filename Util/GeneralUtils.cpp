@@ -58,7 +58,7 @@ int InitSignalHandler(void (*signalHandler)(int))
     sigaction(SIGILL,    &signal_action, NULL);    // 非法指令
     // sigaction(SIGTRAP,   &signal_action, NULL);    // 调试陷阱
     // sigaction(SIGKILL,   &signal_action, NULL);    // 请求进程终止
-    // sigaction(SIGABRT,   &signal_action, NULL);    // 应用异常中止（abort函数）
+    sigaction(SIGABRT,   &signal_action, NULL);    // 应用异常中止（abort函数）
     sigaction(SIGBUS,    &signal_action, NULL);    // 总线错误，内存访问对齐问题
     sigaction(SIGFPE,    &signal_action, NULL);    // 浮点错误，如除以0
     sigaction(SIGUSR1,   &signal_action, NULL);    // 用户自定义信号1
@@ -66,35 +66,18 @@ int InitSignalHandler(void (*signalHandler)(int))
     sigaction(SIGUSR2,   &signal_action, NULL);    // 用户自定义信号2
     sigaction(SIGPIPE,   &signal_action, NULL);    // 管道破裂，写入无读取端的管道
     // sigaction(SIGALRM,   &signal_action, NULL);    // 定时器信号
-    // sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
+    sigaction(SIGTERM,   &signal_action, NULL);    // 请求进程终止
 
     return 0;
 }
 
-int SystemCmd(const char* format, ...)
+static int SystemCmd(std::string& out, const char* format, va_list vlist)
 {
-    std::string out;
-
-    va_list vlist;
-    va_start(vlist, format);
-    int ret = SystemCmd(out, format, vlist);
-
-    va_end(vlist);
-    return ret;
-}
-
-int SystemCmd(std::string& out, const char* format, ...)
-{
-    va_list vlist;
-    va_start(vlist, format);
-
     char* fmt = nullptr;
     if (vasprintf(&fmt, format, vlist) == -1) {
-        va_end(vlist);
         return -1;
     }
 
-    va_end(vlist);
     if (fmt == nullptr) {
         return -1;
     }
@@ -114,6 +97,26 @@ int SystemCmd(std::string& out, const char* format, ...)
     free(fmt);
     int exitCode = pclose(fp);
     return (exitCode == 0) ? 0 : -1;
+}
+
+int SystemCmd(const char* format, ...)
+{
+    std::string out;
+
+    va_list vlist;
+    va_start(vlist, format);
+    int ret = SystemCmd(out, format, vlist);
+    va_end(vlist);
+    return ret;
+}
+
+int SystemCmd(std::string& out, const char* format, ...)
+{
+    va_list vlist;
+    va_start(vlist, format);
+    int ret = SystemCmd(out, format, vlist);
+    va_end(vlist);
+    return ret;
 }
 
 std::string GetRandomString(int width)
@@ -237,5 +240,4 @@ void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen)
 
     return nullptr;
 }
-
-}; // namespace GeneralUtils
+} // namespace GeneralUtils

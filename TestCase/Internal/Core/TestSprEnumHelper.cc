@@ -17,6 +17,7 @@
  *
  */
 #include <vector>
+#include <stdio.h>
 #include "CoreTypeDefs.h"
 #include "CommonErrorCodes.h"
 #include "SprEnumHelper.h"
@@ -57,9 +58,15 @@ TEST(Core_SprEnumHelper, GetSprProxTypeText) {
 TEST(Core_SprEnumHelper, GetSprModuleIDText) {
     EXPECT_EQ(GetSprModuleIDText(MODULE_NONE), "MODULE_NONE");
     EXPECT_EQ(GetSprModuleIDText(MODULE_GENERAL), "MODULE_GENERAL");
-    EXPECT_EQ(GetSprModuleIDText(MODULE_MAX), "MODULE_MAX");
-    EXPECT_EQ(GetSprModuleIDText(-1), "UNDEFINED");
-    EXPECT_EQ(GetSprModuleIDText(MODULE_MAX + 100), "UNDEFINED");
+    EXPECT_EQ(GetSprModuleIDText(MODULE_PUBLIC_END), "MODULE_PUBLIC_END");
+
+    char negModuleExpected[32] = {};
+    char overflowModuleExpected[32] = {};
+    snprintf(negModuleExpected, sizeof(negModuleExpected), "MODULE_0X%X", static_cast<uint32_t>(-1));
+    snprintf(overflowModuleExpected, sizeof(overflowModuleExpected), "MODULE_0X%X", static_cast<uint32_t>(MODULE_PUBLIC_END + 100));
+
+    EXPECT_EQ(std::string(GetSprModuleIDText(-1)), std::string(negModuleExpected));
+    EXPECT_EQ(std::string(GetSprModuleIDText(MODULE_PUBLIC_END + 100)), std::string(overflowModuleExpected));
 }
 
 TEST(Core_SprEnumHelper, GetSprProxyBinderCmdText) {
@@ -88,13 +95,6 @@ TEST(Core_SprEnumHelper, GetSprDebugMBinderCmdText) {
     EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_MSG_BUTT), "DEBUG_MSG_BUTT");
     EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_CMD_ENABLE_REMOTE_PORT - 10), "UNDEFINED");
     EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_MSG_BUTT + 100), "UNDEFINED");
-}
-
-TEST(Core_SprEnumHelper, GetSprOneNetBinderCmdText) {
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_ACTIVE_DEVICE), "ONENET_CMD_ACTIVE_DEVICE");
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_BUTT), "ONENET_CMD_BUTT");
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_ACTIVE_DEVICE - 10), "UNDEFINED");
-    EXPECT_EQ(GetSprOneNetBinderCmdText(ONENET_CMD_BUTT + 100), "UNDEFINED");
 }
 
 TEST(Core_SprEnumHelper, GetSprGeneralBinderCmdText) {

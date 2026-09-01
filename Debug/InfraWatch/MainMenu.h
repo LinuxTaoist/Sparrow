@@ -36,4 +36,4 @@ private:
 
 extern MainMenu theMainMenu;
 
-#endif
+#endif // __MAIN_MENU_H__

@@ -25,7 +25,7 @@
 class EpollEventHandler
 {
 public:
-    static EpollEventHandler* GetInstance(int size = 0, int blockTimeOut = -1);
+    static EpollEventHandler* GetInstance(int32_t size = 0, int32_t blockTimeOut = -1);
 
     void AddPoll(IEpollEvent* p);
     void DelPoll(IEpollEvent* p);
@@ -34,14 +34,15 @@ public:
     virtual void HandleEpollEvent(IEpollEvent& pEvent);
 
 protected:
-    explicit EpollEventHandler(int size = 0, int blockTimeOut = -1);
+    explicit EpollEventHandler(int32_t size = 0, int32_t blockTimeOut = -1);
     virtual ~EpollEventHandler();
 
 private:
-    bool    mRun;
-    int     mHandle;
-    int     mTimeOut;
-    std::map<int, IEpollEvent*> mEpollMap;   // fd, type, IEpollEvent
+    bool        mRun;
+    int32_t     mHandle;
+    int32_t     mTimeOut;
+    int32_t     mWakeFd;    // eventfd for waking up epoll_wait on ExitLoop
+    std::map<int32_t, IEpollEvent*> mEpollMap;   // fd, type, IEpollEvent
 };
 
 

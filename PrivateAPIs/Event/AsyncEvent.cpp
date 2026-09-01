@@ -26,7 +26,7 @@
 #define     AEVENT_NAME_SUFFIX      "_event"
 
 static std::atomic<bool> gObjAlive(true);
-std::shared_ptr<Parcel> pEventParcel = nullptr;
+static std::unique_ptr<Parcel> pEventParcel = nullptr;
 
 AsyncEvent* AsyncEvent::GetInstance()
 {
@@ -56,22 +56,24 @@ AsyncEvent::~AsyncEvent()
 int AsyncEvent::AsWriter(const std::string& name)
 {
     mName = name;
-    pEventParcel = std::make_shared<Parcel>(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, true);
-    return pEventParcel ? 0 : -1;
+    pEventParcel.reset(new Parcel(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, true));
+    return 0;
 }
 
 int AsyncEvent::AsReader(const std::string& name)
 {
     mName = name;
-    pEventParcel = std::make_shared<Parcel>(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, false);
-    return pEventParcel ? 0 : -1;
+    pEventParcel.reset(new Parcel(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, false));
+    return 0;
 }
 
 int AsyncEvent::UnregisterEventCallback()
 {
     mCb = nullptr;
     mRunning = false;
-    mCbThread.join();
+    if (mCbThread.joinable()) {
+        mCbThread.join();
+    }
     return 0;
 }
 

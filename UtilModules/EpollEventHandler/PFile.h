@@ -27,16 +27,16 @@
 class PFile : public IEpollEvent
 {
 public:
-    explicit PFile(int fd, const std::function<void(int, void*)>& cb = nullptr, void* arg = nullptr);
-    explicit PFile(const std::string& fileName, const std::function<void(int, ssize_t, std::string, void*)>& cb = nullptr,
-          void* arg = nullptr, int flags = O_RDWR | O_CREAT | O_TRUNC, mode_t mode = 0777);
+    explicit PFile(int32_t fd, const std::function<void(int32_t, void*)>& cb = nullptr, void* arg = nullptr);
+    explicit PFile(const std::string& fileName, const std::function<void(int32_t, ssize_t, std::string, void*)>& cb = nullptr,
+          void* arg = nullptr, int32_t flags = O_RDWR | O_CREAT | O_TRUNC, mode_t mode = 0777);
 
     virtual ~PFile();
-    void* EpollEvent(int fd, EpollType eType, void* arg) override;
+    void* EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:
-    int mFd;    // Maintains only the file descriptor of the filename passed in the constructor
-    std::function<void(int, void*)> mCb1;
-    std::function<void(int, ssize_t, std::string, void*)> mCb2;
+    int32_t mFd;    // Maintains only the file descriptor of the filename passed in the constructor
+    std::function<void(int32_t, void*)> mCb1;
+    std::function<void(int32_t, ssize_t, std::string, void*)> mCb2;
 };
 #endif // __PFILE_H__

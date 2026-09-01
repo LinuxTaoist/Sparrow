@@ -40,7 +40,11 @@ display_completion_details() {
 
     echo ""
     echo -e "${GREEN}================================================================================${NC}"
-    echo -e "${GREEN}所有操作已完成。${NC}"
+    if [ "${1:-0}" -eq 0 ]; then
+        echo -e "${GREEN}所有操作已完成。${NC}"
+    else
+        echo -e "${RED}操作失败，退出码：${1}${NC}"
+    fi
     echo -e "${GREEN}完成时间：$(date '+%Y-%m-%d %H:%M:%S') 耗时 ${duration} 秒。${NC}"
     echo ""
 }
@@ -65,15 +69,19 @@ show_env() {
 
 # cmd adb_push
 adb_push() {
-    if [ -z "$1" ]; then
-        echo -e "${PURPLE}错误: 未提供路径! 用法: ./xtool.sh <path>${NC}"
+    if [ -z "$1" ] || [ -z "$2" ]; then
+        echo -e "${PURPLE}错误: 未提供必要的参数! 用法: ./xtool.sh <platform> <path>${NC}"
         return 1
     fi
 
     echo -e "${PURPLE} 开始推送文件 ${NC}"
-    adb shell mkdir -p $1/Release
-    adb push ../Release/Bin  $1/Release/
-    adb push ../Release/Lib  $1/Release/
+    adb shell killall -10 servicemanagersrv
+    sleep 2
+    adb shell rm -rf $2/Release/Bin/*
+    adb shell rm -rf $2/Release/Lib/*
+    adb shell mkdir -p $2/Release
+    adb push ../Release/$1/Bin  $2/Release/
+    adb push ../Release/$1/Lib  $2/Release/
 }
 
 # cmd commit-template
@@ -111,13 +119,13 @@ new_platform() {
     platform_name="$1"
     cd ${project_path}
 
-    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/${platform_name}_build.sh ${NC}"
+    echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/build_${platform_name}.sh ${NC}"
     mkdir -p ${project_path}/Platform/${platform_name}
     mkdir -p ${project_path}/Platform/${platform_name}/Build
     mkdir -p ${project_path}/Platform/${platform_name}/Build/Options
     touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_compile_options.cmake
     touch    ${project_path}/Platform/${platform_name}/Build/Options/${platform_name}_modules_config.cmake
-    touch    ${project_path}/Platform/${platform_name}/Build/${platform_name}_build.sh
+    touch    ${project_path}/Platform/${platform_name}/Build/build_${platform_name}.sh
     touch    ${project_path}/Platform/${platform_name}/Build/rebuild_${platform_name}.sh
 
     echo -e "${GREEN}touch ${project_path}/Platform/${platform_name}/Configs/vendor.prop ${NC}"
@@ -149,6 +157,33 @@ stop_valgrind() {
     echo -e "${GREEN}开始停止valgrind...${NC}"
     cd $(pwd)/valgrind
     ./stop_valgrind.sh
+}
+
+## sync_code
+sync_code() {
+    echo -e "${PURPLE}开始同步代码仓库...${NC}"
+    cd "${project_path}" || return 1
+
+    if [ -d ".repo" ]; then
+        echo -e "${GREEN}检测到 repo 管理环境，批量同步所有子仓库${NC}"
+        repo sync --current-branch
+    else
+        if [ ! -d ".git" ]; then
+            echo -e "${RED}错误：${project_path} 不是 Git 仓库${NC}"
+            return 1
+        fi
+        echo -e "${GREEN}单仓库环境，同步当前仓库${NC}"
+        git pull --ff-only
+    fi
+    local sync_status=$?
+
+    if [ ${sync_status} -eq 0 ]; then
+        echo -e "${GREEN}代码同步完成${NC}"
+    else
+        echo -e "${RED}同步失败，请检查上方具体仓库的错误信息${NC}"
+    fi
+
+    return ${sync_status}
 }
 
 # Function to print usage information with logo
@@ -185,6 +220,7 @@ usage() {
     echo -e "${PURPLE}  $0 start-valgrind           启动valgrind${NC}"
     echo -e "${PURPLE}  $0 stop-valgrind            停止valgrind${NC}"
     echo -e "${PURPLE}  $0 help                     显示此帮助信息${NC}"
+    echo -e "${PURPLE}  $0 sync                     同步代码仓库${NC}"
     echo -e ""
     echo -e "${PURPLE}================================================================================${NC}"
 }
@@ -202,7 +238,7 @@ main() {
             show_env
             ;;
         adb-push)
-            adb_push "$2"
+            adb_push "$2" "$3"
             ;;
         commit-template)
             config_commit_template
@@ -223,6 +259,9 @@ main() {
         stop-valgrind)
             stop_valgrind
             ;;
+        sync-code)
+            sync_code
+            ;;
         help|?)
             usage
             ;;
@@ -233,7 +272,9 @@ main() {
             ;;
     esac
 
-    display_completion_details
+    command_status=$?
+    display_completion_details ${command_status}
+    return ${command_status}
 }
 
 # Call the main function with all passed arguments
