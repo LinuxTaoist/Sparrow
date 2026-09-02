@@ -19,7 +19,6 @@
 #include <stdio.h>
 #include "SprMainInterface.h"
 
-SPR_ENTRY() {
+SPR_ENTRY(
     printf("test user entry\n");
-    _SprRunLoop();
-}
+);
