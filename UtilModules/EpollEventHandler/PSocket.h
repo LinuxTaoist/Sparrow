@@ -171,7 +171,7 @@ public:
     virtual ~PTcpClient();
 
     int32_t AsTcpClient(bool con = false, const std::string& srvAddr = "", uint16_t srvPort = 0,
-                        int32_t rcvLen = DEFAULT_BUFFER_LIMIT, int32_t sndLen = DEFAULT_BUFFER_LIMIT);
+                        int32_t rcvLen = DEFAULT_BUFFER_LIMIT, int32_t sndLen = DEFAULT_BUFFER_LIMIT, int32_t timeoutMs = 5000);
 
     void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
@@ -302,7 +302,7 @@ public:
     explicit PUnixStreamClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
     virtual ~PUnixStreamClient();
 
-    int32_t AsUnixStreamClient(bool con = false, const std::string& srvPath = "", const std::string& cliPath = "");
+    int32_t AsUnixStreamClient(bool con = false, const std::string& srvPath = "", const std::string& cliPath = "", int32_t timeoutMs = 5000);
     void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:

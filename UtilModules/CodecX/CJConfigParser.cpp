@@ -73,6 +73,11 @@ std::shared_ptr<CNode> CJConfigParser::ParseJsonToNode(cJSON* pJson, const std::
         pCurNode->SetName(pName->valuestring);
     }
 
+    cJSON* pMatch = cJSON_GetObjectItem(pJson, TEXT_SWITCH_VALUE_TAG);
+    if (cJSON_IsNumber(pMatch)) {
+        pCurNode->SetSwitchValue(static_cast<int64_t>(pMatch->valuedouble));
+    }
+
     cJSON* pValue = cJSON_GetObjectItem(pJson, TEXT_VALUE_TAG);
     if (pValue && !pCurNode->IsField()) {
         std::shared_ptr<CAtom> pAtom = std::dynamic_pointer_cast<CAtom>(pCurNode);

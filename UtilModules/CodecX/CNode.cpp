@@ -20,8 +20,8 @@
 #include "CLog.h"
 #include <utility>
 
-int32_t CNode::mDePos = -1;
-int32_t CNode::mEnPos = -1;
+thread_local int32_t CNode::mDePos = -1;
+thread_local int32_t CNode::mEnPos = -1;
 
 CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
     : std::enable_shared_from_this<CNode>()
@@ -32,6 +32,8 @@ CNode::CNode(const std::shared_ptr<CNode>& pParent, bool isField)
     , mEndian(CENDIAN_BIG)
     , mName()
     , mType()
+    , mHasSwitchValue(false)
+    , mSwitchValue(0)
     , mParentNode(pParent) {
 }
 
@@ -44,6 +46,8 @@ CNode::CNode(const CNode& node)
     , mEndian(node.mEndian)
     , mName(node.mName)
     , mType(node.mType)
+    , mHasSwitchValue(node.mHasSwitchValue)
+    , mSwitchValue(node.mSwitchValue)
     , mParentNode(node.mParentNode) {
 }
 
@@ -56,6 +60,8 @@ CNode& CNode::operator = (const CNode& node) {
         mEndian = node.mEndian;
         mName = node.mName;
         mType = node.mType;
+        mHasSwitchValue = node.mHasSwitchValue;
+        mSwitchValue = node.mSwitchValue;
         mParentNode = node.mParentNode;
     }
 
@@ -139,6 +145,19 @@ void CNode::SetType(const std::string& type) {
 
 std::string CNode::GetType() {
     return mType;
+}
+
+void CNode::SetSwitchValue(int64_t switchValue) {
+    mHasSwitchValue = true;
+    mSwitchValue = switchValue;
+}
+
+bool CNode::HasSwitchValue() const {
+    return mHasSwitchValue;
+}
+
+int64_t CNode::GetSwitchValue() const {
+    return mSwitchValue;
 }
 
 std::shared_ptr<CNode> CNode::GetParentNode() {

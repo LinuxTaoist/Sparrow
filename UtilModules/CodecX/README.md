@@ -319,6 +319,7 @@ CodecX 的协议树包含两类节点：
 | `bytes` | 按字节长度展开 | 变长字节流、payload、原始数据区 |
 | `bit` | 按位数换算成字节数 | 位图、bitmask 区域 |
 | `condition` | 非 0 解析，为 0 跳过 | 可选头、可选附加字段 |
+| `switch` | 按引用字段值选择一个分支结构解析 | 多类型负载、可变结构体 |
 
 说明：
 
@@ -326,6 +327,7 @@ CodecX 的协议树包含两类节点：
 - `bytes`：常用于 `child_template` 为 `u8` 的字节流场景
 - `bit` 会先按 `(bit_len + 7) / 8` 转成字节数
 - `condition` 会把非 0 当作 1，把 0 当作 0
+- `switch` 会根据 `len_ref` 引用到的字段值，在 `children` 中选中一个分支解析
 
 ### 5.3 len_formula 的语法
 
@@ -447,6 +449,85 @@ CodecX 的协议树包含两类节点：
 
 ```json
 {"name": "varint_length", "type": "leb128"}
+```
+
+### 6.4 分支容器（switch-case）
+
+`len_mode = switch` 用于表达“按标签值选择不同子结构”，语义类似 `switch-case`。
+
+规则：
+
+- 分支容器节点固定为 `type = dynamic_field`
+- 分支容器必须配置 `len_ref`，并引用一个已解析的原子字段（如 `u8/u16/u32`）
+- 分支实例个数由外层动态容器控制（如 `len_mode = count`），`switch` 只负责单次分支选择
+- 分支容器仍使用 `child_template`，并在模板内部用 `static_field.children` 定义多个 case 分支
+- 每个 case 使用 `match` 指定命中值，且同级不可重复
+- 若没有命中任何 `match`，则使用名称为 `case_default` 的分支作为默认分支
+- 若没有命中且没有 `case_default`，解析失败
+- 命中后只解析一个分支，不做复制展开
+
+示例：
+
+```json
+{
+    "name": "report_body",
+    "type": "static_field",
+    "children": [
+        {"name": "item_count", "type": "u8"},
+        {
+            "name": "item_list",
+            "type": "dynamic_field",
+            "len_ref": "../item_count",
+            "len_mode": "count",
+            "child_template": {
+                "name": "item",
+                "type": "static_field",
+                "children": [
+                    {"name": "data_type", "type": "u16"},
+                    {
+                        "name": "payload",
+                        "type": "dynamic_field",
+                        "len_ref": "../data_type",
+                        "len_mode": "switch",
+                        "child_template": {
+                            "name": "case_table",
+                            "type": "static_field",
+                            "children": [
+                                {
+                                    "name": "case_temp",
+                                    "type": "static_field",
+                                    "match": 1,
+                                    "children": [
+                                        {"name": "battery_temp", "type": "u8"},
+                                        {"name": "door_temp", "type": "u8"}
+                                    ]
+                                },
+                                {
+                                    "name": "case_distance",
+                                    "type": "static_field",
+                                    "match": 2,
+                                    "children": [
+                                        {"name": "latitude", "type": "u64"},
+                                        {"name": "longitude", "type": "u64"}
+                                    ]
+                                },
+                                {
+                                    "name": "case_default",
+                                    "type": "static_field",
+                                    "children": [
+                                        {"name": "value1", "type": "u16"},
+                                        {"name": "value2", "type": "u32"},
+                                        {"name": "value3", "type": "u64"}
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}
 ```
 
 ## 7. propdump 使用说明
@@ -695,6 +776,81 @@ if (sensorCnt) {
 }
 ```
 
+### 场景 8：列表元素按 type 分支解析（switch-case）
+
+适用场景：每个列表项前面都有一个公共标签字段，用它决定当前项走哪个子结构。
+
+语义类似：
+
+- `switch (data_type)`
+- `case 1: case_temp`
+- `case 2: case_distance`
+- `default: case_default`
+
+```json
+{
+    "name": "item_count",
+    "type": "u8"
+},
+{
+    "name": "item_list",
+    "type": "dynamic_field",
+    "len_ref": "../item_count",
+    "len_mode": "count",
+    "child_template": {
+        "name": "item",
+        "type": "static_field",
+        "children": [
+            {"name": "data_type", "type": "u16"},
+            {
+                "name": "payload",
+                "type": "dynamic_field",
+                "len_ref": "../data_type",
+                "len_mode": "switch",
+                "child_template": {
+                    "name": "case_table",
+                    "type": "static_field",
+                    "children": [
+                        {
+                            "name": "case_temp",
+                            "type": "static_field",
+                            "match": 1,
+                            "children": [
+                                {"name": "battery_temp", "type": "u8"},
+                                {"name": "door_temp", "type": "u8"}
+                            ]
+                        },
+                        {
+                            "name": "case_distance",
+                            "type": "static_field",
+                            "match": 2,
+                            "children": [
+                                {"name": "latitude", "type": "u64"},
+                                {"name": "longitude", "type": "u64"}
+                            ]
+                        },
+                        {
+                            "name": "case_default",
+                            "type": "static_field",
+                            "children": [
+                                {"name": "raw_len", "type": "u8"},
+                                {
+                                    "name": "raw",
+                                    "type": "dynamic_field",
+                                    "len_ref": "../raw_len",
+                                    "len_mode": "bytes",
+                                    "child_template": {"name": "byte", "type": "u8"}
+                                }
+                            ]
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+}
+```
+
 ## 10. 最佳实践
 
 ### 10.1 建模建议
@@ -702,6 +858,7 @@ if (sensorCnt) {
 - 根节点优先使用 `static_field`
 - 固定结构优先用 `static_field`
 - 数组、列表、payload 区优先用 `dynamic_field`
+- 标签分支结构优先用 `dynamic_field + len_mode = switch`
 - `bytes` 模式建议配合 `u8` 模板使用
 - 同级字段命名建议唯一
 

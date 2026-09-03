@@ -40,6 +40,11 @@ std::shared_ptr<CNode> CFactory::CreateCfgParserByCfgString(const std::string& c
 }
 
 std::shared_ptr<CNode> CFactory::CreateDataParserByCfgParser(const std::shared_ptr<CNode>& pCfgParser, const std::vector<uint8_t>& bytes) {
+    if (!pCfgParser) {
+        CLOGE("pCfgParser is nullptr\n");
+        return nullptr;
+    }
+
     std::shared_ptr<CNode> pDataParser = pCfgParser->Clone();
     if (!pDataParser) {
         CLOGE("Create parser failed!\n");
@@ -49,6 +54,7 @@ std::shared_ptr<CNode> CFactory::CreateDataParserByCfgParser(const std::shared_p
     int32_t ret = pDataParser->Decode(bytes);
     if (ret < 0) {
         CLOGE("Decode failed!\n");
+        return nullptr;
     }
 
     return pDataParser;
@@ -216,7 +222,7 @@ bool CFactory::GetFrameHeader(const std::shared_ptr<CNode>& pCfgParser, std::vec
     std::vector<uint8_t> frameHeader;
     int32_t ret = pCfgParser->GetVecValue(TEXT_HEAD_FLAG_TAG, frameHeader);
     if (ret < 0 || frameHeader.empty()) {
-        CLOGE("Get frame header failed! ret = %d, size = %d\n", ret, (int32_t)frameHeader.size());
+        CLOGD("No unpacking without header in json!\n");
         return false;
     }
 

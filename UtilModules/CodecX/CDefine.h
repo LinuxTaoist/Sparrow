@@ -40,6 +40,10 @@
 #define TEXT_LEN_MODE_BIT           "bit"
 #define TEXT_LEN_MODE_BYTES         "bytes"
 #define TEXT_LEN_MODE_CONDITION     "condition"
+#define TEXT_LEN_MODE_SWITCH        "switch"
+
+#define TEXT_SWITCH_VALUE_TAG       "match"
+#define TEXT_SWITCH_DEFAULT_NAME    "case_default"
 
 #define TEXT_LEN_FORMULA_TAG        "len_formula"
 #define TEXT_LEN_FORMULA_CURPOS     "curpos"

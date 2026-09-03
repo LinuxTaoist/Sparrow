@@ -16,7 +16,15 @@
  */
 #include <cstring>
 #include <climits>
+#include <cctype>
+#include <algorithm>
+#include <sstream>
+#include <iomanip>
 #include <gtest/gtest.h>
+#include "CFactory.h"
+#include "CField.h"
+#include "CAtom.h"
+#include "GeneralConversions.h"
 #include "CUtils.h"
 
 using namespace std;
@@ -656,4 +664,728 @@ TEST(UtilModules_CodecX, VToV_CoreCodecLoopProtocolCase) {
     EXPECT_EQ(ret3, ReturnType(4));
     EXPECT_EQ(val1, static_cast<uint32_t>(0x11223344));
     EXPECT_EQ(val2, static_cast<uint32_t>(0x55667788));
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - UtilModules_CodecX - 协议编解码核心：静态/动态容器、字段模板、批量字段解析
+// --------------------------------------------------------------------------------------------------------------------
+namespace {
+static std::shared_ptr<CNode> ParseSwitchConfig(const std::string& jsonText) {
+    auto cfg = CFactory::GetInstance().CreateCfgParserByCfgString(jsonText);
+    EXPECT_TRUE(cfg != nullptr);
+    return cfg;
+}
+
+static std::vector<uint8_t> HexStringToBytes(const std::string& hexText) {
+    std::string cleaned = hexText;
+    cleaned.erase(std::remove_if(cleaned.begin(), cleaned.end(), [](unsigned char ch) {
+        return std::isspace(ch);
+    }), cleaned.end());
+
+    std::string raw = GeneralConversions::HexStringToAscii(cleaned);
+    return std::vector<uint8_t>(raw.begin(), raw.end());
+}
+} // namespace
+
+// 协议场景：静态容器按顺序解析多个字段
+TEST(UtilModules_CodecX, StaticField_Basic) {
+    const std::string json = R"json(
+    {
+        "name": "basic_frame",
+        "type": "static_field",
+        "children": [
+            {"name": "ver", "type": "u8"},
+            {"name": "len", "type": "u16"},
+            {"name": "status", "type": "u8"},
+            {
+                "name": "body",
+                "type": "static_field",
+                "children": [
+                    {"name": "a", "type": "u8"},
+                    {"name": "b", "type": "u8"}
+                ]
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("01 0012 05 22 33");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+
+    auto ver = std::dynamic_pointer_cast<CAtom>(root->GetNode("ver"));
+    auto len = std::dynamic_pointer_cast<CAtom>(root->GetNode("len"));
+    auto status = std::dynamic_pointer_cast<CAtom>(root->GetNode("status"));
+    auto body = std::dynamic_pointer_cast<CField>(root->GetNode("body"));
+
+    ASSERT_TRUE(ver != nullptr);
+    ASSERT_TRUE(len != nullptr);
+    ASSERT_TRUE(status != nullptr);
+    ASSERT_TRUE(body != nullptr);
+
+    int32_t verVal = 0;
+    int32_t lenVal = 0;
+    int32_t statusVal = 0;
+    EXPECT_GE(ver->GetIntValue("", verVal), 0);
+    EXPECT_GE(len->GetIntValue("", lenVal), 0);
+    EXPECT_GE(status->GetIntValue("", statusVal), 0);
+    EXPECT_EQ(verVal, 1);
+    EXPECT_EQ(lenVal, 0x0012);
+    EXPECT_EQ(statusVal, 5);
+
+    auto a = std::dynamic_pointer_cast<CAtom>(body->GetNode("a"));
+    auto b = std::dynamic_pointer_cast<CAtom>(body->GetNode("b"));
+    ASSERT_TRUE(a != nullptr);
+    ASSERT_TRUE(b != nullptr);
+    int32_t aVal = 0;
+    int32_t bVal = 0;
+    EXPECT_GE(a->GetIntValue("", aVal), 0);
+    EXPECT_GE(b->GetIntValue("", bVal), 0);
+    EXPECT_EQ(aVal, 0x22);
+    EXPECT_EQ(bVal, 0x33);
+}
+
+// 协议场景：动态容器按 count 复制模板并逐项解析
+TEST(UtilModules_CodecX, DynamicField_Count) {
+    const std::string json = R"json(
+    {
+        "name": "count_frame",
+        "type": "static_field",
+        "children": [
+            {"name": "count", "type": "u8"},
+            {
+                "name": "items",
+                "type": "dynamic_field",
+                "len_ref": "../count",
+                "len_mode": "count",
+                "child_template": {
+                    "name": "item",
+                    "type": "static_field",
+                    "children": [
+                        {"name": "id", "type": "u8"},
+                        {"name": "value", "type": "u8"}
+                    ]
+                }
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("03 10 20 30 40 50 60");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+    auto items = std::dynamic_pointer_cast<CField>(root->GetNode("items"));
+    ASSERT_TRUE(items != nullptr);
+    EXPECT_EQ(items->GetChildNodes().size(), 3u);
+
+    auto item0 = std::dynamic_pointer_cast<CField>(items->GetChildNodes()[0]);
+    auto item1 = std::dynamic_pointer_cast<CField>(items->GetChildNodes()[1]);
+    auto item2 = std::dynamic_pointer_cast<CField>(items->GetChildNodes()[2]);
+    ASSERT_TRUE(item0 != nullptr);
+    ASSERT_TRUE(item1 != nullptr);
+    ASSERT_TRUE(item2 != nullptr);
+
+    int32_t v0 = 0, v1 = 0, v2 = 0;
+    EXPECT_GE(std::dynamic_pointer_cast<CAtom>(item0->GetNode("id"))->GetIntValue("", v0), 0);
+    EXPECT_GE(std::dynamic_pointer_cast<CAtom>(item1->GetNode("id"))->GetIntValue("", v1), 0);
+    EXPECT_GE(std::dynamic_pointer_cast<CAtom>(item2->GetNode("id"))->GetIntValue("", v2), 0);
+    EXPECT_EQ(v0, 0x10);
+    EXPECT_EQ(v1, 0x30);
+    EXPECT_EQ(v2, 0x50);
+}
+
+// 协议场景：动态容器按 bytes 长度读取原始字节流
+TEST(UtilModules_CodecX, DynamicField_Bytes) {
+    const std::string json = R"json(
+    {
+        "name": "bytes_frame",
+        "type": "static_field",
+        "children": [
+            {"name": "len", "type": "u8"},
+            {
+                "name": "payload",
+                "type": "dynamic_field",
+                "len_ref": "../len",
+                "len_mode": "bytes",
+                "child_template": {"name": "byte", "type": "u8"}
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("04 aa bb cc dd");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+    auto payload = std::dynamic_pointer_cast<CField>(root->GetNode("payload"));
+    ASSERT_TRUE(payload != nullptr);
+    EXPECT_EQ(payload->GetChildNodes().size(), 4u);
+
+    int32_t first = 0;
+    EXPECT_GE(std::dynamic_pointer_cast<CAtom>(payload->GetChildNodes()[0])->GetIntValue("", first), 0);
+    EXPECT_EQ(first, 0xAA);
+}
+
+// 协议场景：条件型动态容器在非 0 时解析一次，0 时跳过
+TEST(UtilModules_CodecX, DynamicField_Condition) {
+    const std::string json = R"json(
+    {
+        "name": "cond_frame",
+        "type": "static_field",
+        "children": [
+            {"name": "has_extra", "type": "u8"},
+            {
+                "name": "extra",
+                "type": "dynamic_field",
+                "len_ref": "../has_extra",
+                "len_mode": "condition",
+                "child_template": {
+                    "name": "extra_item",
+                    "type": "static_field",
+                    "children": [
+                        {"name": "flag", "type": "u8"}
+                    ]
+                }
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("01 7a");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+    auto extra = std::dynamic_pointer_cast<CField>(root->GetNode("extra"));
+    ASSERT_TRUE(extra != nullptr);
+    EXPECT_EQ(extra->GetChildNodes().size(), 1u);
+
+    auto extraItem = std::dynamic_pointer_cast<CField>(extra->GetChildNodes()[0]);
+    ASSERT_TRUE(extraItem != nullptr);
+    auto flagNode = std::dynamic_pointer_cast<CAtom>(extraItem->GetNode("flag"));
+    ASSERT_TRUE(flagNode != nullptr);
+    int32_t flag = 0;
+    EXPECT_GE(flagNode->GetIntValue("", flag), 0);
+    EXPECT_EQ(flag, 0x7A);
+}
+
+// 协议场景：原子字段直接构成一帧，无静态/动态容器节点
+TEST(UtilModules_CodecX, NoContainer_AtomOnly) {
+    const std::string json = R"json(
+    {
+        "name": "atom_frame",
+        "type": "static_field",
+        "children": [
+            {"name": "flag", "type": "u8"},
+            {"name": "code", "type": "u16"}
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("aa 00 10");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+
+    auto flag = std::dynamic_pointer_cast<CAtom>(root->GetNode("flag"));
+    auto code = std::dynamic_pointer_cast<CAtom>(root->GetNode("code"));
+    ASSERT_TRUE(flag != nullptr);
+    ASSERT_TRUE(code != nullptr);
+
+    int32_t f = 0;
+    int32_t c = 0;
+    EXPECT_GE(flag->GetIntValue("", f), 0);
+    EXPECT_GE(code->GetIntValue("", c), 0);
+    EXPECT_EQ(f, 0xAA);
+    EXPECT_EQ(c, 0x0010);
+}
+
+// 协议异常：动态容器缺少 child_template，必须失败
+TEST(UtilModules_CodecX, Exception_MissingTemplate) {
+    const std::string json = R"json(
+    {
+        "name": "bad_frame",
+        "type": "static_field",
+        "children": [
+            {"name": "len", "type": "u8"},
+            {
+                "name": "payload",
+                "type": "dynamic_field",
+                "len_ref": "../len",
+                "len_mode": "bytes"
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("02 11 22");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    EXPECT_TRUE(data == nullptr);
+}
+
+// 协议异常：动态容器引用不存在的 len_ref，必须失败
+TEST(UtilModules_CodecX, Exception_BadLenRef) {
+    const std::string json = R"json(
+    {
+        "name": "bad_ref",
+        "type": "static_field",
+        "children": [
+            {"name": "len", "type": "u8"},
+            {
+                "name": "payload",
+                "type": "dynamic_field",
+                "len_ref": "../missing_len",
+                "len_mode": "bytes",
+                "child_template": {"name": "byte", "type": "u8"}
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("02 11 22");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    EXPECT_TRUE(data == nullptr);
+}
+
+// 协议场景：分支容器按 match 命中对应 case
+TEST(UtilModules_CodecX, SwitchCase_Match) {
+    const std::string json = R"json(
+    {
+        "name": "report_body",
+        "type": "static_field",
+        "children": [
+            {"name": "item_count", "type": "u8"},
+            {
+                "name": "item_list",
+                "type": "dynamic_field",
+                "len_ref": "../item_count",
+                "len_mode": "count",
+                "child_template": {
+                    "name": "item",
+                    "type": "static_field",
+                    "children": [
+                        {"name": "data_type", "type": "u16"},
+                        {
+                            "name": "payload",
+                            "type": "dynamic_field",
+                            "len_ref": "../data_type",
+                            "len_mode": "switch",
+                            "child_template": {
+                                "name": "case_table",
+                                "type": "static_field",
+                                "children": [
+                                    {
+                                        "name": "case_temp",
+                                        "type": "static_field",
+                                        "match": 1,
+                                        "children": [
+                                            {"name": "battery_temp", "type": "u8"},
+                                            {"name": "door_temp", "type": "u8"}
+                                        ]
+                                    },
+                                    {
+                                        "name": "case_distance",
+                                        "type": "static_field",
+                                        "match": 2,
+                                        "children": [
+                                            {"name": "latitude", "type": "u64"},
+                                            {"name": "longitude", "type": "u64"}
+                                        ]
+                                    },
+                                    {
+                                        "name": "case_default",
+                                        "type": "static_field",
+                                        "children": [
+                                            {"name": "value1", "type": "u16"},
+                                            {"name": "value2", "type": "u32"},
+                                            {"name": "value3", "type": "u64"}
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("02 00 01 1A 2B 00 03 12 34 89 AB CD EF 01 02 03 04 05 06 07 08");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+
+    auto itemList = std::dynamic_pointer_cast<CField>(root->GetNode("item_list"));
+    ASSERT_TRUE(itemList != nullptr);
+    ASSERT_EQ(itemList->GetChildNodes().size(), 2u);
+
+    auto itemA = std::dynamic_pointer_cast<CField>(itemList->GetChildNodes()[0]);
+    ASSERT_TRUE(itemA != nullptr);
+    auto dataTypeA = std::dynamic_pointer_cast<CAtom>(itemA->GetNode("data_type"));
+    ASSERT_TRUE(dataTypeA != nullptr);
+    int32_t typeA = 0;
+    EXPECT_GE(dataTypeA->GetIntValue("", typeA), 0);
+    EXPECT_EQ(typeA, 1);
+
+    auto payloadA = std::dynamic_pointer_cast<CField>(itemA->GetNode("payload"));
+    ASSERT_TRUE(payloadA != nullptr);
+    auto caseTempA = std::dynamic_pointer_cast<CField>(payloadA->GetNode("case_temp"));
+    ASSERT_TRUE(caseTempA != nullptr);
+    auto batteryA = std::dynamic_pointer_cast<CAtom>(caseTempA->GetNode("battery_temp"));
+    ASSERT_TRUE(batteryA != nullptr);
+    int32_t batteryVal = 0;
+    EXPECT_GE(batteryA->GetIntValue("", batteryVal), 0);
+    EXPECT_EQ(batteryVal, 0x1A);
+
+    auto itemB = std::dynamic_pointer_cast<CField>(itemList->GetChildNodes()[1]);
+    ASSERT_TRUE(itemB != nullptr);
+    auto dataTypeB = std::dynamic_pointer_cast<CAtom>(itemB->GetNode("data_type"));
+    ASSERT_TRUE(dataTypeB != nullptr);
+    int32_t typeB = 0;
+    EXPECT_GE(dataTypeB->GetIntValue("", typeB), 0);
+    EXPECT_EQ(typeB, 3);
+
+    auto payloadB = std::dynamic_pointer_cast<CField>(itemB->GetNode("payload"));
+    ASSERT_TRUE(payloadB != nullptr);
+    auto defaultCaseB = std::dynamic_pointer_cast<CField>(payloadB->GetNode("case_default"));
+    ASSERT_TRUE(defaultCaseB != nullptr);
+    auto value1 = std::dynamic_pointer_cast<CAtom>(defaultCaseB->GetNode("value1"));
+    ASSERT_TRUE(value1 != nullptr);
+    int32_t v1 = 0;
+    EXPECT_GE(value1->GetIntValue("", v1), 0);
+    EXPECT_EQ(v1, 0x1234);
+    auto value2 = std::dynamic_pointer_cast<CAtom>(defaultCaseB->GetNode("value2"));
+    ASSERT_TRUE(value2 != nullptr);
+    int32_t v2 = 0;
+    EXPECT_GE(value2->GetIntValue("", v2), 0);
+    EXPECT_EQ(v2, static_cast<int32_t>(0x89ABCDEF));
+}
+
+// 协议场景：重复分支流中仍按 match 正确识别并解析
+TEST(UtilModules_CodecX, SwitchCase_Repeat) {
+    const std::string json = R"json(
+    {
+        "name": "report_body",
+        "type": "static_field",
+        "children": [
+            {"name": "item_count", "type": "u8"},
+            {
+                "name": "item_list",
+                "type": "dynamic_field",
+                "len_ref": "../item_count",
+                "len_mode": "count",
+                "child_template": {
+                    "name": "item",
+                    "type": "static_field",
+                    "children": [
+                        {"name": "data_type", "type": "u16"},
+                        {
+                            "name": "payload",
+                            "type": "dynamic_field",
+                            "len_ref": "../data_type",
+                            "len_mode": "switch",
+                            "child_template": {
+                                "name": "case_table",
+                                "type": "static_field",
+                                "children": [
+                                    {
+                                        "name": "case_temp",
+                                        "type": "static_field",
+                                        "match": 1,
+                                        "children": [
+                                            {"name": "battery_temp", "type": "u8"},
+                                            {"name": "door_temp", "type": "u8"}
+                                        ]
+                                    },
+                                    {
+                                        "name": "case_default",
+                                        "type": "static_field",
+                                        "children": [
+                                            {"name": "value1", "type": "u16"}
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("03 0001 1234 0001 00ff 0001 7f80");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+    auto itemList = std::dynamic_pointer_cast<CField>(root->GetNode("item_list"));
+    ASSERT_TRUE(itemList != nullptr);
+    EXPECT_EQ(itemList->GetChildNodes().size(), 3u);
+
+    for (size_t i = 0; i < itemList->GetChildNodes().size(); ++i) {
+        auto item = std::dynamic_pointer_cast<CField>(itemList->GetChildNodes()[i]);
+        ASSERT_TRUE(item != nullptr);
+        auto payload = std::dynamic_pointer_cast<CField>(item->GetNode("payload"));
+        ASSERT_TRUE(payload != nullptr);
+        auto caseTemp = std::dynamic_pointer_cast<CField>(payload->GetNode("case_temp"));
+        ASSERT_TRUE(caseTemp != nullptr);
+    }
+}
+
+// 协议场景：未知分支值走默认 case_default
+TEST(UtilModules_CodecX, SwitchCase_Default) {
+    const std::string json = R"json(
+    {
+        "name": "report_body",
+        "type": "static_field",
+        "children": [
+            {"name": "item_count", "type": "u8"},
+            {
+                "name": "item_list",
+                "type": "dynamic_field",
+                "len_ref": "../item_count",
+                "len_mode": "count",
+                "child_template": {
+                    "name": "item",
+                    "type": "static_field",
+                    "children": [
+                        {"name": "data_type", "type": "u16"},
+                        {
+                            "name": "payload",
+                            "type": "dynamic_field",
+                            "len_ref": "../data_type",
+                            "len_mode": "switch",
+                            "child_template": {
+                                "name": "case_table",
+                                "type": "static_field",
+                                "children": [
+                                    {
+                                        "name": "case_temp",
+                                        "type": "static_field",
+                                        "match": 1,
+                                        "children": [
+                                            {"name": "battery_temp", "type": "u8"}
+                                        ]
+                                    },
+                                    {
+                                        "name": "case_default",
+                                        "type": "static_field",
+                                        "children": [
+                                            {"name": "value1", "type": "u16"},
+                                            {"name": "value2", "type": "u32"}
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("01 00 09 00 04 11 11 22 33 44 55");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+    auto itemList = std::dynamic_pointer_cast<CField>(root->GetNode("item_list"));
+    ASSERT_TRUE(itemList != nullptr);
+    ASSERT_EQ(itemList->GetChildNodes().size(), 1u);
+
+    auto item = std::dynamic_pointer_cast<CField>(itemList->GetChildNodes()[0]);
+    ASSERT_TRUE(item != nullptr);
+    auto payload = std::dynamic_pointer_cast<CField>(item->GetNode("payload"));
+    ASSERT_TRUE(payload != nullptr);
+    auto defaultCase = std::dynamic_pointer_cast<CField>(payload->GetNode("case_default"));
+    ASSERT_TRUE(defaultCase != nullptr);
+
+    auto value1 = std::dynamic_pointer_cast<CAtom>(defaultCase->GetNode("value1"));
+    ASSERT_TRUE(value1 != nullptr);
+    int32_t v1 = 0;
+    EXPECT_GE(value1->GetIntValue("", v1), 0);
+    EXPECT_EQ(v1, 0x0004);
+}
+
+// 协议场景：混合已知/未知分支仍能继续解析后续项
+TEST(UtilModules_CodecX, SwitchCase_Mixed) {
+    const std::string json = R"json(
+    {
+        "name": "report_body",
+        "type": "static_field",
+        "children": [
+            {"name": "item_count", "type": "u8"},
+            {
+                "name": "item_list",
+                "type": "dynamic_field",
+                "len_ref": "../item_count",
+                "len_mode": "count",
+                "child_template": {
+                    "name": "item",
+                    "type": "static_field",
+                    "children": [
+                        {"name": "data_type", "type": "u16"},
+                        {
+                            "name": "payload",
+                            "type": "dynamic_field",
+                            "len_ref": "../data_type",
+                            "len_mode": "switch",
+                            "child_template": {
+                                "name": "case_table",
+                                "type": "static_field",
+                                "children": [
+                                    {
+                                        "name": "case_temp",
+                                        "type": "static_field",
+                                        "match": 1,
+                                        "children": [
+                                            {"name": "battery_temp", "type": "u8"}
+                                        ]
+                                    },
+                                    {
+                                        "name": "case_default",
+                                        "type": "static_field",
+                                        "children": [
+                                            {"name": "value1", "type": "u16"}
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("02 00 01 1A 2B 00 09 12 34");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    ASSERT_TRUE(data != nullptr);
+
+    auto root = std::dynamic_pointer_cast<CField>(data);
+    ASSERT_TRUE(root != nullptr);
+    auto itemList = std::dynamic_pointer_cast<CField>(root->GetNode("item_list"));
+    ASSERT_TRUE(itemList != nullptr);
+    EXPECT_EQ(itemList->GetChildNodes().size(), 2u);
+
+    auto firstItem = std::dynamic_pointer_cast<CField>(itemList->GetChildNodes()[0]);
+    auto secondItem = std::dynamic_pointer_cast<CField>(itemList->GetChildNodes()[1]);
+    ASSERT_TRUE(firstItem != nullptr);
+    ASSERT_TRUE(secondItem != nullptr);
+
+    EXPECT_TRUE(std::dynamic_pointer_cast<CField>(firstItem->GetNode("payload"))->GetNode("case_temp") != nullptr);
+    EXPECT_TRUE(std::dynamic_pointer_cast<CField>(secondItem->GetNode("payload"))->GetNode("case_default") != nullptr);
+}
+
+// 协议异常：未命中任何 match 且无 default，解析必须失败
+TEST(UtilModules_CodecX, SwitchCase_NoDefault) {
+    const std::string json = R"json(
+    {
+        "name": "report_body",
+        "type": "static_field",
+        "children": [
+            {"name": "item_count", "type": "u8"},
+            {
+                "name": "item_list",
+                "type": "dynamic_field",
+                "len_ref": "../item_count",
+                "len_mode": "count",
+                "child_template": {
+                    "name": "item",
+                    "type": "static_field",
+                    "children": [
+                        {"name": "data_type", "type": "u16"},
+                        {
+                            "name": "payload",
+                            "type": "dynamic_field",
+                            "len_ref": "../data_type",
+                            "len_mode": "switch",
+                            "child_template": {
+                                "name": "case_table",
+                                "type": "static_field",
+                                "children": [
+                                    {
+                                        "name": "case_temp",
+                                        "type": "static_field",
+                                        "match": 1,
+                                        "children": [
+                                            {"name": "battery_temp", "type": "u8"}
+                                        ]
+                                    },
+                                    {
+                                        "name": "case_distance",
+                                        "type": "static_field",
+                                        "match": 2,
+                                        "children": [
+                                            {"name": "latitude", "type": "u64"}
+                                        ]
+                                    }
+                                ]
+                            }
+                        }
+                    ]
+                }
+            }
+        ]
+    }
+    )json";
+
+    auto cfg = ParseSwitchConfig(json);
+    ASSERT_TRUE(cfg != nullptr);
+
+    std::vector<uint8_t> bytes = HexStringToBytes("01 0009 1234");
+    auto data = CFactory::GetInstance().CreateDataParserByCfgParser(cfg, bytes);
+    EXPECT_TRUE(data == nullptr);
 }

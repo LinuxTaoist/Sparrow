@@ -1,0 +1,59 @@
+{
+    "name": "report_body",
+    "type": "static_field",
+    "children": [
+        {"name": "item_count", "type": "u8"},
+        {
+            "name": "item_list",
+            "type": "dynamic_field",
+            "len_ref": "../item_count",
+            "len_mode": "count",
+            "child_template": {
+                "name": "item",
+                "type": "static_field",
+                "children": [
+                    {"name": "data_type", "type": "u16"},
+                    {
+                        "name": "payload",
+                        "type": "dynamic_field",
+                        "len_ref": "../data_type",
+                        "len_mode": "switch",
+                        "child_template": {
+                            "name": "case_table",
+                            "type": "static_field",
+                            "children": [
+                                {
+                                    "name": "case_temp",
+                                    "type": "static_field",
+                                    "match": 1,
+                                    "children": [
+                                        {"name": "battery_temp", "type": "u8"},
+                                        {"name": "door_temp", "type": "u8"}
+                                    ]
+                                },
+                                {
+                                    "name": "case_distance",
+                                    "type": "static_field",
+                                    "match": 2,
+                                    "children": [
+                                        {"name": "latitude", "type": "u64"},
+                                        {"name": "longitude", "type": "u64"}
+                                    ]
+                                },
+                                {
+                                    "name": "case_default",
+                                    "type": "static_field",
+                                    "children": [
+                                        {"name": "value1", "type": "u16"},
+                                        {"name": "value2", "type": "u32"},
+                                        {"name": "value3", "type": "u64"}
+                                    ]
+                                }
+                            ]
+                        }
+                    }
+                ]
+            }
+        }
+    ]
+}

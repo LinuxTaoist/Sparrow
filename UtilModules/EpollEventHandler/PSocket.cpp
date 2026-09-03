@@ -341,7 +341,7 @@ PTcpClient::~PTcpClient()
     Close();
 }
 
-int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t srvPort, int32_t rcvLen, int32_t sndLen)
+int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t srvPort, int32_t rcvLen, int32_t sndLen, int32_t timeoutMs)
 {
     int32_t op;
     struct linger so_linger;
@@ -394,8 +394,8 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
 
                 FD_ZERO(&writefds);
                 FD_SET(mEvtFd, &writefds);
-                tv.tv_sec = 5; // 5 seconds timeout
-                tv.tv_usec = 0;
+                tv.tv_sec = timeoutMs / 1000;           // timeout in seconds
+                tv.tv_usec = (timeoutMs % 1000) * 1000; // timeout in microseconds
 
                 ret = select(mEvtFd + 1, nullptr, &writefds, nullptr, &tv);
                 if (ret <= 0) {
@@ -707,7 +707,7 @@ PUnixStreamClient::~PUnixStreamClient()
     Close();
 }
 
-int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPath, const std::string& cliPath)
+int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPath, const std::string& cliPath, int32_t timeoutMs)
 {
     int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
@@ -737,8 +737,8 @@ int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPa
 
                 FD_ZERO(&writefds);
                 FD_SET(mEvtFd, &writefds);
-                tv.tv_sec = 5; // 5 seconds timeout
-                tv.tv_usec = 0;
+                tv.tv_sec = timeoutMs / 1000;           // timeout in seconds
+                tv.tv_usec = (timeoutMs % 1000) * 1000; // timeout in microseconds
 
                 ret = select(mEvtFd + 1, nullptr, &writefds, nullptr, &tv);
                 if (ret <= 0) {

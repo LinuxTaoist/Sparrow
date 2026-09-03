@@ -25,6 +25,8 @@
 
 #define CLOG_TAG "CField"
 
+static const int32_t MAX_DYNAMIC_FIELD_COUNT = 1024 * 1024;
+
 CField::CField(const std::shared_ptr<CNode>& parent)
     : CNode(parent, true) {
 }
@@ -456,10 +458,29 @@ int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
         return -1;
     }
 
+    if (GetLenMode() == TEXT_LEN_MODE_SWITCH) {
+        return DecodeSwitchField(bytes);
+    }
+
     int32_t count = CalculateDynamicFieldSize();
     if (count < 0) {
         CLOGE("Node[%s] CalculateDynamicFieldSize failed!\n", GetName().c_str());
         return -1;
+    }
+
+    if (count > MAX_DYNAMIC_FIELD_COUNT) {
+        CLOGE("Node[%s] count too large! count = %d, max = %d\n",
+            GetName().c_str(), count, MAX_DYNAMIC_FIELD_COUNT);
+        return -1;
+    }
+
+    if (GetLenMode() == TEXT_LEN_MODE_BYTES) {
+        int32_t remain = static_cast<int32_t>(bytes.size()) - GetDePos();
+        if (remain < 0 || count > remain) {
+            CLOGE("Node[%s] bytes mode out of range! count = %d, remain = %d\n",
+                GetName().c_str(), count, remain);
+            return -1;
+        }
     }
 
     CLOGD("Node[%s] Decode dynamic field, count = %d \n", GetName().c_str(), count);
@@ -479,6 +500,78 @@ int32_t CField::DecodeDynamicField(const std::vector<uint8_t>& bytes) {
     }
 
     return ret;
+}
+
+int32_t CField::DecodeSwitchField(const std::vector<uint8_t>& bytes) {
+    if (mChildNodes.empty()) {
+        CLOGE("Node[%s] switch has no child_template!\n", GetName().c_str());
+        return -1;
+    }
+
+    std::shared_ptr<CNode> pKeyNode = GetNodeByPath(GetLenReference());
+    if (!pKeyNode || pKeyNode->IsField()) {
+        CLOGE("Node[%s] invalid switch key node! len_ref = %s\n", GetName().c_str(), GetLenReference().c_str());
+        return -1;
+    }
+
+    int64_t keyValue = 0;
+    if (pKeyNode->GetIntValue("", keyValue) < 0) {
+        CLOGE("Node[%s] get switch key value failed!\n", GetName().c_str());
+        return -1;
+    }
+
+    std::shared_ptr<CField> pCaseTable = std::dynamic_pointer_cast<CField>(mChildNodes[0]);
+    if (!pCaseTable) {
+        CLOGE("Node[%s] switch child_template must be static_field case table!\n", GetName().c_str());
+        return -1;
+    }
+
+    std::shared_ptr<CNode> pMatchedCase = nullptr;
+    std::shared_ptr<CNode> pDefaultCase = nullptr;
+    auto& cases = pCaseTable->GetChildNodes();
+    for (auto& caseNode : cases) {
+        if (!caseNode) {
+            continue;
+        }
+
+        if (caseNode->HasSwitchValue() && caseNode->GetSwitchValue() == keyValue) {
+            pMatchedCase = caseNode;
+            break;
+        }
+
+        if (caseNode->GetName() == TEXT_SWITCH_DEFAULT_NAME) {
+            pDefaultCase = caseNode;
+        }
+    }
+
+    if (!pMatchedCase) {
+        pMatchedCase = pDefaultCase;
+    }
+
+    if (!pMatchedCase) {
+        CLOGE("Node[%s] switch no case matched! key = %lld\n", GetName().c_str(), static_cast<long long>(keyValue));
+        return -1;
+    }
+
+    std::shared_ptr<CNode> pDecodeNode = pMatchedCase->Clone();
+    if (!pDecodeNode) {
+        CLOGE("Node[%s] switch clone case failed!\n", GetName().c_str());
+        return -1;
+    }
+
+    pDecodeNode->SetParentNode(std::static_pointer_cast<CNode>(shared_from_this()));
+    int32_t len = pDecodeNode->Decode(bytes);
+    if (len < 0) {
+        CLOGE("Node[%s] switch decode case failed!\n", GetName().c_str());
+        return -1;
+    }
+
+    mChildNodes.clear();
+    mChildNodes.emplace_back(pDecodeNode);
+
+    CLOGD("Node[%s] switch matched case[%s], key = %lld\n",
+        GetName().c_str(), pDecodeNode->GetName().c_str(), static_cast<long long>(keyValue));
+    return len;
 }
 
 int32_t CField::SetValue(const std::string& name, const std::vector<uint8_t>& value) {

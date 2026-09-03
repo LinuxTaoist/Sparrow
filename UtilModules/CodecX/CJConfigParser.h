@@ -28,6 +28,8 @@ class CJConfigParser {
 public:
     explicit CJConfigParser(const std::string& jText);
     ~CJConfigParser();
+    CJConfigParser(const CJConfigParser&) = delete;
+    CJConfigParser& operator=(const CJConfigParser&) = delete;
 
     std::shared_ptr<CNode> CJsonToNode();
 

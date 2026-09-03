@@ -22,6 +22,7 @@
 #include <string>
 #include <vector>
 #include <memory>
+#include <stdint.h>
 #include "CUtils.h"
 #include "CDefine.h"
 
@@ -39,6 +40,9 @@ public:
     std::string GetName();
     void SetType(const std::string& type);
     std::string GetType();
+    void SetSwitchValue(int64_t switchValue);
+    bool HasSwitchValue() const;
+    int64_t GetSwitchValue() const;
     std::shared_ptr<CNode> GetParentNode();
     std::shared_ptr<CNode> GetRootNode();
     void SetParentNode(const std::shared_ptr<CNode>& pParent);
@@ -115,14 +119,16 @@ protected:
 
 private:
     bool mIsField;
-    static int32_t mDePos;
-    static int32_t mEnPos;
+    static thread_local int32_t mDePos;
+    static thread_local int32_t mEnPos;
     int32_t mSIndex;
     int32_t mEIndex;
     int32_t mLength;
     CEndianType mEndian;
     std::string mName;
     std::string mType;
+    bool mHasSwitchValue;
+    int64_t mSwitchValue;
     std::weak_ptr<CNode> mParentNode;
 };
 
