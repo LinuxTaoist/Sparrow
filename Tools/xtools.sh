@@ -220,7 +220,7 @@ usage() {
     echo -e "${PURPLE}  $0 start-valgrind           启动valgrind${NC}"
     echo -e "${PURPLE}  $0 stop-valgrind            停止valgrind${NC}"
     echo -e "${PURPLE}  $0 help                     显示此帮助信息${NC}"
-    echo -e "${PURPLE}  $0 sync                     同步代码仓库${NC}"
+    echo -e "${PURPLE}  $0 sync-code                同步代码仓库${NC}"
     echo -e ""
     echo -e "${PURPLE}================================================================================${NC}"
 }
