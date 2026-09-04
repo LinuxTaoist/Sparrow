@@ -1,6 +1,8 @@
 # LogManagerSrv
 
-set(OTHER_SRC_FILES         ${PROJECT_PATH}/Util/SharedRingBuffer.cpp)
+set(OTHER_SRC_FILES         ${PROJECT_PATH}/Util/Backtrace.cpp
+                            ${PROJECT_PATH}/Util/GeneralUtils.cpp
+                            ${PROJECT_PATH}/Util/SharedRingBuffer.cpp)
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/LogManagerSrv    SRC_LOG_SRV_PATH)
 
 ## Bin logmanagersrv
@@ -10,5 +12,4 @@ target_include_directories  (BinLogSrv PRIVATE  ${PROJECT_PATH}/Util
                                                 ${PROJECT_PATH}/Core
                                                 ${PROJECT_PATH}/3rdAdapter)
 set_target_properties       (BinLogSrv PROPERTIES OUTPUT_NAME "logmanagersrv")
-target_link_libraries       (BinLogSrv pthread sprcore)
-add_dependencies            (BinLogSrv LibSprCore)
+target_link_libraries       (BinLogSrv pthread dl)

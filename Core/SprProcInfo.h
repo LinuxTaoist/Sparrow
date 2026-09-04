@@ -33,6 +33,8 @@ public:
     std::string GetRunTimeString();
     std::string GetProcName();
     std::string GetDebugPath();
+    std::string GetRunRootPath();
+    std::string GetRunEtcPath();
 
 private:
     SprProcInfo();

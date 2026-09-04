@@ -127,11 +127,11 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
 
 int32_t SprDebugNode::RegisterBuildinCmds()
 {
-    mBuildinCmds["help"]          = { "Dump all cmds", std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
-    mBuildinCmds["version"]       = { "Dump version", std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
-    mBuildinCmds["proc"]          = { "Dump process info", std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
-    mBuildinCmds["threadpool"]    = { "Dump threadpool details", std::bind(&SprDebugNode::DebugDumpThreadPoolDetails, this, std::placeholders::_1)};
-    mBuildinCmds["loglevel"]      = { "Set log level", std::bind(&SprDebugNode::DebugSetLogLevel, this, std::placeholders::_1)};
+    mBuildinCmds["help"]          = { "Dump all cmds",              std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
+    mBuildinCmds["version"]       = { "Dump version",               std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
+    mBuildinCmds["proc"]          = { "Dump process info",          std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
+    mBuildinCmds["threadpool"]    = { "Dump threadpool details",    std::bind(&SprDebugNode::DebugDumpThreadPoolDetails, this, std::placeholders::_1)};
+    mBuildinCmds["loglevel"]      = { "Set log level",              std::bind(&SprDebugNode::DebugSetLogLevel, this, std::placeholders::_1)};
     return 0;
 }
 
@@ -230,6 +230,7 @@ void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
     SPR_LOGI("  LogLevel  : %s(%d)\n", levelStr.c_str(), level);
     SPR_LOGI("  RunTime   : %s\n", pObj->GetRunTimeString().c_str());
     SPR_LOGI("  DebugPath : %s\n", pObj->GetDebugPath().c_str());
+    SPR_LOGI("  RunPath   : %s\n", pObj->GetRunRootPath().c_str());
     SPR_LOGI("\n");
     SPR_LOGI("==============================================================================\n");
 }

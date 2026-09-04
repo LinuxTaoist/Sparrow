@@ -21,6 +21,9 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
+#include <cstdlib>
+#include <limits.h>
+#include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
 #include "GeneralUtils.h"
@@ -39,8 +42,8 @@ using namespace GeneralUtils;
 #define SRV_RESTART_DELAY_US             500000   // 500ms delay before restart to avoid flooding
 #define SRV_GRACEFUL_STOP_POLL_CNT       50
 #define SRV_DEPENDENCY_START_GAP_US      100000   // 100ms
+#define INIT_CONFIGURE_FILE             "init.conf"
 
-const char INIT_CONFIGURE_PATH[] = "init.conf";
 bool ServiceManager::mRunning = false;
 
 ServiceManager::ServiceManager() {
@@ -64,9 +67,9 @@ int32_t ServiceManager::InitEnv() {
 
 int32_t ServiceManager::WorkLoop() {
     InitEnv();
-    StartAllFromConfig(INIT_CONFIGURE_PATH);
-    mRunning = true;
+    StartAllFromConfig(GetInitCfgPath());
 
+    mRunning = true;
     while (mRunning) {
         // reap newly exited children
         int32_t pid = 0, status = 0;
@@ -170,7 +173,39 @@ int32_t ServiceManager::ForkExec(const std::string& exePath) {
     return pid;
 }
 
+int32_t ServiceManager::IsValidExecFile(const std::string& exePath)
+{
+    if (exePath.empty()) {
+        SPR_LOGE("exePath is empty!\n");
+        return -1;
+    }
+
+    struct stat st = {};
+    if (stat(exePath.c_str(), &st) != 0) {
+        SPR_LOGE("File %s does not exist! (%s)\n", exePath.c_str(), strerror(errno));
+        return -1;
+    }
+
+    if (!S_ISREG(st.st_mode)) {
+        SPR_LOGE("File %s is not a regular file!\n", exePath.c_str());
+        return -1;
+    }
+
+    if (access(exePath.c_str(), X_OK) != 0) {
+        SPR_LOGE("File %s is not executable!\n", exePath.c_str());
+        return -1;
+    }
+
+    return 0;
+}
+
 int32_t ServiceManager::StartOne(const std::string& exePath) {
+    int32_t ret = IsValidExecFile(exePath);
+    if (ret < 0) {
+        SPR_LOGE("Exec %s is invalid!\n", exePath.c_str());
+        return -1;
+    }
+
     int32_t pid = ForkExec(exePath);
     if (pid == -1) {
         return -1;
@@ -198,7 +233,7 @@ int32_t ServiceManager::StopAll() {
             continue;
         }
 
-        // Guard against PID recycling: skip entries whose PID already gone
+        // 2. Guard against PID recycling: skip entries whose PID already gone
         if (kill(it->pid, 0) == -1 && errno == ESRCH) {
             SPR_LOGI("%s (pid %d) already gone\n", it->path.c_str(), it->pid);
             continue;
@@ -253,6 +288,27 @@ int32_t ServiceManager::TryRestart(size_t idx) {
     string name = GetSubstringAfterLastDelimiter(svc.path, '/');
     SPR_LOGD("service: %-20s pid: %6d [cnt: %d]\n", name.c_str(), pid, svc.restartCount);
     return 0;
+}
+
+std::string ServiceManager::GetInitCfgPath() {
+    const char* pEnvRoot = std::getenv(ENV_SPR_ROOT_PATH);
+    if (pEnvRoot != nullptr && pEnvRoot[0] != '\0') {
+        return std::string(pEnvRoot) + "/" + DEFAULT_SPR_ETC_FILE + "/" + INIT_CONFIGURE_FILE;
+    }
+
+    char exePath[300] = {0};
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len > 0) {
+        exePath[len] = '\0';
+        std::string fullPath(exePath);
+        std::string::size_type pos = fullPath.find_last_of('/');
+        if (pos != std::string::npos) {
+            std::string execDir = fullPath.substr(0, pos);
+            return execDir + "/../" + DEFAULT_SPR_ETC_FILE + "/" + INIT_CONFIGURE_FILE;
+        }
+    }
+
+    return "";
 }
 
 int32_t ServiceManager::DumpPidMapInfo() {

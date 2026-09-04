@@ -10,9 +10,10 @@ PROJECT_PLATFORM="Default"
 OUTPUT_PATH="${PROJECT_PATH}/Release/${PROJECT_PLATFORM}"
 BUILD_TARGETS=("$@")
 
-mkdir -p "$OUTPUT_PATH/Cache"
-mkdir -p "$OUTPUT_PATH/Include"
-mkdir -p "$OUTPUT_PATH/Lib"
+mkdir -p $OUTPUT_PATH/Cache
+mkdir -p $OUTPUT_PATH/Include
+mkdir -p $OUTPUT_PATH/Etc
+mkdir -p $OUTPUT_PATH/Lib
 
 # 记录开始时间
 START_TIME=$(date +%s)

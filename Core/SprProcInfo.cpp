@@ -142,3 +142,42 @@ std::string SprProcInfo::GetDebugPath()
 {
     return mEnable ? std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + GetProcName() : "";
 }
+
+std::string SprProcInfo::GetRunRootPath()
+{
+    const char* pEnvRoot = std::getenv(ENV_SPR_ROOT_PATH);
+    if (pEnvRoot != nullptr && pEnvRoot[0] != '\0') {
+        return std::string(pEnvRoot);
+    }
+
+    char exePath[300] = {0};
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len > 0) {
+        exePath[len] = '\0';
+        std::string fullPath(exePath);
+        std::string::size_type pos = fullPath.find_last_of('/');
+        if (pos != std::string::npos) {
+            std::string execDir = fullPath.substr(0, pos);
+            return execDir + "/..";
+        }
+    }
+
+    return "";
+}
+
+std::string SprProcInfo::GetRunEtcPath()
+{
+    const std::string rootPath = GetRunRootPath();
+    if (rootPath.empty()) {
+        SPR_LOGE("rootPath is empty!\n");
+        return "";
+    }
+
+    const std::string etcPath = rootPath + "/" + std::string(DEFAULT_SPR_ETC_FILE);
+    if (access(etcPath.c_str(), F_OK) != 0) {
+        SPR_LOGE("Etc %s not exist!\n", etcPath.c_str());
+        return "";
+    }
+
+    return etcPath;
+}

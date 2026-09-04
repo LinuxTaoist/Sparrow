@@ -5,6 +5,7 @@
 # 启用方法：
 #   - 修改路径： Platform/{Platform}/Build/Options/{Platform}_compile_options.cmake
 #   - 修改方式： BASIC_MODULES增加对应文件夹名
+#               BUSINESS_MODULES增加对应文件夹名
 set(BASIC_MODULES "")
 set(BUSINESS_MODULES "")
 

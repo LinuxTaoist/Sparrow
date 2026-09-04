@@ -26,6 +26,7 @@
 #include "CoreTypeDefs.h"
 #include "CommonTypeDefs.h"
 #include "GeneralUtils.h"
+#include "SprProcInfo.h"
 #include "ConfigManager.h"
 
 using namespace InternalDefs;
@@ -40,12 +41,12 @@ static const char* CONFIG_CFG_PATH = "config_manager.conf";
 
 static std::string Trim(const std::string& text)
 {
-    std::string::size_type begin = text.find_first_not_of(" \t\r\n");
+    std::string::size_type begin = text.find_first_not_of(" \t\r");
     if (begin == std::string::npos) {
         return "";
     }
 
-    std::string::size_type end = text.find_last_not_of(" \t\r\n");
+    std::string::size_type end = text.find_last_not_of(" \t\r");
     return text.substr(begin, end - begin + 1);
 }
 
@@ -72,8 +73,15 @@ static bool ParseSeedValue(const std::string& valueText,
 }
 
 ConfigManager::ConfigManager()
-    : mMutex(), mCache(), mStore(nullptr), mCfgPath(CONFIG_CFG_PATH), mDbPath(CONFIG_DB_PATH), mBackupPath(CONFIG_BACKUP_PATH), mSeedItems()
+    : mStore(nullptr), mDbPath(CONFIG_DB_PATH), mBackupPath(CONFIG_BACKUP_PATH)
 {
+    SprProcInfo* pProcInfo = SprProcInfo::GetInstance();
+    if (pProcInfo != nullptr) {
+        std::string etcPath = pProcInfo->GetRunEtcPath();
+        mCfgPath = etcPath + "/" + std::string(CONFIG_CFG_PATH);
+    }
+
+    SPR_LOGD("cfgPath = %s", mCfgPath.c_str());
 }
 
 ConfigManager::~ConfigManager()
@@ -95,7 +103,7 @@ int32_t ConfigManager::LoadCfgFile()
 {
     std::ifstream cfgFile(mCfgPath);
     if (!cfgFile.is_open()) {
-        SPR_LOGW("Open %s failed, use default path settings\n", mCfgPath.c_str());
+        SPR_LOGW("Open %s failed! (%s)", mCfgPath.c_str(), strerror(errno));
         return 0;
     }
 
@@ -148,7 +156,7 @@ int32_t ConfigManager::LoadCfgFile()
             if (ParseSeedValue(value, item.nameSpace, item.key, item.value)) {
                 mSeedItems.push_back(item);
             } else {
-                SPR_LOGW("Ignore invalid seed config: %s\n", line.c_str());
+                SPR_LOGW("Ignore invalid seed config: %s", line.c_str());
             }
         }
     }
@@ -168,7 +176,7 @@ int32_t ConfigManager::ApplySeedItems()
                                           "cfg_seed",
                                           revision);
         if (ret != 0) {
-            SPR_LOGE("Seed item failed, scope=%d ns=%s key=%s\n",
+            SPR_LOGE("Seed item failed, scope=%d ns=%s key=%s",
                      mSeedItems[i].scope,
                      mSeedItems[i].nameSpace.c_str(),
                      mSeedItems[i].key.c_str());
@@ -197,7 +205,7 @@ int32_t ConfigManager::StopWork()
 
 std::string ConfigManager::MakeCacheKey(const std::string& nameSpace, const std::string& key) const
 {
-    return nameSpace + "\n" + key;
+    return nameSpace + "" + key;
 }
 
 bool ConfigManager::IsValidScope(int32_t scope) const

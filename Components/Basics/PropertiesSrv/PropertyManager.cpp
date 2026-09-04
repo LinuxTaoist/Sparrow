@@ -32,6 +32,7 @@
 #include "CommonMacros.h"
 #include "SprDebugNode.h"
 #include "SprPropertyMacros.h"
+#include "SprProcInfo.h"
 #include "PropertyManager.h"
 
 using namespace InternalDefs;
@@ -121,14 +122,26 @@ int32_t PropertyManager::Init()
     mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(mSharedMemoryPath, SHARED_MEMORY_MAX_SIZE));
     mpPersistMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(mSharedPersistPath, SHARED_MEMORY_MAX_SIZE, false));
 
+    SprProcInfo* pProcInfo = SprProcInfo::GetInstance();
+    if (pProcInfo == nullptr) {
+        SPR_LOGE("SprProcInfo is unavailable, cannot resolve property config path.\n");
+        return -1;
+    }
+
+    std::string etcPath = pProcInfo->GetRunEtcPath();
+    if (etcPath.empty()) {
+        SPR_LOGE("Property config path is empty, abort loading properties.\n");
+        return -1;
+    }
+
     // load default property
-    LoadPropertiesFromFile(DEFAULT_PROP_PATH);
+    LoadPropertiesFromFile(etcPath + "/" + std::string(DEFAULT_PROP_PATH));
 
     // load system property
-    LoadPropertiesFromFile(SYSTEM_PROP_PATH);
+    LoadPropertiesFromFile(etcPath + "/" + std::string(SYSTEM_PROP_PATH));
 
     // load vendor property
-    LoadPropertiesFromFile(VENDOR_PROP_PATH);
+    LoadPropertiesFromFile(etcPath + "/" + std::string(VENDOR_PROP_PATH));
 
     // load persist properties
     LoadPersistProperty();

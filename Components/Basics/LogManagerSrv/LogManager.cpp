@@ -134,7 +134,7 @@ LogManager::LogManager()
     mLoadAttrMap.insert(std::make_pair("logging.file_path",     &LogManager::LoadAttrFilePath));
     mLoadAttrMap.insert(std::make_pair("logging.frame_length",  &LogManager::LoadAttrFrameLengthLimit));
 
-    LoadLogCfgFile(LOG_CONFIGURE_FILE_PATH);
+    LoadLogCfgFile(GetLogCfgPath());
     if (access(mLogsFilePath.c_str(), F_OK) != 0) {
         int ret = mkdir(mLogsFilePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
         if (ret != 0) {
@@ -246,13 +246,23 @@ void LogManager::LoadAttrFilePath(const std::string& value)
 
 int LogManager::LoadLogCfgFile(const std::string& cfgPath)
 {
-    std::ifstream file(cfgPath);
+    std::string resolvedCfgPath = cfgPath;
+    if (access(resolvedCfgPath.c_str(), F_OK) != 0) {
+        std::string cfgPath = GetLogCfgPath();
+        if (cfgPath.empty()) {
+            SPR_LOGE("Log config path is empty, cannot resolve fallback.\n");
+            return -1;
+        }
+
+        resolvedCfgPath = cfgPath;
+    }
+
+    std::ifstream file(resolvedCfgPath);
     if (!file) {
-        SPR_LOGE("Open %s fail! \n", cfgPath.c_str());
+        SPR_LOGE("Open %s fail! \n", resolvedCfgPath.c_str());
         return -1;
     }
 
-    SPR_LOGD("Load %s\n", cfgPath.c_str());
     std::string line;
     std::string buffer;
     while (std::getline(file, buffer)) {
@@ -450,6 +460,28 @@ int LogManager::WriteLog(const std::string& logData, int level)
     }
 
     return WriteToLogFile(logData);
+}
+
+std::string LogManager::GetLogCfgPath()
+{
+    const char* pEnvRoot = std::getenv(ENV_SPR_ROOT_PATH);
+    if (pEnvRoot != nullptr && pEnvRoot[0] != '\0') {
+        return std::string(pEnvRoot) + "/" + DEFAULT_SPR_ETC_FILE + "/" + LOG_CONFIGURE_FILE_PATH;
+    }
+
+    char exePath[300] = {0};
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len > 0) {
+        exePath[len] = '\0';
+        std::string fullPath(exePath);
+        std::string::size_type pos = fullPath.find_last_of('/');
+        if (pos != std::string::npos) {
+            std::string execDir = fullPath.substr(0, pos);
+            return execDir + "/../" + DEFAULT_SPR_ETC_FILE + "/" + LOG_CONFIGURE_FILE_PATH;
+        }
+    }
+
+    return "";
 }
 
 std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileNamePrefix)

@@ -21,6 +21,7 @@ rm -rf $OUTPUT_PATH/*
 
 mkdir -p $OUTPUT_PATH/Cache
 mkdir -p $OUTPUT_PATH/Include
+mkdir -p $OUTPUT_PATH/Etc
 mkdir -p $OUTPUT_PATH/Lib
 
 # 记录开始时间

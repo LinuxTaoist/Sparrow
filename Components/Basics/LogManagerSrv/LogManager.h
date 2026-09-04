@@ -61,6 +61,7 @@ private:
     int GetLevelFromLogStrs(const std::string& logData);
     int WriteToLogFile(const std::string& logData);
     int WriteLog(const std::string& logData, int level);
+    std::string GetLogCfgPath();
     std::set<std::string> GetSortedLogFiles(const std::string& path, const std::string& fileName);
 
     void LoadAttrOutputMode(const std::string& value);

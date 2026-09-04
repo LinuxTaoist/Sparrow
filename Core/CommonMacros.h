@@ -24,7 +24,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CommonMacros.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define COMMON_MACROS_VERSION   "COMMON_MACROS_VERSION_M1002"
+#define COMMON_MACROS_VERSION   "COMMON_MACROS_VERSION_M1003"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for environment path
@@ -33,10 +33,12 @@
 #define SYS_PROC_DIR        "/proc"
 #define SYS_DATA_DIR        "/data"
 #define SYS_SDCARD_DIR      "/sdcard"
+#define ENV_SPR_ROOT_PATH   "ENV_SPR_ROOT_PATH"
 
 // User path
 #define DEFAULT_DEBUG_ROOT_DIR      SYS_TEMP_DIR
 #define DEFAULT_MQS_DIR             SYS_TEMP_DIR "/mq_details"
+#define DEFAULT_SPR_ETC_FILE        "Etc"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for service and client

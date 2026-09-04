@@ -77,9 +77,11 @@ adb_push() {
     echo -e "${PURPLE} 开始推送文件 ${NC}"
     adb shell killall -10 servicemanagersrv
     sleep 2
+    adb shell rm -rf $2/Release/Etc/*
     adb shell rm -rf $2/Release/Bin/*
     adb shell rm -rf $2/Release/Lib/*
     adb shell mkdir -p $2/Release
+    adb push ../Release/$1/Etc  $2/Release/
     adb push ../Release/$1/Bin  $2/Release/
     adb push ../Release/$1/Lib  $2/Release/
 }

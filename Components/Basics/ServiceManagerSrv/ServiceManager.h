@@ -43,12 +43,14 @@ public:
 
 private:
     int32_t InitEnv();
+    int32_t IsValidExecFile(const std::string& exePath);
     int32_t StartAllFromConfig(const std::string& cfgPath);
     int32_t StartOne(const std::string& exePath);
     int32_t ForkExec(const std::string& exePath);
     int32_t StopAll();
     int32_t TryRestart(size_t idx);
     int32_t DumpPidMapInfo();
+    std::string GetInitCfgPath();
 
 private:
     static bool mRunning;
