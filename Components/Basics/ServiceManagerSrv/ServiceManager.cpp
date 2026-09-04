@@ -21,8 +21,6 @@
 #include <errno.h>
 #include <unistd.h>
 #include <string.h>
-#include <cstdlib>
-#include <limits.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/resource.h>

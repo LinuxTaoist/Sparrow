@@ -29,6 +29,7 @@
 #include <fcntl.h>
 #include <dirent.h>
 #include <cstdlib>
+#include <limits.h>
 #include <sys/wait.h>
 #include <sys/stat.h>
 #include "gtest/gtest.h"
@@ -41,9 +42,8 @@
 #define LOG_TAG "TestTag"
 #define LONG_LOG_TAG "ThisIsAVeryLongTagThatExceedsLimit"
 
-// 测试前提：先启动日志服务 logmanagersrv
-constexpr int32_t LOG_BUFFER_DEF   = 512;           // 与 SprLog.cpp 的 LOG_BUFFER_SIZE_DEFAULT 保持一致
-const char* LOG_CONF_FILE          = "sprlog.conf"; // 与 LogManager.cpp 的 LOG_CONFIGURE_FILE_PATH 保持一致
+#define LOG_BUFFER_DEF      512           // 与 SprLog.cpp 的 LOG_BUFFER_SIZE_DEFAULT 保持一致
+#define LOG_CONF_FILE       "sprlog.conf" // 与 LogManager.cpp 的 LOG_CONFIGURE_FILE_PATH 保持一致
 
 struct LogConfig {
     std::string output;         // file / stdout
@@ -63,9 +63,33 @@ std::string TrimStr(const std::string& str) {
     return str.substr(begin, end - begin + 1);
 }
 
-// 读取 sprlog.conf（与 test bin 同目录），解析日志配置
+static std::string GetLogCfgPath()
+{
+    const char* pEnvRoot = std::getenv(ENV_SPR_ROOT_PATH);
+    if (pEnvRoot != nullptr && pEnvRoot[0] != '\0') {
+        return std::string(pEnvRoot) + "/" + DEFAULT_SPR_ETC_FILE + "/" + LOG_CONF_FILE;
+    }
+
+    char exePath[300] = {0};
+    ssize_t len = readlink("/proc/self/exe", exePath, sizeof(exePath) - 1);
+    if (len > 0) {
+        exePath[len] = '\0';
+        std::string fullPath(exePath);
+        auto pos = fullPath.find_last_of('/');
+        if (pos != std::string::npos) {
+            std::string execDir = fullPath.substr(0, pos);
+            return execDir + "/../" + DEFAULT_SPR_ETC_FILE + "/" + LOG_CONF_FILE;
+        }
+    }
+
+    return "";
+}
+
+
+// 读取 sprlog.conf（优先按可执行文件目录/Etc 解析，兼容从 Bin 目录启动）
 bool LoadLogConfig(LogConfig& cfg) {
-    std::ifstream file(LOG_CONF_FILE);
+    std::string cfgPath = GetLogCfgPath();
+    std::ifstream file(cfgPath);
     if (!file) {
         return false;
     }
