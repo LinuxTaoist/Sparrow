@@ -6,8 +6,8 @@
 - External: 基于外部释放头文件和库测试，仅能够访问释放的文件，类似于黑盒测试。
 
 ## 当前测试版本
-- googletest 版本: 1.5.0
-- 来源: 3rdParty/googletest/googletest-1.5.0.tar.gz
+- googletest 版本: 1.12.1
+- 来源: 3rdParty/googletest/googletest-1.12.1.tar.gz
 
 ## 启动编译
 参考 [googletest集成指南](../3rdParty/googletest/README.md)。

@@ -9,6 +9,7 @@ CXX_COMPILER=""
 SYSROOT=""
 C_FLAGS=""
 CXX_FLAGS=""
+GTEST_VER="1.12.1"
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
@@ -56,13 +57,26 @@ PLATFORM_GTEST_DIR="${PROJECT_PATH}/Platform/${PLATFORM}/3rdParty/googletest"
 ROOT_GTEST_DIR="${PROJECT_PATH}/3rdParty/googletest"
 OUTPUT_LIB_DIR="${ROOT_GTEST_DIR}/lib/${PLATFORM}"
 
-TARBALL="${PLATFORM_GTEST_DIR}/googletest-1.5.0.tar.gz"
-if [[ ! -f "$TARBALL" ]]; then
-    TARBALL="${ROOT_GTEST_DIR}/googletest-1.5.0.tar.gz"
-fi
+TARBALL=""
+TARBALL_CANDIDATES=(
+    "googletest-${GTEST_VER}.tar.gz"
+    "googletest-release-${GTEST_VER}.tar.gz"
+    "release-${GTEST_VER}.tar.gz"
+)
+
+for candidate in "${TARBALL_CANDIDATES[@]}"; do
+    if [[ -f "${PLATFORM_GTEST_DIR}/${candidate}" ]]; then
+        TARBALL="${PLATFORM_GTEST_DIR}/${candidate}"
+        break
+    fi
+    if [[ -f "${ROOT_GTEST_DIR}/${candidate}" ]]; then
+        TARBALL="${ROOT_GTEST_DIR}/${candidate}"
+        break
+    fi
+done
 
 if [[ ! -f "$TARBALL" ]]; then
-    echo "googletest tarball not found for platform ${PLATFORM}" >&2
+    echo "googletest tarball not found for platform ${PLATFORM}, expected one of: ${TARBALL_CANDIDATES[*]}" >&2
     exit 1
 fi
 
@@ -104,8 +118,12 @@ fi
 
 (
     cd "$BUILD_DIR"
-    cmake "${CMAKE_ARGS[@]}"
-    make -j"$(nproc)"
+    cmake "${CMAKE_ARGS[@]}" \
+        -DCMAKE_CXX_STANDARD=11 \
+        -DCMAKE_CXX_STANDARD_REQUIRED=ON \
+        -DBUILD_GMOCK=OFF \
+        -Dgtest_build_tests=OFF
+    make -j"$(nproc)" gtest gtest_main
 )
 
 GTEST_LIB="$(find "$BUILD_DIR" -name libgtest.a -print -quit || true)"
