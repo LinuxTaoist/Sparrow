@@ -48,11 +48,11 @@ SPR_ENTRY(
 - 使用者只需编写业务初始化代码。
 
 **参考代码**
-- 接口定义: [SprMainInterface.h](../../PrivateAPIs/SprMainInterface.h)
-- 接口实现: [SprMainInterface.cpp](../../PrivateAPIs/SprMainInterface.cpp)
+- 接口定义: [SprMainInterface.h](../../../PrivateAPIs/SprMainInterface.h)
+- 接口实现: [SprMainInterface.cpp](../../../PrivateAPIs/SprMainInterface.cpp)
 
 ## 4. 要注意什么
-- 必须实现 `SPR_ENTRY(...)`，否则 `SPR_ENTRY_IMPLEMENT_CHECK()` 会触发 `NOT_IMPLEMENT_SPR_ENTRY()` 检查失败，参考 [SprMainInterface.cpp:39](../../PrivateAPIs/SprMainInterface.cpp#L39)
-- 框架主流程会先调用 `SprProcPrepare::Init(proc)` 再执行用户入口，最后进入 `EpollLoop()`，参考 [SprMainInterface.cpp:64](../../PrivateAPIs/SprMainInterface.cpp#L64)
-- `SPR_ENTRY(...)` 宏会在静态初始化阶段把 `SprUserEntry` 绑定到全局函数指针，参考 [SprMainInterface.h](../../PrivateAPIs/SprMainInterface.h)
+- 必须实现 `SPR_ENTRY(...)`，否则 `SPR_ENTRY_IMPLEMENT_CHECK()` 会触发 `NOT_IMPLEMENT_SPR_ENTRY()` 检查失败，参考 [SprMainInterface.cpp:39](../../../PrivateAPIs/SprMainInterface.cpp#L39)
+- 框架主流程会先调用 `SprProcPrepare::Init(proc)` 再执行用户入口，最后进入 `EpollLoop()`，参考 [SprMainInterface.cpp:64](../../../PrivateAPIs/SprMainInterface.cpp#L64)
+- `SPR_ENTRY(...)` 宏会在静态初始化阶段把 `SprUserEntry` 绑定到全局函数指针，参考 [SprMainInterface.h](../../../PrivateAPIs/SprMainInterface.h)
 - 该接口负责流程编排，业务模块不要重复实现 `main()`。

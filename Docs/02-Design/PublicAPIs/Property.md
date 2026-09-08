@@ -64,10 +64,10 @@ if (prop->GetProperties(allProps) == 0) {
 ```
 
 **参考代码**
-- 接口定义: [Property.h](../../PublicAPIs/Property.h)
-- 接口实现: [Property.cpp](../../PublicAPIs/Property.cpp)
+- 接口定义: [Property.h](../../../PublicAPIs/Property.h)
+- 接口实现: [Property.cpp](../../../PublicAPIs/Property.cpp)
 
 ## 4. 要注意什么
-- 构造阶段若 `InitializeClientBinder("property_service", ...)` 失败，接口会被置为不可用，后续方法直接返回 -1，参考 [Property.cpp:47](../../PublicAPIs/Property.cpp#L47)
-- `GetProperty`失败时， 会返回 `defaultValue`，参考 [Property.cpp:98](../../PublicAPIs/Property.cpp#L98)
+- 构造阶段若 `InitializeClientBinder("property_service", ...)` 失败，接口会被置为不可用，后续方法直接返回 -1，参考 [Property.cpp:47](../../../PublicAPIs/Property.cpp#L47)
+- `GetProperty`失败时， 会返回 `defaultValue`，参考 [Property.cpp:98](../../../PublicAPIs/Property.cpp#L98)
 

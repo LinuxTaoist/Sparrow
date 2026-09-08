@@ -63,11 +63,11 @@ if (len > 0) {
 ```
 
 **参考代码**
-- 接口定义: [SprDirWatch.h](../../Core/SprDirWatch.h)
-- 接口实现: [SprDirWatch.cpp](../../Core/SprDirWatch.cpp)
+- 接口定义: [SprDirWatch.h](../../../Core/SprDirWatch.h)
+- 接口实现: [SprDirWatch.cpp](../../../Core/SprDirWatch.cpp)
 
 ## 4. 要注意什么
-- `SprDirWatch` 构造时会调用 `inotify_init()`，失败时 `GetInotifyFd()` 可能小于 0，使用前需判定，参考 [SprDirWatch.cpp:30](../../Core/SprDirWatch.cpp#L30)
-- `AddDirWatch()` 失败返回 -1，调用方需要处理失败路径，参考 [SprDirWatch.cpp:46](../../Core/SprDirWatch.cpp#L46)
-- 析构时会遍历已注册 watch 并调用 `inotify_rm_watch()` 清理，然后关闭 inotify fd，参考 [SprDirWatch.cpp:38](../../Core/SprDirWatch.cpp#L38) [SprDirWatch.cpp:41](../../Core/SprDirWatch.cpp#L41)
-- `DelDirWatch()` 是私有接口，外部只通过对象生命周期统一释放 watch，参考 [SprDirWatch.h:37](../../Core/SprDirWatch.h#L37)
+- `SprDirWatch` 构造时会调用 `inotify_init()`，失败时 `GetInotifyFd()` 可能小于 0，使用前需判定，参考 [SprDirWatch.cpp:30](../../../Core/SprDirWatch.cpp#L30)
+- `AddDirWatch()` 失败返回 -1，调用方需要处理失败路径，参考 [SprDirWatch.cpp:46](../../../Core/SprDirWatch.cpp#L46)
+- 析构时会遍历已注册 watch 并调用 `inotify_rm_watch()` 清理，然后关闭 inotify fd，参考 [SprDirWatch.cpp:38](../../../Core/SprDirWatch.cpp#L38) [SprDirWatch.cpp:41](../../../Core/SprDirWatch.cpp#L41)
+- `DelDirWatch()` 是私有接口，外部只通过对象生命周期统一释放 watch，参考 [SprDirWatch.h:37](../../../Core/SprDirWatch.h#L37)

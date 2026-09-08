@@ -17,14 +17,14 @@ BinderManagerSrv 提供类 Android Binder 的 RPC 基础能力，负责服务注
 它作为底层注册与查询中心运行，业务方不需要直接与它交互。
 
 接口使用文档请看：
-- [Binder](../../Components/PrivateAPIs/Binder.md)
+- [Binder](../../PrivateAPIs/Binder.md)
 
 相关实现入口：
-- [main_binder.cpp](../../../Components/Basics/BinderManagerSrv/main_binder.cpp)
-- [BinderManager.h](../../../Components/Basics/BinderManagerSrv/BinderManager.h)
-- [BinderManager.cpp](../../../Components/Basics/BinderManagerSrv/BinderManager.cpp)
-- [BindCommon.h](../../../PrivateAPIs/Binder/BindCommon.h)
-- [BindInterface.cpp](../../../PrivateAPIs/Binder/BindInterface.cpp)
+- [main_binder.cpp](../../../../Components/Basics/BinderManagerSrv/main_binder.cpp)
+- [BinderManager.h](../../../../Components/Basics/BinderManagerSrv/BinderManager.h)
+- [BinderManager.cpp](../../../../Components/Basics/BinderManagerSrv/BinderManager.cpp)
+- [BindCommon.h](../../../../PrivateAPIs/Binder/BindCommon.h)
+- [BindInterface.cpp](../../../../PrivateAPIs/Binder/BindInterface.cpp)
 
 ## 4. 要注意什么
 - 映射保存在内存 `mBinderMap`，进程退出后不保留。

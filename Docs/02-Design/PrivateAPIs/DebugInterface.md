@@ -48,8 +48,8 @@ dbg->EnableRemoteShell();
 ```
 
 **参考代码**
-- 接口定义: [DebugInterface.h](../../PrivateAPIs/DebugInterface.h)
-- 接口实现: [DebugInterface.cpp](../../PrivateAPIs/DebugInterface.cpp)
+- 接口定义: [DebugInterface.h](../../../PrivateAPIs/DebugInterface.h)
+- 接口实现: [DebugInterface.cpp](../../../PrivateAPIs/DebugInterface.cpp)
 
 ## 4. 要注意什么
 - 该接口是命令转发层，不包含调试业务实现逻辑。

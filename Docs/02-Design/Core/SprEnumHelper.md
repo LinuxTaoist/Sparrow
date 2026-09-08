@@ -62,12 +62,12 @@ SPR_LOGI("module=%s logLevel=%s\n",
 ```
 
 **参考代码**
-- 接口定义: [SprEnumHelper.h](../../Core/SprEnumHelper.h)
-- 接口实现: [SprEnumHelper.cpp](../../Core/SprEnumHelper.cpp)
-- 单元测试: [TestSprEnumHelper.cc](../../TestCase/Internal/Core/TestSprEnumHelper.cc)
+- 接口定义: [SprEnumHelper.h](../../../Core/SprEnumHelper.h)
+- 接口实现: [SprEnumHelper.cpp](../../../Core/SprEnumHelper.cpp)
+- 单元测试: [TestSprEnumHelper.cc](../../../TestCase/Internal/Core/TestSprEnumHelper.cc)
 
 ## 4. 要注意什么
-- 错误等级由 `(0 - errorCode) % 50` 计算，输入错误码需遵循项目错误码编码规则，参考 [SprEnumHelper.cpp:36](../../Core/SprEnumHelper.cpp#L36)
-- `GetSprErrorLevel()` 对未命中区间返回 `ERR_EVENT_LEVEL_UNKNOWN`，参考 [SprEnumHelper.cpp:51](../../Core/SprEnumHelper.cpp#L51)
-- 多数 `GetSprXXXText()` 对越界值统一返回 `UNDEFINED`，参考 [SprEnumHelper.cpp:60](../../Core/SprEnumHelper.cpp#L60) [SprEnumHelper.cpp:185](../../Core/SprEnumHelper.cpp#L185)
-- `GetSprModuleIDText()` 对越界模块 ID 不返回 `UNDEFINED`，而是返回 `MODULE_0X%X` 格式文本，参考 [SprEnumHelper.cpp:123](../../Core/SprEnumHelper.cpp#L123)
+- 错误等级由 `(0 - errorCode) % 50` 计算，输入错误码需遵循项目错误码编码规则，参考 [SprEnumHelper.cpp:36](../../../Core/SprEnumHelper.cpp#L36)
+- `GetSprErrorLevel()` 对未命中区间返回 `ERR_EVENT_LEVEL_UNKNOWN`，参考 [SprEnumHelper.cpp:51](../../../Core/SprEnumHelper.cpp#L51)
+- 多数 `GetSprXXXText()` 对越界值统一返回 `UNDEFINED`，参考 [SprEnumHelper.cpp:60](../../../Core/SprEnumHelper.cpp#L60) [SprEnumHelper.cpp:185](../../../Core/SprEnumHelper.cpp#L185)
+- `GetSprModuleIDText()` 对越界模块 ID 不返回 `UNDEFINED`，而是返回 `MODULE_0X%X` 格式文本，参考 [SprEnumHelper.cpp:123](../../../Core/SprEnumHelper.cpp#L123)

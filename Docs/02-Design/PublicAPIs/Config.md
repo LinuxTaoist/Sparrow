@@ -72,13 +72,13 @@ if (cfg->GetIntValue("retry_interval_sec", retry, 10, "cloud") != 0) {
 ```
 
 **参考代码**
-- 接口定义: [Config.h](../../PublicAPIs/Config.h)
-- 接口实现: [Config.cpp](../../PublicAPIs/Config.cpp)
+- 接口定义: [Config.h](../../../PublicAPIs/Config.h)
+- 接口实现: [Config.cpp](../../../PublicAPIs/Config.cpp)
 
 ## 4. 要注意什么
-- 构造阶段若 InitializeClientBinder(SRV_NAME_CONFIG_MANAGER, ...) 失败，接口会被置为不可用，后续方法直接返回 -1，参考 [PublicAPIs/Config.cpp](../../PublicAPIs/Config.cpp#L47)
-- key 版 SetValue 会默认写入 DEFAULT_NAMESPACE，且 scope 默认走 USER 层，参考 [PublicAPIs/Config.cpp](../../PublicAPIs/Config.cpp#L86)
-- 所有同步请求通过 ProcLockGuard(gPMutex, gTMutex) 串行保护，避免并发请求冲突，参考 [PublicAPIs/Config.cpp](../../PublicAPIs/Config.cpp#L145)
-- GetValue 和 typed Get 在失败时会回填 defaultValue，但接口返回值仍是 -1，需要同时判断返回值和输出参数，参考 [PublicAPIs/Config.cpp](../../PublicAPIs/Config.cpp#L193)
-- GetMeta 只返回 scope 和 revision，不返回 value，参考 [PublicAPIs/Config.cpp](../../PublicAPIs/Config.cpp#L384)
+- 构造阶段若 InitializeClientBinder(SRV_NAME_CONFIG_MANAGER, ...) 失败，接口会被置为不可用，后续方法直接返回 -1，参考 [PublicAPIs/Config.cpp](../../../PublicAPIs/Config.cpp#L47)
+- key 版 SetValue 会默认写入 DEFAULT_NAMESPACE，且 scope 默认走 USER 层，参考 [PublicAPIs/Config.cpp](../../../PublicAPIs/Config.cpp#L86)
+- 所有同步请求通过 ProcLockGuard(gPMutex, gTMutex) 串行保护，避免并发请求冲突，参考 [PublicAPIs/Config.cpp](../../../PublicAPIs/Config.cpp#L145)
+- GetValue 和 typed Get 在失败时会回填 defaultValue，但接口返回值仍是 -1，需要同时判断返回值和输出参数，参考 [PublicAPIs/Config.cpp](../../../PublicAPIs/Config.cpp#L193)
+- GetMeta 只返回 scope 和 revision，不返回 value，参考 [PublicAPIs/Config.cpp](../../../PublicAPIs/Config.cpp#L384)
 - 当前 PublicAPI 没有对外 Delete 接口，配置删除不在业务侧开放能力范围内。

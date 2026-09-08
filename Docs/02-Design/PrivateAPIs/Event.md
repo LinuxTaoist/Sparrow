@@ -50,12 +50,12 @@ AsyncEvent::GetInstance()->EventNotify(1001, nullptr, 0);
 ```
 
 **参考代码**
-- 接口定义: [AsyncEvent.h](../../PrivateAPIs/Event/AsyncEvent.h)
-- 接口实现: [AsyncEvent.cpp](../../PrivateAPIs/Event/AsyncEvent.cpp)
-- 调用示例: [PowerManagerInterface.cpp](../../PublicAPIs/PowerManagerInterface.cpp)
+- 接口定义: [AsyncEvent.h](../../../PrivateAPIs/Event/AsyncEvent.h)
+- 接口实现: [AsyncEvent.cpp](../../../PrivateAPIs/Event/AsyncEvent.cpp)
+- 调用示例: [PowerManagerInterface.cpp](../../../PublicAPIs/PowerManagerInterface.cpp)
 
 ## 4. 要注意什么
-- 事件通道固定使用 `KEY_EVENT_NOTIFY = 99999`，且通道名会追加 `_event` 后缀，参考 [AsyncEvent.cpp:25](../../PrivateAPIs/Event/AsyncEvent.cpp#L25)
-- `RegisterEventCallback` 仅允许注册一次：回调为空或线程已启动时返回 -1，参考 [AsyncEvent.cpp:80](../../PrivateAPIs/Event/AsyncEvent.cpp#L80)
-- 回调线程内部是阻塞 `Wait()` 循环，未注销会持续运行，参考 [AsyncEvent.cpp:89](../../PrivateAPIs/Event/AsyncEvent.cpp#L89)
-- `UnregisterEventCallback()` 直接 `join` 线程，调用前应确保线程已启动，参考 [AsyncEvent.cpp:70](../../PrivateAPIs/Event/AsyncEvent.cpp#L70)
+- 事件通道固定使用 `KEY_EVENT_NOTIFY = 99999`，且通道名会追加 `_event` 后缀，参考 [AsyncEvent.cpp:25](../../../PrivateAPIs/Event/AsyncEvent.cpp#L25)
+- `RegisterEventCallback` 仅允许注册一次：回调为空或线程已启动时返回 -1，参考 [AsyncEvent.cpp:80](../../../PrivateAPIs/Event/AsyncEvent.cpp#L80)
+- 回调线程内部是阻塞 `Wait()` 循环，未注销会持续运行，参考 [AsyncEvent.cpp:89](../../../PrivateAPIs/Event/AsyncEvent.cpp#L89)
+- `UnregisterEventCallback()` 直接 `join` 线程，调用前应确保线程已启动，参考 [AsyncEvent.cpp:70](../../../PrivateAPIs/Event/AsyncEvent.cpp#L70)

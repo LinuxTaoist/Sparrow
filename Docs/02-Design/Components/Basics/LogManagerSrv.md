@@ -11,11 +11,11 @@ LogManagerSrv 是 Sparrow 的日志落盘服务，负责从共享缓存中读取
 在使用日志功能时，外部业务模块只需要调用SprLog接口，对 LogManagerSrv 无感知。
 
 接口使用文档，请看：
-- [SprLog.md](../../../Docs/3rdAdapter/SprLog.md)
+- [SprLog.md](../../../05-Reference/3rdAdapter/SprLog.md)
 
 相关实现入口：
-- [LogManagerSrv](../../../Components/Basics/LogManagerSrv)
-- [SprLog](../../../3rdAdapter/SprLog.h)
+- [LogManagerSrv](../../../../Components/Basics/LogManagerSrv)
+- [SprLog](../../../../3rdAdapter/SprLog.h)
 
 ## 4. 要注意什么
 - LogManagerSrv 只负责日志消费和保存，不是业务模块直接调用的打印接口。

@@ -69,11 +69,11 @@ pm->UnRegisterCallback();
 ```
 
 **参考代码**
-- 接口定义: [PowerManagerInterface.h](../../PublicAPIs/PowerManagerInterface.h)
-- 接口实现: [PowerManagerInterface.cpp](../../PublicAPIs/PowerManagerInterface.cpp)
+- 接口定义: [PowerManagerInterface.h](../../../PublicAPIs/PowerManagerInterface.h)
+- 接口实现: [PowerManagerInterface.cpp](../../../PublicAPIs/PowerManagerInterface.cpp)
 
 ## 4. 要注意什么
-- 构造阶段若 `InitializeClientBinder(SRV_NAME_POWER_MANAGER, ...)` 失败，接口会被置为不可用，后续方法直接返回 -1，参考 [PowerManagerInterface.cpp:51](../../PublicAPIs/PowerManagerInterface.cpp#L51)
-- `RegisterCallback` 成功后会调用 `AsyncEvent::AsReader(SRV_NAME_POWER_MANAGER)` 启动异步读取并注册回调函数，参考 [PowerManagerInterface.cpp:128](../../PublicAPIs/PowerManagerInterface.cpp#L128)
-- 所有同步请求通过 `ProcLockGuard(gPMutex, gTMutex)` 串行保护，避免并发请求冲突，参考 [PowerManagerInterface.cpp:80](../../PublicAPIs/PowerManagerInterface.cpp#L80)
+- 构造阶段若 `InitializeClientBinder(SRV_NAME_POWER_MANAGER, ...)` 失败，接口会被置为不可用，后续方法直接返回 -1，参考 [PowerManagerInterface.cpp:51](../../../PublicAPIs/PowerManagerInterface.cpp#L51)
+- `RegisterCallback` 成功后会调用 `AsyncEvent::AsReader(SRV_NAME_POWER_MANAGER)` 启动异步读取并注册回调函数，参考 [PowerManagerInterface.cpp:128](../../../PublicAPIs/PowerManagerInterface.cpp#L128)
+- 所有同步请求通过 `ProcLockGuard(gPMutex, gTMutex)` 串行保护，避免并发请求冲突，参考 [PowerManagerInterface.cpp:80](../../../PublicAPIs/PowerManagerInterface.cpp#L80)
 

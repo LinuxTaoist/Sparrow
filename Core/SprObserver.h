@@ -117,6 +117,13 @@ protected:
     virtual int32_t Init() = 0;
 
     /**
+     * @brief Initialize mediator proxy
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int32_t InitMediatorProxy();
+
+    /**
      * @brief Dump common versions for current module
      * @return 0
      *
@@ -144,7 +151,7 @@ protected:
     InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;
     std::string mModuleName;
-    SprMediatorProxy* mpMsgMediator;
+    SprMediatorProxy* mpMediatorProxy;
 };
 
 #endif  // __SPR_OBSERVER_H__

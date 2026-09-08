@@ -59,11 +59,11 @@ if (recvMsg.GetMsgId() == SIG_ID_PROXY_REGISTER_REQUEST) {
 ```
 
 **参考代码**
-- 接口定义: [SprMsg.h](../../Core/SprMsg.h)
-- 接口实现: [SprMsg.cpp](../../Core/SprMsg.cpp)
-- 使用示例: [SprMediator.cpp](../../Components/Basics/MediatorSrv/SprMediator.cpp)
-- 单元测试: [TestSprMsg.cc](../../TestCase/Internal/Core/TestSprMsg.cc)
+- 接口定义: [SprMsg.h](../../../Core/SprMsg.h)
+- 接口实现: [SprMsg.cpp](../../../Core/SprMsg.cpp)
+- 使用示例: [SprMediator.cpp](../../../Components/Basics/MediatorSrv/SprMediator.cpp)
+- 单元测试: [TestSprMsg.cc](../../../TestCase/Internal/Core/TestSprMsg.cc)
 
 ## 4. 要注意什么
-- `DumpBrief` 的成员输出长度上限是 5，超出会用 `...` 截断，参考 [SprMsg.cpp:26](../../Core/SprMsg.cpp#L26)
+- `DumpBrief` 的成员输出长度上限是 5，超出会用 `...` 截断，参考 [SprMsg.cpp:26](../../../Core/SprMsg.cpp#L26)
 

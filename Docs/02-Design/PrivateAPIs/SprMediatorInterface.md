@@ -47,11 +47,11 @@ std::string sigName = med->GetSigalName(1001);
 ```
 
 **参考代码**
-- 接口定义: [SprMediatorInterface.h](../../PrivateAPIs/SprMediatorInterface.h)
-- 接口实现: [SprMediatorInterface.cpp](../../PrivateAPIs/SprMediatorInterface.cpp)
+- 接口定义: [SprMediatorInterface.h](../../../PrivateAPIs/SprMediatorInterface.h)
+- 接口实现: [SprMediatorInterface.cpp](../../../PrivateAPIs/SprMediatorInterface.cpp)
 
 ## 4. 要注意什么
-- 初始化 Binder 失败会导致接口不可用，后续查询会直接失败或返回空字符串，参考 [SprMediatorInterface.cpp:48](../../PrivateAPIs/SprMediatorInterface.cpp#L48) [SprMediatorInterface.cpp:49](../../PrivateAPIs/SprMediatorInterface.cpp#L49) [SprMediatorInterface.cpp:71](../../PrivateAPIs/SprMediatorInterface.cpp#L71)
-- `GetAllMQStatus` 使用 `PROXY_CMD_GET_ALL_MQ_ATTRS` 命令，并在 ret=0 时才读取向量数据，参考 [SprMediatorInterface.cpp:77](../../PrivateAPIs/SprMediatorInterface.cpp#L77) [SprMediatorInterface.cpp:84](../../PrivateAPIs/SprMediatorInterface.cpp#L84)
-- `GetSigalName` 失败返回空字符串 `""`，调用方需判空，参考 [SprMediatorInterface.cpp:99](../../PrivateAPIs/SprMediatorInterface.cpp#L99)
-- 所有请求通过 `ProcLockGuard(gPMutex, gTMutex)` 串行保护，参考 [SprMediatorInterface.cpp:76](../../PrivateAPIs/SprMediatorInterface.cpp#L76)
+- 初始化 Binder 失败会导致接口不可用，后续查询会直接失败或返回空字符串，参考 [SprMediatorInterface.cpp:48](../../../PrivateAPIs/SprMediatorInterface.cpp#L48) [SprMediatorInterface.cpp:49](../../../PrivateAPIs/SprMediatorInterface.cpp#L49) [SprMediatorInterface.cpp:71](../../../PrivateAPIs/SprMediatorInterface.cpp#L71)
+- `GetAllMQStatus` 使用 `PROXY_CMD_GET_ALL_MQ_ATTRS` 命令，并在 ret=0 时才读取向量数据，参考 [SprMediatorInterface.cpp:77](../../../PrivateAPIs/SprMediatorInterface.cpp#L77) [SprMediatorInterface.cpp:84](../../../PrivateAPIs/SprMediatorInterface.cpp#L84)
+- `GetSigalName` 失败返回空字符串 `""`，调用方需判空，参考 [SprMediatorInterface.cpp:99](../../../PrivateAPIs/SprMediatorInterface.cpp#L99)
+- 所有请求通过 `ProcLockGuard(gPMutex, gTMutex)` 串行保护，参考 [SprMediatorInterface.cpp:76](../../../PrivateAPIs/SprMediatorInterface.cpp#L76)

@@ -127,4 +127,4 @@ int Client()
 - 该层是通信层，不放业务逻辑。
 
 相关文档：
-- [BinderManagerSrv.md](../Basics/BinderManagerSrv.md)
+- [BinderManagerSrv.md](../Components/Basics/BinderManagerSrv.md)

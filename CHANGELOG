@@ -1,4 +1,10 @@
 # Sparrow Change Log
+## v1.8.3.alpha.feature-alarm-manager
+### 新增
+
+### 变更
+- 调整Docs文件结构
+- gtest版本从v1.5.0调整至v1.12.1
 
 ## v1.8.3 (2026-09-01)
 ### 新增

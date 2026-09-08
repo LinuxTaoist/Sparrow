@@ -79,12 +79,12 @@ SprDebugNode 是 Sparrow 的进程内调试节点，基于命名管道（PPipe�
     ```
 
 **参考代码**
-- 接口定义: [SprDebugNode.h](../../Core/SprDebugNode.h)
-- 接口实现: [SprDebugNode.cpp](../../Core/SprDebugNode.cpp)
-- 进程初始化示例: [main_debug.cpp](../../Components/Basics/DebugSrv/main_debug.cpp)
-- 注册示例: [DebugModule.cpp](../../Components/Basics/DebugSrv/DebugModule.cpp)
+- 接口定义: [SprDebugNode.h](../../../Core/SprDebugNode.h)
+- 接口实现: [SprDebugNode.cpp](../../../Core/SprDebugNode.cpp)
+- 进程初始化示例: [main_debug.cpp](../../../Components/Basics/DebugSrv/main_debug.cpp)
+- 注册示例: [DebugModule.cpp](../../../Components/Basics/DebugSrv/DebugModule.cpp)
 
 ## 4. 要注意什么
 - 命令分发按前缀匹配，输入字符串以第一个空格前的部分作为命令名与已注册命令对比。
-- 注册命令数量上限是 200，参考 [SprDebugNode.cpp:36](../../Core/SprDebugNode.cpp#L36)
+- 注册命令数量上限是 200，参考 [SprDebugNode.cpp:36](../../../Core/SprDebugNode.cpp#L36)
 
