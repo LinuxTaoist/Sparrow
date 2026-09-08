@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <stdint.h>
+#include "SqliteAdapter.h"
 
 struct ConfigRecord
 {
@@ -69,10 +70,10 @@ private:
                        const std::string& key, ConfigRecord& record);
     int32_t QueryNamespace(const std::string& tableName, const std::string& nameSpace,
                            std::map<std::string, std::string>& items);
-    const char* TableName(int32_t scope) const;
+    std::string TableName(int32_t scope) const;
 
 private:
-    void* mpDb;
+    SqliteAdapter* mpDb;
     std::string mDbPath;
     int32_t mNextRevision;
 };

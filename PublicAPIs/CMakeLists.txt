@@ -5,10 +5,10 @@ include_directories         (${PROJECT_PATH}/Util)
 include_directories         (${PROJECT_PATH}/PrivateAPIs/Binder)
 include_directories         (${PROJECT_PATH}/PrivateAPIs/Event)
 
-## Build libpowermanagerapi.so
+## Build libpowermapi.so
 set (SRC_POWERM_API_PATH    ${PROJECT_PATH}/PublicAPIs/PowerManagerInterface.cpp)
 add_library                 (LibPowerManagerAPI SHARED ${SRC_POWERM_API_PATH})
-set_target_properties       (LibPowerManagerAPI PROPERTIES OUTPUT_NAME "powermanagerapi")
+set_target_properties       (LibPowerManagerAPI PROPERTIES OUTPUT_NAME "powermapi")
 set_target_properties       (LibPowerManagerAPI PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries       (LibPowerManagerAPI stdc++ rt dl LibBinder)
 add_dependencies            (LibPowerManagerAPI LibBinder)

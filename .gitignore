@@ -3,6 +3,7 @@
 Release/
 3rdParty/googletest/googletest/
 3rdParty/googletest/.gtest_build/
+3rdParty/googletest/lib/
 3rdParty/libgo/libgo/
 3rdParty/sqlite/lib/
 

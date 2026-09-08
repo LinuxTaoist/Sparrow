@@ -95,7 +95,9 @@ if [[ -n "$SYSROOT" ]]; then
     C_FLAGS="${C_FLAGS} --sysroot=${SYSROOT}"
 fi
 if [[ -n "$C_FLAGS" ]]; then
-    export CFLAGS="$C_FLAGS"
+    export CFLAGS="$C_FLAGS -fPIC"
+else
+    export CFLAGS="-fPIC"
 fi
 
 CONFIGURE_ARGS=("--prefix=${INSTALL_DIR}" "--disable-shared" "--enable-static")

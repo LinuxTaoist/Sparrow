@@ -20,6 +20,7 @@
 #include <atomic>
 #include <map>
 #include <string>
+#include <vector>
 #include "gtest/gtest.h"
 #include "Config.h"
 
@@ -56,6 +57,35 @@ public:
         ASSERT_TRUE(WaitFile("/tmp/configmanagersrv", 3000));
         usleep(200 * 1000);
     }
+
+    void TearDown() override
+    {
+        Config* cfg = Config::GetInstance();
+        if (cfg == nullptr || mNamespace.empty()) {
+            return;
+        }
+
+        for (const auto& key : mKeys) {
+            int32_t revision = 0;
+            for (int32_t scope : {CONFIG_SCOPE_DEFAULT, CONFIG_SCOPE_FACTORY, CONFIG_SCOPE_USER}) {
+                (void)cfg->DeleteValue(mNamespace, key, scope, revision);
+            }
+        }
+    }
+
+    void SetNamespace(const std::string& nameSpace)
+    {
+        mNamespace = nameSpace;
+    }
+
+    void RecordKey(const std::string& key)
+    {
+        mKeys.push_back(key);
+    }
+
+private:
+    std::string mNamespace;
+    std::vector<std::string> mKeys;
 };
 
 TEST_F(TestConfigApi, SetAndGetUserValue)
@@ -63,6 +93,8 @@ TEST_F(TestConfigApi, SetAndGetUserValue)
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("cloud");
+    SetNamespace(nameSpace);
+    RecordKey("cursor");
 
     int32_t revision = 0;
     ASSERT_EQ(cfg->SetValueWithScope(nameSpace, "cursor", "100", CONFIG_SCOPE_USER, revision), 0);
@@ -82,6 +114,8 @@ TEST_F(TestConfigApi, LayeredFallbackWorks)
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("net");
+    SetNamespace(nameSpace);
+    RecordKey("apn");
 
     ASSERT_EQ(cfg->SetValueWithScope(nameSpace, "apn", "default_apn", CONFIG_SCOPE_DEFAULT), 0);
     ASSERT_EQ(cfg->SetValueWithScope(nameSpace, "apn", "factory_apn", CONFIG_SCOPE_FACTORY), 0);
@@ -103,6 +137,9 @@ TEST_F(TestConfigApi, ListNamespaceReturnsEffectiveValues)
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("veh");
+    SetNamespace(nameSpace);
+    RecordKey("vin");
+    RecordKey("mode");
 
     ASSERT_EQ(cfg->SetValueWithScope(nameSpace, "vin", "VIN_DEFAULT", CONFIG_SCOPE_DEFAULT), 0);
     ASSERT_EQ(cfg->SetValueWithScope(nameSpace, "vin", "VIN_USER", CONFIG_SCOPE_USER), 0);
@@ -119,6 +156,8 @@ TEST_F(TestConfigApi, BackupAndMetaWork)
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("ota");
+    SetNamespace(nameSpace);
+    RecordKey("policy");
 
     int32_t writeRevision = 0;
     ASSERT_EQ(cfg->SetValueWithScope(nameSpace, "policy", "strict", CONFIG_SCOPE_USER, writeRevision), 0);
@@ -138,6 +177,12 @@ TEST_F(TestConfigApi, TypedValueApisWork)
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("typed");
+    SetNamespace(nameSpace);
+    RecordKey("i32");
+    RecordKey("i64");
+    RecordKey("flag");
+    RecordKey("f32");
+    RecordKey("f64");
 
     ASSERT_EQ(cfg->SetIntValue("i32", static_cast<int32_t>(-123), CONFIG_SCOPE_USER, nameSpace), 0);
 

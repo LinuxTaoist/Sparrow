@@ -19,18 +19,17 @@
 #ifndef __POWER_MANAGER_WATCH_H__
 #define __POWER_MANAGER_WATCH_H__
 
-class PowerManagerWatch
-{
-public:
-    PowerManagerWatch() = default;
-    ~PowerManagerWatch() = default;
+#include "BaseWatch.h"
 
-    char MenuEntry();
+class PowerManagerWatch : public BaseWatch {
+public:
+    static PowerManagerWatch& GetInstance();
 
 private:
-    char HandleInputInMenu(char input);
+    PowerManagerWatch() = default;
+    ~PowerManagerWatch() override = default;
+    void Usage() override;
+    void Menu(char input) override;
 };
-
-extern PowerManagerWatch thePowerManagerWatch;
 
 #endif // __POWER_MANAGER_WATCH_H__

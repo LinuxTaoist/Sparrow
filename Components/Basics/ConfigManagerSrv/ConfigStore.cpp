@@ -16,16 +16,16 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <vector>
 #include <stdio.h>
 #include <unistd.h>
-#include <sqlite3.h>
-#include <vector>
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
 #include "CommonTypeDefs.h"
 #include "CoreTypeDefs.h"
 #include "ConfigStore.h"
+#include "SqliteAdapter.h"
 
 using namespace InternalDefs;
 
@@ -41,41 +41,86 @@ std::string GetNowString()
     return GeneralUtils::GetCurTimeStr();
 }
 
-int32_t SqlExec(sqlite3* db, const std::string& sql)
+static std::string SqlEscape(const std::string& value)
 {
-    char* errMsg = nullptr;
-    int32_t rc = sqlite3_exec(db, sql.c_str(), nullptr, nullptr, &errMsg);
-    if (rc != SQLITE_OK) {
-        SPR_LOGE("SQL exec failed: %s, err=%s\n", sql.c_str(), errMsg ? errMsg : "unknown");
-        sqlite3_free(errMsg);
-        return -1;
-    }
-
-    return 0;
-} // namespace
-
-static bool HasColumn(sqlite3* db, const char* tableName, const char* columnName)
-{
-    std::string sql = std::string("PRAGMA table_info(") + tableName + ");";
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        return false;
-    }
-
-    bool found = false;
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        const unsigned char* name = sqlite3_column_text(stmt, 1);
-        if (name != nullptr && std::string(reinterpret_cast<const char*>(name)) == columnName) {
-            found = true;
-            break;
+    std::string escaped;
+    escaped.reserve(value.size());
+    for (char ch : value) {
+        if (ch == '\'') {
+            escaped += "''";
+        } else {
+            escaped += ch;
         }
     }
-
-    sqlite3_finalize(stmt);
-    return found;
+    return escaped;
 }
 
-static int32_t EnsureItemTypeColumn(sqlite3* db, const char* tableName)
+static std::string SqlText(const std::string& value)
+{
+    return "'" + SqlEscape(value) + "'";
+}
+
+static std::string HexEncode(const std::vector<uint8_t>& value)
+{
+    static const char kHex[] = "0123456789ABCDEF";
+    std::string out;
+    out.reserve(value.size() * 2);
+    for (uint8_t byte : value) {
+        out.push_back(kHex[(byte >> 4) & 0x0F]);
+        out.push_back(kHex[byte & 0x0F]);
+    }
+    return out;
+}
+
+static std::vector<uint8_t> HexDecode(const std::string& value)
+{
+    std::vector<uint8_t> out;
+    if (value.empty()) {
+        return out;
+    }
+
+    std::string text = value;
+    if (text.size() >= 2 && text[0] == 'X' && text[1] == '\'') {
+        text = text.substr(2);
+    }
+    if (text.size() % 2 != 0) {
+        text = text.substr(0, text.size() - 1);
+    }
+
+    out.reserve(text.size() / 2);
+    for (size_t i = 0; i + 1 < text.size(); i += 2) {
+        char hi = text[i];
+        char lo = text[i + 1];
+        auto HexToByte = [](char ch) -> uint8_t {
+            if (ch >= '0' && ch <= '9') return static_cast<uint8_t>(ch - '0');
+            if (ch >= 'a' && ch <= 'f') return static_cast<uint8_t>(10 + (ch - 'a'));
+            if (ch >= 'A' && ch <= 'F') return static_cast<uint8_t>(10 + (ch - 'A'));
+            return 0;
+        };
+        out.push_back(static_cast<uint8_t>((HexToByte(hi) << 4) | HexToByte(lo)));
+    }
+    return out;
+}
+
+static bool HasColumn(SqliteAdapter* db, const char* tableName, const char* columnName)
+{
+    if (db == nullptr) {
+        return false;
+    }
+    std::string sql = std::string("PRAGMA table_info(") + tableName + ");";
+    std::vector<std::vector<std::string>> rows;
+    if (!db->Query(sql, rows)) {
+        return false;
+    }
+    for (const auto& row : rows) {
+        if (row.size() > 1 && row[1] == columnName) {
+            return true;
+        }
+    }
+    return false;
+}
+
+static int32_t EnsureItemTypeColumn(SqliteAdapter* db, const char* tableName)
 {
     if (HasColumn(db, tableName, "item_type")) {
         return 0;
@@ -83,36 +128,31 @@ static int32_t EnsureItemTypeColumn(sqlite3* db, const char* tableName)
 
     std::string sql = std::string("ALTER TABLE ") + tableName +
                       " ADD COLUMN item_type INTEGER NOT NULL DEFAULT 0;";
-    return SqlExec(db, sql);
+    return db->Execute(sql) ? 0 : -1;
 }
 
 ConfigStore::ConfigStore(const std::string& dbPath)
-    : mpDb(nullptr), mDbPath(dbPath), mNextRevision(0)
+    : mpDb(SqliteAdapter::GetInstance(dbPath)), mDbPath(dbPath), mNextRevision(0)
 {
 }
 
 ConfigStore::~ConfigStore()
 {
-    if (mpDb != nullptr) {
-        sqlite3_close(reinterpret_cast<sqlite3*>(mpDb));
-        mpDb = nullptr;
-    }
+    mpDb = nullptr;
 }
 
 int32_t ConfigStore::Initialize()
 {
-    sqlite3* db = nullptr;
-    if (sqlite3_open(mDbPath.c_str(), &db) != SQLITE_OK) {
+    if (mpDb == nullptr) {
+        mpDb = SqliteAdapter::GetInstance(mDbPath);
+    }
+    if (mpDb == nullptr) {
         SPR_LOGE("Open db failed: %s\n", mDbPath.c_str());
-        if (db != nullptr) {
-            sqlite3_close(db);
-        }
         return -1;
     }
 
-    mpDb = db;
-    NONZERO_CHECK_RET(SqlExec(db, "PRAGMA journal_mode=WAL;"));
-    NONZERO_CHECK_RET(SqlExec(db, "PRAGMA synchronous=NORMAL;"));
+    NONZERO_CHECK_RET(mpDb->Execute("PRAGMA journal_mode=WAL;") ? 0 : -1);
+    NONZERO_CHECK_RET(mpDb->Execute("PRAGMA synchronous=NORMAL;") ? 0 : -1);
     NONZERO_CHECK_RET(CreateTables());
     NONZERO_CHECK_RET(LoadNextRevision());
     return 0;
@@ -120,8 +160,9 @@ int32_t ConfigStore::Initialize()
 
 int32_t ConfigStore::CreateTables()
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
+    if (mpDb == nullptr) {
+        return -1;
+    }
 
     std::string metaSql = std::string(
         "CREATE TABLE IF NOT EXISTS ") + META_TABLE +
@@ -140,75 +181,87 @@ int32_t ConfigStore::CreateTables()
         "update_time TEXT NOT NULL,"
         "PRIMARY KEY(namespace_name, item_key));";
 
-    NONZERO_CHECK_RET(SqlExec(db, metaSql));
-    char* defaultSql = sqlite3_mprintf(itemSql.c_str(), DEFAULT_TABLE);
-    char* factorySql = sqlite3_mprintf(itemSql.c_str(), FACTORY_TABLE);
-    char* userSql = sqlite3_mprintf(itemSql.c_str(), USER_TABLE);
+    NONZERO_CHECK_RET(mpDb->Execute(metaSql) ? 0 : -1);
+    std::string defaultSql = std::string("CREATE TABLE IF NOT EXISTS ") + DEFAULT_TABLE + " ("
+        "namespace_name TEXT NOT NULL,"
+        "item_key TEXT NOT NULL,"
+        "item_value BLOB NOT NULL,"
+        "item_type INTEGER NOT NULL DEFAULT 0,"
+        "revision INTEGER NOT NULL,"
+        "schema_version INTEGER NOT NULL DEFAULT 1,"
+        "owner TEXT NOT NULL DEFAULT '',"
+        "update_time TEXT NOT NULL,"
+        "PRIMARY KEY(namespace_name, item_key));";
+    std::string factorySql = std::string("CREATE TABLE IF NOT EXISTS ") + FACTORY_TABLE + " ("
+        "namespace_name TEXT NOT NULL,"
+        "item_key TEXT NOT NULL,"
+        "item_value BLOB NOT NULL,"
+        "item_type INTEGER NOT NULL DEFAULT 0,"
+        "revision INTEGER NOT NULL,"
+        "schema_version INTEGER NOT NULL DEFAULT 1,"
+        "owner TEXT NOT NULL DEFAULT '',"
+        "update_time TEXT NOT NULL,"
+        "PRIMARY KEY(namespace_name, item_key));";
+    std::string userSql = std::string("CREATE TABLE IF NOT EXISTS ") + USER_TABLE + " ("
+        "namespace_name TEXT NOT NULL,"
+        "item_key TEXT NOT NULL,"
+        "item_value BLOB NOT NULL,"
+        "item_type INTEGER NOT NULL DEFAULT 0,"
+        "revision INTEGER NOT NULL,"
+        "schema_version INTEGER NOT NULL DEFAULT 1,"
+        "owner TEXT NOT NULL DEFAULT '',"
+        "update_time TEXT NOT NULL,"
+        "PRIMARY KEY(namespace_name, item_key));";
+
     int32_t ret = 0;
-    ret = SqlExec(db, defaultSql);
+    ret = mpDb->Execute(defaultSql) ? 0 : -1;
     if (ret == 0) {
-        ret = SqlExec(db, factorySql);
+        ret = mpDb->Execute(factorySql) ? 0 : -1;
     }
     if (ret == 0) {
-        ret = SqlExec(db, userSql);
+        ret = mpDb->Execute(userSql) ? 0 : -1;
     }
-    sqlite3_free(defaultSql);
-    sqlite3_free(factorySql);
-    sqlite3_free(userSql);
     if (ret != 0) {
         return -1;
     }
 
-    NONZERO_CHECK_RET(EnsureItemTypeColumn(db, DEFAULT_TABLE));
-    NONZERO_CHECK_RET(EnsureItemTypeColumn(db, FACTORY_TABLE));
-    NONZERO_CHECK_RET(EnsureItemTypeColumn(db, USER_TABLE));
+    NONZERO_CHECK_RET(EnsureItemTypeColumn(mpDb, DEFAULT_TABLE));
+    NONZERO_CHECK_RET(EnsureItemTypeColumn(mpDb, FACTORY_TABLE));
+    NONZERO_CHECK_RET(EnsureItemTypeColumn(mpDb, USER_TABLE));
 
     return 0;
 }
 
 int32_t ConfigStore::QueryMaxRevision(const std::string& tableName, int32_t& maxRevision)
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-
-    maxRevision = 0;
-    std::string sql = "SELECT IFNULL(MAX(revision), 0) FROM " + tableName + ";";
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (mpDb == nullptr) {
         return -1;
     }
 
-    int32_t ret = -1;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        maxRevision = sqlite3_column_int(stmt, 0);
-        ret = 0;
+    maxRevision = 0;
+    std::string sql = "SELECT IFNULL(MAX(revision), 0) FROM " + tableName + ";";
+    std::vector<std::vector<std::string>> rows;
+    if (!mpDb->Query(sql, rows) || rows.empty() || rows[0].empty()) {
+        return -1;
     }
-    sqlite3_finalize(stmt);
-    return ret;
+    maxRevision = std::stoi(rows[0][0]);
+    return 0;
 }
 
 int32_t ConfigStore::LoadNextRevision()
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-
-    sqlite3_stmt* stmt = nullptr;
-    std::string sql = std::string("SELECT meta_value FROM ") + META_TABLE +
-                      " WHERE meta_key='next_revision';";
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (mpDb == nullptr) {
         return -1;
     }
 
-    int32_t ret = -1;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        const unsigned char* text = sqlite3_column_text(stmt, 0);
-        mNextRevision = text ? atoi(reinterpret_cast<const char*>(text)) : 1;
-        ret = 0;
-    }
-    sqlite3_finalize(stmt);
-
-    if (ret == 0 && mNextRevision > 0) {
-        return 0;
+    std::string sql = std::string("SELECT meta_value FROM ") + META_TABLE +
+                      " WHERE meta_key='next_revision';";
+    std::vector<std::vector<std::string>> rows;
+    if (mpDb->Query(sql, rows) && !rows.empty() && !rows[0].empty()) {
+        mNextRevision = std::stoi(rows[0][0]);
+        if (mNextRevision > 0) {
+            return 0;
+        }
     }
 
     int32_t maxRevision = 0;
@@ -229,39 +282,31 @@ int32_t ConfigStore::LoadNextRevision()
 
 int32_t ConfigStore::UpdateNextRevision(int32_t revision)
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-    std::string sql = std::string(
-        "INSERT OR REPLACE INTO ") + META_TABLE +
-        "(meta_key, meta_value) VALUES('next_revision', ?);";
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (mpDb == nullptr) {
         return -1;
     }
 
-    std::string revisionText = std::to_string(revision);
-    sqlite3_bind_text(stmt, 1, revisionText.c_str(), -1, SQLITE_TRANSIENT);
-    int32_t ret = (sqlite3_step(stmt) == SQLITE_DONE) ? 0 : -1;
-    sqlite3_finalize(stmt);
-    return ret;
+    std::string sql = std::string("INSERT OR REPLACE INTO ") + META_TABLE +
+        "(meta_key, meta_value) VALUES('next_revision', " + SqlText(std::to_string(revision)) + ");";
+    return mpDb->Execute(sql) ? 0 : -1;
 }
 
 int32_t ConfigStore::BeginTransaction()
 {
-    return SqlExec(reinterpret_cast<sqlite3*>(mpDb), "BEGIN IMMEDIATE TRANSACTION;");
+    return (mpDb && mpDb->Execute("BEGIN IMMEDIATE TRANSACTION;")) ? 0 : -1;
 }
 
 int32_t ConfigStore::CommitTransaction()
 {
-    return SqlExec(reinterpret_cast<sqlite3*>(mpDb), "COMMIT;");
+    return (mpDb && mpDb->Execute("COMMIT;")) ? 0 : -1;
 }
 
 int32_t ConfigStore::RollbackTransaction()
 {
-    return SqlExec(reinterpret_cast<sqlite3*>(mpDb), "ROLLBACK;");
+    return (mpDb && mpDb->Execute("ROLLBACK;")) ? 0 : -1;
 }
 
-const char* ConfigStore::TableName(int32_t scope) const
+std::string ConfigStore::TableName(int32_t scope) const
 {
     switch (scope) {
         case CONFIG_SCOPE_DEFAULT:
@@ -271,7 +316,7 @@ const char* ConfigStore::TableName(int32_t scope) const
         case CONFIG_SCOPE_USER:
             return USER_TABLE;
         default:
-            return nullptr;
+            return "";
     }
 }
 
@@ -286,10 +331,11 @@ int32_t ConfigStore::UpsertRaw(int32_t scope, const std::string& nameSpace, cons
                                const std::vector<uint8_t>& value, int32_t valueType,
                                const std::string& owner, int32_t& revision)
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-    const char* tableName = TableName(scope);
-    if (tableName == nullptr) {
+    if (mpDb == nullptr) {
+        return -1;
+    }
+    const std::string tableName = TableName(scope);
+    if (tableName.empty()) {
         return -1;
     }
 
@@ -297,35 +343,24 @@ int32_t ConfigStore::UpsertRaw(int32_t scope, const std::string& nameSpace, cons
     revision = mNextRevision;
     mNextRevision++;
 
-    std::string sql = std::string(
-        "INSERT OR REPLACE INTO ") + tableName +
-        "(namespace_name, item_key, item_value, item_type, revision, schema_version, owner, update_time) "
-        "VALUES(?, ?, ?, ?, ?, 1, ?, ?);";
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        RollbackTransaction();
-        return -1;
-    }
-
     std::string now = GetNowString();
-    sqlite3_bind_text(stmt, 1, nameSpace.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 2, key.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_blob(stmt, 3,
-                      value.empty() ? nullptr : reinterpret_cast<const void*>(value.data()),
-                      static_cast<int>(value.size()), SQLITE_TRANSIENT);
-    sqlite3_bind_int(stmt, 4, valueType);
-    sqlite3_bind_int(stmt, 5, revision);
-    sqlite3_bind_text(stmt, 6, owner.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 7, now.c_str(), -1, SQLITE_TRANSIENT);
+    std::string blobLiteral = "X'" + HexEncode(value) + "'";
+    std::string sql = std::string("INSERT OR REPLACE INTO ") + tableName +
+        "(namespace_name, item_key, item_value, item_type, revision, schema_version, owner, update_time) "
+        "VALUES(" + SqlText(nameSpace) + ", " + SqlText(key) + ", " + blobLiteral + ", " +
+        std::to_string(valueType) + ", " + std::to_string(revision) + ", 1, " + SqlText(owner) + ", " +
+        SqlText(now) + ");";
 
-    int32_t ret = (sqlite3_step(stmt) == SQLITE_DONE) ? 0 : -1;
-    sqlite3_finalize(stmt);
-    if (ret != 0 || UpdateNextRevision(mNextRevision) != 0 || CommitTransaction() != 0) {
+    if (!mpDb->Execute(sql) || UpdateNextRevision(mNextRevision) != 0) {
         RollbackTransaction();
         mNextRevision = revision;
         return -1;
     }
-
+    if (CommitTransaction() != 0) {
+        RollbackTransaction();
+        mNextRevision = revision;
+        return -1;
+    }
     return 0;
 }
 
@@ -343,87 +378,70 @@ int32_t ConfigStore::EnsureValue(int32_t scope, const std::string& nameSpace, co
 
 int32_t ConfigStore::Remove(int32_t scope, const std::string& nameSpace, const std::string& key, int32_t& revision)
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-    const char* tableName = TableName(scope);
-    if (tableName == nullptr) {
+    if (mpDb == nullptr) {
+        return -1;
+    }
+    const std::string tableName = TableName(scope);
+    if (tableName.empty()) {
         return -1;
     }
 
     NONZERO_CHECK_RET(BeginTransaction());
     revision = mNextRevision;
     mNextRevision++;
-
-    std::string sql = std::string("DELETE FROM ") + tableName + " WHERE namespace_name=? AND item_key=?;";
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
-        RollbackTransaction();
-        return -1;
-    }
-
-    sqlite3_bind_text(stmt, 1, nameSpace.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 2, key.c_str(), -1, SQLITE_TRANSIENT);
-    int32_t ret = (sqlite3_step(stmt) == SQLITE_DONE) ? 0 : -1;
-    sqlite3_finalize(stmt);
-    if (ret != 0 || UpdateNextRevision(mNextRevision) != 0 || CommitTransaction() != 0) {
+    std::string sql = std::string("DELETE FROM ") + tableName + " WHERE namespace_name=" +
+        SqlText(nameSpace) + " AND item_key=" + SqlText(key) + ";";
+    if (!mpDb->Execute(sql) || UpdateNextRevision(mNextRevision) != 0) {
         RollbackTransaction();
         mNextRevision = revision;
         return -1;
     }
-
+    if (CommitTransaction() != 0) {
+        RollbackTransaction();
+        mNextRevision = revision;
+        return -1;
+    }
     return 0;
 }
 
 int32_t ConfigStore::QueryTable(const std::string& tableName, const std::string& nameSpace,
                                 const std::string& key, ConfigRecord& record)
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-
-    std::string sql = "SELECT item_value, item_type, revision, owner, update_time FROM " + tableName
-                    + " WHERE namespace_name=? AND item_key=?;";
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (mpDb == nullptr) {
         return -1;
     }
 
-    sqlite3_bind_text(stmt, 1, nameSpace.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(stmt, 2, key.c_str(), -1, SQLITE_TRANSIENT);
-
-    int32_t ret = -1;
-    if (sqlite3_step(stmt) == SQLITE_ROW) {
-        const void* value = sqlite3_column_blob(stmt, 0);
-        int valueBytes = sqlite3_column_bytes(stmt, 0);
-        const unsigned char* owner = sqlite3_column_text(stmt, 3);
-        const unsigned char* updateTime = sqlite3_column_text(stmt, 4);
-
-        record.rawValue.clear();
-        if (value != nullptr && valueBytes > 0) {
-            const uint8_t* begin = reinterpret_cast<const uint8_t*>(value);
-            record.rawValue.assign(begin, begin + valueBytes);
-        }
-
-        record.valueType = sqlite3_column_int(stmt, 1);
-        if (record.valueType == CONFIG_VALUE_TYPE_STRING) {
-            record.value.assign(record.rawValue.begin(), record.rawValue.end());
-        } else {
-            record.value.clear();
-        }
-
-        record.revision = sqlite3_column_int(stmt, 2);
-        record.owner = owner ? reinterpret_cast<const char*>(owner) : "";
-        record.updateTime = updateTime ? reinterpret_cast<const char*>(updateTime) : "";
-        ret = 0;
+    std::string sql = "SELECT item_value, item_type, revision, owner, update_time FROM " + tableName +
+        " WHERE namespace_name=" + SqlText(nameSpace) + " AND item_key=" + SqlText(key) + ";";
+    std::vector<std::vector<std::string>> rows;
+    if (!mpDb->Query(sql, rows) || rows.empty() || rows[0].size() < 5) {
+        return -1;
     }
 
-    sqlite3_finalize(stmt);
-    return ret;
+    const std::string& blobText = rows[0][0];
+    record.rawValue = HexDecode(blobText);
+    if (record.rawValue.empty() && !blobText.empty()) {
+        record.rawValue.assign(blobText.begin(), blobText.end());
+    }
+
+    record.valueType = std::stoi(rows[0][1]);
+    if (record.valueType == CONFIG_VALUE_TYPE_STRING) {
+        record.value.assign(record.rawValue.begin(), record.rawValue.end());
+    } else {
+        record.value.clear();
+    }
+
+    record.revision = std::stoi(rows[0][2]);
+    record.owner = rows[0][3];
+    record.updateTime = rows[0][4];
+    record.scope = 0;
+    return 0;
 }
 
 int32_t ConfigStore::GetByScope(int32_t scope, const std::string& nameSpace, const std::string& key, ConfigRecord& record)
 {
-    const char* tableName = TableName(scope);
-    if (tableName == nullptr) {
+    const std::string tableName = TableName(scope);
+    if (tableName.empty()) {
         return -1;
     }
 
@@ -459,28 +477,25 @@ int32_t ConfigStore::GetEffectiveRaw(const std::string& nameSpace, const std::st
 int32_t ConfigStore::QueryNamespace(const std::string& tableName, const std::string& nameSpace,
                                     std::map<std::string, std::string>& items)
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-    std::string sql = "SELECT item_key, item_value, item_type FROM " + tableName + " WHERE namespace_name=?;";
-    sqlite3_stmt* stmt = nullptr;
-    if (sqlite3_prepare_v2(db, sql.c_str(), -1, &stmt, nullptr) != SQLITE_OK) {
+    if (mpDb == nullptr) {
         return -1;
     }
 
-    sqlite3_bind_text(stmt, 1, nameSpace.c_str(), -1, SQLITE_TRANSIENT);
-    while (sqlite3_step(stmt) == SQLITE_ROW) {
-        const unsigned char* key = sqlite3_column_text(stmt, 0);
-        const void* value = sqlite3_column_blob(stmt, 1);
-        int valueBytes = sqlite3_column_bytes(stmt, 1);
-        int valueType = sqlite3_column_int(stmt, 2);
-        if (key != nullptr && valueType == CONFIG_VALUE_TYPE_STRING) {
-            const char* valueData = reinterpret_cast<const char*>(value);
-            items[reinterpret_cast<const char*>(key)] =
-                (valueData != nullptr && valueBytes > 0) ? std::string(valueData, valueBytes) : "";
+    std::string sql = "SELECT item_key, item_value, item_type FROM " + tableName +
+        " WHERE namespace_name=" + SqlText(nameSpace) + ";";
+    std::vector<std::vector<std::string>> rows;
+    if (!mpDb->Query(sql, rows)) {
+        return -1;
+    }
+    for (const auto& row : rows) {
+        if (row.size() < 3) {
+            continue;
+        }
+        int valueType = std::stoi(row[2]);
+        if (valueType == CONFIG_VALUE_TYPE_STRING) {
+            items[row[0]] = row[1];
         }
     }
-
-    sqlite3_finalize(stmt);
     return 0;
 }
 
@@ -495,25 +510,8 @@ int32_t ConfigStore::ListNamespaceEffective(const std::string& nameSpace, std::m
 
 int32_t ConfigStore::Backup(const std::string& backupPath)
 {
-    sqlite3* db = reinterpret_cast<sqlite3*>(mpDb);
-    POINTER_CHECK_ERR(db, -1);
-
-    sqlite3* backupDb = nullptr;
-    if (sqlite3_open(backupPath.c_str(), &backupDb) != SQLITE_OK) {
-        if (backupDb != nullptr) {
-            sqlite3_close(backupDb);
-        }
+    if (mpDb == nullptr) {
         return -1;
     }
-
-    sqlite3_backup* backup = sqlite3_backup_init(backupDb, "main", db, "main");
-    if (backup == nullptr) {
-        sqlite3_close(backupDb);
-        return -1;
-    }
-
-    int32_t rc = sqlite3_backup_step(backup, -1);
-    sqlite3_backup_finish(backup);
-    sqlite3_close(backupDb);
-    return (rc == SQLITE_DONE) ? 0 : -1;
+    return mpDb->BackupTo(backupPath) ? 0 : -1;
 }

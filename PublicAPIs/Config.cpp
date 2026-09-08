@@ -381,6 +381,35 @@ int Config::ListNamespace(const std::string& nameSpace, std::map<std::string, st
     return ret;
 }
 
+int Config::DeleteValue(const std::string& nameSpace, const std::string& key,
+                        int32_t scope, int32_t& revision)
+{
+    if (!EnsureConnected()) {
+        SPR_LOGE("Config service is disable!\n");
+        return -1;
+    }
+
+    ProcLockGuard lock(gPMutex, gTMutex);
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(CONFIG_CMD_DELETE_VALUE));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(nameSpace));
+    NONZERO_CHECK_RET(pReqParcel->WriteString(key));
+    NONZERO_CHECK_RET(pReqParcel->WriteInt(scope));
+    NONZERO_CHECK_RET(pReqParcel->Post());
+
+    int ret = 0;
+    NONZERO_CHECK_RET(pRspParcel->TimedWait());
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(revision));
+    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
+    return ret;
+}
+
+int Config::DeleteValue(const std::string& nameSpace, const std::string& key,
+                        int32_t scope)
+{
+    int32_t revision = 0;
+    return DeleteValue(nameSpace, key, scope, revision);
+}
+
 int Config::GetMeta(const std::string& nameSpace, const std::string& key, int32_t& scope, int32_t& revision)
 {
     if (!EnsureConnected()) {

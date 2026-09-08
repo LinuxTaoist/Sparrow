@@ -29,8 +29,7 @@
 static sqlite3* pDb = nullptr;
 static std::atomic<bool> gObjAlive(true);
 
-static int callback(void* data, int argc, char** argv, char** azColName)
-{
+static int callback(void* data, int argc, char** argv, char** azColName) {
     std::vector<std::vector<std::string>>* results = static_cast<std::vector<std::vector<std::string>>*>(data);
     if (!results) return SQLITE_ABORT;
 
@@ -42,8 +41,7 @@ static int callback(void* data, int argc, char** argv, char** azColName)
     return 0;
 }
 
-bool SqliteAdapter::Execute(const std::string& sqlStr)
-{
+bool SqliteAdapter::Execute(const std::string& sqlStr) {
     char* errMsg;
     int rc = sqlite3_exec(pDb, sqlStr.c_str(), nullptr, nullptr, &errMsg);
     if (rc != SQLITE_OK) {
@@ -53,24 +51,21 @@ bool SqliteAdapter::Execute(const std::string& sqlStr)
     }
     return true;
 }
-SqliteAdapter::SqliteAdapter(const std::string& dbPath)
-{
+SqliteAdapter::SqliteAdapter(const std::string& dbPath) {
     int rc = sqlite3_open(dbPath.c_str(), &pDb);
     if (rc) {
         SPR_LOGE("Open %s fail! (%s)\n", dbPath.c_str(), sqlite3_errmsg(pDb));
     }
 }
 
-SqliteAdapter::~SqliteAdapter()
-{
+SqliteAdapter::~SqliteAdapter() {
     gObjAlive = false;
     if (pDb) {
         sqlite3_close(pDb);
     }
 }
 
-SqliteAdapter* SqliteAdapter::GetInstance(const std::string& dbPath)
-{
+SqliteAdapter* SqliteAdapter::GetInstance(const std::string& dbPath) {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -79,8 +74,7 @@ SqliteAdapter* SqliteAdapter::GetInstance(const std::string& dbPath)
     return &instance;
 }
 
-bool SqliteAdapter::CreateTable(const std::string& tableName, const std::map<std::string, std::string>& columnsDefinition)
-{
+bool SqliteAdapter::CreateTable(const std::string& tableName, const std::map<std::string, std::string>& columnsDefinition) {
     std::string columnDefs;
     for (const auto& col : columnsDefinition) {
         if (!columnDefs.empty()) columnDefs += ", ";
@@ -99,8 +93,7 @@ bool SqliteAdapter::CreateTable(const std::string& tableName, const std::map<std
     return true;
 }
 
-bool SqliteAdapter::Insert(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues)
-{
+bool SqliteAdapter::Insert(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues) {
     std::string columns, values;
     for (const auto& pair : columnsValues) {
         if (!columns.empty()) {
@@ -123,8 +116,7 @@ bool SqliteAdapter::Insert(const std::string& table, const std::vector<std::pair
     return true;
 }
 
-bool SqliteAdapter::Remove(const std::string& table, const std::string& condition)
-{
+bool SqliteAdapter::Remove(const std::string& table, const std::string& condition) {
     std::string sqlStr = "DELETE FROM " + table + (condition.empty() ? "" : " WHERE " + condition);
     char* errMsg;
 
@@ -138,8 +130,7 @@ bool SqliteAdapter::Remove(const std::string& table, const std::string& conditio
     return true;
 }
 
-bool SqliteAdapter::Update(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues, const std::string& condition)
-{
+bool SqliteAdapter::Update(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues, const std::string& condition) {
     std::string setClause;
     for (size_t i = 0; i < columnsValues.size(); ++i) {
         if (i > 0) setClause += ", ";
@@ -158,17 +149,47 @@ bool SqliteAdapter::Update(const std::string& table, const std::vector<std::pair
     return true;
 }
 
-std::vector<std::vector<std::string>> SqliteAdapter::Query(const std::string& table, const std::string& columns, const std::string& condition)
-{
-    std::string sqlStr = "SELECT " + columns + " FROM " + table + (condition.empty() ? "" : " WHERE " + condition);
-    std::vector<std::vector<std::string>> results;
-    char* errMsg;
+bool SqliteAdapter::Query(const std::string& sqlStr, std::vector<std::vector<std::string>>& rows) {
+    rows.clear();
+    char* errMsg = nullptr;
 
-    int rc = sqlite3_exec(pDb, sqlStr.c_str(), callback, &results, &errMsg);
+    int rc = sqlite3_exec(pDb, sqlStr.c_str(), callback, &rows, &errMsg);
     if (rc != SQLITE_OK) {
         SPR_LOGE("SQL error: [%s] (%s)\n", sqlStr.c_str(), errMsg);
         sqlite3_free(errMsg);
+        rows.clear();
+        return false;
     }
 
-    return results;
+    return true;
+}
+
+bool SqliteAdapter::Query(const std::string& table, const std::string& columns, std::vector<std::vector<std::string>>& rows, const std::string& condition) {
+    std::string sqlStr = "SELECT " + columns + " FROM " + table + (condition.empty() ? "" : " WHERE " + condition);
+    return Query(sqlStr, rows);
+}
+
+bool SqliteAdapter::BackupTo(const std::string& backupPath) {
+    if (pDb == nullptr) {
+        return false;
+    }
+
+    sqlite3* backupDb = nullptr;
+    if (sqlite3_open(backupPath.c_str(), &backupDb) != SQLITE_OK) {
+        if (backupDb != nullptr) {
+            sqlite3_close(backupDb);
+        }
+        return false;
+    }
+
+    sqlite3_backup* backup = sqlite3_backup_init(backupDb, "main", pDb, "main");
+    if (backup == nullptr) {
+        sqlite3_close(backupDb);
+        return false;
+    }
+
+    int rc = sqlite3_backup_step(backup, -1);
+    sqlite3_backup_finish(backup);
+    sqlite3_close(backupDb);
+    return rc == SQLITE_DONE;
 }

@@ -19,21 +19,21 @@
 #ifndef __MEDIATOR_WATCH_H__
 #define __MEDIATOR_WATCH_H__
 
-class MediatorWatch
-{
-public:
-    MediatorWatch() = default;
-    ~MediatorWatch() = default;
+#include "BaseWatch.h"
 
-    char MenuEntry();
+class MediatorWatch : public BaseWatch {
+public:
+    static MediatorWatch& GetInstance();
 
 private:
-    char HandleInputInMenu(char input);
+    MediatorWatch() = default;
+    ~MediatorWatch() override = default;
+    void Usage() override;
+    void Menu(char input) override;
+
     char ShowMQStatus();
     char ShowFieldDetails();
     char ShowSignalName();
 };
-
-extern MediatorWatch theMediatorWatch;
 
 #endif // __MEDIATOR_WATCH_H__

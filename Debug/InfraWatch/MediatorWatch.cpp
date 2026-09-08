@@ -23,24 +23,20 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-MediatorWatch theMediatorWatch;
-
-char MediatorWatch::MenuEntry()
-{
-    char bInput = 0;
-    do {
-        HandleInputInMenu(bInput);
-        char input = InfraWatch::WaitUserInputWithoutEnter();
-        bInput = toupper(input);
-    } while(bInput != 'Q');
-
-    return bInput;
+MediatorWatch& MediatorWatch::GetInstance() {
+    static MediatorWatch instance;
+    return instance;
 }
 
-char MediatorWatch::HandleInputInMenu(char input)
-{
+void MediatorWatch::Usage() {
     ShowMQStatus();
-    switch(input) {
+    SPR_LOG("Press 'S' to query signal\n");
+    SPR_LOG("Press 'M' to see more \n");
+    SPR_LOG("Press 'Q' to back \n");
+}
+
+void MediatorWatch::Menu(char input) {
+    switch (toupper(input)) {
         case 'M': {
             ShowFieldDetails();
             break;
@@ -49,19 +45,18 @@ char MediatorWatch::HandleInputInMenu(char input)
             ShowSignalName();
             break;
         }
+        case 'Q': {
+            break;
+        }
         default: {
             SPR_LOG("Press 'S' to query signal\n");
             SPR_LOG("Press 'M' to see more \n");
             break;
         }
     }
-
-    SPR_LOG("Press 'Q' to back \n");
-    return input;
 }
 
-char MediatorWatch::ShowSignalName()
-{
+char MediatorWatch::ShowSignalName() {
     SPR_LOG("\n");
     SPR_LOG("Input Signal Information: \n");
     SPR_LOG("----------------------------------------------------------------------------------------------------\n");
@@ -74,8 +69,7 @@ char MediatorWatch::ShowSignalName()
     return 0;
 }
 
-char MediatorWatch::ShowMQStatus()
-{
+char MediatorWatch::ShowMQStatus() {
     std::vector<SMQueueDetails> mqAttrVec;
     SprMediatorInterface::GetInstance()->GetAllMQStatus(mqAttrVec);
 
@@ -94,8 +88,7 @@ char MediatorWatch::ShowMQStatus()
     return 0;
 }
 
-char MediatorWatch::ShowFieldDetails()
-{
+char MediatorWatch::ShowFieldDetails() {
     SPR_LOG("\n");
     SPR_LOG("Field Descriptions:\n");
     SPR_LOG("----------------------------------------------------------------------------------------------------\n");

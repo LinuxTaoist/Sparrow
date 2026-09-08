@@ -19,17 +19,18 @@
 #ifndef __CONFIG_MANAGER_WATCH_H__
 #define __CONFIG_MANAGER_WATCH_H__
 
-class ConfigManagerWatch
-{
-public:
-    ConfigManagerWatch() = default;
-    ~ConfigManagerWatch() = default;
+#include "BaseWatch.h"
 
-    char MenuEntry();
+class ConfigManagerWatch : public BaseWatch {
+public:
+    static ConfigManagerWatch& GetInstance();
 
 private:
-    char ShowMenu();
-    char HandleInputInMenu(char input);
+    ConfigManagerWatch() = default;
+    ~ConfigManagerWatch() override = default;
+    void Usage() override;
+    void Menu(char input) override;
+
     int  ReadScopeFromInput(int32_t& scope);
     char HandleSetValue();
     char HandleGetValue();
@@ -37,7 +38,5 @@ private:
     char HandleGetMeta();
     char HandleBackup();
 };
-
-extern ConfigManagerWatch theConfigManagerWatch;
 
 #endif // __CONFIG_MANAGER_WATCH_H__

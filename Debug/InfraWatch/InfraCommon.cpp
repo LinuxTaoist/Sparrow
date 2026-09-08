@@ -26,8 +26,7 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-char InfraWatch::WaitUserInputUntilEnter()
-{
+char InfraWatch::WaitUserInputUntilEnter() {
     char in;
     SPR_LOG(": ");
     std::cin >> std::noskipws >> in;
@@ -36,8 +35,7 @@ char InfraWatch::WaitUserInputUntilEnter()
     return in;
 }
 
-char InfraWatch::WaitUserInputWithoutEnter()
-{
+char InfraWatch::WaitUserInputWithoutEnter() {
     char in = 0;
     GeneralUtils::SystemCmd("stty raw");
     in = getchar();
@@ -46,15 +44,13 @@ char InfraWatch::WaitUserInputWithoutEnter()
     return in;
 }
 
-void InfraWatch::ClearScreen()
-{
+void InfraWatch::ClearScreen() {
     SPR_LOG("\033[2J");
     SPR_LOG("\033[H");
     fflush(stdout);
 }
 
-int InfraWatch::ReadIntFromUserInput(int& input)
-{
+int InfraWatch::ReadIntFromUserInput(int& input) {
     std::string line;
     if (ReadLineFromUserInput(line) != 0) {
         return -1;
@@ -78,8 +74,7 @@ int InfraWatch::ReadIntFromUserInput(int& input)
     return 0;
 }
 
-int InfraWatch::ReadLineFromUserInput(std::string& input)
-{
+int InfraWatch::ReadLineFromUserInput(std::string& input) {
     if (!std::getline(std::cin, input)) {
         return -1;
     }

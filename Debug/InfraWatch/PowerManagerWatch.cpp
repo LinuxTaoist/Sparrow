@@ -23,10 +23,12 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-PowerManagerWatch thePowerManagerWatch;
+PowerManagerWatch& PowerManagerWatch::GetInstance() {
+    static PowerManagerWatch instance;
+    return instance;
+}
 
-char PowerManagerWatch::MenuEntry()
-{
+void PowerManagerWatch::Usage() {
     InfraWatch::ClearScreen();
     SPR_LOG("================================  Power Manager  ================================\n"
             "\n"
@@ -36,15 +38,9 @@ char PowerManagerWatch::MenuEntry()
             "    [Q] Quit\n"
             "\n"
             "=================================================================================\n");
-
-    char input = InfraWatch::WaitUserInputWithoutEnter();
-    HandleInputInMenu(input);
-
-    return input;
 }
 
-char PowerManagerWatch::HandleInputInMenu(char input)
-{
+void PowerManagerWatch::Menu(char input) {
     switch(input) {
         case '1': {
             PowerManagerInterface::GetInstance()->PowerOn();
@@ -60,6 +56,4 @@ char PowerManagerWatch::HandleInputInMenu(char input)
         default:
             break;
     }
-
-    return 0;
 }

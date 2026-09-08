@@ -19,18 +19,17 @@
 #ifndef __MANAGERS_WATCH_H__
 #define __MANAGERS_WATCH_H__
 
-class ManagersWatch
-{
-public:
-    ManagersWatch() = default;
-    ~ManagersWatch() = default;
+#include "BaseWatch.h"
 
-    char MenuEntry();
+class ManagersWatch : public BaseWatch {
+public:
+    static ManagersWatch& GetInstance();
 
 private:
-    char HandleInputInMenu(char input);
+    ManagersWatch() = default;
+    ~ManagersWatch() override = default;
+    void Usage() override;
+    void Menu(char input) override;
 };
-
-extern ManagersWatch theManagersWatch;
 
 #endif // __MANAGERS_WATCH_H__

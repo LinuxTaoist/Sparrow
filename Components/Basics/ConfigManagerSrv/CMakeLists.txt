@@ -9,5 +9,5 @@ target_include_directories  (BinConfigManagerSrv PRIVATE ${PROJECT_PATH}/Util
                                                          ${PROJECT_PATH}/PrivateAPIs/Binder
                                                          ${PROJECT_PATH}/3rdParty/sqlite/include)
 set_target_properties       (BinConfigManagerSrv PROPERTIES OUTPUT_NAME "configmanagersrv")
-target_link_libraries       (BinConfigManagerSrv pthread rt LibSprCore LibBinder sqlite3 dl)
-add_dependencies            (BinConfigManagerSrv LibSprCore LibBinder)
+target_link_libraries       (BinConfigManagerSrv pthread rt LibSprCore LibBinder LibSqliteAdapter dl)
+add_dependencies            (BinConfigManagerSrv LibSprCore LibBinder LibSqliteAdapter)

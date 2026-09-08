@@ -1,5 +1,5 @@
 
-# 序   
+# 序
 C++用法很多，包容性也比较强。一个C++的工程可能包含了各种各样没见过的用法。本篇内容主要是参照谷歌C++标准规范，结合自身实际工作
 及经验，整理一份适合平时C++开发的规则，规范自身C++编程规范。详细内容可参考[Google C++风格指南](https://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/contents/)。
 
@@ -61,7 +61,7 @@ void Foo(const string &in, string *out);
 
 若要使用函数重载, 则必须能让读者一看调用点就胸有成竹, 而不用花心思猜测调用的重载函数到底是哪一种. 这一规则也适用于构造函数。
 
-**定义**    
+**定义**
 
 你可以编写一个参数类型为 const string& 的函数, 然后用另一个参数类型为 const char* 的函数对其进行重载:
 
@@ -379,7 +379,7 @@ enum EFormatStateExtPvr    
 * global case matching to replace DRIEVER_CASE and driver_case
 * with your custom driver name.
 * Journal : 2020-05-09 init v1.0 by xxxx
-* Others : 
+* Others :
 ********************************************************************************
 */
 ```
@@ -884,5 +884,5 @@ class Student {
 * 函数体内开头或结尾的空行可读性微乎其微.
 * 在多重 if-else 块里加空行或许有点可读性.
 
-# 参考  
-[Google C++风格指南](https://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/contents/)
+# 参考
+[Google C++风格指南](https://zh-google-styleguide.readthedocs.io/en/latest/google-cpp-styleguide/contents.html)

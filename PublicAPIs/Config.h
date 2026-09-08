@@ -185,6 +185,29 @@ public:
     int ListNamespace(const std::string& nameSpace, std::map<std::string, std::string>& items);
 
     /**
+     * @brief DeleteValue
+     *
+     * @param nameSpace
+     * @param key
+     * @param scope
+     * @param revision
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int DeleteValue(const std::string& nameSpace, const std::string& key,
+                    int32_t scope, int32_t& revision);
+
+    /**
+     * @brief DeleteValue
+     *
+     * @param nameSpace
+     * @param key
+     * @param scope
+     * @return 0 on success, or -1 if an error occurred
+     */
+    int DeleteValue(const std::string& nameSpace, const std::string& key,
+                    int32_t scope = CONFIG_SCOPE_USER);
+
+    /**
      * @brief GetMeta
      *
      * @param nameSpace

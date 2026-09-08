@@ -32,22 +32,12 @@ using namespace InternalDefs;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-ConfigManagerWatch theConfigManagerWatch;
-
-char ConfigManagerWatch::MenuEntry()
-{
-    char bInput = 0;
-    do {
-        HandleInputInMenu(bInput);
-        char input = InfraWatch::WaitUserInputWithoutEnter();
-        bInput = toupper(input);
-    } while (bInput != 'Q');
-
-    return bInput;
+ConfigManagerWatch& ConfigManagerWatch::GetInstance() {
+    static ConfigManagerWatch instance;
+    return instance;
 }
 
-char ConfigManagerWatch::ShowMenu()
-{
+void ConfigManagerWatch::Usage() {
     InfraWatch::ClearScreen();
     SPR_LOG("===============================  Config Manager  ================================\n"
             "\n"
@@ -60,12 +50,9 @@ char ConfigManagerWatch::ShowMenu()
             "    [Q] Quit \n"
             "\n"
             "=================================================================================\n");
-    return 0;
 }
 
-char ConfigManagerWatch::HandleInputInMenu(char input)
-{
-    ShowMenu();
+void ConfigManagerWatch::Menu(char input) {
     switch(input) {
         case '1': {
             HandleSetValue();
@@ -93,12 +80,9 @@ char ConfigManagerWatch::HandleInputInMenu(char input)
         default:
             break;
     }
-
-    return input;
 }
 
-int ConfigManagerWatch::ReadScopeFromInput(int32_t& scope)
-{
+int ConfigManagerWatch::ReadScopeFromInput(int32_t& scope) {
     std::string line;
     SPR_LOG("Input scope [0:default 1:factory 2:user]: ");
     if (InfraWatch::ReadLineFromUserInput(line) != 0) {
@@ -123,8 +107,7 @@ int ConfigManagerWatch::ReadScopeFromInput(int32_t& scope)
     return 0;
 }
 
-char ConfigManagerWatch::HandleSetValue()
-{
+char ConfigManagerWatch::HandleSetValue() {
     std::string line;
     std::string nameSpace;
     std::string key;
@@ -154,8 +137,7 @@ char ConfigManagerWatch::HandleSetValue()
     return 0;
 }
 
-char ConfigManagerWatch::HandleGetValue()
-{
+char ConfigManagerWatch::HandleGetValue() {
     std::string line;
     std::string nameSpace;
     std::string key;
@@ -181,8 +163,7 @@ char ConfigManagerWatch::HandleGetValue()
     return 0;
 }
 
-char ConfigManagerWatch::HandleListNamespace()
-{
+char ConfigManagerWatch::HandleListNamespace() {
     std::string line;
     std::string nameSpace;
     std::map<std::string, std::string> items;
@@ -208,8 +189,7 @@ char ConfigManagerWatch::HandleListNamespace()
     return 0;
 }
 
-char ConfigManagerWatch::HandleGetMeta()
-{
+char ConfigManagerWatch::HandleGetMeta() {
     std::string line;
     std::string nameSpace;
     std::string key;
@@ -234,8 +214,7 @@ char ConfigManagerWatch::HandleGetMeta()
     return 0;
 }
 
-char ConfigManagerWatch::HandleBackup()
-{
+char ConfigManagerWatch::HandleBackup() {
     int ret = Config::GetInstance()->Backup();
     SPR_LOG("Backup ret=%d\n", ret);
     return 0;

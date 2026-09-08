@@ -27,12 +27,13 @@ using namespace InfraWatch;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-MainMenu theMainMenu;
+MainMenu& MainMenu::GetInstance() {
+    static MainMenu instance;
+    return instance;
+}
 
-char MainMenu::MenuEntry()
-{
+void MainMenu::Usage() {
     ClearScreen();
-
     SPR_LOG("==================================  MAIN MENU  ==================================\n"
             "\n"
             "    1. Display All Message Queues \n"
@@ -42,26 +43,20 @@ char MainMenu::MenuEntry()
             "    [Q] Quit\n"
             "\n"
             "=================================================================================\n");
-
-    char input = WaitUserInputWithoutEnter();
-    HandleInputInMenu(input);
-
-    return input;
 }
 
-char MainMenu::HandleInputInMenu(char input)
-{
+char MainMenu::Menu(char input) {
     switch(input) {
         case '1': {
-            CONTINUE_ON_NONQUIT(theMediatorWatch.MenuEntry);
+            MediatorWatch::GetInstance().Entry();
             break;
         }
         case '2': {
-            CONTINUE_ON_NONQUIT(theManagersWatch.MenuEntry);
+            ManagersWatch::GetInstance().Entry();
             break;
         }
         case '3': {
-            CONTINUE_ON_NONQUIT(theCustomDebugWatch.MenuEntry);
+            CustomDebugWatch::GetInstance().Entry();
             break;
         }
         case 'q': {
@@ -74,8 +69,13 @@ char MainMenu::HandleInputInMenu(char input)
     return 0;
 }
 
-int MainMenu::MenuLoop()
-{
-    CONTINUE_ON_NONQUIT(MenuEntry);
+int MainMenu::MenuLoop() {
+    char input = 0;
+    do {
+        Usage();
+        input = WaitUserInputWithoutEnter();
+        Menu(input);
+    } while (input != 'q' && input != 'Q');
+
     return 0;
 }

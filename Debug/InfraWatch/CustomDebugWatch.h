@@ -20,20 +20,24 @@
 #define __CUSTOM_DEBUG_WATCH_H__
 
 #include <thread>
-#include "InfraCommon.h"
+#include "BaseWatch.h"
 
-class CustomDebugWatch
-{
+class CustomDebugWatch : public BaseWatch {
 public:
-    CustomDebugWatch() = default;
-    ~CustomDebugWatch() = default;
-
-    char MenuEntry();
+    static CustomDebugWatch& GetInstance();
 
 private:
-    char HandleInputInMenu(char input);
-};
+    CustomDebugWatch() = default;
+    ~CustomDebugWatch() override = default;
+    void Usage() override;
+    void Menu(char input) override;
 
-extern CustomDebugWatch theCustomDebugWatch;
+    void HandleAddTimerInOneSec();
+    void HandleDelTimerInOneSec();
+    void HandleAddCustomTimer();
+    void HandleDelCustomTimer();
+    void HandleEnableRemoteShell();
+    void HandleDisableRemoteShell();
+};
 
 #endif // __CUSTOM_DEBUG_WATCH_H__

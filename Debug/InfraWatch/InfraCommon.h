@@ -31,6 +31,7 @@ char WaitUserInputUntilEnter();
 char WaitUserInputWithoutEnter();
 int  ReadLineFromUserInput(std::string& input);
 int  ReadIntFromUserInput(int& input);
-};
+
+}; // namespace InfraWatch
 
 #endif // __INFRA_COMMON_H__

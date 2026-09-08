@@ -2,35 +2,27 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : MainMenu.h
+ *  @file       : BaseWatch.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date       : 2024/04/23
+ *  @date       : 2026/09/08
  *
  *
  *  Change History:
  *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/23 | 1.0.0.1   | Xiang.D        | Create file
+ *  2026/09/08 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#ifndef __MAIN_MENU_H__
-#define __MAIN_MENU_H__
+#include "BaseWatch.h"
 
-#include "InfraCommon.h"
-
-class MainMenu {
-public:
-    static MainMenu& GetInstance();
-    int  MenuLoop();
-
-private:
-    MainMenu() = default;
-    ~MainMenu() = default;
-    void Usage();
-    char Menu(char input);
-};
-
-#endif // __MAIN_MENU_H__
+void BaseWatch::Entry() {
+    char input = 0;
+    do {
+        Usage();
+        input = InfraWatch::WaitUserInputWithoutEnter();
+        Menu(input);
+    } while (input != 'q' && input != 'Q');
+}

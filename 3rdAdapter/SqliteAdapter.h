@@ -33,7 +33,9 @@ public:
     bool Insert(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues);
     bool Remove(const std::string& table, const std::string& condition = "");
     bool Update(const std::string& table, const std::vector<std::pair<std::string, std::string>>& columnsValues, const std::string& condition = "");
-    std::vector<std::vector<std::string>> Query(const std::string& table, const std::string& columns = "*", const std::string& condition = "");
+    bool Query(const std::string& sqlStr, std::vector<std::vector<std::string>>& rows);
+    bool Query(const std::string& table, const std::string& columns, std::vector<std::vector<std::string>>& rows, const std::string& condition = "");
+    bool BackupTo(const std::string& backupPath);
 
 private:
     explicit SqliteAdapter(const std::string& dbPath);

@@ -24,12 +24,13 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-ManagersWatch theManagersWatch;
+ManagersWatch& ManagersWatch::GetInstance() {
+    static ManagersWatch instance;
+    return instance;
+}
 
-char ManagersWatch::MenuEntry()
-{
+void ManagersWatch::Usage() {
     InfraWatch::ClearScreen();
-
     SPR_LOG("============================   Manager's  Entrance   ============================\n"
             "\n"
             "    1. PowerManager \n"
@@ -38,21 +39,16 @@ char ManagersWatch::MenuEntry()
             "    [Q] Quit \n"
             "\n"
             "=================================================================================\n");
-
-    char input = InfraWatch::WaitUserInputWithoutEnter();
-    HandleInputInMenu(input);
-    return input;
 }
 
-char ManagersWatch::HandleInputInMenu(char input)
-{
+void ManagersWatch::Menu(char input) {
     switch(input) {
         case '1': {
-            CONTINUE_ON_NONQUIT(thePowerManagerWatch.MenuEntry);
+            PowerManagerWatch::GetInstance().Entry();
             break;
         }
         case '2': {
-            CONTINUE_ON_NONQUIT(theConfigManagerWatch.MenuEntry);
+            ConfigManagerWatch::GetInstance().Entry();
             break;
         }
         case 'q': {
@@ -61,6 +57,4 @@ char ManagersWatch::HandleInputInMenu(char input)
         default:
             break;
     }
-
-    return 0;
 }

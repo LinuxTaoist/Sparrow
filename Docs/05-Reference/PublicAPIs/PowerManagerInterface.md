@@ -16,7 +16,7 @@ PowerManagerInterface 是 Sparrow 对外提供的电源管理控制接口。
 | 类型 | 依赖项 | 说明 |
 |------|--------|------|
 | 头文件 | `PowerManagerInterface.h` | 电源管理接口 |
-| 库文件 | `libpowermanagerapi.so` | PowerManager 对外接口库 |
+| 库文件 | `libpowermapi.so` | PowerManager 对外接口库 |
 
 **典型流程**
 

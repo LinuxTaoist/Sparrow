@@ -63,6 +63,7 @@ enum EHwErrorCode {
     HW_ERR_NET_NO_SERVICE           = -260,
     HW_ERR_NET_REGISTRATION_DENIED  = -261,
     HW_ERR_NET_QUERY_FAILED         = -262,
+    HW_ERR_NET_INTERFACE_DOWN       = -263,
 
     HW_ERR_SIM_QUERY_FAILED         = -310,
     HW_ERR_SIM_NOT_PRESENT          = -311,
