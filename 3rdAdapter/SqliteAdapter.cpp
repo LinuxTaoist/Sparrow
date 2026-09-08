@@ -20,6 +20,7 @@
 #include <iostream>
 #include <vector>
 #include <atomic>
+#include "sqlite3.h"
 #include "SqliteAdapter.h"
 
 #define SPR_LOGD(fmt, args...) printf("%d SQLAdapter D: " fmt, __LINE__, ##args)

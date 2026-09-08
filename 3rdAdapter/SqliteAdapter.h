@@ -19,7 +19,6 @@
 #ifndef __SQLITE_ADAPTER_H__
 #define __SQLITE_ADAPTER_H__
 
-#include "sqlite3.h"
 #include <map>
 #include <string>
 #include <vector>
