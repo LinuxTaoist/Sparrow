@@ -22,7 +22,9 @@
 #include <unistd.h>
 #include "SprLog.h"
 #include "SprDebugNode.h"
+#include "SprProcInfo.h"
 #include "CoreTypeDefs.h"
+#include "CommonMacros.h"
 #include "PluginManager.h"
 
 using namespace InternalDefs;
@@ -102,15 +104,15 @@ void PluginManager::InitWatchDir()
 
 std::string PluginManager::GetDefaultLibraryPath()
 {
-    std::string path = DEFAULT_PLUGIN_LIBRARY_PATH;
-    if (access(DEFAULT_PLUGIN_LIBRARY_PATH, F_OK) == -1) {
-        SPR_LOGW("%s not exist, changed path %s\n", DEFAULT_PLUGIN_LIBRARY_PATH, path.c_str());
+    std::string path = SprProcInfo::GetInstance()->GetRunRootPath() + std::string("/../") + DEFAULT_SPR_LIB_FILE;
+    if (access(path.c_str(), F_OK) == -1) {
+        SPR_LOGW("%s not exist, changed path %s\n", path.c_str(), path.c_str());
         char curPath[100] = {};
         if (getcwd(curPath, sizeof(curPath)) == nullptr) {
             SPR_LOGE("Get current path fail! (%s)\n", strerror(errno));
             return "";
         }
-        path = curPath + std::string("/../Lib");
+        path = curPath + std::string("/../") + DEFAULT_SPR_LIB_FILE;
     }
 
     return path;

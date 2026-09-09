@@ -39,6 +39,7 @@
 #define DEFAULT_DEBUG_ROOT_DIR      SYS_TEMP_DIR
 #define DEFAULT_MQS_DIR             SYS_TEMP_DIR "/mq_details"
 #define DEFAULT_SPR_ETC_FILE        "Etc"
+#define DEFAULT_SPR_LIB_FILE        "Lib"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for service and client

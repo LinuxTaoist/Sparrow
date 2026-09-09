@@ -235,6 +235,7 @@ struct SHwNetAddr6 {
 
 struct SHwApnProfile {
     int32_t callId;
+    std::string callName;
     int32_t simId;
     int32_t apnId;
     std::string apnName;
