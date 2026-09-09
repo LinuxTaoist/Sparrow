@@ -25,7 +25,7 @@
 #include <functional>
 #include <string>
 
-#define HW_COMMON_TYPES_VERSION   "HW_COMMON_TYPES_R1001"
+#define HW_COMMON_TYPES_VERSION   "HW_COMMON_TYPES_R1002"
 
 enum EHwErrorCode {
     HW_OK                           =  0,
