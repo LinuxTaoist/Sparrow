@@ -28,6 +28,7 @@ message(STATUS "BUILD_DEBUG    = ${BUILD_DEBUG}")
 message(STATUS "BUILD_TESTCASE = ${BUILD_TESTCASE}")
 message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
 message(STATUS "BUILD_COVERAGE = ${BUILD_COVERAGE}")
+message(STATUS "BUILD_ASAN     = ${BUILD_ASAN}")
 
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)

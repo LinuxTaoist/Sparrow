@@ -1,6 +1,7 @@
 # Sparrow Change Log
 ## v1.8.3.alpha.feature-alarm-manager
 ### 新增
+- 增加Ubuntu生成gtest测试用例覆盖脚本
 
 ### 变更
 - 调整Docs文件结构

@@ -207,3 +207,120 @@ TEST(Util_FindSubMemory, SameLengthAndSameContent) {
     EXPECT_TRUE(result != nullptr);
     EXPECT_EQ(memcmp(result, tar, tLen), 0);
 }
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_Split
+// --------------------------------------------------------------------------------------------------------------------
+// 测试按分隔符拆分字符串
+TEST(Util_Split, BasicSplit) {
+    std::vector<std::string> tokens = Split("a,b,c", ',');
+    ASSERT_EQ(tokens.size(), 3u);
+    EXPECT_EQ(tokens[0], "a");
+    EXPECT_EQ(tokens[1], "b");
+    EXPECT_EQ(tokens[2], "c");
+}
+
+// 测试无分隔符时拆分结果
+TEST(Util_Split, NoDelimiter) {
+    std::vector<std::string> tokens = Split("hello", ',');
+    ASSERT_EQ(tokens.size(), 1u);
+    EXPECT_EQ(tokens[0], "hello");
+}
+
+// 测试空字符串拆分结果
+TEST(Util_Split, EmptyString) {
+    std::vector<std::string> tokens = Split("", ',');
+    EXPECT_TRUE(tokens.empty());
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_GetSubstringAfterLastDelimiter
+// --------------------------------------------------------------------------------------------------------------------
+// 测试获取最后一个分隔符后的子串
+TEST(Util_GetSubstringAfterLastDelimiter, NormalCase) {
+    EXPECT_EQ(GetSubstringAfterLastDelimiter("/usr/local/bin/app", '/'), "app");
+    EXPECT_EQ(GetSubstringAfterLastDelimiter("a.b.c", '.'), "c");
+}
+
+// 测试无分隔符或末尾分隔符的边界情况
+TEST(Util_GetSubstringAfterLastDelimiter, NoDelimiterOrTrailing) {
+    EXPECT_EQ(GetSubstringAfterLastDelimiter("no-delimiter", '/'), "");
+    EXPECT_EQ(GetSubstringAfterLastDelimiter("trailing/", '/'), "");
+    EXPECT_EQ(GetSubstringAfterLastDelimiter("", '/'), "");
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_GetCharAfterNthTarget
+// --------------------------------------------------------------------------------------------------------------------
+// 测试获取第 n 个目标字符后的字符
+TEST(Util_GetCharAfterNthTarget, NormalCase) {
+    char out = 0;
+    EXPECT_EQ(GetCharAfterNthTarget("a1b2c3", 'b', 1, out), 0);
+    EXPECT_EQ(out, '2');
+}
+
+// 测试目标字符在末尾或不存在等边界情况
+TEST(Util_GetCharAfterNthTarget, BoundaryCases) {
+    char out = 0;
+    // 目标是最后一个字符，找不到后一个字符
+    EXPECT_EQ(GetCharAfterNthTarget("abc", 'c', 1, out), -1);
+    // 不存在
+    EXPECT_EQ(GetCharAfterNthTarget("abc", 'x', 1, out), -1);
+    // 空字符串
+    EXPECT_EQ(GetCharAfterNthTarget("", 'a', 1, out), -1);
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_GetCurTimeStr
+// --------------------------------------------------------------------------------------------------------------------
+// 测试当前时间字符串格式
+TEST(Util_GetCurTimeStr, FormatCheck) {
+    std::string timeStr = GetCurTimeStr();
+    // 格式: YYYY-MM-DD HH:MM:SS.mmm
+    ASSERT_EQ(timeStr.size(), 23u);
+    EXPECT_EQ(timeStr[4], '-');
+    EXPECT_EQ(timeStr[7], '-');
+    EXPECT_EQ(timeStr[10], ' ');
+    EXPECT_EQ(timeStr[13], ':');
+    EXPECT_EQ(timeStr[16], ':');
+    EXPECT_EQ(timeStr[19], '.');
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_SystemCmd
+// --------------------------------------------------------------------------------------------------------------------
+// 测试无输出的系统命令执行
+TEST(Util_SystemCmd, EchoWithoutOutput) {
+    EXPECT_EQ(SystemCmd("echo hello > /dev/null"), 0);
+}
+
+// 测试带输出的系统命令执行
+TEST(Util_SystemCmd, EchoWithOutput) {
+    std::string out;
+    EXPECT_EQ(SystemCmd(out, "echo hello"), 0);
+    EXPECT_EQ(out, "hello\n");
+}
+
+// 测试失败的系统命令返回错误
+TEST(Util_SystemCmd, FailingCommand) {
+    std::string out;
+    EXPECT_EQ(SystemCmd(out, "exit 1"), -1);
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_InitSignalHandler
+// --------------------------------------------------------------------------------------------------------------------
+// 测试注册信号处理函数
+TEST(Util_InitSignalHandler, RegisterHandler) {
+    auto handler = [](int) {};
+    EXPECT_EQ(InitSignalHandler(handler), 0);
+}
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_GetRandomInteger 边界
+// --------------------------------------------------------------------------------------------------------------------
+// 测试随机整数的非法宽度边界
+TEST(Util_GetRandomInteger, BoundaryWidth) {
+    EXPECT_EQ(GetRandomInteger(0), 0);
+    EXPECT_EQ(GetRandomInteger(-5), 0);
+}

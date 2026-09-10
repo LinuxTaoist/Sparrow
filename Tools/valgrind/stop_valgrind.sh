@@ -1,36 +1,64 @@
 #!/bin/bash
+set -euo pipefail
 
-BIN_PATH="../../Release/Bin/"
+usage() {
+    cat <<'EOF'
+Usage:
+    stop_valgrind.sh [--report-path <dir>]
 
-cd $BIN_PATH
-LOG_DIR="./valgrind_logs"
-PID_FILE="${LOG_DIR}/service_pids.txt"
+Options:
+    --report-path <dir>  start_valgrind.sh 的报告输出目录，默认当前路径下 valgrind_logs
+    -h, --help           显示帮助
+EOF
+}
 
-if [ -f "$PID_FILE" ]; then
-  echo "正在按启动反顺序停止所有服务..."
+REPORT_PATH="$(pwd)/valgrind_logs"
 
-  # 使用tac反向读取PID文件（最后启动的服务先停止）
-  tac "$PID_FILE" | while read -r line; do
-    pid=$(echo "$line" | awk '{print $NF}')
-    service=$(echo "$line" | awk '{print $1}')
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        --report-path)
+            REPORT_PATH="$2"
+            shift 2
+            ;;
+        --report-path=*)
+            REPORT_PATH="${1#*=}"
+            shift
+            ;;
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        *)
+            echo "未知参数: $1" >&2
+            usage
+            exit 1
+            ;;
+    esac
+done
 
-    if ps -p "$pid" > /dev/null; then
-      echo "停止 ${service} (PID: ${pid})"
-      kill -10 "$pid"  # 先尝试正常终止
-      sleep 2      # 等待进程优雅退出
+PID_FILE="$REPORT_PATH/service_pids.txt"
 
-      # 若仍未退出，强制终止
-      if ps -p "$pid" > /dev/null; then
-        kill -9 "$pid"
-        echo "${service} (PID: ${pid}) 强制终止"
-      fi
-    else
-      echo "${service} (PID: ${pid}) 已停止"
-    fi
-  done
-
-  rm -f "$PID_FILE"
-  echo "所有服务已按反顺序停止"
-else
-  echo "未发现运行中的服务（PID文件不存在）"
+if [ ! -f "$PID_FILE" ]; then
+    echo "未发现运行中的服务（PID 文件不存在：$PID_FILE）" >&2
+    exit 1
 fi
+
+echo "按启动反序停止所有服务..."
+
+tac "$PID_FILE" | while read -r service pid; do
+    if kill -0 "$pid" 2>/dev/null; then
+        echo "停止 ${service} (PID: ${pid})"
+        kill -10 "$pid" 2>/dev/null || true
+        sleep 2
+
+        if kill -0 "$pid" 2>/dev/null; then
+            kill -9 "$pid" 2>/dev/null || true
+            echo "${service} (PID: ${pid}) 已强制终止"
+        fi
+    else
+        echo "${service} (PID: ${pid}) 已停止"
+    fi
+done
+
+rm -f "$PID_FILE"
+echo "所有服务已停止，报告目录：${REPORT_PATH}"

@@ -17,8 +17,9 @@
 ### 说明
 - 覆盖率默认关闭，不会在常规编译时自动生成。
 - 覆盖率只在 Default(Ubuntu) 平台执行。
-- 当前覆盖率目录只保留 1 个脚本：`Tools/testcoverage/gen_coverage_report.sh`。
-- 该脚本只负责“生成报告”，不会执行测试用例。
+- 当前覆盖率目录只保留 1 个脚本：`Tools/gtestreport/gtest_coverage.sh`。
+- 脚本支持 `--run-tests`，可先执行 `ctest` 再生成覆盖率报告。
+- 若希望必须生成网页报告，可使用 `--strict-html`（缺少 lcov/genhtml 时直接失败）。
 
 ### 复现步骤（按顺序执行）
 
@@ -50,13 +51,25 @@
 4) 生成覆盖率报告（唯一脚本）
 在项目根目录执行：
 
-		./Tools/testcoverage/gen_coverage_report.sh
+		./Tools/gtestreport/gtest_coverage.sh
+
+推荐一键执行测试并生成报告：
+
+		./Tools/gtestreport/gtest_coverage.sh --run-tests
 
 若当前环境没有 `lcov/genhtml`，终端会直接提示文本报告生成路径。
 
+若要求必须输出网页报告（无 lcov/genhtml 则失败）：
+
+		./Tools/gtestreport/gtest_coverage.sh --run-tests --strict-html
+
 可选：指定 gcov 工具
 
-		./Tools/testcoverage/gen_coverage_report.sh --gcov-tool gcov
+		./Tools/gtestreport/gtest_coverage.sh --gcov-tool gcov
+
+可选：仅安装网页报告依赖（Ubuntu）
+
+		sudo apt install lcov
 
 5) 查看报告
 - 若系统有 lcov/genhtml：

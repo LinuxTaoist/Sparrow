@@ -1,5 +1,5 @@
 ## default compile options
-message("load default_compile_options.cmake")
+message("load Default_compile_options.cmake")
 
 ## 模块配置版本控制
 # 用于编译时标识配置文件版本，影响：
@@ -66,5 +66,17 @@ if(BUILD_COVERAGE)
         add_definitions(-DBUILD_COVERAGE=1)
     else()
         message(FATAL_ERROR "BUILD_COVERAGE requires GCC or Clang")
+    endif()
+endif()
+
+if(BUILD_ASAN)
+    if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
+        message(STATUS "AddressSanitizer enabled (Default platform)")
+        add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+        set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -fsanitize=address")
+        set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -fsanitize=address")
+        add_definitions(-DBUILD_ASAN=1)
+    else()
+        message(FATAL_ERROR "BUILD_ASAN requires GCC or Clang")
     endif()
 endif()

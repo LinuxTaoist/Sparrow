@@ -16,7 +16,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
+#include <cstdio>
+#include <cstdlib>
+#include <unistd.h>
+#include <sys/stat.h>
 #include "SprProcInfo.h"
+#include "CommonMacros.h"
 #include "gtest/gtest.h"
 
 // 测试 SprProcInfo::GetDebugPath 方法
@@ -58,4 +63,41 @@ TEST(Core_SprProcInfo, GetProcNameReturnsValidName) {
     SprProcInfo* instance = SprProcInfo::GetInstance();
     std::string procName = instance->GetProcName();
     EXPECT_FALSE(procName.empty());
+}
+
+// 涉及环境变量与临时目录的用例用 fixture 统一清理，避免影响其他测试
+class Core_SprProcInfo_Env : public ::testing::Test {
+protected:
+    void TearDown() override {
+        unsetenv(ENV_SPR_ROOT_PATH);
+        remove("/tmp/sparrow_procinfo_root/Etc");
+        remove("/tmp/sparrow_procinfo_root");
+    }
+};
+
+// 测试设置环境变量时获取运行根路径
+TEST_F(Core_SprProcInfo_Env, GetRunRootPathUsesEnvVariableWhenSet) {
+    SprProcInfo* instance = SprProcInfo::GetInstance();
+    const std::string expectRoot = "/tmp/sparrow_env_root_for_test";
+
+    ASSERT_EQ(0, setenv(ENV_SPR_ROOT_PATH, expectRoot.c_str(), 1));
+    EXPECT_EQ(expectRoot, instance->GetRunRootPath());
+}
+
+// 测试获取 Etc 路径时校验目录存在性
+TEST_F(Core_SprProcInfo_Env, GetRunEtcPathChecksExistence) {
+    SprProcInfo* instance = SprProcInfo::GetInstance();
+    const std::string rootPath = "/tmp/sparrow_procinfo_root";
+    const std::string etcPath = rootPath + "/Etc";
+
+    remove(etcPath.c_str());
+    remove(rootPath.c_str());
+    ASSERT_EQ(0, mkdir(rootPath.c_str(), 0755));
+    ASSERT_EQ(0, mkdir(etcPath.c_str(), 0755));
+    ASSERT_EQ(0, setenv(ENV_SPR_ROOT_PATH, rootPath.c_str(), 1));
+
+    EXPECT_EQ(etcPath, instance->GetRunEtcPath());
+
+    ASSERT_EQ(0, remove(etcPath.c_str()));
+    EXPECT_EQ("", instance->GetRunEtcPath());
 }

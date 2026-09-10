@@ -32,6 +32,48 @@ constexpr int32_t FRAME_HEAD = 4;
 // 测试临时共享内存路径（与日志服务无关）
 const std::string TMP_SHM_PATH = "/tmp/TestSprLogShm";
 
+// 测试使能状态与初始可读可写状态
+TEST(Util_SharedRingBuffer, IsEnabledAndInitialState) {
+    unlink(TMP_SHM_PATH.c_str());
+
+    SharedRingBuffer master(TMP_SHM_PATH, LOG_CACHE_MEMORY_SIZE);
+    EXPECT_TRUE(master.IsEnabled());
+    EXPECT_TRUE(master.IsWriteable());
+    EXPECT_FALSE(master.IsReadable());
+
+    unlink(TMP_SHM_PATH.c_str());
+}
+
+// 测试写入后可读，读取后恢复可写
+TEST(Util_SharedRingBuffer, ReadableAfterWrite) {
+    unlink(TMP_SHM_PATH.c_str());
+
+    SharedRingBuffer master(TMP_SHM_PATH, LOG_CACHE_MEMORY_SIZE);
+    const char* data = "hello";
+    ASSERT_EQ(master.Write(data, 5), 0);
+    EXPECT_TRUE(master.IsReadable());
+
+    char buf[16] = {};
+    ASSERT_EQ(master.Read(buf, 5), 0);
+    EXPECT_FALSE(master.IsReadable());
+    EXPECT_TRUE(master.IsWriteable());
+
+    unlink(TMP_SHM_PATH.c_str());
+}
+
+// 测试打开不存在的共享内存时禁用状态
+TEST(Util_SharedRingBuffer, DisabledState) {
+    const std::string missingPath = "/tmp/TestSprLogShm_not_exist_xyz";
+    unlink(missingPath.c_str());
+
+    SharedRingBuffer slave(missingPath);
+    EXPECT_FALSE(slave.IsEnabled());
+    EXPECT_FALSE(slave.IsReadable());
+    EXPECT_FALSE(slave.IsWriteable());
+    EXPECT_EQ(slave.AvailSpace(), -1);
+    EXPECT_EQ(slave.AvailData(), -1);
+}
+
 // 测试环形缓冲帧协议（[4B len][body] 多帧写入读取完整）
 TEST(Util_SharedRingBuffer, FrameIntegrity) {
     unlink(TMP_SHM_PATH.c_str());

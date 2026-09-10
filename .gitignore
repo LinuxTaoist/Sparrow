@@ -4,14 +4,23 @@ Release/
 3rdParty/googletest/googletest/
 3rdParty/googletest/.gtest_build/
 3rdParty/googletest/lib/
-3rdParty/libgo/libgo/
 3rdParty/sqlite/lib/
+Components/Business/
 
 Platform/*
 !/Platform/Default
-Components/Business/
+
 Hardware/*
 !/Hardware/CMakeLists.txt
 !/Hardware/Default
 !/Hardware/Common
 
+Tools/gtestreport/*
+!/Tools/gtestreport/gtest_coverage.sh
+!/Tools/gtestreport/gtest_report.sh
+!/Tools/gtestreport/README.md
+
+Tools/valgrind/*
+!/Tools/valgrind/start_valgrind.sh
+!/Tools/valgrind/stop_valgrind.sh
+!/Tools/valgrind/README.md

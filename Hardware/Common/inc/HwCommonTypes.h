@@ -313,9 +313,9 @@ struct SHwSimAppInfo {
 };
 
 struct SHwSimCardInfo {
-    EHwSimCardState state;
     std::string imsi;
     std::string iccid;
+    EHwSimCardState state;
     SHwSimAppInfo appInfo;
 };
 

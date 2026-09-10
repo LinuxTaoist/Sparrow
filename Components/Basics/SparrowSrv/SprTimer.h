@@ -19,6 +19,8 @@
 #ifndef __SPR_TIMER_H__
 #define __SPR_TIMER_H__
 
+#include <stdint.h>
+
 class SprTimer
 {
 public:

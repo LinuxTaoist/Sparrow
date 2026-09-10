@@ -224,3 +224,55 @@ TEST(Util_HexStringToAscii, NonHexCharacters) {
     std::string expected = "";
     EXPECT_EQ(expected, result);
 }
+
+// --------------------------------------------------------------------------------------------------------------------
+// - Util_DumpBytesAscall
+// --------------------------------------------------------------------------------------------------------------------
+// 测试空输入转储
+TEST(Util_DumpBytesAscall, EmptyInput) {
+    std::string out;
+    EXPECT_EQ(DumpBytesAscall("", out), 0);
+    EXPECT_TRUE(out.empty());
+}
+
+// 测试单行字节转储格式
+TEST(Util_DumpBytesAscall, SingleLineDump) {
+    std::string input = "Hello, World!";
+    std::string out;
+    EXPECT_EQ(DumpBytesAscall(input, out), 0);
+    EXPECT_FALSE(out.empty());
+    // 首行地址为 00000000
+    EXPECT_EQ(out.substr(0, 8), "00000000");
+    // 包含十六进制与 ascii 两部分（以换行结尾）
+    EXPECT_EQ(out.back(), '\n');
+}
+
+// 测试多行字节转储（超过 16 字节）
+TEST(Util_DumpBytesAscall, MultiLineDump) {
+    // 超过 16 字节，应拆成多行
+    std::string input(40, 'A');
+    std::string out;
+    EXPECT_EQ(DumpBytesAscall(input, out), 0);
+
+    int32_t newlineCount = 0;
+    for (char c : out) {
+        if (c == '\n') {
+            newlineCount++;
+        }
+    }
+    EXPECT_GE(newlineCount, 3);   // 40 字节 = 16+16+8，共 3 行
+
+    // 第二行地址应为 00000010
+    size_t secondLinePos = out.find('\n') + 1;
+    EXPECT_EQ(out.substr(secondLinePos, 8), "00000010");
+}
+
+// 测试非打印字符以点号显示
+TEST(Util_DumpBytesAscall, NonPrintableChars) {
+    std::string input = "\x01\x02\x03";   // 非打印字符
+    std::string out;
+    EXPECT_EQ(DumpBytesAscall(input, out), 0);
+    EXPECT_FALSE(out.empty());
+    // ascii 部分非打印字符显示为 '.'
+    EXPECT_NE(out.find('.'), std::string::npos);
+}

@@ -30,3 +30,4 @@ set(BUILD_DEBUG ON)       # 调试工具集（含调试符号与增强日志）
 set(BUILD_EXAMPLES ON)    # 示例程序（演示API用法，非生产环境）
 set(BUILD_TESTCASE ON)    # 单元测试套件（依赖gtest库）
 set(BUILD_COVERAGE ON)    # 覆盖率开关（仅在需要生成覆盖率报告时开启）
+set(BUILD_ASAN OFF)       # ASan内存检测 （依赖libasan.so）

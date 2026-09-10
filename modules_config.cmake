@@ -18,7 +18,8 @@ set(HAL_FAMILY "Default")
 ## 可选功能模块配置
 # 非核心组件，编译时默认禁用
 # 启用方法：参考Platform/{Platform}/Build/Options/{Platform}_compile_options.cmake
-set(BUILD_DEBUG OFF CACHE BOOL "Build Debug")
+set(BUILD_DEBUG    OFF CACHE BOOL "Build Debug")
 set(BUILD_EXAMPLES OFF CACHE BOOL "Add Examples")
 set(BUILD_TESTCASE OFF CACHE BOOL "Add Test Case")
 set(BUILD_COVERAGE OFF CACHE BOOL "Add Test Coverage")
+set(BUILD_ASAN     OFF CACHE BOOL "Enable AddressSanitizer")

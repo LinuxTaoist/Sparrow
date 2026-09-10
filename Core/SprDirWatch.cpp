@@ -35,7 +35,8 @@ SprDirWatch::SprDirWatch()
 
 SprDirWatch::~SprDirWatch()
 {
-    for (int32_t wd : mWatchFds) {
+    while (!mWatchFds.empty()) {
+        int32_t wd = *mWatchFds.begin();
         DelDirWatch(wd);
     }
     close(mInotifyFd);
