@@ -51,6 +51,7 @@ private:
     SprMediator();
     ~SprMediator();
     int InitInternalPort();
+    int InitEpollEventHandler();
     int LoadMQStaticInfo(int handle, const std::string& devName);
     int NotifyObserver(InternalDefs::ESprModuleID id, const SprMsg& msg);
     int NotifyAllObserver(const SprMsg& msg);

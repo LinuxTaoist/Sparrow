@@ -27,6 +27,7 @@
 #include "SprDebugNode.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
+#include "PLog.h"
 #include "BindInterface.h"
 #include "SprEnumHelper.h"
 #include "SprMediator.h"
@@ -65,6 +66,7 @@ SprMediator* SprMediator::GetInstance()
 int SprMediator::Init()
 {
     SPR_LOGD("### Init SprMediator begin!\n");
+    InitEpollEventHandler();
     InitInternalPort();
     RegisterDebugFuncs();
     SPR_LOGD("### Init SprMediator end!\n");
@@ -81,6 +83,35 @@ int SprMediator::InitInternalPort()
 
     mpInternalMQ->AddToPoll();
     SPR_LOGD("Init internal mq %s fd %d successfully!\n", mpInternalMQ->GetMQDevName().c_str(), mpInternalMQ->GetEvtFd());
+    return 0;
+}
+
+int SprMediator::InitEpollEventHandler()
+{
+    SPR_LOGD("Init epoll event handler!\n");
+    PLog& theLog = PLog::GetInstance();
+    theLog.RegisterPrintCallback([](int level, int line, const char* tag, const char* fmt, va_list ap) {
+        char logBuf[1024] = {0};
+        vsnprintf(logBuf, sizeof(logBuf), fmt, ap);
+        switch (level) {
+            case PLogLevel::PLOG_LEVEL_DEBUG:
+                SprLog::GetInstance()->d(tag, "%4d %s", line, logBuf);
+                break;
+            case PLogLevel::PLOG_LEVEL_INFO:
+                SprLog::GetInstance()->i(tag, "%4d %s", line, logBuf);
+                break;
+            case PLogLevel::PLOG_LEVEL_ERROR:
+                SprLog::GetInstance()->e(tag, "%4d %s", line, logBuf);
+                break;
+            case PLogLevel::PLOG_LEVEL_WARN:
+                SprLog::GetInstance()->w(tag, "%4d %s", line, logBuf);
+                break;
+            default:
+                SprLog::GetInstance()->i(tag, "%4d %s", line, logBuf);
+                break;
+        }
+    });
+
     return 0;
 }
 
