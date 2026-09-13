@@ -49,6 +49,13 @@ public:
     SprObserverWithMQueueThread(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
     virtual ~SprObserverWithMQueueThread();
 
+    /**
+     * @brief  Get current pending message count in internal queue
+     *
+     * @return Current pending message count
+     */
+    uint32_t GetPendingMsgCount();
+
 protected:
     /**
      * @brief  Enqueue received message and notify the processing thread

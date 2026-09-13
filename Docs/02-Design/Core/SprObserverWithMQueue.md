@@ -33,7 +33,7 @@
 
 1. 派生一个业务类，继承 `SprObserverWithMQueue`。
 2. 实现纯虚函数 `ProcessMsg(const SprMsg& msg)`。
-3. 在组件初始化时调用父类初始化逻辑，完成 mediator 注册和消息队列绑定。
+3. 在组件初始化时调用父类初始化`Initialize()`逻辑，完成 mediator 注册和消息队列绑定。
 4. 通过 `SendMsg()` 发送消息，或由外部消息触发 `EpollEvent()`。
 
 **简要示例**
@@ -50,6 +50,10 @@ protected:
         return 0;
     }
 };
+
+MyObserver observer(1, "MyObserver");
+observer.Initialize();
+observer.SendMsg(...);
 ```
 
 **参考代码**

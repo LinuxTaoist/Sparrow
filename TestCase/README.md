@@ -1,87 +1,37 @@
-# 测试指南
-- BenchMark: 基准测试，用于测试性能，如消息处理速度、线程池处理速度等。
+# TestCase
 
-- Internal: 基于内部所有源码的测试，可访问所有工程源码，类似于白盒测试。
+## 1. 这是做什么的
+TestCase 是 Sparrow 的测试入口目录，包含三类测试：
+- [Benchmark](Benchmark/README.md)：性能与稳定性测试。
+- [Internal](Internal)：内部源码测试，偏白盒。
+- [External](External)：对外接口测试，偏黑盒。
 
-- External: 基于外部释放头文件和库测试，仅能够访问释放的文件，类似于黑盒测试。
+## 2. 怎么编译和运行
+在工程根目录执行：
 
-## 当前测试版本
-- googletest 版本: 1.12.1
-- 来源: 3rdParty/googletest/googletest-1.12.1.tar.gz
+```bash
+cd Platform/Default/Build
+./build_default.sh
+```
 
-## 启动编译
-参考 [googletest集成指南](../3rdParty/googletest/README.md)。
-
-## 覆盖率测试（Default Ubuntu）
-
-### 说明
-- 覆盖率默认关闭，不会在常规编译时自动生成。
-- 覆盖率只在 Default(Ubuntu) 平台执行。
-- 当前覆盖率目录只保留 1 个脚本：`Tools/gtestreport/gtest_coverage.sh`。
-- 脚本支持 `--run-tests`，可先执行 `ctest` 再生成覆盖率报告。
-- 若希望必须生成网页报告，可使用 `--strict-html`（缺少 lcov/genhtml 时直接失败）。
-
-### 复现步骤（按顺序执行）
-
-1) 打开覆盖率开关
-编辑 `Platform/Default/Build/Options/Default_modules_config.cmake`，确认：
-
-		set(BUILD_TESTCASE ON)
-		set(BUILD_COVERAGE ON)
-
-2) 编译测试程序
-在项目根目录执行：
-
-		cd Platform/Default/Build
-		./build_default.sh
-
-预期结果：生成 `Release/Default/Bin/test_external`（以及其他测试二进制）。
-
-3) 运行测试，产生 .gcda
-在项目根目录执行（示例）：
-
-		Release/Default/Bin/test_external
-
-可选方式（在构建目录执行）：
-
-		ctest --output-on-failure
-
-预期结果：在 `Release/Default/Cache` 下出现 `.gcda` 文件。
-
-4) 生成覆盖率报告（唯一脚本）
-在项目根目录执行：
-
-		./Tools/gtestreport/gtest_coverage.sh
-
-推荐一键执行测试并生成报告：
-
-		./Tools/gtestreport/gtest_coverage.sh --run-tests
-
-若当前环境没有 `lcov/genhtml`，终端会直接提示文本报告生成路径。
-
-若要求必须输出网页报告（无 lcov/genhtml 则失败）：
-
-		./Tools/gtestreport/gtest_coverage.sh --run-tests --strict-html
-
-可选：指定 gcov 工具
-
-		./Tools/gtestreport/gtest_coverage.sh --gcov-tool gcov
-
-可选：仅安装网页报告依赖（Ubuntu）
-
-		sudo apt install lcov
-
-5) 查看报告
-- 若系统有 lcov/genhtml：
-
-		Release/Default/Coverage/html/index.html
-
-- 若系统没有 lcov/genhtml（自动回退）：
-
-		Release/Default/Coverage/coverage_summary.txt
-
-### 4) 测试目标
-开启 BUILD_TESTCASE 后，已注册以下测试目标：
+编译后常用测试程序在 [Release/Default/Bin](../Release/Default/Bin)：
 - test_internal
 - test_external
 - test_benchmark
+
+## 3. 怎么快速定位文档
+- 基准测试说明： [TestCase/Benchmark/README.md](Benchmark/README.md)
+- googletest 集成说明： [3rdParty/googletest/README.md](../3rdParty/googletest/README.md)
+
+## 4. 覆盖率（Default 平台，可选）
+先确认 [Platform/Default/Build/Options/Default_modules_config.cmake](../Platform/Default/Build/Options/Default_modules_config.cmake) 打开了 BUILD_TESTCASE 和 BUILD_COVERAGE。
+
+生成覆盖率报告命令：
+
+```bash
+./Tools/gtestreport/gtest_coverage.sh --run-tests
+```
+
+结果位置：
+- 有 lcov/genhtml 时：Release/Default/Coverage/html/index.html
+- 无 lcov/genhtml 时：Release/Default/Coverage/coverage_summary.txt

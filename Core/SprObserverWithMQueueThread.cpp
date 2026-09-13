@@ -38,6 +38,11 @@ SprObserverWithMQueueThread::~SprObserverWithMQueueThread() {
     StopThread();
 }
 
+uint32_t SprObserverWithMQueueThread::GetPendingMsgCount() {
+    std::lock_guard<std::mutex> lock(mQueueMutex);
+    return (uint32_t)mMsgQueue.size();
+}
+
 int32_t SprObserverWithMQueueThread::ProcessRecvMsg(SprMsg& msg) {
     std::lock_guard<std::mutex> lock(mQueueMutex);
     if (mMsgQueue.size() >= mMaxQueueSize) {
