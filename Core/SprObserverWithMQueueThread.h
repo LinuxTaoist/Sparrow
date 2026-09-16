@@ -50,6 +50,13 @@ public:
     virtual ~SprObserverWithMQueueThread();
 
     /**
+     * @brief  Initialize function for derived class called in Initialize
+     *
+     * @return 0 on success, or -1 if an error occurred
+     */
+    virtual int32_t InitFramework() override;
+
+    /**
      * @brief  Get current pending message count in internal queue
      *
      * @return Current pending message count

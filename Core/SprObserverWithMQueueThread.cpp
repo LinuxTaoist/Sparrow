@@ -24,18 +24,22 @@ using namespace InternalDefs;
 
 #define LOG_TAG "SprObsThread"
 
-#define DEFAULT_QUEUE_MAX_SIZE  20
+#define DEFAULT_QUEUE_MAX_SIZE  1024
 #define DEFAULT_WAIT_TIMEOUT_MS 200
 
 SprObserverWithMQueueThread::SprObserverWithMQueueThread(ModuleIDType id, const std::string& name, EProxyType proxyType)
     : SprObserverWithMQueue(id, name, proxyType),
       mRunning(false),
       mMaxQueueSize(DEFAULT_QUEUE_MAX_SIZE) {
-    StartThread();
 }
 
 SprObserverWithMQueueThread::~SprObserverWithMQueueThread() {
     StopThread();
+}
+
+int32_t SprObserverWithMQueueThread::InitFramework() {
+    StartThread();
+    return SprObserverWithMQueue::InitFramework();
 }
 
 uint32_t SprObserverWithMQueueThread::GetPendingMsgCount() {

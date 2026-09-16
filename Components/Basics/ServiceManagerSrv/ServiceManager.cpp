@@ -52,14 +52,22 @@ ServiceManager::~ServiceManager() {
 }
 
 int32_t ServiceManager::InitEnv() {
-    // Raise msg queue limit for child processes
-    struct rlimit rlim = {RLIM_INFINITY, RLIM_INFINITY};
-    int32_t ret = getrlimit(RLIMIT_MSGQUEUE, &rlim);
-    if (ret == 0) {
-        rlim.rlim_cur = RLIM_INFINITY;
-        rlim.rlim_max = RLIM_INFINITY;
-        setrlimit(RLIMIT_MSGQUEUE, &rlim);
+    struct rlimit rlim;
+    if (getrlimit(RLIMIT_MSGQUEUE, &rlim) != 0) {
+        return 0;
     }
+
+    if (rlim.rlim_cur == RLIM_INFINITY &&
+        rlim.rlim_max == RLIM_INFINITY) {
+        return 0;
+    }
+
+    rlim.rlim_cur = RLIM_INFINITY;
+    rlim.rlim_max = RLIM_INFINITY;
+    if (setrlimit(RLIMIT_MSGQUEUE, &rlim) != 0) {
+        SPR_LOGW("setrlimit failed! (%s)\n", strerror(errno));
+    }
+
     return 0;
 }
 
