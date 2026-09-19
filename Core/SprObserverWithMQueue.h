@@ -83,11 +83,12 @@ public:
 
 protected:
     /**
-     * @brief Initialize function for derived class called in Initialize
+     * @brief Initialize/Deinitialize function for derived class called in Initialize/Deinitialize
      *
      * @return 0 on success, or -1 if an error occurred
      */
     virtual int32_t InitFramework() override;
+    virtual int32_t DeinitFramework() override;
 
     /**
      * @brief  Process message from message queue received

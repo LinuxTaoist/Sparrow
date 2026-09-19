@@ -20,6 +20,7 @@
 #include "SprLog.h"
 #include "SprSystem.h"
 #include "GeneralUtils.h"
+#include "CommonMacros.h"
 #include "CoreTypeDefs.h"
 #include "BacktraceMacros.h"
 #include "SprEpollSchedule.h"

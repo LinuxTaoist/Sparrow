@@ -31,7 +31,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "MainProper"
 
-int main(int argc, char*  argv[])
+int main(int argc, char* argv[])
 {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);
@@ -54,6 +54,7 @@ int main(int argc, char*  argv[])
     });
 
     SPR_LOGI("Main start!\n");
+
     PropertyManager* pProperM = PropertyManager::GetInstance(MODULE_PROPERTYM, "ProperM");
     PropertyManagerHub thePropertyManagerHub("property_service", pProperM);
 

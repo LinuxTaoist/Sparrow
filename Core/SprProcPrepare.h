@@ -24,6 +24,7 @@
 #ifndef __SPR_PROC_PREPARE_H__
 #define __SPR_PROC_PREPARE_H__
 
+#include <string>
 #include <stdint.h>
 
 class SprProcPrepare
@@ -35,6 +36,8 @@ public:
 private:
     SprProcPrepare();
     ~SprProcPrepare();
+
+    int32_t InitHeartbeatReporter(const std::string& procName);
 
 private:
     std::string mProcName;

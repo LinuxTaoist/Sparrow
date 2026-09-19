@@ -31,8 +31,7 @@
 
 void (*pSprUserEntry)() = nullptr;
 
-void SprRunEventLoop()
-{
+void SprRunEventLoop() {
     SprEpollSchedule::GetInstance()->EpollLoop();
 }
 
@@ -40,8 +39,7 @@ static void SPR_ENTRY_IMPLEMENT_CHECK() {
     NOT_IMPLEMENT_SPR_ENTRY();
 }
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     SPR_ENTRY_IMPLEMENT_CHECK();
 
     GeneralUtils::InitSignalHandler([](int signum) {

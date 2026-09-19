@@ -29,6 +29,7 @@
 #include "SprThreadPool.h"
 #include "SprEnumHelper.h"
 #include "CommonTypeDefs.h"
+#include "HeartbeatReporter.h"
 
 #define LOG_TAG "SprDebugNode"
 
@@ -131,6 +132,7 @@ int32_t SprDebugNode::RegisterBuildinCmds()
     mBuildinCmds["version"]       = { "Dump version",               std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
     mBuildinCmds["proc"]          = { "Dump process info",          std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
     mBuildinCmds["threadpool"]    = { "Dump threadpool details",    std::bind(&SprDebugNode::DebugDumpThreadPoolDetails, this, std::placeholders::_1)};
+    mBuildinCmds["heartbeat"]     = { "Dump heartbeat reporter",    std::bind(&SprDebugNode::DebugDumpHeartbeatDetails, this, std::placeholders::_1)};
     mBuildinCmds["loglevel"]      = { "Set log level",              std::bind(&SprDebugNode::DebugSetLogLevel, this, std::placeholders::_1)};
     return 0;
 }
@@ -244,6 +246,17 @@ void SprDebugNode::DebugDumpThreadPoolDetails(const std::vector<std::string>& ar
     }
 
     pPool->DumpDetails();
+}
+
+void SprDebugNode::DebugDumpHeartbeatDetails(const std::vector<std::string>& args)
+{
+    HeartbeatReporter* pReporter = HeartbeatReporter::GetInstance();
+    if (!pReporter) {
+        SPR_LOGE("pReporter is nullptr!\n");
+        return;
+    }
+
+    pReporter->DumpDetails();
 }
 
 void SprDebugNode::DebugSetLogLevel(const std::vector<std::string>& args)

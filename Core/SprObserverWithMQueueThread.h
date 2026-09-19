@@ -54,7 +54,8 @@ public:
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    virtual int32_t InitFramework() override;
+    virtual int32_t InitFramework() override final;
+    virtual int32_t DeinitFramework() override final;
 
     /**
      * @brief  Get current pending message count in internal queue

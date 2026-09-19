@@ -32,7 +32,7 @@ const int32_t RANDOM_STR_LENGTH = 8;
 
 // Module ID, Module Name, proxyRpc,
 SprObserver::SprObserver(ModuleIDType id, const string& name, EProxyType proxyType)
-    : mProxyType(proxyType), mModuleID(id), mModuleName(name), mpMediatorProxy(nullptr) {
+    : mProxyType(proxyType), mModuleID(id), mModuleName(name) {
 }
 
 SprObserver::~SprObserver() {
@@ -42,9 +42,14 @@ SprObserver::~SprObserver() {
 int32_t SprObserver::Initialize() {
     SPR_LOGD("Initialize Module: [ID: %d Name: %s]", mModuleID, mModuleName.c_str());
     DumpCommonVersion();
-    InitMediatorProxy(); // Init mediator proxy
     InitFramework();     // Init module's framework
     Init();              // Init module's business
+    return 0;
+}
+
+int32_t SprObserver::Deinitialize() {
+    Deinit();            // Deinit module's business
+    DeinitFramework();   // Deinit module's framework
     return 0;
 }
 
@@ -52,46 +57,54 @@ int32_t SprObserver::InitFramework() {
     return 0;
 }
 
-int32_t SprObserver::InitMediatorProxy() {
-    SprMediatorFactory* pFactory = SprMediatorFactory::GetInstance();
-    if (!pFactory) {
-        SPR_LOGE("SprMediatorFactory not available (post-shutdown?)!");
-        return -1;
-    }
-
-    mpMediatorProxy = pFactory->GetMediatorProxy(mProxyType);
-    if (!mpMediatorProxy) {
-        SPR_LOGE("mpMediatorProxy is nullptr! mProxyType = 0x%x", mProxyType);
-        return -1;
-    }
-
+int32_t SprObserver::DeinitFramework() {
     return 0;
 }
 
+int32_t SprObserver::Deinit() {
+    return 0;
+}
+
+SprMediatorProxy* SprObserver::GetMediatorProxy(InternalDefs::EProxyType type) {
+    SprMediatorFactory* pFactory = SprMediatorFactory::GetInstance();
+    if (!pFactory) {
+        SPR_LOGE("pFactory is nullptr!");
+        return nullptr;
+    }
+
+    SprMediatorProxy* pMediatorProxy = pFactory->GetMediatorProxy(type);
+    if (!pMediatorProxy) {
+        SPR_LOGE("pMediatorProxy is nullptr! mProxyType = 0x%x", type);
+        return nullptr;
+    }
+
+    return pMediatorProxy;
+}
+
 int32_t SprObserver::NotifyObserver(SprMsg& msg) {
-    if (!mpMediatorProxy) {
-        SPR_LOGE("mpMediatorProxy is nullptr!");
+    SprMediatorProxy* pMediatorProxy = GetMediatorProxy(mProxyType);
+    if (!pMediatorProxy) {
         return -1;
     }
 
     msg.SetFrom(mModuleID);
-    return mpMediatorProxy->NotifyObserver(msg);
+    return pMediatorProxy->NotifyObserver(msg);
 }
 
 int32_t SprObserver::NotifyObserver(uint32_t id, SprMsg& msg) {
-    if (!mpMediatorProxy) {
-        SPR_LOGE("mpMediatorProxy is nullptr!");
+    SprMediatorProxy* pMediatorProxy = GetMediatorProxy(mProxyType);
+    if (!pMediatorProxy) {
         return -1;
     }
 
     msg.SetFrom(mModuleID);
     msg.SetTo(id);
-    return mpMediatorProxy->NotifyObserver(msg);
+    return pMediatorProxy->NotifyObserver(msg);
 }
 
 int32_t SprObserver::NotifyAllObserver(SprMsg& msg) {
-    if (!mpMediatorProxy) {
-        SPR_LOGE("mpMediatorProxy is nullptr!");
+    SprMediatorProxy* pMediatorProxy = GetMediatorProxy(mProxyType);
+    if (!pMediatorProxy) {
         return -1;
     }
 
@@ -99,7 +112,7 @@ int32_t SprObserver::NotifyAllObserver(SprMsg& msg) {
     // to MODULE_NONE, refer to SprMediator::NotifyAllObserver.
     msg.SetFrom(mModuleID);
     msg.SetTo(MODULE_NONE);
-    return mpMediatorProxy->NotifyAllObserver(msg);
+    return pMediatorProxy->NotifyAllObserver(msg);
 }
 
 int32_t SprObserver::RegisterTimer(int32_t delayInMSec, int32_t intervalInMSec, uint32_t msgId, uint32_t repeatTimes) {

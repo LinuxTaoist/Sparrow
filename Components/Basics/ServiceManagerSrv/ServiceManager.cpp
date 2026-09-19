@@ -16,7 +16,6 @@
  *---------------------------------------------------------------------------------------------------------------------
  *
  */
-#include <fstream>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
@@ -37,8 +36,8 @@ using namespace GeneralUtils;
 #define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 
-#define SRV_RESTART_DELAY_US             500000   // 500ms delay before restart to avoid flooding
 #define SRV_GRACEFUL_STOP_POLL_CNT       50
+#define SRV_RESTART_DELAY_US             500000   // 500ms delay before restart to avoid flooding
 #define SRV_DEPENDENCY_START_GAP_US      100000   // 100ms
 #define INIT_CONFIGURE_FILE             "init.conf"
 
@@ -48,7 +47,36 @@ ServiceManager::ServiceManager() {
 }
 
 ServiceManager::~ServiceManager() {
+    mHeartbeatMonitor.Stop();
     ExitLoop();
+}
+
+int32_t ServiceManager::Init() {
+    int32_t ret = InitEnv();
+    if (ret < 0) {
+        SPR_LOGE("Init env failed!\n");
+        return -1;
+    }
+
+    ret = LoadSrvsInfo();
+    if (ret != 0) {
+        SPR_LOGE("Get service config failed!\n");
+        return -1;
+    }
+
+    ret = InitHeartbeatMonitor();
+    if (ret != 0) {
+        SPR_LOGE("Init heartbeat monitor failed!\n");
+        return -1;
+    }
+
+    ret = StartAllExes();
+    if (ret < 0) {
+        SPR_LOGE("Start services failed!\n");
+        return -1;
+    }
+
+    return 0;
 }
 
 int32_t ServiceManager::InitEnv() {
@@ -71,91 +99,86 @@ int32_t ServiceManager::InitEnv() {
     return 0;
 }
 
-int32_t ServiceManager::WorkLoop() {
-    InitEnv();
-    StartAllFromConfig(GetInitCfgPath());
-
-    mRunning = true;
-    while (mRunning) {
-        // reap newly exited children
-        int32_t pid = 0, status = 0;
-        while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
-            for (size_t i = 0; i < mSvcs.size(); i++) {
-                if (mSvcs[i].pid == pid) {
-                    SPR_LOGW("%s (pid %d) exited, status %d\n", mSvcs[i].path.c_str(), pid, status);
-                    mSvcs[i].pid = -1;       // mark dead, TryRestart will re-fork
-                    TryRestart(i);
-                    break;
-                }
-            }
-        }
-
-        sleep(1);
-    }
-
-    StopAll();
-    SPR_LOGI("Service manager loop exit!\n");
-    return 0;
-}
-
-int32_t ServiceManager::ExitLoop() {
-    mRunning = false;
-    SPR_LOGI("Stop work!\n");
-    return 0;
-}
-
-int32_t ServiceManager::StartAllFromConfig(const std::string& cfgPath) {
-    ifstream cfgFile(cfgPath);
-    if (!cfgFile.is_open()) {
-        SPR_LOGE("Open %s failed! (%s)\n", cfgPath.c_str(), strerror(errno));
+int32_t ServiceManager::LoadSrvsInfo() {
+    std::string path = GetInitCfgPath();
+    if (path.empty()) {
+        SPR_LOGE("Get path failed!\n");
         return -1;
     }
 
-    std::string line;
-    bool waitPrev = false;
+    int32_t ret = mSrvConfiger.Load(path);
+    if (ret != 0) {
+        SPR_LOGE("Load service config %s failed!\n", path.c_str());
+        return -1;
+    }
 
-    while (getline(cfgFile, line)) {
-        size_t start = line.find_first_not_of(" \t");
-        if (start == string::npos) {
-            continue;
-        }
+    ServiceTable services;
+    ret = mSrvConfiger.GetServices(services);
+    if (ret != 0) {
+        SPR_LOGE("Get service config %s failed!\n", path.c_str());
+        return -1;
+    }
 
-        line = line.substr(start);
-        if (line.empty() || line[0] == '#') {
-            continue;
-        }
-        if (line.back() == '\n') {
-            line.pop_back();
-        }
+    mSrvs.clear();
+    mSrvs.reserve(services.size());
+    for (const ServiceInfo& service : services) {
+        mSrvs.emplace_back(service);
+    }
 
-        bool dep = false;
-        size_t dpos = line.find("[d]");
-        if (dpos != string::npos) {
-            dep = true;
-            // Strip "[d]" and any preceding whitespace
-            size_t end = dpos;
-            while (end > 0 && (line[end - 1] == ' ' || line[end - 1] == '\t')) {
-                end--;
-            }
-            line = line.substr(0, end);
-        }
+    return 0;
+}
 
-        if (dep && waitPrev) {
-            usleep(SRV_DEPENDENCY_START_GAP_US);
-        }
-
-        if (StartOne(line) == 0) {
-            waitPrev = dep;
-        } else {
-            SPR_LOGE("Failed to start: %s\n", line.c_str());
+int32_t ServiceManager::InitHeartbeatMonitor() {
+    std::vector<std::string> heartbeatServices;
+    for (const SrvInfo& service : mSrvs) {
+        if (service.heartbeat) {
+            heartbeatServices.push_back(service.name);
         }
     }
 
-    SPR_LOGI("Started %zu services\n", mSvcs.size());
-    return (int32_t)mSvcs.size();
+    if (heartbeatServices.empty()) {
+        SPR_LOGI("Not exist heartbeat services\n");
+        return 0;
+    }
+
+    int32_t ret = mHeartbeatMonitor.Start(
+        HEARTBEAT_DEFAULT_CHANNEL_PATH,
+        HEARTBEAT_DEFAULT_TIMEOUT_MS,
+        heartbeatServices,
+        [this](const std::string& serviceName, bool alive) {
+            if (!alive) {
+                SPR_LOGW("Exe %s heartbeat timeout!\n", serviceName.c_str());
+                MarkSrvAbnormal(serviceName);
+            }
+        });
+    if (ret != 0) {
+        SPR_LOGE("Monitor heartbeat failed!\n");
+    }
+
+    return ret;
 }
 
-int32_t ServiceManager::ForkExec(const std::string& exePath) {
+int32_t ServiceManager::StartAllExes() {
+    bool waitPrev = false;
+    for (SrvInfo& service : mSrvs) {
+        if (service.dependency && waitPrev) {
+            usleep(SRV_DEPENDENCY_START_GAP_US);
+        }
+
+        int32_t ret = StartOne(service);
+        if (ret == 0) {
+            waitPrev = service.dependency;
+        } else {
+            SPR_LOGE("Start %s failed!\n", service.path.c_str());
+        }
+    }
+
+    SPR_LOGI("Started %zu services\n", mSrvs.size());
+    return (int32_t)mSrvs.size();
+}
+
+int32_t ServiceManager::ForkExec(const std::string& exePath,
+                                 const std::vector<std::string>& arguments) {
     int32_t pid = fork();
     if (pid == -1) {
         SPR_LOGE("fork failed (%s)\n", strerror(errno));
@@ -171,16 +194,23 @@ int32_t ServiceManager::ForkExec(const std::string& exePath) {
             close(fd);
         }
 
-        execl(exePath.c_str(), exePath.c_str(), nullptr);
-        SPR_LOGE("execl %s failed (%s)\n", exePath.c_str(), strerror(errno));
+        std::vector<char*> argv;
+        argv.reserve(arguments.size() + 2);
+        argv.push_back(const_cast<char*>(exePath.c_str()));
+        for (const std::string& argument : arguments) {
+            argv.push_back(const_cast<char*>(argument.c_str()));
+        }
+
+        argv.push_back(nullptr);
+        execv(exePath.c_str(), argv.data());
+        SPR_LOGE("execv %s failed (%s)\n", exePath.c_str(), strerror(errno));
         _exit(127);
     }
 
     return pid;
 }
 
-int32_t ServiceManager::IsValidExecFile(const std::string& exePath)
-{
+int32_t ServiceManager::IsValidExecFile(const std::string& exePath) {
     if (exePath.empty()) {
         SPR_LOGE("exePath is empty!\n");
         return -1;
@@ -205,95 +235,127 @@ int32_t ServiceManager::IsValidExecFile(const std::string& exePath)
     return 0;
 }
 
-int32_t ServiceManager::StartOne(const std::string& exePath) {
-    int32_t ret = IsValidExecFile(exePath);
+int32_t ServiceManager::StartOne(SrvInfo& service) {
+    int32_t ret = IsValidExecFile(service.path);
     if (ret < 0) {
-        SPR_LOGE("Exec %s is invalid!\n", exePath.c_str());
+        SPR_LOGE("Exec %s is invalid!\n", service.path.c_str());
         return -1;
     }
 
-    int32_t pid = ForkExec(exePath);
+    int32_t pid = ForkExec(service.path, service.arguments);
     if (pid == -1) {
         return -1;
     }
 
-    string name = GetSubstringAfterLastDelimiter(exePath, '/');
-    if (name.empty()) {
-        name = exePath;
+    {
+        std::lock_guard<std::mutex> lock(mSrvMutex);
+        service.pid = pid;
+        service.abnormal = false;
+    }
+    SPR_LOGD("service: %-20s pid: %6d\n", service.name.c_str(), pid);
+    return 0;
+}
+
+int32_t ServiceManager::StopOne(SrvInfo& service) {
+    if (service.pid <= 0) {
+        SPR_LOGI("%s already dead\n", service.path.c_str());
+        return 0;
     }
 
-    mSvcs.emplace_back(exePath, pid);
-    SPR_LOGD("service: %-20s pid: %6d\n", name.c_str(), pid);
+    if (kill(service.pid, 0) == -1 && errno == ESRCH) {
+        SPR_LOGI("%s (pid %d) already gone\n", service.path.c_str(), service.pid);
+        service.pid = -1;
+        return 0;
+    }
+
+    SPR_LOGI("Stopping %s (pid %d)\n", service.path.c_str(), service.pid);
+    kill(service.pid, MAIN_EXIT_SIGNUM);
+
+    int32_t status = 0;
+    pid_t ret = 0;
+    int32_t elapsed = 0;
+    while (elapsed < SRV_GRACEFUL_STOP_POLL_CNT) {
+        ret = waitpid(service.pid, &status, WNOHANG);
+        if (ret > 0 || (ret < 0 && errno == ECHILD)) {
+            break;
+        }
+        usleep(100000);
+        elapsed++;
+    }
+
+    if (ret <= 0 && !(ret < 0 && errno == ECHILD)) {
+        SPR_LOGW("%s didn't exit, sending SIGKILL, ret = %d\n", service.path.c_str(), ret);
+        kill(service.pid, SIGKILL);
+        waitpid(service.pid, &status, 0);
+    }
+
+    service.pid = -1;
+    SPR_LOGI("%s exited, status %d\n", service.path.c_str(), status);
     return 0;
 }
 
 int32_t ServiceManager::StopAll() {
-    // 1. Sweep residual zombies before shutdown to avoid stale-PID kills
+    mHeartbeatMonitor.Stop();
+
     int32_t status = 0;
     while (waitpid(-1, &status, WNOHANG) > 0);
 
-    for (auto it = mSvcs.rbegin(); it != mSvcs.rend(); ++it) {
-        // Skip services that are already dead (marked by WorkLoop)
-        if (it->pid <= 0) {
-            SPR_LOGI("%s already dead\n", it->path.c_str());
-            continue;
-        }
-
-        // 2. Guard against PID recycling: skip entries whose PID already gone
-        if (kill(it->pid, 0) == -1 && errno == ESRCH) {
-            SPR_LOGI("%s (pid %d) already gone\n", it->path.c_str(), it->pid);
-            continue;
-        }
-
-        SPR_LOGI("Stopping %s (pid %d)\n", it->path.c_str(), it->pid);
-        kill(it->pid, MAIN_EXIT_SIGNUM);
-
-        // 3. Poll-wait for graceful exit (100 ms × SRV_GRACEFUL_STOP_POLL_CNT)
-        pid_t ret = 0;
-        int32_t elapsed = 0;
-        while (elapsed < SRV_GRACEFUL_STOP_POLL_CNT) {
-            ret = waitpid(it->pid, &status, WNOHANG);
-            if (ret > 0) {
-                break;
-            }
-            usleep(100000);
-            elapsed++;
-        }
-
-        // 4. Hard-kill fallback if still alive after timeout
-        if (ret <= 0) {
-            SPR_LOGW("%s didn't exit, sending SIGKILL, ret = %d\n", it->path.c_str(), ret);
-            kill(it->pid, SIGKILL);
-            waitpid(it->pid, &status, 0);
-        }
-
-        SPR_LOGI("%s exited, status %d\n", it->path.c_str(), status);
+    for (auto it = mSrvs.rbegin(); it != mSrvs.rend(); ++it) {
+        StopOne(*it);
     }
 
-    mSvcs.clear();
+    mSrvs.clear();
     return 0;
 }
 
 int32_t ServiceManager::TryRestart(size_t idx) {
-    if (idx >= mSvcs.size()) {
-        return -1;
+    SrvInfo service;
+    {
+        std::lock_guard<std::mutex> lock(mSrvMutex);
+        if (idx >= mSrvs.size() || !mSrvs[idx].abnormal) {
+            return 0;
+        }
+
+        service = mSrvs[idx];
     }
 
-    SvcInfo& svc = mSvcs[idx];
     usleep(SRV_RESTART_DELAY_US);
+    if (service.pid > 0) {
+        SPR_LOGW("Restarting unhealthy %s (pid %d)\n", service.name.c_str(), service.pid);
+        StopOne(service);
+    }
+    if (service.heartbeat) {
+        mHeartbeatMonitor.Reset(service.name);
+    }
 
-    SPR_LOGI("Restarting %s (attempt %d)\n", svc.path.c_str(), svc.restartCount + 1);
-    int32_t pid = ForkExec(svc.path);
+    SPR_LOGI("Restarting %s (attempt %d)\n", service.path.c_str(), service.restartCount + 1);
+    int32_t pid = ForkExec(service.path, service.arguments);
     if (pid == -1) {
-        SPR_LOGE("ForkExec %s failed\n", svc.path.c_str());
+        SPR_LOGE("ForkExec %s failed\n", service.path.c_str());
         return -1;
     }
 
-    svc.pid = pid;
-    svc.restartCount++;
-    string name = GetSubstringAfterLastDelimiter(svc.path, '/');
-    SPR_LOGD("service: %-20s pid: %6d [cnt: %d]\n", name.c_str(), pid, svc.restartCount);
+    {
+        std::lock_guard<std::mutex> lock(mSrvMutex);
+        if (idx < mSrvs.size()) {
+            mSrvs[idx].pid = pid;
+            mSrvs[idx].abnormal = false;
+            mSrvs[idx].restartCount++;
+        }
+    }
+    SPR_LOGD("service: %-20s pid: %6d [cnt: %d]\n",
+             service.name.c_str(), pid, service.restartCount + 1);
     return 0;
+}
+
+void ServiceManager::MarkSrvAbnormal(const std::string& serviceName) {
+    std::lock_guard<std::mutex> lock(mSrvMutex);
+    for (SrvInfo& srv : mSrvs) {
+        if (srv.name == serviceName) {
+            srv.abnormal = true;
+            return;
+        }
+    }
 }
 
 std::string ServiceManager::GetInitCfgPath() {
@@ -317,17 +379,51 @@ std::string ServiceManager::GetInitCfgPath() {
     return "";
 }
 
+int32_t ServiceManager::WorkLoop() {
+    mRunning = true;
+    while (mRunning) {
+        // reap newly exited children
+        int32_t pid = 0, status = 0;
+        while ((pid = waitpid(-1, &status, WNOHANG)) > 0) {
+            std::lock_guard<std::mutex> lock(mSrvMutex);
+            for (size_t i = 0; i < mSrvs.size(); i++) {
+                if (mSrvs[i].pid == pid) {
+                    SPR_LOGW("%s (pid %d) exited, status %d\n", mSrvs[i].path.c_str(), pid, status);
+                    mSrvs[i].pid = -1;
+                    mSrvs[i].abnormal = true;
+                    break;
+                }
+            }
+        }
+
+        for (size_t i = 0; i < mSrvs.size(); ++i) {
+            TryRestart(i);
+        }
+
+        sleep(1);
+    }
+
+    StopAll();
+    SPR_LOGI("Service manager loop exit!\n");
+    return 0;
+}
+
+int32_t ServiceManager::ExitLoop() {
+    mRunning = false;
+    SPR_LOGI("Stop work!\n");
+    return 0;
+}
+
 int32_t ServiceManager::DumpPidMapInfo() {
     SPR_LOGD("PID     PATH                RESTARTS\n");
     SPR_LOGD("-----------------------------------------\n");
-    for (const auto& svc : mSvcs) {
-        if (svc.pid > 0) {
-            SPR_LOGD("%6d  %-20s %2d\n", svc.pid, svc.path.c_str(), svc.restartCount);
+    for (const auto& srv : mSrvs) {
+        if (srv.pid > 0) {
+            SPR_LOGD("%6d  %-20s %2d\n", srv.pid, srv.path.c_str(), srv.restartCount);
         } else {
-            SPR_LOGD("  DEAD  %-20s %2d\n", svc.path.c_str(), svc.restartCount);
+            SPR_LOGD("  DEAD  %-20s %2d\n", srv.path.c_str(), srv.restartCount);
         }
     }
     SPR_LOGD("-----------------------------------------\n");
     return 0;
 }
-

@@ -76,12 +76,12 @@ add_definitions(-DHAL_FAMILY="${HAL_FAMILY}")
 
 add_subdirectory(3rdParty)
 add_subdirectory(3rdAdapter)
+add_subdirectory(UtilModules)
 add_subdirectory(Components)
 add_subdirectory(Core)
 add_subdirectory(Hardware)
 add_subdirectory(PrivateAPIs)
 add_subdirectory(PublicAPIs)
-add_subdirectory(UtilModules)
 
 ## 可选模块
 if (BUILD_DEBUG)

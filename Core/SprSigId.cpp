@@ -34,7 +34,8 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
 
 const char* GetSigName(uint32_t msgID)
 {
-    if (msgID < InternalDefs::SIG_ID_PUBLIC_END) {
+    uint32_t sigIdCnt = (uint32_t) sizeof(sigIdString) / sizeof(sigIdString[0]);
+    if (msgID < sigIdCnt) {
         return sigIdString[msgID];
     }
 

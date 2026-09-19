@@ -48,20 +48,17 @@ using namespace InternalDefs;
 static std::atomic<bool> gObjAlive(true);
 
 PropertyManager::PropertyManager(ModuleIDType id, const std::string& name)
-    : SprObserverWithMQueue(id, name)
-{
+    : SprObserverWithMQueue(id, name) {
     mSharedMemoryPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "__property_shared_memory__";
     mSharedPersistPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "__property_shared_persist__";
 }
 
-PropertyManager::~PropertyManager()
-{
+PropertyManager::~PropertyManager() {
     gObjAlive = false;
     UnregisterDebugFuncs();
 }
 
-PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name)
-{
+PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name) {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -70,8 +67,7 @@ PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string
     return &instance;
 }
 
-int32_t PropertyManager::SetProperty(const std::string& key, const std::string& value)
-{
+int32_t PropertyManager::SetProperty(const std::string& key, const std::string& value) {
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
@@ -80,8 +76,7 @@ int32_t PropertyManager::SetProperty(const std::string& key, const std::string& 
     return HandleKeyValue(key, value);
 }
 
-int32_t PropertyManager::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
-{
+int32_t PropertyManager::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue) {
     int32_t ret = -1;
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
@@ -96,8 +91,7 @@ int32_t PropertyManager::GetProperty(const std::string& key, std::string& value,
     return ret;
 }
 
-int32_t PropertyManager::GetProperties(std::map<std::string, std::string>& properties)
-{
+int32_t PropertyManager::GetProperties(std::map<std::string, std::string>& properties) {
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
@@ -107,8 +101,7 @@ int32_t PropertyManager::GetProperties(std::map<std::string, std::string>& prope
     return 0;
 }
 
-int32_t PropertyManager::DumpProperties()
-{
+int32_t PropertyManager::DumpProperties() {
     if (mpSharedMemory == nullptr) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
@@ -117,8 +110,7 @@ int32_t PropertyManager::DumpProperties()
     return DumpPropertyList();
 }
 
-int32_t PropertyManager::Init()
-{
+int32_t PropertyManager::Init() {
     mpSharedMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(mSharedMemoryPath, SHARED_MEMORY_MAX_SIZE));
     mpPersistMemory = std::unique_ptr<SharedBinaryTree>(new (std::nothrow) SharedBinaryTree(mSharedPersistPath, SHARED_MEMORY_MAX_SIZE, false));
 
@@ -150,8 +142,7 @@ int32_t PropertyManager::Init()
     return 0;
 }
 
-int32_t PropertyManager::ProcessMsg(const SprMsg& msg)
-{
+int32_t PropertyManager::ProcessMsg(const SprMsg& msg) {
     SPR_LOGD("Recv msg: %s\n", GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId()) {
         case SIG_ID_PROPERTY_CHANGED:
@@ -169,8 +160,7 @@ int32_t PropertyManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg)
-{
+void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg) {
     const std::string text = msg.GetString();
     const size_t eqPos = text.find('=');
     if (eqPos == std::string::npos) {
@@ -191,8 +181,7 @@ void PropertyManager::MsgRespondPropertyChanged(const SprMsg& msg)
     NotifyAllObserver(copyMsg);
 }
 
-void PropertyManager::MsgRespondPropertyGetRequest(const SprMsg& msg)
-{
+void PropertyManager::MsgRespondPropertyGetRequest(const SprMsg& msg) {
     std::string value;
     std::string key = msg.GetString();
     int32_t ret = GetProperty(key, value, "");
@@ -206,8 +195,7 @@ void PropertyManager::MsgRespondPropertyGetRequest(const SprMsg& msg)
     NotifyObserver((ModuleIDType)msg.GetFrom(), rspMsg);
 }
 
-void PropertyManager::MsgRespondPropertySetRequest(const SprMsg& msg)
-{
+void PropertyManager::MsgRespondPropertySetRequest(const SprMsg& msg) {
     const std::string text = msg.GetString();
     const size_t eqPos = text.find('=');
     if (eqPos == std::string::npos) {
@@ -229,8 +217,7 @@ void PropertyManager::MsgRespondPropertySetRequest(const SprMsg& msg)
     NotifyObserver((ModuleIDType)msg.GetFrom(), rspMsg);
 }
 
-void PropertyManager::RegisterDebugFuncs()
-{
+void PropertyManager::RegisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -240,8 +227,7 @@ void PropertyManager::RegisterDebugFuncs()
     p->RegisterCmd(DEBUG_MODULE_NAME, "DumpAllProperties", "Dump all properties",  std::bind(&PropertyManager::DebugDumpPropertyList, this, std::placeholders::_1));
 }
 
-void PropertyManager::UnregisterDebugFuncs()
-{
+void PropertyManager::UnregisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -252,13 +238,11 @@ void PropertyManager::UnregisterDebugFuncs()
     p->UnregisterCmd(DEBUG_MODULE_NAME);
 }
 
-void PropertyManager::DebugDumpPropertyList(const std::vector<std::string>& args)
-{
+void PropertyManager::DebugDumpPropertyList(const std::vector<std::string>& args) {
     DumpPropertyList();
 }
 
-int32_t PropertyManager::DumpPropertyList()
-{
+int32_t PropertyManager::DumpPropertyList() {
     std::map<std::string, std::string> keyValueMap;
     mpSharedMemory->GetAllKeyValues(keyValueMap);
 
@@ -269,8 +253,7 @@ int32_t PropertyManager::DumpPropertyList()
     return 0;
 }
 
-int32_t PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
-{
+int32_t PropertyManager::LoadPropertiesFromFile(const std::string& fileName) {
     std::ifstream file(fileName);
     if (!file) {
         SPR_LOGE("Open %s fail! \n", fileName.c_str());
@@ -313,8 +296,7 @@ int32_t PropertyManager::LoadPropertiesFromFile(const std::string& fileName)
     return 0;
 }
 
-int32_t PropertyManager::LoadPersistProperty()
-{
+int32_t PropertyManager::LoadPersistProperty() {
     if (!mpPersistMemory) {
         SPR_LOGE("mpPersistMemory is nullptr!\n");
         return -1;
@@ -329,8 +311,7 @@ int32_t PropertyManager::LoadPersistProperty()
     return 0;
 }
 
-int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text)
-{
+int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text) {
     const size_t eqPos = text.find('=');
     if (eqPos == std::string::npos || text.substr(0, eqPos) != PROP_KEY_LOG_LEVEL) {
         return 0;
@@ -358,8 +339,7 @@ int32_t PropertyManager::HandlePropertyLogLevel(const std::string& text)
     return 0;
 }
 
-int32_t PropertyManager::HandlePropertyLogLength(const std::string& text)
-{
+int32_t PropertyManager::HandlePropertyLogLength(const std::string& text) {
     const size_t eqPos = text.find('=');
     if (eqPos == std::string::npos || text.substr(0, eqPos) != PROP_KEY_LOG_LENGTH) {
         return 0;
@@ -385,8 +365,7 @@ int32_t PropertyManager::HandlePropertyLogLength(const std::string& text)
     return 0;
 }
 
-int32_t PropertyManager::HandleKeyValue(const std::string& key, const std::string& value)
-{
+int32_t PropertyManager::HandleKeyValue(const std::string& key, const std::string& value) {
     if (!mpSharedMemory) {
         SPR_LOGE("mpSharedMemory is nullptr!\n");
         return -1;
@@ -424,7 +403,6 @@ int32_t PropertyManager::HandleKeyValue(const std::string& key, const std::strin
     return ret;
 }
 
-int32_t PropertyManager::SavePersistProperty(const std::string& key, const std::string& value)
-{
+int32_t PropertyManager::SavePersistProperty(const std::string& key, const std::string& value) {
     return mpPersistMemory->SetValue(key, value);
 }

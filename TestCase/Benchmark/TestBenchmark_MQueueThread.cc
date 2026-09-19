@@ -40,8 +40,13 @@ constexpr int32_t MQTHREAD_DRAIN_TIMEOUT_MS = 5000;
 
 class BenchObserverThread : public SprObserverWithMQueueThread {
 public:
-    explicit BenchObserverThread(uint16_t idBase)
-        : SprObserverWithMQueueThread((ModuleIDType)(MODULE_PUBLIC_END + idBase), "bench_th", MEDIATOR_PROXY_MQUEUE) {}
+    explicit BenchObserverThread(uint16_t id)
+        : SprObserverWithMQueueThread((ModuleIDType)(MODULE_PUBLIC_END + id), "bench_th", MEDIATOR_PROXY_MQUEUE) {
+    }
+
+    ~BenchObserverThread() {
+        Deinitialize();
+    }
 
     int32_t GetRecvCount() const {
         return mRecvCount.load();
@@ -58,7 +63,9 @@ public:
     }
 
 private:
-    int32_t Init() override { return 0; }
+    int32_t Init() override {
+        return 0;
+    }
 
     int32_t ProcessMsg(const SprMsg& msg) override {
         if (msg.GetMsgId() != SIG_ID_TEST_BENCHMARK_MQ_EVENT) {
@@ -226,36 +233,36 @@ protected:
 
         if (!validLatencies.empty()) {
             BenchRecordByTimes("MQueueThread", scenario, validLatencies, (uint64_t)recvOk, lossRate,
-                               "attempt=" + std::to_string(targetOps)
-                               + ",send_ok=" + std::to_string(sendOkValue)
-                               + ",recv_ok=" + std::to_string(recvOk)
-                               + ",data_ok=" + std::to_string(dataOk)
-                               + ",processed_ok=" + std::to_string(processedDelta)
-                               + ",pending_base=" + std::to_string(pendingBase)
-                               + ",pending_now=" + std::to_string(pendingNow)
-                               + ",pending_delta=" + std::to_string(pendingDelta)
-                               + ",send_fail=" + std::to_string(sendFailValue)
-                               + ",recv_fail=" + std::to_string(recvFail)
-                               + ",data_fail=" + std::to_string(dataFail)
-                               + ",drained=" + std::to_string(drained ? 1 : 0),
-                               elapsedUs > 0 ? (double)dataOk * 1000000.0 / (double)elapsedUs : 0.0);
+                                "attempt=" + std::to_string(targetOps)
+                                + ",send_ok=" + std::to_string(sendOkValue)
+                                + ",recv_ok=" + std::to_string(recvOk)
+                                + ",data_ok=" + std::to_string(dataOk)
+                                + ",processed_ok=" + std::to_string(processedDelta)
+                                + ",pending_base=" + std::to_string(pendingBase)
+                                + ",pending_now=" + std::to_string(pendingNow)
+                                + ",pending_delta=" + std::to_string(pendingDelta)
+                                + ",send_fail=" + std::to_string(sendFailValue)
+                                + ",recv_fail=" + std::to_string(recvFail)
+                                + ",data_fail=" + std::to_string(dataFail)
+                                + ",drained=" + std::to_string(drained ? 1 : 0),
+                                elapsedUs > 0 ? (double)dataOk * 1000000.0 / (double)elapsedUs : 0.0);
         } else {
             BenchResult r = {0, 0, 0, 0};
             BenchRecordBySummary("MQueueThread", scenario, r,
-                                 elapsedUs > 0 ? (double)dataOk * 1000000.0 / (double)elapsedUs : 0.0,
-                                 lossRate,
-                                 "attempt=" + std::to_string(targetOps)
-                                 + ",send_ok=" + std::to_string(sendOkValue)
-                                 + ",recv_ok=" + std::to_string(recvOk)
-                                 + ",data_ok=" + std::to_string(dataOk)
-                                 + ",processed_ok=" + std::to_string(processedDelta)
-                                 + ",pending_base=" + std::to_string(pendingBase)
-                                 + ",pending_now=" + std::to_string(pendingNow)
-                                 + ",pending_delta=" + std::to_string(pendingDelta)
-                                 + ",send_fail=" + std::to_string(sendFailValue)
-                                 + ",recv_fail=" + std::to_string(recvFail)
-                                 + ",data_fail=" + std::to_string(dataFail)
-                                 + ",drained=" + std::to_string(drained ? 1 : 0));
+                                elapsedUs > 0 ? (double)dataOk * 1000000.0 / (double)elapsedUs : 0.0,
+                                lossRate,
+                                "attempt=" + std::to_string(targetOps)
+                                + ",send_ok=" + std::to_string(sendOkValue)
+                                + ",recv_ok=" + std::to_string(recvOk)
+                                + ",data_ok=" + std::to_string(dataOk)
+                                + ",processed_ok=" + std::to_string(processedDelta)
+                                + ",pending_base=" + std::to_string(pendingBase)
+                                + ",pending_now=" + std::to_string(pendingNow)
+                                + ",pending_delta=" + std::to_string(pendingDelta)
+                                + ",send_fail=" + std::to_string(sendFailValue)
+                                + ",recv_fail=" + std::to_string(recvFail)
+                                + ",data_fail=" + std::to_string(dataFail)
+                                + ",drained=" + std::to_string(drained ? 1 : 0));
         }
 
         BenchLog("SprObsMQThread dual thread %s: attempt=%d send_ok=%d recv_ok=%d data_ok=%d send_fail=%d recv_fail=%d data_fail=%d processed=%d pending_delta=%d drained=%d loss=%.2f%% avg=%.1f us/op rate=%.1f msg/s",

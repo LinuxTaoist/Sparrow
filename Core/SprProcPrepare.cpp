@@ -22,10 +22,19 @@
  *
  */
 #include <atomic>
+#include <fstream>
+#include <string>
+#include <errno.h>
+#include <string.h>
+#include "SprLog.h"
 #include "SprProcInfo.h"
 #include "SprDebugNode.h"
 #include "CommonMacros.h"
+#include "HeartbeatLog.h"
+#include "HeartbeatReporter.h"
 #include "SprProcPrepare.h"
+
+#define LOG_TAG "SprProcPre"
 
 static std::atomic<bool> gObjAlive(true);
 
@@ -52,5 +61,53 @@ int32_t SprProcPrepare::Init(const std::string& procName)
 {
     SprProcInfo::GetInstance()->Init();
     SprDebugNode::GetInstance()->InitPipeDebugNode(std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + procName);
+    return InitHeartbeatReporter(procName);
+}
+
+int32_t SprProcPrepare::InitHeartbeatReporter(const std::string& procName)
+{
+    HeartbeatLog& theLog = HeartbeatLog::GetInstance();
+    theLog.RegisterPrintCallback([](int level, int line, const char* tag, const char* fmt, va_list ap) {
+        char logBuf[1024] = {0};
+        vsnprintf(logBuf, sizeof(logBuf), fmt, ap);
+        switch (level) {
+            case HeartbeatLogLevel::HB_LOG_LEVEL_DEBUG:
+                SprLog::GetInstance()->d(tag, "%4d %s", line, logBuf);
+                break;
+            case HeartbeatLogLevel::HB_LOG_LEVEL_INFO:
+                SprLog::GetInstance()->i(tag, "%4d %s", line, logBuf);
+                break;
+            case HeartbeatLogLevel::HB_LOG_LEVEL_ERROR:
+                SprLog::GetInstance()->e(tag, "%4d %s", line, logBuf);
+                break;
+            case HeartbeatLogLevel::HB_LOG_LEVEL_WARN:
+                SprLog::GetInstance()->w(tag, "%4d %s", line, logBuf);
+                break;
+            default:
+                SprLog::GetInstance()->i(tag, "%4d %s", line, logBuf);
+                break;
+        }
+    });
+
+    HeartbeatReporter* pReporter = HeartbeatReporter::GetInstance();
+    if (!pReporter) {
+        SPR_LOGE("pReporter is nullptr!");
+        return -1;
+    }
+
+    std::string path = "/proc/self/cmdline";
+    std::ifstream cmdline(path, std::ios::in | std::ios::binary);
+    if (!cmdline.is_open()) {
+        SPR_LOGE("Open %s failed! (%s)", path.c_str(), strerror(errno));
+        return 0;
+    }
+
+    std::string argument;
+    while (std::getline(cmdline, argument, '\0')) {
+        if (argument == "--heartbeat=on") {
+            return pReporter->Start(procName);
+        }
+    }
+
     return 0;
 }

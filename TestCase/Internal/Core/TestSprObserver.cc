@@ -80,34 +80,34 @@ TEST(Core_SprObserver, SetPrintLogLengthValid)
     EXPECT_EQ(obs.SetLogLength(512), 0);
 }
 
-// 测试未初始化时通知观察者返回失败
-TEST(Core_SprObserver, NotifyObserverWithoutProxy)
+// 测试首次通知时懒获取 MediatorProxy
+TEST(Core_SprObserver, NotifyObserverWithLazyProxy)
 {
     TestObserver obs(kTestModuleId);
     SprMsg msg(0x1234);
-    EXPECT_EQ(obs.NotifyObserver(msg), -1);
+    EXPECT_EQ(obs.NotifyObserver(msg), 0);
 }
 
-// 测试未初始化时通知指定 ID 观察者返回失败
-TEST(Core_SprObserver, NotifyObserverByIdWithoutProxy)
+// 测试首次按 ID 通知时懒获取 MediatorProxy
+TEST(Core_SprObserver, NotifyObserverByIdWithLazyProxy)
 {
     TestObserver obs(kTestModuleId);
     SprMsg msg(0x1234);
-    EXPECT_EQ(obs.NotifyObserver(kTestModuleId, msg), -1);
+    EXPECT_EQ(obs.NotifyObserver(kTestModuleId, msg), 0);
 }
 
-// 测试未初始化时通知所有观察者返回失败
-TEST(Core_SprObserver, NotifyAllObserverWithoutProxy)
+// 测试首次广播通知时懒获取 MediatorProxy
+TEST(Core_SprObserver, NotifyAllObserverWithLazyProxy)
 {
     TestObserver obs(kTestModuleId);
     SprMsg msg(0x1234);
-    EXPECT_EQ(obs.NotifyAllObserver(msg), -1);
+    EXPECT_EQ(obs.NotifyAllObserver(msg), 0);
 }
 
-// 测试未初始化时注册/注销定时器返回失败
-TEST(Core_SprObserver, TimerWithoutProxy)
+// 测试首次注册/注销定时器时懒获取 MediatorProxy
+TEST(Core_SprObserver, TimerWithLazyProxy)
 {
     TestObserver obs(kTestModuleId);
-    EXPECT_EQ(obs.RegisterTimer(100, 100, 0x1234), -1);
-    EXPECT_EQ(obs.UnregisterTimer(0x1234), -1);
+    EXPECT_EQ(obs.RegisterTimer(100, 100, 0x1234), 0);
+    EXPECT_EQ(obs.UnregisterTimer(0x1234), 0);
 }

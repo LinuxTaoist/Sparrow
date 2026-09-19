@@ -46,6 +46,7 @@ public:
      * @return 0 on success, or -1 if an error occurred
      */
     virtual int32_t Initialize() final;
+    virtual int32_t Deinitialize() final;
 
     /**
      * @brief Get the module id
@@ -103,11 +104,12 @@ public:
 
 protected:
     /**
-     * @brief Initializes the framework module with overrides from derived framework modules
+     * @brief Initializes/Deinitializes the framework module with overrides from derived framework modules
      *
      * @return 0 on success, or -1 if an error occurred
      */
     virtual int32_t InitFramework();
+    virtual int32_t DeinitFramework();
 
      /**
      * @brief Initializes the business module with overrides from derived business modules
@@ -115,13 +117,14 @@ protected:
      * @return 0 on success, or -1 if an error occurred
      */
     virtual int32_t Init() = 0;
+    virtual int32_t Deinit();
 
     /**
      * @brief Initialize mediator proxy
      *
      * @return 0 on success, or -1 if an error occurred
      */
-    int32_t InitMediatorProxy();
+    SprMediatorProxy* GetMediatorProxy(InternalDefs::EProxyType type);
 
     /**
      * @brief Dump common versions for current module
@@ -151,7 +154,6 @@ protected:
     InternalDefs::EProxyType mProxyType;
     ModuleIDType mModuleID;
     std::string mModuleName;
-    SprMediatorProxy* mpMediatorProxy;
 };
 
 #endif  // __SPR_OBSERVER_H__

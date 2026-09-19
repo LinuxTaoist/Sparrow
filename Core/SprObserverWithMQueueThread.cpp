@@ -42,6 +42,11 @@ int32_t SprObserverWithMQueueThread::InitFramework() {
     return SprObserverWithMQueue::InitFramework();
 }
 
+int32_t SprObserverWithMQueueThread::DeinitFramework() {
+    StopThread();
+    return SprObserverWithMQueue::DeinitFramework();
+}
+
 uint32_t SprObserverWithMQueueThread::GetPendingMsgCount() {
     std::lock_guard<std::mutex> lock(mQueueMutex);
     return (uint32_t)mMsgQueue.size();

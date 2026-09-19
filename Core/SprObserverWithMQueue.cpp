@@ -56,6 +56,14 @@ int32_t SprObserverWithMQueue::InitFramework()
     return RegisterFromMediator();
 }
 
+int32_t SprObserverWithMQueue::DeinitFramework()
+{
+    SPR_LOGD("Deinitlize MQueue framework!");
+    UnRegisterFromMediator();
+    DelFromPoll();
+    return SprObserver::DeinitFramework();
+}
+
 int32_t SprObserverWithMQueue::RegisterFromMediator()
 {
     SprMsg msg(GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_REGISTER_REQUEST);
@@ -69,8 +77,6 @@ int32_t SprObserverWithMQueue::RegisterFromMediator()
 int32_t SprObserverWithMQueue::UnRegisterFromMediator()
 {
     mConnected = false;
-    DelFromPoll();
-
     SprMsg msg(GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_UNREGISTER_REQUEST);
     msg.SetU32Value((uint32_t)MEDIATOR_PROXY_MQUEUE);
     msg.SetU16Value((uint16_t)GetModuleId());
