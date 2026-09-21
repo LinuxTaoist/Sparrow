@@ -1,14 +1,26 @@
 # SprLog
 
 ## 1. 这是做什么的
+
 SprLog 是 Sparrow 提供给业务模块的日志接口层。
 
-它对外提供统一日志宏和日志对象接口，负责把业务日志格式化后写入日志链路。业务方只关心“写什么日志”，不需要关心底层共享缓存和日志服务处理细节。
+它提供统一的日志宏和日志对象接口。业务代码只负责记录日志，日志级别、输出位置、文件命名和文件轮转由配置及后台日志服务处理。
 
 ## 2. 什么时候会用到
-当业务模块需要打印调试信息、运行信息、告警信息或错误信息时会用到。
+
+当业务模块需要输出以下信息时使用 SprLog：
+
+| 场景 | 示例 |
+|------|------|
+| 调试信息 | 状态、参数、流程跟踪 |
+| 运行信息 | 服务启动、连接建立、任务完成 |
+| 告警信息 | 重试、资源不足、配置异常 |
+| 错误信息 | 文件打开失败、请求处理失败 |
 
 ## 3. 怎么用
+
+### 3.1 快速使用
+
 **依赖**
 
 | 类型 | 依赖项 | 说明 |
@@ -16,29 +28,235 @@ SprLog 是 Sparrow 提供给业务模块的日志接口层。
 | 头文件 | `SprLog.h` | 日志接口 |
 | 库文件 | `libsprlog.so` | 日志库 |
 
-**典型流程**
+只需要定义日志标签，然后使用日志宏：
 
-1. 在模块中定义日志标签 (必须)
-	- 定义 `LOG_TAG`，作为该模块日志的统一标识。
+```cpp
+#include "SprLog.h"
 
-2. 使用日志宏打印日志 (必须)
-	- 使用 `SPR_LOGD`、`SPR_LOGI`、`SPR_LOGW`、`SPR_LOGE` 输出不同级别日志。
+#define LOG_TAG "MyModule"
 
-3. 按需调整日志行为 (可选)
-	- 通过 `SetLevel()` 控制输出级别。
-	- 通过 `SetLength()` 控制单条日志格式化缓冲长度。
+SPR_LOGI("service started\n");
+SPR_LOGW("warning message\n");
+SPR_LOGE("error occurred: %s\n", error.c_str());
+```
 
-参考代码：
-- 日志接口定义: [SprLog.h](../../../3rdAdapter/SprLog.h)
+如果没有调用 `SPR_INIT()`，日志默认按照当前进程的可执行文件名选择配置；找不到对应配置时使用 `[output.default]`。
+
+这是推荐的大多数场景使用方式，不需要修改代码之外的内容。
+
+### 3.2 配置整个进程
+
+在 `sprlog.conf` 中定义与可执行文件名对应的输出段，可以调整整个进程的日志策略，而不需要重新编译业务代码。
+
+例如，可执行文件名为 `myservice`：
+
+```ini
+[output.myservice]
+level = info
+output = file
+file_name = service.log
+file_path = /var/log/myservice
+```
+
+常用配置是 `level`、`output`、`file_name` 和 `file_path`。配置由日志服务加载，修改后按系统启动方式重启或重新加载日志服务使其生效。
+
+### 3.3 配置多个模块
+
+当同一进程中的不同模块需要使用不同的日志文件或日志级别时，在程序启动早期调用 `SPR_INIT()`：
+
+```cpp
+#define LOG_TAG "Network"
+
+SPR_INIT("NetworkService");
+SPR_LOGI("network service started\n");
+```
+
+然后配置对应模块：
+
+```ini
+[output.default]
+level = info
+output = file
+file_name = main.log
+file_path = /tmp/sprlog/main
+
+[output.NetworkService]
+level = debug
+output = file
+file_name = network.log
+file_path = /tmp/sprlog/network
+```
+
+调用 `SPR_INIT("NetworkService")` 后，日志优先使用 `[output.NetworkService]`；如果该段不存在，则回退到 `[output.default]`。
+
+### 3.4 代码接口速查
+
+| 接口 | 作用 | 建议 |
+|------|------|------|
+| `SPR_LOGD()` | Debug 日志 | 开发调试使用 |
+| `SPR_LOGI()` | Info 日志 | 常规运行信息 |
+| `SPR_LOGW()` | Warn 日志 | 可恢复异常或风险 |
+| `SPR_LOGE()` | Error 日志 | 错误信息 |
+| `SPR_INIT()` | 设置进程日志模块 | 多模块场景使用 |
+| `SetLevel()` | 设置代码侧日志级别 | 一般优先使用配置 |
+| `SetLength()` | 设置单条日志长度上限 | 特殊场景使用 |
+
+运行时接口示例：
+
+```cpp
+SprLog::GetInstance()->SetLevel(LOG_LEVEL_DEBUG);
+SprLog::GetInstance()->SetLength(1024);
+```
+
+这些接口适合临时调试或特殊场景。生产环境通常优先使用配置文件。
+
+### 3.5 日志文件命名
+
+不需要自定义文件名时，只配置 `file_name` 即可：
+
+```ini
+file_name = service.log
+```
+
+未配置 `file_name_format` 时使用默认格式 `BN.FX`，当前活跃文件为：
+
+```text
+service.log
+```
+
+文件轮转由日志服务负责，历史文件使用 `.1`、`.2` 等后缀：
+
+```text
+service.log
+service.log.1
+service.log.2
+```
+
+`file_name_format` 只负责生成当前活跃文件名，不负责生成轮转序号。
+
+### 3.6 文件名 Token
+
+只有需要区分启动时间或启动实例时，才需要配置 `file_name_format`：
+
+```ini
+file_name = service.log
+file_name_format = BN_ST.FX
+```
+
+当前支持的 Token：
+
+| Token | 含义 | 建议用途 |
+|-------|------|----------|
+| `BN` | 基础文件名 | 通常保留 |
+| `FX` | 文件扩展名 | 通常保留 |
+| `ST` | 进程启动时的本地时间 | 需要区分启动批次时使用 |
+| `SI` | 系统启动标识的短值 | 特殊诊断场景使用 |
+| `MH` | 单调时钟运行小时数 | 时间异常时辅助定位 |
+| `BS` | 启动序号 | 当前版本通常不需要配置 |
+
+普通场景推荐只使用 `BN`、`FX` 和 `ST`。Token 可以自由组合，例如：
+
+```ini
+file_name_format = BN_ST-SI.FX
+```
+
+### 3.7 常见需求与实现方式
+
+| 需求 | 推荐实现方式 | 主要配置或接口 |
+|------|--------------|----------------|
+| 快速接入日志 | 定义 `LOG_TAG`，直接使用日志宏 | `SPR_LOGD/I/W/E()` |
+| 调整整个进程的日志级别或文件位置 | 配置进程对应的输出段 | `level`、`file_name`、`file_path` |
+| 调试程序时直接查看终端输出 | 设置输出方式为标准输出 | `output = stdout` |
+| 一个进程中的不同模块使用不同日志策略 | 在启动早期设置模块名 | `SPR_INIT()`、`[output.<module>]` |
+| 日志文件过大时自动轮转 | 配置文件数量和单文件容量 | `file_num`、`file_capacity_mb` |
+| 区分不同启动实例或记录启动时间 | 配置文件名格式 | `file_name_format`、`ST`、`SI`、`MH` |
+| 临时调整代码侧日志行为 | 使用运行时接口 | `SetLevel()`、`SetLength()` |
+
+#### 标准输出场景
+
+开发调试、前台运行或容器环境中，通常希望日志直接进入终端，或交给外部运行平台收集。此时不需要配置日志文件名：
+
+```ini
+[output.myservice]
+level = debug
+output = stdout
+```
+
+该方式只改变输出位置，不改变业务代码中的日志调用方式。
+
+#### 文件输出场景
+
+需要在设备或服务器上保留日志文件时，配置文件输出及轮转策略：
+
+```ini
+[output.myservice]
+level = info
+output = file
+file_name = service.log
+file_path = /var/log/myservice
+file_num = 10
+file_capacity_mb = 10
+```
+
+通常只需要关注 `level`、`file_name` 和 `file_path`。`file_num` 和 `file_capacity_mb` 用于控制历史日志的保留范围。
+
+#### 文件名定制场景
+
+只有需要区分启动时间或启动实例时，才配置 `file_name_format`。文件轮转仍由日志服务负责，历史文件使用 `.1`、`.2` 等后缀。
 
 ## 4. 要注意什么
-- LOG_TAG 长度上限是 12 个字符。超过后会在编译期触发 static_assert 失败。[SprLog.h:26](../../../3rdAdapter/SprLog.h#L26)
-- SetLength() 的有效上限是 1024，默认值是 512。length <= 0 时会回退到默认值 512。[SprLog.cpp:40](../../../3rdAdapter/SprLog.cpp#L40)
-- 格式化结果超过当前缓冲大小或超过 1024 时，会被截断并追加 TRUNCATED 提示。[SprLog.h:27](../../../3rdAdapter/SprLog.h#L27)     \
-级别枚举顺序是：
-    - LOG_LEVEL_MIN(0): 不输出任何日志
-    - LOG_LEVEL_ERROR(1): 只输出ERROR级别日志
-    - LOG_LEVEL_WARN(2): 输出ERROR和WARN级别日志
-    - LOG_LEVEL_INFO(3): 输出ERROR、WARN和INFO级别日志
-    - LOG_LEVEL_DEBUG(4): 输出ERROR、WARN、INFO和DEBUG级别日志
-    - LOG_LEVEL_BUTT(5): 输出所有级别日志
+
+### 4.1 日志路由规则
+
+日志配置按以下规则选择：
+
+```text
+调用 SPR_INIT("ModuleName")：
+    [output.ModuleName]
+        ↓ 不存在时
+    [output.default]
+
+未调用 SPR_INIT()：
+    [output.<可执行文件名>]
+        ↓ 不存在时
+    [output.default]
+```
+
+### 4.2 `SPR_INIT()` 的全局影响
+
+`SPR_INIT()` 是进程级设置，不是线程级、对象级或单条日志级设置。
+
+调用后，当前进程后续所有日志都会使用新的模块名查找配置，包括其他模块产生的日志。因此：
+
+1. 必须在第一条日志输出之前调用；
+2. 一个进程通常只调用一次；
+3. 没有多个日志输出位置的需求时，不要调用它，使用默认路由更安全。
+
+### 4.3 缓冲长度和日志截断
+
+- **`LOG_TAG` 长度**：上限 12 个字符，超过会触发编译错误。
+- **单条日志长度**：`SetLength()` 的有效范围为 1-1024，默认值为 512。
+- **超长日志**：格式化结果超过缓冲长度时会被截断，并追加 `TRUNCATED` 标记。
+
+如果日志内容可能较长，建议拆分为多条日志，而不是无限增大单条日志缓冲。
+
+### 4.4 文件轮转
+
+文件输出时：
+
+- `file_capacity_mb` 控制单个日志文件的容量；
+- `file_num` 控制保留的历史文件数量；
+- 当前文件使用 `file_name` 和 `file_name_format` 生成；
+- 历史文件由日志服务追加 `.1`、`.2` 等轮转后缀。
+
+### 4.5 日志服务依赖
+
+SprLog 依赖 LogManagerSrv 提供后台日志处理。建议先启动 LogManagerSrv，再启动业务进程。
+
+如果日志服务未启动，日志可能无法正常写入后台文件。
+
+## 5. 参考
+
+- 日志接口：[SprLog.h](../../../3rdAdapter/SprLog.h)
+- 日志实现：[SprLog.cpp](../../../3rdAdapter/SprLog.cpp)
+- 使用示例：[15_SprLog.cc](../../../Examples/15_SprLog.cc)

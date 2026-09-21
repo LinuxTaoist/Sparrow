@@ -10,6 +10,8 @@ add_executable  (BinLogSrv  ${SRC_LOG_SRV_PATH}
                             ${OTHER_SRC_FILES})
 target_include_directories  (BinLogSrv PRIVATE  ${PROJECT_PATH}/Util
                                                 ${PROJECT_PATH}/Core
-                                                ${PROJECT_PATH}/3rdAdapter)
+                                                ${PROJECT_PATH}/3rdAdapter
+                                                ${PROJECT_PATH}/UtilModules/IniParser)
 set_target_properties       (BinLogSrv PROPERTIES OUTPUT_NAME "logmanagersrv")
-target_link_libraries       (BinLogSrv pthread dl)
+target_link_libraries       (BinLogSrv LibIniParser pthread dl)
+add_dependencies            (BinLogSrv LibIniParser)

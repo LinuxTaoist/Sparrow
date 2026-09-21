@@ -8,17 +8,26 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/02
  *
+ *  Quick start:
+ *      #define LOG_TAG "LogTag"
  *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
- *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/02 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
+ *      SPR_LOGI("service started\n");
  *
+ *  Custom module:
+ *      #define LOG_TAG "LogTag"
+ *
+ *      SPR_INIT("NetworkSrv");
+ *      SPR_LOGI("network service started\n");
+ *
+ *  A custom module name selects the matching [output.<module>] section in
+ *  sprlog.conf. If SPR_INIT is not called, the executable name is used.
+ *
+ *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __SPR_LOG_H__
 #define __SPR_LOG_H__
 
+#include <string>
 #include <stdarg.h>
 #include <stdint.h>
 #include <semaphore.h>
@@ -27,7 +36,17 @@
 #define LOG_BUFFER_SIZE_LIMIT       1024
 
 // --------------------------------------------------------------------------------------------------------------------
-// - Log interface macro
+// - External interface macro list
+// --------------------------------------------------------------------------------------------------------------------
+#define SPR_LOGD(fmt, args...)     LOGX(d, LOG_TAG, fmt, ##args)
+#define SPR_LOGI(fmt, args...)     LOGX(i, LOG_TAG, fmt, ##args)
+#define SPR_LOGW(fmt, args...)     LOGX(w, LOG_TAG, fmt, ##args)
+#define SPR_LOGE(fmt, args...)     LOGX(e, LOG_TAG, fmt, ##args)
+
+#define SPR_INIT(moduleName)       (SprLog::GetInstance()->Init(moduleName))  // optional
+
+// --------------------------------------------------------------------------------------------------------------------
+// - SprLog implementation
 //   the length of LOG_TAG must be less than TAG_PRINT_WIDTH_LIMIT
 // --------------------------------------------------------------------------------------------------------------------
 constexpr bool check_str_length(const char* str, size_t maxLen, size_t index = 0) {
@@ -46,11 +65,6 @@ constexpr bool check_str_length(const char* str, size_t maxLen, size_t index = 0
         SprLog::GetInstance()->x(tag, "%4d " fmt, __LINE__, ##args);    \
     } while(0)
 
-#define SPR_LOGD(fmt, args...)     LOGX(d, LOG_TAG, fmt, ##args)
-#define SPR_LOGI(fmt, args...)     LOGX(i, LOG_TAG, fmt, ##args)
-#define SPR_LOGW(fmt, args...)     LOGX(w, LOG_TAG, fmt, ##args)
-#define SPR_LOGE(fmt, args...)     LOGX(e, LOG_TAG, fmt, ##args)
-
 // --------------------------------------------------------------------------------------------------------------------
 // - SprLog implementation
 // --------------------------------------------------------------------------------------------------------------------
@@ -63,6 +77,17 @@ public:
      * @return SprLog*
      */
     static SprLog* GetInstance();
+
+    /**
+     * @brief Set the optional module name used for sink routing.
+     *
+     * Call this before writing the first log when the executable name should
+     * not be used. The name is matched with [output.<module>] in sprlog.conf.
+     *
+     * @param moduleName Custom module name.
+     * @return 0 on success, or -1 if the name is empty or too long.
+     */
+    int32_t Init(const std::string& moduleName);
 
     /**
      * @brief Set/Get the level of logs to be printed
@@ -78,10 +103,10 @@ public:
     // ----------------------------------------------------------------------------------------------------------------
     // - External interfaces for printing logs
     // ----------------------------------------------------------------------------------------------------------------
-    int32_t d(const char* tag, const char* format, ...);
-    int32_t i(const char* tag, const char* format, ...);
-    int32_t w(const char* tag, const char* format, ...);
-    int32_t e(const char* tag, const char* format, ...);
+    int32_t d(const std::string& tag, const char* format, ...);
+    int32_t i(const std::string& tag, const char* format, ...);
+    int32_t w(const std::string& tag, const char* format, ...);
+    int32_t e(const std::string& tag, const char* format, ...);
 
 private:
     SprLog();
@@ -102,7 +127,7 @@ private:
      *
      * The interface for printing logs can be connected to other log interfaces
      */
-    int32_t LogImpl(const char* level, const char* tag, const char* format, va_list args);
+    int32_t LogImpl(int32_t level, const std::string& tag, const char* format, va_list args);
 
     /**
      * @brief Writes a log string into shared memory.
@@ -110,12 +135,13 @@ private:
      * @return          -1 if an error occurred,
      *                  Otherwise, returns the number of bytes written.
      */
-    int32_t LogsToMemory(const char* logs, int32_t len);
+    int32_t LogsToMemory(int32_t level, const std::string& tag, const char* logs, int32_t len);
 
 private:
     sem_t* mWriteSem;
     int32_t mLevel;     // allow to print log level
     int32_t mLength;    // allow to print log length
+    std::string mModuleName;
 };
 
 #endif // __SPR_LOG_H__

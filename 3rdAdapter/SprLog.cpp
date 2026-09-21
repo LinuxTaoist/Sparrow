@@ -8,13 +8,7 @@
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/02
  *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/02 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <memory>
 #include <vector>
@@ -138,6 +132,16 @@ int32_t SprLog::SetLevel(int32_t level)
     return 0;
 }
 
+int32_t SprLog::Init(const std::string& moduleName)
+{
+    if (moduleName.empty() || moduleName.size() >= LOG_RECORD_MODULE_NAME_MAX_LENGTH) {
+        return -1;
+    }
+
+    mModuleName = moduleName;
+    return 0;
+}
+
 int32_t SprLog::GetLevel()
 {
     return mLevel;
@@ -159,7 +163,7 @@ int32_t SprLog::GetLength()
     return mLength;
 }
 
-int32_t SprLog::d(const char* tag, const char* format, ...)
+int32_t SprLog::d(const std::string& tag, const char* format, ...)
 {
     if (mLevel < LOG_LEVEL_DEBUG) {
         return 0;
@@ -167,13 +171,13 @@ int32_t SprLog::d(const char* tag, const char* format, ...)
 
     va_list args;
     va_start(args, format);
-    int32_t result = LogImpl("D", tag, format, args);
+    int32_t result = LogImpl(LOG_LEVEL_DEBUG, tag, format, args);
     va_end(args);
 
     return result;
 }
 
-int32_t SprLog::i(const char* tag, const char* format, ...)
+int32_t SprLog::i(const std::string& tag, const char* format, ...)
 {
     if (mLevel < LOG_LEVEL_INFO) {
         return 0;
@@ -181,13 +185,13 @@ int32_t SprLog::i(const char* tag, const char* format, ...)
 
     va_list args;
     va_start(args, format);
-    int32_t result = LogImpl("I", tag, format, args);
+    int32_t result = LogImpl(LOG_LEVEL_INFO, tag, format, args);
     va_end(args);
 
     return result;
 }
 
-int32_t SprLog::w(const char* tag, const char* format, ...)
+int32_t SprLog::w(const std::string& tag, const char* format, ...)
 {
     if (mLevel < LOG_LEVEL_WARN) {
         return 0;
@@ -195,13 +199,13 @@ int32_t SprLog::w(const char* tag, const char* format, ...)
 
     va_list args;
     va_start(args, format);
-    int32_t result = LogImpl("W", tag, format, args);
+    int32_t result = LogImpl(LOG_LEVEL_WARN, tag, format, args);
     va_end(args);
 
     return result;
 }
 
-int32_t SprLog::e(const char* tag, const char* format, ...)
+int32_t SprLog::e(const std::string& tag, const char* format, ...)
 {
     if (mLevel < LOG_LEVEL_ERROR) {
         return 0;
@@ -209,13 +213,41 @@ int32_t SprLog::e(const char* tag, const char* format, ...)
 
     va_list args;
     va_start(args, format);
-    int32_t result = LogImpl("E", tag, format, args);
+    int32_t result = LogImpl(LOG_LEVEL_ERROR, tag, format, args);
     va_end(args);
 
     return result;
 }
 
-static std::string GetCurrentTimestamp()
+static uint64_t GetCurrentTimestampMs()
+{
+    struct timeval tv = {};
+    if (gettimeofday(&tv, nullptr) != 0) {
+        return 0;
+    }
+
+    return static_cast<uint64_t>(tv.tv_sec) * 1000U
+         + static_cast<uint64_t>(tv.tv_usec / 1000);
+}
+
+static const std::string& GetDefaultModuleName()
+{
+    static const std::string moduleName = []() {
+        char path[256] = {0};
+        ssize_t length = readlink("/proc/self/exe", path, sizeof(path) - 1);
+        if (length <= 0) {
+            return std::string("unknown");
+        }
+
+        path[length] = '\0';
+        const char* name = strrchr(path, '/');
+        return std::string(name == nullptr ? path : name + 1);
+    }();
+
+    return moduleName;
+}
+
+static std::string GetCurrentTimestampText()
 {
     struct timeval tv;
     if (gettimeofday(&tv, nullptr) != 0) {
@@ -235,16 +267,21 @@ static std::string GetCurrentTimestamp()
 }
 
 // 04-03 07:56:23.032  43930     DebugMsg D:
-static int FormatLog(std::string& log, const char* level, const char* tag, const char* buffer)
+static int FormatLog(std::string& log, int32_t level, const std::string& tag, const char* buffer)
 {
     __pid_t pid = getpid();
     std::ostringstream oss;
-    std::string timestamp = GetCurrentTimestamp();
+    std::string timestamp = GetCurrentTimestampText();
+    const char* levelText = (level == LOG_LEVEL_DEBUG) ? "D"
+                          : (level == LOG_LEVEL_INFO)  ? "I"
+                          : (level == LOG_LEVEL_WARN)  ? "W"
+                          : (level == LOG_LEVEL_ERROR) ? "E"
+                          : "U";
 
     oss << timestamp;
     oss << " " << std::right << std::setw(PID_PRINT_WIDTH_LIMIT) << pid;
     oss << " " << std::left << std::setw(TAG_PRINT_WIDTH_LIMIT) << tag;
-    oss << " " << level;
+    oss << " " << levelText;
     oss << ": " << buffer;
 
     bool hasNewline = std::any_of(buffer, buffer + strlen(buffer), [](char c){ return c == '\n'; });
@@ -256,7 +293,7 @@ static int FormatLog(std::string& log, const char* level, const char* tag, const
     return 0;
 }
 
-int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, va_list args)
+int32_t SprLog::LogImpl(int32_t level, const std::string& tag, const char* format, va_list args)
 {
     std::vector<char> buffer(mLength, 0);
     int32_t result = vsnprintf(buffer.data(), buffer.size(), format, args);
@@ -282,21 +319,37 @@ int32_t SprLog::LogImpl(const char* level, const char* tag, const char* format, 
         fputs(log.c_str(), stdout);
         return result;
     }
-    LogsToMemory(log.c_str(), (int32_t)log.length());
+    LogsToMemory(level, tag, log.c_str(), (int32_t)log.length());
     sem_post(mWriteSem);
 
     return result;
 }
 
 
-int32_t SprLog::LogsToMemory(const char* logs, int32_t len)
+int32_t SprLog::LogsToMemory(int32_t level, const std::string& tag, const char* logs, int32_t len)
 {
     if (!pLogSCacheMem || !logs || len <= 0) {
         return -1;
     }
 
-    std::vector<unsigned char> buffer(static_cast<size_t>(len) + sizeof(int32_t), 0);
-    memcpy(buffer.data(), &len, sizeof(int32_t));
-    memcpy(buffer.data() + sizeof(int32_t), logs, len);
-    return pLogSCacheMem->Write(buffer.data(), sizeof(int32_t) + len);
+    SLogRecordHeader header = {};
+    header.magic = LOG_RECORD_MAGIC;
+    header.version = LOG_RECORD_VERSION;
+    header.headerSize = sizeof(SLogRecordHeader);
+    header.payloadLength = static_cast<uint32_t>(len);
+    header.timestampMs = GetCurrentTimestampMs();
+    header.pid = static_cast<uint32_t>(getpid());
+    header.level = static_cast<uint8_t>(level);
+    header.category = LOG_CATEGORY_NORMAL;
+    const std::string& moduleName = mModuleName.empty() ? GetDefaultModuleName() : mModuleName;
+    strncpy(header.moduleName, moduleName.c_str(), sizeof(header.moduleName) - 1);
+    strncpy(header.tag, tag.c_str(), sizeof(header.tag) - 1);
+
+    const size_t recordLength = sizeof(header) + static_cast<size_t>(len);
+    const int32_t frameLength = static_cast<int32_t>(recordLength);
+    std::vector<unsigned char> frame(sizeof(frameLength) + recordLength, 0);
+    memcpy(frame.data(), &frameLength, sizeof(frameLength));
+    memcpy(frame.data() + sizeof(frameLength), &header, sizeof(header));
+    memcpy(frame.data() + sizeof(frameLength) + sizeof(header), logs, len);
+    return pLogSCacheMem->Write(frame.data(), static_cast<int32_t>(frame.size()));
 }

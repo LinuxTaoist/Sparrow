@@ -29,7 +29,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CoreTypeDefs.h version
 // --------------------------------------------------------------------------------------------------------------------
-#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1006"
+#define CORE_TYPE_DEFS_VERSION   "CORE_TYPE_DEFS_VERSION_R1007"
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common defines for Plugin
@@ -54,7 +54,6 @@ typedef void(*PluginExitFunc) (std::map<int32_t, SprObserver*>& modules, SprCont
 #define     MODULE_ID_OFFSET              16
 
 namespace InternalDefs {
-
 namespace {
 
 #ifdef ENUM_OR_STRING
@@ -318,6 +317,39 @@ typedef struct
     int32_t  delayInMilliSec;
     int32_t  intervalInMilliSec;
 } STimerInfo;
+
+//---------------------------------------------------------------------------------------------------------------------
+// - SprLog
+// --------------------------------------------------------------------------------------------------------------------
+#define LOG_RECORD_MAGIC                  0x5350524CUL // "SPRL"
+#define LOG_RECORD_VERSION                1U
+#define LOG_RECORD_TAG_MAX_LENGTH         12U
+#define LOG_RECORD_EVENT_MAX_LENGTH       32U
+#define LOG_RECORD_MODULE_NAME_MAX_LENGTH 32U
+
+enum ELogRecordCategory : uint8_t
+{
+    LOG_CATEGORY_NORMAL = 0,
+    LOG_CATEGORY_EVENT,
+    LOG_CATEGORY_DIAGNOSTIC,
+    LOG_CATEGORY_BUTT
+};
+
+typedef struct
+{
+    uint32_t magic;
+    uint16_t version;
+    uint16_t headerSize;
+    uint32_t payloadLength;
+    uint64_t timestampMs;
+    uint32_t pid;
+    uint8_t  level;
+    uint8_t  category;
+    uint16_t flags;
+    char     moduleName[LOG_RECORD_MODULE_NAME_MAX_LENGTH];
+    char     tag[LOG_RECORD_TAG_MAX_LENGTH];
+    char     event[LOG_RECORD_EVENT_MAX_LENGTH];
+} SLogRecordHeader;
 
 template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
 struct StateTransition

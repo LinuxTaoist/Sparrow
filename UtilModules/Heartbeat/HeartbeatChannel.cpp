@@ -68,6 +68,7 @@ int32_t HeartbeatChannel::OpenMonitor(const std::string& path) {
     mAddress.sun_family = AF_UNIX;
     std::strncpy(mAddress.sun_path, path.c_str(), sizeof(mAddress.sun_path) - 1);
 
+    unlink(path.c_str());
     if (bind(mFd, reinterpret_cast<const sockaddr*>(&mAddress), sizeof(mAddress)) != 0) {
         HBLOGE("bind %s failed! (%s)\n", path.c_str(), std::strerror(errno));
         Close();

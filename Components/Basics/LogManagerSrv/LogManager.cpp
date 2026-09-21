@@ -20,6 +20,7 @@
  *
  */
 #include <memory>
+#include <vector>
 #include <algorithm>
 #include <sstream>
 #include <time.h>
@@ -31,9 +32,13 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <cstdlib>
+#include <limits>
+#include <tuple>
 #include "SharedRingBuffer.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
+#include "LogConfigKeys.h"
 #include "LogManager.h"
 
 using namespace std;
@@ -44,22 +49,13 @@ using namespace GeneralUtils;
 #define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "LOGM", __LINE__, ##args)
 
-#define DEFAULT_LOG_FILE_NUM_LIMIT  10
-#define DEFAULT_FRAME_LEN_LIMIT     1024
-#define DEFAULT_LOG_FILE_MAX_SIZE   10 * 1024 * 1024        // 10MB
-#define DEFAULT_BASE_LOG_FILE_NAME  "sprlog.log"
 #define LOG_CONFIGURE_FILE_PATH     "sprlog.conf"
 #define LOG_WRITE_SEMAPHORE_NAME    "/SprLogSem"
-#define LOG_FLUSH_COUNT_LIMIT       64
-#define LOG_FLUSH_INTERVAL_SEC      1
 #define LOG_SEM_WAIT_TIMEOUT_MS     100
-
-static std::unique_ptr<SharedRingBuffer> pLogMCacheMem = nullptr;
 
 bool LogManager::mRunning = true;
 
-static int WaitSemTimeout(sem_t* sem, int timeoutMs)
-{
+static int32_t WaitSemTimeout(sem_t* sem, int32_t timeoutMs) {
     if (sem == nullptr || sem == SEM_FAILED) {
         return -1;
     }
@@ -99,69 +95,25 @@ static int WaitSemTimeout(sem_t* sem, int timeoutMs)
     }
 }
 
-static uint64_t GetMonotonicTickSec()
-{
-    struct timespec ts {};
-    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
-        return 0;
-    }
-
-    return static_cast<uint64_t>(ts.tv_sec);
-}
-
 LogManager::LogManager()
-    : mLogLevelLimit(InternalDefs::LOG_LEVEL_BUTT)
-    , mOutputMode(LOG_OUTPUT_FILE)
-    , mLogFrameLength(DEFAULT_FRAME_LEN_LIMIT)
-    , mLogFileNum(DEFAULT_LOG_FILE_NUM_LIMIT)
-    , mLogFileCapacity(DEFAULT_LOG_FILE_MAX_SIZE)
-    , mPendingFlushCount(0)
-    , mLastFlushTickSec(GetMonotonicTickSec())
-    , mLogFileName(DEFAULT_BASE_LOG_FILE_NAME)
-    , mLogsFilePath(DEFAULT_DEBUG_ROOT_DIR + std::string("/") + DEFAULT_BASE_LOG_FILE_NAME)
-    , mCurrentLogFile(DEFAULT_BASE_LOG_FILE_NAME)
-    , mReadSem(sem_open(LOG_WRITE_SEMAPHORE_NAME, O_CREAT, 0600, 1))
-    , mLogFileStream()
-    , mLogFilePaths()
-    , mLoadAttrMap()
-{
-
-    mLoadAttrMap.insert(std::make_pair("logging.output",        &LogManager::LoadAttrOutputMode));
-    mLoadAttrMap.insert(std::make_pair("logging.level",         &LogManager::LoadAttrLevelLimit));
-    mLoadAttrMap.insert(std::make_pair("logging.file_name",     &LogManager::LoadAttrFileName));
-    mLoadAttrMap.insert(std::make_pair("logging.file_num",      &LogManager::LoadAttrFileNumLimit));
-    mLoadAttrMap.insert(std::make_pair("logging.file_capacity", &LogManager::LoadAttrFileCapacityLimit));
-    mLoadAttrMap.insert(std::make_pair("logging.file_path",     &LogManager::LoadAttrFilePath));
-    mLoadAttrMap.insert(std::make_pair("logging.frame_length",  &LogManager::LoadAttrFrameLengthLimit));
-
-    LoadLogCfgFile(GetLogCfgPath());
-    if (access(mLogsFilePath.c_str(), F_OK) != 0) {
-        int ret = mkdir(mLogsFilePath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-        if (ret != 0) {
-            SPR_LOGE("mkdir %s failed! (%s)\n", mLogsFilePath.c_str(), strerror(errno));
-            mRunning = false;
-        }
-    }
-
-    pLogMCacheMem.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE));
-    mLogFilePaths = GetSortedLogFiles(mLogsFilePath, mLogFileName);
+    : mCache()
+    , mConfiger()
+    , mFrameLength(1024) {
+    mReadSem = sem_open(LOG_WRITE_SEMAPHORE_NAME, O_CREAT, 0600, 1);
+    LoadConfig(GetConfigPath());
+    mCache.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE));
     EnvReady(SRV_NAME_LOG);
-
-    // Dump log attrs for debug
-    // DumpLogAttrs();
 }
 
-LogManager::~LogManager()
-{
+LogManager::~LogManager() {
     if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
         sem_close(mReadSem);
     }
 }
 
-int LogManager::EnvReady(const std::string& srvName)
-{
+int32_t LogManager::EnvReady(const std::string& srvName) {
     std::string node = DEFAULT_DEBUG_ROOT_DIR + std::string("/") + srvName;
-    int fd = creat(node.c_str(), 0644);
+    int32_t fd = creat(node.c_str(), 0644);
     if (fd != -1) {
         close(fd);
     }
@@ -169,301 +121,127 @@ int LogManager::EnvReady(const std::string& srvName)
     return 0;
 }
 
-int LogManager::StopWork()
-{
+int32_t LogManager::StopWork() {
     mRunning = false;
     SPR_LOGD("Stop Work!\n");
     return 0;
 }
 
-int LogManager::DumpLogAttrs()
-{
-    SPR_LOGD("------------------------- Dump Log Attrs -------------------------\n");
-    SPR_LOGD("- mOutputMode         = %d\n", mOutputMode);
-    SPR_LOGD("- mLogLevelLimit      = %d\n", mLogLevelLimit);
-    SPR_LOGD("- mLogFrameLength     = %uB\n", mLogFrameLength);
-    SPR_LOGD("- mLogFileNum         = %u\n", mLogFileNum);
-    SPR_LOGD("- mLogFileCapacity    = %uM\n", mLogFileCapacity / (1024 * 1024));
-    SPR_LOGD("- mLogFileName        = %s\n", mLogFileName.c_str());
-    SPR_LOGD("- mLogsFilePath       = %s\n", mLogsFilePath.c_str());
-    SPR_LOGD("- mCurrentLogFile     = %s\n", mCurrentLogFile.c_str());
-    SPR_LOGD("------------------------------------------------------------------\n");
-    return 0;
-}
-
-void LogManager::LoadAttrOutputMode(const std::string& value)
-{
-    mOutputMode = (value == "file") ? LOG_OUTPUT_FILE : LOG_OUTPUT_STDOUT;
-}
-
-void LogManager::LoadAttrLevelLimit(const std::string& value)
-{
-    if (value == "debug") {
-        mLogLevelLimit = InternalDefs::LOG_LEVEL_DEBUG;
-    } else if (value == "info") {
-        mLogLevelLimit = InternalDefs::LOG_LEVEL_INFO;
-    } else if (value == "warn") {
-        mLogLevelLimit = InternalDefs::LOG_LEVEL_WARN;
-    } else if (value == "error") {
-        mLogLevelLimit = InternalDefs::LOG_LEVEL_ERROR;
-    } else {
-        mLogLevelLimit = InternalDefs::LOG_LEVEL_BUTT;
-    }
-}
-
-void LogManager::LoadAttrFrameLengthLimit(const std::string& value)
-{
-    int32_t frameLength = atoi(value.c_str());
-    mLogFrameLength = (frameLength > static_cast<int32_t>(sizeof(int32_t)))
-                    ? static_cast<uint32_t>(frameLength)
-                    : DEFAULT_FRAME_LEN_LIMIT;
-}
-
-void LogManager::LoadAttrFileNumLimit(const std::string& value)
-{
-    int32_t fileNum = atoi(value.c_str());
-    mLogFileNum = (fileNum > 0) ? static_cast<uint32_t>(fileNum) : DEFAULT_LOG_FILE_NUM_LIMIT;
-}
-
-void LogManager::LoadAttrFileCapacityLimit(const std::string& value)
-{
-    int32_t fileCapacityMb = atoi(value.c_str());
-    mLogFileCapacity = (fileCapacityMb > 0)
-                     ? static_cast<uint32_t>(fileCapacityMb) * 1024 * 1024
-                     : DEFAULT_LOG_FILE_MAX_SIZE;
-}
-
-void LogManager::LoadAttrFileName(const std::string& value)
-{
-    mLogFileName = value;
-    mCurrentLogFile = value;
-}
-
-void LogManager::LoadAttrFilePath(const std::string& value)
-{
-    mLogsFilePath = value;
-}
-
-int LogManager::LoadLogCfgFile(const std::string& cfgPath)
-{
-    std::string resolvedCfgPath = cfgPath;
-    if (access(resolvedCfgPath.c_str(), F_OK) != 0) {
-        std::string cfgPath = GetLogCfgPath();
-        if (cfgPath.empty()) {
-            SPR_LOGE("Log config path is empty, cannot resolve fallback.\n");
-            return -1;
-        }
-
-        resolvedCfgPath = cfgPath;
-    }
-
-    std::ifstream file(resolvedCfgPath);
-    if (!file) {
-        SPR_LOGE("Open %s fail! \n", resolvedCfgPath.c_str());
+int32_t LogManager::LoadConfig(const std::string& path) {
+    int32_t ret = mConfiger.Load(path);
+    const LogConfiger::LogModules modules = mConfiger.GetLogModules();
+    auto moduleIt = modules.find(LOG_CONFIG_MODULE_DEFAULT);
+    if (moduleIt == modules.end()) {
         return -1;
     }
 
-    std::string line;
-    std::string buffer;
-    while (std::getline(file, buffer)) {
-        line += buffer + "\n";
-    }
-
-    std::istringstream iss(line);
-    std::string keyValue;
-    while (std::getline(iss, keyValue, '\n')) {
-        size_t delimiter = keyValue.find('=');
-        if (delimiter != std::string::npos) {
-            std::string key = keyValue.substr(0, delimiter);
-            std::string value = keyValue.substr(delimiter + 1);
-            if (mLoadAttrMap.count(key) != 0) {
-                (reinterpret_cast<LogManager*>(this)->*(mLoadAttrMap[key]))(value);
-            }
+    const LogConfiger::LogModuleAttrs& attrs = moduleIt->second;
+    auto frameLength = attrs.find(LOG_CONFIG_KEY_FRAME_LENGTH_BYTES);
+    if (frameLength != attrs.end()) {
+        errno = 0;
+        char* end = nullptr;
+        const unsigned long value = std::strtoul(frameLength->second.c_str(), &end, 10);
+        if (errno == 0 && end != frameLength->second.c_str() && *end == '\0'
+            && value >= sizeof(int32_t) && value <= std::numeric_limits<uint32_t>::max()) {
+            mFrameLength = static_cast<uint32_t>(value);
         }
     }
 
-    return 0;
+    mSinks.clear();
+    for (const auto& module : modules) {
+        mSinks.emplace(std::piecewise_construct,
+                       std::forward_as_tuple(module.first),
+                       std::forward_as_tuple(module.second));
+    }
+    return ret;
 }
 
-int LogManager::OpenCurrentLogFile()
-{
-    if (mLogFileStream.is_open()) {
-        return 0;
+int32_t LogManager::Write(const std::string& moduleName, const std::string& data, int32_t level) {
+    auto sink = mSinks.find(moduleName);
+    if (sink == mSinks.end()) {
+        sink = mSinks.find(LOG_CONFIG_MODULE_DEFAULT);
     }
-
-    mLogFileStream.open(mLogsFilePath + '/' + mCurrentLogFile, std::ios_base::app | std::ios_base::out);
-    if (!mLogFileStream.is_open()) {
-        SPR_LOGE("Open %s failed!\n", mCurrentLogFile.c_str());
-        return -1;
-    }
-
-    return 0;
+    return sink->second.Write(data, level);
 }
 
-int LogManager::UpdateSuffixOfAllFiles()
-{
-    while (mLogFilePaths.size() >= mLogFileNum) {
-        auto it = mLogFilePaths.end();
-        --it;
-        int ret = remove(it->c_str());
-        if (ret != 0) {
-            SPR_LOGE("Remove %s failed! (%s)\n", it->c_str(), strerror(errno));
-        }
-
-        mLogFilePaths.erase(it);
-    }
-
-    std::set<std::string> tmpLogPaths;
-    for (auto it = mLogFilePaths.rbegin(); it != mLogFilePaths.rend(); ++it) {
-        std::string oldPath = *it;
-        std::string suffix;
-
-        // Add 1 to the suffix of an existing file
-        std::string suffixTag = mLogFileName + ".";
-        auto pos = oldPath.rfind(suffixTag);
-        if (pos != std::string::npos) {
-            suffix = oldPath.substr(pos + suffixTag.size());
-            int version = atoi(suffix.c_str()) + 1;
-            suffix = std::to_string(version);
-        } else {
-            oldPath = mLogsFilePath + "/" + mLogFileName;
-            suffix = "1";
-        }
-
-        // E.g. /tmp/sprlog/sparrow.log.1 -> /tmp/sprlog/sparrow.log.2
-        std::string newFile = mLogFileName + "." + suffix;
-        std::string newPath = mLogsFilePath + "/" + newFile;
-        int ret = rename(oldPath.c_str(), newPath.c_str());
-        if (ret != 0) {
-            SPR_LOGE("Rename %s to %s failed! (%s)\n", oldPath.c_str(), newPath.c_str(), strerror(errno));
-        }
-
-        tmpLogPaths.insert(newPath);
-    }
-
-    tmpLogPaths.insert(mLogsFilePath + "/" + mCurrentLogFile);
-    mLogFilePaths = std::move(tmpLogPaths);
-    return 0;
-}
-
-int LogManager::FlushLogFileIfNecessary(bool force)
-{
-    if (!mLogFileStream.is_open()) {
-        return 0;
-    }
-
-    if (!force && mPendingFlushCount == 0) {
-        return 0;
-    }
-
-    uint64_t now = GetMonotonicTickSec();
-    bool needFlush = force
-                  || (mPendingFlushCount >= LOG_FLUSH_COUNT_LIMIT)
-                  || (now >= mLastFlushTickSec + LOG_FLUSH_INTERVAL_SEC);
-    if (!needFlush) {
-        return 0;
-    }
-
-    mLogFileStream.flush();
-    if (!mLogFileStream.good()) {
-        SPR_LOGE("Flush %s failed!\n", mCurrentLogFile.c_str());
-        return -1;
-    }
-
-    mPendingFlushCount = 0;
-    mLastFlushTickSec = now;
-    return 0;
-}
-
-// E.g: sparrow.log sparrow.log.1 sparrow.log.2 ...
-int LogManager::RotateLogsIfNecessary(uint32_t logDataSize)
-{
-    if (OpenCurrentLogFile() != 0) {
-        return -1;
-    }
-
-    std::streampos pos = mLogFileStream.tellp();
-    uint32_t curFileSize = (pos >= 0) ? static_cast<uint32_t>(pos) : 0;
-    if (curFileSize + logDataSize > mLogFileCapacity) {
-        FlushLogFileIfNecessary(true);
-        mLogFileStream.close();
-
-        UpdateSuffixOfAllFiles();
-        if (OpenCurrentLogFile() != 0) {
-            return -1;
-        }
-
-        mPendingFlushCount = 0;
-        mLastFlushTickSec = GetMonotonicTickSec();
-    }
-
-    return 0;
-}
-
-int LogManager::GetLevelFromLogStrs(const std::string& logData)
-{
-    int level = InternalDefs::LOG_LEVEL_BUTT;
-
-    // 04-03 07:56:23.032  43930     DebugMsg D:
-    char levelChar = 0;
-    int rc = GetCharBeforeNthTarget(logData, ':', 3, levelChar);
-    if (rc == 0) {
-        if  (levelChar == 'D') {
-            level = InternalDefs::LOG_LEVEL_DEBUG;
-        } else if (levelChar == 'I') {
-            level = InternalDefs::LOG_LEVEL_INFO;
-        } else if (levelChar == 'W') {
-            level = InternalDefs::LOG_LEVEL_WARN;
-        } else if (levelChar == 'E') {
-            level = InternalDefs::LOG_LEVEL_ERROR;
-        } else {
-            level = InternalDefs::LOG_LEVEL_BUTT;
+int32_t LogManager::Flush(bool force) {
+    int32_t ret = 0;
+    for (auto& sink : mSinks) {
+        if (sink.second.Flush(force) != 0) {
+            ret = -1;
         }
     }
-
-    return level;
+    return ret;
 }
 
-int LogManager::WriteToLogFile(const std::string& logData)
-{
-    if (logData.size() > mLogFrameLength) {
-        SPR_LOGE("Out of length limit [%d %u]!\n", (int)logData.size(), mLogFrameLength);
+int32_t LogManager::TryReadRecord(std::string& moduleName,
+                                  std::string& data,
+                                  int32_t& level) {
+    if (mCache->AvailData() < static_cast<int32_t>(sizeof(uint32_t))) {
         return -1;
     }
 
-    if (OpenCurrentLogFile() != 0) {
+    if (mReadSem != SEM_FAILED &&
+        mReadSem != nullptr    &&
+        WaitSemTimeout(mReadSem, LOG_SEM_WAIT_TIMEOUT_MS) != 0) {
         return -1;
     }
 
-    mLogFileStream.write(logData.c_str(), logData.size());
-    if (!mLogFileStream.good()) {
-        SPR_LOGE("Write %s failed!\n", mCurrentLogFile.c_str());
-        return -1;
-    }
+    // Scan the byte stream for the record magic. The outer frame length is
+    // intentionally ignored here: it is only a fast framing hint and may be
+    // corrupted. Producers publish a complete frame in one ring-buffer write,
+    // so a valid candidate has its complete header available when found.
+    const uint32_t magic = LOG_RECORD_MAGIC;
+    uint32_t window = 0;
+    int32_t scanCount = mCache->AvailData();
+    while (scanCount-- > 0) {
+        uint8_t byte = 0;
+        if (mCache->Read(&byte, sizeof(byte)) != 0) {
+            break;
+        }
+        window = (window >> 8) | (static_cast<uint32_t>(byte) << 24);
+        if (window != magic || mCache->AvailData()
+                < static_cast<int32_t>(sizeof(InternalDefs::SLogRecordHeader) - sizeof(uint32_t))) {
+            continue;
+        }
 
-    mPendingFlushCount++;
-    return FlushLogFileIfNecessary(false);
-}
+        InternalDefs::SLogRecordHeader header = {};
+        memcpy(&header, &magic, sizeof(magic));
+        if (mCache->Read(reinterpret_cast<uint8_t*>(&header) + sizeof(magic),
+                 sizeof(header) - sizeof(magic)) != 0) {
+            break;
+        }
 
-int LogManager::WriteLog(const std::string& logData, int level)
-{
-    if (mOutputMode == LOG_OUTPUT_STDOUT) {
-        fputs(logData.c_str(), stdout);
-        if (level <= InternalDefs::LOG_LEVEL_ERROR) {
-            fflush(stdout);
+        if (header.version != LOG_RECORD_VERSION
+            || header.headerSize < sizeof(InternalDefs::SLogRecordHeader)
+            || header.payloadLength > mFrameLength
+            || mCache->AvailData() < static_cast<int32_t>(header.payloadLength)) {
+            window = 0;
+            continue;
+        }
+
+        std::vector<char> payload(header.payloadLength);
+        if (mCache->Read(payload.data(), header.payloadLength) != 0) {
+            break;
+        }
+        moduleName.assign(header.moduleName,
+                   strnlen(header.moduleName,
+                       LOG_RECORD_MODULE_NAME_MAX_LENGTH));
+        data.assign(payload.data(), header.payloadLength);
+        level = header.level;
+        if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
+            sem_post(mReadSem);
         }
         return 0;
     }
 
-    if (RotateLogsIfNecessary(logData.size()) != 0) {
-        return -1;
+    if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
+        sem_post(mReadSem);
     }
-
-    return WriteToLogFile(logData);
+    return -1;
 }
 
-std::string LogManager::GetLogCfgPath()
-{
+std::string LogManager::GetConfigPath() {
     const char* pEnvRoot = std::getenv(ENV_SPR_ROOT_PATH);
     if (pEnvRoot != nullptr && pEnvRoot[0] != '\0') {
         return std::string(pEnvRoot) + "/" + DEFAULT_SPR_ETC_FILE + "/" + LOG_CONFIGURE_FILE_PATH;
@@ -484,88 +262,31 @@ std::string LogManager::GetLogCfgPath()
     return "";
 }
 
-std::set<std::string> LogManager::GetSortedLogFiles(const std::string& path, const std::string& fileNamePrefix)
-{
-    DIR* dir = opendir(path.c_str());
-    if (!dir) {
-        SPR_LOGE("Open %s failed! (%s)\n", mLogsFilePath.c_str(), strerror(errno));
-        return {};
-    }
-
-    std::set<std::string> matchingFiles;
-
-    // Iterate through each file in the directory
-    struct dirent* entry;
-    while ((entry = readdir(dir)) != nullptr) {
-        std::string currentFile(entry->d_name);
-
-        // Check if the file name starts with the given prefix
-        if (currentFile.rfind(fileNamePrefix, 0) == 0) {
-            matchingFiles.insert(mLogsFilePath + '/' + currentFile);
-        }
-    }
-
-    // If no files were found, insert the current log file
-    if (matchingFiles.empty()) {
-        matchingFiles.insert(mLogsFilePath + '/' + mCurrentLogFile);
-    }
-
-    closedir(dir);
-    return matchingFiles;
-}
-
-int LogManager::MainLoop()
-{
-    if (!pLogMCacheMem) {
-        SPR_LOGE("pLogMCacheMem is nullptr!\n");
+int32_t LogManager::MainLoop() {
+    if (!mCache) {
+        SPR_LOGE("Log cache is unavailable!\n");
         return -1;
     }
 
     while (mRunning) {
-        if (pLogMCacheMem->AvailData() < static_cast<int32_t>(sizeof(int32_t))) {
-            FlushLogFileIfNecessary(false);
-            usleep(10000);
-            continue;
-        }
-
-        if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
-            if (WaitSemTimeout(mReadSem, LOG_SEM_WAIT_TIMEOUT_MS) != 0) {
-                usleep(10000);
-                continue;
-            }
-        }
-
-        int32_t len = 0;
-        int ret = pLogMCacheMem->Read(&len, sizeof(int32_t));
-        if (ret != 0 || len < 0 || len > static_cast<int32_t>(mLogFrameLength)) {
-            if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
-                sem_post(mReadSem);
-            }
-
-            SPR_LOGE("Read memory failed! len = %d, ret = %d\n", len, ret);
+        if (mCache->AvailData() < static_cast<int32_t>(sizeof(int32_t))) {
+            Flush(false);
             usleep(10000);
             continue;
         }
 
         std::string value;
-        value.resize(len);
-        char* data = const_cast<char*>(value.c_str());
-        ret = pLogMCacheMem->Read(data, len);
-        if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
-            sem_post(mReadSem);
-        }
-
+        std::string moduleName;
+        int32_t level = InternalDefs::LOG_LEVEL_BUTT;
+        int32_t ret = TryReadRecord(moduleName, value, level);
         if (ret != 0) {
-            SPR_LOGE("Read failed! len = %d\n", len);
+            usleep(10000);
+            continue;
         }
 
-        // Write the log if level less than the limit
-        int level = GetLevelFromLogStrs(value);
-        if (level <= mLogLevelLimit) {
-            WriteLog(value, level);
-        }
+        Write(moduleName, value, level);
     }
 
-    FlushLogFileIfNecessary(true);
+    Flush(true);
     return 0;
 }

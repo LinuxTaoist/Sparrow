@@ -22,7 +22,7 @@
 #include <thread>
 #include <chrono>
 #include <numeric>
-#include <gtest/gtest.h>
+#include "gtest/gtest.h"
 #include "SprMsg.h"
 #include "BenchCommon.h"
 

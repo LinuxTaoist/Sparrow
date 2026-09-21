@@ -23,6 +23,15 @@ list(APPEND BASIC_MODULES ServiceManagerSrv)
 list(APPEND BASIC_MODULES SparrowSrv)
 list(APPEND BASIC_MODULES StatusMonitorSrv)
 
+## 业务模块配置
+## 增加变量名对应Components/Business路径下的文件夹名
+## 启用方法：
+##   - 修改路径： 当前文件
+##   - 修改方式： 增加/删除对应行的注释符号(#)
+# list(APPEND BUSINESS_MODULES GB32960)
+# list(APPEND BUSINESS_MODULES Network)
+list(APPEND BUSINESS_MODULES OneNetMqtt)
+
 ## 可选功能模块配置
 # 非核心模块，编译时默认禁用
 # 启用方法：增加/删除对应行的注释符号(#)

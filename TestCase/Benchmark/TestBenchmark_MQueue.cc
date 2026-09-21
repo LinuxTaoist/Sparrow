@@ -27,8 +27,8 @@
 #include "gtest/gtest.h"
 #include "SprMsg.h"
 #include "BenchCommon.h"
-#include "SprObserverWithMQueue.h"
 #include "SprEpollSchedule.h"
+#include "SprObserverWithMQueue.h"
 
 using namespace InternalDefs;
 

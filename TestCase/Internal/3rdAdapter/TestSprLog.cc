@@ -95,10 +95,17 @@ bool LoadLogConfig(LogConfig& cfg) {
     }
 
     std::string line;
+    std::string section;
+    const std::string targetSection = "output.TestInternal";
     while (std::getline(file, line)) {
         size_t comment = line.find('#');
         if (comment != std::string::npos) {
             line = line.substr(0, comment);
+        }
+        line = TrimStr(line);
+        if (line.size() >= 2 && line.front() == '[' && line.back() == ']') {
+            section = TrimStr(line.substr(1, line.size() - 2));
+            continue;
         }
         size_t eq = line.find('=');
         if (eq == std::string::npos) {
@@ -107,15 +114,19 @@ bool LoadLogConfig(LogConfig& cfg) {
 
         std::string key = TrimStr(line.substr(0, eq));
         std::string value = TrimStr(line.substr(eq + 1));
-        if (key == "logging.output") {
+        if (section != "output.default" && section != targetSection
+            && key.find("logging.") != 0) {
+            continue;
+        }
+        if (key == "logging.output" || key == "output") {
             cfg.output = value;
-        } else if (key == "logging.file_path") {
+        } else if (key == "logging.file_path" || key == "file_path") {
             cfg.filePath = value;
-        } else if (key == "logging.file_name") {
+        } else if (key == "logging.file_name" || key == "file_name") {
             cfg.fileName = value;
-        } else if (key == "logging.file_num") {
+        } else if (key == "logging.file_num" || key == "file_num") {
             cfg.fileNum = atoi(value.c_str());
-        } else if (key == "logging.file_capacity") {
+        } else if (key == "logging.file_capacity" || key == "file_capacity_mb") {
             cfg.fileCapacityMb = atoi(value.c_str());
         }
     }

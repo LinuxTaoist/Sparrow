@@ -22,28 +22,22 @@
 #ifndef __LOG_MANAGER_H__
 #define __LOG_MANAGER_H__
 
-#include <set>
 #include <map>
+#include <memory>
 #include <string>
-#include <fstream>
 #include <semaphore.h>
 #include "CoreTypeDefs.h"
+#include "LogSink.h"
+#include "LogConfiger.h"
 
-enum LogOutputMode
-{
-    LOG_OUTPUT_MIN   = 0,
-    LOG_OUTPUT_STDOUT,
-    LOG_OUTPUT_FILE,
-    LOG_OUTPUT_BUTT
-};
+class SharedRingBuffer;
 
-class LogManager
-{
+class LogManager {
 public:
     LogManager();
     ~LogManager();
-    int MainLoop();
-    static int StopWork();
+    int32_t MainLoop();
+    static int32_t StopWork();
 
 private:
     LogManager(const LogManager&) = delete;
@@ -51,45 +45,20 @@ private:
     LogManager(LogManager&&) = delete;
     LogManager& operator = (LogManager&&) = delete;
 
-    int EnvReady(const std::string& srvName);
-    int DumpLogAttrs();
-    int LoadLogCfgFile(const std::string& cfgPath);
-    int OpenCurrentLogFile();
-    int UpdateSuffixOfAllFiles();
-    int FlushLogFileIfNecessary(bool force = false);
-    int RotateLogsIfNecessary(uint32_t logDataSize);
-    int GetLevelFromLogStrs(const std::string& logData);
-    int WriteToLogFile(const std::string& logData);
-    int WriteLog(const std::string& logData, int level);
-    std::string GetLogCfgPath();
-    std::set<std::string> GetSortedLogFiles(const std::string& path, const std::string& fileName);
-
-    void LoadAttrOutputMode(const std::string& value);
-    void LoadAttrLevelLimit(const std::string& value);
-    void LoadAttrFrameLengthLimit(const std::string& value);
-    void LoadAttrFileNumLimit(const std::string& value);
-    void LoadAttrFileCapacityLimit(const std::string& value);
-    void LoadAttrFileName(const std::string& value);
-    void LoadAttrFilePath(const std::string& value);
+    int32_t EnvReady(const std::string& srvName);
+    int32_t LoadConfig(const std::string& path);
+    int32_t TryReadRecord(std::string& moduleName, std::string& data, int32_t& level);
+    int32_t Write(const std::string& moduleName, const std::string& data, int32_t level);
+    int32_t Flush(bool force = false);
+    std::string GetConfigPath();
 
 private:
     static bool     mRunning;
-    uint8_t         mLogLevelLimit;     // defined with "logging.level"
-    uint8_t         mOutputMode;        // defined with "logging.output"
-    uint32_t        mLogFrameLength;    // defined with "logging.frame_length"
-    uint32_t        mLogFileNum;        // defined with "logging.file_num"
-    uint32_t        mLogFileCapacity;   // defined with "logging.file_capacity"
-    uint32_t        mPendingFlushCount;
-    uint64_t        mLastFlushTickSec;
-    std::string     mLogFileName;       // defined with "logging.file_name"
-    std::string     mLogsFilePath;      // defined with "logging.file_path"
-    std::string     mCurrentLogFile;
+    std::unique_ptr<SharedRingBuffer> mCache;
+    LogConfiger     mConfiger;
+    uint32_t        mFrameLength;
     sem_t*          mReadSem;
-    std::ofstream   mLogFileStream;
-    std::set<std::string> mLogFilePaths;
-
-    using LoadAttrFunc = void (LogManager::*)(const std::string&);
-    std::map<std::string, LoadAttrFunc> mLoadAttrMap;
+    std::map<std::string, LogSink> mSinks;
 };
 
 #endif // __LOG_MANAGER_H__

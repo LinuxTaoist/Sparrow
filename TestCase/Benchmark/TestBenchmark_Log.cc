@@ -18,23 +18,23 @@
 
 #include <string>
 #include <vector>
-#include <algorithm>
 #include <thread>
 #include <chrono>
 #include <mutex>
-#include <stdio.h>
+#include <algorithm>
 #include <unistd.h>
 #include <sys/wait.h>
 #include "gtest/gtest.h"
 #include "BenchCommon.h"
+#include "CoreTypeDefs.h"
+#define LOG_TAG "LogBench"
+#include "SprLog.h"
 
 namespace {
 constexpr int32_t LOG_BENCH_PROC_COUNT = 4;
 constexpr int32_t LOG_BENCH_THREAD_PER_PROC = 4;
 
 struct ChildPayloadHeader {
-    int32_t formatFail;
-    int32_t truncFail;
     int32_t success;
     int32_t sampleCount;
 };
@@ -70,6 +70,7 @@ protected:
     static void SetUpTestSuite() {
         BenchInstallReportListener();
         BenchInstallGlobalEnvironment();
+        SprLog::GetInstance()->SetLevel(InternalDefs::LOG_LEVEL_DEBUG);
     }
 
     static void TearDownTestSuite() {
@@ -91,8 +92,7 @@ protected:
             return;
         }
 
-        int32_t formatFail = 0;
-        int32_t truncFail = 0;
+        int32_t logFail = 0;
         int32_t success = 0;
         std::vector<uint64_t> sampleUs;
         sampleUs.reserve((size_t)targetOps);
@@ -111,7 +111,7 @@ protected:
         for (int32_t p = 0; p < procCount; ++p) {
             int pipefd[2] = {-1, -1};
             if (pipe(pipefd) != 0) {
-                formatFail += targetOps;
+                logFail += targetOps;
                 break;
             }
 
@@ -119,7 +119,7 @@ protected:
             if (pid < 0) {
                 close(pipefd[0]);
                 close(pipefd[1]);
-                formatFail += targetOps;
+                logFail += targetOps;
                 break;
             }
 
@@ -129,8 +129,6 @@ protected:
                 std::mutex mergeMutex;
                 std::vector<uint64_t> localSamples;
                 localSamples.reserve((size_t)(targetOps / procCount + 8));
-                int32_t localFormatFail = 0;
-                int32_t localTruncFail = 0;
                 int32_t localSuccess = 0;
 
                 std::vector<std::thread> workers;
@@ -140,10 +138,7 @@ protected:
                     workers.emplace_back([&, workerId]() {
                         std::vector<uint64_t> threadSamples;
                         threadSamples.reserve((size_t)(targetOps / workerCount + 8));
-                        int32_t threadFormatFail = 0;
-                        int32_t threadTruncFail = 0;
                         int32_t threadSuccess = 0;
-                        char buf[256] = {0};
 
                         for (int32_t i = workerId; i < targetOps; i += workerCount) {
                             uint64_t dueUs = startEpochUs + (uint64_t)(i + 1) * 1000000ULL / (uint64_t)targetOps;
@@ -153,23 +148,13 @@ protected:
                             }
 
                             uint64_t opStartUs = BenchNowUs();
-                            int32_t ret = snprintf(buf, sizeof(buf), "log idx=%d level=%s value=%d text=%s",
-                                                   i, "INFO", i * 3 + 7, "benchmark_load1s");
-                            if (ret < 0) {
-                                ++threadFormatFail;
-                                continue;
-                            }
-                            if ((size_t)ret >= sizeof(buf)) {
-                                ++threadTruncFail;
-                                continue;
-                            }
+                            SPR_LOGI("log idx=%d level=%s value=%d text=%s",
+                                     i, "INFO", i * 3 + 7, "benchmark_load1s");
                             threadSamples.push_back(BenchNowUs() - opStartUs);
                             ++threadSuccess;
                         }
 
                         std::lock_guard<std::mutex> lk(mergeMutex);
-                        localFormatFail += threadFormatFail;
-                        localTruncFail += threadTruncFail;
                         localSuccess += threadSuccess;
                         localSamples.insert(localSamples.end(), threadSamples.begin(), threadSamples.end());
                     });
@@ -180,8 +165,6 @@ protected:
                 }
 
                 ChildPayloadHeader hdr = {
-                    localFormatFail,
-                    localTruncFail,
                     localSuccess,
                     (int32_t)localSamples.size()
                 };
@@ -200,7 +183,7 @@ protected:
         }
 
         for (size_t i = 0; i < readFds.size(); ++i) {
-            ChildPayloadHeader hdr = {0, 0, 0, 0};
+            ChildPayloadHeader hdr = {0, 0};
             bool ok = ReadAll(readFds[i], &hdr, sizeof(hdr));
             if (ok && hdr.sampleCount > 0) {
                 std::vector<uint64_t> childSamples((size_t)hdr.sampleCount);
@@ -209,21 +192,19 @@ protected:
                     sampleUs.insert(sampleUs.end(), childSamples.begin(), childSamples.end());
                 }
             }
-            close(readFds[i]);
 
+            close(readFds[i]);
             if (ok) {
-                formatFail += hdr.formatFail;
-                truncFail += hdr.truncFail;
                 success += hdr.success;
             } else {
-                formatFail += targetOps;
+                logFail += targetOps;
             }
         }
 
         for (size_t i = 0; i < pids.size(); ++i) {
             int status = 0;
             if (waitpid(pids[i], &status, 0) <= 0 || !WIFEXITED(status) || WEXITSTATUS(status) != 0) {
-                formatFail += targetOps;
+                logFail += targetOps;
             }
         }
 
@@ -248,19 +229,17 @@ protected:
                                  lossRate,
                                  "attempt=" + std::to_string(targetOps)
                                  + ",success=" + std::to_string(success)
-                                 + ",format_fail=" + std::to_string(formatFail)
-                                 + ",trunc_fail=" + std::to_string(truncFail));
+                                 + ",log_fail=" + std::to_string(logFail));
         } else {
             BenchRecordByTimes("Log", scenario, sampleUs, (uint64_t)success, lossRate,
                                "attempt=" + std::to_string(targetOps)
                                + ",success=" + std::to_string(success)
-                               + ",format_fail=" + std::to_string(formatFail)
-                               + ",trunc_fail=" + std::to_string(truncFail),
+                               + ",log_fail=" + std::to_string(logFail),
                                elapsedUs > 0 ? (double)success * 1000000.0 / (double)elapsedUs : 0.0);
         }
 
-        BenchLog("Log %s: attempt=%d success=%d format_fail=%d trunc_fail=%d loss=%.2f%% avg=%.1f us/op rate=%.1f ops/s",
-                 scenario, targetOps, success, formatFail, truncFail, lossRate * 100.0,
+        BenchLog("Log %s: attempt=%d success=%d log_fail=%d loss=%.2f%% avg=%.1f us/op rate=%.1f ops/s",
+             scenario, targetOps, success, logFail, lossRate * 100.0,
                  avgSampleUs,
                  elapsedUs > 0 ? (double)success * 1000000.0 / (double)elapsedUs : 0.0);
     }

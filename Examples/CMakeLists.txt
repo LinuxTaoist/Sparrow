@@ -113,3 +113,10 @@ target_include_directories  (Bin14DebugHal PRIVATE ${PROJECT_PATH}/Hardware/Comm
 set_target_properties       (Bin14DebugHal PROPERTIES OUTPUT_NAME "14_debug_hal")
 target_link_libraries       (Bin14DebugHal c LibSprHal LibSprCore pthread rt)
 add_dependencies            (Bin14DebugHal LibSprHal LibSprCore)
+
+## Bin 15_sprlog
+set(SRC_BIN_15_SPRLOG       15_SprLog.cc)
+add_executable              (Bin15SprLog ${SRC_BIN_15_SPRLOG})
+set_target_properties       (Bin15SprLog PROPERTIES OUTPUT_NAME "15_sprlog")
+target_link_libraries       (Bin15SprLog c LibSprLog pthread rt)
+add_dependencies            (Bin15SprLog LibSprLog)
