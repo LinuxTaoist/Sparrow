@@ -34,6 +34,7 @@
 #include <sys/types.h>
 #include <cstdlib>
 #include <limits>
+#include <set>
 #include <tuple>
 #include "SharedRingBuffer.h"
 #include "CommonMacros.h"
@@ -95,10 +96,7 @@ static int32_t WaitSemTimeout(sem_t* sem, int32_t timeoutMs) {
     }
 }
 
-LogManager::LogManager()
-    : mCache()
-    , mConfiger()
-    , mFrameLength(1024) {
+LogManager::LogManager() : mFrameLength(1024) {
     mReadSem = sem_open(LOG_WRITE_SEMAPHORE_NAME, O_CREAT, 0600, 1);
     LoadConfig(GetConfigPath());
     mCache.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE));
@@ -129,7 +127,10 @@ int32_t LogManager::StopWork() {
 
 int32_t LogManager::LoadConfig(const std::string& path) {
     int32_t ret = mConfiger.Load(path);
-    const LogConfiger::LogModules modules = mConfiger.GetLogModules();
+    LogConfiger::LogModules modules;
+    if (mConfiger.GetLogModules(modules) != 0) {
+        return -1;
+    }
     auto moduleIt = modules.find(LOG_CONFIG_MODULE_DEFAULT);
     if (moduleIt == modules.end()) {
         return -1;
@@ -148,10 +149,37 @@ int32_t LogManager::LoadConfig(const std::string& path) {
     }
 
     mSinks.clear();
+    std::set<std::string> sinkTargets;
+    const auto defaultModule = modules.find(LOG_CONFIG_MODULE_DEFAULT);
+    if (defaultModule != modules.end()) {
+        mSinks.emplace(std::piecewise_construct,
+                       std::forward_as_tuple(defaultModule->first),
+                       std::forward_as_tuple(defaultModule->second));
+        const std::string target = GetSinkTarget(defaultModule->second);
+        if (!target.empty()) {
+            sinkTargets.insert(target);
+        }
+    }
+
     for (const auto& module : modules) {
+        if (module.first == LOG_CONFIG_MODULE_DEFAULT) {
+            continue;
+        }
+
+        const std::string target = GetSinkTarget(module.second);
+        if (!target.empty() &&
+            sinkTargets.find(target) != sinkTargets.end()) {
+            SPR_LOGW("Invalid %s module, target %s, fallback to default sink!\n",
+                module.first.c_str(), target.c_str());
+            continue;
+        }
+
         mSinks.emplace(std::piecewise_construct,
                        std::forward_as_tuple(module.first),
                        std::forward_as_tuple(module.second));
+        if (!target.empty()) {
+            sinkTargets.insert(target);
+        }
     }
     return ret;
 }
@@ -160,6 +188,10 @@ int32_t LogManager::Write(const std::string& moduleName, const std::string& data
     auto sink = mSinks.find(moduleName);
     if (sink == mSinks.end()) {
         sink = mSinks.find(LOG_CONFIG_MODULE_DEFAULT);
+    }
+    if (sink == mSinks.end()) {
+        SPR_LOGW("Not find %s sink!\n", moduleName.c_str());
+        return -1;
     }
     return sink->second.Write(data, level);
 }
@@ -260,6 +292,29 @@ std::string LogManager::GetConfigPath() {
     }
 
     return "";
+}
+
+std::string LogManager::GetSinkTarget(const LogConfiger::LogModuleAttrs& attrs) const {
+    const auto output = attrs.find(LOG_CONFIG_KEY_OUTPUT);
+    if (output == attrs.end() || output->second != LOG_CONFIG_VALUE_FILE) {
+        return "";
+    }
+
+    const auto filePath = attrs.find(LOG_CONFIG_KEY_FILE_PATH);
+    const auto fileName = attrs.find(LOG_CONFIG_KEY_FILE_NAME);
+    if (filePath == attrs.end()     ||
+        fileName == attrs.end()     ||
+        filePath->second.empty()    ||
+        fileName->second.empty()) {
+        return "";
+    }
+
+    std::string path = filePath->second;
+    while (path.size() > 1 && path.back() == '/') {
+        path.pop_back();
+    }
+
+    return path == "/" ? path + fileName->second : path + '/' + fileName->second;
 }
 
 int32_t LogManager::MainLoop() {

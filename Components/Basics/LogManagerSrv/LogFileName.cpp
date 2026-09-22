@@ -19,7 +19,6 @@
 #include "LogFileName.h"
 
 #define LOG_FILE_TOKEN_BN    "BN" // Base Name
-#define LOG_FILE_TOKEN_BS    "BS" // Boot Sequence
 #define LOG_FILE_TOKEN_SI    "SI" // Short Identifier
 #define LOG_FILE_TOKEN_MH    "MH" // Monotonic Hour
 #define LOG_FILE_TOKEN_ST    "ST" // Start Time
@@ -51,9 +50,9 @@ int32_t LogFileName::Build(std::string& fileName) const {
         }
 
         const std::string token = mFormat.substr(index, 2);
-        if (token != LOG_FILE_TOKEN_BN && token != LOG_FILE_TOKEN_BS
-            && token != LOG_FILE_TOKEN_SI && token != LOG_FILE_TOKEN_MH
-            && token != LOG_FILE_TOKEN_ST && token != LOG_FILE_TOKEN_FX) {
+        if (token != LOG_FILE_TOKEN_BN && token != LOG_FILE_TOKEN_SI
+            && token != LOG_FILE_TOKEN_MH && token != LOG_FILE_TOKEN_ST
+            && token != LOG_FILE_TOKEN_FX) {
             formatted.push_back(mFormat[index]);
             ++index;
             continue;
@@ -77,23 +76,19 @@ int32_t LogFileName::Build(std::string& fileName) const {
 }
 
 int32_t LogFileName::LoadContext(Context& context) const {
-    static bool contextLoaded = false;
-    static Context processContext;
-    if (contextLoaded) {
-        context = processContext;
-        return 0;
-    }
+    context.bootId = GetBootIdText();
+    context.monotonicHour = GetMonotonicHourText();
+    context.startTime = GetStartTimeText();
+    return 0;
+}
 
-    context.bootSequence = "000000";
-    context.bootId = "0000";
-    context.monotonicHour = "0000";
-    context.startTime = "000000-000000";
-
+std::string LogFileName::GetBootIdText() const {
+    std::string bootId = "0000";
     std::ifstream bootIdFile("/proc/sys/kernel/random/boot_id");
-    std::string bootId;
-    if (bootIdFile >> bootId) {
+    std::string bootIdValue;
+    if (bootIdFile >> bootIdValue) {
         std::string shortId;
-        for (const char value : bootId) {
+        for (const char value : bootIdValue) {
             if (value == '-') {
                 continue;
             }
@@ -104,37 +99,36 @@ int32_t LogFileName::LoadContext(Context& context) const {
             }
         }
         if (!shortId.empty()) {
-            context.bootId = shortId;
+            bootId = shortId;
         }
+    }
+    return bootId;
+}
+
+std::string LogFileName::GetMonotonicHourText() const {
+    struct timespec monotonicTime = {};
+    if (clock_gettime(CLOCK_MONOTONIC, &monotonicTime) != 0) {
+        return "0000";
     }
 
-    struct timespec monotonicTime = {};
-#ifdef CLOCK_BOOTTIME
-    if (clock_gettime(CLOCK_BOOTTIME, &monotonicTime) != 0)
-#endif
-    {
-        if (clock_gettime(CLOCK_MONOTONIC, &monotonicTime) != 0) {
-            return -1;
-        }
-    }
     const uint64_t elapsedHours = static_cast<uint64_t>(monotonicTime.tv_sec) / 3600;
     std::ostringstream monotonicHour;
     monotonicHour << std::setfill('0') << std::setw(4) << elapsedHours;
-    context.monotonicHour = monotonicHour.str();
+    return monotonicHour.str();
+}
 
+std::string LogFileName::GetStartTimeText() const {
+    std::string startTime = "000000000000";
     const time_t currentTime = time(nullptr);
     struct tm localTime = {};
     if (localtime_r(&currentTime, &localTime) != nullptr
         && localTime.tm_year >= 120) {
-        char startTime[32] = {};
-        if (strftime(startTime, sizeof(startTime), "%y%m%d-%H%M%S", &localTime) != 0) {
-            context.startTime = startTime;
+        char startTimeBuf[32] = {};
+        if (strftime(startTimeBuf, sizeof(startTimeBuf), "%y%m%d%H%M%S", &localTime) != 0) {
+            startTime = startTimeBuf;
         }
     }
-
-    processContext = context;
-    contextLoaded = true;
-    return 0;
+    return startTime;
 }
 
 std::string LogFileName::GetBaseName() const {
@@ -158,9 +152,6 @@ std::string LogFileName::GetTokenValue(const std::string& token,
                                        const Context& context) const {
     if (token == LOG_FILE_TOKEN_BN) {
         return GetBaseName();
-    }
-    if (token == LOG_FILE_TOKEN_BS) {
-        return context.bootSequence;
     }
     if (token == LOG_FILE_TOKEN_SI) {
         return context.bootId;

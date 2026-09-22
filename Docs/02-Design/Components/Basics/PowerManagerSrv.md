@@ -16,7 +16,7 @@ PowerManagerSrv 是 Sparrow 的电源状态管理服务，负责电源状态切�
 业务模块通常通过 PowerManagerInterface 触发 PowerOn/PowerOff，或注册回调接收电源事件，不直接操作状态机细节。
 
 接口使用文档请看：
-- [PowerManagerInterface](../../../05-Reference/PublicAPIs/PowerManagerInterface.md)
+- [PowerManagerInterface](../../PublicAPIs/PowerManagerInterface.md)
 
 相关实现入口：
 - [PowerManagerInterface.h](../../../../PublicAPIs/PowerManagerInterface.h)

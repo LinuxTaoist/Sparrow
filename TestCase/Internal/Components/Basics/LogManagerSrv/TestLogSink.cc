@@ -1,6 +1,19 @@
+/**
+ *---------------------------------------------------------------------------------------------------------------------
+ *  @copyright Copyright (c) 2026  <dx_65535@163.com>.
+ *
+ *  @file       : TestLogSink.cc
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : LogSink internal tests.
+ *  @date       : 2026/09/20
+ *
+ *---------------------------------------------------------------------------------------------------------------------
+ */
 #include <string>
 #include <fstream>
 #include <dirent.h>
+#include <sys/stat.h>
 #include <unistd.h>
 #include <gtest/gtest.h>
 #include "CoreTypeDefs.h"
@@ -24,6 +37,7 @@ LogConfiger::LogModuleAttrs FileAttrs(const std::string& path)
     };
 }
 
+// 测试文件输出和强制刷新后能够正确读取日志内容
 TEST(LogM_LogSink, WritesAndFlushesFile)
 {
     const std::string path = "/tmp/sparrow_log_sink_test_" + std::to_string(getpid());
@@ -41,6 +55,7 @@ TEST(LogM_LogSink, WritesAndFlushesFile)
     rmdir(path.c_str());
 }
 
+// 测试禁用开关和日志级别过滤
 TEST(LogM_LogSink, FiltersDisabledAndLevel)
 {
     auto attrs = FileAttrs("/tmp/sparrow_log_sink_disabled_" + std::to_string(getpid()));
@@ -54,6 +69,7 @@ TEST(LogM_LogSink, FiltersDisabledAndLevel)
     EXPECT_EQ(limited.Write("ignored", InternalDefs::LOG_LEVEL_INFO), 0);
 }
 
+// 测试动态文件名格式以及达到容量限制后的文件轮转
 TEST(LogM_LogSink, CustomFileNameFormatAndRotation)
 {
     const std::string path = "/tmp/sparrow_log_sink_format_" + std::to_string(getpid());

@@ -26,13 +26,15 @@ public:
 
 private:
     struct Context {
-        std::string bootSequence;   // Boot Sequence
         std::string bootId;         // Short Identifier
         std::string monotonicHour;  // Monotonic Hour
         std::string startTime;      // Start Time
     };
 
     int32_t LoadContext(Context& context) const;
+    std::string GetBootIdText() const;
+    std::string GetMonotonicHourText() const;
+    std::string GetStartTimeText() const;
     std::string GetBaseName() const;
     std::string GetExtension() const;
     std::string GetTokenValue(const std::string& token,

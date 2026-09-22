@@ -98,15 +98,6 @@ file_path = /tmp/sprlog/network
 | `SPR_LOGW()` | Warn 日志 | 可恢复异常或风险 |
 | `SPR_LOGE()` | Error 日志 | 错误信息 |
 | `SPR_INIT()` | 设置进程日志模块 | 多模块场景使用 |
-| `SetLevel()` | 设置代码侧日志级别 | 一般优先使用配置 |
-| `SetLength()` | 设置单条日志长度上限 | 特殊场景使用 |
-
-运行时接口示例：
-
-```cpp
-SprLog::GetInstance()->SetLevel(LOG_LEVEL_DEBUG);
-SprLog::GetInstance()->SetLength(1024);
-```
 
 这些接口适合临时调试或特殊场景。生产环境通常优先使用配置文件。
 
@@ -152,57 +143,21 @@ file_name_format = BN_ST.FX
 | `ST` | 进程启动时的本地时间 | 需要区分启动批次时使用 |
 | `SI` | 系统启动标识的短值 | 特殊诊断场景使用 |
 | `MH` | 单调时钟运行小时数 | 时间异常时辅助定位 |
-| `BS` | 启动序号 | 当前版本通常不需要配置 |
 
 普通场景推荐只使用 `BN`、`FX` 和 `ST`。Token 可以自由组合，例如：
 
 ```ini
-file_name_format = BN_ST-SI.FX
+file_name_format = BN_SI_MH_ST.FX  // example_58C2_0141_260922111336.log
 ```
 
-### 3.7 常见需求与实现方式
+### 3.7 经典场景
 
-| 需求 | 推荐实现方式 | 主要配置或接口 |
-|------|--------------|----------------|
-| 快速接入日志 | 定义 `LOG_TAG`，直接使用日志宏 | `SPR_LOGD/I/W/E()` |
-| 调整整个进程的日志级别或文件位置 | 配置进程对应的输出段 | `level`、`file_name`、`file_path` |
-| 调试程序时直接查看终端输出 | 设置输出方式为标准输出 | `output = stdout` |
-| 一个进程中的不同模块使用不同日志策略 | 在启动早期设置模块名 | `SPR_INIT()`、`[output.<module>]` |
-| 日志文件过大时自动轮转 | 配置文件数量和单文件容量 | `file_num`、`file_capacity_mb` |
-| 区分不同启动实例或记录启动时间 | 配置文件名格式 | `file_name_format`、`ST`、`SI`、`MH` |
-| 临时调整代码侧日志行为 | 使用运行时接口 | `SetLevel()`、`SetLength()` |
-
-#### 标准输出场景
-
-开发调试、前台运行或容器环境中，通常希望日志直接进入终端，或交给外部运行平台收集。此时不需要配置日志文件名：
-
-```ini
-[output.myservice]
-level = debug
-output = stdout
-```
-
-该方式只改变输出位置，不改变业务代码中的日志调用方式。
-
-#### 文件输出场景
-
-需要在设备或服务器上保留日志文件时，配置文件输出及轮转策略：
-
-```ini
-[output.myservice]
-level = info
-output = file
-file_name = service.log
-file_path = /var/log/myservice
-file_num = 10
-file_capacity_mb = 10
-```
-
-通常只需要关注 `level`、`file_name` 和 `file_path`。`file_num` 和 `file_capacity_mb` 用于控制历史日志的保留范围。
-
-#### 文件名定制场景
-
-只有需要区分启动时间或启动实例时，才配置 `file_name_format`。文件轮转仍由日志服务负责，历史文件使用 `.1`、`.2` 等后缀。
+| 场景 | 描述 | 实现步骤 |
+|------|------|----------|
+| 快速接入日志 | 先把业务日志打出来，尽快跑通流程。 | 1. 定义 `LOG_TAG`。<br>2. 直接使用 `SPR_LOGD/I/W/E()`。 |
+| 文件输出 | 设备或服务器上需要长期保存日志文件。 | 1. 配置 `output = file`。<br>2. 设置 `file_name` 和 `file_path`。<br>3. 按需补充轮转参数。 |
+| 多模块分流 | 同一进程里的不同模块，日志级别或文件不同。 | 1. 程序早期调用 `SPR_INIT()`。<br>2. 为不同模块配置 `[output.<module>]`。 |
+| 标准输出 | 调试期或容器环境，日志直接进终端。 | 1. 配置 `output = stdout`。<br>2. 按模块设置 `level`。 |
 
 ## 4. 要注意什么
 
@@ -235,7 +190,7 @@ file_capacity_mb = 10
 ### 4.3 缓冲长度和日志截断
 
 - **`LOG_TAG` 长度**：上限 12 个字符，超过会触发编译错误。
-- **单条日志长度**：`SetLength()` 的有效范围为 1-1024，默认值为 512。
+- **单条日志长度**：有效范围为 1-1024，默认值为 512。
 - **超长日志**：格式化结果超过缓冲长度时会被截断，并追加 `TRUNCATED` 标记。
 
 如果日志内容可能较长，建议拆分为多条日志，而不是无限增大单条日志缓冲。

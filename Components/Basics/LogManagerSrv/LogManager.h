@@ -51,13 +51,14 @@ private:
     int32_t Write(const std::string& moduleName, const std::string& data, int32_t level);
     int32_t Flush(bool force = false);
     std::string GetConfigPath();
+    std::string GetSinkTarget(const LogConfiger::LogModuleAttrs& attrs) const;
 
 private:
     static bool     mRunning;
-    std::unique_ptr<SharedRingBuffer> mCache;
-    LogConfiger     mConfiger;
     uint32_t        mFrameLength;
     sem_t*          mReadSem;
+    LogConfiger     mConfiger;
+    std::unique_ptr<SharedRingBuffer> mCache;
     std::map<std::string, LogSink> mSinks;
 };
 

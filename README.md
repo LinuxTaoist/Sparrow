@@ -7,17 +7,16 @@
 
 ## ✨ 功能亮点
 
-Sparrow 当前提供的核心能力，重点体现在“稳定运行 + 模块通信 + 可观测性”三类能力：
-
-- **事件驱动框架**：基于 `Epoll` 统一处理 IO、定时器、线程任务和信号事件，适合高并发设备服务场景
-- **模块化通信机制**：提供 `Binder`、消息队列、事件分发等能力，便于服务之间解耦和协作
-- **进程与服务管理**：支持守护、状态管理、异常恢复、进程信息采集，提升系统稳定性
-- **配置与属性管理**：统一管理运行参数、属性配置和动态状态，方便调试和迭代
-- **日志与调试能力**：日志、调试节点、状态展示和诊断入口，便于快速定位问题
-- **平台与硬件适配**：通过 `Hardware/` 与 `Platform/` 分层处理平台差异，降低移植成本
-- **工程实践支持**：包含示例、测试、文档和构建脚本，便于直接上手和扩展业务
-
-一句话理解：Sparrow 是面向 Linux / 嵌入式设备的基础中间件和服务化运行框架。
+| 功能 | 功能概述 |
+| --- | --- |
+| [事件驱动](Docs/01-Overview/功能概览.md) | 基于 `Epoll` 统一处理 IO、定时器、信号和任务事件，适合高并发设备服务。 |
+| [服务通信](Docs/02-Design/Components/Basics/MediatorSrv.md) | 提供 `Binder`、消息队列和事件分发能力，支持模块间解耦与协作。 |
+| [服务管理](Docs/02-Design/Components/Basics/ServiceManagerSrv.md) | 管理服务生命周期、状态、守护与恢复，提高系统稳定性。 |
+| [配置管理](Docs/02-Design/Components/Basics/ConfigManagerSrv.md) | 统一管理运行参数、配置加载和动态配置能力。 |
+| [属性管理](Docs/02-Design/Components/Basics/PropertiesSrv.md) | 统一管理运行状态、属性更新和状态观测。 |
+| [日志调试](Docs/02-Design/Components/Basics/LogManagerSrv.md) | 提供日志输出、调试节点和诊断入口，便于快速定位问题。 |
+| [平台适配](Docs/01-Overview/系统架构.md) | 通过 `Hardware/` 与 `Platform/` 分层处理平台差异，降低移植成本。 |
+| [测试示例](TestCase/README.md) | 提供单元测试、基准测试和示例程序，便于工程验证与扩展。 |
 
 ## 🚀 快速开始
 
@@ -44,7 +43,7 @@ cd Release/Bin
 tail -f /tmp/sprlog/sparrow.log
 ```
 
-## 🧩 关键目录
+## 🧩 工程目录
 ```text
 Sparrow/
 ├── Core/                  // 核心框架模块

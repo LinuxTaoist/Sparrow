@@ -26,10 +26,10 @@ public:
     ~LogConfiger() = default;
 
     int32_t Load(const std::string& path);
-    LogModules GetLogModules() const;
+    int32_t GetLogModules(LogModules& modules) const;
 
 private:
-    LogModules InitModules() const;
+    int32_t InitModules(LogModules& modules) const;
     int32_t UpdateModuleAttr(const std::string& moduleName,
                              const std::string& key,
                              const std::string& value,

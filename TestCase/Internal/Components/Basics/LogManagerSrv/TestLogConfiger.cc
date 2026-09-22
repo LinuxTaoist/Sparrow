@@ -59,7 +59,8 @@ TEST_F(LogM_LogConfiger, LoadAndMergeModuleConfiguration)
 
     LogConfiger configer;
     ASSERT_EQ(configer.Load(TEST_CONFIG_PATH), 0);
-    const LogConfiger::LogModules config = configer.GetLogModules();
+    LogConfiger::LogModules config;
+    ASSERT_EQ(configer.GetLogModules(config), 0);
 
     ASSERT_EQ(config.size(), 3U);
     ASSERT_EQ(config.at("default").at("frame_length_bytes"), "2048");
@@ -87,7 +88,8 @@ TEST_F(LogM_LogConfiger, MissingModuleKeysUseMergedDefaults)
 
     LogConfiger configer;
     ASSERT_EQ(configer.Load(TEST_CONFIG_PATH), 0);
-    const LogConfiger::LogModules allModules = configer.GetLogModules();
+    LogConfiger::LogModules allModules;
+    ASSERT_EQ(configer.GetLogModules(allModules), 0);
     const LogConfiger::LogModuleAttrs& config = allModules.at("NetworkSrv");
 
     EXPECT_EQ(config.at("file_name"), "default.log");
@@ -103,7 +105,8 @@ TEST_F(LogM_LogConfiger, MissingFileKeepsDefaultConfiguration)
     LogConfiger configer;
     EXPECT_EQ(configer.Load("/tmp/sparrow_log_configer_missing.ini"), -1);
 
-    const LogConfiger::LogModules config = configer.GetLogModules();
+    LogConfiger::LogModules config;
+    ASSERT_EQ(configer.GetLogModules(config), 0);
     ASSERT_EQ(config.size(), 1U);
     EXPECT_EQ(config.at("default").at("file_name"), "sprlog.log");
     EXPECT_EQ(config.at("default").at("flush_interval_ms"), "1000");

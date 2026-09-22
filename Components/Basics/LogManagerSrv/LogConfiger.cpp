@@ -15,12 +15,12 @@
 #include "LogConfiger.h"
 #include "LogConfigKeys.h"
 
-LogConfiger::LogConfiger()
-    : mModules(InitModules()) {
+LogConfiger::LogConfiger() {
+    InitModules(mModules);
 }
 
-LogConfiger::LogModules LogConfiger::InitModules() const {
-    LogModules modules;
+int32_t LogConfiger::InitModules(LogModules& modules) const {
+    modules.clear();
     modules[LOG_CONFIG_MODULE_DEFAULT] = {
         {LOG_CONFIG_KEY_FRAME_LENGTH_BYTES, "1024"},
         {LOG_CONFIG_KEY_ENABLED,            LOG_CONFIG_VALUE_TRUE},
@@ -34,14 +34,18 @@ LogConfiger::LogModules LogConfiger::InitModules() const {
         {LOG_CONFIG_KEY_FLUSH_COUNT,        "64"},
         {LOG_CONFIG_KEY_FLUSH_INTERVAL_MS,  "1000"},
     };
-    return modules;
+    return 0;
 }
 
 int32_t LogConfiger::Load(const std::string& path) {
-    IniParser parser;
-    LogModules modules = InitModules();
+    LogModules modules;
+    int32_t ret = InitModules(modules);
+    if (ret != 0) {
+        return -1;
+    }
 
-    int32_t ret = parser.Load(path);
+    IniParser parser;
+    ret = parser.Load(path);
     if (ret != 0) {
         mModules = std::move(modules);
         return -1;
@@ -71,8 +75,9 @@ int32_t LogConfiger::Load(const std::string& path) {
     return 0;
 }
 
-LogConfiger::LogModules LogConfiger::GetLogModules() const {
-    return mModules;
+int32_t LogConfiger::GetLogModules(LogModules& modules) const {
+    modules = mModules;
+    return 0;
 }
 
 int32_t LogConfiger::UpdateModuleAttr(const std::string& moduleName,
@@ -93,6 +98,7 @@ int32_t LogConfiger::UpdateModuleAttr(const std::string& moduleName,
     if (moduleIt == modules.end()) {
         moduleIt = modules.emplace(module, LogConfiger::LogModuleAttrs()).first;
     }
+
     moduleIt->second[key] = value;
     return 0;
 }

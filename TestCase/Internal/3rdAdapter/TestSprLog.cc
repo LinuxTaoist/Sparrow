@@ -22,6 +22,7 @@
 #include <regex>
 #include <string>
 #include <algorithm>
+#include <cctype>
 #include <fstream>
 #include <sstream>
 #include <chrono>
@@ -133,7 +134,48 @@ bool LoadLogConfig(LogConfig& cfg) {
     return true;
 }
 
-// 获取日志目录下全部日志文件路径（含轮转后缀：sprlog.log, sprlog.log.1, ...）
+// 判断文件名是否由 logging.file_name 及 logging.file_name_format 生成。
+// 例如 main.log、main.log.1、main_260922161824.log、main_260922161824.log.1。
+static bool IsConfiguredLogFile(const std::string& name, const std::string& fileName)
+{
+    if (name == fileName) {
+        return true;
+    }
+
+    const size_t extensionPos = fileName.rfind('.');
+    const std::string baseName = extensionPos == std::string::npos
+                               ? fileName : fileName.substr(0, extensionPos);
+    const std::string extension = extensionPos == std::string::npos
+                                ? std::string() : fileName.substr(extensionPos);
+    const std::string prefix = baseName + "_";
+    if (name.rfind(prefix, 0) != 0) {
+        return false;
+    }
+
+    const size_t generatedExtension = extension.empty()
+                                    ? std::string::npos
+                                    : name.find(extension, prefix.size());
+    if (!extension.empty() && generatedExtension == std::string::npos) {
+        return false;
+    }
+
+    const size_t rotationPos = extension.empty()
+                             ? name.size() : generatedExtension + extension.size();
+    if (rotationPos == name.size()) {
+        return true;
+    }
+    if (name[rotationPos] != '.') {
+        return false;
+    }
+
+    const std::string suffix = name.substr(rotationPos + 1);
+    return !suffix.empty()
+        && std::all_of(suffix.begin(), suffix.end(), [](char value) {
+            return std::isdigit(static_cast<unsigned char>(value)) != 0;
+        });
+}
+
+// 获取日志目录下全部日志文件路径（含动态文件名和轮转后缀）。
 std::vector<std::string> GetAllLogFilePaths() {
     LogConfig cfg;
     std::vector<std::string> paths;
@@ -149,7 +191,7 @@ std::vector<std::string> GetAllLogFilePaths() {
     struct dirent* entry;
     while ((entry = readdir(dir)) != nullptr) {
         std::string name(entry->d_name);
-        if (name.rfind(cfg.fileName, 0) == 0) {
+        if (IsConfiguredLogFile(name, cfg.fileName)) {
             paths.push_back(cfg.filePath + "/" + name);
         }
     }

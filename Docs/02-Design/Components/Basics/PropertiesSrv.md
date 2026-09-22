@@ -16,7 +16,7 @@ PropertiesSrv 是 Sparrow 的属性管理服务，负责属性加载、读写、
 业务模块通过 PublicAPIs 的 Property 接口访问属性，不需要直接操作 PropertiesSrv 内部共享内存结构。
 
 接口使用文档请看：
-- [Property](../../../05-Reference/PublicAPIs/Property.md)
+- [Property](../../PublicAPIs/Property.md)
 
 相关实现入口：
 - [Property.h](../../../../PublicAPIs/Property.h)

@@ -1,3 +1,15 @@
+/**
+ *---------------------------------------------------------------------------------------------------------------------
+ *  @copyright Copyright (c) 2026  <dx_65535@163.com>.
+ *
+ *  @file       : LogSink.h
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : Log output sink.
+ *  @date       : 2026/09/20
+ *
+ *---------------------------------------------------------------------------------------------------------------------
+ */
 #ifndef __LOG_SINK_H__
 #define __LOG_SINK_H__
 
@@ -24,7 +36,7 @@ private:
     int32_t WriteFile(const std::string& data);
     int32_t ShiftFiles();
     std::set<std::string> ListFiles(const std::string& path,
-                                    const std::string& name) const;
+                                    const std::string& name);
     uint32_t ReadUint32(const LogConfiger::LogModuleAttrs& attrs,
                         const std::string& key,
                         uint32_t defaultValue) const;

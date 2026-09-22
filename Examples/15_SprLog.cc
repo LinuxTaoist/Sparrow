@@ -30,6 +30,7 @@
  * level               = debug             # 日志级别：error、warn、info、debug
  * output              = file              # 输出方式：file、stdout
  * file_name           = main.log          # 日志文件名
+ * file_name_format    = BN.FX             # 日志文件名格式: BN：基础名称，FX：文件扩展名，ST：时间戳，SI: 系统启动短标识，MH: 进程单调时间戳
  * file_path           = /tmp/sprlog/main  # 日志目录
  * file_num            = 10                # 保留日志文件数量
  * file_capacity_mb    = 10                # 单个日志文件最大容量，单位：MB
@@ -44,7 +45,9 @@
 
  * [output.SprLogExample]
  * file_name = example.log
+ * file_name_format = BN_SI_MH_ST.FX
  * file_path = /tmp/sprlog/example
+ * file_name_format = BN_SI_MH_ST.FX
  * level = debug
  * output = file
  *
@@ -64,7 +67,7 @@
 // SPR_INIT: use the matching [output.15_sprlog] sink.
 void UsageWithCustomLogConfig()
 {
-    printf("log config file: /tmp/sprlog/example/sprlog.log\n");
+    printf("1. log config file: /tmp/sprlog/example/sprlog.log\n");
     SPR_LOGI("1. Custom log config");
     SPR_LOGI("log file: /tmp/sprlog/example/sprlog.log");
     SPR_LOGI("info message");
@@ -79,7 +82,7 @@ void UsageWithDefault()
 {
     // to not match [output.15_sprlog] in sprlog.conf
     SPR_INIT("InvalidModuleName");
-    printf("log file: /tmp/sprlog/main/main.log\n");
+    printf("2. log file: /tmp/sprlog/main/main.log\n");
 
     SPR_LOGI("2. Default usage");
     SPR_LOGI("log file: /tmp/sprlog/main/main.log");
@@ -93,6 +96,7 @@ void UsageWithDefault()
 int32_t UsageWithCustomLogInit()
 {
     SPR_INIT("SprLogExample");
+    printf("3. log file: /tmp/sprlog/example/example.log\n");
 
     SPR_LOGI("3. Custom sprlog module name");
     SPR_LOGI("log file: /tmp/sprlog/example/example.log");
