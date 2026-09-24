@@ -259,9 +259,29 @@ int32_t LogSink::ShiftFiles() {
     }
 
     std::set<std::string> paths;
-    for (size_t index = 0; index < temporaryFiles.size(); ++index) {
-        const std::string newPath = currentPath + "." + std::to_string(index + 1);
-        if (rename(temporaryFiles[index].c_str(), newPath.c_str()) == 0) {
+    for (const auto& file : temporaryFiles) {
+        std::string path = file;
+        const size_t markerPos = path.rfind(".sprlog_rotating_");
+        if (markerPos != std::string::npos) {
+            path = path.substr(0, markerPos);
+        }
+
+        // Extract suffix number and increment
+        size_t dotPos = path.rfind('.');
+        uint32_t newSuffix = 1;
+        if (dotPos != std::string::npos && dotPos > 0) {
+            const std::string suffix = path.substr(dotPos + 1);
+            char* end = nullptr;
+            unsigned long value = std::strtoul(suffix.c_str(), &end, 10);
+            if (end != suffix.c_str() && *end == '\0') {
+                // Has numeric suffix, increment it
+                path = path.substr(0, dotPos);
+                newSuffix = static_cast<uint32_t>(value) + 1;
+            }
+        }
+
+        const std::string newPath = path + "." + std::to_string(newSuffix);
+        if (rename(file.c_str(), newPath.c_str()) == 0) {
             paths.insert(newPath);
         }
     }

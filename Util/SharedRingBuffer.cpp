@@ -149,13 +149,25 @@ int SharedRingBuffer::Write(const void* data, int32_t len)
     // Although post after it is written in the shared memory, synchronization still might not be timely,
     // and the AvailSpace() returns 0. Only add a retry to avoid it
     while (retry > 0) {
+        if (len <= 0 || (uint32_t)len > mDataCapacity) {
+            return -1;
+        }
+
         // SPSC: writer only reads rp (reader owns it), acquires to see reader's progress
         uint32_t curWp = mRoot->wp.load(std::memory_order_relaxed);
         uint32_t curRp = mRoot->rp.load(std::memory_order_acquire);
         int32_t avail = (curWp >= curRp) ? (mDataCapacity - curWp + curRp) : (curRp - curWp);
         if (avail >= len) {
-            if (curWp + (uint32_t)len >= mDataCapacity ||
-                curWp >= (mDataCapacity - RESERVER_SIZE)) {
+            const bool needWrap = (curWp + (uint32_t)len >= mDataCapacity) ||
+                                  (curWp >= (mDataCapacity - RESERVER_SIZE));
+            if (needWrap) {
+                // Only wrap when the head has enough contiguous room.
+                // Otherwise the frame would overwrite unread data.
+                if (curRp < static_cast<uint32_t>(len)) {
+                    retry--;
+                    usleep(RETRY_INTERVAL_US);
+                    continue;
+                }
                 curWp = 0;
             }
             memmove(reinterpret_cast<uint8_t*>(mData) + curWp, data, len);
