@@ -41,7 +41,7 @@ int InitSignalHandler(void (*signalHandler)(int)) {
     struct sigaction signal_action;
 
     signal_action.sa_handler = signalHandler;
-    signal_action.sa_flags = 0;
+    signal_action.sa_flags = SA_RESTART;
     sigemptyset(&signal_action.sa_mask);
 
     // sigaction(SIGHUP,    &signal_action, NULL);    // 终端挂断，重载配置或终止
