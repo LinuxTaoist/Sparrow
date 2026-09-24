@@ -9,14 +9,7 @@
  *  @date       : 2026/07/29
  *
  *  HAL interface debug / verification example.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *  2026/07/29 | 1.1.0.0   | Xiang.D        | Use static HwInterfaceHub API
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <iostream>
 #include <string>
@@ -34,8 +27,7 @@ using namespace std;
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-void TestPower()
-{
+void TestPower() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  [ Power ]\n");
 
@@ -70,8 +62,7 @@ void TestPower()
     SPR_LOG("  Deinit   : %s\n", pwr->Deinit() == HW_OK ? "OK" : "ERR");
 }
 
-void TestGpio()
-{
+void TestGpio() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  [ GPIO ]\n");
 
@@ -104,8 +95,7 @@ void TestGpio()
     SPR_LOG("  Release   : %s\n", gpio->Release()                == HW_OK ? "OK" : "ERR");
 }
 
-void TestUart()
-{
+void TestUart() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  [ UART ]\n");
 
@@ -134,8 +124,7 @@ void TestUart()
     SPR_LOG("  Close    : %s\n", uart->Close() == HW_OK ? "OK" : "ERR");
 }
 
-void TestWatchdog()
-{
+void TestWatchdog() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  [ Watchdog ]\n");
 
@@ -154,8 +143,7 @@ void TestWatchdog()
     SPR_LOG("  Stop     : %s\n", wdt->Stop()     == HW_OK ? "OK" : "ERR");
 }
 
-void TestRtc()
-{
+void TestRtc() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  [ RTC ]\n");
 
@@ -180,8 +168,7 @@ void TestRtc()
     SPR_LOG("  Cancel   : %s\n", rtc->CancelAlarm()             == HW_OK ? "OK" : "ERR");
 }
 
-void TestNetwork()
-{
+void TestNetwork() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  [ Network ]\n");
 
@@ -211,8 +198,7 @@ void TestNetwork()
     }
 }
 
-void ShowVersions()
-{
+void ShowVersions() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  Versions (all registered interfaces)\n");
     SPR_LOG("--------------------------------------------------\n");
@@ -246,8 +232,7 @@ void ShowVersions()
     }
 }
 
-void usage()
-{
+void usage() {
     SPR_LOG("------------------------------------------------------------------\n"
             "1: Power\n"
             "2: GPIO\n"
@@ -261,8 +246,7 @@ void usage()
     );
 }
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     printf("\n  === Sparrow HAL Debug Tool ===\n\n");
     usage();
 

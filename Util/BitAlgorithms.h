@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/03
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/03 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __BIT_ALGORITHMS_H__
 #define __BIT_ALGORITHMS_H__

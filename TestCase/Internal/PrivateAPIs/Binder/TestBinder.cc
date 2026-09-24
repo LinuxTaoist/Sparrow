@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Binder/IBinder 请求响应 Parcel 创建内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <cstdio>
@@ -27,8 +20,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeName(const std::string& prefix)
-{
+std::string MakeName(const std::string& prefix) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char buf[96] = {};
@@ -59,8 +51,7 @@ protected:
 };
 
 // 测试 Binder（服务端）创建 master Parcel
-TEST_F(Util_Binder, GetParcelCreatesMasterParcels)
-{
+TEST_F(Util_Binder, GetParcelCreatesMasterParcels) {
     Binder binder(mName, mKey);
     std::shared_ptr<Parcel> req;
     std::shared_ptr<Parcel> rsp;
@@ -71,8 +62,7 @@ TEST_F(Util_Binder, GetParcelCreatesMasterParcels)
 }
 
 // 测试 IBinder（客户端）创建 slave Parcel
-TEST_F(Util_Binder, GetParcelCreatesSlaveParcels)
-{
+TEST_F(Util_Binder, GetParcelCreatesSlaveParcels) {
     IBinder binder(mName, mKey);
     std::shared_ptr<Parcel> req;
     std::shared_ptr<Parcel> rsp;

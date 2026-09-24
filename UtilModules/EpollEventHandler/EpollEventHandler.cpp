@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : EpollEventHandler.h
+ *  @file       : EpollEventHandler.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/05/07
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/05/07 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <errno.h>
@@ -30,8 +23,7 @@
 
 static std::atomic<bool> gObjAlive(true);
 
-EpollEventHandler::EpollEventHandler(int32_t size, int32_t blockTimeOut)
-{
+EpollEventHandler::EpollEventHandler(int32_t size, int32_t blockTimeOut) {
     if (size) {
         mHandle = epoll_create(size);
     } else {
@@ -66,8 +58,7 @@ EpollEventHandler::EpollEventHandler(int32_t size, int32_t blockTimeOut)
     }
 }
 
-EpollEventHandler::~EpollEventHandler()
-{
+EpollEventHandler::~EpollEventHandler() {
     gObjAlive = false;
     ExitLoop();
 
@@ -82,8 +73,7 @@ EpollEventHandler::~EpollEventHandler()
     }
 }
 
-EpollEventHandler* EpollEventHandler::GetInstance(int32_t size, int32_t blockTimeOut)
-{
+EpollEventHandler* EpollEventHandler::GetInstance(int32_t size, int32_t blockTimeOut) {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -92,8 +82,7 @@ EpollEventHandler* EpollEventHandler::GetInstance(int32_t size, int32_t blockTim
     return &instance;
 }
 
-void EpollEventHandler::AddPoll(IEpollEvent* p)
-{
+void EpollEventHandler::AddPoll(IEpollEvent* p) {
     //EPOLLIN ：表示对应的文件描述符可以读（包括对端SOCKET正常关闭）；
     //EPOLLOUT：表示对应的文件描述符可以写；
     //EPOLLET： 将EPOLL设为边缘触发(Edge Triggered)模式，这是相对于水平触发(Level Triggered)来说的，默认水平触发。
@@ -125,8 +114,7 @@ void EpollEventHandler::AddPoll(IEpollEvent* p)
     PLOGD("Add epoll fd %d\n", fd);
 }
 
-void EpollEventHandler::DelPoll(IEpollEvent* p)
-{
+void EpollEventHandler::DelPoll(IEpollEvent* p) {
     if (p == nullptr) {
         PLOGE("p is null\n");
         return ;
@@ -141,13 +129,11 @@ void EpollEventHandler::DelPoll(IEpollEvent* p)
     PLOGD("Delete epoll fd %d\n", p->GetEvtFd());
 }
 
-void EpollEventHandler::HandleEpollEvent(IEpollEvent& event)
-{
+void EpollEventHandler::HandleEpollEvent(IEpollEvent& event) {
     event.EpollEvent(event.GetEvtFd(), event.GetEpollType(), event.GetArgs());
 }
 
-void EpollEventHandler::EpollLoop()
-{
+void EpollEventHandler::EpollLoop() {
     if (mRun) {
         PLOGW("EpollLoop already running\n");
         return;
@@ -196,8 +182,7 @@ void EpollEventHandler::EpollLoop()
     PLOGD("EpollLoop exit\n");
 }
 
-void EpollEventHandler::ExitLoop()
-{
+void EpollEventHandler::ExitLoop() {
     mRun = false;
 
     // Wake up a possibly blocked epoll_wait in EpollLoop thread,

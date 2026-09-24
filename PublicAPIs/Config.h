@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
@@ -27,8 +20,7 @@
 
 #define DEFAULT_NAMESPACE "global"
 
-class Config
-{
+class Config {
 public:
     /**
      * @brief Get the Instance object

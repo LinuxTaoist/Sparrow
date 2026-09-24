@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_MEDIATOR_H__
 #define __SPR_MEDIATOR_H__
@@ -31,15 +24,13 @@
 #include "CommonTypeDefs.h"
 #include "SprMQueueDetails.h"
 
-struct SModuleInfo
-{
+struct SModuleInfo {
     bool monitored;
     SprMsg lastMsg;
     std::shared_ptr<PMsgQueue> pModMQ;
 };
 
-class SprMediator
-{
+class SprMediator {
 public:
     static SprMediator* GetInstance();
 

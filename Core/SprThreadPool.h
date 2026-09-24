@@ -6,15 +6,10 @@
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Singleton thread pool implementation (C++11 compatible)
- *                Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/09/14
  *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
+ *                Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/11 | 1.0.0.1   | Xiang.D        |
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_THREAD_POOL_H__
 #define __SPR_THREAD_POOL_H__
@@ -32,8 +27,7 @@
 // Thread pool config: Max number of worker threads (keep moderate for efficiency)
 #define SPR_THREAD_POOL_MAX_WORKERS 16
 
-class SprThreadPool
-{
+class SprThreadPool {
 public:
     /**
      * @brief Get singleton instance of thread pool
@@ -121,8 +115,7 @@ private:
 };
 
 template<class F, class... Args>
-auto SprThreadPool::SubmitTask(F&& taskFunc, Args&&... args) -> std::future<decltype(taskFunc(args...))>
-{
+auto SprThreadPool::SubmitTask(F&& taskFunc, Args&&... args) -> std::future<decltype(taskFunc(args...))> {
     // Return invalid future if pool has stopped (no exception throw)
     if (!mIsPoolRunning) {
         // printf("[SprThreadPool] Submit failed: Pool is stopped\n");
@@ -152,8 +145,7 @@ auto SprThreadPool::SubmitTask(F&& taskFunc, Args&&... args) -> std::future<decl
 }
 
 template<class F>
-void SprThreadPool::SubmitTask(F&& task)
-{
+void SprThreadPool::SubmitTask(F&& task) {
     // Do nothing if pool has stopped (no exception throw)
     if (!mIsPoolRunning) {
         // printf("[SprThreadPool] Submit failed: Pool is stopped\n");

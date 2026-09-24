@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/17
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/17 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include "CommonMacros.h"
@@ -24,17 +17,14 @@
 #define LOG_TAG "PropertyHub"
 
 using namespace InternalDefs;
-PropertyManagerHub::PropertyManagerHub(const std::string& srvName, PropertyManager* powerManager) : BinderHub(srvName)
-{
+PropertyManagerHub::PropertyManagerHub(const std::string& srvName, PropertyManager* powerManager) : BinderHub(srvName) {
     mPropertyManager = powerManager;
 }
 
-PropertyManagerHub::~PropertyManagerHub()
-{
+PropertyManagerHub::~PropertyManagerHub() {
 }
 
-void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
-{
+void PropertyManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) {
     switch (cmd) {
         case PROPERTY_CMD_SET_PROPERTY: {
             std::string key;

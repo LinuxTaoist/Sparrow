@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Cellular network HAL interface — pure virtual.
  *  @date       : 2026/07/27
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *  2026/08/12 | 1.0.0.2   | Xiang.D        | All methods pure virtual, full Doxygen
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __IHW_NETWORK_H__
 #define __IHW_NETWORK_H__

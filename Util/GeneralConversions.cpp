@@ -7,24 +7,15 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string.h>
 #include <stdint.h>
 #include "GeneralConversions.h"
 
-namespace GeneralConversions
-{
+namespace GeneralConversions {
 
-std::string HexStringToAscii(const std::string& hexString)
-{
+std::string HexStringToAscii(const std::string& hexString) {
     if (hexString.empty() || hexString.size() % 2 != 0) {
         return "";
     }
@@ -62,8 +53,7 @@ std::string HexStringToAscii(const std::string& hexString)
     return result;
 }
 
-int DumpBytesAscall(const std::string& bytes, std::string& out)
-{
+int DumpBytesAscall(const std::string& bytes, std::string& out) {
     const int32_t BYTES_PER_LINE = 16;
     int32_t size = static_cast<int32_t>(bytes.size());
 

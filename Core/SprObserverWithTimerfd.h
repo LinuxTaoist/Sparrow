@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/15
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/15 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_OBSERVER_TIMER_FD_H__
 #define __SPR_OBSERVER_TIMER_FD_H__
@@ -22,8 +15,7 @@
 #include "PTimer.h"
 #include "SprObserver.h"
 
-class SprObserverWithTimerfd : public SprObserver, public PTimer
-{
+class SprObserverWithTimerfd : public SprObserver, public PTimer {
 public:
     /**
      * @brief  Construct/Destruct

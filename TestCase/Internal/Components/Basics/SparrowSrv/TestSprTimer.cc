@@ -7,21 +7,13 @@
  *  @version    : 1.0
  *  @brief      : SprTimer 定时器实体内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprTimer.h"
 #include "gtest/gtest.h"
 
 // 测试构造与访问器
-TEST(UtilModules_SprTimer, ConstructorAndAccessors)
-{
+TEST(UtilModules_SprTimer, ConstructorAndAccessors) {
     SprTimer timer(100, 0x1234, 3, 10, 20);
 
     EXPECT_EQ(timer.GetModuleId(), 100u);
@@ -33,8 +25,7 @@ TEST(UtilModules_SprTimer, ConstructorAndAccessors)
 }
 
 // 测试拷贝构造
-TEST(UtilModules_SprTimer, CopyConstructor)
-{
+TEST(UtilModules_SprTimer, CopyConstructor) {
     SprTimer src(1, 2, 3, 4, 5);
     SprTimer dst(src);
 
@@ -46,8 +37,7 @@ TEST(UtilModules_SprTimer, CopyConstructor)
 }
 
 // 测试移动构造
-TEST(UtilModules_SprTimer, MoveConstructor)
-{
+TEST(UtilModules_SprTimer, MoveConstructor) {
     SprTimer src(1, 2, 3, 4, 5);
     SprTimer dst(std::move(src));
 
@@ -56,8 +46,7 @@ TEST(UtilModules_SprTimer, MoveConstructor)
 }
 
 // 测试拷贝赋值
-TEST(UtilModules_SprTimer, CopyAssignment)
-{
+TEST(UtilModules_SprTimer, CopyAssignment) {
     SprTimer src(1, 2, 3, 4, 5);
     SprTimer dst(9, 9, 9, 9, 9);
     dst = src;
@@ -67,8 +56,7 @@ TEST(UtilModules_SprTimer, CopyAssignment)
 }
 
 // 测试移动赋值
-TEST(UtilModules_SprTimer, MoveAssignment)
-{
+TEST(UtilModules_SprTimer, MoveAssignment) {
     SprTimer src(1, 2, 3, 4, 5);
     SprTimer dst(9, 9, 9, 9, 9);
     dst = std::move(src);
@@ -78,8 +66,7 @@ TEST(UtilModules_SprTimer, MoveAssignment)
 }
 
 // 测试小于运算符（按过期时间比较）
-TEST(UtilModules_SprTimer, LessThanOperator)
-{
+TEST(UtilModules_SprTimer, LessThanOperator) {
     SprTimer earlier(1, 0x100, 0, 0, 0);
     SprTimer later(1, 0x200, 0, 1000, 0);
 
@@ -94,8 +81,7 @@ TEST(UtilModules_SprTimer, LessThanOperator)
 }
 
 // 测试是否过期
-TEST(UtilModules_SprTimer, IsExpired)
-{
+TEST(UtilModules_SprTimer, IsExpired) {
     SprTimer notExpired(1, 1, 0, 60000, 0);   // 60 秒后才过期
     EXPECT_FALSE(notExpired.IsExpired());
 
@@ -104,15 +90,13 @@ TEST(UtilModules_SprTimer, IsExpired)
 }
 
 // 测试获取当前时间
-TEST(UtilModules_SprTimer, GetTickMs)
-{
+TEST(UtilModules_SprTimer, GetTickMs) {
     SprTimer timer(1, 1, 0, 0, 0);
     EXPECT_GT(timer.GetTickMs(), 0u);
 }
 
 // 测试设置过期时间与重复计数
-TEST(UtilModules_SprTimer, SetExpiredAndRepeatCount)
-{
+TEST(UtilModules_SprTimer, SetExpiredAndRepeatCount) {
     SprTimer timer(1, 1, 0, 0, 0);
 
     timer.SetExpired(12345);

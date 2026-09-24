@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/17
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/17 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include "CommonMacros.h"
@@ -24,17 +17,14 @@
 #define LOG_TAG "PowerHub"
 
 using namespace InternalDefs;
-PowerManagerHub::PowerManagerHub(const std::string& srvName, PowerManager* powerManager) : BinderHub(srvName)
-{
+PowerManagerHub::PowerManagerHub(const std::string& srvName, PowerManager* powerManager) : BinderHub(srvName) {
     mPowerManager = powerManager;
 }
 
-PowerManagerHub::~PowerManagerHub()
-{
+PowerManagerHub::~PowerManagerHub() {
 }
 
-void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
-{
+void PowerManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) {
     switch(cmd) {
         case POWERM_CMD_POWER_ON: {
             SprMsg msg(SIG_ID_POWER_ON);

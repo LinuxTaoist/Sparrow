@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SprProcPrepare 进程框架初始化内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <unistd.h>
 #include <string>
@@ -22,8 +15,7 @@
 #include "gtest/gtest.h"
 
 // 测试单例模式返回非空
-TEST(Core_SprProcPrepare, SingletonReturnsValid)
-{
+TEST(Core_SprProcPrepare, SingletonReturnsValid) {
     SprProcPrepare* a = SprProcPrepare::GetInstance();
     SprProcPrepare* b = SprProcPrepare::GetInstance();
     ASSERT_TRUE(a != nullptr);
@@ -31,8 +23,7 @@ TEST(Core_SprProcPrepare, SingletonReturnsValid)
 }
 
 // 测试进程框架初始化（初始化 proc info 与 debug pipe node）
-TEST(Core_SprProcPrepare, Init)
-{
+TEST(Core_SprProcPrepare, Init) {
     SprProcPrepare* prepare = SprProcPrepare::GetInstance();
     ASSERT_TRUE(prepare != nullptr);
 

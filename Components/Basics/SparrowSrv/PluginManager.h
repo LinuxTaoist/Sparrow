@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/18
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/18 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PLUGIN_MANAGER_H__
 #define __PLUGIN_MANAGER_H__
@@ -28,8 +21,7 @@
 #include "SprObserver.h"
 #include "SprDirWatch.h"
 
-class PluginManager
-{
+class PluginManager {
 public:
     PluginManager();
     ~PluginManager();

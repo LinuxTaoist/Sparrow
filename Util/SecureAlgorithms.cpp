@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/03
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/03 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SecureAlgorithms.h"
 #include "SecurePrimitives.h"
@@ -24,8 +17,7 @@
 namespace {
 
 // FNV-1a hash to produce 32-byte digest
-std::vector<uint8_t> ComputeHash(const std::vector<uint8_t>& data)
-{
+std::vector<uint8_t> ComputeHash(const std::vector<uint8_t>& data) {
     std::vector<uint8_t> hash(32, 0);
     uint64_t h = 14695981039346656037ULL;
     for (std::size_t i = 0; i < data.size(); ++i) {
@@ -38,8 +30,7 @@ std::vector<uint8_t> ComputeHash(const std::vector<uint8_t>& data)
 
 // Convert 32 bytes to big-endian integer (mod n)
 // For 32-byte input, interpret as unsigned big integer modulo n
-uint64_t BytesToInt64(const std::vector<uint8_t>& bytes, int start, uint64_t mod)
-{
+uint64_t BytesToInt64(const std::vector<uint8_t>& bytes, int start, uint64_t mod) {
     uint64_t result = 0;
     for (int i = 0; i < 8 && start + i < static_cast<int>(bytes.size()); ++i) {
         result = (result << 8) | static_cast<uint64_t>(bytes[start + i]);
@@ -48,8 +39,7 @@ uint64_t BytesToInt64(const std::vector<uint8_t>& bytes, int start, uint64_t mod
 }
 
 // Convert 64-bit integer to 8 bytes (big-endian)
-void Int64ToBytes(uint64_t value, std::vector<uint8_t>& bytes, int start)
-{
+void Int64ToBytes(uint64_t value, std::vector<uint8_t>& bytes, int start) {
     for (int i = 7; i >= 0; --i) {
         bytes[start + (7 - i)] = static_cast<uint8_t>((value >> (i * 8)) & 0xFF);
     }
@@ -57,8 +47,7 @@ void Int64ToBytes(uint64_t value, std::vector<uint8_t>& bytes, int start)
 
 // Seed to deterministic private key (scalar d)
 // Uses hash-based derivation
-uint64_t DerivePrivateKey(const std::vector<uint8_t>& seed, uint64_t n)
-{
+uint64_t DerivePrivateKey(const std::vector<uint8_t>& seed, uint64_t n) {
     std::vector<uint8_t> hash = ComputeHash(seed);
     uint64_t d = BytesToInt64(hash, 0, n);
     if (d == 0) {
@@ -68,8 +57,7 @@ uint64_t DerivePrivateKey(const std::vector<uint8_t>& seed, uint64_t n)
 }
 
 // Pseudo-random k for ECDSA signing (based on message and private key)
-uint64_t DeriveK(const std::vector<uint8_t>& msgHash, uint64_t privateKey, uint64_t n)
-{
+uint64_t DeriveK(const std::vector<uint8_t>& msgHash, uint64_t privateKey, uint64_t n) {
     uint64_t e = BytesToInt64(msgHash, 0, n);
     uint64_t k = (e + privateKey * 12345) % n;
     if (k == 0) {
@@ -84,8 +72,7 @@ namespace SecureAlgorithms {
 
 int GenerateSM2KeyPair(const std::vector<uint8_t>& seed,
                        std::vector<uint8_t>& publicKey,
-                       std::vector<uint8_t>& privateKey)
-{
+                       std::vector<uint8_t>& privateKey) {
     if (seed.empty()) {
         return -1;
     }
@@ -108,8 +95,7 @@ int GenerateSM2KeyPair(const std::vector<uint8_t>& seed,
 int SignWithSM2(const std::vector<uint8_t>& data,
                 const std::vector<uint8_t>& privateKey,
                 std::vector<uint8_t>& signR,
-                std::vector<uint8_t>& signS)
-{
+                std::vector<uint8_t>& signS) {
     if (privateKey.size() < 8 || data.empty()) {
         return -1;
     }
@@ -165,8 +151,7 @@ int SignWithSM2(const std::vector<uint8_t>& data,
 int VerifyWithSM2(const std::vector<uint8_t>& data,
                   const std::vector<uint8_t>& publicKey,
                   const std::vector<uint8_t>& signR,
-                  const std::vector<uint8_t>& signS)
-{
+                  const std::vector<uint8_t>& signS) {
     if (publicKey.empty() || signR.size() < 8 || signS.size() < 8 || data.empty()) {
         return -1;
     }
@@ -229,22 +214,19 @@ int VerifyWithSM2(const std::vector<uint8_t>& data,
     return -1;
 }
 
-int EncryptWithSM2(const std::vector<uint8_t>& plaintext, std::vector<uint8_t>& ciphertext)
-{
+int EncryptWithSM2(const std::vector<uint8_t>& plaintext, std::vector<uint8_t>& ciphertext) {
     static const SecurePrimitives::ECCurve kSm2LikeCurve = {251, 1, 1, 2};
     static const int kSm2PrivateKey = 97;
     return SecurePrimitives::EncryptByToyEC(kSm2LikeCurve, kSm2PrivateKey, plaintext, ciphertext);
 }
 
-int DecryptWithSM2(const std::vector<uint8_t>& ciphertext, std::vector<uint8_t>& plaintext)
-{
+int DecryptWithSM2(const std::vector<uint8_t>& ciphertext, std::vector<uint8_t>& plaintext) {
     static const SecurePrimitives::ECCurve kSm2LikeCurve = {251, 1, 1, 2};
     static const int kSm2PrivateKey = 97;
     return SecurePrimitives::DecryptByToyEC(kSm2LikeCurve, kSm2PrivateKey, ciphertext, plaintext);
 }
 
-int EncryptWithRSA(const std::vector<uint8_t>& plaintext, std::vector<uint8_t>& ciphertext)
-{
+int EncryptWithRSA(const std::vector<uint8_t>& plaintext, std::vector<uint8_t>& ciphertext) {
     // Toy RSA demo parameters: n=3233, e=17 (matching d=2753)
     static const int kRsaN = 3233;
     static const int kRsaE = 17;
@@ -259,8 +241,7 @@ int EncryptWithRSA(const std::vector<uint8_t>& plaintext, std::vector<uint8_t>& 
     return 0;
 }
 
-int DecryptWithRSA(const std::vector<uint8_t>& ciphertext, std::vector<uint8_t>& plaintext)
-{
+int DecryptWithRSA(const std::vector<uint8_t>& ciphertext, std::vector<uint8_t>& plaintext) {
     static const int kRsaN = 3233;
     static const int kRsaD = 2753;
 
@@ -282,15 +263,13 @@ int DecryptWithRSA(const std::vector<uint8_t>& ciphertext, std::vector<uint8_t>&
     return 0;
 }
 
-int EncryptWithECC(const std::vector<uint8_t>& plaintext, std::vector<uint8_t>& ciphertext)
-{
+int EncryptWithECC(const std::vector<uint8_t>& plaintext, std::vector<uint8_t>& ciphertext) {
     static const SecurePrimitives::ECCurve kEccCurve = {251, 2, 3, 5};
     static const int kEccPrivateKey = 131;
     return SecurePrimitives::EncryptByToyEC(kEccCurve, kEccPrivateKey, plaintext, ciphertext);
 }
 
-int DecryptWithECC(const std::vector<uint8_t>& ciphertext, std::vector<uint8_t>& plaintext)
-{
+int DecryptWithECC(const std::vector<uint8_t>& ciphertext, std::vector<uint8_t>& plaintext) {
     static const SecurePrimitives::ECCurve kEccCurve = {251, 2, 3, 5};
     static const int kEccPrivateKey = 131;
     return SecurePrimitives::DecryptByToyEC(kEccCurve, kEccPrivateKey, ciphertext, plaintext);

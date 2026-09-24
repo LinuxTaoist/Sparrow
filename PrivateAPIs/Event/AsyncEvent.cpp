@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/09/27
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/09/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <memory>
@@ -28,8 +21,7 @@
 static std::atomic<bool> gObjAlive(true);
 static std::unique_ptr<Parcel> pEventParcel = nullptr;
 
-AsyncEvent* AsyncEvent::GetInstance()
-{
+AsyncEvent* AsyncEvent::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -39,12 +31,10 @@ AsyncEvent* AsyncEvent::GetInstance()
 }
 
 AsyncEvent::AsyncEvent()
-    : mRunning(true), mCb(nullptr)
-{
+    : mRunning(true), mCb(nullptr) {
 }
 
-AsyncEvent::~AsyncEvent()
-{
+AsyncEvent::~AsyncEvent() {
     mRunning = false;
     gObjAlive = false;
 
@@ -53,22 +43,19 @@ AsyncEvent::~AsyncEvent()
     }
 }
 
-int AsyncEvent::AsWriter(const std::string& name)
-{
+int AsyncEvent::AsWriter(const std::string& name) {
     mName = name;
     pEventParcel.reset(new Parcel(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, true));
     return 0;
 }
 
-int AsyncEvent::AsReader(const std::string& name)
-{
+int AsyncEvent::AsReader(const std::string& name) {
     mName = name;
     pEventParcel.reset(new Parcel(mName + AEVENT_NAME_SUFFIX, KEY_EVENT_NOTIFY, false));
     return 0;
 }
 
-int AsyncEvent::UnregisterEventCallback()
-{
+int AsyncEvent::UnregisterEventCallback() {
     mCb = nullptr;
     mRunning = false;
     if (mCbThread.joinable()) {
@@ -77,8 +64,7 @@ int AsyncEvent::UnregisterEventCallback()
     return 0;
 }
 
-int AsyncEvent::RegisterEventCallback(const EventCallback& callback)
-{
+int AsyncEvent::RegisterEventCallback(const EventCallback& callback) {
     if (!callback || mCbThread.joinable()) {
         return -1;
     }
@@ -103,8 +89,7 @@ int AsyncEvent::RegisterEventCallback(const EventCallback& callback)
     return 0;
 }
 
-int AsyncEvent::EventNotify(int32_t event, void* data, int32_t size)
-{
+int AsyncEvent::EventNotify(int32_t event, void* data, int32_t size) {
     if (!pEventParcel) {
         return -1;
     }

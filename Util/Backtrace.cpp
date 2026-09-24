@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/05/05
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/05/05 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <iostream>
 #include <sstream>
@@ -27,8 +20,7 @@
 
 namespace Backtrace {
 
-std::string DumpBacktrace(const int32_t totalFrames)
-{
+std::string DumpBacktrace(const int32_t totalFrames) {
     std::ostringstream oss;
 
     void* pCallStacks[totalFrames] = {};

@@ -10,13 +10,7 @@
  *
  *  Default (stub) implementation of IHwPower.  All methods return HW_ERR_NOT_IMPL.
  *  Real platforms override this in Hardware/<Family>/.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __HW_POWER_DEFAULT_H__
 #define __HW_POWER_DEFAULT_H__

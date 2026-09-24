@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/12/15
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/15 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <time.h>
 #include <stdint.h>
@@ -24,8 +17,7 @@
 
 #define LOG_TAG "SprTimer"
 
-SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec)
-{
+SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint32_t delayInMilliSec, uint32_t intervalInMilliSec) {
     mModuleId = moduleId;
     mMsgId = msgId;
     mIntervalInMilliSec = intervalInMilliSec;
@@ -34,8 +26,7 @@ SprTimer::SprTimer(uint32_t moduleId, uint32_t msgId, uint32_t repeatTimes, uint
     mRepeatCount = 0;
 }
 
-SprTimer::SprTimer(const SprTimer& timer)
-{
+SprTimer::SprTimer(const SprTimer& timer) {
     mModuleId = timer.mModuleId;
     mMsgId = timer.mMsgId;
     mIntervalInMilliSec = timer.mIntervalInMilliSec;
@@ -44,8 +35,7 @@ SprTimer::SprTimer(const SprTimer& timer)
     mRepeatCount = timer.mRepeatCount;
 }
 
-SprTimer& SprTimer::operator = (const SprTimer& timer)
-{
+SprTimer& SprTimer::operator = (const SprTimer& timer) {
     if (this != &timer) {
         mModuleId = timer.mModuleId;
         mMsgId = timer.mMsgId;
@@ -57,8 +47,7 @@ SprTimer& SprTimer::operator = (const SprTimer& timer)
     return *this;
 }
 
-SprTimer::SprTimer(SprTimer&& timer)
-{
+SprTimer::SprTimer(SprTimer&& timer) {
     mModuleId = timer.mModuleId;
     mMsgId = timer.mMsgId;
     mIntervalInMilliSec = timer.mIntervalInMilliSec;
@@ -67,8 +56,7 @@ SprTimer::SprTimer(SprTimer&& timer)
     mRepeatCount = timer.mRepeatCount;
 }
 
-SprTimer& SprTimer::operator = (SprTimer&& timer)
-{
+SprTimer& SprTimer::operator = (SprTimer&& timer) {
     mModuleId = timer.mModuleId;
     mMsgId = timer.mMsgId;
     mIntervalInMilliSec = timer.mIntervalInMilliSec;
@@ -78,12 +66,10 @@ SprTimer& SprTimer::operator = (SprTimer&& timer)
     return *this;
 }
 
-SprTimer::~SprTimer()
-{
+SprTimer::~SprTimer() {
 }
 
-bool SprTimer::operator < (const SprTimer& timer) const
-{
+bool SprTimer::operator < (const SprTimer& timer) const {
     if (mExpired < timer.mExpired) {
         return true;
     } else if (mExpired > timer.mExpired) {
@@ -93,13 +79,11 @@ bool SprTimer::operator < (const SprTimer& timer) const
     }
 }
 
-bool SprTimer::IsExpired() const
-{
+bool SprTimer::IsExpired() const {
     return (GetTickMs() >= mExpired);
 }
 
-uint64_t SprTimer::GetTickMs() const
-{
+uint64_t SprTimer::GetTickMs() const {
     uint64_t td = 0;
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC_RAW, &ts);

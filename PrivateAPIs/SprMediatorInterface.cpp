@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/04/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <stdio.h>
@@ -42,8 +35,7 @@ static std::atomic<bool> gObjAlive(true);
 static std::shared_ptr<Parcel> pReqParcel = nullptr;
 static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-SprMediatorInterface::SprMediatorInterface()
-{
+SprMediatorInterface::SprMediatorInterface() {
     mEnable = true;
     bool ret = BindInterface::GetInstance()->InitializeClientBinder(SRV_NAME_MEDIATOR, pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
@@ -51,13 +43,11 @@ SprMediatorInterface::SprMediatorInterface()
     }
 }
 
-SprMediatorInterface::~SprMediatorInterface()
-{
+SprMediatorInterface::~SprMediatorInterface() {
     gObjAlive = false;
 }
 
-SprMediatorInterface* SprMediatorInterface::GetInstance()
-{
+SprMediatorInterface* SprMediatorInterface::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -66,8 +56,7 @@ SprMediatorInterface* SprMediatorInterface::GetInstance()
     return &instance;
 }
 
-int SprMediatorInterface::GetAllMQStatus(std::vector<SMQueueDetails>& mqAttrVec)
-{
+int SprMediatorInterface::GetAllMQStatus(std::vector<SMQueueDetails>& mqAttrVec) {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return -1;
@@ -88,8 +77,7 @@ int SprMediatorInterface::GetAllMQStatus(std::vector<SMQueueDetails>& mqAttrVec)
     return ret;
 }
 
-std::string SprMediatorInterface::GetSigalName(int sig)
-{
+std::string SprMediatorInterface::GetSigalName(int sig) {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return "";

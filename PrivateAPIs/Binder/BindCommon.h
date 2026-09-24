@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/16
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/16 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __BIND_COMMON_H__
 #define __BIND_COMMON_H__
@@ -26,8 +19,7 @@
 
 namespace InternalDefs {
 
-enum BinderCmd
-{
+enum BinderCmd {
     BINDER_CMD_INVALID = 0x01,
     BINDER_CMD_GET_VERSION,
     BINDER_CMD_ADD_SERVICE,
@@ -38,8 +30,7 @@ enum BinderCmd
 
 }
 
-class BinderInfo
-{
+class BinderInfo {
 public:
     BinderInfo() = default;
     BinderInfo(int32_t key, const std::string& shmName) : mKey(key), mRefCount(0), mShmName(shmName) {}

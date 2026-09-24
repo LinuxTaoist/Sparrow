@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/13
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SESSION_MANAGER_H__
 #define __SESSION_MANAGER_H__
@@ -25,8 +18,7 @@
 #include "PSocket.h"
 #include "PtyTerminal.h"
 
-class SessionManager
-{
+class SessionManager {
 public:
     static SessionManager* GetInstance();
 

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/14
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/14 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PMSG_QUEUE_H__
 #define __PMSG_QUEUE_H__
@@ -23,8 +16,7 @@
 #include <functional>
 #include "IEpollEvent.h"
 
-class PMsgQueue : public IEpollEvent
-{
+class PMsgQueue : public IEpollEvent {
 public:
     explicit PMsgQueue(const std::string& name, long maxmsg,
               const std::function<void(int32_t, const std::string&, void*)>& cb = nullptr,

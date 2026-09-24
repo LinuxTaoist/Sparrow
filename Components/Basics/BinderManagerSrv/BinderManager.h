@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/16
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/16 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __BINDER_MANAGER_H__
 #define __BINDER_MANAGER_H__
@@ -24,8 +17,7 @@
 #include <stdint.h>
 #include "BindCommon.h"
 
-class BinderManager
-{
+class BinderManager {
 public:
     static BinderManager* GetInstance();
     int32_t StartWork();

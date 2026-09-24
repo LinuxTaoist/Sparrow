@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/13
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <signal.h>
 #include "SprLog.h"
@@ -31,8 +24,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "MainProper"
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     GeneralUtils::InitSignalHandler([](int signum) {
         SPR_LOGI("Receive signal: %d!\n", signum);
         switch (signum) {

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/15
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/15 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_OBSERVER_WITH_MQUEUE_H__
 #define __SPR_OBSERVER_WITH_MQUEUE_H__
@@ -25,8 +18,7 @@
 #include "CommonTypeDefs.h"
 #include "SprMQueueDetails.h"
 
-class SprObserverWithMQueue : public SprObserver, public PMsgQueue
-{
+class SprObserverWithMQueue : public SprObserver, public PMsgQueue {
 public:
     /**
      * @brief  Construct / Destruct

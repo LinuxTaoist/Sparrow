@@ -7,15 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/07
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/07 | 1.0.0.1   | Xiang.D        | Create file
- *  2024/11/22 | 1.0.0.2   | Xiang.D        | Interface adjustment
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 
 #ifndef __PSOCKET_H__
@@ -31,8 +23,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 // SocketCommon: Socket common functions
 //---------------------------------------------------------------------------------------------------------------------
-class SocketCommon
-{
+class SocketCommon {
 public:
     static bool IsIPAddress(const std::string& str);
     static std::string ResolveHostToIP(const std::string& host);
@@ -41,8 +32,7 @@ public:
 //---------------------------------------------------------------------------------------------------------------------
 // PUdp: UDP
 //---------------------------------------------------------------------------------------------------------------------
-class PUdp : public IEpollEvent
-{
+class PUdp : public IEpollEvent {
 public:
     /**
      * @brief 构建UDP实例
@@ -108,8 +98,7 @@ private:
 //---------------------------------------------------------------------------------------------------------------------
 // PTcpServer: TCP server
 //---------------------------------------------------------------------------------------------------------------------
-class PTcpServer : public IEpollEvent
-{
+class PTcpServer : public IEpollEvent {
 public:
     /**
      * @brief 构建TCP server实例
@@ -140,8 +129,7 @@ private:
 //---------------------------------------------------------------------------------------------------------------------
 // PTcpClient: TCP client
 //---------------------------------------------------------------------------------------------------------------------
-class PTcpClient : public IEpollEvent
-{
+class PTcpClient : public IEpollEvent {
 public:
     /**
      * @brief 使用指定句柄构建客户端对象，常用于服务端与已连接的客户端通信
@@ -183,8 +171,7 @@ private:
 //---------------------------------------------------------------------------------------------------------------------
 // PUnixDgram: Unix dgram
 //---------------------------------------------------------------------------------------------------------------------
-class PUnixDgram : public IEpollEvent
-{
+class PUnixDgram : public IEpollEvent {
 public:
     /**
      * @brief 构建Unix dgram实例
@@ -248,8 +235,7 @@ private:
 //---------------------------------------------------------------------------------------------------------------------
 // PUnixStreamServer: Unix stream server
 //---------------------------------------------------------------------------------------------------------------------
-class PUnixStreamServer : public IEpollEvent
-{
+class PUnixStreamServer : public IEpollEvent {
 public:
     explicit PUnixStreamServer(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb) {}
@@ -272,8 +258,7 @@ private:
 //---------------------------------------------------------------------------------------------------------------------
 // PUnixStreamClient : Unix stream client
 //---------------------------------------------------------------------------------------------------------------------
-class PUnixStreamClient : public IEpollEvent
-{
+class PUnixStreamClient : public IEpollEvent {
 public:
     /**
      * @brief 使用指定句柄构建客户端对象，常用于服务端与已连接的客户端通信

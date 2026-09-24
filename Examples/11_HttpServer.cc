@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/12/11
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <list>
 #include "PSocket.h"
@@ -26,8 +19,7 @@ using namespace std;
 #define SPR_LOGD(fmt, args...) printf("%4d SampleHttpSrv D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d SampleHttpSrv E: " fmt, __LINE__, ##args)
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
 
     std::list<std::shared_ptr<PTcpClient>> clients;

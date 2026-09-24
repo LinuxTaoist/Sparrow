@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : GetProperty.cc
+ *  @file       : GetProperty.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/04/01
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/01 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string>
 #include <stdio.h>
@@ -22,8 +15,7 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     if (argc > 3) {
         SPR_LOG("Usage:%s <property name>\n", argv[0]);
         return -1;

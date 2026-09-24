@@ -1,4 +1,5 @@
-/*--------------------------------------------------------------------------------------------------------------------
+/**
+ *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
  *  @file       : CUtils.h
@@ -6,11 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/12/19
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
- *---------------------------------------------------------------------------------------------------------------------
- *  2025/12/19 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __CUTILS_H__
@@ -360,8 +356,7 @@ int32_t VToV(const std::vector<T>& in, std::vector<U>& out, CEndianType type = C
 }
 
 template<typename T>
-std::string ToHexString(const std::vector<T>& vec)
-{
+std::string ToHexString(const std::vector<T>& vec) {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
@@ -379,8 +374,7 @@ std::string ToHexString(const std::vector<T>& vec)
  * @return  The string converted with space
  */
 template<typename T>
-std::string ToHexStringWithSpace(const std::vector<T>& vec)
-{
+std::string ToHexStringWithSpace(const std::vector<T>& vec) {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {

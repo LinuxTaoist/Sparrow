@@ -2,39 +2,28 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : M09_Suback.h
+ *  @file       : M09_Suback.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "M09_Suback.h"
 
-Suback::Suback() : mIdentifier(0), mReturnCode(0)
-{
+Suback::Suback() : mIdentifier(0), mReturnCode(0) {
 }
 
-Suback::~Suback()
-{
+Suback::~Suback() {
 }
 
-int32_t Suback::DecodeVariableHeader(const std::string& bytes)
-{
+int32_t Suback::DecodeVariableHeader(const std::string& bytes) {
     int32_t len = 0;
     CHECK_ADD_RESULT(DecodeIntegerFromBytes(mIdentifier, bytes), len);
     return len;
 }
 
-int32_t Suback::DecodePayload(const std::string& bytes)
-{
+int32_t Suback::DecodePayload(const std::string& bytes) {
     int32_t len = 0;
     CHECK_ADD_RESULT(DecodeIntegerFromBytes(mReturnCode, bytes), len);
     return len;
@@ -50,7 +39,7 @@ int32_t Suback::EncodeVariableHeader(std::string& bytes) {
     return len;
 }
 
-int32_t Suback::EncodePayload(std::string& bytes)  {
+int32_t Suback::EncodePayload(std::string& bytes) {
     int32_t len = 0;
 
     mPayload.clear();

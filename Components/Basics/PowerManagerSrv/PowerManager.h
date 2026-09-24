@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/12/21
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/21 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __POWER_MANAGER_H__
 #define __POWER_MANAGER_H__
@@ -47,25 +40,21 @@ namespace {
     ENUM_OR_STRING(LEV2_POWER_BUTT)
 
 // 一级状态:
-enum EPowerLev1State
-{
+enum EPowerLev1State {
     POWER_LEV1_MACROS
 };
 
 //二级状态:
-enum EPowerLev2State
-{
+enum EPowerLev2State {
     POWER_LEV2_MACROS
 };
 
-struct StandbyDetail
-{
+struct StandbyDetail {
     InternalDefs::EPreStandbyAck preStandbyAck;
     InternalDefs::EModuleBootPriority priority;
 };
 
-class PowerManager : public SprObserverWithMQueue
-{
+class PowerManager : public SprObserverWithMQueue {
 public:
     PowerManager(ModuleIDType id, const std::string& name);
     virtual ~PowerManager();

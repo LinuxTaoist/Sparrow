@@ -7,35 +7,24 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "M08_Subscribe.h"
 
 MqttSubscribe::MqttSubscribe(uint16_t identifier, const std::string& topic)
-    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mIdentifier(identifier), mTopic(topic)
-{
+    : MqttMsgBase(MQTT_MSG_SUBSCRIBE, 2), mIdentifier(identifier), mTopic(topic) {
 }
 
-MqttSubscribe::~MqttSubscribe()
-{
+MqttSubscribe::~MqttSubscribe() {
 }
 
-int32_t MqttSubscribe::DecodeVariableHeader(const std::string& bytes)
-{
+int32_t MqttSubscribe::DecodeVariableHeader(const std::string& bytes) {
     int len = 0;
     CHECK_ADD_RESULT(DecodeIntegerFromBytes(mIdentifier, bytes), len);
     return len;
 }
 
-int32_t MqttSubscribe::DecodePayload(const std::string& bytes)
-{
+int32_t MqttSubscribe::DecodePayload(const std::string& bytes) {
     int8_t qos = 0;
     int32_t len = 0;
     uint16_t topicLength = 0;
@@ -47,8 +36,7 @@ int32_t MqttSubscribe::DecodePayload(const std::string& bytes)
     return len;
 }
 
-int32_t MqttSubscribe::EncodeVariableHeader(std::string& bytes)
-{
+int32_t MqttSubscribe::EncodeVariableHeader(std::string& bytes) {
     int32_t len = 0;
 
     mVariableHeader.clear();
@@ -58,8 +46,7 @@ int32_t MqttSubscribe::EncodeVariableHeader(std::string& bytes)
     return len;
 }
 
-int32_t MqttSubscribe::EncodePayload(std::string& bytes)
-{
+int32_t MqttSubscribe::EncodePayload(std::string& bytes) {
     uint8_t qos = 0;
     int32_t len = 0;
 

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __GENERAL_UTILS_H__
 #define __GENERAL_UTILS_H__
@@ -31,8 +24,7 @@ namespace GeneralUtils {
  * @return  absolute value of v
  */
 template<typename T>
-int AbsValue(T v)
-{
+int AbsValue(T v) {
     return v > 0 ? v : (0 - v);
 }
 
@@ -44,8 +36,7 @@ int AbsValue(T v)
  * @return  absolute value between v1 and v2
  */
 template<typename T>
-int AbsValue(T v1, T v2)
-{
+int AbsValue(T v1, T v2) {
     return v1 > v2 ? (v1 - v2) : (v2 - v1);
 }
 

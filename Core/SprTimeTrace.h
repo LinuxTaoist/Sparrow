@@ -7,15 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
- *
- *  System initialization file
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/02/24 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 
 #ifndef __SPR_TIME_TRACE_H__
@@ -25,15 +17,13 @@
 #include <string>
 #include <time.h>
 
-typedef struct
-{
+typedef struct {
     int32_t         eId;
     timespec    eTimeStamp;
     std::string eText;
 } EntryInfo;
 
-class SprTimeTrace
-{
+class SprTimeTrace {
 public:
     /**
      * @brief Get the Instance object

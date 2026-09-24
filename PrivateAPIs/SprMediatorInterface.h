@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/04/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_MEDIATOR_INTERFACE_H__
 #define __SPR_MEDIATOR_INTERFACE_H__
@@ -24,8 +17,7 @@
 #include <mqueue.h>
 #include "CommonTypeDefs.h"
 
-class SprMediatorInterface
-{
+class SprMediatorInterface {
 public:
     /**
      * @brief  Get the instance

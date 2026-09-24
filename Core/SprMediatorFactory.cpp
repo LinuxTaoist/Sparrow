@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include "SprMediatorFactory.h"
@@ -24,17 +17,14 @@ using namespace InternalDefs;
 
 static std::atomic<bool> gObjAlive(true);
 
-SprMediatorFactory::SprMediatorFactory()
-{
+SprMediatorFactory::SprMediatorFactory() {
 }
 
-SprMediatorFactory::~SprMediatorFactory()
-{
+SprMediatorFactory::~SprMediatorFactory() {
     gObjAlive = false;
 }
 
-SprMediatorFactory* SprMediatorFactory::GetInstance()
-{
+SprMediatorFactory* SprMediatorFactory::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -43,8 +33,7 @@ SprMediatorFactory* SprMediatorFactory::GetInstance()
     return &instance;
 }
 
-SprMediatorProxy* SprMediatorFactory::GetMediatorProxy(InternalDefs::EProxyType type)
-{
+SprMediatorProxy* SprMediatorFactory::GetMediatorProxy(InternalDefs::EProxyType type) {
     SprMediatorProxy* pProxy = nullptr;
     switch (type) {
         case MEDIATOR_PROXY_MQUEUE: {

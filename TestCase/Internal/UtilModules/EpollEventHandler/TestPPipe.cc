@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : PPipe FIFO 管道事件封装内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <cstdio>
@@ -26,8 +19,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeFifoPath()
-{
+std::string MakeFifoPath() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char buf[96] = {};
@@ -50,8 +42,7 @@ protected:
 };
 
 // 测试通过文件描述符构造管道事件
-TEST_F(UtilModules_PPipe, ConstructWithFd)
-{
+TEST_F(UtilModules_PPipe, ConstructWithFd) {
     int32_t pipeFds[2] = {-1, -1};
     ASSERT_EQ(pipe(pipeFds), 0);
 
@@ -63,8 +54,7 @@ TEST_F(UtilModules_PPipe, ConstructWithFd)
 }
 
 // 测试通过文件名构造命名管道
-TEST_F(UtilModules_PPipe, ConstructWithFileName)
-{
+TEST_F(UtilModules_PPipe, ConstructWithFileName) {
     PPipe pipe(mFifoPath, [](ssize_t, std::string, void*) {});
     EXPECT_TRUE(pipe.IsReady());
     EXPECT_GE(pipe.GetEvtFd(), 0);
@@ -76,8 +66,7 @@ TEST_F(UtilModules_PPipe, ConstructWithFileName)
 }
 
 // 测试管道事件读写往返并触发回调
-TEST_F(UtilModules_PPipe, EpollEventReadWriteRoundtrip)
-{
+TEST_F(UtilModules_PPipe, EpollEventReadWriteRoundtrip) {
     int32_t pipeFds[2] = {-1, -1};
     ASSERT_EQ(pipe(pipeFds), 0);
 
@@ -99,8 +88,7 @@ TEST_F(UtilModules_PPipe, EpollEventReadWriteRoundtrip)
 }
 
 // 测试非法 fd 的事件处理不崩溃
-TEST_F(UtilModules_PPipe, EpollEventInvalidFd)
-{
+TEST_F(UtilModules_PPipe, EpollEventInvalidFd) {
     int32_t pipeFds[2] = {-1, -1};
     ASSERT_EQ(pipe(pipeFds), 0);
 
@@ -111,8 +99,7 @@ TEST_F(UtilModules_PPipe, EpollEventInvalidFd)
 }
 
 // 测试空回调的管道事件处理
-TEST_F(UtilModules_PPipe, EpollEventWithoutCallback)
-{
+TEST_F(UtilModules_PPipe, EpollEventWithoutCallback) {
     PPipe pipe(mFifoPath);
     ASSERT_TRUE(pipe.IsReady());
 

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/31
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/31 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <iostream>
 #include <vector>
@@ -30,8 +23,7 @@
 
 const std::string DEMO_SHARED_MUTEX = "demo_shared_mutex";
 
-void childProcessWork(int processId, bool isCrashProcess)
-{
+void childProcessWork(int processId, bool isCrashProcess) {
     std::mutex threadMutex;
     ProcMutex procMutex(DEMO_SHARED_MUTEX);
     SPR_LOG("进程 %d: 启动，准备竞争锁...\n", processId);
@@ -54,8 +46,7 @@ void childProcessWork(int processId, bool isCrashProcess)
     SPR_LOG("进程 %d: 正常退出\n", processId);
 }
 
-int main()
-{
+int main() {
     const int NUM_PROCESSES     = 3;  // 总进程数
     const int CRASH_PROCESS_ID  = 1;  // 指定崩溃的进程ID
 

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
@@ -28,8 +21,7 @@
 #include <stdint.h>
 #include "ConfigStore.h"
 
-class ConfigManager
-{
+class ConfigManager {
 public:
     ConfigManager();
     ~ConfigManager();

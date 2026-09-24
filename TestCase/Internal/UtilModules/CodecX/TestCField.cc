@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : CField 编解码框架字段节点内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string>
 #include <vector>
@@ -24,47 +17,41 @@
 #include "gtest/gtest.h"
 
 // 测试构造与 IsField 默认值
-TEST(UtilModules_CField, Construct)
-{
+TEST(UtilModules_CField, Construct) {
     CField field(nullptr);
     EXPECT_TRUE(field.IsField());   // CField 默认 isField=true
 }
 
 // 测试长度引用设置与获取
-TEST(UtilModules_CField, LenReferenceSetGet)
-{
+TEST(UtilModules_CField, LenReferenceSetGet) {
     CField field(nullptr);
     field.SetLenReference("bms_count");
     EXPECT_EQ(field.GetLenReference(), "bms_count");
 }
 
 // 测试长度模式设置与获取
-TEST(UtilModules_CField, LenModeSetGet)
-{
+TEST(UtilModules_CField, LenModeSetGet) {
     CField field(nullptr);
     field.SetLenMode(TEXT_LEN_MODE_BYTES);
     EXPECT_EQ(field.GetLenMode(), TEXT_LEN_MODE_BYTES);
 }
 
 // 测试长度公式设置与获取
-TEST(UtilModules_CField, LenFormulaSetGet)
-{
+TEST(UtilModules_CField, LenFormulaSetGet) {
     CField field(nullptr);
     field.SetLenFormula("curpos");
     EXPECT_EQ(field.GetLenFormula(), "curpos");
 }
 
 // 测试子节点容器标签设置与获取
-TEST(UtilModules_CField, ChildNodesTagSetGet)
-{
+TEST(UtilModules_CField, ChildNodesTagSetGet) {
     CField field(nullptr);
     field.SetChildNodesTag("children");
     EXPECT_EQ(field.GetChildNodesTag(), "children");
 }
 
 // 测试添加/删除/查找子节点
-TEST(UtilModules_CField, AddDelGetNode)
-{
+TEST(UtilModules_CField, AddDelGetNode) {
     CField field(nullptr);
 
     auto atom1 = std::make_shared<CAtom>(nullptr, "atom1", std::vector<uint8_t>{});
@@ -85,8 +72,7 @@ TEST(UtilModules_CField, AddDelGetNode)
 }
 
 // 测试通过 atom 子节点设置与获取字符串值
-TEST(UtilModules_CField, StrValueAtomChild)
-{
+TEST(UtilModules_CField, StrValueAtomChild) {
     CField field(nullptr);
     auto atom = std::make_shared<CAtom>(nullptr, "atom1", std::vector<uint8_t>{});
     atom->SetType(TEXT_TYPE_U8);
@@ -100,22 +86,19 @@ TEST(UtilModules_CField, StrValueAtomChild)
 }
 
 // 测试空名称设置值返回失败
-TEST(UtilModules_CField, SetValueEmptyNameFails)
-{
+TEST(UtilModules_CField, SetValueEmptyNameFails) {
     CField field(nullptr);
     EXPECT_EQ(field.SetStrValue("", "x"), -1);
 }
 
 // 测试设置不存在的子节点返回失败
-TEST(UtilModules_CField, SetValueNonexistChildFails)
-{
+TEST(UtilModules_CField, SetValueNonexistChildFails) {
     CField field(nullptr);
     EXPECT_EQ(field.SetStrValue("nonexist", "x"), -1);
 }
 
 // 测试克隆字段及其子节点
-TEST(UtilModules_CField, Clone)
-{
+TEST(UtilModules_CField, Clone) {
     CField field(nullptr);
     field.SetName("root");
     auto atom = std::make_shared<CAtom>(nullptr, "atom1", std::vector<uint8_t>{0x01});
@@ -131,8 +114,7 @@ TEST(UtilModules_CField, Clone)
 }
 
 // 测试按相对路径查找子节点
-TEST(UtilModules_CField, GetNodeByRelativePath)
-{
+TEST(UtilModules_CField, GetNodeByRelativePath) {
     CField field(nullptr);
     field.SetName("root");
     auto atom = std::make_shared<CAtom>(nullptr, "atom1", std::vector<uint8_t>{});
@@ -143,8 +125,7 @@ TEST(UtilModules_CField, GetNodeByRelativePath)
 }
 
 // 测试按绝对路径查找子节点
-TEST(UtilModules_CField, GetNodeByAbsolutePath)
-{
+TEST(UtilModules_CField, GetNodeByAbsolutePath) {
     CField root(nullptr);
     root.SetName("root");
     auto atom = std::make_shared<CAtom>(nullptr, "atom1", std::vector<uint8_t>{});
@@ -154,8 +135,7 @@ TEST(UtilModules_CField, GetNodeByAbsolutePath)
 }
 
 // 测试空路径查找返回空
-TEST(UtilModules_CField, GetNodeByEmptyPath)
-{
+TEST(UtilModules_CField, GetNodeByEmptyPath) {
     CField field(nullptr);
     EXPECT_EQ(field.GetNodeByPath(""), nullptr);
 }

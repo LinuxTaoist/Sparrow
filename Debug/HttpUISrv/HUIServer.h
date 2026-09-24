@@ -7,13 +7,7 @@
  *  @version    : 1.0
  *  @brief      : HTTP User Interface Server for project status display and remote debugging
  *  @date       : 2026/05/28
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __HUI_SERVER_H__
 #define __HUI_SERVER_H__
@@ -25,8 +19,7 @@
 #define HUI_DEFAULT_PORT                (8888)
 #define HUI_SERVER_BACKLOG              (5)
 
-class HUIServer
-{
+class HUIServer {
 public:
     HUIServer();
     ~HUIServer();

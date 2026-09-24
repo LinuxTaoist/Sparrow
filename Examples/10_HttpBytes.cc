@@ -7,22 +7,14 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/12/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "HttpProtocol.h"
 
 #define SPR_LOGD(fmt, args...) printf("%4d SampleHttp D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d SampleHttp E: " fmt, __LINE__, ##args)
 
-void TestHttpRequestBytes()
-{
+void TestHttpRequestBytes() {
     std::string bytes =
     "GET /favicon.ico HTTP/1.1\r\n"
     "Host: 127.0.0.1:8080\r\n"
@@ -60,8 +52,7 @@ void TestHttpRequestBytes()
     SPR_LOGD("-- Encode : \n%s\n", enBytes.c_str());
 }
 
-void TestHttpResponseBytes()
-{
+void TestHttpResponseBytes() {
     std::string bytes =
     "HTTP/1.1 200 OK\r\n"
     "Date: Tue, 12 Dec 2023 12:00:00 GMT\r\n"
@@ -91,8 +82,7 @@ void TestHttpResponseBytes()
     SPR_LOGD("-- Encode : \n%s\n", enBytes.c_str());
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     TestHttpRequestBytes();
     TestHttpResponseBytes();
     return 0;

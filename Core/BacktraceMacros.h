@@ -10,13 +10,7 @@
  *
  *  This header file serves as a repository for shared data structure types utilized by both client and server code.
  *  All common data structure definitions intended for use across both client and server should be encapsulated herein.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __BACKTRACE_MACROS_H__
 #define __BACKTRACE_MACROS_H__

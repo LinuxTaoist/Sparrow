@@ -2,21 +2,14 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file SprsigId.cpp
- *  @author Xiang.D (dx_65535@163.com)
- *  @version 1.0
- *  @brief Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date 2022-06-03
+ *  @file       : SprSigId.cpp
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
+ *  @date       : 2022/06/03
  *
  *  In "signal_list.gen" add the message definition.
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2022/06/03 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <stdio.h>
 #include <stdint.h>
@@ -32,8 +25,7 @@ const char sigIdString[][MAX_LENGTH_MSG] = {
     #include "SprSigList.gen"
 };
 
-const char* GetSigName(uint32_t msgID)
-{
+const char* GetSigName(uint32_t msgID) {
     uint32_t sigIdCnt = (uint32_t) sizeof(sigIdString) / sizeof(sigIdString[0]);
     if (msgID < sigIdCnt) {
         return sigIdString[msgID];

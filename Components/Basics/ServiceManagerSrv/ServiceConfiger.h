@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Service configuration data and loader interface.
  *  @date       : 2026/09/12
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/12 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SERVICE_CONFIGER_H__
 #define __SERVICE_CONFIGER_H__

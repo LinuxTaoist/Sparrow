@@ -14,13 +14,7 @@
  *    1. GetTime() / SetTime()            — sync system ↔ hardware clock
  *    2. RegisterAlarmCallback(ts, handler)            — schedule wake-up
  *    3. CancelAlarm()                    — clear
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __IHW_RTC_H__
 #define __IHW_RTC_H__

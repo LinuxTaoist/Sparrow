@@ -7,22 +7,14 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/28
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __DEBUG_INTERFACE_H__
 #define __DEBUG_INTERFACE_H__
 
 #include <stdint.h>
 
-class DebugInterface
-{
+class DebugInterface {
 public:
     static DebugInterface* GetInstance();
 

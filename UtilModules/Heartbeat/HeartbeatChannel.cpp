@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Internal Unix domain datagram channel for Heartbeat.
  *  @date       : 2026/09/17
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <cerrno>

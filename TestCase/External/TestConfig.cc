@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <unistd.h>
 #include <atomic>
@@ -27,8 +20,7 @@
 
 namespace {
 
-bool WaitFile(const std::string& path, int32_t timeoutMs)
-{
+bool WaitFile(const std::string& path, int32_t timeoutMs) {
     int32_t loop = timeoutMs / 50;
     for (int32_t i = 0; i < loop; ++i) {
         if (access(path.c_str(), F_OK) == 0) {
@@ -40,26 +32,22 @@ bool WaitFile(const std::string& path, int32_t timeoutMs)
     return false;
 }
 
-std::string MakeUniqueNamespace(const char* base)
-{
+std::string MakeUniqueNamespace(const char* base) {
     static std::atomic<uint32_t> seq(0);
     return std::string(base) + "_" + std::to_string(getpid()) + "_" + std::to_string(seq.fetch_add(1));
 }
 
 } // namespace
 
-class TestConfigApi : public ::testing::Test
-{
+class TestConfigApi : public ::testing::Test {
 public:
-    static void SetUpTestCase()
-    {
+    static void SetUpTestCase() {
         ASSERT_TRUE(WaitFile("/tmp/bindermanagersrv", 3000));
         ASSERT_TRUE(WaitFile("/tmp/configmanagersrv", 3000));
         usleep(200 * 1000);
     }
 
-    void TearDown() override
-    {
+    void TearDown() override {
         Config* cfg = Config::GetInstance();
         if (cfg == nullptr || mNamespace.empty()) {
             return;
@@ -73,13 +61,11 @@ public:
         }
     }
 
-    void SetNamespace(const std::string& nameSpace)
-    {
+    void SetNamespace(const std::string& nameSpace) {
         mNamespace = nameSpace;
     }
 
-    void RecordKey(const std::string& key)
-    {
+    void RecordKey(const std::string& key) {
         mKeys.push_back(key);
     }
 
@@ -88,8 +74,7 @@ private:
     std::vector<std::string> mKeys;
 };
 
-TEST_F(TestConfigApi, SetAndGetUserValue)
-{
+TEST_F(TestConfigApi, SetAndGetUserValue) {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("cloud");
@@ -109,8 +94,7 @@ TEST_F(TestConfigApi, SetAndGetUserValue)
     EXPECT_EQ(queryRevision, revision);
 }
 
-TEST_F(TestConfigApi, LayeredFallbackWorks)
-{
+TEST_F(TestConfigApi, LayeredFallbackWorks) {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("net");
@@ -132,8 +116,7 @@ TEST_F(TestConfigApi, LayeredFallbackWorks)
     EXPECT_EQ(scope, CONFIG_SCOPE_USER);
 }
 
-TEST_F(TestConfigApi, ListNamespaceReturnsEffectiveValues)
-{
+TEST_F(TestConfigApi, ListNamespaceReturnsEffectiveValues) {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("veh");
@@ -151,8 +134,7 @@ TEST_F(TestConfigApi, ListNamespaceReturnsEffectiveValues)
     EXPECT_EQ(items["mode"], "eco");
 }
 
-TEST_F(TestConfigApi, BackupAndMetaWork)
-{
+TEST_F(TestConfigApi, BackupAndMetaWork) {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("ota");
@@ -172,8 +154,7 @@ TEST_F(TestConfigApi, BackupAndMetaWork)
     EXPECT_EQ(access("/tmp/config_manager.db.bak", F_OK), 0);
 }
 
-TEST_F(TestConfigApi, TypedValueApisWork)
-{
+TEST_F(TestConfigApi, TypedValueApisWork) {
     Config* cfg = Config::GetInstance();
     ASSERT_TRUE(cfg != nullptr);
     std::string nameSpace = MakeUniqueNamespace("typed");

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/31
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/31 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <iostream>
 #include <thread>
@@ -45,8 +38,7 @@ struct STestData {
     int value1;
     int value2;
 };
-int Server()
-{
+int Server() {
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
 
@@ -115,8 +107,7 @@ int Server()
     return 0;
 }
 
-void usage()
-{
+void usage() {
     SPR_LOG("------------------------------------------------------------------\n"
             "Usage:\n"
             "0: CMD_TEST\n"
@@ -132,8 +123,7 @@ void usage()
     );
 }
 
-int Client()
-{
+int Client() {
     char in = 0;
     std::shared_ptr<Parcel> pReqParcel = nullptr;
     std::shared_ptr<Parcel> pRspParcel = nullptr;
@@ -346,8 +336,7 @@ int Client()
     return 0;
 }
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     pid_t pid = fork();
     if (pid == -1) {
         SPR_LOGE("fork failed! (%s)", strerror(errno));

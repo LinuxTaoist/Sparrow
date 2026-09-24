@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : PFile 文件事件封装内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <cstdio>
@@ -25,8 +18,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeFilePath(const std::string& prefix)
-{
+std::string MakeFilePath(const std::string& prefix) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char buf[96] = {};
@@ -49,23 +41,20 @@ protected:
 };
 
 // 测试通过文件名构造文件事件
-TEST_F(UtilModules_PFile, ConstructWithFileName)
-{
+TEST_F(UtilModules_PFile, ConstructWithFileName) {
     PFile file(mPath);
     EXPECT_TRUE(file.IsReady());
     EXPECT_GE(file.GetEvtFd(), 0);
 }
 
 // 测试构造不存在的文件路径
-TEST_F(UtilModules_PFile, ConstructWithMissingFile)
-{
+TEST_F(UtilModules_PFile, ConstructWithMissingFile) {
     PFile file("/tmp/no_such_pfile_dir/no_file.tmp");
     EXPECT_FALSE(file.IsReady());
 }
 
 // 测试通过文件描述符构造文件事件
-TEST_F(UtilModules_PFile, ConstructWithFd)
-{
+TEST_F(UtilModules_PFile, ConstructWithFd) {
     int32_t fd = open(mPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
     ASSERT_GE(fd, 0);
 
@@ -75,8 +64,7 @@ TEST_F(UtilModules_PFile, ConstructWithFd)
 }
 
 // 测试文件事件回调被触发
-TEST_F(UtilModules_PFile, EpollEventCallbackInvoked)
-{
+TEST_F(UtilModules_PFile, EpollEventCallbackInvoked) {
     int32_t hit = 0;
     PFile file(mPath, [&hit](int32_t, ssize_t, std::string, void*) {
         hit++;
@@ -87,8 +75,7 @@ TEST_F(UtilModules_PFile, EpollEventCallbackInvoked)
 }
 
 // 测试带 fd 回调的文件事件被触发
-TEST_F(UtilModules_PFile, EpollEventWithFdCallbackInvoked)
-{
+TEST_F(UtilModules_PFile, EpollEventWithFdCallbackInvoked) {
     int32_t fd = open(mPath.c_str(), O_RDWR | O_CREAT | O_TRUNC, 0666);
     ASSERT_GE(fd, 0);
 
@@ -102,8 +89,7 @@ TEST_F(UtilModules_PFile, EpollEventWithFdCallbackInvoked)
 }
 
 // 测试非法 fd 的文件事件不崩溃
-TEST_F(UtilModules_PFile, EpollEventInvalidFd)
-{
+TEST_F(UtilModules_PFile, EpollEventInvalidFd) {
     PFile file(mPath);
     // 传入错误的 fd 走错误日志分支，不应崩溃
     file.EpollEvent(-999, EPOLL_TYPE_FILE, nullptr);

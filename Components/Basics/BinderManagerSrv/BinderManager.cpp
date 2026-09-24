@@ -7,12 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/16
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
- *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/16 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <atomic>
@@ -40,8 +34,7 @@ static Parcel* pRspParcel = nullptr;
 static std::atomic<bool> gObjAlive(true);
 bool BinderManager::mRunning = false;
 
-BinderManager::BinderManager()
-{
+BinderManager::BinderManager() {
     mRootDir = DEFAULT_DEBUG_ROOT_DIR;
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_ADD_SERVICE,     &BinderManager::BMsgRespondAddService));
     mHandleFuncs.insert(std::make_pair((int32_t)BINDER_CMD_REMOVE_SERVICE,  &BinderManager::BMsgRespondRemoveService));
@@ -58,8 +51,7 @@ BinderManager::BinderManager()
     EnvReady(SRV_NAME_BINDER);
 }
 
-BinderManager::~BinderManager()
-{
+BinderManager::~BinderManager() {
     gObjAlive = false;
     if (pReqParcel != nullptr) {
         delete pReqParcel;
@@ -72,8 +64,7 @@ BinderManager::~BinderManager()
     }
 }
 
-BinderManager* BinderManager::GetInstance()
-{
+BinderManager* BinderManager::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -82,8 +73,7 @@ BinderManager* BinderManager::GetInstance()
     return &instance;
 }
 
-int32_t BinderManager::EnvReady(const std::string& srvName)
-{
+int32_t BinderManager::EnvReady(const std::string& srvName) {
     std::string node = mRootDir + "/" + srvName;
     int32_t fd = creat(node.c_str(), 0644);
     if (fd == -1) {
@@ -95,8 +85,7 @@ int32_t BinderManager::EnvReady(const std::string& srvName)
     return 0;
 }
 
-int32_t BinderManager::BMsgRespondAddService()
-{
+int32_t BinderManager::BMsgRespondAddService() {
     std::string name;
     int32_t key = GeneralUtils::GetRandomInteger(INT_KEY_LENGTH);
     NONZERO_CHECK_RET(pReqParcel->ReadString(name));
@@ -110,8 +99,7 @@ int32_t BinderManager::BMsgRespondAddService()
     return 0;
 }
 
-int32_t BinderManager::BMsgRespondRemoveService()
-{
+int32_t BinderManager::BMsgRespondRemoveService() {
     std::string name;
     NONZERO_CHECK_RET(pReqParcel->ReadString(name));
     mBinderMap.erase(name);
@@ -122,8 +110,7 @@ int32_t BinderManager::BMsgRespondRemoveService()
     return 0;
 }
 
-int32_t BinderManager::BMsgRespondGetService()
-{
+int32_t BinderManager::BMsgRespondGetService() {
     int32_t ret = 0;
     int32_t key = 0;
     std::string name;
@@ -147,8 +134,7 @@ int32_t BinderManager::BMsgRespondGetService()
     return ret;
 }
 
-int32_t BinderManager::StartWork()
-{
+int32_t BinderManager::StartWork() {
     mRunning = true;
     while (mRunning) {
         int32_t cmd = 0;
@@ -173,8 +159,7 @@ int32_t BinderManager::StartWork()
     return 0;
 }
 
-int32_t BinderManager::StopWork()
-{
+int32_t BinderManager::StopWork() {
     // Signal to unblock the pReqParcel->Wait() call
     NONZERO_CHECK_RET(pReqParcel->WriteInt(GENERAL_CMD_EXE_EXIT));
     NONZERO_CHECK_RET(pReqParcel->Post());

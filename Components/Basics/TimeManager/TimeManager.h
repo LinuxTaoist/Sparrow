@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/11/11
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/11/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __TIME_MANAGER_H__
 #define __TIME_MANAGER_H__
@@ -22,8 +15,7 @@
 #include "NtpSource.h"
 #include "SprObserverWithMQueue.h"
 
-enum TimeSourcePriority
-{
+enum TimeSourcePriority {
     TIME_SOURCE_PRIORITY_NONE,
     TIME_SOURCE_PRIORITY_HIGHEST,
     TIME_SOURCE_PRIORITY_HIGH,
@@ -33,8 +25,7 @@ enum TimeSourcePriority
     TIME_SOURCE_PRIORITY_BUTT
 };
 
-class TimeManager : public SprObserverWithMQueue
-{
+class TimeManager : public SprObserverWithMQueue {
 public:
     /**
      * @brief Get the single instance

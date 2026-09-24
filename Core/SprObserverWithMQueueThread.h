@@ -16,13 +16,7 @@
  *
  *  Interface is identical to SprObserverWithMQueue, components can switch between them by only changing
  *  the base class name.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/08/18 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_OBSERVER_WITH_MQUEUE_THREAD_H__
 #define __SPR_OBSERVER_WITH_MQUEUE_THREAD_H__
@@ -36,8 +30,7 @@
 #include "SprMsg.h"
 #include "SprObserverWithMQueue.h"
 
-class SprObserverWithMQueueThread : public SprObserverWithMQueue
-{
+class SprObserverWithMQueueThread : public SprObserverWithMQueue {
 public:
     /**
      * @brief  Construct / Destruct

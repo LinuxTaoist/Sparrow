@@ -2,28 +2,21 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file SprsigId.h
- *  @author Xiang.D (dx_65535@163.com)
- *  @version 1.0
- *  @brief Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
- *  @date 2022-06-03
+ *  @file       : SprSigId.h
+ *  @author     : Xiang.D (dx_65535@163.com)
+ *  @version    : 1.0
+ *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
+ *  @date       : 2022/06/03
  *
- *  In "signal_list.gen" add the message definition.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
+ *  In "SprSigList.gen" add the message definition.
  *---------------------------------------------------------------------------------------------------------------------
- *  2022/06/03 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_SIG_ID_H__
 #define __SPR_SIG_ID_H__
 
 namespace InternalDefs {
 
-namespace
-{
+namespace {
 
 /* 消息ID转枚举 */
 #ifdef ENUM_OR_STRING
@@ -33,8 +26,7 @@ namespace
 
 }
 
-enum ESprSigId : uint32_t
-{
+enum ESprSigId : uint32_t {
     #include "SprSigList.gen"
     ENUM_OR_STRING(SIG_ID_PUBLIC_END) = 0x10000,
 };

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __GENERAL_CONVERSIONS_H__
 #define __GENERAL_CONVERSIONS_H__
@@ -35,8 +28,7 @@ namespace GeneralConversions {
  * @return  0 if success, -1 if failed
  */
 template <typename T>
-int ToInteger(const std::string& in, T& out)
-{
+int ToInteger(const std::string& in, T& out) {
     size_t size = sizeof(T);
     if (in.size() < size) {
         return -1;
@@ -59,8 +51,7 @@ int ToInteger(const std::string& in, T& out)
  * @return  0 if success, -1 if failed
  */
 template<typename T>
-int ToString(const T& in, std::string& out)
-{
+int ToString(const T& in, std::string& out) {
     size_t size = sizeof(T);
     for (size_t i = 0; i < size; i++) {
         char ch = static_cast<char>((in >> ((size - 1 - i) * 8)) & 0xFF);
@@ -77,8 +68,7 @@ int ToString(const T& in, std::string& out)
  * @return  The string converted without space
  */
 template<typename T>
-std::string ToHexString(const std::vector<T>& vec)
-{
+std::string ToHexString(const std::vector<T>& vec) {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
@@ -96,8 +86,7 @@ std::string ToHexString(const std::vector<T>& vec)
  * @return  The string converted with space
  */
 template<typename T>
-std::string ToHexStringWithSpace(const std::vector<T>& vec)
-{
+std::string ToHexStringWithSpace(const std::vector<T>& vec) {
     std::stringstream ss;
     ss << std::hex << std::setfill('0');
     for (const auto& it : vec) {
@@ -114,8 +103,7 @@ std::string ToHexStringWithSpace(const std::vector<T>& vec)
  * @return  The string converted
  */
 template<typename T>
-std::string ToString(const std::vector<T>& vec)
-{
+std::string ToString(const std::vector<T>& vec) {
     std::string str;
     str.reserve(vec.size() * sizeof(T));
     size_t size = sizeof(T);

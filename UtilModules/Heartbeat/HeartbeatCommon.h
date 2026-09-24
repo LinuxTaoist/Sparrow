@@ -11,7 +11,6 @@
  *  The reporter and monitor use HEARTBEAT_DEFAULT_CHANNEL_PATH by default.
  *  Include this header when a service needs to share the channel path or
  *  default timing values with the Heartbeat module.
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __HEART_BEAT_COMMON_H__
@@ -28,23 +27,20 @@
 #define HEARTBEAT_PROTOCOL_MAGIC             0x48525442U
 #define HEARTBEAT_PROTOCOL_VERSION           1U
 
-enum HeartbeatState
-{
+enum HeartbeatState {
     HEARTBEAT_STATE_UNKNOWN = 0,
     HEARTBEAT_STATE_ALIVE,
     HEARTBEAT_STATE_TIMEOUT
 };
 
-struct HeartbeatInfo
-{
+struct HeartbeatInfo {
     std::string serviceName;
     HeartbeatState state;
     uint64_t sequence;
     uint64_t lastReportTimeMs;
 
     HeartbeatInfo()
-        : state(HEARTBEAT_STATE_UNKNOWN), sequence(0), lastReportTimeMs(0)
-    {
+        : state(HEARTBEAT_STATE_UNKNOWN), sequence(0), lastReportTimeMs(0) {
     }
 };
 

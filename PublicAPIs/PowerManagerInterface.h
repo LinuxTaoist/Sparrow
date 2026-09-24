@@ -7,20 +7,12 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/11
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __POWER_MANAGER_INTERFACE_H__
 #define __POWER_MANAGER_INTERFACE_H__
 
-class PowerManagerInterface
-{
+class PowerManagerInterface {
 public:
     /**
      * @brief Get the Instance object

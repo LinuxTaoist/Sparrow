@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/26
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/26 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <stdio.h>
 #include <errno.h>
@@ -38,8 +31,7 @@ const int ERR_PARCEL_WRITE_FAILED   = -303;
 const int ERR_PARCEL_READ_FAILED    = -304;
 const int SHM_MAX_SIZE              = 10 * 1024;    // 10KB
 
-Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master), mShmKey(key), mShmPath(path)
-{
+Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master), mShmKey(key), mShmPath(path) {
     mRingBuffer = new (std::nothrow)SharedRingBuffer(std::string(SHM_ROOT_PATH) + path, SHM_MAX_SIZE);
     if (mRingBuffer == nullptr) {
         SPR_LOGE("mRingBuffer is nullptr!\n");
@@ -51,8 +43,7 @@ Parcel::Parcel(const std::string& path, int key, bool master) : mMaster(master),
     }
 }
 
-Parcel::~Parcel()
-{
+Parcel::~Parcel() {
     if (SEM_FAILED != mSem) {
         if (sem_close(mSem) != 0) {
             SPR_LOGE("sem_close failed! (%s)\n", strerror(errno));
@@ -73,8 +64,7 @@ Parcel::~Parcel()
     }
 }
 
-int Parcel::WriteBool(bool value)
-{
+int Parcel::WriteBool(bool value) {
     NODE_LENGTH_T len = sizeof(value);
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T)) ) {
         return ERR_PARCEL_WRITE_FAILED;
@@ -88,8 +78,7 @@ int Parcel::WriteBool(bool value)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::ReadBool(bool& value)
-{
+int Parcel::ReadBool(bool& value) {
     NODE_LENGTH_T len = 0;
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T))) {
         return ERR_PARCEL_READ_FAILED;
@@ -104,8 +93,7 @@ int Parcel::ReadBool(bool& value)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::WriteInt(int value)
-{
+int Parcel::WriteInt(int value) {
     int netValue = htonl(value);
     NODE_LENGTH_T len = sizeof(netValue);
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T))) {
@@ -120,8 +108,7 @@ int Parcel::WriteInt(int value)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::ReadInt(int& value)
-{
+int Parcel::ReadInt(int& value) {
     NODE_LENGTH_T len = 0;
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T))) {
         return ERR_PARCEL_READ_FAILED;
@@ -139,8 +126,7 @@ int Parcel::ReadInt(int& value)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::WriteString(const std::string& value)
-{
+int Parcel::WriteString(const std::string& value) {
     NODE_LENGTH_T len = value.length();
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T))) {
         SPR_LOGE("Write string len failed!\n");
@@ -155,8 +141,7 @@ int Parcel::WriteString(const std::string& value)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::ReadString(std::string& value)
-{
+int Parcel::ReadString(std::string& value) {
     int ret = 0;
     NODE_LENGTH_T len = 0;
 
@@ -176,8 +161,7 @@ int Parcel::ReadString(std::string& value)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::WriteData(void* data, int size)
-{
+int Parcel::WriteData(void* data, int size) {
     NODE_LENGTH_T len = size;
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T))) {
         return ERR_PARCEL_WRITE_FAILED;
@@ -190,8 +174,7 @@ int Parcel::WriteData(void* data, int size)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::ReadData(void* data, int& size)
-{
+int Parcel::ReadData(void* data, int& size) {
     int ret = 0;
     NODE_LENGTH_T len = 0;
     ret = mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T));
@@ -207,8 +190,7 @@ int Parcel::ReadData(void* data, int& size)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::Wait()
-{
+int Parcel::Wait() {
     while (!mRingBuffer->IsReadable()) {
         if (sem_wait(mSem) != 0) {
             SPR_LOGE("sem_wait failed! (%s)\n", strerror(errno));
@@ -219,8 +201,7 @@ int Parcel::Wait()
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::TimedWait(int timeout)
-{
+int Parcel::TimedWait(int timeout) {
     while (!mRingBuffer->IsReadable()) {
         struct timespec ts;
         clock_gettime(CLOCK_REALTIME, &ts);
@@ -236,8 +217,7 @@ int Parcel::TimedWait(int timeout)
     return ERR_PARCEL_SUCCESS;
 }
 
-int Parcel::Post()
-{
+int Parcel::Post() {
     if (sem_post(mSem) != 0) {
         SPR_LOGE("sem_post failed! (%s)\n", strerror(errno));
         return ERR_PARCEL_POST_FAILED;

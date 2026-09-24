@@ -10,13 +10,7 @@
  *
  *  This header file serves as a repository for shared data structure types utilized by both client and server code.
  *  All common data structure definitions intended for use across both client and server should be encapsulated herein.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __COMMON_TYPE_DEFS_H__
 #define __COMMON_TYPE_DEFS_H__
@@ -54,16 +48,14 @@ struct SMQueueDetails {
     mq_attr mqAttr;
 };
 
-enum EConfigScope
-{
+enum EConfigScope {
     CONFIG_SCOPE_DEFAULT = 0,
     CONFIG_SCOPE_FACTORY,
     CONFIG_SCOPE_USER,
     CONFIG_SCOPE_BUTT
 };
 
-enum EConfigValueType
-{
+enum EConfigValueType {
     CONFIG_VALUE_TYPE_STRING = 0,
     CONFIG_VALUE_TYPE_BOOL,
     CONFIG_VALUE_TYPE_INT32,

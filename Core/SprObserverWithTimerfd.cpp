@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/15
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/15 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include "SprObserverWithTimerfd.h"
@@ -22,22 +15,18 @@
 #define LOG_TAG "SprObsTmrFd"
 
 SprObserverWithTimerfd::SprObserverWithTimerfd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType)
-    : SprObserver(id, name, proxyType)
-{
+    : SprObserver(id, name, proxyType) {
 }
 
-SprObserverWithTimerfd::~SprObserverWithTimerfd()
-{
+SprObserverWithTimerfd::~SprObserverWithTimerfd() {
 }
 
-int32_t SprObserverWithTimerfd::InitFramework()
-{
+int32_t SprObserverWithTimerfd::InitFramework() {
     AddToPoll();
     return 0;
 }
 
-void* SprObserverWithTimerfd::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* SprObserverWithTimerfd::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     if (fd != GetEvtFd()) {
         SPR_LOGW("fd is not timerfd!\n");
         return nullptr;

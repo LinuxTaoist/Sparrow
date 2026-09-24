@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/16
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/16 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <memory>
 #include <inttypes.h>
@@ -27,8 +20,7 @@ using namespace std;
 #define SPR_LOGD(fmt, args...) printf("%4d MQueue D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d MQueue E: " fmt, __LINE__, ##args)
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     auto pMQueue = make_shared<PMsgQueue>("MQTest", 1025, [](int fd, const string& msg, void* arg) {
         SPR_LOGD("fd = %d, msg = %s\n", fd, msg.c_str());
     });

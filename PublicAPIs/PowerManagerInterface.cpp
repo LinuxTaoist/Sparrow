@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : PowerManagerInterface.h
+ *  @file       : PowerManagerInterface.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/11
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <stdio.h>
@@ -45,8 +38,7 @@ static ProcMutex gPMutex("IPowerMgrMutex");
 static std::shared_ptr<Parcel> pReqParcel = nullptr;
 static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-PowerManagerInterface::PowerManagerInterface()
-{
+PowerManagerInterface::PowerManagerInterface() {
     mEnable = true;
     bool ret = BindInterface::GetInstance()->InitializeClientBinder(SRV_NAME_POWER_MANAGER, pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
@@ -54,14 +46,12 @@ PowerManagerInterface::PowerManagerInterface()
     }
 }
 
-PowerManagerInterface::~PowerManagerInterface()
-{
+PowerManagerInterface::~PowerManagerInterface() {
     mEnable = false;
     gObjAlive = false;
 }
 
-PowerManagerInterface* PowerManagerInterface::GetInstance()
-{
+PowerManagerInterface* PowerManagerInterface::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -70,8 +60,7 @@ PowerManagerInterface* PowerManagerInterface::GetInstance()
     return &instance;
 }
 
-int PowerManagerInterface::PowerOn()
-{
+int PowerManagerInterface::PowerOn() {
     if (!mEnable) {
         SPR_LOGE("PowerManager is disable!\n");
         return -1;
@@ -89,8 +78,7 @@ int PowerManagerInterface::PowerOn()
     return ret;
 }
 
-int PowerManagerInterface::PowerOff()
-{
+int PowerManagerInterface::PowerOff() {
     if (!mEnable) {
         SPR_LOGE("PowerManager is disable!\n");
         return -1;
@@ -108,8 +96,7 @@ int PowerManagerInterface::PowerOff()
     return ret;
 }
 
-int PowerManagerInterface::RegisterCallback(void (*callback)(int32_t eventID, void* data, int32_t size))
-{
+int PowerManagerInterface::RegisterCallback(void (*callback)(int32_t eventID, void* data, int32_t size)) {
     if (!mEnable) {
         SPR_LOGE("PowerManager is disable!\n");
         return -1;
@@ -131,8 +118,7 @@ int PowerManagerInterface::RegisterCallback(void (*callback)(int32_t eventID, vo
 }
 
 
-int PowerManagerInterface::UnRegisterCallback()
-{
+int PowerManagerInterface::UnRegisterCallback() {
     if (!mEnable) {
         SPR_LOGE("PowerManager is disable!\n");
         return -1;

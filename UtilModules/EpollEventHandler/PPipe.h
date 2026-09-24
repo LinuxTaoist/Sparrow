@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PPIPE_H__
 #define __PPIPE_H__
@@ -24,8 +17,7 @@
 #include <fcntl.h>
 #include "IEpollEvent.h"
 
-class PPipe : public IEpollEvent
-{
+class PPipe : public IEpollEvent {
 public:
     explicit PPipe(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb = nullptr, void* arg = nullptr);
     explicit PPipe(const std::string& fileName, const std::function<void(ssize_t, std::string, void*)>& cb = nullptr, void* arg = nullptr);

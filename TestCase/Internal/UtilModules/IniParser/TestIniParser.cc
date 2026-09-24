@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : IniParser unit tests.
  *  @date       : 2026/09/20
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <cstdio>
@@ -22,16 +21,13 @@ namespace {
 
 const char* TEST_INI_PATH = "/tmp/sparrow_ini_parser_test.ini";
 
-class IniParserTest : public ::testing::Test
-{
+class IniParserTest : public ::testing::Test {
 protected:
-    void TearDown() override
-    {
+    void TearDown() override {
         std::remove(TEST_INI_PATH);
     }
 
-    void WriteConfig(const std::string& content)
-    {
+    void WriteConfig(const std::string& content) {
         std::ofstream file(TEST_INI_PATH);
         ASSERT_TRUE(file.is_open());
         file << content;
@@ -41,8 +37,7 @@ protected:
 } // namespace
 
 // 测试加载配置文件并读取 section、key 和 value
-TEST_F(IniParserTest, LoadValuesAndSections)
-{
+TEST_F(IniParserTest, LoadValuesAndSections) {
     WriteConfig(
         "# common settings\n"
         "[logging]\n"
@@ -66,8 +61,7 @@ TEST_F(IniParserTest, LoadValuesAndSections)
 }
 
 // 测试忽略空行以及 #、; 开头的注释行
-TEST_F(IniParserTest, IgnoreBlankLinesAndComments)
-{
+TEST_F(IniParserTest, IgnoreBlankLinesAndComments) {
     WriteConfig(
         "; comment\n"
         "\n"
@@ -81,8 +75,7 @@ TEST_F(IniParserTest, IgnoreBlankLinesAndComments)
 }
 
 // 测试 section、key 和 value 两侧空白字符的裁剪
-TEST_F(IniParserTest, TrimSectionKeyAndValue)
-{
+TEST_F(IniParserTest, TrimSectionKeyAndValue) {
     WriteConfig("  [ section ]  \n  key  =  value  \n");
 
     IniParser parser;
@@ -91,8 +84,7 @@ TEST_F(IniParserTest, TrimSectionKeyAndValue)
 }
 
 // 测试 value 中包含额外等号时保留等号及其后内容
-TEST_F(IniParserTest, PreserveValueAfterAdditionalDelimiter)
-{
+TEST_F(IniParserTest, PreserveValueAfterAdditionalDelimiter) {
     WriteConfig("[section]\npath=/tmp/a=b\n");
 
     IniParser parser;
@@ -101,8 +93,7 @@ TEST_F(IniParserTest, PreserveValueAfterAdditionalDelimiter)
 }
 
 // 测试同一 section 中重复 key 时后读取的 value 覆盖前值
-TEST_F(IniParserTest, LastValueWinsForDuplicateKey)
-{
+TEST_F(IniParserTest, LastValueWinsForDuplicateKey) {
     WriteConfig("[section]\nkey=first\nkey=second\n");
 
     IniParser parser;
@@ -111,8 +102,7 @@ TEST_F(IniParserTest, LastValueWinsForDuplicateKey)
 }
 
 // 测试读取不存在的 key 或 section 时返回默认值
-TEST_F(IniParserTest, ReturnDefaultForMissingValue)
-{
+TEST_F(IniParserTest, ReturnDefaultForMissingValue) {
     WriteConfig("[section]\nkey=value\n");
 
     IniParser parser;
@@ -122,8 +112,7 @@ TEST_F(IniParserTest, ReturnDefaultForMissingValue)
 }
 
 // 测试重新加载配置后旧 section 和旧 key 不会残留
-TEST_F(IniParserTest, ReloadReplacesPreviousContent)
-{
+TEST_F(IniParserTest, ReloadReplacesPreviousContent) {
     WriteConfig("[old]\nkey=value\n");
 
     IniParser parser;
@@ -137,8 +126,7 @@ TEST_F(IniParserTest, ReloadReplacesPreviousContent)
 }
 
 // 测试获取不存在的 section 时返回空容器
-TEST_F(IniParserTest, MissingSectionReturnsEmptyContainer)
-{
+TEST_F(IniParserTest, MissingSectionReturnsEmptyContainer) {
     WriteConfig("[section]\nkey=value\n");
 
     IniParser parser;
@@ -147,15 +135,13 @@ TEST_F(IniParserTest, MissingSectionReturnsEmptyContainer)
 }
 
 // 测试配置文件不存在时返回加载错误
-TEST_F(IniParserTest, LoadMissingFileReturnsError)
-{
+TEST_F(IniParserTest, LoadMissingFileReturnsError) {
     IniParser parser;
     EXPECT_EQ(parser.Load("/tmp/sparrow_ini_parser_missing.ini"), -1);
 }
 
 // 测试 section 之前的 key/value 配置不会被保存
-TEST_F(IniParserTest, IgnoreKeyBeforeSection)
-{
+TEST_F(IniParserTest, IgnoreKeyBeforeSection) {
     WriteConfig(
         "key=value\n"
         "[section]\n"
@@ -168,8 +154,7 @@ TEST_F(IniParserTest, IgnoreKeyBeforeSection)
 }
 
 // 测试 ForEachSection 遍历所有 section
-TEST_F(IniParserTest, ForEachSectionVisitsAllSections)
-{
+TEST_F(IniParserTest, ForEachSectionVisitsAllSections) {
     WriteConfig(
         "[logging]\n"
         "level=debug\n"
@@ -191,8 +176,7 @@ TEST_F(IniParserTest, ForEachSectionVisitsAllSections)
 }
 
 // 测试 ForEachKey 遍历指定 section 中的所有 key/value
-TEST_F(IniParserTest, ForEachKeyVisitsKeysInSection)
-{
+TEST_F(IniParserTest, ForEachKeyVisitsKeysInSection) {
     WriteConfig("[section]\nb=2\na=1\n");
 
     IniParser parser;
@@ -210,8 +194,7 @@ TEST_F(IniParserTest, ForEachKeyVisitsKeysInSection)
 }
 
 // 测试 ForEach 遍历配置中的所有 section、key 和 value
-TEST_F(IniParserTest, ForEachAllVisitsEveryEntry)
-{
+TEST_F(IniParserTest, ForEachAllVisitsEveryEntry) {
     WriteConfig(
         "[first]\n"
         "key=value\n"
@@ -235,8 +218,7 @@ TEST_F(IniParserTest, ForEachAllVisitsEveryEntry)
 }
 
 // 测试遍历回调返回 false 时立即停止遍历
-TEST_F(IniParserTest, ForEachStopsWhenCallbackReturnsFalse)
-{
+TEST_F(IniParserTest, ForEachStopsWhenCallbackReturnsFalse) {
     WriteConfig(
         "[first]\n"
         "a=1\n"
@@ -270,8 +252,7 @@ TEST_F(IniParserTest, ForEachStopsWhenCallbackReturnsFalse)
 }
 
 // 测试遍历不存在的 section 时不会触发回调
-TEST_F(IniParserTest, ForEachMissingSectionDoesNothing)
-{
+TEST_F(IniParserTest, ForEachMissingSectionDoesNothing) {
     WriteConfig("[section]\nkey=value\n");
 
     IniParser parser;

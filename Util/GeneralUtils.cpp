@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <random>
 #include <chrono>
@@ -44,8 +37,7 @@ int32_t GetRandomInteger(int32_t width) {
     return dis(gen);
 }
 
-int InitSignalHandler(void (*signalHandler)(int))
-{
+int InitSignalHandler(void (*signalHandler)(int)) {
     struct sigaction signal_action;
 
     signal_action.sa_handler = signalHandler;
@@ -71,8 +63,7 @@ int InitSignalHandler(void (*signalHandler)(int))
     return 0;
 }
 
-static int SystemCmd(std::string& out, const char* format, va_list vlist)
-{
+static int SystemCmd(std::string& out, const char* format, va_list vlist) {
     char* fmt = nullptr;
     if (vasprintf(&fmt, format, vlist) == -1) {
         return -1;
@@ -99,8 +90,7 @@ static int SystemCmd(std::string& out, const char* format, va_list vlist)
     return (exitCode == 0) ? 0 : -1;
 }
 
-int SystemCmd(const char* format, ...)
-{
+int SystemCmd(const char* format, ...) {
     std::string out;
 
     va_list vlist;
@@ -110,8 +100,7 @@ int SystemCmd(const char* format, ...)
     return ret;
 }
 
-int SystemCmd(std::string& out, const char* format, ...)
-{
+int SystemCmd(std::string& out, const char* format, ...) {
     va_list vlist;
     va_start(vlist, format);
     int ret = SystemCmd(out, format, vlist);
@@ -119,8 +108,7 @@ int SystemCmd(std::string& out, const char* format, ...)
     return ret;
 }
 
-std::string GetRandomString(int width)
-{
+std::string GetRandomString(int width) {
     std::string strRandom;
     const std::string seedStr = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
     std::default_random_engine generator(std::chrono::system_clock::now().time_since_epoch().count());
@@ -134,8 +122,7 @@ std::string GetRandomString(int width)
     return strRandom;
 }
 
-std::string GetCurTimeStr()
-{
+std::string GetCurTimeStr() {
     struct timespec currentTime;
     clock_gettime(CLOCK_REALTIME, &currentTime);
 
@@ -161,8 +148,7 @@ std::vector<std::string> Split(const std::string& str, char delimiter) {
     return tokens;
 }
 
-std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter)
-{
+std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimiter) {
     std::string subStr;
     size_t found = str.find_last_of(delimiter);
     if (found != std::string::npos && found + 1 < str.length()) {
@@ -172,8 +158,7 @@ std::string GetSubstringAfterLastDelimiter(const std::string& str, char delimite
     return subStr;
 }
 
-int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out)
-{
+int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, char& out) {
     int count = 0;
     size_t pos = 0;
 
@@ -189,8 +174,7 @@ int GetCharAfterNthTarget(const std::string& str, char targetChar, int index, ch
     return -1;
 }
 
-int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out)
-{
+int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, char& out) {
     int count = 0;
     size_t pos = 0;
 
@@ -206,8 +190,7 @@ int GetCharBeforeNthTarget(const std::string& str, char targetChar, int index, c
     return -1;
 }
 
-int CountWords(const std::string& str)
-{
+int CountWords(const std::string& str) {
     std::istringstream iss(str);
     std::string word;
     int count = 0;
@@ -219,8 +202,7 @@ int CountWords(const std::string& str)
     return count;
 }
 
-void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen)
-{
+void* FindSubMemory(void* srcMem, int sLen, void* tarMem, int tLen) {
     if (srcMem == nullptr || tarMem == nullptr || tLen <= 0 || sLen <= 0 || sLen < tLen) {
         return nullptr;
     }

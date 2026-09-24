@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : CLog 编解码框架日志封装内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <string>
@@ -22,16 +15,14 @@
 #include "gtest/gtest.h"
 
 // 测试单例模式返回同一实例
-TEST(UtilModules_CLog, SingletonReturnsSameInstance)
-{
+TEST(UtilModules_CLog, SingletonReturnsSameInstance) {
     CLog& a = CLog::GetInstance();
     CLog& b = CLog::GetInstance();
     EXPECT_EQ(&a, &b);
 }
 
 // 测试设置与获取日志等级
-TEST(UtilModules_CLog, SetAndGetLevel)
-{
+TEST(UtilModules_CLog, SetAndGetLevel) {
     CLog& log = CLog::GetInstance();
 
     log.SetLevel(CLOG_LEVEL_ERROR);
@@ -46,8 +37,7 @@ TEST(UtilModules_CLog, SetAndGetLevel)
 }
 
 // 测试各等级打印分支与默认分支
-TEST(UtilModules_CLog, PrintAllLevels)
-{
+TEST(UtilModules_CLog, PrintAllLevels) {
     CLog& log = CLog::GetInstance();
     log.SetLevel(CLOG_LEVEL_DEBUG);
 
@@ -62,8 +52,7 @@ TEST(UtilModules_CLog, PrintAllLevels)
 }
 
 // 测试打印等级过滤（低等级被拦截）
-TEST(UtilModules_CLog, LevelFilterBlocksLowerLevel)
-{
+TEST(UtilModules_CLog, LevelFilterBlocksLowerLevel) {
     CLog& log = CLog::GetInstance();
     log.SetLevel(CLOG_LEVEL_ERROR);
 
@@ -76,8 +65,7 @@ TEST(UtilModules_CLog, LevelFilterBlocksLowerLevel)
 }
 
 // 测试注册回调后打印走回调分支
-TEST(UtilModules_CLog, RegisterPrintCallback)
-{
+TEST(UtilModules_CLog, RegisterPrintCallback) {
     CLog& log = CLog::GetInstance();
 
     std::atomic<int32_t> hitLevel(0);

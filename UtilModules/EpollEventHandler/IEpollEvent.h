@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/05/07
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/05/07 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 
 #ifndef __IEPOLL_EVENT_H__
@@ -24,8 +17,7 @@
 #include <stdio.h>
 #include "EpollDefs.h"
 
-class IEpollEvent
-{
+class IEpollEvent {
 public:
     IEpollEvent(int32_t fd, EpollType eType = EPOLL_TYPE_BEGIN, void* arg = nullptr)
         : mReady(true), mEvtFd(fd), mEpollType(eType), mArgs(arg) {};

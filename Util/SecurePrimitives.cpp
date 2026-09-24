@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/16
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/16 | 1.0.0.1   | Copilot        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SecurePrimitives.h"
 
@@ -29,14 +22,12 @@ struct InternalECPoint {
     bool inf;
 };
 
-int Mod(int v, int p)
-{
+int Mod(int v, int p) {
     int r = v % p;
     return (r < 0) ? (r + p) : r;
 }
 
-int ModInv(int value, int p)
-{
+int ModInv(int value, int p) {
     int t = 0;
     int newT = 1;
     int r = p;
@@ -60,8 +51,7 @@ int ModInv(int value, int p)
     return Mod(t, p);
 }
 
-bool IsOnCurve(const SecurePrimitives::ECCurve& curve, const InternalECPoint& p)
-{
+bool IsOnCurve(const SecurePrimitives::ECCurve& curve, const InternalECPoint& p) {
     if (p.inf) {
         return true;
     }
@@ -71,8 +61,7 @@ bool IsOnCurve(const SecurePrimitives::ECCurve& curve, const InternalECPoint& p)
     return left == right;
 }
 
-InternalECPoint PointAdd(const SecurePrimitives::ECCurve& curve, const InternalECPoint& p1, const InternalECPoint& p2)
-{
+InternalECPoint PointAdd(const SecurePrimitives::ECCurve& curve, const InternalECPoint& p1, const InternalECPoint& p2) {
     if (p1.inf) {
         return p2;
     }
@@ -104,8 +93,7 @@ InternalECPoint PointAdd(const SecurePrimitives::ECCurve& curve, const InternalE
     return InternalECPoint{xr, yr, false};
 }
 
-InternalECPoint PointMul(const SecurePrimitives::ECCurve& curve, int k, const InternalECPoint& p)
-{
+InternalECPoint PointMul(const SecurePrimitives::ECCurve& curve, int k, const InternalECPoint& p) {
     InternalECPoint result{0, 0, true};
     InternalECPoint addend = p;
 
@@ -120,8 +108,7 @@ InternalECPoint PointMul(const SecurePrimitives::ECCurve& curve, int k, const In
     return result;
 }
 
-InternalECPoint FindBasePoint(const SecurePrimitives::ECCurve& curve)
-{
+InternalECPoint FindBasePoint(const SecurePrimitives::ECCurve& curve) {
     for (int x = curve.startX; x < curve.p; ++x) {
         int rhs = Mod(x * x * x + curve.a * x + curve.b, curve.p);
         for (int y = 0; y < curve.p; ++y) {
@@ -134,8 +121,7 @@ InternalECPoint FindBasePoint(const SecurePrimitives::ECCurve& curve)
 }
 
 // Cache the base point G
-InternalECPoint& GetBasePointG()
-{
+InternalECPoint& GetBasePointG() {
     static const SecurePrimitives::ECCurve curve = {251, 1, 1, 2};
     static InternalECPoint g = FindBasePoint(curve);
     return g;
@@ -145,8 +131,7 @@ InternalECPoint& GetBasePointG()
 
 namespace SecurePrimitives {
 
-int ModPow(int base, int exp, int mod)
-{
+int ModPow(int base, int exp, int mod) {
     int64_t result = 1;
     int64_t b = Mod(base, mod);
     while (exp > 0) {
@@ -160,8 +145,7 @@ int ModPow(int base, int exp, int mod)
 }
 
 // Modular inverse using extended Euclidean algorithm
-int64_t ModularInverse(int64_t a, int64_t m)
-{
+int64_t ModularInverse(int64_t a, int64_t m) {
     int64_t m0 = m;
     int64_t x0 = 0, x1 = 1;
 
@@ -187,8 +171,7 @@ int64_t ModularInverse(int64_t a, int64_t m)
 }
 
 // Compute public key P = d * G
-int ComputePublicKey(uint64_t d, std::vector<uint8_t>& publicKey)
-{
+int ComputePublicKey(uint64_t d, std::vector<uint8_t>& publicKey) {
     static const ECCurve curve = {251, 1, 1, 2};
 
     if (d == 0) {
@@ -224,8 +207,7 @@ int ComputePublicKey(uint64_t d, std::vector<uint8_t>& publicKey)
 }
 
 // Scalar multiplication: result = k * G
-int ScalarMultiplyPoint(uint64_t k, ECPoint& result)
-{
+int ScalarMultiplyPoint(uint64_t k, ECPoint& result) {
     static const ECCurve curve = {251, 1, 1, 2};
 
     if (k == 0) {
@@ -249,8 +231,7 @@ int ScalarMultiplyPoint(uint64_t k, ECPoint& result)
 }
 
 // Scalar multiplication: result = k * p
-int ScalarMultiplyPoint(uint64_t k, const ECPoint& p, ECPoint& result)
-{
+int ScalarMultiplyPoint(uint64_t k, const ECPoint& p, ECPoint& result) {
     static const ECCurve curve = {251, 1, 1, 2};
 
     if (k == 0 || p.inf) {
@@ -270,8 +251,7 @@ int ScalarMultiplyPoint(uint64_t k, const ECPoint& p, ECPoint& result)
 }
 
 // Point addition: result = p1 + p2
-int AddECPoints(const ECPoint& p1, const ECPoint& p2, ECPoint& result)
-{
+int AddECPoints(const ECPoint& p1, const ECPoint& p2, ECPoint& result) {
     static const ECCurve curve = {251, 1, 1, 2};
 
     InternalECPoint internal1{p1.x, p1.y, p1.inf};
@@ -289,8 +269,7 @@ int AddECPoints(const ECPoint& p1, const ECPoint& p2, ECPoint& result)
 }
 
 // Convert bytes to ECPoint
-int BytesToECPoint(const std::vector<uint8_t>& bytes, ECPoint& pt)
-{
+int BytesToECPoint(const std::vector<uint8_t>& bytes, ECPoint& pt) {
     if (bytes.size() < 8) {
         return -1;
     }
@@ -315,8 +294,7 @@ int BytesToECPoint(const std::vector<uint8_t>& bytes, ECPoint& pt)
 int EncryptByToyEC(const ECCurve& curve,
                    int privateKey,
                    const std::vector<uint8_t>& plaintext,
-                   std::vector<uint8_t>& ciphertext)
-{
+                   std::vector<uint8_t>& ciphertext) {
     if (plaintext.empty()) {
         ciphertext.clear();
         return 0;
@@ -367,8 +345,7 @@ int EncryptByToyEC(const ECCurve& curve,
 int DecryptByToyEC(const ECCurve& curve,
                    int privateKey,
                    const std::vector<uint8_t>& ciphertext,
-                   std::vector<uint8_t>& plaintext)
-{
+                   std::vector<uint8_t>& plaintext) {
     if (ciphertext.empty()) {
         plaintext.clear();
         return 0;

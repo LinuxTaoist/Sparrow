@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/28
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <memory>
 #include "SprLog.h"
@@ -27,17 +20,14 @@ using namespace InternalDefs;
 
 #define LOG_TAG "DebugModule"
 
-DebugModuleHub::DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule) : BinderHub(srvName)
-{
+DebugModuleHub::DebugModuleHub(const std::string& srvName, DebugModule* pDebugModule) : BinderHub(srvName) {
     mpDebugModule = pDebugModule;
 }
 
-DebugModuleHub::~DebugModuleHub()
-{
+DebugModuleHub::~DebugModuleHub() {
 }
 
-void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
-{
+void DebugModuleHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) {
     switch(cmd) {
         case DEBUG_CMD_ENABLE_REMOTE_PORT: {
             SprMsg msg(SIG_ID_DEBUG_ENABLE_REMOTE_SHELL);

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/13
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PTY_TERMINAL_H__
 #define __PTY_TERMINAL_H__
@@ -24,8 +17,7 @@
 #include <stdint.h>
 #include <PPipe.h>
 
-class PtyTerminal
-{
+class PtyTerminal {
 public:
     explicit PtyTerminal(const std::function<void(int32_t ret, std::string, void*)>& cb = nullptr, void* arg = nullptr);
     ~PtyTerminal();

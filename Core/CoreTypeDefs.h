@@ -11,13 +11,7 @@
  *  This header serves as a central repository for standardized definitions to enhance code clarity,
  *  facilitate maintenance, and minimize duplication across various internal modules within the project.
  *  It encapsulates fundamental data types ubiquitously understood and employed across different system components.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __CORE_TYPE_DEFS_H__
 #define __CORE_TYPE_DEFS_H__
@@ -72,8 +66,7 @@ namespace {
     ENUM_OR_STRING(MEDIATOR_PROXY_TIMERFD), \
     ENUM_OR_STRING(IPC_TYPE_BUTT)
 
-enum EProxyType
-{
+enum EProxyType {
     PROXY_TYPE_MACROS
 };
 
@@ -97,8 +90,7 @@ enum EProxyType
     ENUM_OR_STRING(MODULE_GENERAL),             \
     ENUM_OR_STRING(MODULE_PUBLIC_END)
 
-enum ESprModuleID : uint8_t
-{
+enum ESprModuleID : uint8_t {
     SPR_MODULE_ID_MACROS
 };
 
@@ -110,8 +102,7 @@ enum ESprModuleID : uint8_t
     ENUM_OR_STRING(PROXY_CMD_GET_SIGNAL_NAME),  \
     ENUM_OR_STRING(PROXY_CMD_BUTT)
 
-enum EProxyBinderCmd
-{
+enum EProxyBinderCmd {
     PROXY_CMD_BEGIN = MODULE_PROXY << MODULE_ID_OFFSET | 1,
     PROXY_BINDER_CMD_MACROS
 };
@@ -126,8 +117,7 @@ enum EProxyBinderCmd
     ENUM_OR_STRING(PROPERTY_CMD_DUMP_PROPERTIES),   \
     ENUM_OR_STRING(PROPERTY_CMD_BUTT)
 
-enum EPropertyBinderCmd
-{
+enum EPropertyBinderCmd {
     PROPERTY_CMD_BEGIN = MODULE_PROPERTYM << MODULE_ID_OFFSET | 1,
     PROPERTY_BINDER_CMD_MACROS
 };
@@ -146,8 +136,7 @@ enum EPropertyBinderCmd
     ENUM_OR_STRING(CONFIG_CMD_BACKUP),           \
     ENUM_OR_STRING(CONFIG_CMD_BUTT)
 
-enum EConfigBinderCmd
-{
+enum EConfigBinderCmd {
     CONFIG_CMD_BEGIN = MODULE_CONFIG << MODULE_ID_OFFSET | 1,
     CONFIG_BINDER_CMD_MACROS
 };
@@ -160,8 +149,7 @@ enum EConfigBinderCmd
     ENUM_OR_STRING(POWERM_CMD_POWER_OFF),   \
     ENUM_OR_STRING(POWERM_CMD_BUTT)
 
-enum EPowerMBinderCmd
-{
+enum EPowerMBinderCmd {
     POWERM_CMD_BEGIN = MODULE_POWERM << MODULE_ID_OFFSET | 1,
     POWER_BINDER_CMD_MACROS
 };
@@ -180,8 +168,7 @@ enum EPowerMBinderCmd
     ENUM_OR_STRING(DEBUG_CMD_DISABLE_REMOTE_SHELL),     \
     ENUM_OR_STRING(DEBUG_MSG_BUTT)
 
-enum EDebugMBinderCmd
-{
+enum EDebugMBinderCmd {
     DEBUG_CMD_BEGIN = MODULE_DEBUG << MODULE_ID_OFFSET | 1,
     DEBUG_BINDER_CMD_MACROS
 };
@@ -197,8 +184,7 @@ enum EDebugMBinderCmd
     ENUM_OR_STRING(LOG_LEVEL_DEBUG), \
     ENUM_OR_STRING(LOG_LEVEL_BUTT)
 
-enum ELogLevel
-{
+enum ELogLevel {
     LOG_LEVEL_MACROS
 };
 
@@ -211,8 +197,7 @@ enum ELogLevel
     ENUM_OR_STRING(GENERAL_UNREGISTER_CALLBACK),    \
     ENUM_OR_STRING(GENERAL_CMD_BUTT)
 
-enum EGeneralBinderCmd
-{
+enum EGeneralBinderCmd {
     GENERAL_CMD_BEGIN = MODULE_GENERAL << MODULE_ID_OFFSET | 1,
     GENERAL_BINDER_CMD_MACROS
 };
@@ -233,8 +218,7 @@ enum EGeneralBinderCmd
     ENUM_OR_STRING(BOOT_PRIORITY_LOWEST),       \
     ENUM_OR_STRING(BOOT_PRIORITY_BUTT)
 
-enum EModuleBootPriority
-{
+enum EModuleBootPriority {
     MODULE_BOOT_PRIORITY_MACROS
 };
 
@@ -247,8 +231,7 @@ enum EModuleBootPriority
     ENUM_OR_STRING(STARTUP_RESUME),     \
     ENUM_OR_STRING(STARTUP_BUTT)
 
-enum EStartupType
-{
+enum EStartupType {
     STARTUP_TYPE_MACROS
 };
 
@@ -261,8 +244,7 @@ enum EStartupType
     ENUM_OR_STRING(PRE_STANDBY_ACK_DELAY),  \
     ENUM_OR_STRING(PRE_STANDBY_ACK_BUTT)
 
-enum EPreStandbyAck
-{
+enum EPreStandbyAck {
     PRE_STANDBY_ACK_MACROS
 };
 
@@ -274,8 +256,7 @@ enum EPreStandbyAck
     ENUM_OR_STRING(STANDBY_REASON_WAKEUPIN),    \
     ENUM_OR_STRING(STANDBY_REASON_BUTT)
 
-enum EStandbyReasonType
-{
+enum EStandbyReasonType {
     STANDBY_REASON_TYPE_MACROS
 };
 
@@ -287,8 +268,7 @@ enum EStandbyReasonType
     ENUM_OR_STRING(WAKEUP_SOURCE_RTC),  \
     ENUM_OR_STRING(WAKEUP_SOURCE_BUTT)
 
-enum EWakeupSourceType
-{
+enum EWakeupSourceType {
     WAKEUP_SOURCE_TYPE_MACROS
 };
 
@@ -301,16 +281,14 @@ enum EWakeupSourceType
     ENUM_OR_STRING(TIME_SOURCE_TYPE_GNSS),  \
     ENUM_OR_STRING(TIME_SOURCE_TYPE_BUTT)
 
-enum TimeSourceType
-{
+enum TimeSourceType {
     TIME_SOURCE_TYPE_MACROS
 };
 
 //---------------------------------------------------------------------------------------------------------------------
 // - STimerInfo
 // --------------------------------------------------------------------------------------------------------------------
-typedef struct
-{
+typedef struct {
     uint32_t moduleId;
     uint32_t msgId;
     uint32_t repeatTimes;
@@ -327,16 +305,14 @@ typedef struct
 #define LOG_RECORD_EVENT_MAX_LENGTH       32U
 #define LOG_RECORD_MODULE_NAME_MAX_LENGTH 32U
 
-enum ELogRecordCategory : uint8_t
-{
+enum ELogRecordCategory : uint8_t {
     LOG_CATEGORY_NORMAL = 0,
     LOG_CATEGORY_EVENT,
     LOG_CATEGORY_DIAGNOSTIC,
     LOG_CATEGORY_BUTT
 };
 
-typedef struct
-{
+typedef struct {
     uint32_t magic;
     uint16_t version;
     uint16_t headerSize;
@@ -352,8 +328,7 @@ typedef struct
 } SLogRecordHeader;
 
 template <class Lev1State, class Lev2State, class SignalType, class ClassName, class MsgType>
-struct StateTransition
-{
+struct StateTransition {
     Lev1State   lev1State;
     Lev2State   lev2State;
     SignalType  sigId;

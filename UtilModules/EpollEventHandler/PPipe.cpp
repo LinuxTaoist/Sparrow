@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <errno.h>
 #include <string.h>
@@ -28,15 +21,13 @@
 #define PLOG_TAG "PPipe"
 
 PPipe::PPipe(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
-    : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mCb(cb)
-{
+    : IEpollEvent(fd, EPOLL_TYPE_PIPE, arg), mCb(cb) {
     int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 }
 
 PPipe::PPipe(const std::string& fileName, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_PIPE, arg), mFifoName(fileName), mCb(cb)
-{
+    : IEpollEvent(-1, EPOLL_TYPE_PIPE, arg), mFifoName(fileName), mCb(cb) {
     bool isExist = IsExistFifo(fileName);
     if (!isExist && mkfifo(fileName.c_str(), 0666) == -1) {
         PLOGE("mkfifo %s fail! (%s)\n", fileName.c_str(), strerror(errno));
@@ -57,8 +48,7 @@ PPipe::PPipe(const std::string& fileName, const std::function<void(ssize_t, std:
     }
 }
 
-PPipe::~PPipe()
-{
+PPipe::~PPipe() {
     Close();
     if (!mFifoName.empty()) {
         unlink(mFifoName.c_str());
@@ -78,8 +68,7 @@ bool PPipe::IsExistFifo(const std::string& path) {
     return S_ISFIFO(buffer.st_mode);
 }
 
-void* PPipe::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PPipe::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     if (fd != mEvtFd) {
         PLOGE("Invalid fd (%d)!\n", fd);
     }

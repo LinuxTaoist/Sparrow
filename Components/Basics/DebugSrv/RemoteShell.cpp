@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/28
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <list>
 #include <string>
@@ -32,18 +25,15 @@
 
 #define BUFFER_SIZE 1024
 
-RemoteShell::RemoteShell()
-{
+RemoteShell::RemoteShell() {
     mEnable = false;
 }
 
-RemoteShell::~RemoteShell()
-{
+RemoteShell::~RemoteShell() {
 
 }
 
-int RemoteShell::Init()
-{
+int RemoteShell::Init() {
     if (mEnable) {
         SPR_LOGD("Remote shell already initialized!\n");
         return 0;
@@ -125,8 +115,7 @@ int RemoteShell::Init()
     return 0;
 }
 
-int RemoteShell::DeInit()
-{
+int RemoteShell::DeInit() {
     if (!mEnable) {
         SPR_LOGD("Remote shell uninitialized!\n");
         return 0;
@@ -143,14 +132,12 @@ int RemoteShell::DeInit()
     return 0;
 }
 
-int RemoteShell::Enable()
-{
+int RemoteShell::Enable() {
     Init();
     return 0;
 }
 
-int RemoteShell::Disable()
-{
+int RemoteShell::Disable() {
     DeInit();
     return 0;
 }

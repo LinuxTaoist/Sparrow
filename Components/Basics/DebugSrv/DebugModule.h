@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/28
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/28 | 1.0.0.1  | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __DEBUG_MODULE_H__
 #define __DEBUG_MODULE_H__
@@ -23,8 +16,7 @@
 #include "RemoteShell.h"
 #include "SprObserverWithMQueue.h"
 
-class DebugModule : public SprObserverWithMQueue
-{
+class DebugModule : public SprObserverWithMQueue {
 public:
     DebugModule(ModuleIDType id, const std::string& name);
     ~DebugModule();

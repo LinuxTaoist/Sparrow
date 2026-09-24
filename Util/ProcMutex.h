@@ -7,15 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/03/02
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/03/02 | 1.0.0.1   | Xiang.D        | Create file
- *  2025/08/17 | 1.0.0.2   | Xiang.D        | Use atomic variables for thread safety
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PROC_MUTEX_H__
 #define __PROC_MUTEX_H__

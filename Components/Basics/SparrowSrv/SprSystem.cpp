@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/02/24 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <memory>
@@ -39,18 +32,15 @@ using namespace InternalDefs;
 
 static std::atomic<bool> gObjAlive(true);
 
-SprSystem::SprSystem()
-{
+SprSystem::SprSystem() {
     mVersionPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "sparrow_version";
 }
 
-SprSystem::~SprSystem()
-{
+SprSystem::~SprSystem() {
     gObjAlive = false;
 }
 
-SprSystem* SprSystem::GetInstance()
-{
+SprSystem* SprSystem::GetInstance() {
     if (gObjAlive == false) {
         return nullptr;
     }
@@ -59,19 +49,16 @@ SprSystem* SprSystem::GetInstance()
     return &instance;
 }
 
-void SprSystem::InitEnv()
-{
+void SprSystem::InitEnv() {
     // write release information
     LoadReleaseInformation();
 }
 
-void SprSystem::InitOthers()
-{
+void SprSystem::InitOthers() {
     SprProcPrepare::GetInstance()->Init(SRV_NAME_SPARROW);
 }
 
-void SprSystem::LoadReleaseInformation()
-{
+void SprSystem::LoadReleaseInformation() {
     std::string projectInfo     = PROJECT_INFO;
     std::string cxxStandard     = CXX_STANDARD;
     std::string gxxStandard     = GXX_VERSION;
@@ -107,8 +94,7 @@ void SprSystem::LoadReleaseInformation()
     }
 }
 
-void SprSystem::Init()
-{
+void SprSystem::Init() {
     SPR_LOGD("=============================================\n");
     SPR_LOGD("=          Sprrow System Init               =\n");
     SPR_LOGD("=============================================\n");

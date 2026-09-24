@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <memory>
@@ -44,21 +37,18 @@ static std::atomic<bool> gObjAlive(true);
 static std::shared_ptr<Parcel> pReqParcel = nullptr;
 static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-Config::Config()
-{
+Config::Config() {
     mEnable = true;
     if (!EnsureConnected()) {
         mEnable = false;
     }
 }
 
-Config::~Config()
-{
+Config::~Config() {
     gObjAlive = false;
 }
 
-Config* Config::GetInstance()
-{
+Config* Config::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -67,8 +57,7 @@ Config* Config::GetInstance()
     return &instance;
 }
 
-bool Config::EnsureConnected()
-{
+bool Config::EnsureConnected() {
     if (mEnable && pReqParcel && pRspParcel) {
         return true;
     }
@@ -78,65 +67,56 @@ bool Config::EnsureConnected()
     return mEnable;
 }
 
-int Config::SetValue(const std::string& nameSpace, const std::string& key, const std::string& value)
-{
+int Config::SetValue(const std::string& nameSpace, const std::string& key, const std::string& value) {
     return SetValueWithScope(nameSpace, key, value, ::CONFIG_SCOPE_USER);
 }
 
-int Config::SetValue(const std::string& key, const std::string& value)
-{
+int Config::SetValue(const std::string& key, const std::string& value) {
     return SetValue(DEFAULT_NAMESPACE, key, value);
 }
 
 int Config::SetStrValue(const std::string& key, const std::string& value,
-                        int32_t scope, const std::string& nameSpace)
-{
+                        int32_t scope, const std::string& nameSpace) {
     return SetValueWithScope(nameSpace, key, value, scope);
 }
 
 int Config::SetBoolValue(const std::string& key, bool value,
-                         int32_t scope, const std::string& nameSpace)
-{
+                         int32_t scope, const std::string& nameSpace) {
     int32_t revision = 0;
     return SetTypedValueWithScope(nameSpace, key, &value, static_cast<int32_t>(sizeof(bool)),
                                   ::CONFIG_VALUE_TYPE_BOOL, scope, revision);
 }
 
 int Config::SetIntValue(const std::string& key, int32_t value,
-                        int32_t scope, const std::string& nameSpace)
-{
+                        int32_t scope, const std::string& nameSpace) {
     int32_t revision = 0;
     return SetTypedValueWithScope(nameSpace, key, &value, static_cast<int32_t>(sizeof(int32_t)),
                                   ::CONFIG_VALUE_TYPE_INT32, scope, revision);
 }
 
 int Config::SetInt64Value(const std::string& key, int64_t value,
-                          int32_t scope, const std::string& nameSpace)
-{
+                          int32_t scope, const std::string& nameSpace) {
     int32_t revision = 0;
     return SetTypedValueWithScope(nameSpace, key, &value, static_cast<int32_t>(sizeof(int64_t)),
                                   ::CONFIG_VALUE_TYPE_INT64, scope, revision);
 }
 
 int Config::SetFloatValue(const std::string& key, float value,
-                          int32_t scope, const std::string& nameSpace)
-{
+                          int32_t scope, const std::string& nameSpace) {
     int32_t revision = 0;
     return SetTypedValueWithScope(nameSpace, key, &value, static_cast<int32_t>(sizeof(float)),
                                   ::CONFIG_VALUE_TYPE_FLOAT, scope, revision);
 }
 
 int Config::SetDoubleValue(const std::string& key, double value,
-                           int32_t scope, const std::string& nameSpace)
-{
+                           int32_t scope, const std::string& nameSpace) {
     int32_t revision = 0;
     return SetTypedValueWithScope(nameSpace, key, &value, static_cast<int32_t>(sizeof(double)),
                                   ::CONFIG_VALUE_TYPE_DOUBLE, scope, revision);
 }
 
 int Config::SetValueWithScope(const std::string& nameSpace, const std::string& key,
-                              const std::string& value, int32_t scope, int32_t& revision)
-{
+                              const std::string& value, int32_t scope, int32_t& revision) {
     if (!EnsureConnected()) {
         SPR_LOGE("Config service is disable!\n");
         return -1;
@@ -159,8 +139,7 @@ int Config::SetValueWithScope(const std::string& nameSpace, const std::string& k
 
 int Config::SetTypedValueWithScope(const std::string& nameSpace, const std::string& key,
                                    const void* valueData, int32_t valueSize,
-                                   int32_t valueType, int32_t scope, int32_t& revision)
-{
+                                   int32_t valueType, int32_t scope, int32_t& revision) {
     if (!EnsureConnected()) {
         SPR_LOGE("Config service is disable!\n");
         return -1;
@@ -184,15 +163,13 @@ int Config::SetTypedValueWithScope(const std::string& nameSpace, const std::stri
 }
 
 int Config::SetValueWithScope(const std::string& nameSpace, const std::string& key,
-                              const std::string& value, int32_t scope)
-{
+                              const std::string& value, int32_t scope) {
     int32_t revision = 0;
     return SetValueWithScope(nameSpace, key, value, scope, revision);
 }
 
 int Config::GetValue(const std::string& nameSpace, const std::string& key,
-                     std::string& value, const std::string& defaultValue, int32_t& scope, int32_t& revision)
-{
+                     std::string& value, const std::string& defaultValue, int32_t& scope, int32_t& revision) {
     if (!EnsureConnected()) {
         value = defaultValue;
         SPR_LOGE("Config service is disable!\n");
@@ -221,28 +198,24 @@ int Config::GetValue(const std::string& nameSpace, const std::string& key,
 }
 
 int Config::GetValue(const std::string& nameSpace, const std::string& key,
-                     std::string& value, const std::string& defaultValue, int32_t& scope)
-{
+                     std::string& value, const std::string& defaultValue, int32_t& scope) {
     int32_t revision = 0;
     return GetValue(nameSpace, key, value, defaultValue, scope, revision);
 }
 
 int Config::GetValue(const std::string& nameSpace, const std::string& key,
-                     std::string& value, const std::string& defaultValue)
-{
+                     std::string& value, const std::string& defaultValue) {
     int32_t scope = ::CONFIG_SCOPE_DEFAULT;
     int32_t revision = 0;
     return GetValue(nameSpace, key, value, defaultValue, scope, revision);
 }
 
-int Config::GetValue(const std::string& key, std::string& value, const std::string& defaultValue)
-{
+int Config::GetValue(const std::string& key, std::string& value, const std::string& defaultValue) {
     return GetValue(DEFAULT_NAMESPACE, key, value, defaultValue);
 }
 
 int Config::GetBoolValue(const std::string& key, bool& value,
-                         bool defaultValue, const std::string& nameSpace)
-{
+                         bool defaultValue, const std::string& nameSpace) {
     int32_t scope = ::CONFIG_SCOPE_DEFAULT;
     int32_t revision = 0;
     int ret = GetTypedValue(nameSpace, key, &value, static_cast<int32_t>(sizeof(bool)),
@@ -254,8 +227,7 @@ int Config::GetBoolValue(const std::string& key, bool& value,
 }
 
 int Config::GetIntValue(const std::string& key, int32_t& value,
-                        int32_t defaultValue, const std::string& nameSpace)
-{
+                        int32_t defaultValue, const std::string& nameSpace) {
     int32_t scope = ::CONFIG_SCOPE_DEFAULT;
     int32_t revision = 0;
     int ret = GetTypedValue(nameSpace, key, &value, static_cast<int32_t>(sizeof(int32_t)),
@@ -267,8 +239,7 @@ int Config::GetIntValue(const std::string& key, int32_t& value,
 }
 
 int Config::GetInt64Value(const std::string& key, int64_t& value,
-                          int64_t defaultValue, const std::string& nameSpace)
-{
+                          int64_t defaultValue, const std::string& nameSpace) {
     int32_t scope = ::CONFIG_SCOPE_DEFAULT;
     int32_t revision = 0;
     int ret = GetTypedValue(nameSpace, key, &value, static_cast<int32_t>(sizeof(int64_t)),
@@ -280,8 +251,7 @@ int Config::GetInt64Value(const std::string& key, int64_t& value,
 }
 
 int Config::GetFloatValue(const std::string& key, float& value,
-                          float defaultValue, const std::string& nameSpace)
-{
+                          float defaultValue, const std::string& nameSpace) {
     int32_t scope = ::CONFIG_SCOPE_DEFAULT;
     int32_t revision = 0;
     int ret = GetTypedValue(nameSpace, key, &value, static_cast<int32_t>(sizeof(float)),
@@ -293,8 +263,7 @@ int Config::GetFloatValue(const std::string& key, float& value,
 }
 
 int Config::GetDoubleValue(const std::string& key, double& value,
-                           double defaultValue, const std::string& nameSpace)
-{
+                           double defaultValue, const std::string& nameSpace) {
     int32_t scope = ::CONFIG_SCOPE_DEFAULT;
     int32_t revision = 0;
     int ret = GetTypedValue(nameSpace, key, &value, static_cast<int32_t>(sizeof(double)),
@@ -307,8 +276,7 @@ int Config::GetDoubleValue(const std::string& key, double& value,
 
 int Config::GetTypedValue(const std::string& nameSpace, const std::string& key,
                           void* valueData, int32_t valueSize,
-                          int32_t valueType, int32_t& scope, int32_t& revision)
-{
+                          int32_t valueType, int32_t& scope, int32_t& revision) {
     if (!EnsureConnected()) {
         SPR_LOGE("Config service is disable!\n");
         return -1;
@@ -350,8 +318,7 @@ int Config::GetTypedValue(const std::string& nameSpace, const std::string& key,
     return 0;
 }
 
-int Config::ListNamespace(const std::string& nameSpace, std::map<std::string, std::string>& items)
-{
+int Config::ListNamespace(const std::string& nameSpace, std::map<std::string, std::string>& items) {
     if (!EnsureConnected()) {
         SPR_LOGE("Config service is disable!\n");
         return -1;
@@ -382,8 +349,7 @@ int Config::ListNamespace(const std::string& nameSpace, std::map<std::string, st
 }
 
 int Config::DeleteValue(const std::string& nameSpace, const std::string& key,
-                        int32_t scope, int32_t& revision)
-{
+                        int32_t scope, int32_t& revision) {
     if (!EnsureConnected()) {
         SPR_LOGE("Config service is disable!\n");
         return -1;
@@ -404,14 +370,12 @@ int Config::DeleteValue(const std::string& nameSpace, const std::string& key,
 }
 
 int Config::DeleteValue(const std::string& nameSpace, const std::string& key,
-                        int32_t scope)
-{
+                        int32_t scope) {
     int32_t revision = 0;
     return DeleteValue(nameSpace, key, scope, revision);
 }
 
-int Config::GetMeta(const std::string& nameSpace, const std::string& key, int32_t& scope, int32_t& revision)
-{
+int Config::GetMeta(const std::string& nameSpace, const std::string& key, int32_t& scope, int32_t& revision) {
     if (!EnsureConnected()) {
         SPR_LOGE("Config service is disable!\n");
         return -1;
@@ -431,8 +395,7 @@ int Config::GetMeta(const std::string& nameSpace, const std::string& key, int32_
     return ret;
 }
 
-int Config::Backup()
-{
+int Config::Backup() {
     if (!EnsureConnected()) {
         SPR_LOGE("Config service is disable!\n");
         return -1;

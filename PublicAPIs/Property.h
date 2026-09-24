@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/04/01
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/01 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PROPERTY_H__
 #define __PROPERTY_H__
@@ -22,8 +15,7 @@
 #include <map>
 #include <string>
 
-class Property
-{
+class Property {
 public:
     /**
      * @brief Get the Instance object

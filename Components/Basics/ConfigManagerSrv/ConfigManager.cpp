@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <unistd.h>
 #include <fstream>
@@ -39,8 +32,7 @@ static const char* CONFIG_DB_PATH = "/tmp/config_manager.db";
 static const char* CONFIG_BACKUP_PATH = "/tmp/config_manager.db.bak";
 static const char* CONFIG_CFG_PATH = "config_manager.conf";
 
-static std::string Trim(const std::string& text)
-{
+static std::string Trim(const std::string& text) {
     std::string::size_type begin = text.find_first_not_of(" \t\r");
     if (begin == std::string::npos) {
         return "";
@@ -53,8 +45,7 @@ static std::string Trim(const std::string& text)
 static bool ParseSeedValue(const std::string& valueText,
                            std::string& nameSpace,
                            std::string& key,
-                           std::string& value)
-{
+                           std::string& value) {
     std::vector<std::string> tokens = GeneralUtils::Split(valueText, '|');
     if (tokens.size() < 3) {
         return false;
@@ -73,8 +64,7 @@ static bool ParseSeedValue(const std::string& valueText,
 }
 
 ConfigManager::ConfigManager()
-    : mStore(nullptr), mDbPath(CONFIG_DB_PATH), mBackupPath(CONFIG_BACKUP_PATH)
-{
+    : mStore(nullptr), mDbPath(CONFIG_DB_PATH), mBackupPath(CONFIG_BACKUP_PATH) {
     SprProcInfo* pProcInfo = SprProcInfo::GetInstance();
     if (pProcInfo != nullptr) {
         std::string etcPath = pProcInfo->GetRunEtcPath();
@@ -84,12 +74,10 @@ ConfigManager::ConfigManager()
     SPR_LOGD("cfgPath = %s", mCfgPath.c_str());
 }
 
-ConfigManager::~ConfigManager()
-{
+ConfigManager::~ConfigManager() {
 }
 
-int32_t ConfigManager::Initialize()
-{
+int32_t ConfigManager::Initialize() {
     NONZERO_CHECK_RET(LoadCfgFile());
 
     mStore.reset(new (std::nothrow) ConfigStore(mDbPath));
@@ -99,8 +87,7 @@ int32_t ConfigManager::Initialize()
     return 0;
 }
 
-int32_t ConfigManager::LoadCfgFile()
-{
+int32_t ConfigManager::LoadCfgFile() {
     std::ifstream cfgFile(mCfgPath);
     if (!cfgFile.is_open()) {
         SPR_LOGW("Open %s failed! (%s)", mCfgPath.c_str(), strerror(errno));
@@ -164,8 +151,7 @@ int32_t ConfigManager::LoadCfgFile()
     return 0;
 }
 
-int32_t ConfigManager::ApplySeedItems()
-{
+int32_t ConfigManager::ApplySeedItems() {
     POINTER_CHECK_ERR(mStore, -1);
     for (size_t i = 0; i < mSeedItems.size(); ++i) {
         int32_t revision = 0;
@@ -187,8 +173,7 @@ int32_t ConfigManager::ApplySeedItems()
     return 0;
 }
 
-int32_t ConfigManager::MainLoop()
-{
+int32_t ConfigManager::MainLoop() {
     mRunning = true;
     while (mRunning) {
         usleep(100 * 1000);
@@ -197,25 +182,21 @@ int32_t ConfigManager::MainLoop()
     return 0;
 }
 
-int32_t ConfigManager::StopWork()
-{
+int32_t ConfigManager::StopWork() {
     mRunning = false;
     return 0;
 }
 
-std::string ConfigManager::MakeCacheKey(const std::string& nameSpace, const std::string& key) const
-{
+std::string ConfigManager::MakeCacheKey(const std::string& nameSpace, const std::string& key) const {
     return nameSpace + "" + key;
 }
 
-bool ConfigManager::IsValidScope(int32_t scope) const
-{
+bool ConfigManager::IsValidScope(int32_t scope) const {
     return scope >= CONFIG_SCOPE_DEFAULT && scope < CONFIG_SCOPE_BUTT;
 }
 
 int32_t ConfigManager::SetValue(const std::string& nameSpace, const std::string& key,
-                                const std::string& value, int32_t scope, int32_t& revision)
-{
+                                const std::string& value, int32_t scope, int32_t& revision) {
     if (nameSpace.empty() || key.empty() || !IsValidScope(scope)) {
         return -1;
     }
@@ -231,8 +212,7 @@ int32_t ConfigManager::SetValue(const std::string& nameSpace, const std::string&
 }
 
 int32_t ConfigManager::GetValue(const std::string& nameSpace, const std::string& key,
-                                std::string& value, int32_t& scope, int32_t& revision)
-{
+                                std::string& value, int32_t& scope, int32_t& revision) {
     if (nameSpace.empty() || key.empty()) {
         return -1;
     }
@@ -268,8 +248,7 @@ int32_t ConfigManager::GetValue(const std::string& nameSpace, const std::string&
 
 int32_t ConfigManager::SetRawValue(const std::string& nameSpace, const std::string& key,
                                    const void* data, int32_t size, int32_t valueType,
-                                   int32_t scope, int32_t& revision)
-{
+                                   int32_t scope, int32_t& revision) {
     if (nameSpace.empty() || key.empty() || !IsValidScope(scope) || data == nullptr || size <= 0) {
         return -1;
     }
@@ -293,8 +272,7 @@ int32_t ConfigManager::SetRawValue(const std::string& nameSpace, const std::stri
 
 int32_t ConfigManager::GetRawValue(const std::string& nameSpace, const std::string& key,
                                    void* data, int32_t size, int32_t valueType,
-                                   int32_t& scope, int32_t& revision)
-{
+                                   int32_t& scope, int32_t& revision) {
     if (nameSpace.empty() || key.empty() || data == nullptr || size <= 0) {
         return -1;
     }
@@ -326,8 +304,7 @@ int32_t ConfigManager::GetRawValue(const std::string& nameSpace, const std::stri
 }
 
 int32_t ConfigManager::DeleteValue(const std::string& nameSpace, const std::string& key,
-                                   int32_t scope, int32_t& revision)
-{
+                                   int32_t scope, int32_t& revision) {
     if (nameSpace.empty() || key.empty() || !IsValidScope(scope)) {
         return -1;
     }
@@ -342,8 +319,7 @@ int32_t ConfigManager::DeleteValue(const std::string& nameSpace, const std::stri
     return ret;
 }
 
-int32_t ConfigManager::ListNamespace(const std::string& nameSpace, std::map<std::string, std::string>& items)
-{
+int32_t ConfigManager::ListNamespace(const std::string& nameSpace, std::map<std::string, std::string>& items) {
     if (nameSpace.empty()) {
         return -1;
     }
@@ -353,14 +329,12 @@ int32_t ConfigManager::ListNamespace(const std::string& nameSpace, std::map<std:
     return mStore->ListNamespaceEffective(nameSpace, items);
 }
 
-int32_t ConfigManager::GetMeta(const std::string& nameSpace, const std::string& key, int32_t& scope, int32_t& revision)
-{
+int32_t ConfigManager::GetMeta(const std::string& nameSpace, const std::string& key, int32_t& scope, int32_t& revision) {
     std::string value;
     return GetValue(nameSpace, key, value, scope, revision);
 }
 
-int32_t ConfigManager::Backup()
-{
+int32_t ConfigManager::Backup() {
     std::lock_guard<std::mutex> lock(mMutex);
     POINTER_CHECK_ERR(mStore, -1);
     return mStore->Backup(mBackupPath);

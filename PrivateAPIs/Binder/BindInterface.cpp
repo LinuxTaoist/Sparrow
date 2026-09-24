@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/16
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/16 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include "Parcel.h"
@@ -31,13 +24,11 @@ static ProcMutex gPMutex("IBinderMutex");
 static Parcel iReqParcel("IBinderM", KEY_IBINDER_MANAGER, false);
 static Parcel iRspParcel("BinderM",  KEY_BINDER_MANAGER,  false);
 
-BindInterface::~BindInterface()
-{
+BindInterface::~BindInterface() {
     gObjAlive = false;
 }
 
-BindInterface* BindInterface::GetInstance()
-{
+BindInterface* BindInterface::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -47,8 +38,7 @@ BindInterface* BindInterface::GetInstance()
 }
 
 bool BindInterface::InitializeServiceBinder(const std::string& srvName,
-     std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
-{
+     std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel) {
     std::shared_ptr<Binder> pBinder = AddService(srvName);
     if (!pBinder) {
         return false;
@@ -63,8 +53,7 @@ bool BindInterface::InitializeServiceBinder(const std::string& srvName,
 }
 
 bool BindInterface::InitializeClientBinder(const std::string& srvName,
-        std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel)
-{
+        std::shared_ptr<Parcel>& pReqParcel, std::shared_ptr<Parcel>& pRspParcel) {
     std::shared_ptr<IBinder> pBinder = GetService(srvName);
     if (pBinder == nullptr) {
         return false;
@@ -78,8 +67,7 @@ bool BindInterface::InitializeClientBinder(const std::string& srvName,
     return true;
 }
 
-std::shared_ptr<Binder> BindInterface::AddService(const std::string& name)
-{
+std::shared_ptr<Binder> BindInterface::AddService(const std::string& name) {
     ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_ERR(iReqParcel.WriteInt(BINDER_CMD_ADD_SERVICE), nullptr);
     NONZERO_CHECK_ERR(iReqParcel.WriteString(name), nullptr);
@@ -98,8 +86,7 @@ std::shared_ptr<Binder> BindInterface::AddService(const std::string& name)
     }
 }
 
-std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name)
-{
+std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name) {
     ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_ERR(iReqParcel.WriteInt(BINDER_CMD_GET_SERVICE), nullptr);
     NONZERO_CHECK_ERR(iReqParcel.WriteString(name), nullptr);
@@ -120,8 +107,7 @@ std::shared_ptr<IBinder> BindInterface::GetService(const std::string& name)
     }
 }
 
-int32_t BindInterface::RemoveService(const std::string& name)
-{
+int32_t BindInterface::RemoveService(const std::string& name) {
     ProcLockGuard lock(gPMutex, gTMutex);
     NONZERO_CHECK_RET(iReqParcel.WriteInt(BINDER_CMD_REMOVE_SERVICE));
     NONZERO_CHECK_RET(iReqParcel.WriteString(name));

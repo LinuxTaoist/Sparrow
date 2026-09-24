@@ -10,13 +10,7 @@
  *
  *  The minimum scale of the timer is milliseconds, and the value set during use must be
  *  a multiple of 1 milliseconds
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/15 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __TIMER_MANAGER_H__
 #define __TIMER_MANAGER_H__
@@ -31,8 +25,7 @@
 #include "SprSystemTimer.h"
 #include "SprObserverWithMQueue.h"
 
-class SprTimerManager : public SprObserverWithMQueue
-{
+class SprTimerManager : public SprObserverWithMQueue {
 public:
     /**
      * @brief  Init

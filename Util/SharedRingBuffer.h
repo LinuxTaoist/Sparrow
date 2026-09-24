@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/26
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/26 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SHARED_RING_BUFFER_H__
 #define __SHARED_RING_BUFFER_H__
@@ -23,8 +16,7 @@
 #include <stdint.h>
 #include <atomic>
 
-struct Root
-{
+struct Root {
     std::atomic<uint8_t>  cmd;        // 使能状态
     std::atomic<uint8_t>  busy;       // 忙碌状态
     std::atomic<uint8_t>  rwStatus;   // 可读状态
@@ -33,15 +25,13 @@ struct Root
     std::atomic<uint32_t> rp;         // 读取位置
 };
 
-enum ECmdType
-{
+enum ECmdType {
     CMD_WRITEABLE   = 0x01,
     CMD_READABLE    = 0x02,
     CMD_BUTT,
 };
 
-class SharedRingBuffer
-{
+class SharedRingBuffer {
 public:
     /**
      * @brief Constructs a master Shared Ring Buffer object.

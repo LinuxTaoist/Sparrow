@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/12/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __HTTP_MSG_H__
 #define __HTTP_MSG_H__
@@ -23,8 +16,7 @@
 #include <string>
 #include <stdint.h>
 
-class HttpMsgBase
-{
+class HttpMsgBase {
 public:
     HttpMsgBase() = default;
     virtual ~HttpMsgBase() = default;
@@ -36,8 +28,7 @@ public:
     virtual int32_t Encode(std::string& bytes) = 0;
 };
 
-class HttpMsgRequest : public HttpMsgBase
-{
+class HttpMsgRequest : public HttpMsgBase {
 public:
     HttpMsgRequest() = default;
     explicit HttpMsgRequest(const std::string& bytes);
@@ -69,8 +60,7 @@ private:
     std::string mMsgBody;
 };
 
-class HttpMsgResponse : public HttpMsgBase
-{
+class HttpMsgResponse : public HttpMsgBase {
 public:
     HttpMsgResponse() = default;
     explicit HttpMsgResponse(const std::string& bytes);

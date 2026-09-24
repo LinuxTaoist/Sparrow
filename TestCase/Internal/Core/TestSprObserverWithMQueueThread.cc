@@ -7,12 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/08/18
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
- *---------------------------------------------------------------------------------------------------------------------
- *  2026/08/18 | 1.0.0.1   | Xiang.D        | Create file
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <string>
@@ -108,8 +102,7 @@ private:
 
 class Core_SprObserverWithMQueueThread : public ::testing::Test {
 protected:
-    static void SetUpTestCase()
-    {
+    static void SetUpTestCase() {
         SPR_LOGD("SetUpTestCase enter!");
         mCaseIndex = 0;
         mThread = std::thread([&]() {
@@ -119,8 +112,7 @@ protected:
         SPR_LOGD("SetUpTestCase exit!");
     }
 
-    static void TearDownTestCase()
-    {
+    static void TearDownTestCase() {
         SPR_LOGD("TearDownTestCase enter!");
         SprEpollSchedule::GetInstance(0, 2000)->ExitLoop();
         mThread.join();

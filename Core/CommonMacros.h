@@ -10,13 +10,7 @@
  *
  *  This header is used to define macro definitions common to both client and server code implementations.
  *  The implementation of this header file is not publicly available
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/02 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __COMMON_MACROS_H__
 #define __COMMON_MACROS_H__

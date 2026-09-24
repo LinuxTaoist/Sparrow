@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/28
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __REMOTE_SHELL_H__
 #define __REMOTE_SHELL_H__
@@ -24,8 +17,7 @@
 #include "PSocket.h"
 #include "EpollEventHandler.h"
 
-class RemoteShell
-{
+class RemoteShell {
 public:
     RemoteShell();
     ~RemoteShell();

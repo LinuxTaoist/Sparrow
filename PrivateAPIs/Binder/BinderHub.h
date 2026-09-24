@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/17
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/17 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __BINDER_HUB_H__
 #define __BINDER_HUB_H__
@@ -25,8 +18,7 @@
 #include <stdint.h>
 #include "Parcel.h"
 
-class BinderHub
-{
+class BinderHub {
 public:
     explicit BinderHub(const std::string& srvName);
     virtual ~BinderHub();

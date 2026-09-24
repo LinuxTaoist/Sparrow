@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_MSG_H__
 #define __SPR_MSG_H__
@@ -25,8 +18,7 @@
 #include <map>
 #include <stdint.h>
 
-enum class ESprMsgType : uint32_t
-{
+enum class ESprMsgType : uint32_t {
     MSG_TYPE_MIN  = 0,
     MSG_TYPE_BOOLVALUE,
     MSG_TYPE_U8VALUE,
@@ -50,8 +42,7 @@ enum class ESprMsgType : uint32_t
     MSG_TYPE_MAX
 };
 
-class SprMsg
-{
+class SprMsg {
 public:
     SprMsg();
     SprMsg(const SprMsg& srcMsg);

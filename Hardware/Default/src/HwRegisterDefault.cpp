@@ -14,13 +14,7 @@
  *  Real platforms provide their own HwRegister*.cpp in Hardware/<Family>/.
  *  They must follow the same pattern: each factory uses a function-local
  *  static instance and returns a reference.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "HwInterfaceHub.h"
 #include "HwPowerDefault.h"

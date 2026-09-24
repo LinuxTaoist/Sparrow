@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : EpollEventHandler.cpp
+ *  @file       : EpollEventHandler.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/05/07
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/05/07 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __EPOLL_EVENT_HANDLER_H__
 #define __EPOLL_EVENT_HANDLER_H__
@@ -22,8 +15,7 @@
 #include <map>
 #include "IEpollEvent.h"
 
-class EpollEventHandler
-{
+class EpollEventHandler {
 public:
     static EpollEventHandler* GetInstance(int32_t size = 0, int32_t blockTimeOut = -1);
 

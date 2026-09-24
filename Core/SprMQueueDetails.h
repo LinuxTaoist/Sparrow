@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/03/30
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/03/30 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_MQUEUE_DETAILS_H__
 #define __SPR_MQUEUE_DETAILS_H__
@@ -24,8 +17,7 @@
 #include <mqueue.h>
 #include "CommonTypeDefs.h"
 
-class SprMQueueDetails
-{
+class SprMQueueDetails {
 public:
     SprMQueueDetails(const std::string& mqName, bool create);
     ~SprMQueueDetails();

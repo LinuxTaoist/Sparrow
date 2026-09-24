@@ -9,13 +9,7 @@
  *  @date       : 2024/02/25
  *
  *  The timerfd encapsulates interfaces
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/02/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <errno.h>
 #include <stdio.h>
@@ -31,21 +25,17 @@ using namespace InternalDefs;
 #define LOG_TAG "SysTimer"
 
 SprSystemTimer::SprSystemTimer(ModuleIDType id, const std::string& name)
-    : SprObserverWithTimerfd(id, name)
-{
+    : SprObserverWithTimerfd(id, name) {
 }
 
-SprSystemTimer::~SprSystemTimer()
-{
+SprSystemTimer::~SprSystemTimer() {
 }
 
-int32_t SprSystemTimer::Init()
-{
+int32_t SprSystemTimer::Init() {
     return 0;
 }
 
-int32_t SprSystemTimer::ProcessTimerEvent()
-{
+int32_t SprSystemTimer::ProcessTimerEvent() {
     // Event is triggered by timer, only notify to TimerManager
     SprMsg timerMsg(MODULE_TIMERM, SIG_ID_SYSTEM_TIMER_NOTIFY);
     return NotifyObserver(timerMsg);

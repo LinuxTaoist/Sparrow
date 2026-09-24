@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/04/19
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/04/19 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include "SprLog.h"
@@ -28,8 +21,7 @@ using namespace InternalDefs;
 #define LOG_TAG "TestModule"
 
 TestModule::TestModule()
-    : SprObserverWithMQueue(InternalDefs::MODULE_GTEST_INTERNAL, "TestInternal")
-{
+    : SprObserverWithMQueue(InternalDefs::MODULE_GTEST_INTERNAL, "TestInternal") {
     m200MSCnt = 0;
     m500MSCnt = 0;
     m1SCnt = 0;
@@ -38,18 +30,15 @@ TestModule::TestModule()
     m5SCnt = 0;
 }
 
-TestModule::~TestModule()
-{
+TestModule::~TestModule() {
 }
 
-int32_t TestModule::CondNotify()
-{
+int32_t TestModule::CondNotify() {
     mCond.notify_all();
     return 0;
 }
 
-int32_t TestModule::CondWait(int32_t timeoutMs)
-{
+int32_t TestModule::CondWait(int32_t timeoutMs) {
     std::unique_lock<std::mutex> lock(mMutex);
     mCond.wait_for(lock, std::chrono::milliseconds(timeoutMs), []() {
         return false;
@@ -57,8 +46,7 @@ int32_t TestModule::CondWait(int32_t timeoutMs)
     return 0;
 }
 
-int32_t TestModule::CondWait(int32_t timeoutMs, int32_t expectValue, const int32_t& actualValue)
-{
+int32_t TestModule::CondWait(int32_t timeoutMs, int32_t expectValue, const int32_t& actualValue) {
     std::unique_lock<std::mutex> lock(mMutex);
     mCond.wait_for(lock, std::chrono::milliseconds(timeoutMs), [&]() {
         SPR_LOGD("Waiting: expect = %d, actual = %d", expectValue, actualValue);
@@ -67,13 +55,11 @@ int32_t TestModule::CondWait(int32_t timeoutMs, int32_t expectValue, const int32
     return 0;
 }
 
-int32_t TestModule::Init()
-{
+int32_t TestModule::Init() {
     return 0;
 }
 
-int32_t TestModule::ProcessMsg(const SprMsg& msg)
-{
+int32_t TestModule::ProcessMsg(const SprMsg& msg) {
     SPR_LOGD("Recv msgId: %s\n", GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId()) {
         case SIG_ID_TEST_MODULE_200MS_TIMER_EVENT: {
@@ -113,8 +99,7 @@ EpollEventHandler* TestSprComponents::mpEpollSchedule = nullptr;
 std::shared_ptr<std::thread> TestSprComponents::mpMsgThread = nullptr;
 std::shared_ptr<TestModule> TestSprComponents::mpTestModule = nullptr;
 
-void TestSprComponents::SetUpTestCase()
-{
+void TestSprComponents::SetUpTestCase() {
     SPR_LOGD("SetUpTestCase enter!");
     mCaseIndex = 0;
     mpEpollSchedule = SprEpollSchedule::GetInstance(0, 2000);
@@ -133,8 +118,7 @@ void TestSprComponents::SetUpTestCase()
     SPR_LOGD("SetUpTestCase exit!");
 }
 
-void TestSprComponents::TearDownTestCase()
-{
+void TestSprComponents::TearDownTestCase() {
     SPR_LOGD("TearDownTestCase enter!");
     if (!mpEpollSchedule) {
         SPR_LOGE("mpEpollSchedule is nullptr!");

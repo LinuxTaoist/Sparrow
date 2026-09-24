@@ -10,13 +10,7 @@
  *
  *  The minimum scale of the timer is milliseconds, and the value set during use must be
  *  a multiple of 1 milliseconds
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/02/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __STATUS_MONITOR_MANAGER_H__
 #define __STATUS_MONITOR_MANAGER_H__
@@ -25,8 +19,7 @@
 #include <time.h>
 #include "SprObserverWithMQueue.h"
 
-struct StatusEvent
-{
+struct StatusEvent {
     time_t sTime;
     int32_t sErrorCode;
     std::string sText;
@@ -35,8 +28,7 @@ struct StatusEvent
         : sTime(time), sErrorCode(errorCode), sText(text) {}
 };
 
-class StatusMonitorManager : public SprObserverWithMQueue
-{
+class StatusMonitorManager : public SprObserverWithMQueue {
 public:
     StatusMonitorManager(ModuleIDType id, const std::string& name);
     ~StatusMonitorManager();

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SecureAlgorithms 密码算法（SM2/RSA/ECC）内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <cstdint>
 #include <vector>
@@ -24,8 +17,7 @@
 using namespace SecureAlgorithms;
 
 // 测试 SM2 密钥对生成的边界与正常情况
-TEST(Util_SecureAlgorithms, GenerateSM2KeyPairBoundaryAndNormal)
-{
+TEST(Util_SecureAlgorithms, GenerateSM2KeyPairBoundaryAndNormal) {
     std::vector<uint8_t> pub;
     std::vector<uint8_t> priv;
 
@@ -37,8 +29,7 @@ TEST(Util_SecureAlgorithms, GenerateSM2KeyPairBoundaryAndNormal)
 }
 
 // 测试 SM2 签名的边界与正常情况
-TEST(Util_SecureAlgorithms, SignSM2BoundaryAndNormal)
-{
+TEST(Util_SecureAlgorithms, SignSM2BoundaryAndNormal) {
     std::vector<uint8_t> signR;
     std::vector<uint8_t> signS;
 
@@ -55,8 +46,7 @@ TEST(Util_SecureAlgorithms, SignSM2BoundaryAndNormal)
 }
 
 // 测试 SM2 验签的边界情况
-TEST(Util_SecureAlgorithms, VerifySM2Boundary)
-{
+TEST(Util_SecureAlgorithms, VerifySM2Boundary) {
     std::vector<uint8_t> pub = {0, 0, 0, 1, 0, 0, 0, 2};
     std::vector<uint8_t> signR = {0, 0, 0, 0, 0, 0, 0, 1};
     std::vector<uint8_t> signS = {0, 0, 0, 0, 0, 0, 0, 2};
@@ -68,8 +58,7 @@ TEST(Util_SecureAlgorithms, VerifySM2Boundary)
 }
 
 // 测试 SM2 加解密往返一致性
-TEST(Util_SecureAlgorithms, SM2EncryptDecryptRoundtrip)
-{
+TEST(Util_SecureAlgorithms, SM2EncryptDecryptRoundtrip) {
     const std::vector<uint8_t> plaintext = {0xaa, 0xbb, 0xcc, 0xdd};
     std::vector<uint8_t> cipher;
     std::vector<uint8_t> decrypted;
@@ -80,8 +69,7 @@ TEST(Util_SecureAlgorithms, SM2EncryptDecryptRoundtrip)
 }
 
 // 测试 RSA 加解密往返一致性
-TEST(Util_SecureAlgorithms, RSAEncryptDecryptRoundtrip)
-{
+TEST(Util_SecureAlgorithms, RSAEncryptDecryptRoundtrip) {
     const std::vector<uint8_t> plaintext = {0x48, 0x65, 0x6c, 0x6c, 0x6f};  // "Hello"
     std::vector<uint8_t> cipher;
     std::vector<uint8_t> decrypted;
@@ -96,8 +84,7 @@ TEST(Util_SecureAlgorithms, RSAEncryptDecryptRoundtrip)
 }
 
 // 测试 ECC 加解密往返一致性
-TEST(Util_SecureAlgorithms, ECCEncryptDecryptRoundtrip)
-{
+TEST(Util_SecureAlgorithms, ECCEncryptDecryptRoundtrip) {
     const std::vector<uint8_t> plaintext = {0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
     std::vector<uint8_t> cipher;
     std::vector<uint8_t> decrypted;

@@ -22,35 +22,32 @@
  *     tail -f /tmp/sprlog/main/main.log
  *     tail -f /tmp/sprlog/example/example.log
  *
- * sprlog.conf:
+ *  sprlog.conf:
  *
- * [output.default]                        # 默认输出
- * frame_length_bytes  = 1024              # 单条日志帧最大长度，单位：字节
- * enabled             = true              # 是否启用日志输出
- * level               = debug             # 日志级别：error、warn、info、debug
- * output              = file              # 输出方式：file、stdout
- * file_name           = main.log          # 日志文件名
- * file_name_format    = BN.FX             # 日志文件名格式: BN：基础名称，FX：文件扩展名，ST：时间戳，SI: 系统启动短标识，MH: 进程单调时间戳
- * file_path           = /tmp/sprlog/main  # 日志目录
- * file_num            = 10                # 保留日志文件数量
- * file_capacity_mb    = 10                # 单个日志文件最大容量，单位：MB
- * flush_count         = 64                # 累积日志条数达到该值时刷新
- * flush_interval_ms   = 1000              # 定时刷新间隔，单位：毫秒
-
- * [output.15_sprlog]
- * file_name = sprlog.log
- * file_path = /tmp/sprlog/example
- * level = debug
- * output = file
-
- * [output.SprLogExample]
- * file_name = example.log
- * file_name_format = BN_SI_MH_ST.FX
- * file_path = /tmp/sprlog/example
- * file_name_format = BN_SI_MH_ST.FX
- * level = debug
- * output = file
- *
+ *  [output.default]                        # 默认输出
+ *  frame_length_bytes  = 1024              # 单条日志帧最大长度，单位：字节
+ *  enabled             = true              # 是否启用日志输出
+ *  level               = debug             # 日志级别：error、warn、info、debug
+ *  output              = file              # 输出方式：file、stdout
+ *  file_name           = main.log          # 日志文件名
+ *  file_name_format    = BN.FX             # 日志文件名格式: BN：基础名称，FX：文件扩展名，ST：时间戳，SI: 系统启动短标识，MH: 进程单调时间戳
+ *  file_path           = /tmp/sprlog/main  # 日志目录
+ *  file_num            = 10                # 保留日志文件数量
+ *  file_capacity_mb    = 10                # 单个日志文件最大容量，单位：MB
+ *  flush_count         = 64                # 累积日志条数达到该值时刷新
+ *  flush_interval_ms   = 1000              # 定时刷新间隔，单位：毫秒
+ *  [output.15_sprlog]
+ *  file_name = sprlog.log
+ *  file_path = /tmp/sprlog/example
+ *  level = debug
+ *  output = file
+ *  [output.SprLogExample]
+ *  file_name = example.log
+ *  file_name_format = BN_SI_MH_ST.FX
+ *  file_path = /tmp/sprlog/example
+ *  file_name_format = BN_SI_MH_ST.FX
+ *  level = debug
+ *  output = file
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <fstream>
@@ -65,8 +62,7 @@
 #define LOG_TAG "LogExample"
 
 // SPR_INIT: use the matching [output.15_sprlog] sink.
-void UsageWithCustomLogConfig()
-{
+void UsageWithCustomLogConfig() {
     printf("1. log config file: /tmp/sprlog/example/sprlog.log\n");
     SPR_LOGI("1. Custom log config");
     SPR_LOGI("log file: /tmp/sprlog/example/sprlog.log");
@@ -78,8 +74,7 @@ void UsageWithCustomLogConfig()
 
 // SPR_INIT: use not matching sink in sprlog.conf,
 // fallback to [output.default].
-void UsageWithDefault()
-{
+void UsageWithDefault() {
     // to not match [output.15_sprlog] in sprlog.conf
     SPR_INIT("InvalidModuleName");
     printf("2. log file: /tmp/sprlog/main/main.log\n");
@@ -93,8 +88,7 @@ void UsageWithDefault()
 }
 
 // SPR_INIT: use the matching [output.SprLogExample] sink.
-int32_t UsageWithCustomLogInit()
-{
+int32_t UsageWithCustomLogInit() {
     SPR_INIT("SprLogExample");
     printf("3. log file: /tmp/sprlog/example/example.log\n");
 
@@ -107,8 +101,7 @@ int32_t UsageWithCustomLogInit()
     return 0;
 }
 
-int main()
-{
+int main() {
     // 1. Custom log config
     // log config route [output.15_sprlog] in sprlog.conf
     // [output.15_sprlog]: log file in /tmp/sprlog/example/sprlog.log

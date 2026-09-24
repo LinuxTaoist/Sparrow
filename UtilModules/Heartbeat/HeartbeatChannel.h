@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Internal Unix domain datagram channel for Heartbeat.
  *  @date       : 2026/09/17
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __HEART_BEAT_CHANNEL_H__
@@ -20,8 +19,7 @@
 
 #include "HeartbeatCommon.h"
 
-struct HeartbeatMessage
-{
+struct HeartbeatMessage {
     uint32_t magic;
     uint16_t version;
     uint16_t nameLength;
@@ -29,8 +27,7 @@ struct HeartbeatMessage
     char serviceName[HEARTBEAT_SERVICE_NAME_MAX_LENGTH];
 };
 
-class HeartbeatChannel
-{
+class HeartbeatChannel {
 public:
     HeartbeatChannel();
     ~HeartbeatChannel();

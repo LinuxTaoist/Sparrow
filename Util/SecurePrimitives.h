@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/16
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/16 | 1.0.0.1   | Copilot        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SECURE_PRIMITIVES_H__
 #define __SECURE_PRIMITIVES_H__

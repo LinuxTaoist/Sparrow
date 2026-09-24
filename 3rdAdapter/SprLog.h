@@ -21,7 +21,6 @@
  *
  *  A custom module name selects the matching [output.<module>] section in
  *  sprlog.conf. If SPR_INIT is not called, the executable name is used.
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __SPR_LOG_H__

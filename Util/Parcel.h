@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/26
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/26 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PARCEL_H__
 #define __PARCEL_H__
@@ -27,8 +20,7 @@
 
 #define PARCEL_TIMEOUT_MS 2000
 
-class Parcel
-{
+class Parcel {
 public:
     Parcel(const std::string& path, int key, bool master);
     ~Parcel();
@@ -50,8 +42,7 @@ public:
     int ReadData(void* data, int& size);
 
     template<typename T>
-    int WriteVector(const std::vector<T>& vec)
-    {
+    int WriteVector(const std::vector<T>& vec) {
         int size = vec.size() * sizeof(T);
         if (WriteInt(size) != 0) {
             return -1;
@@ -67,8 +58,7 @@ public:
     }
 
     template<typename T>
-    int ReadVector(std::vector<T>& vec)
-    {
+    int ReadVector(std::vector<T>& vec) {
         int totalSize = 0;
         if (ReadInt(totalSize) != 0) {
             return -1;

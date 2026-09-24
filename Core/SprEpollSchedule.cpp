@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <stdio.h>
 #include <unistd.h>
@@ -33,8 +26,7 @@ bool SprEpollSchedule::mEnablePLog = false;
 
 SprEpollSchedule::SprEpollSchedule(int32_t size, int32_t timeout, bool enableCoroutine)
     : EpollEventHandler(size, timeout),
-      mEnableCoroutine(enableCoroutine)
-{
+      mEnableCoroutine(enableCoroutine) {
     // if (enableCoroutine) {
     //     mCoPool.InitCoroutinePool(1024);
     //     mCoPool.Start(10, 128);
@@ -44,12 +36,10 @@ SprEpollSchedule::SprEpollSchedule(int32_t size, int32_t timeout, bool enableCor
     SPR_LOGD("%s coroutine schedule!\n", enableCoroutine ? "Enable" : "Disable");
 }
 
-SprEpollSchedule::~SprEpollSchedule()
-{
+SprEpollSchedule::~SprEpollSchedule() {
 }
 
-EpollEventHandler* SprEpollSchedule::GetInstance(int32_t size, int32_t timeout, bool enableCoroutine)
-{
+EpollEventHandler* SprEpollSchedule::GetInstance(int32_t size, int32_t timeout, bool enableCoroutine) {
     if (!mEnablePLog) {
         mEnablePLog = true;
         InitPLog();
@@ -58,8 +48,7 @@ EpollEventHandler* SprEpollSchedule::GetInstance(int32_t size, int32_t timeout, 
     return EpollEventHandler::GetInstance(size, timeout);
 }
 
-void SprEpollSchedule::InitPLog()
-{
+void SprEpollSchedule::InitPLog() {
     SPR_LOGD("Init epoll event handler!\n");
     PLog& theLog = PLog::GetInstance();
     theLog.RegisterPrintCallback([](int level, int line, const char* tag, const char* fmt, va_list ap) {
@@ -85,8 +74,7 @@ void SprEpollSchedule::InitPLog()
     });
 }
 
-void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event)
-{
+void SprEpollSchedule::HandleEpollEvent(IEpollEvent& event) {
     if (mEnableCoroutine) {
         // 触发回调处理器
         // using GoPoolCb = co::AsyncCoroutinePool::CallbackPoint;

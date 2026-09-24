@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Heartbeat module internal tests.
  *  @date       : 2026/09/17
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <atomic>
@@ -27,16 +26,14 @@
 
 namespace {
 
-std::string MakeChannel(const char* tag)
-{
+std::string MakeChannel(const char* tag) {
     char buffer[128];
     snprintf(buffer, sizeof(buffer), "/tmp/spr_heartbeat_%s_%d.sock", tag, static_cast<int>(getpid()));
     unlink(buffer);
     return buffer;
 }
 
-bool WaitForCount(const std::atomic<int>& count, int expected, uint32_t timeoutMs)
-{
+bool WaitForCount(const std::atomic<int>& count, int expected, uint32_t timeoutMs) {
     const uint32_t intervalMs = 10;
     for (uint32_t elapsedMs = 0; elapsedMs < timeoutMs; elapsedMs += intervalMs) {
         if (count.load() >= expected) {
@@ -47,8 +44,7 @@ bool WaitForCount(const std::atomic<int>& count, int expected, uint32_t timeoutM
     return count.load() >= expected;
 }
 
-void SendInvalidMessage(const std::string& channel)
-{
+void SendInvalidMessage(const std::string& channel) {
     const int32_t fd = socket(AF_UNIX, SOCK_DGRAM | SOCK_CLOEXEC, 0);
     ASSERT_GE(fd, 0);
 
@@ -63,8 +59,7 @@ void SendInvalidMessage(const std::string& channel)
     close(fd);
 }
 
-void SendHeartbeat(const std::string& channel, const std::string& serviceName, uint64_t sequence)
-{
+void SendHeartbeat(const std::string& channel, const std::string& serviceName, uint64_t sequence) {
     HeartbeatChannel reporter;
     ASSERT_EQ(0, reporter.OpenReporter(channel));
 
@@ -80,8 +75,7 @@ void SendHeartbeat(const std::string& channel, const std::string& serviceName, u
 } // namespace
 
 // 测试 Reporter 未启动、参数非法以及重复启动时的返回值
-TEST(UtilModules_Heartbeat, ReporterParameterValidation)
-{
+TEST(UtilModules_Heartbeat, ReporterParameterValidation) {
     HeartbeatReporter* reporter = HeartbeatReporter::GetInstance();
     ASSERT_NE(nullptr, reporter);
     const std::string channel = MakeChannel("reporter_validation");
@@ -100,8 +94,7 @@ TEST(UtilModules_Heartbeat, ReporterParameterValidation)
 }
 
 // 测试 Monitor 参数校验、重复启动和重复停止
-TEST(UtilModules_Heartbeat, MonitorParameterValidation)
-{
+TEST(UtilModules_Heartbeat, MonitorParameterValidation) {
     HeartbeatMonitor monitor;
     const std::string channel = MakeChannel("monitor_validation");
     const std::vector<std::string> invalidServices = {
@@ -119,8 +112,7 @@ TEST(UtilModules_Heartbeat, MonitorParameterValidation)
 }
 
 // 测试单个服务的自动发现和首次心跳回调
-TEST(UtilModules_Heartbeat, ReporterMonitorSingleService)
-{
+TEST(UtilModules_Heartbeat, ReporterMonitorSingleService) {
     const std::string channel = MakeChannel("single");
     std::atomic<int> aliveCount(0);
 
@@ -145,8 +137,7 @@ TEST(UtilModules_Heartbeat, ReporterMonitorSingleService)
 }
 
 // 测试一个 Monitor 同时监听多个服务
-TEST(UtilModules_Heartbeat, MonitorTracksMultipleServices)
-{
+TEST(UtilModules_Heartbeat, MonitorTracksMultipleServices) {
     const std::string channel = MakeChannel("multiple");
     std::atomic<int> serviceCount(0);
 
@@ -169,8 +160,7 @@ TEST(UtilModules_Heartbeat, MonitorTracksMultipleServices)
 }
 
 // 测试预期服务持续无心跳时按周期重复触发超时
-TEST(UtilModules_Heartbeat, MonitorReportsExpectedServiceTimeout)
-{
+TEST(UtilModules_Heartbeat, MonitorReportsExpectedServiceTimeout) {
     const std::string channel = MakeChannel("timeout");
     std::atomic<int> timeoutCount(0);
     std::vector<std::string> services;
@@ -192,8 +182,7 @@ TEST(UtilModules_Heartbeat, MonitorReportsExpectedServiceTimeout)
 }
 
 // 测试服务超时后的恢复回调
-TEST(UtilModules_Heartbeat, MonitorReportsServiceRecovery)
-{
+TEST(UtilModules_Heartbeat, MonitorReportsServiceRecovery) {
     const std::string channel = MakeChannel("recovery");
     std::atomic<int> aliveCount(0);
     std::atomic<int> timeoutCount(0);
@@ -232,8 +221,7 @@ TEST(UtilModules_Heartbeat, MonitorReportsServiceRecovery)
 }
 
 // 测试 Reporter 停止后 Monitor 能够检测服务超时
-TEST(UtilModules_Heartbeat, MonitorReportsReporterStop)
-{
+TEST(UtilModules_Heartbeat, MonitorReportsReporterStop) {
     const std::string channel = MakeChannel("reporter_stop");
     std::atomic<int> timeoutCount(0);
     std::vector<std::string> services;
@@ -260,8 +248,7 @@ TEST(UtilModules_Heartbeat, MonitorReportsReporterStop)
 }
 
 // 测试手动 Report 能够在周期上报间隔之外立即发送心跳
-TEST(UtilModules_Heartbeat, ReporterManualReport)
-{
+TEST(UtilModules_Heartbeat, ReporterManualReport) {
     const std::string channel = MakeChannel("manual_report");
     std::atomic<int> aliveCount(0);
 
@@ -286,8 +273,7 @@ TEST(UtilModules_Heartbeat, ReporterManualReport)
 }
 
 // 测试非法心跳数据不会触发服务存活回调，也不会停止 Monitor
-TEST(UtilModules_Heartbeat, MonitorIgnoresInvalidMessage)
-{
+TEST(UtilModules_Heartbeat, MonitorIgnoresInvalidMessage) {
     const std::string channel = MakeChannel("invalid_message");
     std::atomic<int> callbackCount(0);
 
@@ -306,8 +292,7 @@ TEST(UtilModules_Heartbeat, MonitorIgnoresInvalidMessage)
 }
 
 // 测试 Monitor Stop 能够唤醒监听线程并及时返回
-TEST(UtilModules_Heartbeat, MonitorStopsPromptly)
-{
+TEST(UtilModules_Heartbeat, MonitorStopsPromptly) {
     const std::string channel = MakeChannel("stop");
     HeartbeatMonitor monitor;
     ASSERT_EQ(0, monitor.Start(channel, 1000, HeartbeatMonitor::Callback()));

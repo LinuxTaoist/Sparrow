@@ -32,25 +32,17 @@
  *      std::cout << "Code block took " << timeInSeconds << " seconds." << std::endl;
  *      // double timeInMilliseconds = timer.GetCurTimeInMSec();      // total time in milliseconds
  *      // std::cout << "Code block took " << timeInMilliseconds << " milliseconds." << std::endl;
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/09/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <time.h>
 #include <sys/time.h>
 #include "RunningTiming.h"
 
-RunningTiming::RunningTiming()
-{
+RunningTiming::RunningTiming() {
     mStartTimeInMSec = GetCurTimeInMSec();
 }
 
-RunningTiming::~RunningTiming()
-{
+RunningTiming::~RunningTiming() {
 }
 
 uint64_t RunningTiming::GetCurTimeInMSec() {
@@ -60,8 +52,7 @@ uint64_t RunningTiming::GetCurTimeInMSec() {
     return timeInMSec;
 }
 
-uint64_t RunningTiming::GetElapsedTimeInSec()
-{
+uint64_t RunningTiming::GetElapsedTimeInSec() {
     uint64_t stopTimeInMsec = GetCurTimeInMSec();
     return (stopTimeInMsec - mStartTimeInMSec) / 1000;
 }

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SprObserverWithTimerfd 基于 timerfd 的观察者内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include "SprSigId.h"
@@ -50,31 +43,27 @@ const ModuleIDType kTestModuleId = static_cast<ModuleIDType>(MODULE_PUBLIC_END +
 }
 
 // 测试构造
-TEST(Core_SprObserverWithTimerfd, Constructor)
-{
+TEST(Core_SprObserverWithTimerfd, Constructor) {
     TestTimerfdObserver obs(kTestModuleId);
     EXPECT_EQ(obs.GetModuleId(), kTestModuleId);
     EXPECT_EQ(obs.GetModuleName(), "TestTimerfdObserver");
 }
 
 // 测试框架初始化（注册到 epoll）
-TEST(Core_SprObserverWithTimerfd, InitFramework)
-{
+TEST(Core_SprObserverWithTimerfd, InitFramework) {
     TestTimerfdObserver obs(kTestModuleId);
     // InitFramework 调用 AddToPoll，返回 0 且不崩溃
     obs.Initialize();
 }
 
 // 测试 EpollEvent 传入错误 fd 返回空
-TEST(Core_SprObserverWithTimerfd, EpollEventInvalidFd)
-{
+TEST(Core_SprObserverWithTimerfd, EpollEventInvalidFd) {
     TestTimerfdObserver obs(kTestModuleId);
     EXPECT_EQ(obs.EpollEvent(-999, EPOLL_TYPE_TIMERFD, nullptr), nullptr);
 }
 
 // 测试 timerfd 定时事件触发 ProcessTimerEvent
-TEST(Core_SprObserverWithTimerfd, TimerEventTriggersProcess)
-{
+TEST(Core_SprObserverWithTimerfd, TimerEventTriggersProcess) {
     TestTimerfdObserver obs(kTestModuleId);
     // PTimer 构造已 InitTimer，直接启动定时器即可
     ASSERT_GE(obs.GetEvtFd(), 0);

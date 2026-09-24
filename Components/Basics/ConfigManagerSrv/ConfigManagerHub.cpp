@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include <string.h>
@@ -27,8 +20,7 @@
 
 using namespace InternalDefs;
 
-static int32_t ConfigValueTypeSize(int valueType)
-{
+static int32_t ConfigValueTypeSize(int valueType) {
     switch (valueType) {
         case CONFIG_VALUE_TYPE_BOOL:
             return static_cast<int32_t>(sizeof(bool));
@@ -46,18 +38,15 @@ static int32_t ConfigValueTypeSize(int valueType)
 }
 
 ConfigManagerHub::ConfigManagerHub(const std::string& srvName, ConfigManager* pManager)
-    : BinderHub(srvName)
-{
+    : BinderHub(srvName) {
     mConfigManager = pManager;
 }
 
-ConfigManagerHub::~ConfigManagerHub()
-{
+ConfigManagerHub::~ConfigManagerHub() {
 }
 
 void ConfigManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel,
-                                 const std::shared_ptr<Parcel>& pRspParcel, int32_t cmd)
-{
+                                 const std::shared_ptr<Parcel>& pRspParcel, int32_t cmd) {
     if (cmd == GENERAL_REGISTER_CALLBACK) {
         return;
     }

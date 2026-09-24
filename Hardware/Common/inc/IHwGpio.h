@@ -16,13 +16,7 @@
  *    3. RegisterIrqCallback()              — set up interrupt on edge
  *    4. EnableIrq() → handler fires       — interrupt-driven
  *    5. DisableIrq() / Release()          — tear down
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __IHW_GPIO_H__
 #define __IHW_GPIO_H__

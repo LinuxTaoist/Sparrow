@@ -12,14 +12,7 @@
  *  the system framework functions for each process in the Sparrow microservice framework.
  *  By calling the Init method of this class, some common functions of the system framework can be loaded,
  *  ensuring that each process has the necessary runtime environment and basic functions when starting.
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/04/06 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_PROC_PREPARE_H__
 #define __SPR_PROC_PREPARE_H__
@@ -27,8 +20,7 @@
 #include <string>
 #include <stdint.h>
 
-class SprProcPrepare
-{
+class SprProcPrepare {
 public:
     static SprProcPrepare* GetInstance();
     int32_t Init(const std::string& procName);

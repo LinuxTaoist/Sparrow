@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/13
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <memory>
 #include <pty.h>
@@ -37,19 +30,16 @@
 
 using namespace std;
 
-static void SigChldHandler(int signo)
-{
+static void SigChldHandler(int signo) {
     (void)signo;
     while (waitpid(-1, NULL, WNOHANG) > 0);
 }
 
 PtyTerminal::PtyTerminal(const std::function<void(int32_t ret, std::string, void*)>& cb, void* arg)
-    : mArg(arg), mMasterFd(-1), mSlaveFd(-1), mCb(cb)
-{
+    : mArg(arg), mMasterFd(-1), mSlaveFd(-1), mCb(cb) {
 }
 
-PtyTerminal::~PtyTerminal()
-{
+PtyTerminal::~PtyTerminal() {
     if (mMasterFd != -1) {
         SPR_LOGI("# CLOSE MASTER FD: %d", mMasterFd);
         close(mMasterFd);
@@ -62,13 +52,11 @@ PtyTerminal::~PtyTerminal()
     }
 }
 
-int32_t PtyTerminal::Write(const std::string& bytes)
-{
+int32_t PtyTerminal::Write(const std::string& bytes) {
     return write(mMasterFd, bytes.c_str(), bytes.size());
 }
 
-int32_t PtyTerminal::Init()
-{
+int32_t PtyTerminal::Init() {
     int32_t ret = openpty(&mMasterFd, &mSlaveFd, nullptr, nullptr, nullptr);
     if (ret != 0) {
         SPR_LOGE("openpty failed! (%s)", strerror(errno));
@@ -87,8 +75,7 @@ int32_t PtyTerminal::Init()
     return 0;
 }
 
-int32_t PtyTerminal::BashProcess()
-{
+int32_t PtyTerminal::BashProcess() {
     // Set the slave fd as the controlling terminal
     setsid();
     ioctl(mSlaveFd, TIOCSCTTY, 0);
@@ -130,8 +117,7 @@ int32_t PtyTerminal::BashProcess()
     return 0;
 }
 
-int32_t PtyTerminal::MasterProcess()
-{
+int32_t PtyTerminal::MasterProcess() {
     close(mSlaveFd);
     signal(SIGCHLD, SigChldHandler);
 
@@ -154,8 +140,7 @@ int32_t PtyTerminal::MasterProcess()
     return 0;
 }
 
-int32_t PtyTerminal::EraseColor(const std::string& in, std::string& out)
-{
+int32_t PtyTerminal::EraseColor(const std::string& in, std::string& out) {
     out.clear();
     out.reserve(in.size());
 
@@ -185,8 +170,7 @@ int32_t PtyTerminal::EraseColor(const std::string& in, std::string& out)
     return (int32_t)(out.size());
 }
 
-std::string PtyTerminal::GetCurShell()
-{
+std::string PtyTerminal::GetCurShell() {
     const char* shell = getenv("SHELL");
     return shell ? shell : "/bin/sh";
 }

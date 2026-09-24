@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/17
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/17 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <errno.h>
 #include <unistd.h>
@@ -28,8 +21,7 @@
 #define PLOG_TAG "PFile"
 
 PFile::PFile(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg)
-    : IEpollEvent(fd, EPOLL_TYPE_FILE, arg), mFd(-1), mCb1(cb), mCb2(nullptr)
-{
+    : IEpollEvent(fd, EPOLL_TYPE_FILE, arg), mFd(-1), mCb1(cb), mCb2(nullptr) {
     int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 }
@@ -39,8 +31,7 @@ PFile::PFile(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* ar
 // This error can occur if fd refers to, for example, a regular file or a directory.
 PFile::PFile(const std::string& fileName, const std::function<void(int32_t, ssize_t, std::string, void*)>& cb,
     void* arg, int32_t flags, mode_t mode)
-    : IEpollEvent(-1, EPOLL_TYPE_FILE, arg), mCb1(nullptr), mCb2(cb)
-{
+    : IEpollEvent(-1, EPOLL_TYPE_FILE, arg), mCb1(nullptr), mCb2(cb) {
     mFd = open(fileName.c_str(), flags | O_NONBLOCK, mode);
     if (mFd < 0) {
         PLOGE("open %s failed! (%s)\n", fileName.c_str(), strerror(errno));
@@ -49,14 +40,12 @@ PFile::PFile(const std::string& fileName, const std::function<void(int32_t, ssiz
     mEvtFd = mFd;
 }
 
-PFile::~PFile()
-{
+PFile::~PFile() {
     Close();
     mFd = -1;
 }
 
-void* PFile::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PFile::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     if (fd != mEvtFd) {
         PLOGE("Invalid fd (%d)!\n", fd);
     }

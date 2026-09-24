@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/12/13
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/12/23 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string.h>
 #include <sys/mman.h>
@@ -31,8 +24,7 @@ using namespace std;
 #define SPR_LOGE(fmt, args...) printf("%d SharedBinaryTree E: " fmt, __LINE__, ##args)
 
 SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size, bool create)
-    : mRoot(nullptr), mSize(size), mCurUsedSize(0), mFirstNode(nullptr), mFilename(filename)
-{
+    : mRoot(nullptr), mSize(size), mCurUsedSize(0), mFirstNode(nullptr), mFilename(filename) {
     mHandler = OpenMapFile(filename, size, create);
     if (mHandler == -1) {
         SPR_LOGE("OpenAndCreateFile fail!\n");
@@ -65,8 +57,7 @@ SharedBinaryTree::SharedBinaryTree(const string& filename, size_t size, bool cre
 
 }
 
-SharedBinaryTree::~SharedBinaryTree()
-{
+SharedBinaryTree::~SharedBinaryTree() {
     sem_destroy(&mSemaphore);
     if (mRoot != nullptr) {
         munmap(mRoot, mSize);
@@ -78,8 +69,7 @@ SharedBinaryTree::~SharedBinaryTree()
     }
 }
 
-int SharedBinaryTree::GetValue(const string& key, string& value)
-{
+int SharedBinaryTree::GetValue(const string& key, string& value) {
     int ret = -1;
     sem_wait(&mSemaphore);
     Node* pNode = mFirstNode;
@@ -102,8 +92,7 @@ int SharedBinaryTree::GetValue(const string& key, string& value)
     return ret;
 }
 
-int SharedBinaryTree::SetValue(const string& key, const string& value)
-{
+int SharedBinaryTree::SetValue(const string& key, const string& value) {
     if (key.size() >= SHARED_BTREE_KEY_MAX_LEN || value.size() >= SHARED_BTREE_VALUE_MAX_LEN) {
         SPR_LOGW("Lenght out of limit! Limit length: %d %d\n", SHARED_BTREE_KEY_MAX_LEN, SHARED_BTREE_VALUE_MAX_LEN);
         return -1;
@@ -180,8 +169,7 @@ int SharedBinaryTree::SetValue(const string& key, const string& value)
     return 0;
 }
 
-int SharedBinaryTree::OpenMapFile(const string& filename, size_t size, bool create)
-{
+int SharedBinaryTree::OpenMapFile(const string& filename, size_t size, bool create) {
     if (create) {
         unlink(filename.c_str());
     }
@@ -201,8 +189,7 @@ int SharedBinaryTree::OpenMapFile(const string& filename, size_t size, bool crea
     return fd;
 }
 
-Node* SharedBinaryTree::CreateNode(const string& key, const string& value)
-{
+Node* SharedBinaryTree::CreateNode(const string& key, const string& value) {
     // mCurUsedSize was already incremented by sizeof(Node) in SetValue(),
     // so the new node starts at mCurUsedSize - sizeof(Node).
     Node* newNode = (Node*)((char*)mRoot + mCurUsedSize - sizeof(Node));
@@ -219,16 +206,14 @@ Node* SharedBinaryTree::CreateNode(const string& key, const string& value)
     return newNode;
 }
 
-void SharedBinaryTree::GetAllKeyValues(std::map<std::string, std::string>& keyValueMap)
-{
+void SharedBinaryTree::GetAllKeyValues(std::map<std::string, std::string>& keyValueMap) {
     sem_wait(&mSemaphore);
     // 从根节点开始遍历，包括根节点本身
     GetKeyValue(mFirstNode, keyValueMap);
     sem_post(&mSemaphore);
 }
 
-void SharedBinaryTree::GetKeyValue(Node* pNode, std::map<std::string, std::string>& keyValueMap)
-{
+void SharedBinaryTree::GetKeyValue(Node* pNode, std::map<std::string, std::string>& keyValueMap) {
     if (pNode != nullptr && pNode->key[0] != '\0') {
         // 先遍历左子树
         GetKeyValue(GetNodeByOffset(pNode->left), keyValueMap);

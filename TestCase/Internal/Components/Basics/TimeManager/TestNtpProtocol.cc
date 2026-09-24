@@ -7,22 +7,14 @@
  *  @version    : 1.0
  *  @brief      : NtpProtocol NTP 报文编解码内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string>
 #include "NtpProtocol.h"
 #include "gtest/gtest.h"
 
 // 测试默认构造的字段默认值
-TEST(UtilModules_NtpProtocol, DefaultConstruction)
-{
+TEST(UtilModules_NtpProtocol, DefaultConstruction) {
     NtpProtocol proto("");
 
     EXPECT_EQ(proto.GetLi(), 0);
@@ -36,8 +28,7 @@ TEST(UtilModules_NtpProtocol, DefaultConstruction)
 }
 
 // 测试所有字段 setter/getter 往返
-TEST(UtilModules_NtpProtocol, SetGetRoundtrip)
-{
+TEST(UtilModules_NtpProtocol, SetGetRoundtrip) {
     NtpProtocol proto("");
 
     proto.SetLi(2);
@@ -68,8 +59,7 @@ TEST(UtilModules_NtpProtocol, SetGetRoundtrip)
 }
 
 // 测试认证密钥 ID 往返
-TEST(UtilModules_NtpProtocol, AuthKeyIdRoundtrip)
-{
+TEST(UtilModules_NtpProtocol, AuthKeyIdRoundtrip) {
     NtpProtocol proto("");
     proto.SetAuthKeyID("0123456789abcdef");
 
@@ -79,8 +69,7 @@ TEST(UtilModules_NtpProtocol, AuthKeyIdRoundtrip)
 }
 
 // 测试编码后再解码数据一致
-TEST(UtilModules_NtpProtocol, EncodeDecodeRoundtrip)
-{
+TEST(UtilModules_NtpProtocol, EncodeDecodeRoundtrip) {
     NtpProtocol proto("");
     proto.SetStratum(2);
     proto.SetPoll(6);
@@ -105,15 +94,13 @@ TEST(UtilModules_NtpProtocol, EncodeDecodeRoundtrip)
 }
 
 // 测试解码过短报文返回失败
-TEST(UtilModules_NtpProtocol, DecodeShortPacketFails)
-{
+TEST(UtilModules_NtpProtocol, DecodeShortPacketFails) {
     NtpProtocol proto("");
     EXPECT_EQ(proto.Decode("short"), -1);
 }
 
 // 测试编码非法字段返回失败
-TEST(UtilModules_NtpProtocol, EncodeInvalidFieldFails)
-{
+TEST(UtilModules_NtpProtocol, EncodeInvalidFieldFails) {
     // VN 低于 3
     NtpProtocol p1("");
     p1.SetVn(2);
@@ -132,8 +119,7 @@ TEST(UtilModules_NtpProtocol, EncodeInvalidFieldFails)
 }
 
 // 测试编码时更新时间戳
-TEST(UtilModules_NtpProtocol, EncodeUpdatesOriginateTimestamp)
-{
+TEST(UtilModules_NtpProtocol, EncodeUpdatesOriginateTimestamp) {
     NtpProtocol proto("");
     proto.SetOriginateTimestamp(0);
 
@@ -145,8 +131,7 @@ TEST(UtilModules_NtpProtocol, EncodeUpdatesOriginateTimestamp)
 }
 
 // 测试无认证密钥时解码边界（恰好 48 字节）
-TEST(UtilModules_NtpProtocol, DecodeExactlyBaseSize)
-{
+TEST(UtilModules_NtpProtocol, DecodeExactlyBaseSize) {
     NtpProtocol src("");
     src.SetStratum(5);
 

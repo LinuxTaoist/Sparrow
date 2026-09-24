@@ -2,7 +2,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : StatusMonitorManager.h
+ *  @file       : StatusMonitorManager.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
@@ -10,13 +10,7 @@
  *
  *  The minimum scale of the timer is milliseconds, and the value set during use must be
  *  a multiple of 1 milliseconds
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/02/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include "SprDebugNode.h"
@@ -33,23 +27,19 @@ using namespace InternalDefs;
 #define STATUS_EVENT_NUM_LIMIT      100
 
 StatusMonitorManager::StatusMonitorManager(ModuleIDType id, const std::string& name)
-            : SprObserverWithMQueue(id, name), mErasedNum(0)
-{
+            : SprObserverWithMQueue(id, name), mErasedNum(0) {
 }
 
-StatusMonitorManager::~StatusMonitorManager()
-{
+StatusMonitorManager::~StatusMonitorManager() {
     UnregisterDebugFuncs();
 }
 
-int32_t StatusMonitorManager::Init()
-{
+int32_t StatusMonitorManager::Init() {
     RegisterDebugFuncs();
     return 0;
 }
 
-int32_t StatusMonitorManager::AddStatusEvent(uint32_t moduleID, int32_t errCode, const std::string& text)
-{
+int32_t StatusMonitorManager::AddStatusEvent(uint32_t moduleID, int32_t errCode, const std::string& text) {
     auto& event = mAllEvents[moduleID];
     time_t now = time(nullptr);
 
@@ -62,8 +52,7 @@ int32_t StatusMonitorManager::AddStatusEvent(uint32_t moduleID, int32_t errCode,
     return 0;
 }
 
-int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text)
-{
+int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text) {
     int32_t totalNum = mErasedNum + mAllEvents.size();
     SPR_LOGI("                             Show All Status Events (%d)                                       \n", totalNum);
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
@@ -92,38 +81,32 @@ int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32
     return 0;
 }
 
-int32_t StatusMonitorManager::DumpAllStatusEvents()
-{
+int32_t StatusMonitorManager::DumpAllStatusEvents() {
     DumpStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, "");
     return 0;
 }
 
-int32_t StatusMonitorManager::DumpStatusEventsWithModuleID(int32_t moduleID)
-{
+int32_t StatusMonitorManager::DumpStatusEventsWithModuleID(int32_t moduleID) {
     DumpStatusEventsWithFilter(moduleID, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, "");
     return 0;
 }
 
-int32_t StatusMonitorManager::DumpStatusEventsWithLevel(int32_t level)
-{
+int32_t StatusMonitorManager::DumpStatusEventsWithLevel(int32_t level) {
     DumpStatusEventsWithFilter(0, level, ERR_GENERAL_SUCCESS, "");
     return 0;
 }
 
-int32_t StatusMonitorManager::DumpStatusEventsWithErrorCode(int32_t errCode)
-{
+int32_t StatusMonitorManager::DumpStatusEventsWithErrorCode(int32_t errCode) {
     DumpStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, errCode, "");
     return 0;
 }
 
-int32_t StatusMonitorManager::DumpStatusEventsWithText(const std::string& text)
-{
+int32_t StatusMonitorManager::DumpStatusEventsWithText(const std::string& text) {
     DumpStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, text);
     return 0;
 }
 
-int32_t StatusMonitorManager::DelStatusEventWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text)
-{
+int32_t StatusMonitorManager::DelStatusEventWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text) {
     for (auto& moduleEvents : mAllEvents) {
         int32_t tmpModuleID = moduleEvents.first;
         auto& tmpEvents = moduleEvents.second;
@@ -149,46 +132,39 @@ int32_t StatusMonitorManager::DelStatusEventWithFilter(int32_t moduleID, int32_t
     return 0;
 }
 
-int32_t StatusMonitorManager::DelAllStatusEvents()
-{
+int32_t StatusMonitorManager::DelAllStatusEvents() {
     mAllEvents.clear();
     return 0;
 }
 
-int32_t StatusMonitorManager::DelStatusEventsWithModuleID(int32_t moduleID)
-{
+int32_t StatusMonitorManager::DelStatusEventsWithModuleID(int32_t moduleID) {
     DelStatusEventWithFilter(moduleID, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, "");
     return 0;
 }
 
-int32_t StatusMonitorManager::DelStatusEventsWithLevel(int32_t level)
-{
+int32_t StatusMonitorManager::DelStatusEventsWithLevel(int32_t level) {
     DelStatusEventWithFilter(0, level, ERR_GENERAL_SUCCESS, "");
     return 0;
 }
 
-int32_t StatusMonitorManager::DelStatusEventsWithErrorCode(int32_t errCode)
-{
+int32_t StatusMonitorManager::DelStatusEventsWithErrorCode(int32_t errCode) {
     DelStatusEventWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, errCode, "");
     return 0;
 }
 
-int32_t StatusMonitorManager::DelStatusEventsWithText(const std::string& text)
-{
+int32_t StatusMonitorManager::DelStatusEventsWithText(const std::string& text) {
     DelStatusEventWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, text);
     return 0;
 }
 
-std::string StatusMonitorManager::FormatTimeAsLocalString(const time_t& time)
-{
+std::string StatusMonitorManager::FormatTimeAsLocalString(const time_t& time) {
     struct tm* pTime = localtime(&time);
     char buffer[64];
     strftime(buffer, sizeof(buffer), "%Y-%m-%d %H:%M:%S", pTime);
     return buffer;
 }
 
-int32_t StatusMonitorManager::ProcessMsg(const SprMsg& msg)
-{
+int32_t StatusMonitorManager::ProcessMsg(const SprMsg& msg) {
     SPR_LOGD("Recv msg: %s\n", GetSigName(msg.GetMsgId()));
     switch (msg.GetMsgId()) {
         case SIG_ID_MONITOR_STATUS_EVENT: {
@@ -204,8 +180,7 @@ int32_t StatusMonitorManager::ProcessMsg(const SprMsg& msg)
     return 0;
 }
 
-void StatusMonitorManager::RegisterDebugFuncs()
-{
+void StatusMonitorManager::RegisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -226,8 +201,7 @@ void StatusMonitorManager::RegisterDebugFuncs()
     p->RegisterCmd(OWNER_STATUSMONITOR, "DelWithText",      "Del With Text",    std::bind(&StatusMonitorManager::DebugDelStatusEventsWithText, this, std::placeholders::_1));
 }
 
-void StatusMonitorManager::UnregisterDebugFuncs()
-{
+void StatusMonitorManager::UnregisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -238,8 +212,7 @@ void StatusMonitorManager::UnregisterDebugFuncs()
     p->UnregisterCmd(OWNER_STATUSMONITOR);
 }
 
-void StatusMonitorManager::DebugDisplayUTCTimeAsLocalString(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDisplayUTCTimeAsLocalString(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DisplayUTCTimeAsLocalString {utc} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -255,14 +228,12 @@ void StatusMonitorManager::DebugDisplayUTCTimeAsLocalString(const std::vector<st
     SPR_LOGI("utc: %u, local: %s", utc, ctime(&utc));
 }
 
-void StatusMonitorManager::DebugDumpAllStatusEvents(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDumpAllStatusEvents(const std::vector<std::string>& args) {
     SPR_LOGI("Dump all events\n");
     DumpAllStatusEvents();
 }
 
-void StatusMonitorManager::DebugDumpStatusEventsWithModuleID(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDumpStatusEventsWithModuleID(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DumpWithID {moduleID} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -279,8 +250,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithModuleID(const std::vector<s
     DumpStatusEventsWithModuleID(moduleID);
 }
 
-void StatusMonitorManager::DebugDumpStatusEventsWithLevel(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDumpStatusEventsWithLevel(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DumpWithLevel {level} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -297,8 +267,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithLevel(const std::vector<std:
     DumpStatusEventsWithLevel(level);
 }
 
-void StatusMonitorManager::DebugDumpStatusEventsWithErrorCode(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDumpStatusEventsWithErrorCode(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DumpWithErrCode {errCode} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -315,8 +284,7 @@ void StatusMonitorManager::DebugDumpStatusEventsWithErrorCode(const std::vector<
     DumpStatusEventsWithErrorCode(errCode);
 }
 
-void StatusMonitorManager::DebugDumpStatusEventsWithText(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDumpStatusEventsWithText(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DumpWithText {text} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -327,14 +295,12 @@ void StatusMonitorManager::DebugDumpStatusEventsWithText(const std::vector<std::
     DumpStatusEventsWithText(args[1]);
 }
 
-void StatusMonitorManager::DebugDelAllStatusEvent(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDelAllStatusEvent(const std::vector<std::string>& args) {
     SPR_LOGI("Delete all events\n");
     DelAllStatusEvents();
 }
 
-void StatusMonitorManager::DebugDelStatusEventsWithModuleID(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDelStatusEventsWithModuleID(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DelWithID {moduleID} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -351,8 +317,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithModuleID(const std::vector<st
     DelStatusEventsWithModuleID(moduleID);
 }
 
-void StatusMonitorManager::DebugDelStatusEventsWithLevel(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDelStatusEventsWithLevel(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DelWithLevel {level} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -369,8 +334,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithLevel(const std::vector<std::
     DelStatusEventsWithLevel(level);
 }
 
-void StatusMonitorManager::DebugDelStatusEventsWithErrorCode(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDelStatusEventsWithErrorCode(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DelWithErrCode {errCode} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -387,8 +351,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithErrorCode(const std::vector<s
     DelStatusEventsWithErrorCode(errCode);
 }
 
-void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo DelWithText {text} > %s/statusmonitorsrv\n", DEFAULT_DEBUG_ROOT_DIR);
@@ -399,8 +362,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::s
     DelStatusEventsWithText(args[1]);
 }
 
-void StatusMonitorManager::DebugAddStatusEvent(const std::vector<std::string>& args)
-{
+void StatusMonitorManager::DebugAddStatusEvent(const std::vector<std::string>& args) {
     SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
     msg.SetU32Value(ERR_GENERAL_ERROR);
     msg.SetString("For test");

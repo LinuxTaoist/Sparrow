@@ -7,13 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Device management HAL interface — pure virtual.
  *  @date       : 2026/08/12
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/08/12 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __IHW_DEVICE_H__
 #define __IHW_DEVICE_H__

@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Injectable logging interface for Heartbeat.
  *  @date       : 2026/09/17
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __HEARTBEAT_LOG_H__

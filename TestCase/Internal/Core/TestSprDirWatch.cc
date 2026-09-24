@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SprDirWatch 目录监控内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <poll.h>
 #include <cstdio>
@@ -27,8 +20,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-bool WaitForMaskEvent(int32_t fd, uint32_t expectedMask, const std::string& expectedName)
-{
+bool WaitForMaskEvent(int32_t fd, uint32_t expectedMask, const std::string& expectedName) {
     struct pollfd pfd;
     pfd.fd = fd;
     pfd.events = POLLIN;
@@ -67,16 +59,14 @@ bool WaitForMaskEvent(int32_t fd, uint32_t expectedMask, const std::string& expe
 
 class Core_SprDirWatch : public ::testing::Test {
 protected:
-    void SetUp() override
-    {
+    void SetUp() override {
         char pathTemplate[] = "/tmp/spr_dir_watch_XXXXXX";
         char* created = mkdtemp(pathTemplate);
         ASSERT_TRUE(created != nullptr);
         mWatchDir = created;
     }
 
-    void TearDown() override
-    {
+    void TearDown() override {
         if (!mCreatedFile.empty()) {
             remove(mCreatedFile.c_str());
             mCreatedFile.clear();
@@ -94,8 +84,7 @@ protected:
 };
 
 // 测试添加目录监听并收到创建/删除事件
-TEST_F(Core_SprDirWatch, AddWatchAndReceiveCreateDeleteEvents)
-{
+TEST_F(Core_SprDirWatch, AddWatchAndReceiveCreateDeleteEvents) {
     SprDirWatch watcher;
     ASSERT_GE(watcher.GetInotifyFd(), 0);
 
@@ -118,8 +107,7 @@ TEST_F(Core_SprDirWatch, AddWatchAndReceiveCreateDeleteEvents)
 }
 
 // 测试添加无效路径监听返回失败
-TEST_F(Core_SprDirWatch, AddWatchInvalidPathFails)
-{
+TEST_F(Core_SprDirWatch, AddWatchInvalidPathFails) {
     SprDirWatch watcher;
     ASSERT_GE(watcher.GetInotifyFd(), 0);
 

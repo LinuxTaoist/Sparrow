@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : LogSink internal tests.
  *  @date       : 2026/09/20
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <string>
@@ -22,8 +21,7 @@
 
 namespace {
 
-LogConfiger::LogModuleAttrs FileAttrs(const std::string& path)
-{
+LogConfiger::LogModuleAttrs FileAttrs(const std::string& path) {
     return {
         {"enabled", "true"},
         {"level", "debug"},
@@ -38,8 +36,7 @@ LogConfiger::LogModuleAttrs FileAttrs(const std::string& path)
 }
 
 // 测试文件输出和强制刷新后能够正确读取日志内容
-TEST(LogM_LogSink, WritesAndFlushesFile)
-{
+TEST(LogM_LogSink, WritesAndFlushesFile) {
     const std::string path = "/tmp/sparrow_log_sink_test_" + std::to_string(getpid());
     LogSink sink(FileAttrs(path));
 
@@ -56,8 +53,7 @@ TEST(LogM_LogSink, WritesAndFlushesFile)
 }
 
 // 测试禁用开关和日志级别过滤
-TEST(LogM_LogSink, FiltersDisabledAndLevel)
-{
+TEST(LogM_LogSink, FiltersDisabledAndLevel) {
     auto attrs = FileAttrs("/tmp/sparrow_log_sink_disabled_" + std::to_string(getpid()));
     attrs[LOG_CONFIG_KEY_ENABLED] = LOG_CONFIG_VALUE_FALSE;
     LogSink disabled(attrs);
@@ -70,8 +66,7 @@ TEST(LogM_LogSink, FiltersDisabledAndLevel)
 }
 
 // 测试动态文件名格式以及达到容量限制后的文件轮转
-TEST(LogM_LogSink, CustomFileNameFormatAndRotation)
-{
+TEST(LogM_LogSink, CustomFileNameFormatAndRotation) {
     const std::string path = "/tmp/sparrow_log_sink_format_" + std::to_string(getpid());
     auto attrs = FileAttrs(path);
     attrs[LOG_CONFIG_KEY_FILE_NAME] = "main.log";
@@ -127,8 +122,7 @@ TEST(LogM_LogSink, CustomFileNameFormatAndRotation)
 }
 
 // 测试文件轮转时保留原始文件名中的时间戳
-TEST(LogM_LogSink, PreservesTimestampOnRotation)
-{
+TEST(LogM_LogSink, PreservesTimestampOnRotation) {
     const std::string path = "/tmp/sparrow_log_sink_timestamp_" + std::to_string(getpid());
     auto attrs = FileAttrs(path);
     attrs[LOG_CONFIG_KEY_FILE_NAME] = "main.log";
@@ -216,8 +210,7 @@ TEST(LogM_LogSink, PreservesTimestampOnRotation)
 }
 
 // 测试多次轮转后后缀正确递增
-TEST(LogM_LogSink, RotationSuffixIncrement)
-{
+TEST(LogM_LogSink, RotationSuffixIncrement) {
     const std::string path = "/tmp/sparrow_log_sink_suffix_" + std::to_string(getpid());
     auto attrs = FileAttrs(path);
     attrs[LOG_CONFIG_KEY_FILE_NAME] = "test.log";
@@ -264,8 +257,7 @@ TEST(LogM_LogSink, RotationSuffixIncrement)
 }
 
 // 测试达到最大文件数后删除最旧文件
-TEST(LogM_LogSink, RotationMaxFileCountExceeded)
-{
+TEST(LogM_LogSink, RotationMaxFileCountExceeded) {
     const std::string path = "/tmp/sparrow_log_sink_maxcount_" + std::to_string(getpid());
     auto attrs = FileAttrs(path);
     attrs[LOG_CONFIG_KEY_FILE_NAME] = "maxtest.log";
@@ -305,8 +297,7 @@ TEST(LogM_LogSink, RotationMaxFileCountExceeded)
 }
 
 // 测试连续快速轮转
-TEST(LogM_LogSink, RotationSequential)
-{
+TEST(LogM_LogSink, RotationSequential) {
     const std::string path = "/tmp/sparrow_log_sink_sequential_" + std::to_string(getpid());
     auto attrs = FileAttrs(path);
     attrs[LOG_CONFIG_KEY_FILE_NAME] = "seq.log";
@@ -356,8 +347,7 @@ TEST(LogM_LogSink, RotationSequential)
 }
 
 // 测试轮转时文件完整性（每个轮转的文件大小应为容量或接近）
-TEST(LogM_LogSink, RotationIntegrity)
-{
+TEST(LogM_LogSink, RotationIntegrity) {
     const std::string path = "/tmp/sparrow_log_sink_integrity_" + std::to_string(getpid());
     auto attrs = FileAttrs(path);
     attrs[LOG_CONFIG_KEY_FILE_NAME] = "intact.log";
@@ -405,8 +395,7 @@ TEST(LogM_LogSink, RotationIntegrity)
 }
 
 // 测试混合场景：多次轮转 + 名字中保留时间戳 + 正确的后缀序号
-TEST(LogM_LogSink, RotationComprehensive)
-{
+TEST(LogM_LogSink, RotationComprehensive) {
     const std::string path = "/tmp/sparrow_log_sink_comprehensive_" + std::to_string(getpid());
     auto attrs = FileAttrs(path);
     attrs[LOG_CONFIG_KEY_FILE_NAME] = "comp.log";

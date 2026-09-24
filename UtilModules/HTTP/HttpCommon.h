@@ -7,20 +7,12 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __HTTP_COMMON_H__
 #define __HTTP_COMMON_H__
 
-enum EHttpStatusCode
-{
+enum EHttpStatusCode {
     HTTP_STATUS_100 = 100,  // Continue
     HTTP_STATUS_101 = 101,  // Switching Protocols
     HTTP_STATUS_102 = 102,  // Processing (WebDAV)

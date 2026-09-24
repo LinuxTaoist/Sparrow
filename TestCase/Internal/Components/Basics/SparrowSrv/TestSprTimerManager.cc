@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/04/19
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/04/19 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include "TestModule.h"
@@ -25,8 +18,7 @@ using namespace InternalDefs;
 #define LOG_TAG "TimerTest"
 
 // 测试200ms永久定时器，等待1100ms后验证计数器值是否为5
-TEST_F(TestSprComponents, Timer200MSPermanentWait1100MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer200MSPermanentWait1100MSVerifyCount) {
     int32_t waitMs = 1180;
     int32_t expectVal = 5;
     const int32_t& actualVal = mpTestModule->Get200MSCnt();
@@ -40,8 +32,7 @@ TEST_F(TestSprComponents, Timer200MSPermanentWait1100MSVerifyCount)
 }
 
 // 测试200ms 5次定时器，等待1100ms后验证计数器值是否为5
-TEST_F(TestSprComponents, Timer200MS5TimesWait1100MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer200MS5TimesWait1100MSVerifyCount) {
     int32_t waitMs = 1100;
     int32_t expectVal = 5;
     const int32_t& actualVal = mpTestModule->Get200MSCnt();
@@ -54,8 +45,7 @@ TEST_F(TestSprComponents, Timer200MS5TimesWait1100MSVerifyCount)
 }
 
 // 测试500ms永久定时器，等待2600ms后验证计数器值是否为5
-TEST_F(TestSprComponents, Timer500MSPermanentWait2600MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer500MSPermanentWait2600MSVerifyCount) {
     int32_t waitMs = 2600;
     int32_t expectVal = 5;
     const int32_t& actualVal = mpTestModule->Get500MSCnt();
@@ -69,8 +59,7 @@ TEST_F(TestSprComponents, Timer500MSPermanentWait2600MSVerifyCount)
 }
 
 // 测试500ms 5次定时器，等待2600ms后验证计数器值是否为5
-TEST_F(TestSprComponents, Timer500MS5TimesWait2600MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer500MS5TimesWait2600MSVerifyCount) {
     int32_t waitMs = 2600;
     int32_t expectVal = 5;
     const int32_t& actualVal = mpTestModule->Get500MSCnt();
@@ -83,8 +72,7 @@ TEST_F(TestSprComponents, Timer500MS5TimesWait2600MSVerifyCount)
 }
 
 // 测试1s永久定时器，等待2100ms后验证计数器值是否为2
-TEST_F(TestSprComponents, Timer1SPermanentWait2100MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer1SPermanentWait2100MSVerifyCount) {
     int32_t waitMs = 2100;
     int32_t expectVal = 2;
     const int32_t& actualVal = mpTestModule->Get1SCnt();
@@ -98,8 +86,7 @@ TEST_F(TestSprComponents, Timer1SPermanentWait2100MSVerifyCount)
 }
 
 // 测试1s 2次定时器，等待3000ms后验证计数器值是否为2
-TEST_F(TestSprComponents, Timer1S2TimesWait3000MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer1S2TimesWait3000MSVerifyCount) {
     int32_t waitMs = 3000;
     int32_t expectVal = 2;
     const int32_t& actualVal = mpTestModule->Get1SCnt();
@@ -112,8 +99,7 @@ TEST_F(TestSprComponents, Timer1S2TimesWait3000MSVerifyCount)
 }
 
 // 测试2s永久定时器，等待4100ms后验证计数器值是否为2
-TEST_F(TestSprComponents, Timer2SPermanentWait4100MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer2SPermanentWait4100MSVerifyCount) {
     int32_t waitMs = 4100;
     int32_t expectVal = 2;
     const int32_t& actualVal = mpTestModule->Get2SCnt();
@@ -127,8 +113,7 @@ TEST_F(TestSprComponents, Timer2SPermanentWait4100MSVerifyCount)
 }
 
 // 测试2s 2次定时器，等待4100ms后验证计数器值是否为2
-TEST_F(TestSprComponents, Timer2S2TimesWait4100MSVerifyCount)
-{
+TEST_F(TestSprComponents, Timer2S2TimesWait4100MSVerifyCount) {
     int32_t waitMs = 4100;
     int32_t expectVal = 2;
     const int32_t& actualVal = mpTestModule->Get2SCnt();
@@ -141,8 +126,7 @@ TEST_F(TestSprComponents, Timer2S2TimesWait4100MSVerifyCount)
 }
 
 // 测试多个定时器交叉使用
-TEST_F(TestSprComponents, TimerMultipleTimersCrossUse)
-{
+TEST_F(TestSprComponents, TimerMultipleTimersCrossUse) {
     int32_t waitMs = 2100;
     int32_t expectVal200MS = 10;
     int32_t expectVal500MS = 4;
@@ -174,8 +158,7 @@ TEST_F(TestSprComponents, TimerMultipleTimersCrossUse)
 }
 
 // 测试先注册多个定时器，然后注销部分定时器
-TEST_F(TestSprComponents, TimerRegisterMultiUnregisterPart)
-{
+TEST_F(TestSprComponents, TimerRegisterMultiUnregisterPart) {
     int32_t waitMsFirst = 1100;
     int32_t waitMsSecond = 1100;
     int32_t expectVal200MSFirst = 5;
@@ -207,8 +190,7 @@ TEST_F(TestSprComponents, TimerRegisterMultiUnregisterPart)
 }
 
 // 测试多个定时器顺序启动和停止
-TEST_F(TestSprComponents, TimerMultipleTimersSeqStartStop)
-{
+TEST_F(TestSprComponents, TimerMultipleTimersSeqStartStop) {
     int32_t waitMs1 = 1100;
     int32_t waitMs2 = 1100;
     int32_t waitMs3 = 1100;
@@ -243,8 +225,7 @@ TEST_F(TestSprComponents, TimerMultipleTimersSeqStartStop)
 }
 
 // 测试多个定时器交替启动和停止
-TEST_F(TestSprComponents, TimerMultipleTimersAltStartStop)
-{
+TEST_F(TestSprComponents, TimerMultipleTimersAltStartStop) {
     int32_t waitMs = 510;
     int32_t expectVal200MS = 2;
     int32_t expectVal500MS = 1;

@@ -7,13 +7,7 @@
  *  @version    : 1.0
  *  @brief      : HTTP UI Server implementation
  *  @date       : 2026/05/28
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <stdio.h>
 #include <list>
@@ -36,8 +30,7 @@ using namespace std;
 
 namespace {
 
-std::string UrlDecode(const std::string& input)
-{
+std::string UrlDecode(const std::string& input) {
     std::string result;
     for (size_t i = 0; i < input.length(); ++i) {
         if (input[i] == '%' && i + 2 < input.length()) {
@@ -57,8 +50,7 @@ std::string UrlDecode(const std::string& input)
     return result;
 }
 
-std::string EscapeJson(const std::string& input)
-{
+std::string EscapeJson(const std::string& input) {
     std::ostringstream oss;
     for (const auto c : input) {
         switch (c) {
@@ -98,8 +90,7 @@ std::string EscapeJson(const std::string& input)
     return oss.str();
 }
 
-std::string BuildJsonStatus(int32_t queues, int32_t pending, int32_t total, int32_t peak, const std::string& busiest)
-{
+std::string BuildJsonStatus(int32_t queues, int32_t pending, int32_t total, int32_t peak, const std::string& busiest) {
     std::ostringstream oss;
     oss << "{"
         << "\"queues\":" << queues << ","
@@ -111,8 +102,7 @@ std::string BuildJsonStatus(int32_t queues, int32_t pending, int32_t total, int3
     return oss.str();
 }
 
-std::string BuildJsonQueue(const SMQueueDetails& mq)
-{
+std::string BuildJsonQueue(const SMQueueDetails& mq) {
     std::ostringstream oss;
     oss << "{"
         << "\"name\":\"" << EscapeJson(mq.mqName) << "\","
@@ -124,8 +114,7 @@ std::string BuildJsonQueue(const SMQueueDetails& mq)
     return oss.str();
 }
 
-std::string GetHttpStatus()
-{
+std::string GetHttpStatus() {
     int32_t queueCount = 0;
     int32_t pendingMsgs = 0;
     int32_t totalMsgs = 0;
@@ -149,8 +138,7 @@ std::string GetHttpStatus()
     return BuildJsonStatus(queueCount, pendingMsgs, totalMsgs, usedPeak, busiestQueue);
 }
 
-std::string GetQueueDetails()
-{
+std::string GetQueueDetails() {
     std::vector<SMQueueDetails> mqAttrVec;
     SprMediatorInterface* pMediator = SprMediatorInterface::GetInstance();
 
@@ -171,27 +159,23 @@ std::string GetQueueDetails()
     return oss.str();
 }
 
-std::string GetHtmlPage(const std::string& activePage)
-{
+std::string GetHtmlPage(const std::string& activePage) {
     return HUIRender::BuildHtmlPage(activePage);
 }
 
-std::string GetDeviceProfile()
-{
+std::string GetDeviceProfile() {
     std::string profile;
     HUIShell::GetDeviceProfile(profile);
     return profile;
 }
 
-std::string GetResourceUsage()
-{
+std::string GetResourceUsage() {
     std::string resources;
     HUIShell::GetResourceUsage(resources);
     return resources;
 }
 
-std::string ExecuteShellCommand(const std::string& cmd)
-{
+std::string ExecuteShellCommand(const std::string& cmd) {
     if (cmd.empty()) {
         std::ostringstream oss;
         oss << "{\"prompt\":\"" << EscapeJson(HUIShell::GetPrompt()) << "\",\"output\":\"\",\"exitCode\":0}";
@@ -216,15 +200,13 @@ std::string ExecuteShellCommand(const std::string& cmd)
     return oss.str();
 }
 
-std::string BuildShellInitResponse()
-{
+std::string BuildShellInitResponse() {
     std::ostringstream oss;
     oss << "{\"prompt\":\"" << EscapeJson(HUIShell::GetPrompt()) << "\"}";
     return oss.str();
 }
 
-std::string BuildShellWriteResponse(const std::string& cmd)
-{
+std::string BuildShellWriteResponse(const std::string& cmd) {
     std::string promptBefore;
     int ret = HUIShell::SendCommand(cmd, promptBefore);
 
@@ -236,8 +218,7 @@ std::string BuildShellWriteResponse(const std::string& cmd)
     return oss.str();
 }
 
-std::string BuildShellReadResponse()
-{
+std::string BuildShellReadResponse() {
     std::string output;
     std::string promptAfter;
     bool promptReady = false;
@@ -253,16 +234,14 @@ std::string BuildShellReadResponse()
     return oss.str();
 }
 
-std::string BuildShellInterruptResponse()
-{
+std::string BuildShellInterruptResponse() {
     int ret = HUIShell::Interrupt();
     std::ostringstream oss;
     oss << "{\"ok\":" << (ret == 0 ? "true" : "false") << "}";
     return oss.str();
 }
 
-void BuildHttpResponse(const std::string& uri, std::string& body, int32_t& statusCode, bool& isHtmlResponse)
-{
+void BuildHttpResponse(const std::string& uri, std::string& body, int32_t& statusCode, bool& isHtmlResponse) {
     statusCode = HTTP_STATUS_404;
     isHtmlResponse = false;
     body.clear();
@@ -327,17 +306,14 @@ void BuildHttpResponse(const std::string& uri, std::string& body, int32_t& statu
 
 }  // namespace
 
-HUIServer::HUIServer() : mPort(HUI_DEFAULT_PORT), mRunning(false)
-{
+HUIServer::HUIServer() : mPort(HUI_DEFAULT_PORT), mRunning(false) {
 }
 
-HUIServer::~HUIServer()
-{
+HUIServer::~HUIServer() {
     Stop();
 }
 
-int HUIServer::Start(int port)
-{
+int HUIServer::Start(int port) {
     mPort = port;
     mRunning = true;
 
@@ -413,7 +389,6 @@ int HUIServer::Start(int port)
     return 0;
 }
 
-void HUIServer::Stop()
-{
+void HUIServer::Stop() {
     mRunning = false;
 }

@@ -9,13 +9,7 @@
  *  @date       : 2025/03/08
  *
  *  Defines macros for property names across all general modules..
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/03/08 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_PROPERTY_MACROS_H__
 #define __SPR_PROPERTY_MACROS_H__

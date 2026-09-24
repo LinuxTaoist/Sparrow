@@ -32,21 +32,14 @@
  *      std::cout << "Code block took " << timeInSeconds << " seconds." << std::endl;
  *      // double timeInMilliseconds = timer.GetTimeInMSec();      // total time in milliseconds
  *      // std::cout << "Code block took " << timeInMilliseconds << " milliseconds." << std::endl;
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/09/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __RUNNING_TIMING_H__
 #define __RUNNING_TIMING_H__
 
 #include <stdint.h>
 
-class RunningTiming
-{
+class RunningTiming {
 public:
     /**
      * @brief Constructor. Initializes the timer and automatically records the start time.

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/05/07
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/05/07 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <vector>
 #include <errno.h>
@@ -30,8 +23,7 @@ IEpollEvent::~IEpollEvent() {
     // Close();
 }
 
-ssize_t IEpollEvent::Write(int32_t fd, const char* data, size_t size)
-{
+ssize_t IEpollEvent::Write(int32_t fd, const char* data, size_t size) {
     const char* ptr = data;
     size_t nleft = size;
 
@@ -60,23 +52,19 @@ ssize_t IEpollEvent::Write(int32_t fd, const char* data, size_t size)
     return (size - nleft);
 }
 
-ssize_t IEpollEvent::Write(int32_t fd, const std::string& bytes)
-{
+ssize_t IEpollEvent::Write(int32_t fd, const std::string& bytes) {
     return Write(fd, bytes.c_str(), bytes.size());
 }
 
-ssize_t IEpollEvent::Write(const char* data, size_t size)
-{
+ssize_t IEpollEvent::Write(const char* data, size_t size) {
     return Write(mEvtFd, data, size);
 }
 
-ssize_t IEpollEvent::Write(const std::string& bytes)
-{
+ssize_t IEpollEvent::Write(const std::string& bytes) {
     return Write(mEvtFd, bytes.c_str(), bytes.size());
 }
 
-ssize_t IEpollEvent::Read(int32_t fd, char* data, size_t size)
-{
+ssize_t IEpollEvent::Read(int32_t fd, char* data, size_t size) {
     char* ptr = data;
     size_t nleft = size;
 
@@ -129,23 +117,19 @@ ssize_t IEpollEvent::Read(int32_t fd, std::string& bytes) {
     return totalBytesRead;
 }
 
-ssize_t IEpollEvent::Read(char* data, size_t size)
-{
+ssize_t IEpollEvent::Read(char* data, size_t size) {
     return Read(mEvtFd, data, size);
 }
 
-ssize_t IEpollEvent::Read(std::string& bytes)
-{
+ssize_t IEpollEvent::Read(std::string& bytes) {
     return Read(mEvtFd, bytes);
 }
 
-bool IEpollEvent::IsReady()
-{
+bool IEpollEvent::IsReady() {
     return mReady;
 }
 
-void IEpollEvent::Close()
-{
+void IEpollEvent::Close() {
     PLOGD("Close fd: %d\n", mEvtFd);
     if (mEvtFd == -1) {
         return;
@@ -156,16 +140,14 @@ void IEpollEvent::Close()
     mEvtFd = -1;
 }
 
-void IEpollEvent::AddToPoll()
-{
+void IEpollEvent::AddToPoll() {
     auto epollHandler = EpollEventHandler::GetInstance();
     if (epollHandler) {
         epollHandler->AddPoll(this);
     }
 }
 
-void IEpollEvent::DelFromPoll()
-{
+void IEpollEvent::DelFromPoll() {
     auto epollHandler = EpollEventHandler::GetInstance();
     if (epollHandler) {
         epollHandler->DelPoll(this);

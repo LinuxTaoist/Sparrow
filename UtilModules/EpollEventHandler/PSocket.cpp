@@ -7,15 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/07
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/07 | 1.0.0.1   | Xiang.D        | Create file
- *  2024/11/22 | 1.0.0.2   | Xiang.D        | Interface adjustment
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <errno.h>
 #include <unistd.h>
@@ -35,16 +27,14 @@ using namespace std;
 //---------------------------------------------------------------------------------------------------------------------
 // SocketCommon: Socket common functions
 //---------------------------------------------------------------------------------------------------------------------
-bool SocketCommon::IsIPAddress(const std::string& str)
-{
+bool SocketCommon::IsIPAddress(const std::string& str) {
     struct sockaddr_in sa;
     struct sockaddr_in6 sa6;
     return (inet_pton(AF_INET, str.c_str(), &(sa.sin_addr)) == 1 ||
             inet_pton(AF_INET6, str.c_str(), &(sa6.sin6_addr)) == 1);
 }
 
-std::string SocketCommon::ResolveHostToIP(const std::string& host)
-{
+std::string SocketCommon::ResolveHostToIP(const std::string& host) {
     if (IsIPAddress(host)) {
         return host;
     }
@@ -79,13 +69,11 @@ std::string SocketCommon::ResolveHostToIP(const std::string& host)
 //---------------------------------------------------------------------------------------------------------------------
 // PUdp: UDP with PSOCKET_UDP
 //---------------------------------------------------------------------------------------------------------------------
-PUdp::~PUdp()
-{
+PUdp::~PUdp() {
     Close();
 }
 
-int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
-{
+int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen) {
     mEvtFd = socket(AF_INET, SOCK_DGRAM, 0);
     if (mEvtFd == -1) {
         PLOGE("socket failed! (%s)\n", strerror(errno));
@@ -130,13 +118,11 @@ int32_t PUdp::AsUdp(uint16_t port, int32_t rcvLen, int32_t sndLen)
     return ret;
 }
 
-int32_t PUdp::Write(const std::string& bytes, const std::string& addr, uint16_t port)
-{
+int32_t PUdp::Write(const std::string& bytes, const std::string& addr, uint16_t port) {
     return Write(bytes.c_str(), bytes.size(), addr, port);
 }
 
-int32_t PUdp::Write(const void* data, size_t size, const std::string& addr, uint16_t port)
-{
+int32_t PUdp::Write(const void* data, size_t size, const std::string& addr, uint16_t port) {
     if (!data || size == 0) {
         PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
@@ -155,8 +141,7 @@ int32_t PUdp::Write(const void* data, size_t size, const std::string& addr, uint
     return ret;
 }
 
-int32_t PUdp::Read(std::string& bytes, std::string& addr, uint16_t& port)
-{
+int32_t PUdp::Read(std::string& bytes, std::string& addr, uint16_t& port) {
     char buf[2048] = {0};
     std::string tmpAddr;
     uint16_t tmpPort;
@@ -170,8 +155,7 @@ int32_t PUdp::Read(std::string& bytes, std::string& addr, uint16_t& port)
     return bytesRead;
 }
 
-int32_t PUdp::Read(void* data, size_t size, std::string& addr, uint16_t& port)
-{
+int32_t PUdp::Read(void* data, size_t size, std::string& addr, uint16_t& port) {
     if (!data || size == 0) {
         PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
@@ -189,8 +173,7 @@ int32_t PUdp::Read(void* data, size_t size, std::string& addr, uint16_t& port)
     return ret;
 }
 
-void* PUdp::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PUdp::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     arg = arg ? arg : this;
     if (mCb1) {
         mCb1(fd, arg);
@@ -210,13 +193,11 @@ void* PUdp::EpollEvent(int32_t fd, EpollType eType, void* arg)
 //---------------------------------------------------------------------------------------------------------------------
 // PTcpServer: TCP server
 //---------------------------------------------------------------------------------------------------------------------
-PTcpServer::~PTcpServer()
-{
+PTcpServer::~PTcpServer() {
     Close();
 }
 
-int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::string& addr)
-{
+int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::string& addr) {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
         PLOGE("socket failed! (%s)\n", strerror(errno));
@@ -249,8 +230,7 @@ int32_t PTcpServer::AsTcpServer(uint16_t port, int32_t backlog, const std::strin
     return ret;
 }
 
-void* PTcpServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PTcpServer::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     struct sockaddr_in client;
     socklen_t len = (socklen_t)sizeof(client);
     int32_t cliFd = accept(fd, (struct sockaddr *)&client, &len);
@@ -271,8 +251,7 @@ void* PTcpServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
 // PTcpClient: TCP client
 //---------------------------------------------------------------------------------------------------------------------
 PTcpClient::PTcpClient(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg)
-    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
-{
+    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {
     int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     if (flags >= 0) {
         fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
@@ -287,8 +266,7 @@ PTcpClient::PTcpClient(int32_t fd, const std::function<void(int32_t, void*)>& cb
 }
 
 PTcpClient::PTcpClient(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
-    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb)
-{
+    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {
     int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     if (flags >= 0) {
         fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
@@ -303,8 +281,7 @@ PTcpClient::PTcpClient(int32_t fd, const std::function<void(ssize_t, std::string
 }
 
 PTcpClient::PTcpClient(const std::function<void(int32_t, void*)>& cb, void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
-{
+    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
         PLOGE("socket failed! (%s)\n", strerror(errno));
@@ -320,8 +297,7 @@ PTcpClient::PTcpClient(const std::function<void(int32_t, void*)>& cb, void* arg)
 }
 
 PTcpClient::PTcpClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb)
-{
+    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {
     mEvtFd = socket(AF_INET, SOCK_STREAM, 0);
     if (mEvtFd == -1) {
         PLOGE("socket failed! (%s)\n", strerror(errno));
@@ -336,13 +312,11 @@ PTcpClient::PTcpClient(const std::function<void(ssize_t, std::string, void*)>& c
     }
 }
 
-PTcpClient::~PTcpClient()
-{
+PTcpClient::~PTcpClient() {
     Close();
 }
 
-int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t srvPort, int32_t rcvLen, int32_t sndLen, int32_t timeoutMs)
-{
+int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t srvPort, int32_t rcvLen, int32_t sndLen, int32_t timeoutMs) {
     int32_t op;
     struct linger so_linger;
     struct sockaddr_in server;
@@ -423,8 +397,7 @@ int32_t PTcpClient::AsTcpClient(bool con, const std::string& srvAddr, uint16_t s
     return 0;
 }
 
-void* PTcpClient::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PTcpClient::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     arg = arg ? arg : this;
     if (mCb1) {
         mCb1(fd, arg);
@@ -442,13 +415,11 @@ void* PTcpClient::EpollEvent(int32_t fd, EpollType eType, void* arg)
 //---------------------------------------------------------------------------------------------------------------------
 // PUnixDgram: Unix dgram
 //---------------------------------------------------------------------------------------------------------------------
-PUnixDgram::~PUnixDgram()
-{
+PUnixDgram::~PUnixDgram() {
     Close();
 }
 
-int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int32_t sndLen)
-{
+int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int32_t sndLen) {
     unlink(srcPath.c_str());
     mEvtFd = socket(AF_UNIX, SOCK_DGRAM, 0);
     if (mEvtFd < 0) {
@@ -484,13 +455,11 @@ int32_t PUnixDgram::AsUnixDgram(const std::string& srcPath, int32_t rcvLen, int3
     return ret;
 }
 
-int32_t PUnixDgram::Write(const std::string& bytes, const std::string& dstPath)
-{
+int32_t PUnixDgram::Write(const std::string& bytes, const std::string& dstPath) {
     return Write(bytes.c_str(), bytes.size(), dstPath);
 }
 
-int32_t PUnixDgram::Write(const void* data, size_t size, const std::string& dstPath)
-{
+int32_t PUnixDgram::Write(const void* data, size_t size, const std::string& dstPath) {
     if (!data || size == 0) {
         PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
@@ -509,8 +478,7 @@ int32_t PUnixDgram::Write(const void* data, size_t size, const std::string& dstP
     return ret;
 }
 
-int32_t PUnixDgram::Read(std::string& bytes, std::string& dstPath)
-{
+int32_t PUnixDgram::Read(std::string& bytes, std::string& dstPath) {
     std::string tempBytes;
     int32_t totalBytesRead = 0;
     bool firstRead = true;
@@ -545,8 +513,7 @@ int32_t PUnixDgram::Read(std::string& bytes, std::string& dstPath)
     return totalBytesRead;
 }
 
-int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath)
-{
+int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath) {
     if (!data || size == 0) {
         PLOGE("Invalid params! data = %p, size = %zu\n", data, size);
         return -1;
@@ -564,8 +531,7 @@ int32_t PUnixDgram::Read(void* data, size_t size, std::string& dstPath)
     return ret;
 }
 
-void* PUnixDgram::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PUnixDgram::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     arg = arg ? arg : this;
     if (mCb1) {
         mCb1(fd, arg);
@@ -584,13 +550,11 @@ void* PUnixDgram::EpollEvent(int32_t fd, EpollType eType, void* arg)
 //---------------------------------------------------------------------------------------------------------------------
 // PUnixStreamServer: Unix stream server
 //---------------------------------------------------------------------------------------------------------------------
-PUnixStreamServer::~PUnixStreamServer()
-{
+PUnixStreamServer::~PUnixStreamServer() {
     Close();
 }
 
-int32_t PUnixStreamServer::AsUnixStreamServer(const std::string& srvPath, int32_t backlog)
-{
+int32_t PUnixStreamServer::AsUnixStreamServer(const std::string& srvPath, int32_t backlog) {
     unlink(srvPath.c_str());
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
@@ -625,8 +589,7 @@ int32_t PUnixStreamServer::AsUnixStreamServer(const std::string& srvPath, int32_
     return ret;
 }
 
-void* PUnixStreamServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PUnixStreamServer::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     struct sockaddr_un client;
     socklen_t len = (socklen_t)sizeof(client);
     int32_t cliFd = accept(fd, (struct sockaddr *)&client, &len);
@@ -647,8 +610,7 @@ void* PUnixStreamServer::EpollEvent(int32_t fd, EpollType eType, void* arg)
 // PUnixStreamClient : Unix stream client
 //---------------------------------------------------------------------------------------------------------------------
 PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(int32_t, void*)>& cb, void* arg)
-    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
-{
+    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
@@ -658,8 +620,7 @@ PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(int32_
 }
 
 PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
-    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb)
-{
+    : IEpollEvent(fd, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {
     int32_t op = 1;
     if (setsockopt(mEvtFd, SOL_SOCKET, SO_REUSEADDR, &op, sizeof(op)) < 0) {
         PLOGE("setsockopt %d failed! (%s)\n", mEvtFd, strerror(errno));
@@ -669,8 +630,7 @@ PUnixStreamClient::PUnixStreamClient(int32_t fd, const std::function<void(ssize_
 }
 
 PUnixStreamClient::PUnixStreamClient(const std::function<void(int32_t, void*)>& cb, void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr)
-{
+    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
         PLOGE("socket failed! (%s)\n", strerror(errno));
@@ -686,8 +646,7 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(int32_t, void*)>& 
 }
 
 PUnixStreamClient::PUnixStreamClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg)
-    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb)
-{
+    : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {
     mEvtFd = socket(AF_UNIX, SOCK_STREAM, 0);
     if (mEvtFd < 0) {
         PLOGE("socket failed! (%s)\n", strerror(errno));
@@ -702,13 +661,11 @@ PUnixStreamClient::PUnixStreamClient(const std::function<void(ssize_t, std::stri
     }
 }
 
-PUnixStreamClient::~PUnixStreamClient()
-{
+PUnixStreamClient::~PUnixStreamClient() {
     Close();
 }
 
-int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPath, const std::string& cliPath, int32_t timeoutMs)
-{
+int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPath, const std::string& cliPath, int32_t timeoutMs) {
     int32_t flags = fcntl(mEvtFd, F_GETFL, 0);
     fcntl(mEvtFd, F_SETFL, flags | O_NONBLOCK);
 
@@ -766,8 +723,7 @@ int32_t PUnixStreamClient::AsUnixStreamClient(bool con, const std::string& srvPa
     return 0;
 }
 
-void* PUnixStreamClient::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PUnixStreamClient::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     arg = arg ? arg : this;
     if (mCb1) {
         mCb1(fd, arg);

@@ -7,13 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/11/11
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/11/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string.h>
 #include <errno.h>
@@ -36,8 +30,7 @@ constexpr uint8_t NTP_STRATUM_MAX = 16;        // 层级字段最大有效值（
 constexpr uint8_t NTP_POLL_MAX = 20;           // 轮询间隔最大有效值
 constexpr uint64_t NTP_UNIX_EPOCH_OFFSET = 2208988800ULL; // NTP纪元与UNIX纪元的时间差（1970-1900）
 
-NtpProtocol::NtpProtocol(const std::string& bytes)
-{
+NtpProtocol::NtpProtocol(const std::string& bytes) {
     mLiVnMode.Li = 0;          // 无leap警告
     mLiVnMode.VN = 4;          // NTPv4
     mLiVnMode.Mode = 3;        // 客户端模式
@@ -58,12 +51,10 @@ NtpProtocol::NtpProtocol(const std::string& bytes)
     }
 }
 
-NtpProtocol::~NtpProtocol()
-{
+NtpProtocol::~NtpProtocol() {
 }
 
-int32_t NtpProtocol::Encode(std::string& bytes)
-{
+int32_t NtpProtocol::Encode(std::string& bytes) {
     if (mLiVnMode.Li > NTP_LI_MAX ||
         mLiVnMode.VN < NTP_VN_MIN || mLiVnMode.VN > NTP_VN_MAX ||
         mLiVnMode.Mode > NTP_MODE_MAX ||
@@ -113,8 +104,7 @@ int32_t NtpProtocol::Encode(std::string& bytes)
     return offset;
 }
 
-int32_t NtpProtocol::Decode(const std::string& bytes)
-{
+int32_t NtpProtocol::Decode(const std::string& bytes) {
     if (bytes.size() < NTP_BASE_PACKET_SIZE) {
         return -1;
     }
@@ -161,8 +151,7 @@ int32_t NtpProtocol::Decode(const std::string& bytes)
     return offset;
 }
 
-void NtpProtocol::EncodeNtpTimestamp(uint64_t timestamp, uint8_t* pBuf)
-{
+void NtpProtocol::EncodeNtpTimestamp(uint64_t timestamp, uint8_t* pBuf) {
     uint32_t sec = static_cast<uint32_t>((timestamp >> 32) & 0xFFFFFFFF);
     uint32_t frac = static_cast<uint32_t>(timestamp & 0xFFFFFFFF);
 
@@ -170,16 +159,14 @@ void NtpProtocol::EncodeNtpTimestamp(uint64_t timestamp, uint8_t* pBuf)
     *reinterpret_cast<uint32_t*>(pBuf + 4) = htonl(frac);
 }
 
-uint64_t NtpProtocol::NtpProtocol::DecodeNtpTimestamp(const uint8_t* pBuf)
-{
+uint64_t NtpProtocol::NtpProtocol::DecodeNtpTimestamp(const uint8_t* pBuf) {
     uint32_t sec = ntohl(*reinterpret_cast<const uint32_t*>(pBuf));
     uint32_t frac = ntohl(*reinterpret_cast<const uint32_t*>(pBuf + 4));
 
     return (static_cast<uint64_t>(sec) << 32) | frac;
 }
 
-void NtpProtocol::UpdateOriginateTimestamp()
-{
+void NtpProtocol::UpdateOriginateTimestamp() {
     struct timespec ts;
     if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
         mOriginateTimestamp = 0;
@@ -192,148 +179,119 @@ void NtpProtocol::UpdateOriginateTimestamp()
     mOriginateTimestamp = (ntpSec << 32) | ntpFrac;
 }
 
-uint8_t NtpProtocol::GetLi()
-{
+uint8_t NtpProtocol::GetLi() {
     return mLiVnMode.Li;
 }
 
-uint8_t NtpProtocol::GetVn()
-{
+uint8_t NtpProtocol::GetVn() {
     return mLiVnMode.VN;
 }
 
-uint8_t NtpProtocol::GetMode()
-{
+uint8_t NtpProtocol::GetMode() {
     return mLiVnMode.Mode;
 }
 
-uint8_t NtpProtocol::GetStratum()
-{
+uint8_t NtpProtocol::GetStratum() {
     return mStratum;
 }
 
-uint8_t NtpProtocol::GetPoll()
-{
+uint8_t NtpProtocol::GetPoll() {
     return mPoll;
 }
 
-uint8_t NtpProtocol::GetPrecision()
-{
+uint8_t NtpProtocol::GetPrecision() {
     return mPrecision;
 }
 
-uint32_t NtpProtocol::GetRootDelay()
-{
+uint32_t NtpProtocol::GetRootDelay() {
     return mRootDelay;
 }
 
-uint32_t NtpProtocol::GetRootDispersion()
-{
+uint32_t NtpProtocol::GetRootDispersion() {
     return mRootDispersion;
 }
 
-uint32_t NtpProtocol::GetReferenceId()
-{
+uint32_t NtpProtocol::GetReferenceId() {
     return mReferenceId;
 }
 
-uint64_t NtpProtocol::GetReferenceTimestamp()
-{
+uint64_t NtpProtocol::GetReferenceTimestamp() {
     return mReferenceTimestamp;
 }
 
-uint64_t NtpProtocol::GetOriginateTimestamp()
-{
+uint64_t NtpProtocol::GetOriginateTimestamp() {
     return mOriginateTimestamp;
 }
 
-uint64_t NtpProtocol::GetReceiveTimestamp()
-{
+uint64_t NtpProtocol::GetReceiveTimestamp() {
     return mReceiveTimestamp;
 }
 
-uint64_t NtpProtocol::GetTransmitTimestamp()
-{
+uint64_t NtpProtocol::GetTransmitTimestamp() {
     return mTransmitTimestamp;
 }
 
-void NtpProtocol::GetAuthKeyID(std::string& key)
-{
+void NtpProtocol::GetAuthKeyID(std::string& key) {
     key = mAuthKeyIDs;
 }
 
-void NtpProtocol::SetLi(uint8_t li)
-{
+void NtpProtocol::SetLi(uint8_t li) {
     mLiVnMode.Li = li;
 }
 
-void NtpProtocol::SetVn(uint8_t vn)
-{
+void NtpProtocol::SetVn(uint8_t vn) {
     mLiVnMode.VN = vn;
 }
 
-void NtpProtocol::SetMode(uint8_t mode)
-{
+void NtpProtocol::SetMode(uint8_t mode) {
     mLiVnMode.Mode = mode;
 }
 
-void NtpProtocol::SetStratum(uint8_t stratum)
-{
+void NtpProtocol::SetStratum(uint8_t stratum) {
     mStratum = stratum;
 }
 
-void NtpProtocol::SetPoll(uint8_t poll)
-{
+void NtpProtocol::SetPoll(uint8_t poll) {
     mPoll = poll;
 }
 
-void NtpProtocol::SetPrecision(uint8_t precision)
-{
+void NtpProtocol::SetPrecision(uint8_t precision) {
     mPrecision = precision;
 }
 
-void NtpProtocol::SetRootDelay(uint32_t rootDelay)
-{
+void NtpProtocol::SetRootDelay(uint32_t rootDelay) {
     mRootDelay = rootDelay;
 }
 
-void NtpProtocol::SetRootDispersion(uint32_t rootDispersion)
-{
+void NtpProtocol::SetRootDispersion(uint32_t rootDispersion) {
     mRootDispersion = rootDispersion;
 }
 
-void NtpProtocol::SetReferenceId(uint32_t referenceId)
-{
+void NtpProtocol::SetReferenceId(uint32_t referenceId) {
     mReferenceId = referenceId;
 }
 
-void NtpProtocol::SetReferenceTimestamp(uint64_t referenceTimestamp)
-{
+void NtpProtocol::SetReferenceTimestamp(uint64_t referenceTimestamp) {
     mReferenceTimestamp = referenceTimestamp;
 }
 
-void NtpProtocol::SetOriginateTimestamp(uint64_t originateTimestamp)
-{
+void NtpProtocol::SetOriginateTimestamp(uint64_t originateTimestamp) {
     mOriginateTimestamp = originateTimestamp;
 }
 
-void NtpProtocol::SetReceiveTimestamp(uint64_t receiveTimestamp)
-{
+void NtpProtocol::SetReceiveTimestamp(uint64_t receiveTimestamp) {
     mReceiveTimestamp = receiveTimestamp;
 }
 
-void NtpProtocol::SetTransmitTimestamp(uint64_t transmitTimestamp)
-{
+void NtpProtocol::SetTransmitTimestamp(uint64_t transmitTimestamp) {
     mTransmitTimestamp = transmitTimestamp;
 }
 
-void NtpProtocol::SetAuthKeyID(const std::string& key)
-{
+void NtpProtocol::SetAuthKeyID(const std::string& key) {
     mAuthKeyIDs = key;
 }
 
-void NtpProtocol::DumpDetails()
-{
+void NtpProtocol::DumpDetails() {
     SPR_LOGI("NTP Protocol Details:\n");
     SPR_LOGI("Li: %d, VN: %d, Mode: %d\n", mLiVnMode.Li, mLiVnMode.VN, mLiVnMode.Mode);
     SPR_LOGI("Stratum: %d, Poll: %d, Precision: %d\n", mStratum, mPoll, mPrecision);

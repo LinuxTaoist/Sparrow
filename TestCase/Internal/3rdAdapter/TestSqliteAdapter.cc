@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SqliteAdapter SQLite 适配器内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <cstdio>
@@ -39,15 +32,13 @@ protected:
 };
 
 // 测试单例模式返回非空
-TEST_F(Util_SqliteAdapter, GetInstanceReturnsValid)
-{
+TEST_F(Util_SqliteAdapter, GetInstanceReturnsValid) {
     ASSERT_TRUE(mpDb != nullptr);
     EXPECT_EQ(mpDb, SqliteAdapter::GetInstance(":memory:"));
 }
 
 // 测试建表并插入数据
-TEST_F(Util_SqliteAdapter, CreateTableAndInsert)
-{
+TEST_F(Util_SqliteAdapter, CreateTableAndInsert) {
     std::map<std::string, std::string> cols = {
         {"id", "INTEGER PRIMARY KEY"},
         {"name", "TEXT"},
@@ -62,8 +53,7 @@ TEST_F(Util_SqliteAdapter, CreateTableAndInsert)
 }
 
 // 测试查询数据（带列名重载）
-TEST_F(Util_SqliteAdapter, QueryByTableAndColumns)
-{
+TEST_F(Util_SqliteAdapter, QueryByTableAndColumns) {
     std::map<std::string, std::string> cols = {{"id", "INTEGER"}, {"val", "TEXT"}};
     ASSERT_TRUE(mpDb->CreateTable("t_query", cols));
 
@@ -80,8 +70,7 @@ TEST_F(Util_SqliteAdapter, QueryByTableAndColumns)
 }
 
 // 测试查询数据（原始 SQL 重载）
-TEST_F(Util_SqliteAdapter, QueryByRawSql)
-{
+TEST_F(Util_SqliteAdapter, QueryByRawSql) {
     std::map<std::string, std::string> cols = {{"id", "INTEGER"}, {"val", "TEXT"}};
     ASSERT_TRUE(mpDb->CreateTable("t_raw", cols));
     std::vector<std::pair<std::string, std::string>> v = {{"id", "1"}, {"val", "abc"}};
@@ -94,8 +83,7 @@ TEST_F(Util_SqliteAdapter, QueryByRawSql)
 }
 
 // 测试更新数据
-TEST_F(Util_SqliteAdapter, Update)
-{
+TEST_F(Util_SqliteAdapter, Update) {
     std::map<std::string, std::string> cols = {{"id", "INTEGER"}, {"val", "TEXT"}};
     ASSERT_TRUE(mpDb->CreateTable("t_update", cols));
     std::vector<std::pair<std::string, std::string>> v = {{"id", "1"}, {"val", "before"}};
@@ -110,8 +98,7 @@ TEST_F(Util_SqliteAdapter, Update)
 }
 
 // 测试删除数据
-TEST_F(Util_SqliteAdapter, Remove)
-{
+TEST_F(Util_SqliteAdapter, Remove) {
     std::map<std::string, std::string> cols = {{"id", "INTEGER"}, {"val", "TEXT"}};
     ASSERT_TRUE(mpDb->CreateTable("t_remove", cols));
     std::vector<std::pair<std::string, std::string>> v = {{"id", "1"}, {"val", "x"}};
@@ -125,8 +112,7 @@ TEST_F(Util_SqliteAdapter, Remove)
 }
 
 // 测试执行任意 SQL
-TEST_F(Util_SqliteAdapter, Execute)
-{
+TEST_F(Util_SqliteAdapter, Execute) {
     EXPECT_TRUE(mpDb->Execute("CREATE TABLE IF NOT EXISTS t_exec (id INTEGER)"));
     EXPECT_TRUE(mpDb->Execute("INSERT INTO t_exec (id) VALUES (42)"));
 
@@ -137,8 +123,7 @@ TEST_F(Util_SqliteAdapter, Execute)
 }
 
 // 测试备份到文件
-TEST_F(Util_SqliteAdapter, BackupTo)
-{
+TEST_F(Util_SqliteAdapter, BackupTo) {
     std::map<std::string, std::string> cols = {{"id", "INTEGER"}, {"val", "TEXT"}};
     ASSERT_TRUE(mpDb->CreateTable("t_backup", cols));
     std::vector<std::pair<std::string, std::string>> v = {{"id", "1"}, {"val", "data"}};
@@ -153,8 +138,7 @@ TEST_F(Util_SqliteAdapter, BackupTo)
 }
 
 // 测试执行错误 SQL 返回失败
-TEST_F(Util_SqliteAdapter, ExecuteInvalidSqlFails)
-{
+TEST_F(Util_SqliteAdapter, ExecuteInvalidSqlFails) {
     EXPECT_FALSE(mpDb->Execute("NOT A VALID SQL STATEMENT"));
     std::vector<std::vector<std::string>> rows;
     EXPECT_FALSE(mpDb->Query("SELECT FROM nonexistent_table_xyz", rows));

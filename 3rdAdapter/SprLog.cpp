@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/02
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <memory>

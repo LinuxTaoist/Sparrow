@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/18
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/18 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <dlfcn.h>
 #include <string.h>
@@ -34,26 +27,22 @@ using namespace InternalDefs;
 #define DEFAULT_HOT_PLUG_ENABLE false
 #define OWNER_PLUGINMGR         "PluginManager"
 
-PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE)
-{
+PluginManager::PluginManager() : mHotPlugEnable(DEFAULT_HOT_PLUG_ENABLE) {
 }
 
-PluginManager::~PluginManager()
-{
+PluginManager::~PluginManager() {
     UnregisterDebugFuncs();
     UnloadAllPlugins();
 }
 
-void PluginManager::Init()
-{
+void PluginManager::Init() {
     mDefaultLibPath = GetDefaultLibraryPath();
     LoadAllPlugins();
     InitWatchDir();
     RegisterDebugFuncs();
 }
 
-void PluginManager::InitWatchDir()
-{
+void PluginManager::InitWatchDir() {
     // Add a watch on the specified directory. The events to monitor include:
     // - IN_CLOSE_WRITE: Triggered when a file is closed after being written.
     // - IN_DELETE: Triggered when a file or directory is deleted.
@@ -102,8 +91,7 @@ void PluginManager::InitWatchDir()
     mpFile->AddToPoll();
 }
 
-std::string PluginManager::GetDefaultLibraryPath()
-{
+std::string PluginManager::GetDefaultLibraryPath() {
     std::string path = SprProcInfo::GetInstance()->GetRunRootPath() + std::string("/../") + DEFAULT_SPR_LIB_FILE;
     if (access(path.c_str(), F_OK) == -1) {
         SPR_LOGW("%s not exist, changed path %s\n", path.c_str(), path.c_str());
@@ -118,8 +106,7 @@ std::string PluginManager::GetDefaultLibraryPath()
     return path;
 }
 
-void PluginManager::LoadPlugin(const std::string& path)
-{
+void PluginManager::LoadPlugin(const std::string& path) {
     if (strncmp(path.c_str(), DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX, strlen(DEFAULT_PLUGIN_LIBRARY_FILE_PREFIX)) != 0) {
         return;
     }
@@ -177,8 +164,7 @@ void PluginManager::UnloadPlugin(const std::string& path) {
     SPR_LOGD("Unload plugin %s %s!\n", pathTmp.c_str(), num > 0 ? "success" : "fail");
 }
 
-void PluginManager::LoadAllPlugins()
-{
+void PluginManager::LoadAllPlugins() {
     DIR* dir = opendir(mDefaultLibPath.c_str());
     if (dir == nullptr) {
         SPR_LOGE("Open %s fail! (%s)\n", mDefaultLibPath.c_str(), strerror(errno));
@@ -194,8 +180,7 @@ void PluginManager::LoadAllPlugins()
     closedir(dir);
 }
 
-void PluginManager::UnloadAllPlugins()
-{
+void PluginManager::UnloadAllPlugins() {
     // Collect keys first to avoid iterator invalidation during erase
     std::vector<std::string> paths;
     for (const auto& handle : mPluginHandles) {
@@ -207,8 +192,7 @@ void PluginManager::UnloadAllPlugins()
     }
 }
 
-void PluginManager::RegisterDebugFuncs()
-{
+void PluginManager::RegisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -220,8 +204,7 @@ void PluginManager::RegisterDebugFuncs()
     p->RegisterCmd(OWNER_PLUGINMGR, "DisableHotPlug", "Disable hot plug",   std::bind(&PluginManager::DebugDisableHotPlug, this, std::placeholders::_1));
 }
 
-void PluginManager::UnregisterDebugFuncs()
-{
+void PluginManager::UnregisterDebugFuncs() {
     SprDebugNode* p = SprDebugNode::GetInstance();
     if (!p) {
         SPR_LOGE("p is nullptr!\n");
@@ -231,19 +214,16 @@ void PluginManager::UnregisterDebugFuncs()
     p->UnregisterCmd(OWNER_PLUGINMGR);
 }
 
-void PluginManager::DebugDumpPlugMInfo(const std::vector<std::string>& args)
-{
+void PluginManager::DebugDumpPlugMInfo(const std::vector<std::string>& args) {
     SPR_LOGI("-------------- Dump PlugManager Info --------------\n");
     SPR_LOGI("- mHotPlugEnable = %d\n", mHotPlugEnable);
     SPR_LOGI("---------------------------------------------------\n");
 }
 
-void PluginManager::DebugEnableHotPlug(const std::vector<std::string>& args)
-{
+void PluginManager::DebugEnableHotPlug(const std::vector<std::string>& args) {
     mHotPlugEnable = true;
 }
 
-void PluginManager::DebugDisableHotPlug(const std::vector<std::string>& args)
-{
+void PluginManager::DebugDisableHotPlug(const std::vector<std::string>& args) {
     mHotPlugEnable = false;
 }

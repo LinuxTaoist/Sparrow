@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/04/19
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/04/19 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __TEST_MODULE_H__
 #define __TEST_MODULE_H__
@@ -26,8 +19,7 @@
 #include "SprEpollSchedule.h"
 #include "SprObserverWithMQueue.h"
 
-class TestModule : public SprObserverWithMQueue
-{
+class TestModule : public SprObserverWithMQueue {
 public:
     TestModule();
     virtual ~TestModule();

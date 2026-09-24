@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/09/27
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/09/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <memory>
 #include <errno.h>
@@ -24,8 +17,7 @@
 #include "SprDirWatch.h"
 #include "EpollEventHandler.h"
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
     if (argc < 2) {
         printf("Usage: %s <dir>\n", argv[0]);
         return -1;

@@ -7,32 +7,21 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
- *
- *  System initialization file
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/02/24 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include "SprTimeTrace.h"
 
 static std::atomic<bool> gObjAlive(true);
 
-SprTimeTrace::SprTimeTrace()
-{
+SprTimeTrace::SprTimeTrace() {
 }
 
-SprTimeTrace::~SprTimeTrace()
-{
+SprTimeTrace::~SprTimeTrace() {
     gObjAlive = false;
 }
 
-SprTimeTrace* SprTimeTrace::GetInstance()
-{
+SprTimeTrace* SprTimeTrace::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -41,8 +30,7 @@ SprTimeTrace* SprTimeTrace::GetInstance()
     return &instance;
 }
 
-void SprTimeTrace::TimeTracePoint(int32_t id, const std::string& text)
-{
+void SprTimeTrace::TimeTracePoint(int32_t id, const std::string& text) {
     EntryInfo entry;
     entry.eId = id;
     entry.eText = text;

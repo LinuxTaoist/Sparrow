@@ -19,7 +19,6 @@
  *          });
  *
  *      monitor.Stop();
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __HEART_BEAT_MONITOR_H__
@@ -33,8 +32,7 @@
 
 #include "HeartbeatCommon.h"
 
-class HeartbeatMonitor
-{
+class HeartbeatMonitor {
 public:
     using Callback = std::function<void(const std::string&, bool)>;
 

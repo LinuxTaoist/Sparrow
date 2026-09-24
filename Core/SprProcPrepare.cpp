@@ -12,14 +12,7 @@
  *  the system framework functions for each process in the Sparrow microservice framework.
  *  By calling the Init method of this class, some common functions of the system framework can be loaded,
  *  ensuring that each process has the necessary runtime environment and basic functions when starting.
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/04/06 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <fstream>
@@ -38,17 +31,14 @@
 
 static std::atomic<bool> gObjAlive(true);
 
-SprProcPrepare::SprProcPrepare()
-{
+SprProcPrepare::SprProcPrepare() {
 }
 
-SprProcPrepare::~SprProcPrepare()
-{
+SprProcPrepare::~SprProcPrepare() {
     gObjAlive = false;
 }
 
-SprProcPrepare* SprProcPrepare::GetInstance()
-{
+SprProcPrepare* SprProcPrepare::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -57,15 +47,13 @@ SprProcPrepare* SprProcPrepare::GetInstance()
     return &instance;
 }
 
-int32_t SprProcPrepare::Init(const std::string& procName)
-{
+int32_t SprProcPrepare::Init(const std::string& procName) {
     SprProcInfo::GetInstance()->Init();
     SprDebugNode::GetInstance()->InitPipeDebugNode(std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + procName);
     return InitHeartbeatReporter(procName);
 }
 
-int32_t SprProcPrepare::InitHeartbeatReporter(const std::string& procName)
-{
+int32_t SprProcPrepare::InitHeartbeatReporter(const std::string& procName) {
     HeartbeatLog& theLog = HeartbeatLog::GetInstance();
     theLog.RegisterPrintCallback([](int level, int line, const char* tag, const char* fmt, va_list ap) {
         char logBuf[1024] = {0};

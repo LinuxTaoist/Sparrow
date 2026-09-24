@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Service configuration file parser implementation.
  *  @date       : 2026/09/12
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/12 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <set>
 #include <fstream>

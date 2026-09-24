@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : 13_Codecx.cc
+ *  @file       : 13_DebugCodecX.cc
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/05
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/05 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 
 #include <iostream>
@@ -160,8 +153,7 @@ static const std::vector<uint8_t> TEST_BIN_BYTES2 = {
     0x02, 0x05, 0x02, 0x50, 0x60
 };
 
-void usage()
-{
+void usage() {
     SPR_LOGD("------------------------------------------------------------------\n"
             "Usage:\n"
             "1: Test print config\n"
@@ -172,8 +164,7 @@ void usage()
     );
 }
 
-int main(int argc, char* argv[])
-{
+int main(int argc, char* argv[]) {
     char val = 0;
     bool run = true;
     usage();
@@ -184,7 +175,7 @@ int main(int argc, char* argv[])
             case '1': {
                 CFactory& theFactory = CFactory::GetInstance();
                 std::shared_ptr<CNode> pCfgParser = theFactory.CreateCfgParserByCfgString(TEST_JSON_STR1);
-                if (!pCfgParser)  {
+                if (!pCfgParser) {
                     SPR_LOGE("CreateCfgParserByCfgString failed! \n");
                     return -1;
                 }
@@ -195,7 +186,7 @@ int main(int argc, char* argv[])
             case '2': {
                 CFactory& theFactory = CFactory::GetInstance();
                 std::shared_ptr<CNode> pCfgParser = theFactory.CreateCfgParserByCfgString(TEST_JSON_STR2);
-                if (!pCfgParser)  {
+                if (!pCfgParser) {
                     SPR_LOGE("CreateCfgParserByCfgString failed! \n");
                     return -1;
                 }

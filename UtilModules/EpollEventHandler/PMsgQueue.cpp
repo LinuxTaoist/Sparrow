@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/14
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/14 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <iostream>
 #include <stdio.h>
@@ -37,8 +30,7 @@
 PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
             const std::function<void(int32_t, const std::string&, void*)>& cb,
             void* arg, bool clearOnOpen)
-    : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mClearOnOpen(clearOnOpen), mCb(cb)
-{
+    : IEpollEvent(-1, EPOLL_TYPE_MQUEUE, arg), mMaxMsg(maxmsg), mClearOnOpen(clearOnOpen), mCb(cb) {
     if (name.empty()) {
         SetReady(false);
         return;
@@ -52,16 +44,14 @@ PMsgQueue::PMsgQueue(const std::string& name, long maxmsg,
     }
 }
 
-PMsgQueue::~PMsgQueue()
-{
+PMsgQueue::~PMsgQueue() {
     Close();
     if (!mDevName.empty()) {
         mq_unlink(mDevName.c_str());
     }
 }
 
-int32_t PMsgQueue::InitMsgQueue(long msgSize)
-{
+int32_t PMsgQueue::InitMsgQueue(long msgSize) {
     if (mDevName.empty()) {
         PLOGE("mDevName is empty!\n");
         return -1;
@@ -101,8 +91,7 @@ int32_t PMsgQueue::InitMsgQueue(long msgSize)
     return 0;
 }
 
-int32_t PMsgQueue::Clear()
-{
+int32_t PMsgQueue::Clear() {
     std::string msg;
     uint32_t prio = 0;
 
@@ -113,8 +102,7 @@ int32_t PMsgQueue::Clear()
     return 0;
 }
 
-int32_t PMsgQueue::Send(int32_t fd, const char* data, size_t size, uint32_t prio)
-{
+int32_t PMsgQueue::Send(int32_t fd, const char* data, size_t size, uint32_t prio) {
     int32_t ret = mq_send(fd, data, size, prio);
     if (ret < 0) {
         PLOGE("mq_send failed! (%s)\n", strerror(errno));
@@ -124,13 +112,11 @@ int32_t PMsgQueue::Send(int32_t fd, const char* data, size_t size, uint32_t prio
     return ret;
 }
 
-int32_t PMsgQueue::Send(const std::string& msg, uint32_t prio)
-{
+int32_t PMsgQueue::Send(const std::string& msg, uint32_t prio) {
     return Send(mEvtFd, msg.c_str(), msg.size(), prio);
 }
 
-int32_t PMsgQueue::Recv(int32_t fd, char* data, size_t size, uint32_t& prio)
-{
+int32_t PMsgQueue::Recv(int32_t fd, char* data, size_t size, uint32_t& prio) {
     if (!data || size == 0) {
         return -1;
     }
@@ -148,8 +134,7 @@ int32_t PMsgQueue::Recv(int32_t fd, char* data, size_t size, uint32_t& prio)
 
     return len;
 }
-int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
-{
+int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio) {
     mq_attr mqAttr;
     if (mq_getattr(mEvtFd, &mqAttr) < 0) {
         PLOGE("mq_getattr failed! (%s)\n", strerror(errno));
@@ -181,8 +166,7 @@ int32_t PMsgQueue::Recv(std::string& msg, uint32_t& prio)
     return len;
 }
 
-void PMsgQueue::Close()
-{
+void PMsgQueue::Close() {
     if (mEvtFd == -1) {
         return;
     }
@@ -193,19 +177,16 @@ void PMsgQueue::Close()
     mEvtFd = -1;
 }
 
-ssize_t PMsgQueue::Write(int32_t fd, const char* data, size_t size)
-{
+ssize_t PMsgQueue::Write(int32_t fd, const char* data, size_t size) {
     return Send(fd, data, size);
 }
 
-ssize_t PMsgQueue::Read(int32_t fd, char* data, size_t size)
-{
+ssize_t PMsgQueue::Read(int32_t fd, char* data, size_t size) {
     uint32_t prio = 0;
     return Recv(fd, data, size, prio);
 }
 
-void* PMsgQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* PMsgQueue::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     std::string msg;
     uint32_t prio = 0;
     if (Recv(msg, prio) < 0) {

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __MQTT_MSG_H__
 #define __MQTT_MSG_H__
@@ -39,8 +32,7 @@
     }                           \
 } while(0)
 
-enum EMqttMsgType
-{
+enum EMqttMsgType {
     MQTT_MSG_CONNECT        = 1,
     MQTT_MSG_CONNACK        = 2,
     MQTT_MSG_PUBLISH        = 3,
@@ -61,16 +53,14 @@ enum EMqttMsgType
 #define MQTT_MSG_FLAG_QOS_MASK  0x06
 #define MQTT_MSG_FLAG_QOS_SHIFT 1
 
-enum EMqttSubackResult
-{
+enum EMqttSubackResult {
     MQTT_SUBACK_SUCCESS = 0x00,
     MQTT_SUBACK_QOS0    = 0x01,
     MQTT_SUBACK_QOS1    = 0x02,
     MQTT_SUBACK_FAILURE = 0x80,
 };
 
-class MqttMsgBase
-{
+class MqttMsgBase {
 public:
     /**
      * @brief Construct/Destruct
@@ -132,8 +122,7 @@ protected:
     // --------------------------------------------------------------------------------------------
     int32_t DecodeU8BytesFromBytes(std::string& data, const std::string& bytes, int32_t len = -1);
     template <typename T>
-    int32_t DecodeIntegerFromBytes(T& data, const std::string& bytes)
-    {
+    int32_t DecodeIntegerFromBytes(T& data, const std::string& bytes) {
         size_t len = sizeof(T);
         if (len > bytes.size()) {
             return -1;
@@ -150,8 +139,7 @@ protected:
 
     int32_t EncodeU8BytesToBytes(const std::string& data, std::string& bytes, int32_t len = -1);
     template <typename T>
-    int32_t EncodeIntegerToBytes(const T& data, std::string& bytes)
-    {
+    int32_t EncodeIntegerToBytes(const T& data, std::string& bytes) {
         size_t len = sizeof(T);
         for (size_t i = 0; i < len; i++) {
             char ch = static_cast<char>((data >> ((len - 1 - i) * 8)) & 0xFF);
@@ -165,8 +153,7 @@ private:
     int32_t DecodeImpl(const std::string& bytes);
 
 protected:
-    struct FixHeader
-    {
+    struct FixHeader {
         uint8_t     type  : 4;
         uint8_t     flags : 4;
         std::string remainingLength;

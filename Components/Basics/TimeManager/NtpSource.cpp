@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/11/21
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/11/21 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <algorithm>
 #include <string.h>
@@ -34,17 +27,14 @@ using namespace std;
 #define NTP_UNIX_EPOCH_OFFSET   2208988800ULL   // 1970-1900
 
 NtpSource::NtpSource(uint16_t port, const TimeCallback& cb, void* arg)
-    : mArg(arg), mIsReady(false), mCb(cb), mLocalPort(port)
-{
+    : mArg(arg), mIsReady(false), mCb(cb), mLocalPort(port) {
     InitSocket();
 }
 
-NtpSource::~NtpSource()
-{
+NtpSource::~NtpSource() {
 }
 
-int32_t NtpSource::SendTimeRequest()
-{
+int32_t NtpSource::SendTimeRequest() {
     for (auto& srv : mNtpServers) {
         SendTimeRequest(srv);
     }
@@ -52,8 +42,7 @@ int32_t NtpSource::SendTimeRequest()
     return 0;
 }
 
-int32_t NtpSource::InitSocket()
-{
+int32_t NtpSource::InitSocket() {
     mpSocket = make_shared<PUdp>([&](int sock, void* arg) {
         PUdp* pUdp = static_cast<PUdp*>(arg);
         if (!pUdp) {
@@ -80,8 +69,7 @@ int32_t NtpSource::InitSocket()
     return mpSocket ? 0 : -1;
 }
 
-int32_t NtpSource::AddNtpServer(const std::string& addr, uint16_t port)
-{
+int32_t NtpSource::AddNtpServer(const std::string& addr, uint16_t port) {
     if (addr.empty()) {
         SPR_LOGE("Invalid NTP server address\n");
         return -1;
@@ -93,8 +81,7 @@ int32_t NtpSource::AddNtpServer(const std::string& addr, uint16_t port)
     return 0;
 }
 
-int32_t NtpSource::SendTimeRequest(NtpServer& srv)
-{
+int32_t NtpSource::SendTimeRequest(NtpServer& srv) {
     int32_t ret = -1;
     if (!mIsReady) {
         SPR_LOGD("Creating UDP socket on port %d\n", mLocalPort);
@@ -130,8 +117,7 @@ int32_t NtpSource::SendTimeRequest(NtpServer& srv)
     return 0;
 }
 
-int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& srcAddr)
-{
+int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& srcAddr) {
     NtpProtocol ntpPacket(bytes);
     // ntpPacket.DumpDetails();
 
@@ -160,8 +146,7 @@ int32_t NtpSource::HandleNtpBytes(const std::string& bytes, const std::string& s
     return 0;
 }
 
-uint64_t NtpSource::GetCurTimeStampWithNtp()
-{
+uint64_t NtpSource::GetCurTimeStampWithNtp() {
     struct timespec ts;
     if (clock_gettime(CLOCK_REALTIME, &ts) == -1) {
         SPR_LOGE("Get orgin time failed! (%s)", strerror(errno));
@@ -173,8 +158,7 @@ uint64_t NtpSource::GetCurTimeStampWithNtp()
     return (ntpSec * 4294967296ULL) | ntpFrac;
 }
 
-int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, int64_t& ns)
-{
+int32_t NtpSource::GetOffsetNsec(uint64_t t1, uint64_t t2, uint64_t t3, uint64_t t4, int64_t& ns) {
     #define NTPTIME_TO_NSEC(x) ( \
         (int64_t)(((x >> 32) & 0xFFFFFFFF) - NTP_UNIX_EPOCH_OFFSET) * 1000000000ULL + \
         (int64_t)(( (x & 0xFFFFFFFF) * 1000000000ULL ) / 4294967296ULL) \

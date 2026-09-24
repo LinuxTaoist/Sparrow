@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprObserverWithMQueue.h
+ *  @file       : SprObserverWithMQueue.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/15
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/15 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <errno.h>
 #include <string.h>
@@ -33,39 +26,33 @@ using namespace GeneralUtils;
 #define RUNTIME_WARN_MS 2000
 
 SprObserverWithMQueue::SprObserverWithMQueue(ModuleIDType id, const std::string& name, EProxyType proxyType)
-    : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), 1024), mConnected(false)
-{
+    : SprObserver(id, name, proxyType), PMsgQueue(name + "_" + GetRandomString(8), 1024), mConnected(false) {
     mpDetails = std::make_shared<SprMQueueDetails>(GetMQDevName(), true);
 }
 
-SprObserverWithMQueue::~SprObserverWithMQueue()
-{
+SprObserverWithMQueue::~SprObserverWithMQueue() {
     UnRegisterFromMediator();
 }
 
-bool SprObserverWithMQueue::IsConnected()
-{
+bool SprObserverWithMQueue::IsConnected() {
     return mConnected;
 }
 
-int32_t SprObserverWithMQueue::InitFramework()
-{
+int32_t SprObserverWithMQueue::InitFramework() {
     SPR_LOGD("Initlize MQueue framework!");
     AddToPoll();
     LoadMQStaticInfo(GetEvtFd(), GetMQDevName());
     return RegisterFromMediator();
 }
 
-int32_t SprObserverWithMQueue::DeinitFramework()
-{
+int32_t SprObserverWithMQueue::DeinitFramework() {
     SPR_LOGD("Deinitlize MQueue framework!");
     UnRegisterFromMediator();
     DelFromPoll();
     return SprObserver::DeinitFramework();
 }
 
-int32_t SprObserverWithMQueue::RegisterFromMediator()
-{
+int32_t SprObserverWithMQueue::RegisterFromMediator() {
     SprMsg msg(GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_REGISTER_REQUEST);
     msg.SetBoolValue(true);
     msg.SetU32Value((uint32_t)MEDIATOR_PROXY_MQUEUE);
@@ -74,8 +61,7 @@ int32_t SprObserverWithMQueue::RegisterFromMediator()
     return NotifyObserver(msg);
 }
 
-int32_t SprObserverWithMQueue::UnRegisterFromMediator()
-{
+int32_t SprObserverWithMQueue::UnRegisterFromMediator() {
     mConnected = false;
     SprMsg msg(GetModuleId(), MODULE_PROXY, SIG_ID_PROXY_UNREGISTER_REQUEST);
     msg.SetU32Value((uint32_t)MEDIATOR_PROXY_MQUEUE);
@@ -84,8 +70,7 @@ int32_t SprObserverWithMQueue::UnRegisterFromMediator()
     return NotifyObserver(msg);
 }
 
-int32_t SprObserverWithMQueue::SendMsg(SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::SendMsg(SprMsg& msg) {
     std::string bytes;
     msg.SetFrom(mModuleID);
     msg.SetTo(mModuleID);
@@ -102,14 +87,12 @@ int32_t SprObserverWithMQueue::SendMsg(SprMsg& msg)
     return ret;
 }
 
-int32_t SprObserverWithMQueue::SendMsg(uint32_t msgId)
-{
+int32_t SprObserverWithMQueue::SendMsg(uint32_t msgId) {
     SprMsg msg(msgId);
     return SendMsg(msg);
 }
 
-int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg) {
     uint32_t prio = 0;
     std::string bytes;
     int32_t ret = Recv(bytes, prio);
@@ -127,39 +110,33 @@ int32_t SprObserverWithMQueue::RecvMsg(SprMsg& msg)
     return ret;
 }
 
-int32_t SprObserverWithMQueue::MsgRespondSystemExit(const SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::MsgRespondSystemExit(const SprMsg& msg) {
     SPR_LOGD("System Exit!");
     return 0;
 }
 
-int32_t SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::MsgRespondRegisterRsp(const SprMsg& msg) {
     // 注册成功，连接状态为true
     mConnected = msg.GetU8Value();
     SPR_LOGD("Register Successfully! mConnected = %d", mConnected);
     return 0;
 }
 
-int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::MsgRespondUnregisterRsp(const SprMsg& msg) {
     mConnected = !msg.GetU8Value();
     SPR_LOGD("Unregister Successfully! mConnected = %d", mConnected);
     return 0;
 }
 
-int32_t SprObserverWithMQueue::MsgRespondPropertyLogLevelChanged(const SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::MsgRespondPropertyLogLevelChanged(const SprMsg& msg) {
     return SetPrintLogLevel(msg.GetI32Value());
 }
 
-int32_t SprObserverWithMQueue::MsgRespondPropertyLogLengthChanged(const SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::MsgRespondPropertyLogLengthChanged(const SprMsg& msg) {
     return SetPrintLogLength(msg.GetI32Value());
 }
 
-int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::string& devName)
-{
+int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::string& devName) {
     if (devName.length() >= MQ_NAME_MAX_LENGTH) {
         SPR_LOGW("devName %s too long(max %d characters)", devName.c_str(), MQ_NAME_MAX_LENGTH);
     }
@@ -173,8 +150,7 @@ int32_t SprObserverWithMQueue::LoadMQStaticInfo(int32_t handle, const std::strin
     return 0;
 }
 
-int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& msg) {
     if (!mpDetails) {
         SPR_LOGE("mpDetails is nullptr!");
         return -1;
@@ -209,8 +185,7 @@ int32_t SprObserverWithMQueue::LoadMQDynamicInfo(int32_t handle, const SprMsg& m
     return 0;
 }
 
-int32_t SprObserverWithMQueue::SendEventToMonitor(int32_t errcode, const std::string& text)
-{
+int32_t SprObserverWithMQueue::SendEventToMonitor(int32_t errcode, const std::string& text) {
     SPR_LOGD("Send event to monitor, errcode: %d, text: %s", errcode, text.c_str());
     SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
     msg.SetI32Value(errcode);
@@ -218,8 +193,7 @@ int32_t SprObserverWithMQueue::SendEventToMonitor(int32_t errcode, const std::st
     return NotifyObserver(MODULE_STATUS_MONITOR, msg);
 }
 
-int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg) {
     RunningTiming runTime;
 
     LoadMQDynamicInfo(GetEvtFd(), msg);
@@ -253,8 +227,7 @@ int32_t SprObserverWithMQueue::DispatchSprMsg(const SprMsg& msg)
     return 0;
 }
 
-void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
-{
+void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg) {
     if (fd != GetEvtFd()) {
         SPR_LOGW("fd is not match!");
         return nullptr;
@@ -271,7 +244,6 @@ void* SprObserverWithMQueue::EpollEvent(int32_t fd, EpollType eType, void* arg)
     return nullptr;
 }
 
-int32_t SprObserverWithMQueue::ProcessRecvMsg(SprMsg& msg)
-{
+int32_t SprObserverWithMQueue::ProcessRecvMsg(SprMsg& msg) {
     return DispatchSprMsg(msg);
 }

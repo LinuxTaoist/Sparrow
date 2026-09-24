@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <iostream>
 #include <memory>
@@ -29,8 +22,7 @@ using namespace InternalDefs;
 
 #define LOG_TAG "DebugMsg"
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     char val = 0;
     bool run = true;
     do {
@@ -57,8 +49,7 @@ int main(int argc, const char* argv[])
                 std::vector<uint64_t> u64Vec1 = {0x1111111111111111, 0x2222222222222222, 0x3333333333333333};
                 theEnMsg.SetU64Vec(u64Vec1);
 
-                struct TestSpr
-                {
+                struct TestSpr {
                     int id;
                     char buf[20];
                 } testData = { 10, "hello sparrow"};

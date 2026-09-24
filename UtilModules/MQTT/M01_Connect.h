@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __M01_CONNECT_H__
 #define __M01_CONNECT_H__
@@ -23,8 +16,7 @@
 #include "MqttMsg.h"
 
 // 3.1 CONNECT – 连接服务端
-class MqttConnect : public MqttMsgBase
-{
+class MqttConnect : public MqttMsgBase {
 public:
     MqttConnect(const std::string& protocolName, uint8_t version, uint8_t flags, uint16_t keepalive);
     virtual ~MqttConnect();

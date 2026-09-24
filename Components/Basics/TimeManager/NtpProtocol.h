@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/11/11
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/11/11 | 1.0.0.1   | Xiang.D        | Create file
- *  2024/11/22 | 1.0.0.2   | Fixed          | 添加辅助函数声明，修正宏定义错误
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __NTP_PROTOCOL_H__
 #define __NTP_PROTOCOL_H__
@@ -22,8 +15,7 @@
 #include <string>
 #include <stdint.h>
 
-class NtpProtocol
-{
+class NtpProtocol {
 public:
     explicit NtpProtocol(const std::string& bytes);
     NtpProtocol() = delete;
@@ -72,8 +64,7 @@ private:
     void EncodeNtpTimestamp(uint64_t timestamp, uint8_t* pBuf);
     uint64_t DecodeNtpTimestamp(const uint8_t* pBuf);
 
-    struct LiVnMode
-    {
+    struct LiVnMode {
         uint8_t Li : 2;
         uint8_t VN : 3;
         uint8_t Mode : 3;

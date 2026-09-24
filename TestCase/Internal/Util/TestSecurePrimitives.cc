@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SecurePrimitives 椭圆曲线密码原语内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <cstdint>
 #include <vector>
@@ -27,8 +20,7 @@ using namespace SecurePrimitives;
 static const ECCurve kDefCurve = {251, 1, 1, 2};
 
 // 测试模幂运算的基础与边界情况
-TEST(Util_SecurePrimitives, ModPowBasicAndBoundary)
-{
+TEST(Util_SecurePrimitives, ModPowBasicAndBoundary) {
     EXPECT_EQ(ModPow(2, 10, 1000), 24);     // 1024 % 1000
     EXPECT_EQ(ModPow(3, 4, 7), 4);          // 81 % 7
     EXPECT_EQ(ModPow(5, 0, 7), 1);          // exp=0
@@ -37,8 +29,7 @@ TEST(Util_SecurePrimitives, ModPowBasicAndBoundary)
 }
 
 // 测试模逆运算的基础与边界情况
-TEST(Util_SecurePrimitives, ModularInverseBasicAndBoundary)
-{
+TEST(Util_SecurePrimitives, ModularInverseBasicAndBoundary) {
     EXPECT_EQ(ModularInverse(3, 7), 5);     // 3*5=15 ≡ 1 mod 7
     EXPECT_EQ(ModularInverse(4, 251), 63);  // 4*63=252 ≡ 1 mod 251
     EXPECT_EQ(ModularInverse(1, 1), 0);     // m==1 -> 0
@@ -47,8 +38,7 @@ TEST(Util_SecurePrimitives, ModularInverseBasicAndBoundary)
 }
 
 // 测试由私钥计算公钥的边界与正常情况
-TEST(Util_SecurePrimitives, ComputePublicKeyBoundaryAndNormal)
-{
+TEST(Util_SecurePrimitives, ComputePublicKeyBoundaryAndNormal) {
     std::vector<uint8_t> pub;
     EXPECT_EQ(ComputePublicKey(0, pub), -1);   // d == 0
 
@@ -59,8 +49,7 @@ TEST(Util_SecurePrimitives, ComputePublicKeyBoundaryAndNormal)
 }
 
 // 测试基于基点的标量乘法
-TEST(Util_SecurePrimitives, ScalarMultiplyByBasePoint)
-{
+TEST(Util_SecurePrimitives, ScalarMultiplyByBasePoint) {
     ECPoint g;
     ASSERT_EQ(ScalarMultiplyPoint(1, g), 0);
     EXPECT_FALSE(g.inf);
@@ -73,8 +62,7 @@ TEST(Util_SecurePrimitives, ScalarMultiplyByBasePoint)
 }
 
 // 测试指定点的标量乘法
-TEST(Util_SecurePrimitives, ScalarMultiplyWithExplicitPoint)
-{
+TEST(Util_SecurePrimitives, ScalarMultiplyWithExplicitPoint) {
     ECPoint g;
     ASSERT_EQ(ScalarMultiplyPoint(1, g), 0);
 
@@ -92,8 +80,7 @@ TEST(Util_SecurePrimitives, ScalarMultiplyWithExplicitPoint)
 }
 
 // 测试椭圆曲线点加法的正确性
-TEST(Util_SecurePrimitives, AddECPointsCorrectness)
-{
+TEST(Util_SecurePrimitives, AddECPointsCorrectness) {
     ECPoint g;
     ASSERT_EQ(ScalarMultiplyPoint(1, g), 0);
 
@@ -116,8 +103,7 @@ TEST(Util_SecurePrimitives, AddECPointsCorrectness)
 }
 
 // 测试字节流转椭圆曲线点的边界与正常情况
-TEST(Util_SecurePrimitives, BytesToECPointBoundaryAndNormal)
-{
+TEST(Util_SecurePrimitives, BytesToECPointBoundaryAndNormal) {
     ECPoint pt;
     std::vector<uint8_t> shortBytes = {0x01, 0x02, 0x03};
     EXPECT_EQ(BytesToECPoint(shortBytes, pt), -1);   // < 8 字节
@@ -130,8 +116,7 @@ TEST(Util_SecurePrimitives, BytesToECPointBoundaryAndNormal)
 }
 
 // 测试玩具椭圆曲线加解密往返一致性
-TEST(Util_SecurePrimitives, ToyECEncryptDecryptRoundtrip)
-{
+TEST(Util_SecurePrimitives, ToyECEncryptDecryptRoundtrip) {
     const std::vector<uint8_t> plaintext = {0x01, 0x02, 0x03, 0x04, 0x05};
     std::vector<uint8_t> cipher;
     std::vector<uint8_t> decrypted;
@@ -143,8 +128,7 @@ TEST(Util_SecurePrimitives, ToyECEncryptDecryptRoundtrip)
 }
 
 // 测试玩具椭圆曲线空输入与边界情况
-TEST(Util_SecurePrimitives, ToyECEmptyAndBoundary)
-{
+TEST(Util_SecurePrimitives, ToyECEmptyAndBoundary) {
     std::vector<uint8_t> out;
 
     EXPECT_EQ(EncryptByToyEC(kDefCurve, 97, {}, out), 0);   // 空明文

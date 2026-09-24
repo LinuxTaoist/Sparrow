@@ -17,13 +17,7 @@
  *
  *  The watchdog is a safety net: if Feed() is not called within
  *  timeoutSec seconds, the system resets.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __IHW_WATCHDOG_H__
 #define __IHW_WATCHDOG_H__

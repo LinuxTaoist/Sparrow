@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/12/06
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/06 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_DEBUG_NODE_H__
 #define __SPR_DEBUG_NODE_H__
@@ -31,8 +24,7 @@
 
 using DebugCmdFunc = std::function<void(const std::vector<std::string>&)>;
 
-class DebugFuncDetail
-{
+class DebugFuncDetail {
 public:
     DebugFuncDetail() = default;
     DebugFuncDetail(const DebugFuncDetail&) = delete;
@@ -47,8 +39,7 @@ private:
     std::map<std::string, std::pair<std::string, DebugCmdFunc>> mCmdMap; // <cmd, <desc, func>>
 };
 
-class SprDebugNode
-{
+class SprDebugNode {
 public:
     SprDebugNode(const SprDebugNode&) = delete;
     SprDebugNode& operator=(const SprDebugNode&) = delete;

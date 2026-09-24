@@ -17,13 +17,7 @@
  *  After that, business code calls GetXxx() to obtain a reference to the
  *  singleton instance.  C++11 guarantees thread-safe initialisation of
  *  function-local statics, so no explicit locking is needed.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __HW_INTERFACE_HUB_H__
 #define __HW_INTERFACE_HUB_H__

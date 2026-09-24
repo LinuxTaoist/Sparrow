@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Injectable logging implementation for Heartbeat.
  *  @date       : 2026/09/17
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <string>

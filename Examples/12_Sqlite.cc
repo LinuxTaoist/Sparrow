@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : Generic SQLite browser powered by SqliteAdapter.
  *  @date       : 2026/09/08
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <algorithm>
@@ -20,8 +19,7 @@
 
 namespace {
 
-std::string Trim(const std::string& text)
-{
+std::string Trim(const std::string& text) {
     const std::string whitespace = " \t\r\n";
     const size_t begin = text.find_first_not_of(whitespace);
     if (begin == std::string::npos) {
@@ -31,8 +29,7 @@ std::string Trim(const std::string& text)
     return text.substr(begin, end - begin + 1);
 }
 
-std::string EscapeSqlText(const std::string& text)
-{
+std::string EscapeSqlText(const std::string& text) {
     std::string out;
     out.reserve(text.size());
     for (char ch : text) {
@@ -44,8 +41,7 @@ std::string EscapeSqlText(const std::string& text)
     return out;
 }
 
-std::string QuoteIdent(const std::string& value)
-{
+std::string QuoteIdent(const std::string& value) {
     std::string out;
     out.reserve(value.size() + 2);
     out.push_back('"');
@@ -59,43 +55,37 @@ std::string QuoteIdent(const std::string& value)
     return out;
 }
 
-std::string ReadLine(const std::string& prompt)
-{
+std::string ReadLine(const std::string& prompt) {
     std::string value;
     std::cout << prompt;
     std::getline(std::cin, value);
     return value;
 }
 
-void ClearScreen()
-{
+void ClearScreen() {
     std::cout << "\033[2J\033[H";
 }
 
-void WaitForEnter(const std::string& message = "Press Enter to continue...")
-{
+void WaitForEnter(const std::string& message = "Press Enter to continue...") {
     std::cout << message << std::endl;
     std::string dummy;
     std::getline(std::cin, dummy);
 }
 
-void PrintSectionHeader(const std::string& title)
-{
+void PrintSectionHeader(const std::string& title) {
     std::cout << "\n" << std::string(80, '=') << std::endl;
     std::cout << title << std::endl;
     std::cout << std::string(80, '=') << std::endl;
 }
 
-bool QueryRows(SqliteAdapter* db, const std::string& sql, std::vector<std::vector<std::string>>& rows)
-{
+bool QueryRows(SqliteAdapter* db, const std::string& sql, std::vector<std::vector<std::string>>& rows) {
     if (db == nullptr) {
         return false;
     }
     return db->Query(sql, rows);
 }
 
-std::vector<std::string> ListTables(SqliteAdapter* db)
-{
+std::vector<std::string> ListTables(SqliteAdapter* db) {
     std::vector<std::string> tables;
     std::vector<std::vector<std::string>> rows;
     if (!QueryRows(db, "SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' ORDER BY name;", rows)) {
@@ -109,8 +99,7 @@ std::vector<std::string> ListTables(SqliteAdapter* db)
     return tables;
 }
 
-bool GetColumns(SqliteAdapter* db, const std::string& tableName, std::vector<std::string>& columns)
-{
+bool GetColumns(SqliteAdapter* db, const std::string& tableName, std::vector<std::string>& columns) {
     columns.clear();
     std::vector<std::vector<std::string>> rows;
     const std::string sql = "PRAGMA table_info(" + QuoteIdent(tableName) + ");";
@@ -125,8 +114,7 @@ bool GetColumns(SqliteAdapter* db, const std::string& tableName, std::vector<std
     return true;
 }
 
-void PrintRows(const std::vector<std::vector<std::string>>& rows, const std::vector<std::string>& headers)
-{
+void PrintRows(const std::vector<std::vector<std::string>>& rows, const std::vector<std::string>& headers) {
     if (rows.empty()) {
         std::cout << "  [no rows]" << std::endl;
         return;
@@ -172,8 +160,7 @@ void PrintRows(const std::vector<std::vector<std::string>>& rows, const std::vec
     }
 }
 
-bool ShowTableRows(SqliteAdapter* db, const std::string& tableName, int limit)
-{
+bool ShowTableRows(SqliteAdapter* db, const std::string& tableName, int limit) {
     std::vector<std::string> columns;
     if (!GetColumns(db, tableName, columns) || columns.empty()) {
         std::cout << "Error: table '" << tableName << "' has no columns." << std::endl;
@@ -192,8 +179,7 @@ bool ShowTableRows(SqliteAdapter* db, const std::string& tableName, int limit)
     return true;
 }
 
-bool ShowTableSchema(SqliteAdapter* db, const std::string& tableName)
-{
+bool ShowTableSchema(SqliteAdapter* db, const std::string& tableName) {
     std::vector<std::vector<std::string>> rows;
     const std::string sql = "PRAGMA table_info(" + QuoteIdent(tableName) + ");";
     if (!QueryRows(db, sql, rows)) {
@@ -211,8 +197,7 @@ bool ShowTableSchema(SqliteAdapter* db, const std::string& tableName)
     return true;
 }
 
-bool InsertRow(SqliteAdapter* db, const std::string& tableName)
-{
+bool InsertRow(SqliteAdapter* db, const std::string& tableName) {
     std::vector<std::string> columns;
     if (!GetColumns(db, tableName, columns)) {
         std::cout << "Error: cannot inspect table '" << tableName << "'." << std::endl;
@@ -251,8 +236,7 @@ bool InsertRow(SqliteAdapter* db, const std::string& tableName)
     return true;
 }
 
-bool UpdateRow(SqliteAdapter* db, const std::string& tableName)
-{
+bool UpdateRow(SqliteAdapter* db, const std::string& tableName) {
     std::vector<std::string> columns;
     if (!GetColumns(db, tableName, columns) || columns.empty()) {
         std::cout << "Error: no editable columns in " << tableName << "." << std::endl;
@@ -289,8 +273,7 @@ bool UpdateRow(SqliteAdapter* db, const std::string& tableName)
     return true;
 }
 
-bool DeleteRow(SqliteAdapter* db, const std::string& tableName)
-{
+bool DeleteRow(SqliteAdapter* db, const std::string& tableName) {
     std::vector<std::string> columns;
     if (!GetColumns(db, tableName, columns) || columns.empty()) {
         std::cout << "Error: no columns in " << tableName << "." << std::endl;
@@ -316,8 +299,7 @@ bool DeleteRow(SqliteAdapter* db, const std::string& tableName)
     return true;
 }
 
-bool ExecuteCustomSql(SqliteAdapter* db)
-{
+bool ExecuteCustomSql(SqliteAdapter* db) {
     std::string sql = ReadLine("SQL> ");
     if (Trim(sql).empty()) {
         return true;
@@ -353,8 +335,7 @@ bool ExecuteCustomSql(SqliteAdapter* db)
     return true;
 }
 
-void PrintMenu()
-{
+void PrintMenu() {
     PrintSectionHeader("SQLite Explorer");
     std::cout << "  1) List tables" << std::endl;
     std::cout << "  2) Show schema" << std::endl;
@@ -367,8 +348,7 @@ void PrintMenu()
     std::cout << std::string(80, '-') << std::endl;
 }
 
-std::string ChooseTable(SqliteAdapter* db)
-{
+std::string ChooseTable(SqliteAdapter* db) {
     const std::vector<std::string> tables = ListTables(db);
     if (tables.empty()) {
         std::cout << "No tables found." << std::endl;
@@ -405,8 +385,7 @@ std::string ChooseTable(SqliteAdapter* db)
 
 }  // namespace
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     std::string dbPath;
     if (argc > 1) {
         dbPath = argv[1];

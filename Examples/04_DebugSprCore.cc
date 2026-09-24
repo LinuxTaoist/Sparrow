@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <iostream>
 #include <sstream>
@@ -38,19 +31,15 @@ using namespace InternalDefs;
 #define SPR_LOGD(fmt, args...) printf("%d DebugCore D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%d DebugCore E: " fmt, __LINE__, ##args)
 
-class DebugCore : public SprObserverWithMQueue
-{
+class DebugCore : public SprObserverWithMQueue {
 public:
-    DebugCore(ModuleIDType id, const std::string& name) : SprObserverWithMQueue(id, name)
-    {
+    DebugCore(ModuleIDType id, const std::string& name) : SprObserverWithMQueue(id, name) {
     }
 
-    ~DebugCore()
-    {
+    ~DebugCore() {
     }
 
-    int32_t ProcessMsg(const SprMsg& msg)
-    {
+    int32_t ProcessMsg(const SprMsg& msg) {
         switch(msg.GetMsgId()) {
             default:
                 SPR_LOGD("msg id: %s %s\n", GetSigName(msg.GetMsgId()), GetCurTimeStr().c_str());
@@ -61,14 +50,12 @@ public:
     }
 
 protected:
-    virtual int32_t Init()
-    {
+    virtual int32_t Init() {
         return 0;
     }
 };
 
-static void usage()
-{
+static void usage() {
     SPR_LOG("------------------------------------------------------------------\n"
             "usage:\n"
             "0: NotifyAllObserver\n"
@@ -84,13 +71,11 @@ static void usage()
     );
 }
 
-static void callback(int32_t eventID, void* data, int32_t size)
-{
+static void callback(int32_t eventID, void* data, int32_t size) {
     SPR_LOG("Recv eventId: %d\n", eventID);
 }
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     PowerManagerInterface* pPowerM = PowerManagerInterface::GetInstance();
     pPowerM->RegisterCallback(callback);
 

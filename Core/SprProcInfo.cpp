@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/03/11
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/03/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <unistd.h>
@@ -27,17 +20,14 @@
 
 static std::atomic<bool> gObjAlive(true);
 
-SprProcInfo::SprProcInfo() : mEnable(false), mBootTimeUs(0)
-{
+SprProcInfo::SprProcInfo() : mEnable(false), mBootTimeUs(0) {
 }
 
-SprProcInfo::~SprProcInfo()
-{
+SprProcInfo::~SprProcInfo() {
     gObjAlive = false;
 }
 
-SprProcInfo* SprProcInfo::GetInstance()
-{
+SprProcInfo* SprProcInfo::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -46,14 +36,12 @@ SprProcInfo* SprProcInfo::GetInstance()
     return &instance;
 }
 
-void SprProcInfo::Init()
-{
+void SprProcInfo::Init() {
     mEnable = true;
     LoadBootTimeUs();
 }
 
-uint64_t SprProcInfo::GetTickUs()
-{
+uint64_t SprProcInfo::GetTickUs() {
     static uint64_t td = 0;
     struct timespec ts;
     int32_t ret = clock_gettime(CLOCK_MONOTONIC_RAW, &ts);
@@ -66,23 +54,19 @@ uint64_t SprProcInfo::GetTickUs()
     return td;
 }
 
-void SprProcInfo::LoadBootTimeUs()
-{
+void SprProcInfo::LoadBootTimeUs() {
     mBootTimeUs = GetTickUs();
 }
 
-uint64_t SprProcInfo::GetBootTimeUs()
-{
+uint64_t SprProcInfo::GetBootTimeUs() {
     return mBootTimeUs;
 }
 
-uint64_t SprProcInfo::GetRunTimeUs()
-{
+uint64_t SprProcInfo::GetRunTimeUs() {
     return GetTickUs() - mBootTimeUs;
 }
 
-std::string SprProcInfo::UsToTimeString(uint64_t us)
-{
+std::string SprProcInfo::UsToTimeString(uint64_t us) {
     const uint64_t hourPerDay = 24;
     const uint64_t minPerHour = 60;
     const uint64_t secPerMin = 60;
@@ -109,18 +93,15 @@ std::string SprProcInfo::UsToTimeString(uint64_t us)
     return timeText;
 }
 
-std::string SprProcInfo::GetBootTimeString()
-{
+std::string SprProcInfo::GetBootTimeString() {
     return UsToTimeString(mBootTimeUs);
 }
 
-std::string SprProcInfo::GetRunTimeString()
-{
+std::string SprProcInfo::GetRunTimeString() {
     return UsToTimeString(GetRunTimeUs());
 }
 
-std::string SprProcInfo::GetProcName()
-{
+std::string SprProcInfo::GetProcName() {
     char buf[512] = {0};
     std::string procName = "Unknown";
 
@@ -138,13 +119,11 @@ std::string SprProcInfo::GetProcName()
     return procName;
 }
 
-std::string SprProcInfo::GetDebugPath()
-{
+std::string SprProcInfo::GetDebugPath() {
     return mEnable ? std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + GetProcName() : "";
 }
 
-std::string SprProcInfo::GetRunRootPath()
-{
+std::string SprProcInfo::GetRunRootPath() {
     const char* pEnvRoot = std::getenv(ENV_SPR_ROOT_PATH);
     if (pEnvRoot != nullptr && pEnvRoot[0] != '\0') {
         return std::string(pEnvRoot);
@@ -165,8 +144,7 @@ std::string SprProcInfo::GetRunRootPath()
     return "";
 }
 
-std::string SprProcInfo::GetRunEtcPath()
-{
+std::string SprProcInfo::GetRunEtcPath() {
     const std::string rootPath = GetRunRootPath();
     if (rootPath.empty()) {
         SPR_LOGE("rootPath is empty!\n");

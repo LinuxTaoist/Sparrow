@@ -7,13 +7,7 @@
  *  @version    : 1.0
  *  @brief      : HTML/CSS/JS rendering assets for HTTP UI
  *  @date       : 2026/05/28
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __HUI_RENDER_H__
 #define __HUI_RENDER_H__
@@ -715,8 +709,7 @@ if (HUI_ACTIVE_PAGE == 'terminal') {
 </body>
 </html>)__HUI__";
 
-inline void ReplaceToken(std::string& text, const std::string& token, const std::string& value)
-{
+inline void ReplaceToken(std::string& text, const std::string& token, const std::string& value) {
 	std::string::size_type pos = 0;
 	while ((pos = text.find(token, pos)) != std::string::npos) {
 		text.replace(pos, token.length(), value);
@@ -724,8 +717,7 @@ inline void ReplaceToken(std::string& text, const std::string& token, const std:
 	}
 }
 
-inline std::string BuildHtmlPage(const std::string& activePage)
-{
+inline std::string BuildHtmlPage(const std::string& activePage) {
 	std::string html = HTML_TEMPLATE;
 	ReplaceToken(html, "__ACTIVE_PAGE__", activePage == "terminal" ? "terminal" : "dashboard");
 	return html;

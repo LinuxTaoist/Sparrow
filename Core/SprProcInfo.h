@@ -7,22 +7,14 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/03/11
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/03/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_PROC_INFO_H__
 #define __SPR_PROC_INFO_H__
 
 #include <string>
 
-class SprProcInfo
-{
+class SprProcInfo {
 public:
     static SprProcInfo* GetInstance();
 

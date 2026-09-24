@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SprMQueueDetails 消息队列详情共享内存内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <string>
@@ -28,8 +21,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeShortName(const std::string& prefix)
-{
+std::string MakeShortName(const std::string& prefix) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char buf[MQ_NAME_MAX_LENGTH] = {};
@@ -37,15 +29,13 @@ std::string MakeShortName(const std::string& prefix)
     return std::string(buf);
 }
 
-std::string BuildDetailsPath(const std::string& name)
-{
+std::string BuildDetailsPath(const std::string& name) {
     return std::string(DEFAULT_MQS_DIR) + "/" + name;
 }
 }
 
 // 测试创建者与访问者共享同一份详情数据
-TEST(Core_SprMQueueDetails, CreatorAndVisitorShareSameDetails)
-{
+TEST(Core_SprMQueueDetails, CreatorAndVisitorShareSameDetails) {
     const std::string mqName = MakeShortName("utd");
 
     {
@@ -105,8 +95,7 @@ TEST(Core_SprMQueueDetails, CreatorAndVisitorShareSameDetails)
 }
 
 // 测试打开不存在的详情文件返回错误
-TEST(Core_SprMQueueDetails, OpenMissingDetailsReturnsError)
-{
+TEST(Core_SprMQueueDetails, OpenMissingDetailsReturnsError) {
     const std::string missingName = MakeShortName("missing");
     SprMQueueDetails visitor(missingName, false);
 
@@ -125,8 +114,7 @@ TEST(Core_SprMQueueDetails, OpenMissingDetailsReturnsError)
 }
 
 // 测试 GetMQDetails 通过真实队列句柄更新 mq_attr
-TEST(Core_SprMQueueDetails, GetMQDetailsUpdatesAttrWithRealQueueHandle)
-{
+TEST(Core_SprMQueueDetails, GetMQDetailsUpdatesAttrWithRealQueueHandle) {
     const std::string detailsName = MakeShortName("attr");
     const std::string posixMqName = "/" + MakeShortName("pmq");
 

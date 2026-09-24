@@ -2,27 +2,19 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : M03_Puback.h
+ *  @file       : M04_Puback.h
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/09/11
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/09/11 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __M04_PUBACK_H__
 #define __M04_PUBACK_H__
 
 #include "MqttMsg.h"
 
-class MqttPuback : public MqttMsgBase
-{
+class MqttPuback : public MqttMsgBase {
 public:
     MqttPuback();
     MqttPuback(uint8_t flags, uint16_t identifier);

@@ -7,22 +7,14 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __M03_PUBLISH_H__
 #define __M03_PUBLISH_H__
 
 #include "MqttMsg.h"
 
-class MqttPublish : public MqttMsgBase
-{
+class MqttPublish : public MqttMsgBase {
 public:
     MqttPublish();
     MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload);

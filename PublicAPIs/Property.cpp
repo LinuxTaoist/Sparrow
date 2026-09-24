@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/04/01
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/04/01 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <unistd.h>
@@ -41,8 +34,7 @@ static std::atomic<bool> gObjAlive(true);
 static std::shared_ptr<Parcel> pReqParcel = nullptr;
 static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-Property::Property()
-{
+Property::Property() {
     mEnable = true;
     bool ret = BindInterface::GetInstance()->InitializeClientBinder("property_service", pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
@@ -50,13 +42,11 @@ Property::Property()
     }
 }
 
-Property::~Property()
-{
+Property::~Property() {
     gObjAlive = false;
 }
 
-Property* Property::GetInstance()
-{
+Property* Property::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -65,8 +55,7 @@ Property* Property::GetInstance()
     return &instance;
 }
 
-int Property::SetProperty(const std::string& key, const std::string& value)
-{
+int Property::SetProperty(const std::string& key, const std::string& value) {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return -1;
@@ -85,8 +74,7 @@ int Property::SetProperty(const std::string& key, const std::string& value)
     return ret;
 }
 
-int Property::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue)
-{
+int Property::GetProperty(const std::string& key, std::string& value, const std::string& defaultValue) {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return -1;
@@ -106,8 +94,7 @@ int Property::GetProperty(const std::string& key, std::string& value, const std:
     return ret;
 }
 
-int Property::GetProperties(std::map<std::string, std::string>& properties)
-{
+int Property::GetProperties(std::map<std::string, std::string>& properties) {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return -1;
@@ -137,8 +124,7 @@ int Property::GetProperties(std::map<std::string, std::string>& properties)
     return ret;
 }
 
-int Property::DumpProperties()
-{
+int Property::DumpProperties() {
     if (!mEnable) {
         SPR_LOGE("Property is disable!\n");
         return -1;

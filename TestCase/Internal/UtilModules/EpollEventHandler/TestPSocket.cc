@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : PSocket 套接字封装（UDP/TCP/Unix）内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <cstdio>
@@ -27,8 +20,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeSockPath(const std::string& prefix)
-{
+std::string MakeSockPath(const std::string& prefix) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char buf[96] = {};
@@ -52,8 +44,7 @@ protected:
 
 // ---------- SocketCommon ----------
 // 测试 IP 地址识别
-TEST(UtilModules_PSocket, IsIPAddress)
-{
+TEST(UtilModules_PSocket, IsIPAddress) {
     EXPECT_TRUE(SocketCommon::IsIPAddress("127.0.0.1"));
     EXPECT_TRUE(SocketCommon::IsIPAddress("192.168.1.1"));
     EXPECT_TRUE(SocketCommon::IsIPAddress("::1"));
@@ -64,8 +55,7 @@ TEST(UtilModules_PSocket, IsIPAddress)
 }
 
 // 测试主机名解析为 IP
-TEST(UtilModules_PSocket, ResolveHostToIP)
-{
+TEST(UtilModules_PSocket, ResolveHostToIP) {
     // 已经是 IP 则直接返回
     EXPECT_EQ(SocketCommon::ResolveHostToIP("127.0.0.1"), "127.0.0.1");
 
@@ -79,8 +69,7 @@ TEST(UtilModules_PSocket, ResolveHostToIP)
 
 // ---------- PUdp ----------
 // 测试 UDP 绑定与非法参数校验
-TEST(UtilModules_PSocket, UdpBindAndInvalidParams)
-{
+TEST(UtilModules_PSocket, UdpBindAndInvalidParams) {
     PUdp udp([](int32_t, void*) {}, nullptr);
     ASSERT_EQ(udp.AsUdp(0), 0);   // 随机端口绑定成功
 
@@ -94,8 +83,7 @@ TEST(UtilModules_PSocket, UdpBindAndInvalidParams)
 }
 
 // 测试 UDP 回环收发
-TEST(UtilModules_PSocket, UdpLoopback)
-{
+TEST(UtilModules_PSocket, UdpLoopback) {
     PUdp server([](int32_t, void*) {}, nullptr);
     ASSERT_EQ(server.AsUdp(38921), 0);
 
@@ -124,8 +112,7 @@ TEST(UtilModules_PSocket, UdpLoopback)
 
 // ---------- PTcpServer / PTcpClient ----------
 // 测试 TCP 服务端绑定与客户端构造
-TEST(UtilModules_PSocket, TcpServerBindAndClientConstruct)
-{
+TEST(UtilModules_PSocket, TcpServerBindAndClientConstruct) {
     PTcpServer server([](int32_t, void*) {}, nullptr);
     ASSERT_EQ(server.AsTcpServer(0, 5), 0);   // 随机端口
 
@@ -134,16 +121,14 @@ TEST(UtilModules_PSocket, TcpServerBindAndClientConstruct)
 }
 
 // 测试 TCP 客户端连接被拒绝
-TEST(UtilModules_PSocket, TcpClientConnectRefused)
-{
+TEST(UtilModules_PSocket, TcpClientConnectRefused) {
     PTcpClient client([](int32_t, void*) {}, nullptr);
     // 连接到未监听的端口，应失败
     EXPECT_EQ(client.AsTcpClient(true, "127.0.0.1", 1, DEFAULT_BUFFER_LIMIT, DEFAULT_BUFFER_LIMIT, 500), -1);
 }
 
 // 测试 TCP 服务端接受连接并客户端连接成功
-TEST_F(UtilModules_PSocket_Sock, TcpServerAcceptAndClientConnect)
-{
+TEST_F(UtilModules_PSocket_Sock, TcpServerAcceptAndClientConnect) {
     const uint16_t port = 38922;
     std::atomic<int32_t> acceptCount(0);
     PTcpServer server([&](int32_t cliFd, void*) {
@@ -160,8 +145,7 @@ TEST_F(UtilModules_PSocket_Sock, TcpServerAcceptAndClientConnect)
 }
 
 // 测试 UDP 事件回调（mCb1 分支）
-TEST(UtilModules_PSocket, UdpEpollEventCb1)
-{
+TEST(UtilModules_PSocket, UdpEpollEventCb1) {
     int32_t hitFd = -1;
     PUdp udp([&](int32_t fd, void*) { hitFd = fd; }, nullptr);
     ASSERT_EQ(udp.AsUdp(0), 0);
@@ -171,8 +155,7 @@ TEST(UtilModules_PSocket, UdpEpollEventCb1)
 }
 
 // 测试 UDP 事件回调（mCb2 分支）
-TEST(UtilModules_PSocket, UdpEpollEventCb2)
-{
+TEST(UtilModules_PSocket, UdpEpollEventCb2) {
     PUdp udp([](ssize_t, std::string, std::string, uint16_t, void*) {}, nullptr);
     ASSERT_EQ(udp.AsUdp(0), 0);
 
@@ -180,8 +163,7 @@ TEST(UtilModules_PSocket, UdpEpollEventCb2)
 }
 
 // 测试 TCP 客户端事件回调（mCb1 分支）
-TEST(UtilModules_PSocket, TcpClientEpollEventCb1)
-{
+TEST(UtilModules_PSocket, TcpClientEpollEventCb1) {
     int32_t hitFd = -1;
     PTcpClient client([&](int32_t fd, void*) { hitFd = fd; }, nullptr);
     ASSERT_EQ(client.AsTcpClient(false), 0);
@@ -191,8 +173,7 @@ TEST(UtilModules_PSocket, TcpClientEpollEventCb1)
 }
 
 // 测试 TCP 客户端事件回调（mCb2 分支）
-TEST(UtilModules_PSocket, TcpClientEpollEventCb2)
-{
+TEST(UtilModules_PSocket, TcpClientEpollEventCb2) {
     ssize_t recvSize = -1;
     PTcpClient client([&](ssize_t size, std::string, void*) { recvSize = size; }, nullptr);
     ASSERT_EQ(client.AsTcpClient(false), 0);
@@ -203,8 +184,7 @@ TEST(UtilModules_PSocket, TcpClientEpollEventCb2)
 }
 
 // 测试 Unix 数据报事件回调（mCb1 分支）
-TEST_F(UtilModules_PSocket_Sock, UnixDgramEpollEventCb1)
-{
+TEST_F(UtilModules_PSocket_Sock, UnixDgramEpollEventCb1) {
     const std::string srvPath = MakeSockPath("spr_udgram_cb_srv");
     mSockPaths.push_back(srvPath);
 
@@ -217,8 +197,7 @@ TEST_F(UtilModules_PSocket_Sock, UnixDgramEpollEventCb1)
 }
 
 // 测试 Unix 流式客户端事件回调（mCb1 分支）
-TEST_F(UtilModules_PSocket_Sock, UnixStreamClientEpollEventCb1)
-{
+TEST_F(UtilModules_PSocket_Sock, UnixStreamClientEpollEventCb1) {
     const std::string cliPath = MakeSockPath("spr_ustream_cb_cli");
     mSockPaths.push_back(cliPath);
 
@@ -232,8 +211,7 @@ TEST_F(UtilModules_PSocket_Sock, UnixStreamClientEpollEventCb1)
 
 // ---------- PUnixDgram ----------
 // 测试 Unix 数据报套接字回环收发
-TEST_F(UtilModules_PSocket_Sock, UnixDgramLoopback)
-{
+TEST_F(UtilModules_PSocket_Sock, UnixDgramLoopback) {
     const std::string srvPath = MakeSockPath("spr_udgram_srv");
     const std::string cliPath = MakeSockPath("spr_udgram_cli");
     mSockPaths.push_back(srvPath);
@@ -266,8 +244,7 @@ TEST_F(UtilModules_PSocket_Sock, UnixDgramLoopback)
 }
 
 // 测试 Unix 数据报套接字非法参数校验
-TEST_F(UtilModules_PSocket_Sock, UnixDgramInvalidParams)
-{
+TEST_F(UtilModules_PSocket_Sock, UnixDgramInvalidParams) {
     const std::string srvPath = MakeSockPath("spr_udgram_inv");
     mSockPaths.push_back(srvPath);
 
@@ -282,8 +259,7 @@ TEST_F(UtilModules_PSocket_Sock, UnixDgramInvalidParams)
 
 // ---------- PUnixStream ----------
 // 测试 Unix 流式套接字服务端绑定与客户端构造
-TEST_F(UtilModules_PSocket_Sock, UnixStreamServerBindAndClientConstruct)
-{
+TEST_F(UtilModules_PSocket_Sock, UnixStreamServerBindAndClientConstruct) {
     const std::string srvPath = MakeSockPath("spr_ustream_srv");
     const std::string cliPath = MakeSockPath("spr_ustream_cli");
     mSockPaths.push_back(srvPath);
@@ -297,8 +273,7 @@ TEST_F(UtilModules_PSocket_Sock, UnixStreamServerBindAndClientConstruct)
 }
 
 // 测试 Unix 流式套接字服务端接受连接并客户端连接成功
-TEST_F(UtilModules_PSocket_Sock, UnixStreamServerAcceptAndClientConnect)
-{
+TEST_F(UtilModules_PSocket_Sock, UnixStreamServerAcceptAndClientConnect) {
     const std::string srvPath = MakeSockPath("spr_ustream_accept_srv");
     const std::string cliPath = MakeSockPath("spr_ustream_accept_cli");
     mSockPaths.push_back(srvPath);

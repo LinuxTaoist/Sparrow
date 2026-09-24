@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/09/08
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/09/08 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include "CommonMacros.h"
@@ -24,17 +17,14 @@
 #define LOG_TAG "MediatorHub"
 
 using namespace InternalDefs;
-SprMediatorHub::SprMediatorHub(const std::string& srvName, SprMediator* SprMediator) : BinderHub(srvName)
-{
+SprMediatorHub::SprMediatorHub(const std::string& srvName, SprMediator* SprMediator) : BinderHub(srvName) {
     mSprMediator = SprMediator;
 }
 
-SprMediatorHub::~SprMediatorHub()
-{
+SprMediatorHub::~SprMediatorHub() {
 }
 
-void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd)
-{
+void SprMediatorHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) {
     switch(cmd) {
         case PROXY_CMD_GET_ALL_MQ_ATTRS: {
             std::vector<SMQueueDetails> tmpMQAttrs;

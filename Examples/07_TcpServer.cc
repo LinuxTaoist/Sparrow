@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/08
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/08 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <list>
 #include <memory>
@@ -28,8 +21,7 @@ using namespace std;
 
 #define SPR_LOGD(fmt, args...) printf("%4d TcpServer D: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%4d TcpServer E: " fmt, __LINE__, ##args)
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     EpollEventHandler* pEpoll = EpollEventHandler::GetInstance();
 
     std::list<std::shared_ptr<PTcpClient>> clients;

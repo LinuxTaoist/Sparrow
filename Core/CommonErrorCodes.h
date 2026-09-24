@@ -9,13 +9,7 @@
  *  @date       : 2025/02/10
  *
  *  This header file defines common error codes for both client and server code implementations.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/02/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __COMMON_ERROR_CODES_H__
 #define __COMMON_ERROR_CODES_H__
@@ -48,8 +42,7 @@ namespace {
     ENUM_OR_STRING(ERR_EVENT_LEVEL_INFO),       \
     ENUM_OR_STRING(ERR_EVENT_LEVEL_BUTT)
 
-enum SprErrorLevel
-{
+enum SprErrorLevel {
     ERR_EVENT_LEVEL_MACROS
 };
 

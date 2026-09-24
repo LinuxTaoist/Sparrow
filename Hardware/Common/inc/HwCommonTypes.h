@@ -10,13 +10,7 @@
  *
  *  Common types, enums, error codes and callbacks shared across all
  *  Hardware Abstraction Layer interfaces.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __HW_COMMON_TYPES_H__
 #define __HW_COMMON_TYPES_H__

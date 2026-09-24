@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <vector>
 #include <stdio.h>
@@ -36,13 +29,11 @@ static const char* DEFAULT_TABLE = "default_items";
 static const char* FACTORY_TABLE = "factory_items";
 static const char* USER_TABLE = "user_items";
 
-std::string GetNowString()
-{
+std::string GetNowString() {
     return GeneralUtils::GetCurTimeStr();
 }
 
-static std::string SqlEscape(const std::string& value)
-{
+static std::string SqlEscape(const std::string& value) {
     std::string escaped;
     escaped.reserve(value.size());
     for (char ch : value) {
@@ -55,13 +46,11 @@ static std::string SqlEscape(const std::string& value)
     return escaped;
 }
 
-static std::string SqlText(const std::string& value)
-{
+static std::string SqlText(const std::string& value) {
     return "'" + SqlEscape(value) + "'";
 }
 
-static std::string HexEncode(const std::vector<uint8_t>& value)
-{
+static std::string HexEncode(const std::vector<uint8_t>& value) {
     static const char kHex[] = "0123456789ABCDEF";
     std::string out;
     out.reserve(value.size() * 2);
@@ -72,8 +61,7 @@ static std::string HexEncode(const std::vector<uint8_t>& value)
     return out;
 }
 
-static std::vector<uint8_t> HexDecode(const std::string& value)
-{
+static std::vector<uint8_t> HexDecode(const std::string& value) {
     std::vector<uint8_t> out;
     if (value.empty()) {
         return out;
@@ -102,8 +90,7 @@ static std::vector<uint8_t> HexDecode(const std::string& value)
     return out;
 }
 
-static bool HasColumn(SqliteAdapter* db, const char* tableName, const char* columnName)
-{
+static bool HasColumn(SqliteAdapter* db, const char* tableName, const char* columnName) {
     if (db == nullptr) {
         return false;
     }
@@ -120,8 +107,7 @@ static bool HasColumn(SqliteAdapter* db, const char* tableName, const char* colu
     return false;
 }
 
-static int32_t EnsureItemTypeColumn(SqliteAdapter* db, const char* tableName)
-{
+static int32_t EnsureItemTypeColumn(SqliteAdapter* db, const char* tableName) {
     if (HasColumn(db, tableName, "item_type")) {
         return 0;
     }
@@ -132,17 +118,14 @@ static int32_t EnsureItemTypeColumn(SqliteAdapter* db, const char* tableName)
 }
 
 ConfigStore::ConfigStore(const std::string& dbPath)
-    : mpDb(SqliteAdapter::GetInstance(dbPath)), mDbPath(dbPath), mNextRevision(0)
-{
+    : mpDb(SqliteAdapter::GetInstance(dbPath)), mDbPath(dbPath), mNextRevision(0) {
 }
 
-ConfigStore::~ConfigStore()
-{
+ConfigStore::~ConfigStore() {
     mpDb = nullptr;
 }
 
-int32_t ConfigStore::Initialize()
-{
+int32_t ConfigStore::Initialize() {
     if (mpDb == nullptr) {
         mpDb = SqliteAdapter::GetInstance(mDbPath);
     }
@@ -158,8 +141,7 @@ int32_t ConfigStore::Initialize()
     return 0;
 }
 
-int32_t ConfigStore::CreateTables()
-{
+int32_t ConfigStore::CreateTables() {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -232,8 +214,7 @@ int32_t ConfigStore::CreateTables()
     return 0;
 }
 
-int32_t ConfigStore::QueryMaxRevision(const std::string& tableName, int32_t& maxRevision)
-{
+int32_t ConfigStore::QueryMaxRevision(const std::string& tableName, int32_t& maxRevision) {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -248,8 +229,7 @@ int32_t ConfigStore::QueryMaxRevision(const std::string& tableName, int32_t& max
     return 0;
 }
 
-int32_t ConfigStore::LoadNextRevision()
-{
+int32_t ConfigStore::LoadNextRevision() {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -280,8 +260,7 @@ int32_t ConfigStore::LoadNextRevision()
     return UpdateNextRevision(mNextRevision);
 }
 
-int32_t ConfigStore::UpdateNextRevision(int32_t revision)
-{
+int32_t ConfigStore::UpdateNextRevision(int32_t revision) {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -291,23 +270,19 @@ int32_t ConfigStore::UpdateNextRevision(int32_t revision)
     return mpDb->Execute(sql) ? 0 : -1;
 }
 
-int32_t ConfigStore::BeginTransaction()
-{
+int32_t ConfigStore::BeginTransaction() {
     return (mpDb && mpDb->Execute("BEGIN IMMEDIATE TRANSACTION;")) ? 0 : -1;
 }
 
-int32_t ConfigStore::CommitTransaction()
-{
+int32_t ConfigStore::CommitTransaction() {
     return (mpDb && mpDb->Execute("COMMIT;")) ? 0 : -1;
 }
 
-int32_t ConfigStore::RollbackTransaction()
-{
+int32_t ConfigStore::RollbackTransaction() {
     return (mpDb && mpDb->Execute("ROLLBACK;")) ? 0 : -1;
 }
 
-std::string ConfigStore::TableName(int32_t scope) const
-{
+std::string ConfigStore::TableName(int32_t scope) const {
     switch (scope) {
         case CONFIG_SCOPE_DEFAULT:
             return DEFAULT_TABLE;
@@ -321,16 +296,14 @@ std::string ConfigStore::TableName(int32_t scope) const
 }
 
 int32_t ConfigStore::Upsert(int32_t scope, const std::string& nameSpace, const std::string& key,
-                            const std::string& value, const std::string& owner, int32_t& revision)
-{
+                            const std::string& value, const std::string& owner, int32_t& revision) {
     std::vector<uint8_t> rawValue(value.begin(), value.end());
     return UpsertRaw(scope, nameSpace, key, rawValue, CONFIG_VALUE_TYPE_STRING, owner, revision);
 }
 
 int32_t ConfigStore::UpsertRaw(int32_t scope, const std::string& nameSpace, const std::string& key,
                                const std::vector<uint8_t>& value, int32_t valueType,
-                               const std::string& owner, int32_t& revision)
-{
+                               const std::string& owner, int32_t& revision) {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -365,8 +338,7 @@ int32_t ConfigStore::UpsertRaw(int32_t scope, const std::string& nameSpace, cons
 }
 
 int32_t ConfigStore::EnsureValue(int32_t scope, const std::string& nameSpace, const std::string& key,
-                                 const std::string& value, const std::string& owner, int32_t& revision)
-{
+                                 const std::string& value, const std::string& owner, int32_t& revision) {
     ConfigRecord record;
     if (GetByScope(scope, nameSpace, key, record) == 0) {
         revision = record.revision;
@@ -376,8 +348,7 @@ int32_t ConfigStore::EnsureValue(int32_t scope, const std::string& nameSpace, co
     return Upsert(scope, nameSpace, key, value, owner, revision);
 }
 
-int32_t ConfigStore::Remove(int32_t scope, const std::string& nameSpace, const std::string& key, int32_t& revision)
-{
+int32_t ConfigStore::Remove(int32_t scope, const std::string& nameSpace, const std::string& key, int32_t& revision) {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -405,8 +376,7 @@ int32_t ConfigStore::Remove(int32_t scope, const std::string& nameSpace, const s
 }
 
 int32_t ConfigStore::QueryTable(const std::string& tableName, const std::string& nameSpace,
-                                const std::string& key, ConfigRecord& record)
-{
+                                const std::string& key, ConfigRecord& record) {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -438,8 +408,7 @@ int32_t ConfigStore::QueryTable(const std::string& tableName, const std::string&
     return 0;
 }
 
-int32_t ConfigStore::GetByScope(int32_t scope, const std::string& nameSpace, const std::string& key, ConfigRecord& record)
-{
+int32_t ConfigStore::GetByScope(int32_t scope, const std::string& nameSpace, const std::string& key, ConfigRecord& record) {
     const std::string tableName = TableName(scope);
     if (tableName.empty()) {
         return -1;
@@ -449,13 +418,11 @@ int32_t ConfigStore::GetByScope(int32_t scope, const std::string& nameSpace, con
     return QueryTable(tableName, nameSpace, key, record);
 }
 
-int32_t ConfigStore::GetByScopeRaw(int32_t scope, const std::string& nameSpace, const std::string& key, ConfigRecord& record)
-{
+int32_t ConfigStore::GetByScopeRaw(int32_t scope, const std::string& nameSpace, const std::string& key, ConfigRecord& record) {
     return GetByScope(scope, nameSpace, key, record);
 }
 
-int32_t ConfigStore::GetEffective(const std::string& nameSpace, const std::string& key, ConfigRecord& record)
-{
+int32_t ConfigStore::GetEffective(const std::string& nameSpace, const std::string& key, ConfigRecord& record) {
     int32_t ret = GetByScope(CONFIG_SCOPE_USER, nameSpace, key, record);
     if (ret == 0) {
         return 0;
@@ -469,14 +436,12 @@ int32_t ConfigStore::GetEffective(const std::string& nameSpace, const std::strin
     return GetByScope(CONFIG_SCOPE_DEFAULT, nameSpace, key, record);
 }
 
-int32_t ConfigStore::GetEffectiveRaw(const std::string& nameSpace, const std::string& key, ConfigRecord& record)
-{
+int32_t ConfigStore::GetEffectiveRaw(const std::string& nameSpace, const std::string& key, ConfigRecord& record) {
     return GetEffective(nameSpace, key, record);
 }
 
 int32_t ConfigStore::QueryNamespace(const std::string& tableName, const std::string& nameSpace,
-                                    std::map<std::string, std::string>& items)
-{
+                                    std::map<std::string, std::string>& items) {
     if (mpDb == nullptr) {
         return -1;
     }
@@ -499,8 +464,7 @@ int32_t ConfigStore::QueryNamespace(const std::string& tableName, const std::str
     return 0;
 }
 
-int32_t ConfigStore::ListNamespaceEffective(const std::string& nameSpace, std::map<std::string, std::string>& items)
-{
+int32_t ConfigStore::ListNamespaceEffective(const std::string& nameSpace, std::map<std::string, std::string>& items) {
     items.clear();
     NONZERO_CHECK_RET(QueryNamespace(DEFAULT_TABLE, nameSpace, items));
     NONZERO_CHECK_RET(QueryNamespace(FACTORY_TABLE, nameSpace, items));
@@ -508,8 +472,7 @@ int32_t ConfigStore::ListNamespaceEffective(const std::string& nameSpace, std::m
     return 0;
 }
 
-int32_t ConfigStore::Backup(const std::string& backupPath)
-{
+int32_t ConfigStore::Backup(const std::string& backupPath) {
     if (mpDb == nullptr) {
         return -1;
     }

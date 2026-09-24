@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/14
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/14 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PTIMER_H__
 #define __PTIMER_H__
@@ -23,8 +16,7 @@
 #include <stdint.h>
 #include "IEpollEvent.h"
 
-class PTimer : public IEpollEvent
-{
+class PTimer : public IEpollEvent {
 public:
     PTimer(const std::function<void(int32_t, uint64_t, void*)>& cb = nullptr, void* arg = nullptr);
     virtual ~PTimer();

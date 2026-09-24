@@ -20,13 +20,7 @@
  *  Design note:
  *    Each instance represents ONE physical UART port.  For multi-port
  *    scenarios, create multiple instances.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/07/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __IHW_UART_H__
 #define __IHW_UART_H__

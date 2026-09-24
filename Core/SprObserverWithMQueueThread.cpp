@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/08/18
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/08/18 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "SprLog.h"
 #include "CommonErrorCodes.h"
@@ -101,8 +94,7 @@ void SprObserverWithMQueueThread::StartThread() {
     SPR_LOGD("Start MQ thread!");
 }
 
-void SprObserverWithMQueueThread::StopThread() {
-    {
+void SprObserverWithMQueueThread::StopThread() { {
         std::lock_guard<std::mutex> lock(mQueueMutex);
         std::queue<SprMsg> empty;
         std::swap(mMsgQueue, empty);

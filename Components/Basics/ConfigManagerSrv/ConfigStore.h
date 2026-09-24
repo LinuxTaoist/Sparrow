@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __CONFIG_STORE_H__
 #define __CONFIG_STORE_H__
@@ -25,8 +18,7 @@
 #include <stdint.h>
 #include "SqliteAdapter.h"
 
-struct ConfigRecord
-{
+struct ConfigRecord {
     std::string value;
     std::vector<uint8_t> rawValue;
     int32_t valueType;
@@ -36,8 +28,7 @@ struct ConfigRecord
     std::string updateTime;
 };
 
-class ConfigStore
-{
+class ConfigStore {
 public:
     explicit ConfigStore(const std::string& dbPath);
     ~ConfigStore();

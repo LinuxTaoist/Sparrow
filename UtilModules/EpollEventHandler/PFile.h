@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/17
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/17 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __PFILE_H__
 #define __PFILE_H__
@@ -24,8 +17,7 @@
 #include <functional>
 #include "IEpollEvent.h"
 
-class PFile : public IEpollEvent
-{
+class PFile : public IEpollEvent {
 public:
     explicit PFile(int32_t fd, const std::function<void(int32_t, void*)>& cb = nullptr, void* arg = nullptr);
     explicit PFile(const std::string& fileName, const std::function<void(int32_t, ssize_t, std::string, void*)>& cb = nullptr,

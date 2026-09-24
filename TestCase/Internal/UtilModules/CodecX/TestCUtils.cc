@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : CUtils 工具函数（CRC/LEB128/四则运算/文件读取）内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <cstdio>
 #include <fstream>
@@ -38,8 +31,7 @@ protected:
 
 // ---------- Crc8 / Crc16 / Bcc8 ----------
 // 测试 CRC8 已知校验向量
-TEST(UtilModules_CUtils, Crc8KnownVectors)
-{
+TEST(UtilModules_CUtils, Crc8KnownVectors) {
     // CRC-8/ATM (poly 0x07, init 0x00), "123456789" -> 0xF4
     const std::vector<uint8_t> data = {'1','2','3','4','5','6','7','8','9'};
     EXPECT_EQ(Crc8(data), 0xF4);
@@ -49,8 +41,7 @@ TEST(UtilModules_CUtils, Crc8KnownVectors)
 }
 
 // 测试 CRC16 已知校验向量
-TEST(UtilModules_CUtils, Crc16KnownVectors)
-{
+TEST(UtilModules_CUtils, Crc16KnownVectors) {
     // CRC-16/MODBUS (poly 0xA001, init 0xFFFF), "123456789" -> 0x4B37
     const std::vector<uint8_t> data = {'1','2','3','4','5','6','7','8','9'};
     EXPECT_EQ(Crc16(data), 0x4B37);
@@ -60,8 +51,7 @@ TEST(UtilModules_CUtils, Crc16KnownVectors)
 }
 
 // 测试 BCC8 异或累加
-TEST(UtilModules_CUtils, Bcc8XorAccumulation)
-{
+TEST(UtilModules_CUtils, Bcc8XorAccumulation) {
     const std::vector<uint8_t> data = {0x01, 0x02, 0x03, 0x04};
     EXPECT_EQ(Bcc8(data), 0x01 ^ 0x02 ^ 0x03 ^ 0x04);
 
@@ -70,8 +60,7 @@ TEST(UtilModules_CUtils, Bcc8XorAccumulation)
 }
 
 // ---------- DecodeLeb128 ----------
-TEST(UtilModules_CUtils, DecodeLeb128SingleByte)
-{
+TEST(UtilModules_CUtils, DecodeLeb128SingleByte) {
     // 测试单字节 LEB128 解码
     std::vector<uint8_t> bytes = {0x05};   // 0x05, no continuation
     int32_t offset = 0;
@@ -80,8 +69,7 @@ TEST(UtilModules_CUtils, DecodeLeb128SingleByte)
 }
 
 // 测试多字节 LEB128 解码
-TEST(UtilModules_CUtils, DecodeLeb128MultiByte)
-{
+TEST(UtilModules_CUtils, DecodeLeb128MultiByte) {
     std::vector<uint8_t> bytes = {0xE5, 0x8E, 0x26};   // 624485
     int32_t offset = 0;
     EXPECT_EQ(DecodeLeb128(bytes, offset, 4), 624485);
@@ -89,8 +77,7 @@ TEST(UtilModules_CUtils, DecodeLeb128MultiByte)
 }
 
 // 测试 LEB128 偏移越界返回失败
-TEST(UtilModules_CUtils, DecodeLeb128OffsetOutOfRange)
-{
+TEST(UtilModules_CUtils, DecodeLeb128OffsetOutOfRange) {
     std::vector<uint8_t> bytes = {0x01, 0x02};
     int32_t offset = 5;   // >= size
     EXPECT_EQ(DecodeLeb128(bytes, offset, 4), -1);
@@ -99,8 +86,7 @@ TEST(UtilModules_CUtils, DecodeLeb128OffsetOutOfRange)
 
 // ---------- CalculateFromString ----------
 // 测试四则运算基础表达式
-TEST(UtilModules_CUtils, CalculateBasic)
-{
+TEST(UtilModules_CUtils, CalculateBasic) {
     int32_t result = 0;
     EXPECT_EQ(CalculateFromString("1+2*3", result), 0);
     EXPECT_EQ(result, 7);
@@ -116,8 +102,7 @@ TEST(UtilModules_CUtils, CalculateBasic)
 }
 
 // 测试四则运算错误处理（除零/括号/非法字符）
-TEST(UtilModules_CUtils, CalculateErrors)
-{
+TEST(UtilModules_CUtils, CalculateErrors) {
     int32_t result = 0;
     EXPECT_EQ(CalculateFromString("", result), -1);         // 空
     EXPECT_EQ(CalculateFromString("1/0", result), -3);      // 除零
@@ -128,8 +113,7 @@ TEST(UtilModules_CUtils, CalculateErrors)
 
 // ---------- ReadFile ----------
 // 测试文件读取正常与文件不存在
-TEST(UtilModules_CUtils, ReadFileNormalAndMissing)
-{
+TEST(UtilModules_CUtils, ReadFileNormalAndMissing) {
     const std::string path = "/tmp/spr_cutils_readfile_test.txt";
     std::ofstream ofs(path, std::ios::binary);
     ofs << "hello-cutils";
@@ -147,8 +131,7 @@ TEST(UtilModules_CUtils, ReadFileNormalAndMissing)
 
 // ---------- ReadHexTextToHexVector ----------
 // 测试十六进制文本转向量正常情况
-TEST(UtilModules_CUtils, ReadHexTextNormal)
-{
+TEST(UtilModules_CUtils, ReadHexTextNormal) {
     const std::string path = "/tmp/spr_cutils_hex_test.txt";
     std::ofstream ofs(path, std::ios::binary);
     ofs << "123456AB";
@@ -167,8 +150,7 @@ TEST(UtilModules_CUtils, ReadHexTextNormal)
 }
 
 // 测试十六进制文本空文件与文件不存在
-TEST(UtilModules_CUtils, ReadHexTextEmptyAndMissing)
-{
+TEST(UtilModules_CUtils, ReadHexTextEmptyAndMissing) {
     const std::string emptyPath = "/tmp/spr_cutils_hex_empty.txt";
     std::ofstream ofs(emptyPath, std::ios::binary);
     ofs.close();

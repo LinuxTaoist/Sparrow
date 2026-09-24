@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/06/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/06/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __CONFIG_MANAGER_HUB_H__
 #define __CONFIG_MANAGER_HUB_H__
@@ -23,8 +16,7 @@
 #include "ConfigManager.h"
 #include "BinderHub.h"
 
-class ConfigManagerHub : public BinderHub
-{
+class ConfigManagerHub : public BinderHub {
 public:
     ConfigManagerHub(const std::string& srvName, ConfigManager* pManager);
     virtual ~ConfigManagerHub();

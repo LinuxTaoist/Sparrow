@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/12/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <sstream>
 #include <algorithm>
@@ -24,8 +17,7 @@
 //---------------------------------------------------------------------------------------------------------------------
 // HttpMsgBase
 //---------------------------------------------------------------------------------------------------------------------
-void HttpMsgBase::Trim(std::string& bytes)
-{
+void HttpMsgBase::Trim(std::string& bytes) {
     bytes.erase(bytes.begin(), std::find_if(bytes.begin(), bytes.end(), [](unsigned char ch) {
         return !std::isspace(ch);
     }));
@@ -35,8 +27,7 @@ void HttpMsgBase::Trim(std::string& bytes)
     }).base(), bytes.end());
 }
 
-std::string HttpMsgBase::GetStatusText(int32_t status)
-{
+std::string HttpMsgBase::GetStatusText(int32_t status) {
     switch (status) {
         case HTTP_STATUS_100: return "Continue";
         case HTTP_STATUS_101: return "Switching Protocols";
@@ -107,73 +98,60 @@ std::string HttpMsgBase::GetStatusText(int32_t status)
 //---------------------------------------------------------------------------------------------------------------------
 // HttpMsgRequest
 //---------------------------------------------------------------------------------------------------------------------
-HttpMsgRequest::HttpMsgRequest(const std::string& bytes)
-{
+HttpMsgRequest::HttpMsgRequest(const std::string& bytes) {
     Decode(bytes);
 }
 
 HttpMsgRequest::HttpMsgRequest(const std::string& method, const std::string& uri, const std::string& version)
-    : mReqMethod(method), mReqURI(uri), mHttpVersion(version)
-{
+    : mReqMethod(method), mReqURI(uri), mHttpVersion(version) {
 }
 
-HttpMsgRequest::~HttpMsgRequest()
-{
+HttpMsgRequest::~HttpMsgRequest() {
 }
 
-int32_t HttpMsgRequest::SetMethod(const std::string& method)
-{
+int32_t HttpMsgRequest::SetMethod(const std::string& method) {
     mReqMethod = method;
     return 0;
 }
 
-int32_t HttpMsgRequest::SetURI(const std::string& uri)
-{
+int32_t HttpMsgRequest::SetURI(const std::string& uri) {
     mReqURI = uri;
     return 0;
 }
 
-int32_t HttpMsgRequest::SetHttpVersion(const std::string& version)
-{
+int32_t HttpMsgRequest::SetHttpVersion(const std::string& version) {
     mHttpVersion = version;
     return 0;
 }
 
-int32_t HttpMsgRequest::SetHeader(const std::string& key, const std::string& value)
-{
+int32_t HttpMsgRequest::SetHeader(const std::string& key, const std::string& value) {
     mMsgHeaders[key] = value;
     return 0;
 }
 
-int32_t HttpMsgRequest::SetMsgHeaders(const std::map<std::string, std::string>& headers)
-{
+int32_t HttpMsgRequest::SetMsgHeaders(const std::map<std::string, std::string>& headers) {
     mMsgHeaders = headers;
     return 0;
 }
 
-int32_t HttpMsgRequest::SetMsgBody(const std::string& body)
-{
+int32_t HttpMsgRequest::SetMsgBody(const std::string& body) {
     mMsgBody = body;
     return 0;
 }
 
-std::string HttpMsgRequest::GetMethod()
-{
+std::string HttpMsgRequest::GetMethod() {
     return mReqMethod;
 }
 
-std::string HttpMsgRequest::GetURI()
-{
+std::string HttpMsgRequest::GetURI() {
     return mReqURI;
 }
 
-std::string HttpMsgRequest::GetHttpVersion()
-{
+std::string HttpMsgRequest::GetHttpVersion() {
     return mHttpVersion;
 }
 
-std::string HttpMsgRequest::GetMsgHeader(const std::string& key)
-{
+std::string HttpMsgRequest::GetMsgHeader(const std::string& key) {
     auto it = mMsgHeaders.find(key);
     if (it != mMsgHeaders.end()) {
         return it->second;
@@ -181,18 +159,15 @@ std::string HttpMsgRequest::GetMsgHeader(const std::string& key)
     return "";
 }
 
-std::map<std::string, std::string> HttpMsgRequest::GetMsgHeaders()
-{
+std::map<std::string, std::string> HttpMsgRequest::GetMsgHeaders() {
     return mMsgHeaders;
 }
 
-std::string HttpMsgRequest::GetMsgBody()
-{
+std::string HttpMsgRequest::GetMsgBody() {
     return mMsgBody;
 }
 
-int32_t HttpMsgRequest::Decode(const std::string& bytes)
-{
+int32_t HttpMsgRequest::Decode(const std::string& bytes) {
     std::istringstream stream(bytes);
     std::string line;
 
@@ -235,8 +210,7 @@ int32_t HttpMsgRequest::Decode(const std::string& bytes)
     return 0;
 }
 
-int32_t HttpMsgRequest::Encode(std::string& bytes)
-{
+int32_t HttpMsgRequest::Encode(std::string& bytes) {
     // HTTP Request Message Format (RFC 7230 and RFC 7231)
     // Request        = Request-Line                          ; Section 5.1
     //                  *( ( general-header                   ; Section 4.5
@@ -258,68 +232,56 @@ int32_t HttpMsgRequest::Encode(std::string& bytes)
 //---------------------------------------------------------------------------------------------------------------------
 // HttpMsgResponse
 //---------------------------------------------------------------------------------------------------------------------
-HttpMsgResponse::HttpMsgResponse(const std::string& bytes)
-{
+HttpMsgResponse::HttpMsgResponse(const std::string& bytes) {
     Decode(bytes);
 }
 
 HttpMsgResponse::HttpMsgResponse(const std::string& version, int32_t status, const std::string& body)
-    : mHttpVersion(version), mStatusCode(status), mMsgBody(body)
-{
+    : mHttpVersion(version), mStatusCode(status), mMsgBody(body) {
 }
 
-HttpMsgResponse::~HttpMsgResponse()
-{
+HttpMsgResponse::~HttpMsgResponse() {
 }
 
-int32_t HttpMsgResponse::SetHttpVersion(const std::string& version)
-{
+int32_t HttpMsgResponse::SetHttpVersion(const std::string& version) {
     mHttpVersion = version;
     return 0;
 }
 
-int32_t HttpMsgResponse::SetStatusCode(int32_t status)
-{
+int32_t HttpMsgResponse::SetStatusCode(int32_t status) {
     mStatusCode = status;
     return 0;
 }
 
-int32_t HttpMsgResponse::SetHeader(const std::string& key, const std::string& value)
-{
+int32_t HttpMsgResponse::SetHeader(const std::string& key, const std::string& value) {
     mMsgHeaders[key] = value;
     return 0;
 }
 
-int32_t HttpMsgResponse::SetMsgHeaders(const std::map<std::string, std::string>& headers)
-{
+int32_t HttpMsgResponse::SetMsgHeaders(const std::map<std::string, std::string>& headers) {
     mMsgHeaders = headers;
     return 0;
 }
 
-int32_t HttpMsgResponse::SetMsgBody(const std::string& body)
-{
+int32_t HttpMsgResponse::SetMsgBody(const std::string& body) {
     mMsgBody = body;
     return 0;
 }
 
-std::string HttpMsgResponse::GetHttpVersion()
-{
+std::string HttpMsgResponse::GetHttpVersion() {
     return mHttpVersion;
 }
 
-int32_t HttpMsgResponse::GetStatusCode()
-{
+int32_t HttpMsgResponse::GetStatusCode() {
     return mStatusCode;
 }
 
-std::string HttpMsgResponse::GetReasonPhrase()
-{
+std::string HttpMsgResponse::GetReasonPhrase() {
     mReasonPhrase = GetStatusText(mStatusCode);
     return mReasonPhrase;
 }
 
-std::string HttpMsgResponse::GetMsgHeader(const std::string& key)
-{
+std::string HttpMsgResponse::GetMsgHeader(const std::string& key) {
     auto it = mMsgHeaders.find(key);
     if (it != mMsgHeaders.end()) {
         return it->second;
@@ -327,18 +289,15 @@ std::string HttpMsgResponse::GetMsgHeader(const std::string& key)
     return "";
 }
 
-std::map<std::string, std::string> HttpMsgResponse::GetMsgHeaders()
-{
+std::map<std::string, std::string> HttpMsgResponse::GetMsgHeaders() {
     return mMsgHeaders;
 }
 
-std::string HttpMsgResponse::GetMsgBody()
-{
+std::string HttpMsgResponse::GetMsgBody() {
     return mMsgBody;
 }
 
-int32_t HttpMsgResponse::Decode(const std::string& bytes)
-{
+int32_t HttpMsgResponse::Decode(const std::string& bytes) {
     std::istringstream stream(bytes);
     std::string line;
 
@@ -393,8 +352,7 @@ int32_t HttpMsgResponse::Decode(const std::string& bytes)
     return 0;
 }
 
-int32_t HttpMsgResponse::Encode(std::string& bytes)
-{
+int32_t HttpMsgResponse::Encode(std::string& bytes) {
     // HTTP Response Message Format (RFC 7230 and RFC 7231)
     //response      = Status-Line                           ; Section 6.1
     //              *( ( general-header                     ; Section 4.5

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/10/13
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/10/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <algorithm>
@@ -33,17 +26,14 @@ using namespace std;
 
 static std::atomic<bool> gObjAlive(true);
 
-SessionManager::SessionManager()
-{
+SessionManager::SessionManager() {
 }
 
-SessionManager::~SessionManager()
-{
+SessionManager::~SessionManager() {
     gObjAlive = false;
 }
 
-SessionManager* SessionManager::GetInstance()
-{
+SessionManager* SessionManager::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -52,8 +42,7 @@ SessionManager* SessionManager::GetInstance()
     return &instance;
 }
 
-int32_t SessionManager::AsTcpServer(uint16_t port)
-{
+int32_t SessionManager::AsTcpServer(uint16_t port) {
     mpTcpServer = make_shared<PTcpServer>([&](int32_t cli, void* arg) {
         PTcpServer* pSrvObj = (PTcpServer*)arg;
         if (pSrvObj == nullptr) {
@@ -136,8 +125,7 @@ int32_t SessionManager::AsTcpServer(uint16_t port)
     return 0;
 }
 
-int32_t SessionManager::AsTcpClient(const std::string& ip, uint16_t port)
-{
+int32_t SessionManager::AsTcpClient(const std::string& ip, uint16_t port) {
     static std::shared_ptr<PtyTerminal> pPtyObj = make_shared<PtyTerminal>([&](int32_t ret, std::string bytes, void* arg) {
         if (ret <= 0) {
             SPR_LOGE("Pty closed\n");
@@ -173,8 +161,7 @@ int32_t SessionManager::AsTcpClient(const std::string& ip, uint16_t port)
     return (rc1 == 0 && rc2 == 0) ? 0 : -1;
 }
 
-int32_t SessionManager::EpollLoop()
-{
+int32_t SessionManager::EpollLoop() {
     EpollEventHandler::GetInstance()->EpollLoop();
     return 0;
 }

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/05/17
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/05/17 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __POWER_MANAGER_HUB_H__
 #define __POWER_MANAGER_HUB_H__
@@ -23,8 +16,7 @@
 #include "PowerManager.h"
 #include "BinderHub.h"
 
-class PowerManagerHub : public BinderHub
-{
+class PowerManagerHub : public BinderHub {
 public:
     PowerManagerHub(const std::string& srvName, PowerManager* powerManager);
     virtual ~PowerManagerHub();

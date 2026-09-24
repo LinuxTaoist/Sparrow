@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Parcel 共享内存+信号量进程间通信内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <cstdio>
@@ -25,8 +18,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeParcelPath()
-{
+std::string MakeParcelPath() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char buf[64] = {};
@@ -51,8 +43,7 @@ protected:
 };
 
 // 测试布尔类型往返通信
-TEST_F(Util_Parcel, BoolRoundtrip)
-{
+TEST_F(Util_Parcel, BoolRoundtrip) {
     Parcel master(mPath, 1, true);
     Parcel slave(mPath, 1, false);
 
@@ -72,8 +63,7 @@ TEST_F(Util_Parcel, BoolRoundtrip)
 }
 
 // 测试整型往返通信（含负数与边界值）
-TEST_F(Util_Parcel, IntRoundtrip)
-{
+TEST_F(Util_Parcel, IntRoundtrip) {
     Parcel master(mPath, 2, true);
     Parcel slave(mPath, 2, false);
 
@@ -93,8 +83,7 @@ TEST_F(Util_Parcel, IntRoundtrip)
 }
 
 // 测试字符串往返通信
-TEST_F(Util_Parcel, StringRoundtrip)
-{
+TEST_F(Util_Parcel, StringRoundtrip) {
     Parcel master(mPath, 3, true);
     Parcel slave(mPath, 3, false);
 
@@ -109,8 +98,7 @@ TEST_F(Util_Parcel, StringRoundtrip)
 }
 
 // 测试原始二进制数据往返通信
-TEST_F(Util_Parcel, DataRoundtrip)
-{
+TEST_F(Util_Parcel, DataRoundtrip) {
     Parcel master(mPath, 4, true);
     Parcel slave(mPath, 4, false);
 
@@ -129,8 +117,7 @@ TEST_F(Util_Parcel, DataRoundtrip)
 }
 
 // 测试向量容器往返通信
-TEST_F(Util_Parcel, VectorRoundtrip)
-{
+TEST_F(Util_Parcel, VectorRoundtrip) {
     Parcel master(mPath, 5, true);
     Parcel slave(mPath, 5, false);
 
@@ -148,8 +135,7 @@ TEST_F(Util_Parcel, VectorRoundtrip)
 }
 
 // 测试无数据时定时等待超时
-TEST_F(Util_Parcel, TimedWaitTimeoutWhenNoData)
-{
+TEST_F(Util_Parcel, TimedWaitTimeoutWhenNoData) {
     Parcel master(mPath, 6, true);
     Parcel slave(mPath, 6, false);
 
@@ -158,8 +144,7 @@ TEST_F(Util_Parcel, TimedWaitTimeoutWhenNoData)
 }
 
 // 测试无读者时 Post 递增信号量成功
-TEST_F(Util_Parcel, PostWithoutReader)
-{
+TEST_F(Util_Parcel, PostWithoutReader) {
     Parcel master(mPath, 7, true);
     // Post 没有读者也能成功（信号量递增）
     EXPECT_EQ(master.Post(), 0);

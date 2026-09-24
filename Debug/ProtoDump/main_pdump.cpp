@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2026/05/05
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/05/05 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string>
 #include <errno.h>
@@ -25,8 +18,7 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-int main(int argc, const char* argv[])
-{
+int main(int argc, const char* argv[]) {
     if (argc < 2) {
         SPR_LOG("Usage: \n");
         SPR_LOG(" Dump Config: %s <config path> \n", argv[0]);

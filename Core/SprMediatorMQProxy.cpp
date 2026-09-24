@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : SprMediatorProxy.cpp
+ *  @file       : SprMediatorMQProxy.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <errno.h>
@@ -33,14 +26,12 @@ using namespace InternalDefs;
 
 static std::atomic<bool> gObjAlive(true);
 
-SprMediatorMQProxy::SprMediatorMQProxy()
-{
+SprMediatorMQProxy::SprMediatorMQProxy() {
     mMdtFd = -1;
     ConnectMediator();
 }
 
-SprMediatorMQProxy::~SprMediatorMQProxy()
-{
+SprMediatorMQProxy::~SprMediatorMQProxy() {
     gObjAlive = false;
     if (mMdtFd != -1) {
         mq_close(mMdtFd);
@@ -48,8 +39,7 @@ SprMediatorMQProxy::~SprMediatorMQProxy()
     }
 }
 
-SprMediatorMQProxy* SprMediatorMQProxy::GetInstance()
-{
+SprMediatorMQProxy* SprMediatorMQProxy::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -58,8 +48,7 @@ SprMediatorMQProxy* SprMediatorMQProxy::GetInstance()
     return &instance;
 }
 
-int32_t SprMediatorMQProxy::ConnectMediator()
-{
+int32_t SprMediatorMQProxy::ConnectMediator() {
     mq_attr mqAttr;
     mqAttr.mq_maxmsg = 10;      // cat /proc/sys/fs/mqueue/msg_max
     mqAttr.mq_msgsize = 1024;
@@ -73,8 +62,7 @@ int32_t SprMediatorMQProxy::ConnectMediator()
     return 0;
 }
 
-int32_t SprMediatorMQProxy::SendMsg(const SprMsg& msg)
-{
+int32_t SprMediatorMQProxy::SendMsg(const SprMsg& msg) {
     std::string datas;
 
     if (msg.Encode(datas) != 0) {
@@ -90,14 +78,12 @@ int32_t SprMediatorMQProxy::SendMsg(const SprMsg& msg)
     return ret;
 }
 
-int32_t SprMediatorMQProxy::NotifyObserver(const SprMsg& msg)
-{
+int32_t SprMediatorMQProxy::NotifyObserver(const SprMsg& msg) {
     SendMsg(msg);
     return 0;
 }
 
-int32_t SprMediatorMQProxy::NotifyAllObserver(const SprMsg& msg)
-{
+int32_t SprMediatorMQProxy::NotifyAllObserver(const SprMsg& msg) {
     // The default value of mTo in SprMsg is MODULE_NONE.
     // If you want to notify all, do not modify the mTo value in SprMsg when using
     NotifyObserver(msg);

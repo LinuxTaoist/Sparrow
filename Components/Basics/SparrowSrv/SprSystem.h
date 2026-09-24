@@ -7,22 +7,14 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/02/24
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/02/24 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_SYSTEM_H__
 #define __SPR_SYSTEM_H__
 
 #include "PluginManager.h"
 
-class SprSystem
-{
+class SprSystem {
 public:
     // --------------------------------------------------------------------------------------------
     // - Init functions

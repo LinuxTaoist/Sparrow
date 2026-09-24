@@ -7,13 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Remote shell command execution implementation
  *  @date       : 2026/05/28
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/05/28 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -51,8 +45,7 @@ static pid_t gShellPid = -1;
 static bool gWaitingForPrompt = false;
 static std::mutex gSessionMutex;
 
-void UpdatePromptCacheLocked(const std::string& prompt)
-{
+void UpdatePromptCacheLocked(const std::string& prompt) {
     gPrompt = prompt;
 
     size_t atPos = prompt.find('@');
@@ -69,8 +62,7 @@ void UpdatePromptCacheLocked(const std::string& prompt)
     }
 }
 
-void ResetSessionLocked(bool killChild)
-{
+void ResetSessionLocked(bool killChild) {
     if (gMasterFd >= 0) {
         close(gMasterFd);
         gMasterFd = -1;
@@ -89,8 +81,7 @@ void ResetSessionLocked(bool killChild)
     gWaitingForPrompt = false;
 }
 
-bool IsShellAliveLocked()
-{
+bool IsShellAliveLocked() {
     if (gShellPid <= 0) {
         return false;
     }
@@ -105,8 +96,7 @@ bool IsShellAliveLocked()
     return false;
 }
 
-bool WriteAllLocked(const std::string& data)
-{
+bool WriteAllLocked(const std::string& data) {
     const char* ptr = data.c_str();
     size_t remain = data.length();
     while (remain > 0) {
@@ -127,8 +117,7 @@ bool WriteAllLocked(const std::string& data)
     return true;
 }
 
-bool SelectReadableLocked(int waitMs)
-{
+bool SelectReadableLocked(int waitMs) {
     fd_set readfds;
     FD_ZERO(&readfds);
     FD_SET(gMasterFd, &readfds);
@@ -144,8 +133,7 @@ bool SelectReadableLocked(int waitMs)
     return ret > 0 && FD_ISSET(gMasterFd, &readfds);
 }
 
-bool DrainReadyOutputLocked()
-{
+bool DrainReadyOutputLocked() {
     char buf[4096];
     while (true) {
         ssize_t readLen = read(gMasterFd, buf, sizeof(buf));
@@ -170,8 +158,7 @@ bool DrainReadyOutputLocked()
     }
 }
 
-bool IsPartialPromptMarker(const std::string& text, size_t index)
-{
+bool IsPartialPromptMarker(const std::string& text, size_t index) {
     size_t remain = text.length() - index;
     size_t markerLen = strlen(PROMPT_MARKER);
     if (remain >= markerLen) {
@@ -181,8 +168,7 @@ bool IsPartialPromptMarker(const std::string& text, size_t index)
     return text.compare(index, remain, PROMPT_MARKER, remain) == 0;
 }
 
-bool TryConsumePrompt(const std::string& text, size_t index, std::string& prompt, size_t& consumed)
-{
+bool TryConsumePrompt(const std::string& text, size_t index, std::string& prompt, size_t& consumed) {
     size_t markerLen = strlen(PROMPT_MARKER);
     if (text.length() - index < markerLen) {
         return false;
@@ -205,8 +191,7 @@ bool TryConsumePrompt(const std::string& text, size_t index, std::string& prompt
     return false;
 }
 
-bool TrySkipEscapeSequence(const std::string& text, size_t index, size_t& consumed)
-{
+bool TrySkipEscapeSequence(const std::string& text, size_t index, size_t& consumed) {
     if (text[index] != 0x1b) {
         return false;
     }
@@ -248,8 +233,7 @@ bool TrySkipEscapeSequence(const std::string& text, size_t index, size_t& consum
     return true;
 }
 
-void ConsumeProcessedOutputLocked(std::string& output, bool& promptReady, std::string& promptAfter)
-{
+void ConsumeProcessedOutputLocked(std::string& output, bool& promptReady, std::string& promptAfter) {
     output.clear();
     promptReady = false;
     promptAfter.clear();
@@ -297,8 +281,7 @@ void ConsumeProcessedOutputLocked(std::string& output, bool& promptReady, std::s
     gRawBuffer.erase(0, i);
 }
 
-bool ReadOutputChunkLocked(std::string& output, std::string& promptAfter, bool& promptReady, int waitMs)
-{
+bool ReadOutputChunkLocked(std::string& output, std::string& promptAfter, bool& promptReady, int waitMs) {
     if (!gRawBuffer.empty()) {
         ConsumeProcessedOutputLocked(output, promptReady, promptAfter);
         if (!output.empty() || promptReady) {
@@ -321,8 +304,7 @@ bool ReadOutputChunkLocked(std::string& output, std::string& promptAfter, bool& 
     return true;
 }
 
-bool WaitForPromptLocked(std::string& output, std::string& promptAfter, int timeoutMs)
-{
+bool WaitForPromptLocked(std::string& output, std::string& promptAfter, int timeoutMs) {
     output.clear();
     promptAfter.clear();
     int elapsedMs = 0;
@@ -351,8 +333,7 @@ bool WaitForPromptLocked(std::string& output, std::string& promptAfter, int time
     return false;
 }
 
-int StartShellLocked()
-{
+int StartShellLocked() {
     ResetSessionLocked(true);
 
     int masterFd = -1;
@@ -409,8 +390,7 @@ int StartShellLocked()
     return 0;
 }
 
-int EnsureSessionLocked()
-{
+int EnsureSessionLocked() {
     if (gMasterFd >= 0 && IsShellAliveLocked()) {
         return 0;
     }
@@ -420,8 +400,7 @@ int EnsureSessionLocked()
 
 }  // namespace
 
-int InitSession()
-{
+int InitSession() {
     std::lock_guard<std::mutex> lock(gSessionMutex);
 
     char cwd[4096];
@@ -448,14 +427,12 @@ int InitSession()
     return EnsureSessionLocked();
 }
 
-std::string GetCurrentDir()
-{
+std::string GetCurrentDir() {
     std::lock_guard<std::mutex> lock(gSessionMutex);
     return gCurrentDir;
 }
 
-std::string GetPrompt()
-{
+std::string GetPrompt() {
     std::lock_guard<std::mutex> lock(gSessionMutex);
     if (EnsureSessionLocked() != 0) {
         return gUsername + "@" + gHostname + ":" + gCurrentDir + "$ ";
@@ -464,8 +441,7 @@ std::string GetPrompt()
     return gPrompt.empty() ? (gUsername + "@" + gHostname + ":" + gCurrentDir + "$ ") : gPrompt;
 }
 
-int SendCommand(const std::string& cmd, std::string& promptBefore)
-{
+int SendCommand(const std::string& cmd, std::string& promptBefore) {
     if (cmd.empty()) {
         return -1;
     }
@@ -486,8 +462,7 @@ int SendCommand(const std::string& cmd, std::string& promptBefore)
     return 0;
 }
 
-int ReadOutput(std::string& output, std::string& promptAfter, bool& promptReady, int waitMs)
-{
+int ReadOutput(std::string& output, std::string& promptAfter, bool& promptReady, int waitMs) {
     std::lock_guard<std::mutex> lock(gSessionMutex);
     if (EnsureSessionLocked() != 0) {
         return -1;
@@ -501,8 +476,7 @@ int ReadOutput(std::string& output, std::string& promptAfter, bool& promptReady,
     return 0;
 }
 
-int Interrupt()
-{
+int Interrupt() {
     std::lock_guard<std::mutex> lock(gSessionMutex);
     if (EnsureSessionLocked() != 0) {
         return -1;
@@ -519,8 +493,7 @@ int Interrupt()
     return 0;
 }
 
-int ExecuteCommand(const std::string& cmd, std::string& output, int timeoutMs)
-{
+int ExecuteCommand(const std::string& cmd, std::string& output, int timeoutMs) {
     output.clear();
     std::string promptBefore;
     if (SendCommand(cmd, promptBefore) != 0) {
@@ -551,8 +524,7 @@ int ExecuteCommand(const std::string& cmd, std::string& output, int timeoutMs)
     return -1;
 }
 
-int GetDeviceProfile(std::string& profile)
-{
+int GetDeviceProfile(std::string& profile) {
     std::ostringstream oss;
     std::string hostname, uptime, kernel;
 
@@ -584,8 +556,7 @@ int GetDeviceProfile(std::string& profile)
     return 0;
 }
 
-int GetResourceUsage(std::string& resources)
-{
+int GetResourceUsage(std::string& resources) {
     std::ostringstream oss;
     std::string meminfo, df;
 

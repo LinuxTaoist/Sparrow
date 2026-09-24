@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : cJSON 解析/构建/打印/操作内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <cstdio>
 #include <cstdlib>
@@ -29,15 +22,13 @@ static cJSON* Parse(const char* text) {
 }
 
 // 测试版本号返回非空
-TEST(Util_cJSON, Version)
-{
+TEST(Util_cJSON, Version) {
     EXPECT_NE(cJSON_Version(), nullptr);
     EXPECT_GT(strlen(cJSON_Version()), 0u);
 }
 
 // 测试解析 null 与各种非法输入
-TEST(Util_cJSON, ParseNullAndInvalid)
-{
+TEST(Util_cJSON, ParseNullAndInvalid) {
     EXPECT_EQ(cJSON_Parse(nullptr), nullptr);
     EXPECT_EQ(cJSON_Parse(""), nullptr);
     EXPECT_EQ(cJSON_Parse("not json"), nullptr);
@@ -49,8 +40,7 @@ TEST(Util_cJSON, ParseNullAndInvalid)
 }
 
 // 测试解析基础类型（数字/字符串/布尔/null）
-TEST(Util_cJSON, ParseBasicTypes)
-{
+TEST(Util_cJSON, ParseBasicTypes) {
     // number
     cJSON* n = Parse("42");
     ASSERT_TRUE(n != nullptr);
@@ -85,8 +75,7 @@ TEST(Util_cJSON, ParseBasicTypes)
 }
 
 // 测试解析数组及其元素访问
-TEST(Util_cJSON, ParseArray)
-{
+TEST(Util_cJSON, ParseArray) {
     cJSON* arr = Parse("[1, 2, 3, \"four\", true]");
     ASSERT_TRUE(arr != nullptr);
     EXPECT_TRUE(cJSON_IsArray(arr));
@@ -103,8 +92,7 @@ TEST(Util_cJSON, ParseArray)
 }
 
 // 测试解析嵌套对象及其字段
-TEST(Util_cJSON, ParseNestedObject)
-{
+TEST(Util_cJSON, ParseNestedObject) {
     const char* text = "{\"name\":\"sparrow\",\"version\":1.8,\"tags\":[\"a\",\"b\"],\"meta\":{\"ok\":true}}";
     cJSON* obj = Parse(text);
     ASSERT_TRUE(obj != nullptr);
@@ -129,8 +117,7 @@ TEST(Util_cJSON, ParseNestedObject)
 }
 
 // 测试创建对象并打印/重解析
-TEST(Util_cJSON, CreateAndPrint)
-{
+TEST(Util_cJSON, CreateAndPrint) {
     cJSON* root = cJSON_CreateObject();
     ASSERT_TRUE(root != nullptr);
 
@@ -162,8 +149,7 @@ TEST(Util_cJSON, CreateAndPrint)
 }
 
 // 测试缓冲打印与预分配打印
-TEST(Util_cJSON, PrintBufferedAndPreallocated)
-{
+TEST(Util_cJSON, PrintBufferedAndPreallocated) {
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddItemToObject(obj, "k", cJSON_CreateString("v"));
 
@@ -188,8 +174,7 @@ TEST(Util_cJSON, PrintBufferedAndPreallocated)
 }
 
 // 测试添加/删除对象成员
-TEST(Util_cJSON, AddItemAndDelete)
-{
+TEST(Util_cJSON, AddItemAndDelete) {
     cJSON* obj = cJSON_CreateObject();
     cJSON_AddItemToObject(obj, "a", cJSON_CreateNumber(1));
     cJSON_AddItemToObject(obj, "b", cJSON_CreateNumber(2));
@@ -209,8 +194,7 @@ TEST(Util_cJSON, AddItemAndDelete)
 }
 
 // 测试数组元素的增删操作
-TEST(Util_cJSON, ArrayManipulation)
-{
+TEST(Util_cJSON, ArrayManipulation) {
     cJSON* arr = cJSON_CreateArray();
     cJSON_AddItemToArray(arr, cJSON_CreateNumber(10));
     cJSON_AddItemToArray(arr, cJSON_CreateNumber(20));
@@ -228,8 +212,7 @@ TEST(Util_cJSON, ArrayManipulation)
 }
 
 // 测试按长度/选项解析
-TEST(Util_cJSON, ParseWithLengthAndOpts)
-{
+TEST(Util_cJSON, ParseWithLengthAndOpts) {
     // ParseWithLength：在 buffer 中截断
     const char* text = "[1,2,3] trailing-garbage";
     cJSON* item = cJSON_ParseWithLength(text, 7);
@@ -252,8 +235,7 @@ TEST(Util_cJSON, ParseWithLengthAndOpts)
 }
 
 // 测试转义与 Unicode 字符串解析
-TEST(Util_cJSON, EscapeAndUnicodeString)
-{
+TEST(Util_cJSON, EscapeAndUnicodeString) {
     const char* text = "\"line1\\nline2\\t\\\"quoted\\\" \\u0041\"";
     cJSON* s = Parse(text);
     ASSERT_TRUE(s != nullptr);
@@ -271,8 +253,7 @@ TEST(Util_cJSON, EscapeAndUnicodeString)
 }
 
 // 测试各种数字格式解析
-TEST(Util_cJSON, NumberFormats)
-{
+TEST(Util_cJSON, NumberFormats) {
     // 整数、负数、浮点、科学计数法
     cJSON* a = Parse("0");
     EXPECT_DOUBLE_EQ(cJSON_GetNumberValue(a), 0.0);
@@ -292,8 +273,7 @@ TEST(Util_cJSON, NumberFormats)
 }
 
 // 测试 IsInvalid 对空指针与 Invalid 类型的判断
-TEST(Util_cJSON, IsInvalidOnNull)
-{
+TEST(Util_cJSON, IsInvalidOnNull) {
     // cJSON_IsInvalid(nullptr) 返回 false（null 不是 Invalid 类型）
     EXPECT_FALSE(cJSON_IsInvalid(nullptr));
 

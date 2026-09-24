@@ -7,7 +7,6 @@
  *  @version    : 1.0
  *  @brief      : LogConfiger internal tests.
  *  @date       : 2026/09/20
- *
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <cstdio>
@@ -21,16 +20,13 @@ namespace {
 
 const char* TEST_CONFIG_PATH = "/tmp/sparrow_log_configer_test.ini";
 
-class LogM_LogConfiger : public ::testing::Test
-{
+class LogM_LogConfiger : public ::testing::Test {
 protected:
-    void TearDown() override
-    {
+    void TearDown() override {
         std::remove(TEST_CONFIG_PATH);
     }
 
-    void WriteConfig(const std::string& content)
-    {
+    void WriteConfig(const std::string& content) {
         std::ofstream file(TEST_CONFIG_PATH);
         ASSERT_TRUE(file.is_open());
         file << content;
@@ -40,8 +36,7 @@ protected:
 } // namespace
 
 // 测试 default 和模块配置整合为完整模块配置
-TEST_F(LogM_LogConfiger, LoadAndMergeModuleConfiguration)
-{
+TEST_F(LogM_LogConfiger, LoadAndMergeModuleConfiguration) {
     WriteConfig(
         "[output.default]\n"
         "frame_length_bytes=2048\n"
@@ -78,8 +73,7 @@ TEST_F(LogM_LogConfiger, LoadAndMergeModuleConfiguration)
 }
 
 // 测试模块缺少配置项时使用 default 生成完整配置
-TEST_F(LogM_LogConfiger, MissingModuleKeysUseMergedDefaults)
-{
+TEST_F(LogM_LogConfiger, MissingModuleKeysUseMergedDefaults) {
     WriteConfig(
         "[output.default]\n"
         "file_name=default.log\n"
@@ -100,8 +94,7 @@ TEST_F(LogM_LogConfiger, MissingModuleKeysUseMergedDefaults)
 }
 
 // 测试没有配置文件时仍保留完整的 default 模块配置
-TEST_F(LogM_LogConfiger, MissingFileKeepsDefaultConfiguration)
-{
+TEST_F(LogM_LogConfiger, MissingFileKeepsDefaultConfiguration) {
     LogConfiger configer;
     EXPECT_EQ(configer.Load("/tmp/sparrow_log_configer_missing.ini"), -1);
 

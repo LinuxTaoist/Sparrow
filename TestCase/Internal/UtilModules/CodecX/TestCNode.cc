@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : CNode 编解码框架节点基类内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <string>
 #include "CNode.h"
@@ -44,8 +37,7 @@ public:
 };
 
 // 测试构造默认值
-TEST(UtilModules_CNode, DefaultConstruction)
-{
+TEST(UtilModules_CNode, DefaultConstruction) {
     TestNode node;
     EXPECT_FALSE(node.IsField());
     EXPECT_EQ(node.GetName(), "");
@@ -57,8 +49,7 @@ TEST(UtilModules_CNode, DefaultConstruction)
 }
 
 // 测试名称与类型设置
-TEST(UtilModules_CNode, NameAndType)
-{
+TEST(UtilModules_CNode, NameAndType) {
     TestNode node;
     node.SetName("node1");
     node.SetType("u32");
@@ -67,8 +58,7 @@ TEST(UtilModules_CNode, NameAndType)
 }
 
 // 测试索引设置与获取
-TEST(UtilModules_CNode, IndexSetGet)
-{
+TEST(UtilModules_CNode, IndexSetGet) {
     TestNode node;
     node.SetSIdx(10);
     node.SetEIdx(20);
@@ -77,16 +67,14 @@ TEST(UtilModules_CNode, IndexSetGet)
 }
 
 // 测试长度设置与获取
-TEST(UtilModules_CNode, LengthSetGet)
-{
+TEST(UtilModules_CNode, LengthSetGet) {
     TestNode node;
     node.SetLen(64);
     EXPECT_EQ(node.GetLen(), 64);
 }
 
 // 测试大小端设置与获取
-TEST(UtilModules_CNode, EndianSetGet)
-{
+TEST(UtilModules_CNode, EndianSetGet) {
     TestNode node;
     node.SetEnd(CENDIAN_LITTLE);
     EXPECT_EQ(node.GetEnd(), CENDIAN_LITTLE);
@@ -95,8 +83,7 @@ TEST(UtilModules_CNode, EndianSetGet)
 }
 
 // 测试开关值设置与获取
-TEST(UtilModules_CNode, SwitchValue)
-{
+TEST(UtilModules_CNode, SwitchValue) {
     TestNode node;
     EXPECT_FALSE(node.HasSwitchValue());
     EXPECT_EQ(node.GetSwitchValue(), 0);
@@ -107,8 +94,7 @@ TEST(UtilModules_CNode, SwitchValue)
 }
 
 // 测试编码位置相关方法
-TEST(UtilModules_CNode, EncodePosition)
-{
+TEST(UtilModules_CNode, EncodePosition) {
     TestNode node;
     node.ResetEPos(5);
     EXPECT_EQ(node.GetEPos(), 5);
@@ -117,8 +103,7 @@ TEST(UtilModules_CNode, EncodePosition)
 }
 
 // 测试解码位置相关方法
-TEST(UtilModules_CNode, DecodePosition)
-{
+TEST(UtilModules_CNode, DecodePosition) {
     TestNode node;
     node.ResetDPos(4);
     EXPECT_EQ(node.GetDPos(), 4);
@@ -127,8 +112,7 @@ TEST(UtilModules_CNode, DecodePosition)
 }
 
 // 测试父子节点关系
-TEST(UtilModules_CNode, ParentChildRelationship)
-{
+TEST(UtilModules_CNode, ParentChildRelationship) {
     auto parent = std::make_shared<TestNode>();
     auto child = std::make_shared<TestNode>();
     child->SetParentNode(parent);
@@ -140,8 +124,7 @@ TEST(UtilModules_CNode, ParentChildRelationship)
 }
 
 // 测试字符串值设置与获取
-TEST(UtilModules_CNode, StrValueSetGet)
-{
+TEST(UtilModules_CNode, StrValueSetGet) {
     TestNode node;
     EXPECT_EQ(node.SetStrValue("", "hello"), 0);
 
@@ -152,8 +135,7 @@ TEST(UtilModules_CNode, StrValueSetGet)
 }
 
 // 测试拷贝构造
-TEST(UtilModules_CNode, CopyConstructor)
-{
+TEST(UtilModules_CNode, CopyConstructor) {
     TestNode src;
     src.SetName("copied");
     src.SetType("u8");
@@ -164,8 +146,7 @@ TEST(UtilModules_CNode, CopyConstructor)
 }
 
 // 测试赋值运算符
-TEST(UtilModules_CNode, AssignmentOperator)
-{
+TEST(UtilModules_CNode, AssignmentOperator) {
     TestNode src;
     src.SetName("assigned");
     src.SetType("u16");

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/09/27
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/09/27 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __ASYNC_EVENT_H__
 #define __ASYNC_EVENT_H__
@@ -28,8 +21,7 @@ typedef void(*EventCallback)(int32_t eventID, void* data, int32_t size);
 
 #define POST_AEVENT(eventID, args, size)   AsyncEvent::GetInstance()->EventNotify(eventID, args, size)
 
-class AsyncEvent
-{
+class AsyncEvent {
 public:
     static AsyncEvent* GetInstance();
 

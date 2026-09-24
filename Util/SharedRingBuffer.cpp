@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/03/26
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/03/26 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <algorithm>
 #include <fcntl.h>
@@ -71,8 +64,7 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path, uint32_t capacity)
 }
 
 // Used for slave mode
-SharedRingBuffer::SharedRingBuffer(const std::string& path)
-{
+SharedRingBuffer::SharedRingBuffer(const std::string& path) {
     mEnable = true;
     int fd = open(path.c_str(), O_RDWR);
     if (fd == -1) {
@@ -130,13 +122,11 @@ SharedRingBuffer::SharedRingBuffer(const std::string& path)
     mData = reinterpret_cast<uint8_t*>(mapMemory) + sizeof(Root);
 }
 
-SharedRingBuffer::~SharedRingBuffer()
-{
+SharedRingBuffer::~SharedRingBuffer() {
     munmap(mRoot, mMapCapacity);
 }
 
-int SharedRingBuffer::Write(const void* data, int32_t len)
-{
+int SharedRingBuffer::Write(const void* data, int32_t len) {
     int ret = -1;
     int retry = RETRY_TIMES;
 
@@ -188,8 +178,7 @@ int SharedRingBuffer::Write(const void* data, int32_t len)
     return ret;
 }
 
-int SharedRingBuffer::Read(void* data, int32_t len)
-{
+int SharedRingBuffer::Read(void* data, int32_t len) {
     int ret = -1;
     int retry = RETRY_TIMES;
 
@@ -331,8 +320,7 @@ void SharedRingBuffer::SetRWStatus(ECmdType type) const noexcept
 //     }
 // }
 
-void SharedRingBuffer::DumpErrorInfo()
-{
+void SharedRingBuffer::DumpErrorInfo() {
     if (!mEnable) {
         SPR_LOGE("SharedRingBuffer is disable!\n");
         return ;

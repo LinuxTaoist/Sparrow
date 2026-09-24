@@ -6,15 +6,10 @@
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Singleton thread pool implementation (non-template logic)
- *                Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/12/11
  *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
+ *                Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/11 | 1.0.0.1   | Xiang.D        | Align brace style, remove all exceptions
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <chrono>
 #include "SprLog.h"
@@ -24,8 +19,7 @@
 
 static std::atomic<bool> gObjAlive(true);
 
-SprThreadPool* SprThreadPool::GetInstance(int32_t initWorkerCount)
-{
+SprThreadPool* SprThreadPool::GetInstance(int32_t initWorkerCount) {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -35,14 +29,12 @@ SprThreadPool* SprThreadPool::GetInstance(int32_t initWorkerCount)
 }
 
 SprThreadPool::SprThreadPool(int32_t initWorkerCount)
-    : mInitWorkerCount(initWorkerCount), mIsPoolRunning(true), mTaskCntPeak(0), mIdleWorkerCount(0)
-{
+    : mInitWorkerCount(initWorkerCount), mIsPoolRunning(true), mTaskCntPeak(0), mIdleWorkerCount(0) {
     AddWorkerThreads(initWorkerCount);
     SPR_LOGI("Init workers = %d, Max workers = %d", initWorkerCount, SPR_THREAD_POOL_MAX_WORKERS);
 }
 
-SprThreadPool::~SprThreadPool()
-{
+SprThreadPool::~SprThreadPool() {
     gObjAlive = false;
 
     // 1. Drain — wait for workers to finish all pending tasks
@@ -74,18 +66,15 @@ SprThreadPool::~SprThreadPool()
     SPR_LOGI("Destroy workers = %zu, Remaining tasks = %zu", mWorkers.size(), mTaskQueue.size());
 }
 
-int32_t SprThreadPool::GetIdleWorkerCount() const
-{
+int32_t SprThreadPool::GetIdleWorkerCount() const {
     return mIdleWorkerCount;
 }
 
-int32_t SprThreadPool::GetTotalWorkerCount() const
-{
+int32_t SprThreadPool::GetTotalWorkerCount() const {
     return static_cast<int32_t>(mWorkers.size());
 }
 
-int32_t SprThreadPool::DumpDetails() const
-{
+int32_t SprThreadPool::DumpDetails() const {
     SPR_LOGI("                           Dump Thread Poll Details                                            \n");
     SPR_LOGI("-----------------------------------------------------------------------------------------------\n");
     SPR_LOGI("- Init workers = %d \n", mInitWorkerCount);
@@ -97,8 +86,7 @@ int32_t SprThreadPool::DumpDetails() const
     return 0;
 }
 
-void SprThreadPool::AddWorkerThreads(int32_t workerCount)
-{
+void SprThreadPool::AddWorkerThreads(int32_t workerCount) {
     const size_t currWorkerCount = mWorkers.size();
 
     // Add workers only if not exceeding max limit
@@ -115,8 +103,7 @@ void SprThreadPool::AddWorkerThreads(int32_t workerCount)
     }
 }
 
-void SprThreadPool::RunWorkerLoop()
-{
+void SprThreadPool::RunWorkerLoop() {
     // Worker loop: Run until pool stops and no pending tasks
     while (mIsPoolRunning) {
         Task currentTask;

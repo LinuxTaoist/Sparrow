@@ -7,13 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SIM (Subscriber Identity Module) HAL interface — pure virtual.
  *  @date       : 2026/08/13
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/08/13 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __IHW_SIM_H__
 #define __IHW_SIM_H__

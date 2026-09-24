@@ -11,13 +11,7 @@
  *  @TODO:
  *  The component prints log directly to the library, not through LogManager.
  *  LogManager only used to monitor real-time log status and manage log storage.
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __LOG_MANAGER_H__
 #define __LOG_MANAGER_H__

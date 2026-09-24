@@ -2,19 +2,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  *  @copyright Copyright (c) 2022  <dx_65535@163.com>.
  *
- *  @file       : CoreTypeDefs.h
+ *  @file       : SprEnumHelper.cpp
  *  @author     : Xiang.D (dx_65535@163.com)
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2025/03/15
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2025/03/15 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <vector>
 #include "CoreTypeDefs.h"
@@ -31,8 +24,7 @@ namespace InternalDefs {
 // --------------------------------------------------------------------------------------------------------------------
 // - Enums of CommonErrorCodes.h
 // --------------------------------------------------------------------------------------------------------------------
-int32_t GetSprErrorLevel(int32_t errorCode)
-{
+int32_t GetSprErrorLevel(int32_t errorCode) {
     int32_t levelCode = (0 - errorCode) % 50;
 
     if (levelCode >= ERR_LEVEL_CRITICAL_BEGIN && levelCode < ERR_LEVEL_ERROR_BEGIN) {
@@ -51,8 +43,7 @@ int32_t GetSprErrorLevel(int32_t errorCode)
     return ERR_EVENT_LEVEL_UNKNOWN;
 }
 
-std::string GetSprErrorLevelText(int32_t level)
-{
+std::string GetSprErrorLevelText(int32_t level) {
     std::vector<std::string> errorLevels = {
         ERR_EVENT_LEVEL_MACROS
     };
@@ -60,8 +51,7 @@ std::string GetSprErrorLevelText(int32_t level)
     return ((int32_t)errorLevels.size() > level) ? errorLevels[level] : "UNDEFINED";
 }
 
-std::string GetSprErrorText(int32_t errorCode)
-{
+std::string GetSprErrorText(int32_t errorCode) {
     switch (errorCode) {
         case ERR_GENERAL_SUCCESS:             return "General success";
         case ERR_GENERAL_ERROR:               return "General error";
@@ -97,8 +87,7 @@ std::string GetSprErrorText(int32_t errorCode)
 // --------------------------------------------------------------------------------------------------------------------
 // - Enums of CoreTypeDefs.h
 // --------------------------------------------------------------------------------------------------------------------
-std::string GetSprProxTypeText(int32_t type)
-{
+std::string GetSprProxTypeText(int32_t type) {
     std::vector<std::string> proxyTypes = {
         PROXY_TYPE_MACROS
     };
@@ -108,8 +97,7 @@ std::string GetSprProxTypeText(int32_t type)
         proxyTypes[type] : "UNDEFINED";
 }
 
-std::string GetSprModuleIDText(int32_t moduleID)
-{
+std::string GetSprModuleIDText(int32_t moduleID) {
     std::vector<std::string> moduleIDs = {
         SPR_MODULE_ID_MACROS
     };
@@ -121,8 +109,7 @@ std::string GetSprModuleIDText(int32_t moduleID)
         moduleIDs[moduleID] : warnText;
 }
 
-std::string GetSprProxyBinderCmdText(int32_t proxyBinderCmd)
-{
+std::string GetSprProxyBinderCmdText(int32_t proxyBinderCmd) {
     std::vector<std::string> proxyBinderCmds = {
         PROXY_BINDER_CMD_MACROS
     };
@@ -133,8 +120,7 @@ std::string GetSprProxyBinderCmdText(int32_t proxyBinderCmd)
         proxyBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprPropertyBinderCmdText(int32_t propertyBinderCmd)
-{
+std::string GetSprPropertyBinderCmdText(int32_t propertyBinderCmd) {
     std::vector<std::string> propertyBinderCmds = {
         PROPERTY_BINDER_CMD_MACROS
     };
@@ -145,8 +131,7 @@ std::string GetSprPropertyBinderCmdText(int32_t propertyBinderCmd)
         propertyBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprPowerMBinderCmdText(int32_t powerMBinderCmd)
-{
+std::string GetSprPowerMBinderCmdText(int32_t powerMBinderCmd) {
     std::vector<std::string> powerMBinderCmds = {
         POWER_BINDER_CMD_MACROS
     };
@@ -157,8 +142,7 @@ std::string GetSprPowerMBinderCmdText(int32_t powerMBinderCmd)
         powerMBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprDebugMBinderCmdText(int32_t debugMBinderCmd)
-{
+std::string GetSprDebugMBinderCmdText(int32_t debugMBinderCmd) {
     std::vector<std::string> debugMBinderCmds = {
         DEBUG_BINDER_CMD_MACROS
     };
@@ -169,8 +153,7 @@ std::string GetSprDebugMBinderCmdText(int32_t debugMBinderCmd)
         debugMBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprLogLevelText(int32_t level)
-{
+std::string GetSprLogLevelText(int32_t level) {
     std::vector<std::string> logLevels = {
         LOG_LEVEL_MACROS
     };
@@ -180,8 +163,7 @@ std::string GetSprLogLevelText(int32_t level)
         logLevels[level] : "UNDEFINED";
 }
 
-std::string GetSprGeneralBinderCmdText(int32_t generalBinderCmd)
-{
+std::string GetSprGeneralBinderCmdText(int32_t generalBinderCmd) {
     std::vector<std::string> generalBinderCmds = {
         GENERAL_BINDER_CMD_MACROS
     };
@@ -192,8 +174,7 @@ std::string GetSprGeneralBinderCmdText(int32_t generalBinderCmd)
         generalBinderCmds[index] : "UNDEFINED";
 }
 
-std::string GetSprModuleBootPriorityText(int32_t moduleBootPriority)
-{
+std::string GetSprModuleBootPriorityText(int32_t moduleBootPriority) {
     std::vector<std::string> moduleBootPriorities = {
         MODULE_BOOT_PRIORITY_MACROS
     };
@@ -203,8 +184,7 @@ std::string GetSprModuleBootPriorityText(int32_t moduleBootPriority)
         moduleBootPriorities[moduleBootPriority] : "UNDEFINED";
 }
 
-std::string GetStartupTypeText(int32_t type)
-{
+std::string GetStartupTypeText(int32_t type) {
     std::vector<std::string> startupTypes = {
         STARTUP_TYPE_MACROS
     };
@@ -214,8 +194,7 @@ std::string GetStartupTypeText(int32_t type)
         startupTypes[type] : "UNDEFINED";
 }
 
-std::string GetSprPreStandbyAckText(int32_t standbyAck)
-{
+std::string GetSprPreStandbyAckText(int32_t standbyAck) {
     std::vector<std::string> preStandbyAcks = {
         PRE_STANDBY_ACK_MACROS
     };
@@ -225,8 +204,7 @@ std::string GetSprPreStandbyAckText(int32_t standbyAck)
         preStandbyAcks[standbyAck] : "UNDEFINED";
 }
 
-std::string GetStandbyReasonTypeText(int32_t reason)
-{
+std::string GetStandbyReasonTypeText(int32_t reason) {
     std::vector<std::string> standbyReasonTypes = {
         STANDBY_REASON_TYPE_MACROS
     };
@@ -236,8 +214,7 @@ std::string GetStandbyReasonTypeText(int32_t reason)
         standbyReasonTypes[reason] : "UNDEFINED";
 }
 
-std::string GetWakeupSourceTypeText(int32_t source)
-{
+std::string GetWakeupSourceTypeText(int32_t source) {
     std::vector<std::string> wakeupSourceTypes = {
         WAKEUP_SOURCE_TYPE_MACROS
     };
@@ -247,8 +224,7 @@ std::string GetWakeupSourceTypeText(int32_t source)
         wakeupSourceTypes[source] : "UNDEFINED";
 }
 
-std::string GetSprTimeSourceTypeText(int32_t timeSourceType)
-{
+std::string GetSprTimeSourceTypeText(int32_t timeSourceType) {
     std::vector<std::string> timeSourceTypes = {
         TIME_SOURCE_TYPE_MACROS
     };

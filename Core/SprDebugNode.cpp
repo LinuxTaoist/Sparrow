@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/12/06
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/12/06 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <atomic>
 #include <algorithm>
@@ -37,18 +30,15 @@
 
 static std::atomic<bool> gObjAlive(true);
 
-SprDebugNode::SprDebugNode() : mMaxNum(DEFAULT_CMD_MAX_SIZE)
-{
+SprDebugNode::SprDebugNode() : mMaxNum(DEFAULT_CMD_MAX_SIZE) {
     RegisterBuildinCmds();
 }
 
-SprDebugNode::~SprDebugNode()
-{
+SprDebugNode::~SprDebugNode() {
     gObjAlive = false;
 }
 
-SprDebugNode* SprDebugNode::GetInstance()
-{
+SprDebugNode* SprDebugNode::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
@@ -57,13 +47,11 @@ SprDebugNode* SprDebugNode::GetInstance()
     return &instance;
 }
 
-std::string SprDebugNode::GetDebugPath()
-{
+std::string SprDebugNode::GetDebugPath() {
     return mPipePath;
 }
 
-int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
-{
+int32_t SprDebugNode::InitPipeDebugNode(const std::string& path) {
     if (mpDebugNode && mpDebugNode->IsReady()) {
         SPR_LOGD("Already init! path = %s\n", mPipePath.c_str());
         return 0;
@@ -126,8 +114,7 @@ int32_t SprDebugNode::InitPipeDebugNode(const std::string& path)
     return 0;
 }
 
-int32_t SprDebugNode::RegisterBuildinCmds()
-{
+int32_t SprDebugNode::RegisterBuildinCmds() {
     mBuildinCmds["help"]          = { "Dump all cmds",              std::bind(&SprDebugNode::DebugDumpAllOwners, this, std::placeholders::_1)};
     mBuildinCmds["version"]       = { "Dump version",               std::bind(&SprDebugNode::DebugDumpVersion, this, std::placeholders::_1)};
     mBuildinCmds["proc"]          = { "Dump process info",          std::bind(&SprDebugNode::DebugDumpProcInfo, this, std::placeholders::_1)};
@@ -137,16 +124,14 @@ int32_t SprDebugNode::RegisterBuildinCmds()
     return 0;
 }
 
-int32_t SprDebugNode::RegisterCmd(const std::string& owner, const std::string& cmd, const std::string& desc, DebugCmdFunc func)
-{
+int32_t SprDebugNode::RegisterCmd(const std::string& owner, const std::string& cmd, const std::string& desc, DebugCmdFunc func) {
     std::lock_guard<std::mutex> lock(mMutex);
     auto& pair = mDebugOwners[owner];
     pair.mCmdMap[cmd] = {desc, func};
     return 0;
 }
 
-int32_t SprDebugNode::UnregisterCmd(const std::string& owner)
-{
+int32_t SprDebugNode::UnregisterCmd(const std::string& owner) {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mDebugOwners.find(owner) == mDebugOwners.end()) {
         return -1;
@@ -156,8 +141,7 @@ int32_t SprDebugNode::UnregisterCmd(const std::string& owner)
     return 0;
 }
 
-int32_t SprDebugNode::UnregisterCmd(const std::string& owner, const std::string& cmd)
-{
+int32_t SprDebugNode::UnregisterCmd(const std::string& owner, const std::string& cmd) {
     std::lock_guard<std::mutex> lock(mMutex);
     if (mDebugOwners.find(owner) == mDebugOwners.end()) {
         return -1;
@@ -172,8 +156,7 @@ int32_t SprDebugNode::UnregisterCmd(const std::string& owner, const std::string&
     return 0;
 }
 
-void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
-{
+void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args) {
     SPR_LOGI("============================  Debug Command List  ============================\n");
     SPR_LOGI("\n");
 
@@ -202,8 +185,7 @@ void SprDebugNode::DebugDumpAllOwners(const std::vector<std::string>& args)
     SPR_LOGI("==============================================================================\n");
 }
 
-void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
-{
+void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args) {
     SPR_LOGI("=============================   Version About   ==============================\n");
     SPR_LOGI("\n");
     SPR_LOGI("  Build Time      : %s %s\n", __DATE__, __TIME__);
@@ -214,8 +196,7 @@ void SprDebugNode::DebugDumpVersion(const std::vector<std::string>& args)
     SPR_LOGI("==============================================================================\n");
 }
 
-void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
-{
+void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args) {
     auto pObj = SprProcInfo::GetInstance();
     if (!pObj) {
         SPR_LOGE("pObj is nullptr!\n");
@@ -237,8 +218,7 @@ void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args)
     SPR_LOGI("==============================================================================\n");
 }
 
-void SprDebugNode::DebugDumpThreadPoolDetails(const std::vector<std::string>& args)
-{
+void SprDebugNode::DebugDumpThreadPoolDetails(const std::vector<std::string>& args) {
     SprThreadPool* pPool = SprThreadPool::GetInstance();
     if (!pPool) {
         SPR_LOGE("pPool is nullptr!\n");
@@ -248,8 +228,7 @@ void SprDebugNode::DebugDumpThreadPoolDetails(const std::vector<std::string>& ar
     pPool->DumpDetails();
 }
 
-void SprDebugNode::DebugDumpHeartbeatDetails(const std::vector<std::string>& args)
-{
+void SprDebugNode::DebugDumpHeartbeatDetails(const std::vector<std::string>& args) {
     HeartbeatReporter* pReporter = HeartbeatReporter::GetInstance();
     if (!pReporter) {
         SPR_LOGE("pReporter is nullptr!\n");
@@ -259,8 +238,7 @@ void SprDebugNode::DebugDumpHeartbeatDetails(const std::vector<std::string>& arg
     pReporter->DumpDetails();
 }
 
-void SprDebugNode::DebugSetLogLevel(const std::vector<std::string>& args)
-{
+void SprDebugNode::DebugSetLogLevel(const std::vector<std::string>& args) {
     if (args.size() < 2) {
         SPR_LOGE("Invalid args! size = %d\n", args.size());
         SPR_LOGE("Usage: echo loglevel {level} > %s (0: none, 1: error, 2: warning, 3: info, 4: debug)\n", mPipePath.c_str());
@@ -271,18 +249,15 @@ void SprDebugNode::DebugSetLogLevel(const std::vector<std::string>& args)
     SprLog::GetInstance()->SetLevel(level);
 }
 
-int32_t SprDebugNode::SetMaxNum(int32_t num)
-{
+int32_t SprDebugNode::SetMaxNum(int32_t num) {
     mMaxNum = num;
     return 0;
 }
 
-int32_t SprDebugNode::GetMaxNum()
-{
+int32_t SprDebugNode::GetMaxNum() {
     return mMaxNum;
 }
 
-int32_t SprDebugNode::GetCurNum()
-{
+int32_t SprDebugNode::GetCurNum() {
     return (int32_t)mDebugOwners.size();
 }

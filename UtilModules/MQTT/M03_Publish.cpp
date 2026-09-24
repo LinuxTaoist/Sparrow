@@ -7,34 +7,23 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2024/08/20
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2024/08/20 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include "M03_Publish.h"
 
 MqttPublish::MqttPublish()
-    : MqttMsgBase(MQTT_MSG_PUBLISH)
-{
+    : MqttMsgBase(MQTT_MSG_PUBLISH) {
     mIdentifier = 0;
 }
 
 MqttPublish::MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload)
-    : MqttMsgBase(MQTT_MSG_PUBLISH, flags, payload), mIdentifier(identifier), mTopic(topic)
-{
+    : MqttMsgBase(MQTT_MSG_PUBLISH, flags, payload), mIdentifier(identifier), mTopic(topic) {
 }
 
-MqttPublish::~MqttPublish()
-{
+MqttPublish::~MqttPublish() {
 }
 
-int32_t MqttPublish::DecodeVariableHeader(const std::string& bytes)
-{
+int32_t MqttPublish::DecodeVariableHeader(const std::string& bytes) {
     int32_t len = 0;
     uint16_t topicLen = 0;
     CHECK_ADD_RESULT(DecodeIntegerFromBytes(topicLen, bytes), len);
@@ -42,8 +31,7 @@ int32_t MqttPublish::DecodeVariableHeader(const std::string& bytes)
     return len;
 }
 
-int32_t MqttPublish::EncodeVariableHeader(std::string& bytes)
-{
+int32_t MqttPublish::EncodeVariableHeader(std::string& bytes) {
     int32_t len = 0;
     uint16_t topicLen = mTopic.length();
 

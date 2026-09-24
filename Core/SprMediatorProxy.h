@@ -7,22 +7,14 @@
  *  @version    : 1.0
  *  @brief      : Blog: https://mp.weixin.qq.com/s/eoCPWMGbIcZyxvJ3dMjQXQ
  *  @date       : 2023/11/25
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2023/11/25 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #ifndef __SPR_MEDIATOR_PROXY_H__
 #define __SPR_MEDIATOR_PROXY_H__
 
 #include "SprMsg.h"
 
-class SprMediatorProxy
-{
+class SprMediatorProxy {
 public:
     /**
      * @brief Construct/Destruct

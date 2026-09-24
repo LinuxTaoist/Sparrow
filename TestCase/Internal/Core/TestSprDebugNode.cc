@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : SprDebugNode 调试命令节点内部测试
  *  @date       : 2026/09/09
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/09 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <string>
@@ -24,8 +17,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeOwnerName(const std::string& prefix)
-{
+std::string MakeOwnerName(const std::string& prefix) {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return prefix + "_" + std::to_string(ts.tv_nsec % 1000000L);
@@ -33,8 +25,7 @@ std::string MakeOwnerName(const std::string& prefix)
 }
 
 // 测试注册/注销 owner 命令的生命周期
-TEST(Core_SprDebugNode, RegisterAndUnregisterOwnerCommands)
-{
+TEST(Core_SprDebugNode, RegisterAndUnregisterOwnerCommands) {
     SprDebugNode* node = SprDebugNode::GetInstance();
     ASSERT_TRUE(node != nullptr);
 
@@ -60,8 +51,7 @@ TEST(Core_SprDebugNode, RegisterAndUnregisterOwnerCommands)
 }
 
 // 测试注销不存在的 owner 返回错误
-TEST(Core_SprDebugNode, UnregisterMissingOwnerReturnsError)
-{
+TEST(Core_SprDebugNode, UnregisterMissingOwnerReturnsError) {
     SprDebugNode* node = SprDebugNode::GetInstance();
     ASSERT_TRUE(node != nullptr);
 
@@ -71,8 +61,7 @@ TEST(Core_SprDebugNode, UnregisterMissingOwnerReturnsError)
 }
 
 // 测试设置/获取最大命令数
-TEST(Core_SprDebugNode, SetAndGetMaxNum)
-{
+TEST(Core_SprDebugNode, SetAndGetMaxNum) {
     SprDebugNode* node = SprDebugNode::GetInstance();
     ASSERT_TRUE(node != nullptr);
 
@@ -85,8 +74,7 @@ TEST(Core_SprDebugNode, SetAndGetMaxNum)
 }
 
 // 内置命令直接调用不应崩溃（真实调试命令执行路径）
-TEST(Core_SprDebugNode, BuiltinCommandsExecuteWithoutCrash)
-{
+TEST(Core_SprDebugNode, BuiltinCommandsExecuteWithoutCrash) {
     SprDebugNode* node = SprDebugNode::GetInstance();
     ASSERT_TRUE(node != nullptr);
 
@@ -103,8 +91,7 @@ TEST(Core_SprDebugNode, BuiltinCommandsExecuteWithoutCrash)
 }
 
 // 管道调试节点初始化：重复初始化与无效路径
-TEST(Core_SprDebugNode, InitPipeDebugNode)
-{
+TEST(Core_SprDebugNode, InitPipeDebugNode) {
     SprDebugNode* node = SprDebugNode::GetInstance();
     ASSERT_TRUE(node != nullptr);
 

@@ -7,14 +7,7 @@
  *  @version    : 1.0
  *  @brief      : AsyncEvent 异步事件通知内部测试
  *  @date       : 2026/09/10
- *
- *
- *  Change History:
- *  <Date>     | <Version> | <Author>       | <Description>
  *---------------------------------------------------------------------------------------------------------------------
- *  2026/09/10 | 1.0.0.1   | Xiang.D        | Create file
- *---------------------------------------------------------------------------------------------------------------------
- *
  */
 #include <ctime>
 #include <cstdio>
@@ -24,8 +17,7 @@
 #include "gtest/gtest.h"
 
 namespace {
-std::string MakeEventName()
-{
+std::string MakeEventName() {
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     char buf[96] = {};
@@ -48,8 +40,7 @@ protected:
 };
 
 // 测试单例模式返回非空
-TEST_F(Util_AsyncEvent, SingletonReturnsSameInstance)
-{
+TEST_F(Util_AsyncEvent, SingletonReturnsSameInstance) {
     AsyncEvent* a = AsyncEvent::GetInstance();
     AsyncEvent* b = AsyncEvent::GetInstance();
     ASSERT_TRUE(a != nullptr);
@@ -57,15 +48,13 @@ TEST_F(Util_AsyncEvent, SingletonReturnsSameInstance)
 }
 
 // 测试未初始化 Parcel 时 EventNotify 返回失败
-TEST_F(Util_AsyncEvent, EventNotifyWithoutParcel)
-{
+TEST_F(Util_AsyncEvent, EventNotifyWithoutParcel) {
     AsyncEvent* event = AsyncEvent::GetInstance();
     EXPECT_EQ(event->EventNotify(1, nullptr, 0), -1);
 }
 
 // 测试作为写者初始化并发送事件
-TEST_F(Util_AsyncEvent, AsWriterAndNotify)
-{
+TEST_F(Util_AsyncEvent, AsWriterAndNotify) {
     AsyncEvent* event = AsyncEvent::GetInstance();
     ASSERT_EQ(event->AsWriter(mName), 0);
 
@@ -75,22 +64,19 @@ TEST_F(Util_AsyncEvent, AsWriterAndNotify)
 }
 
 // 测试注册空回调返回失败
-TEST_F(Util_AsyncEvent, RegisterNullCallbackFails)
-{
+TEST_F(Util_AsyncEvent, RegisterNullCallbackFails) {
     AsyncEvent* event = AsyncEvent::GetInstance();
     EXPECT_EQ(event->RegisterEventCallback(nullptr), -1);
 }
 
 // 测试取消注册事件回调
-TEST_F(Util_AsyncEvent, UnregisterEventCallback)
-{
+TEST_F(Util_AsyncEvent, UnregisterEventCallback) {
     AsyncEvent* event = AsyncEvent::GetInstance();
     EXPECT_EQ(event->UnregisterEventCallback(), 0);
 }
 
 // 测试作为读者初始化
-TEST_F(Util_AsyncEvent, AsReader)
-{
+TEST_F(Util_AsyncEvent, AsReader) {
     AsyncEvent* event = AsyncEvent::GetInstance();
     // 先以写者身份创建共享资源，再切换为读者
     ASSERT_EQ(event->AsWriter(mName), 0);
