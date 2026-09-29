@@ -18,6 +18,8 @@ Sparrow 的统一开发辅助入口，用一条命令封装了环境查看、编
 | `build-all` | 编译整个项目（含第三方库） |
 | `build-3rd` | 编译依赖的第三方库 |
 | `staticscan` | 执行 cppcheck 静态代码扫描 |
+| `gtest-report` | Default平台，生成测试用例html报告 |
+| `gtest-coverage` | Default平台，生成覆盖率html报告 |
 | `start-valgrind` | 启动 valgrind 内存检测 |
 | `stop-valgrind` | 停止 valgrind |
 | `new-platform <name>` | 创建新平台目录骨架 |
@@ -37,4 +39,10 @@ Sparrow 的统一开发辅助入口，用一条命令封装了环境查看、编
 
 # 静态扫描
 ./xtools.sh staticscan
+
+# 生成 GTest 测试结果报告（xtools 内部默认传 --run）
+./xtools.sh gtest-report
+
+# 生成 GTest 覆盖率报告（xtools 内部默认传 --run-tests --strict-html）
+./xtools.sh gtest-coverage
 ```

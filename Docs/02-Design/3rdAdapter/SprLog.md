@@ -147,7 +147,7 @@ file_name_format = BN_ST.FX
 普通场景推荐只使用 `BN`、`FX` 和 `ST`。Token 可以自由组合，例如：
 
 ```ini
-file_name_format = BN_SI_MH_ST.FX  // example_58C2_0141_260922111336.log
+file_name_format = BN_ST-SI.FX  // service_20260922083035-12345.log
 ```
 
 ### 3.7 经典场景

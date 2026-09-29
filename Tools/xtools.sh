@@ -147,6 +147,36 @@ static_scan() {
     ./RunCppcheck.sh
 }
 
+## cmd gtest-report
+gtest_report() {
+    local tools_path
+    tools_path=$(pwd)
+    local script_path="${tools_path}/gtestreport/gtest_report.sh"
+
+    if [ ! -f "${script_path}" ]; then
+        echo -e "${RED}错误: 未找到 GTest 报告脚本: ${script_path}${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}开始执行 GTest 测试报告（默认 --run）...${NC}"
+    bash "${script_path}" --run
+}
+
+## cmd gtest-coverage
+gtest_coverage() {
+    local tools_path
+    tools_path=$(pwd)
+    local script_path="${tools_path}/gtestreport/gtest_coverage.sh"
+
+    if [ ! -f "${script_path}" ]; then
+        echo -e "${RED}错误: 未找到 GTest 覆盖率脚本: ${script_path}${NC}"
+        return 1
+    fi
+
+    echo -e "${GREEN}开始执行 GTest 覆盖率报告（默认 --run-tests --strict-html）...${NC}"
+    bash "${script_path}" --run-tests --strict-html
+}
+
 ## start_valgrind
 start_valgrind() {
     echo -e "${GREEN}开始启动valgrind...${NC}"
@@ -219,6 +249,8 @@ usage() {
     echo -e "${PURPLE}  $0 build-3rd                编译依赖的第三方库${NC}"
     echo -e "${PURPLE}  $0 new-platform <platform>  创建新项目${NC}"
     echo -e "${PURPLE}  $0 staticscan               执行静态代码扫描${NC}"
+    echo -e "${PURPLE}  $0 gtest-report             生成 GTest 测试结果报告（默认 run）${NC}"
+    echo -e "${PURPLE}  $0 gtest-coverage           生成 GTest 覆盖率报告（默认 run-tests --strict-html）${NC}"
     echo -e "${PURPLE}  $0 start-valgrind           启动valgrind${NC}"
     echo -e "${PURPLE}  $0 stop-valgrind            停止valgrind${NC}"
     echo -e "${PURPLE}  $0 help                     显示此帮助信息${NC}"
@@ -254,6 +286,12 @@ main() {
             new_platform "$2";;
         staticscan)
             static_scan
+            ;;
+        gtest-report)
+            gtest_report
+            ;;
+        gtest-coverage)
+            gtest_coverage
             ;;
         start-valgrind)
             start_valgrind

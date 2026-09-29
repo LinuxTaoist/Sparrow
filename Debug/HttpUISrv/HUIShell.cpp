@@ -9,6 +9,7 @@
  *  @date       : 2026/05/28
  *---------------------------------------------------------------------------------------------------------------------
  */
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -19,6 +20,7 @@
 #include <pty.h>
 #include <pwd.h>
 #include <stdint.h>
+#include <iomanip>
 #include <sys/select.h>
 #include <sys/wait.h>
 #include <algorithm>
@@ -44,6 +46,46 @@ static int gMasterFd = -1;
 static pid_t gShellPid = -1;
 static bool gWaitingForPrompt = false;
 static std::mutex gSessionMutex;
+
+std::string EscapeJson(const std::string& input) {
+    std::ostringstream oss;
+    for (const auto c : input) {
+        switch (c) {
+            case '"':
+                oss << "\\\"";
+                break;
+            case '\\':
+                oss << "\\\\";
+                break;
+            case '\b':
+                oss << "\\b";
+                break;
+            case '\f':
+                oss << "\\f";
+                break;
+            case '\n':
+                oss << "\\n";
+                break;
+            case '\r':
+                oss << "\\r";
+                break;
+            case '\t':
+                oss << "\\t";
+                break;
+            default:
+                if (static_cast<unsigned char>(c) < 0x20) {
+                    oss << "\\u"
+                        << std::hex << std::setw(4) << std::setfill('0')
+                        << static_cast<int>(static_cast<unsigned char>(c))
+                        << std::dec << std::setfill(' ');
+                } else {
+                    oss << c;
+                }
+                break;
+        }
+    }
+    return oss.str();
+}
 
 void UpdatePromptCacheLocked(const std::string& prompt) {
     gPrompt = prompt;
@@ -547,9 +589,9 @@ int GetDeviceProfile(std::string& profile) {
     }
 
     oss << "{"
-        << "\"hostname\":\"" << (hostname.empty() ? "-" : hostname) << "\","
-        << "\"uptime\":\"" << (uptime.empty() ? "-" : uptime) << "\","
-        << "\"kernel\":\"" << (kernel.empty() ? "-" : kernel) << "\""
+        << "\"hostname\":\"" << EscapeJson(hostname.empty() ? "-" : hostname) << "\","
+        << "\"uptime\":\"" << EscapeJson(uptime.empty() ? "-" : uptime) << "\","
+        << "\"kernel\":\"" << EscapeJson(kernel.empty() ? "-" : kernel) << "\""
         << "}";
 
     profile = oss.str();
@@ -573,8 +615,8 @@ int GetResourceUsage(std::string& resources) {
     }
 
     oss << "{"
-        << "\"memory\":\"" << (meminfo.empty() ? "-" : meminfo) << "\","
-        << "\"disk\":\"" << (df.empty() ? "-" : df) << "\""
+        << "\"memory\":\"" << EscapeJson(meminfo.empty() ? "-" : meminfo) << "\","
+        << "\"disk\":\"" << EscapeJson(df.empty() ? "-" : df) << "\""
         << "}";
 
     resources = oss.str();
