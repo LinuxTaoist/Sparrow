@@ -16,32 +16,26 @@ extern void (*pSprUserEntry)();
 extern void NOT_IMPLEMENT_SPR_ENTRY();
 extern void SprRunEventLoop();
 
-// SPR_ENTRY(...) 宏: 定义 Sparrow 进程业务入口。
+// 定义 Sparrow 进程的业务入口：初始化业务模块并启动事件循环。
+// 入口中声明的局部对象在事件循环退出前保持有效。
 //
-// 设计目标:
-// - 用户侧只需关注业务初始化逻辑；
-// - 局部对象在事件循环期间保持存活。
-//
-// 典型写法:
+// 用法:
 //   SPR_ENTRY(
 //       MyModule mod;        // 局部变量
 //       mod.init();
 //   );
 //
-// 上述展开后会在同一作用域末尾自动执行 SprRunEventLoop();
-// 因此 mod 在 EpollLoop 运行期间不会析构，直到循环退出。
-//
-// NOT_IMPLEMENT_SPR_ENTRY: 链接期检查，未实现 SPR_ENTRY() 时触发报错。
-#define SPR_ENTRY(...)                                                       \
-    void SprUserEntry() {                                                    \
-        [&]() {                                                              \
-            __VA_ARGS__                                                      \
-            SprRunEventLoop();                                               \
-        }();                                                                 \
-    }                                                                        \
-    static struct SprEntryRegister {                                          \
-        SprEntryRegister() { ::pSprUserEntry = SprUserEntry; }                \
-    } SprEntryRegister;                                                       \
+// 进程未定义 SPR_ENTRY 时，构建将因缺少业务入口而失败。
+#define SPR_ENTRY(...)                                              \
+    void SprUserEntry() {                                           \
+        [&]() {                                                     \
+            __VA_ARGS__                                             \
+            SprRunEventLoop();                                      \
+        }();                                                        \
+    }                                                               \
+    static struct SprEntryRegister {                                \
+        SprEntryRegister() { ::pSprUserEntry = SprUserEntry; }      \
+    } SprEntryRegister;                                             \
     void NOT_IMPLEMENT_SPR_ENTRY(){}
 
 #endif // __SPR_MAIN_INTERFACE_H__

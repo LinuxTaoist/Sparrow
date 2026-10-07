@@ -23,6 +23,9 @@ list(APPEND BASIC_MODULES ServiceManagerSrv)
 list(APPEND BASIC_MODULES SparrowSrv)
 list(APPEND BASIC_MODULES StatusMonitorSrv)
 
+## Business modules
+list(APPEND BUSINESS_MODULES OTA)
+
 ## 可选功能模块配置
 # 非核心模块，编译时默认禁用
 # 启用方法：增加/删除对应行的注释符号(#)

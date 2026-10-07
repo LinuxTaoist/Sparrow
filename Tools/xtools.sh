@@ -74,6 +74,11 @@ adb_push() {
         return 1
     fi
 
+    if adb shell test -L "$2/Release"; then
+        echo -e "${PURPLE}错误: $2/Release 是软链接；为避免覆盖 OTA 当前槽，拒绝直接推送。${NC}"
+        return 1
+    fi
+
     echo -e "${PURPLE} 开始推送文件 ${NC}"
     adb shell killall -10 servicemanagersrv
     sleep 2

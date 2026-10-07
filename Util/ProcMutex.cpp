@@ -21,6 +21,16 @@
 #define SPR_LOGW(fmt, args...)  printf("%4d ProcMutex W: " fmt, __LINE__, ##args)
 #define SPR_LOGE(fmt, args...)  printf("%4d ProcMutex E: " fmt, __LINE__, ##args)
 
+namespace {
+
+const int MUTEX_STATE_UNINITIALIZED = 0;
+const int MUTEX_STATE_INITIALIZING = 1;
+const int MUTEX_STATE_READY = 2;
+const int MUTEX_INIT_WAIT_RETRY = 100;
+const useconds_t MUTEX_INIT_WAIT_US = 1000;
+
+}
+
 ProcMutex::ProcMutex(const std::string& mutexName)
     : mShmFd(-1), mMutexName(std::string("/") + mutexName), mSharedData(nullptr) {
     Init();
@@ -96,14 +106,17 @@ void ProcMutex::Init() {
         return;
     }
 
-    // CAS ensures one-time mutex init across process restarts
-    int expected = 0;
-    if (mSharedData->initialized.compare_exchange_strong(expected, 1)) {
-        // First init: create mutex pair
+    // CAS ensures one-time mutex init across process restarts.
+    // State flow: 0(uninitialized) -> 1(initializing) -> 2(ready).
+    int expected = MUTEX_STATE_UNINITIALIZED;
+    if (mSharedData->initialized.compare_exchange_strong(expected, MUTEX_STATE_INITIALIZING)) {
+        mSharedData->refCnt = 0;
+        mSharedData->waitCnt = 0;
+
         rc = pthread_mutex_init(&mSharedData->dataMutex, &mutexAttr);
         if (rc != 0) {
             SPR_LOGE("init data mutex failed! (%s)\n", strerror(rc));
-            mSharedData->initialized = 0;
+            mSharedData->initialized = MUTEX_STATE_UNINITIALIZED;
             pthread_mutexattr_destroy(&mutexAttr);
             munmap(mSharedData, sizeof(SharedData));
             close(mShmFd);
@@ -116,7 +129,7 @@ void ProcMutex::Init() {
         if (rc != 0) {
             SPR_LOGE("init wait mutex failed! (%s)\n", strerror(rc));
             pthread_mutex_destroy(&mSharedData->dataMutex);
-            mSharedData->initialized = 0;
+            mSharedData->initialized = MUTEX_STATE_UNINITIALIZED;
             pthread_mutexattr_destroy(&mutexAttr);
             munmap(mSharedData, sizeof(SharedData));
             close(mShmFd);
@@ -125,9 +138,22 @@ void ProcMutex::Init() {
             return;
         }
 
-        mSharedData->refCnt = 0;
-        mSharedData->waitCnt = 0;
+        mSharedData->initialized.store(MUTEX_STATE_READY, std::memory_order_release);
     } else {
+        int retry = 0;
+        while (mSharedData->initialized.load(std::memory_order_acquire) == MUTEX_STATE_INITIALIZING
+                && retry < MUTEX_INIT_WAIT_RETRY) {
+            usleep(MUTEX_INIT_WAIT_US);
+            ++retry;
+        }
+
+        if (mSharedData->initialized.load(std::memory_order_acquire) != MUTEX_STATE_READY) {
+            SPR_LOGE("mutex %s initialize timeout or invalid state: %d\n",
+                     mMutexName.c_str(), mSharedData->initialized.load());
+            pthread_mutexattr_destroy(&mutexAttr);
+            return;
+        }
+
         // Re-entry: recover EOWNERDEAD mutex from crashed previous owner
         rc = pthread_mutex_trylock(&mSharedData->dataMutex);
         if (rc == EOWNERDEAD) {
@@ -137,6 +163,8 @@ void ProcMutex::Init() {
             mSharedData->refCnt = 0;
         } else if (rc == 0) {
             pthread_mutex_unlock(&mSharedData->dataMutex);
+        } else if (rc == EINVAL) {
+            SPR_LOGE("dataMutex invalid on re-entry: %s\n", mMutexName.c_str());
         }
 
         rc = pthread_mutex_trylock(&mSharedData->waitMutex);
@@ -147,6 +175,8 @@ void ProcMutex::Init() {
             mSharedData->waitCnt = 0;
         } else if (rc == 0) {
             pthread_mutex_unlock(&mSharedData->waitMutex);
+        } else if (rc == EINVAL) {
+            SPR_LOGE("waitMutex invalid on re-entry: %s\n", mMutexName.c_str());
         }
     }
 

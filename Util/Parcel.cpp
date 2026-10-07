@@ -133,6 +133,10 @@ int Parcel::WriteString(const std::string& value) {
         return ERR_PARCEL_WRITE_FAILED;
     }
 
+    if (len == 0) {
+        return ERR_PARCEL_SUCCESS;
+    }
+
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(value.c_str(), len)) {
         SPR_LOGE("Write string failed!\n");
         return ERR_PARCEL_WRITE_FAILED;
@@ -146,9 +150,14 @@ int Parcel::ReadString(std::string& value) {
     NODE_LENGTH_T len = 0;
 
     ret = mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T));
-    if (len == 0 || ERR_PARCEL_SUCCESS != ret) {
+    if (ret != ERR_PARCEL_SUCCESS) {
         SPR_LOGE("Read string len failed! len = %d, ret = %d\n", len, ret);
         return ERR_PARCEL_READ_FAILED;
+    }
+
+    if (len == 0) {
+        value.clear();
+        return ERR_PARCEL_SUCCESS;
     }
 
     value.resize(len);
