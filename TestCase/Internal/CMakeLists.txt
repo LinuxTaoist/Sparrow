@@ -1,4 +1,4 @@
-# Internal
+# Internal (white-box testing with source code)
 set(TEST_INTERNAL_PATH      ${PROJECT_PATH}/TestCase/Internal)
 
 include_directories         (${PROJECT_PATH}/3rdAdapter)
@@ -11,6 +11,8 @@ include_directories         (${PROJECT_PATH}/UtilModules/CodecX)
 include_directories         (${PROJECT_PATH}/UtilModules/EpollEventHandler)
 include_directories         (${PROJECT_PATH}/UtilModules/Heartbeat)
 include_directories         (${PROJECT_PATH}/UtilModules/IniParser)
+include_directories         (${PROJECT_PATH}/Components/Business/Common)
+include_directories         (${PROJECT_PATH}/Hardware/Common/inc)
 include_directories         (${PROJECT_PATH}/Components/Basics/LogManagerSrv)
 include_directories         (${PROJECT_PATH}/Components/Basics/TimeManager)
 include_directories         (${PROJECT_PATH}/Components/Basics/SparrowSrv)
@@ -18,6 +20,7 @@ include_directories         (${TEST_INTERNAL_PATH}/Components/Basics/SparrowSrv)
 
 aux_source_directory        (${PROJECT_PATH}/Core                                   SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${PROJECT_PATH}/Util                                   SRC_TEST_INTERNAL_PATH)
+aux_source_directory        (${PROJECT_PATH}/UtilModules/Heartbeat                  SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${PROJECT_PATH}/PrivateAPIs/Event                      SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/Core                             SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/Util                             SRC_TEST_INTERNAL_PATH)
@@ -26,26 +29,47 @@ aux_source_directory        (${TEST_INTERNAL_PATH}/PrivateAPIs/Binder           
 aux_source_directory        (${TEST_INTERNAL_PATH}/3rdAdapter                       SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/Components/Basics/SparrowSrv     SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/Components/Basics/TimeManager    SRC_TEST_INTERNAL_PATH)
-aux_source_directory        (${TEST_INTERNAL_PATH}/Components/Basics/LogManagerSrv SRC_TEST_INTERNAL_PATH)
+aux_source_directory        (${TEST_INTERNAL_PATH}/Components/Basics/LogManagerSrv  SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules/CodecX               SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules/EpollEventHandler    SRC_TEST_INTERNAL_PATH)
-aux_source_directory        (${PROJECT_PATH}/UtilModules/Heartbeat                 SRC_TEST_INTERNAL_PATH)
-aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules/Heartbeat           SRC_TEST_INTERNAL_PATH)
-aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules/IniParser           SRC_TEST_INTERNAL_PATH)
+aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules/Heartbeat            SRC_TEST_INTERNAL_PATH)
+aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules/IniParser            SRC_TEST_INTERNAL_PATH)
 
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/LogManagerSrv/LogConfiger.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/LogManagerSrv/LogFileName.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/LogManagerSrv/LogSink.cpp)
-
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/TimeManager/NtpProtocol.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/SparrowSrv/SprTimer.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/PrivateAPIs/Binder/Binder.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/PrivateAPIs/Binder/IBinder.cpp)
 
+## Business Modules TestCase Internal
+set(TEST_INTERNAL_APPEND_LIBS)
+set(TEST_INTERNAL_APPEND_DEPS)
+set(TEST_INTERNAL_APPEND_INCS)
+
+foreach(module IN LISTS BUSINESS_MODULES)
+    set(BUSINESS_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Business/${module}/TestCase/Internal)
+    set(BUSINESS_TEST_INTERNAL_CMAKELISTS ${BUSINESS_TEST_INTERNAL_PATH}/CMakeLists.txt)
+    if(EXISTS ${BUSINESS_TEST_INTERNAL_CMAKELISTS})
+        include(${BUSINESS_TEST_INTERNAL_CMAKELISTS})
+        set(BUSINESS_TESTCASE_MODULE_NAME ${module})
+        set(BUSINESS_TESTCASE_MODULE_PATH ${PROJECT_PATH}/Components/Business/${module})
+        set(BUSINESS_TESTCASE_MODULE_SRC_PATH ${PROJECT_PATH}/Components/Business/${module}/Src)
+        set(BUSINESS_TESTCASE_INTERNAL_PATH ${BUSINESS_TEST_INTERNAL_PATH})
+    endif()
+endforeach()
+
+list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_LIBS)
+list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_DEPS)
+list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_INCS)
+
 ## Bin test_internal
 add_executable              (test_internal ${SRC_TEST_INTERNAL_PATH})
-target_include_directories  (test_internal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include)
+target_include_directories  (test_internal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include ${TEST_INTERNAL_APPEND_INCS})
 set_target_properties       (test_internal PROPERTIES OUTPUT_NAME "test_internal")
-target_link_libraries       (test_internal c LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser LibSqliteAdapter gtest gtest_main pthread rt dl)
-add_dependencies            (test_internal LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser LibSqliteAdapter)
+target_link_libraries       (test_internal c LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser
+                                           LibSqliteAdapter gtest gtest_main pthread rt dl ${TEST_INTERNAL_APPEND_LIBS})
+add_dependencies            (test_internal LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser
+                                           LibSqliteAdapter ${TEST_INTERNAL_APPEND_DEPS})
 add_test                    (NAME test_internal COMMAND test_internal)
