@@ -19,16 +19,22 @@
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
-char InfraWatch::WaitUserInputUntilEnter() {
+char InfraWatch::WaitUserInputUntilEnter(const std::string& text) {
+    if (!text.empty()) {
+        SPR_LOG("%s", text.c_str());
+    }
+
     char in;
-    SPR_LOG(": ");
     std::cin >> std::noskipws >> in;
     std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
-
     return in;
 }
 
-char InfraWatch::WaitUserInputWithoutEnter() {
+char InfraWatch::WaitUserInputWithoutEnter(const std::string& text) {
+    if (!text.empty()) {
+        SPR_LOG("%s", text.c_str());
+    }
+
     char in = 0;
     GeneralUtils::SystemCmd("stty raw");
     in = getchar();

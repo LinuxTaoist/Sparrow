@@ -21,8 +21,8 @@ aux_source_directory        (${PROJECT_PATH}/Util               SRC_INFRA_WATCH_
 aux_source_directory        (${SRC_DEBUG_PATH}/InfraWatch       SRC_INFRA_WATCH_PATH)
 add_executable              (BinInfraWatch ${SRC_INFRA_WATCH_PATH})
 set_target_properties       (BinInfraWatch PROPERTIES OUTPUT_NAME "infrawatch")
-target_link_libraries       (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibDebugAPI LibConfigAPI rt pthread dl)
-add_dependencies            (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibDebugAPI LibConfigAPI)
+target_link_libraries       (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibDebugAPI LibConfigAPI LibStatusMonitorAPI rt pthread dl)
+add_dependencies            (BinInfraWatch LibSprCore LibMediatorAPI LibPowerManagerAPI LibDebugAPI LibConfigAPI LibStatusMonitorAPI)
 
 ## Bin getprop
 set(SRC_BIN_GET_PROPERTY    ${SRC_DEBUG_PATH}/Property/GetProperty.cpp)
@@ -61,5 +61,5 @@ aux_source_directory        (${SRC_DEBUG_PATH}/HttpUISrv        SRC_HTTP_DEBUG_P
 aux_source_directory        (${PROJECT_PATH}/UtilModules/HTTP   SRC_HTTP_DEBUG_PATH)
 add_executable              (BinHttpUISrv ${SRC_HTTP_DEBUG_PATH})
 set_target_properties       (BinHttpUISrv PROPERTIES OUTPUT_NAME "huisrv")
-target_link_libraries       (BinHttpUISrv LibSprCore LibMediatorAPI rt pthread dl util)
-add_dependencies            (BinHttpUISrv LibSprCore LibMediatorAPI)
+target_link_libraries       (BinHttpUISrv LibSprCore LibMediatorAPI LibStatusMonitorAPI rt pthread dl util)
+add_dependencies            (BinHttpUISrv LibSprCore LibMediatorAPI LibStatusMonitorAPI)

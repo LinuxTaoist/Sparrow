@@ -52,7 +52,8 @@ char MainMenu::Menu(char input) {
             CustomDebugWatch::GetInstance().Entry();
             break;
         }
-        case 'q': {
+        case 'q':
+        case 'Q': {
             break;
         }
         default:

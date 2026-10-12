@@ -17,6 +17,7 @@
 #include "SprProcPrepare.h"
 #include "BacktraceMacros.h"
 #include "StatusMonitorManager.h"
+#include "StatusMonitorHub.h"
 #include "SprEpollSchedule.h"
 
 using namespace InternalDefs;
@@ -47,8 +48,10 @@ int main(int argc, const char* argv[]) {
 
     SPR_LOGI("Main start!\n");
     StatusMonitorManager monitorMgr(MODULE_STATUS_MONITOR, "StatusM");
+    StatusMonitorHub theStatusMonitorHub(SRV_NAME_STATUS_MONITOR, &monitorMgr);
     SprProcPrepare::GetInstance()->Init(SRV_NAME_STATUS_MONITOR);
     monitorMgr.Initialize();
+    theStatusMonitorHub.InitializeHub();
     SprEpollSchedule::GetInstance()->EpollLoop();
     SPR_LOGI("Main exit!\n");
     return 0;

@@ -142,6 +142,17 @@ std::string GetSprPowerMBinderCmdText(int32_t powerMBinderCmd) {
         powerMBinderCmds[index] : "UNDEFINED";
 }
 
+std::string GetSprStatusMonitorMBinderCmdText(int32_t statusMonitorBinderCmd) {
+    std::vector<std::string> statusMonitorBinderCmds = {
+        STATUS_MONITOR_BINDER_CMD_MACROS
+    };
+
+    int32_t index = statusMonitorBinderCmd - STATUSMON_CMD_BEGIN - 1;
+    return ( (index >= 0) &&
+             (index < (int32_t)statusMonitorBinderCmds.size()) ) ?
+        statusMonitorBinderCmds[index] : "UNDEFINED";
+}
+
 std::string GetSprDebugMBinderCmdText(int32_t debugMBinderCmd) {
     std::vector<std::string> debugMBinderCmds = {
         DEBUG_BINDER_CMD_MACROS

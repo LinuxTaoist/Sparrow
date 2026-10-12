@@ -48,8 +48,33 @@ int32_t StatusMonitorManager::AddStatusEvent(uint32_t moduleID, int32_t errCode,
         mErasedNum++;
     }
 
-    event.push_back({now, errCode, text});
+    event.push_back({static_cast<int32_t>(moduleID), now, errCode, text});
     return 0;
+}
+
+int32_t StatusMonitorManager::GetStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, std::vector<StatusEvent>& events) {
+    events.clear();
+    for (const auto& moduleEvents : mAllEvents) {
+        int32_t tmpID = moduleEvents.first;
+        const auto& tmpEvents = moduleEvents.second;
+
+        for (auto it = tmpEvents.rbegin(); it != tmpEvents.rend(); ++it) {
+            const auto& event = *it;
+            int32_t tmpLevel = GetSprErrorLevel(event.sErrorCode);
+
+            if (((moduleID == 0) || (moduleID == tmpID))                 &&
+                ((level == ERR_EVENT_LEVEL_UNKNOWN) || (level == tmpLevel)) &&
+                ((errCode == ERR_GENERAL_SUCCESS) || (errCode == event.sErrorCode))) {
+                events.push_back(StatusEvent(tmpID, event.sTime, event.sErrorCode, event.sText));
+            }
+        }
+    }
+
+    return 0;
+}
+
+int32_t StatusMonitorManager::GetAllStatusEvents(std::vector<StatusEvent>& events) {
+    return GetStatusEventsWithFilter(0, ERR_EVENT_LEVEL_UNKNOWN, ERR_GENERAL_SUCCESS, events);
 }
 
 int32_t StatusMonitorManager::DumpStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, const std::string& text) {
@@ -364,7 +389,7 @@ void StatusMonitorManager::DebugDelStatusEventsWithText(const std::vector<std::s
 
 void StatusMonitorManager::DebugAddStatusEvent(const std::vector<std::string>& args) {
     SprMsg msg(SIG_ID_MONITOR_STATUS_EVENT);
-    msg.SetU32Value(ERR_GENERAL_ERROR);
+    msg.SetI32Value(ERR_GENERAL_ERROR);
     msg.SetString("For test");
     SendMsg(msg);
 }

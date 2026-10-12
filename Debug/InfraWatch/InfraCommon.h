@@ -20,8 +20,8 @@ namespace InfraWatch {
 #define CONTINUE_ON_NONQUIT(handle) while(toupper((handle())) != 'Q')
 
 void ClearScreen();
-char WaitUserInputUntilEnter();
-char WaitUserInputWithoutEnter();
+char WaitUserInputUntilEnter(const std::string& text = "");
+char WaitUserInputWithoutEnter(const std::string& text = "");
 int  ReadLineFromUserInput(std::string& input);
 int  ReadIntFromUserInput(int& input);
 

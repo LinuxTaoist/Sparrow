@@ -83,6 +83,13 @@ TEST(Core_SprEnumHelper, GetSprPowerMBinderCmdText) {
     EXPECT_EQ(GetSprPowerMBinderCmdText(POWERM_CMD_BUTT + 100), "UNDEFINED");
 }
 
+TEST(Core_SprEnumHelper, GetSprStatusMonitorMBinderCmdText) {
+    EXPECT_EQ(GetSprStatusMonitorMBinderCmdText(STATUSMON_CMD_GET_ALL_EVENTS), "STATUSMON_CMD_GET_ALL_EVENTS");
+    EXPECT_EQ(GetSprStatusMonitorMBinderCmdText(STATUSMON_CMD_GET_EVENT), "STATUSMON_CMD_GET_EVENT");
+    EXPECT_EQ(GetSprStatusMonitorMBinderCmdText(STATUSMON_CMD_GET_ALL_EVENTS - 10), "UNDEFINED");
+    EXPECT_EQ(GetSprStatusMonitorMBinderCmdText(STATUSMON_CMD_BUTT + 100), "UNDEFINED");
+}
+
 TEST(Core_SprEnumHelper, GetSprDebugMBinderCmdText) {
     EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_CMD_ENABLE_REMOTE_PORT), "DEBUG_CMD_ENABLE_REMOTE_PORT");
     EXPECT_EQ(GetSprDebugMBinderCmdText(DEBUG_MSG_BUTT), "DEBUG_MSG_BUTT");

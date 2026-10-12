@@ -155,6 +155,19 @@ enum EPowerMBinderCmd {
 };
 
 //---------------------------------------------------------------------------------------------------------------------
+// - EStatusMonitorBinderCmd
+// --------------------------------------------------------------------------------------------------------------------
+#define STATUS_MONITOR_BINDER_CMD_MACROS \
+    ENUM_OR_STRING(STATUSMON_CMD_GET_ALL_EVENTS),    \
+    ENUM_OR_STRING(STATUSMON_CMD_GET_EVENT),         \
+    ENUM_OR_STRING(STATUSMON_CMD_BUTT)
+
+enum EStatusMonitorMBinderCmd {
+    STATUSMON_CMD_BEGIN = MODULE_STATUS_MONITOR << MODULE_ID_OFFSET | 1,
+    STATUS_MONITOR_BINDER_CMD_MACROS
+};
+
+//---------------------------------------------------------------------------------------------------------------------
 // - EDebugBinderCmd
 // --------------------------------------------------------------------------------------------------------------------
 #define DEBUG_BINDER_CMD_MACROS \

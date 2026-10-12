@@ -43,7 +43,7 @@ set(CMAKE_EXE_LINKER_FLAGS      "${CMAKE_EXE_LINKER_FLAGS} -Wl,-rpath-link=${LIB
 set(CMAKE_SHARED_LINKER_FLAGS   "${CMAKE_SHARED_LINKER_FLAGS} -Wl,-rpath-link=${LIBRARY_OUTPUT_PATH}")
 
 ## 工程信息
-string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S")
+string(TIMESTAMP CURRENT_TIME "%Y-%m-%d %H:%M:%S UTC" UTC)
 cmake_host_system_information(RESULT HOSTNAME QUERY HOSTNAME)
 
 ## 打印工程信息

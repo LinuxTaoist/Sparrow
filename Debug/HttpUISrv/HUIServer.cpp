@@ -18,8 +18,10 @@
 #include "EpollEventHandler.h"
 #include "HttpCommon.h"
 #include "HttpProtocol.h"
-#include "SprMediatorInterface.h"
 #include "SprLog.h"
+#include "SprEnumHelper.h"
+#include "SprMediatorInterface.h"
+#include "StatusMonitorInterface.h"
 #include "HUIServer.h"
 #include "HUIRender.h"
 #include "HUIShell.h"
@@ -175,6 +177,37 @@ std::string GetResourceUsage() {
     return resources;
 }
 
+std::string GetStatusMonitorEvents() {
+    std::vector<StatusEvent> events;
+    StatusMonitorInterface* pStatusMonitor = StatusMonitorInterface::GetInstance();
+    if (pStatusMonitor == nullptr) {
+        return "[]";
+    }
+
+    if (pStatusMonitor->GetAllEvents(events) != 0) {
+        return "[]";
+    }
+
+    std::ostringstream oss;
+    oss << "[";
+    for (size_t i = 0; i < events.size(); ++i) {
+        if (i > 0) {
+            oss << ",";
+        }
+
+        const StatusEvent& event = events[i];
+        oss << "{"
+            << "\"moduleId\":" << event.sModuleID << ","
+            << "\"level\":" << InternalDefs::GetSprErrorLevel(event.sErrorCode) << ","
+            << "\"errCode\":" << event.sErrorCode << ","
+            << "\"time\":" << event.sTime << ","
+            << "\"text\":\"" << EscapeJson(event.sText) << "\""
+            << "}";
+    }
+    oss << "]";
+    return oss.str();
+}
+
 std::string ExecuteShellCommand(const std::string& cmd) {
     if (cmd.empty()) {
         std::ostringstream oss;
@@ -266,6 +299,13 @@ void BuildHttpResponse(const std::string& uri, std::string& body, int32_t& statu
     } else if (uri == "/api/resources") {
         statusCode = HTTP_STATUS_200;
         body = GetResourceUsage();
+    } else if (uri == "/statusmonitor" || uri == "/monitor") {
+        statusCode = HTTP_STATUS_200;
+        body = GetHtmlPage("statusmonitor");
+        isHtmlResponse = true;
+    } else if (uri == "/api/statusmonitor") {
+        statusCode = HTTP_STATUS_200;
+        body = GetStatusMonitorEvents();
     } else if (uri == "/api/shell/init") {
         statusCode = HTTP_STATUS_200;
         body = BuildShellInitResponse();

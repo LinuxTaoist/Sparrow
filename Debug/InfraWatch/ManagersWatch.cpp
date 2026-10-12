@@ -14,6 +14,7 @@
 #include "ManagersWatch.h"
 #include "PowerManagerWatch.h"
 #include "ConfigManagerWatch.h"
+#include "StatusMonitorWatch.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
 
@@ -28,6 +29,7 @@ void ManagersWatch::Usage() {
             "\n"
             "    1. PowerManager \n"
             "    2. ConfigManager \n"
+            "    3. StatusMonitor \n"
             "\n"
             "    [Q] Quit \n"
             "\n"
@@ -44,7 +46,12 @@ void ManagersWatch::Menu(char input) {
             ConfigManagerWatch::GetInstance().Entry();
             break;
         }
-        case 'q': {
+        case '3': {
+            StatusMonitorWatch::GetInstance().Entry();
+            break;
+        }
+        case 'q':
+        case 'Q': {
             break;
         }
         default:

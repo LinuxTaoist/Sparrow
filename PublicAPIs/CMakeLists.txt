@@ -21,6 +21,14 @@ set_target_properties       (LibPropertyAPI PROPERTIES LINKER_LANGUAGE CXX)
 target_link_libraries       (LibPropertyAPI stdc++ rt dl LibBinder)
 add_dependencies            (LibPropertyAPI LibBinder)
 
+## Build libstatusmonitorapi.so
+set (SRC_STATUS_MONITOR_API_PATH ${PROJECT_PATH}/PublicAPIs/StatusMonitorInterface.cpp)
+add_library                 (LibStatusMonitorAPI SHARED ${SRC_STATUS_MONITOR_API_PATH})
+set_target_properties       (LibStatusMonitorAPI PROPERTIES OUTPUT_NAME "statusmonitorapi")
+set_target_properties       (LibStatusMonitorAPI PROPERTIES LINKER_LANGUAGE CXX)
+target_link_libraries       (LibStatusMonitorAPI stdc++ rt dl LibBinder)
+add_dependencies            (LibStatusMonitorAPI LibBinder)
+
 ## Build libconfigapi.so
 set (SRC_CONFIG_API_PATH    ${PROJECT_PATH}/PublicAPIs/Config.cpp)
 add_library                 (LibConfigAPI SHARED ${SRC_CONFIG_API_PATH})

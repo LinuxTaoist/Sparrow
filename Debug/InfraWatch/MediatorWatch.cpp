@@ -10,8 +10,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <stdio.h>
-#include "SprMediatorInterface.h"
 #include "InfraCommon.h"
+#include "SprMediatorInterface.h"
 #include "MediatorWatch.h"
 
 #define SPR_LOG(fmt, args...)  printf(fmt, ##args)
@@ -42,8 +42,6 @@ void MediatorWatch::Menu(char input) {
             break;
         }
         default: {
-            SPR_LOG("Press 'S' to query signal\n");
-            SPR_LOG("Press 'M' to see more \n");
             break;
         }
     }

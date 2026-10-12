@@ -25,6 +25,7 @@ std::string GetSprModuleIDText(int32_t id);
 std::string GetSprProxyBinderCmdText(int32_t cmd);
 std::string GetSprPropertyBinderCmdText(int32_t cmd);
 std::string GetSprPowerMBinderCmdText(int32_t cmd);
+std::string GetSprStatusMonitorMBinderCmdText(int32_t cmd);
 std::string GetSprDebugMBinderCmdText(int32_t cmd);
 std::string GetSprLogLevelText(int32_t level);
 std::string GetSprGeneralBinderCmdText(int32_t cmd);

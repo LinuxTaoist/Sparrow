@@ -16,22 +16,28 @@
 #define __STATUS_MONITOR_MANAGER_H__
 
 #include <list>
+#include <vector>
 #include <time.h>
 #include "SprObserverWithMQueue.h"
 
 struct StatusEvent {
     time_t sTime;
+    int32_t sModuleID;
     int32_t sErrorCode;
     std::string sText;
 
-    StatusEvent(time_t time, int32_t errorCode, const std::string& text)
-        : sTime(time), sErrorCode(errorCode), sText(text) {}
+    StatusEvent() : sTime(0), sModuleID(0), sErrorCode(0), sText() {}
+    StatusEvent(int32_t moduleID, time_t time, int32_t errorCode, const std::string& text)
+        : sTime(time), sModuleID(moduleID), sErrorCode(errorCode), sText(text) {}
 };
 
 class StatusMonitorManager : public SprObserverWithMQueue {
 public:
     StatusMonitorManager(ModuleIDType id, const std::string& name);
     ~StatusMonitorManager();
+
+    int32_t GetStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, std::vector<StatusEvent>& events);
+    int32_t GetAllStatusEvents(std::vector<StatusEvent>& events);
 
 protected:
     int32_t Init() override;

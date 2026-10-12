@@ -140,6 +140,7 @@ tbody tr:hover{background:rgba(248,251,255,.9)}
 			<div id='page-subtitle' class='subtitle'>Overview and terminal access for the current device.</div>
 			<div class='nav'>
 				<a id='nav-dashboard' class='nav-link' href='/'>Device Uplink</a>
+				<a id='nav-statusmonitor' class='nav-link' href='/statusmonitor'>Status Monitor</a>
 				<a id='nav-terminal' class='nav-link' href='/terminal'>Remote Terminal</a>
 			</div>
 		</div>
@@ -216,6 +217,29 @@ tbody tr:hover{background:rgba(248,251,255,.9)}
 								<tr><th>Name</th><th>Handle</th><th>Pending</th><th>Total</th><th>Peak</th></tr>
 							</thead>
 							<tbody id='queue-table'>
+								<tr><td colspan='5' class='empty'>Loading...</td></tr>
+							</tbody>
+						</table>
+					</div>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section id='page-statusmonitor' class='page'>
+		<div class='grid'>
+			<div class='card split-card' style='grid-column:span 12; min-height: 620px;'>
+				<div class='panel-head'>
+					<div class='sec-title' style='margin:0'>Status Monitor</div>
+					<div class='panel-note'>Current device status messages</div>
+				</div>
+				<div class='table-shell'>
+					<div class='table-wrap'>
+						<table>
+							<thead>
+								<tr><th>Module</th><th>Level</th><th>Code</th><th>Time</th><th>Message</th></tr>
+							</thead>
+							<tbody id='statusmonitor-table'>
 								<tr><td colspan='5' class='empty'>Loading...</td></tr>
 							</tbody>
 						</table>
@@ -310,8 +334,10 @@ function setDataNote(message) {
 
 function setupPage() {
 	const dashboardPage = document.getElementById('page-dashboard');
+	const statusPage = document.getElementById('page-statusmonitor');
 	const terminalPage = document.getElementById('page-terminal');
 	const dashboardNav = document.getElementById('nav-dashboard');
+	const statusNav = document.getElementById('nav-statusmonitor');
 	const terminalNav = document.getElementById('nav-terminal');
 	const pageTitle = document.getElementById('page-title');
 	const pageSubtitle = document.getElementById('page-subtitle');
@@ -320,7 +346,13 @@ function setupPage() {
 		terminalPage.classList.add('active');
 		terminalNav.classList.add('active');
 		pageTitle.textContent = 'Remote Terminal';
-		pageSubtitle.textContent = 'Dedicated shell access with a separate page, so monitoring and command execution do not compete for space.';
+		pageSubtitle.textContent = 'Separate shell page for monitoring and command execution.';
+		setDataNote('');
+	} else if (HUI_ACTIVE_PAGE === 'statusmonitor') {
+		statusPage.classList.add('active');
+		statusNav.classList.add('active');
+		pageTitle.textContent = 'Status Monitor';
+		pageSubtitle.textContent = 'Current device status messages and event list for the active system.';
 		setDataNote('');
 	} else {
 		dashboardPage.classList.add('active');
@@ -423,6 +455,40 @@ function renderDashboard(status, queues, profile, resources, latency, refreshTex
 	setConn('online', latency);
 	markRefresh(refreshText);
 	setDataNote('');
+}
+
+function renderStatusMonitorTable(items) {
+	const tb = document.getElementById('statusmonitor-table');
+	if (!Array.isArray(items) || items.length === 0) {
+		tb.innerHTML = '<tr><td colspan="5" class="empty">No status messages</td></tr>';
+		return;
+	}
+
+	tb.innerHTML = items.map(function (x) {
+		const timeText = x.time ? new Date(Number(x.time) * 1000).toLocaleString() : '-';
+		return '<tr>'
+			+ '<td>' + (x.moduleId || '-') + '</td>'
+			+ '<td>' + (x.level || '-') + '</td>'
+			+ '<td>' + (x.errCode || '-') + '</td>'
+			+ '<td>' + timeText + '</td>'
+			+ '<td>' + escapeHtml(x.text || '-') + '</td>'
+			+ '</tr>';
+	}).join('');
+}
+
+function loadStatusMonitorData() {
+	fetch('/api/statusmonitor', { cache: 'no-store' })
+		.then(function (r) { return r.json(); })
+		.then(function (data) {
+			renderStatusMonitorTable(Array.isArray(data) ? data : []);
+			setConn('online', 0);
+			markRefresh(new Date().toLocaleTimeString());
+		})
+		.catch(function () {
+			const tb = document.getElementById('statusmonitor-table');
+			tb.innerHTML = '<tr><td colspan="5" class="empty">Load failed</td></tr>';
+			setConn('offline');
+		});
 }
 
 function loadData() {
@@ -717,6 +783,9 @@ document.getElementById('chip-host').textContent = window.location.host || '-';
 setupPage();
 if (HUI_ACTIVE_PAGE == 'terminal') {
 	initShellTerminal(true);
+} else if (HUI_ACTIVE_PAGE == 'statusmonitor') {
+	loadStatusMonitorData();
+	setInterval(loadStatusMonitorData, HUI_REFRESH_INTERVAL_MS);
 } else {
 	loadData();
 	dashboardTimer = setInterval(loadData, HUI_REFRESH_INTERVAL_MS);
@@ -735,7 +804,13 @@ inline void ReplaceToken(std::string& text, const std::string& token, const std:
 
 inline std::string BuildHtmlPage(const std::string& activePage) {
 	std::string html = HTML_TEMPLATE;
-	ReplaceToken(html, "__ACTIVE_PAGE__", activePage == "terminal" ? "terminal" : "dashboard");
+	if (activePage == "terminal") {
+		ReplaceToken(html, "__ACTIVE_PAGE__", "terminal");
+	} else if (activePage == "statusmonitor") {
+		ReplaceToken(html, "__ACTIVE_PAGE__", "statusmonitor");
+	} else {
+		ReplaceToken(html, "__ACTIVE_PAGE__", "dashboard");
+	}
 	return html;
 }
 
