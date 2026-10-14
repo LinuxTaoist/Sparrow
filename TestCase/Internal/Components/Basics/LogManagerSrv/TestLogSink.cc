@@ -27,12 +27,65 @@ LogConfiger::LogModuleAttrs FileAttrs(const std::string& path) {
         {"level", "debug"},
         {"output", "file"},
         {"file_name", "sink.log"},
-        {"file_path", path},
+        {"log_dir", path},
         {"file_num", "3"},
         {"file_capacity_mb", "1"},
         {"flush_count", "1"},
-        {"flush_interval_ms", "100000"}
+        {"flush_interval_ms", "100000"},
+        {"pack_enabled", "false"},
+        {"pack_name", "sink.pack"},
+        {"pack_dir", ""},
+        {"pack_name_format", "BN.FX"},
+        {"pack_type", "gz"},
+        {"pack_command_override", ""},
+        {"pack_file_num", "3"},
+        {"pack_total_size_mb", "0"}
     };
+}
+
+std::vector<std::string> FindFiles(const std::string& path, const std::string& contains) {
+    std::vector<std::string> files;
+    DIR* directory = opendir(path.c_str());
+    if (directory == nullptr) {
+        return files;
+    }
+    struct dirent* entry = nullptr;
+    while ((entry = readdir(directory)) != nullptr) {
+        const std::string name(entry->d_name);
+        if (name.find(contains) != std::string::npos) {
+            files.push_back(name);
+        }
+    }
+    closedir(directory);
+    return files;
+}
+
+uint64_t TotalSize(const std::string& path, const std::vector<std::string>& files) {
+    uint64_t total = 0;
+    for (size_t index = 0; index < files.size(); ++index) {
+        struct stat st = {};
+        if (stat((path + "/" + files[index]).c_str(), &st) == 0) {
+            total += static_cast<uint64_t>(st.st_size);
+        }
+    }
+    return total;
+}
+
+bool DirectoryExists(const std::string& path) {
+    struct stat st = {};
+    return stat(path.c_str(), &st) == 0 && S_ISDIR(st.st_mode);
+}
+
+int CountTarEntries(const std::string& archivePath) {
+    FILE* pipe = popen(("tar -tf \"" + archivePath + "\" | wc -l").c_str(), "r");
+    if (pipe == nullptr) {
+        return -1;
+    }
+
+    char buffer[32] = {0};
+    const bool ok = fgets(buffer, sizeof(buffer), pipe) != nullptr;
+    pclose(pipe);
+    return ok ? atoi(buffer) : -1;
 }
 
 // 测试文件输出和强制刷新后能够正确读取日志内容
@@ -485,6 +538,245 @@ TEST(LogM_LogSink, RotationComprehensive) {
     for (const auto& file : foundFiles) {
         remove((path + "/" + file).c_str());
     }
+    rmdir(path.c_str());
+}
+
+// 测试达到触发阈值后会生成 pack 文件，并保留原始最近轮转文件
+TEST(LogM_LogSink, PackFilesGeneratedAfterTrigger) {
+    const std::string path = "/tmp/sparrow_log_sink_pack_" + std::to_string(getpid());
+    const std::string packPath = path + "_pack";
+    auto attrs = FileAttrs(path);
+    attrs[LOG_CONFIG_KEY_FILE_NAME] = "packtest.log";
+    attrs[LOG_CONFIG_KEY_PACK_ENABLED] = LOG_CONFIG_VALUE_TRUE;
+    attrs[LOG_CONFIG_KEY_PACK_NAME] = "packtest.pack";
+    attrs[LOG_CONFIG_KEY_PACK_DIR] = packPath;
+    attrs[LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE] = "tar -cf \"{dst}\" -C \"{dir}\" {name_list}";
+    attrs[LOG_CONFIG_KEY_FILE_NUM] = "2";
+    attrs[LOG_CONFIG_KEY_PACK_FILE_NUM] = "4";
+
+    LogSink sink(attrs);
+    ASSERT_EQ(sink.Write(std::string(600 * 1024, 'x'), InternalDefs::LOG_LEVEL_INFO), 0);
+    ASSERT_EQ(sink.Write(std::string(600 * 1024, 'y'), InternalDefs::LOG_LEVEL_INFO), 0);
+    ASSERT_EQ(sink.Flush(true), 0);
+
+    const std::vector<std::string> rotatedBeforePack = FindFiles(path, ".log.");
+    const std::vector<std::string> packBeforeTrigger = FindFiles(packPath, ".pack");
+    EXPECT_EQ(rotatedBeforePack.size(), 1U);
+    EXPECT_TRUE(packBeforeTrigger.empty());
+
+    for (int i = 0; i < 6; ++i) {
+        const std::string data(600 * 1024, 'a' + i);
+        ASSERT_EQ(sink.Write(data, InternalDefs::LOG_LEVEL_INFO), 0);
+    }
+    ASSERT_EQ(sink.Flush(true), 0);
+
+    const std::vector<std::string> packFiles = FindFiles(packPath, ".pack");
+    const std::vector<std::string> packFilesInRawDir = FindFiles(path, ".pack");
+    const std::vector<std::string> rotatedAfterPack = FindFiles(path, ".log.");
+    EXPECT_GE(packFiles.size(), 1U);
+    EXPECT_TRUE(packFilesInRawDir.empty());
+    EXPECT_LT(rotatedAfterPack.size(), 2U);
+
+    bool hasIndexedPack = false;
+    for (size_t index = 0; index < packFiles.size(); ++index) {
+        if (packFiles[index].find(".1.pack") != std::string::npos
+            || packFiles[index].find(".2.pack") != std::string::npos) {
+            hasIndexedPack = true;
+        }
+        EXPECT_GE(CountTarEntries(packPath + "/" + packFiles[index]), 2);
+        remove((packPath + "/" + packFiles[index]).c_str());
+    }
+    EXPECT_TRUE(hasIndexedPack);
+
+    const std::vector<std::string> rawFiles = FindFiles(path, "packtest");
+    for (size_t index = 0; index < rawFiles.size(); ++index) {
+        remove((path + "/" + rawFiles[index]).c_str());
+    }
+    rmdir(packPath.c_str());
+    rmdir(path.c_str());
+}
+
+// 测试 pack_dir 留空时回退到 log_dir，打包文件仍生成在原日志目录
+TEST(LogM_LogSink, PackDirFallbackToLogDir) {
+    const std::string path = "/tmp/sparrow_log_sink_pack_fallback_" + std::to_string(getpid());
+    auto attrs = FileAttrs(path);
+    attrs[LOG_CONFIG_KEY_FILE_NAME] = "fallback.log";
+    attrs[LOG_CONFIG_KEY_PACK_ENABLED] = LOG_CONFIG_VALUE_TRUE;
+    attrs[LOG_CONFIG_KEY_PACK_NAME] = "fallback.pack";
+    attrs[LOG_CONFIG_KEY_PACK_DIR] = "";
+    attrs[LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE] = "tar -cf \"{dst}\" -C \"{dir}\" {name_list}";
+    attrs[LOG_CONFIG_KEY_FILE_NUM] = "2";
+    attrs[LOG_CONFIG_KEY_PACK_FILE_NUM] = "4";
+
+    LogSink sink(attrs);
+    for (int i = 0; i < 6; ++i) {
+        const std::string data(600 * 1024, 'a' + i);
+        ASSERT_EQ(sink.Write(data, InternalDefs::LOG_LEVEL_INFO), 0);
+    }
+    ASSERT_EQ(sink.Flush(true), 0);
+
+    const std::vector<std::string> packFiles = FindFiles(path, ".pack");
+    EXPECT_GE(packFiles.size(), 1U);
+
+    const std::vector<std::string> allFiles = FindFiles(path, "fallback");
+    for (size_t index = 0; index < allFiles.size(); ++index) {
+        remove((path + "/" + allFiles[index]).c_str());
+    }
+    rmdir(path.c_str());
+}
+
+// 测试启用 pack_dir 时会自动创建打包目录
+TEST(LogM_LogSink, PackDirCreatedAutomatically) {
+    const std::string path = "/tmp/sparrow_log_sink_pack_mkdir_" + std::to_string(getpid());
+    const std::string packPath = path + "_pack";
+    auto attrs = FileAttrs(path);
+    attrs[LOG_CONFIG_KEY_FILE_NAME] = "mkdir.log";
+    attrs[LOG_CONFIG_KEY_PACK_ENABLED] = LOG_CONFIG_VALUE_TRUE;
+    attrs[LOG_CONFIG_KEY_PACK_NAME] = "mkdir.pack";
+    attrs[LOG_CONFIG_KEY_PACK_DIR] = packPath;
+    attrs[LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE] = "tar -cf \"{dst}\" -C \"{dir}\" {name_list}";
+    attrs[LOG_CONFIG_KEY_FILE_NUM] = "2";
+
+    LogSink sink(attrs);
+    ASSERT_TRUE(DirectoryExists(path));
+    ASSERT_TRUE(DirectoryExists(packPath));
+
+    const std::vector<std::string> allFiles = FindFiles(path, "mkdir");
+    for (size_t index = 0; index < allFiles.size(); ++index) {
+        remove((path + "/" + allFiles[index]).c_str());
+    }
+    rmdir(packPath.c_str());
+    rmdir(path.c_str());
+}
+
+// 测试 pack 命令失败或中断时，不会生成正式 pack 文件，也不会删除原始轮转日志
+TEST(LogM_LogSink, PackFailureKeepsRawLogs) {
+    const std::string path = "/tmp/sparrow_log_sink_pack_fail_" + std::to_string(getpid());
+    const std::string packPath = path + "_pack";
+    auto attrs = FileAttrs(path);
+    attrs[LOG_CONFIG_KEY_FILE_NAME] = "packfail.log";
+    attrs[LOG_CONFIG_KEY_PACK_ENABLED] = LOG_CONFIG_VALUE_TRUE;
+    attrs[LOG_CONFIG_KEY_PACK_NAME] = "packfail.pack";
+    attrs[LOG_CONFIG_KEY_PACK_DIR] = packPath;
+    attrs[LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE] = "sh -c 'printf fail > \"$1\"; exit 1' sh \"{dst}\"";
+    attrs[LOG_CONFIG_KEY_FILE_NUM] = "2";
+
+    LogSink sink(attrs);
+    for (int i = 0; i < 4; ++i) {
+        const std::string data(600 * 1024, 'f');
+        ASSERT_EQ(sink.Write(data, InternalDefs::LOG_LEVEL_INFO), 0);
+    }
+    ASSERT_EQ(sink.Flush(true), 0);
+
+    const std::vector<std::string> packFiles = FindFiles(packPath, ".pack");
+    const std::vector<std::string> tempFiles = FindFiles(packPath, ".sprlog_packing_");
+    const std::vector<std::string> rawFiles = FindFiles(path, ".log.");
+
+    EXPECT_TRUE(packFiles.empty());
+    EXPECT_TRUE(tempFiles.empty());
+    EXPECT_GE(rawFiles.size(), 2U);
+
+    const std::vector<std::string> allFiles = FindFiles(path, "packfail");
+    for (size_t index = 0; index < allFiles.size(); ++index) {
+        remove((path + "/" + allFiles[index]).c_str());
+    }
+    rmdir(packPath.c_str());
+    rmdir(path.c_str());
+}
+
+// 测试连续打包时，归档文件名应取每次生成时的实际时间戳，而不是复用第一次命名
+TEST(LogM_LogSink, PackNamesRefreshPerGeneration) {
+    const std::string path = "/tmp/sparrow_log_sink_pack_time_" + std::to_string(getpid());
+    const std::string packPath = path + "_pack";
+    auto attrs = FileAttrs(path);
+    attrs[LOG_CONFIG_KEY_FILE_NAME] = "time.log";
+    attrs[LOG_CONFIG_KEY_PACK_ENABLED] = LOG_CONFIG_VALUE_TRUE;
+    attrs[LOG_CONFIG_KEY_PACK_NAME] = "time.pack";
+    attrs[LOG_CONFIG_KEY_PACK_DIR] = packPath;
+    attrs[LOG_CONFIG_KEY_PACK_NAME_FORMAT] = "BN_ST.FX";
+    attrs[LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE] = "tar -cf \"{dst}\" -C \"{dir}\" {name_list}";
+    attrs[LOG_CONFIG_KEY_FILE_NUM] = "2";
+    attrs[LOG_CONFIG_KEY_PACK_FILE_NUM] = "10";
+
+    LogSink sink(attrs);
+    std::set<std::string> packBases;
+    for (int round = 0; round < 3; ++round) {
+        for (int i = 0; i < 4; ++i) {
+            const std::string data(600 * 1024, 'a' + round * 4 + i);
+            ASSERT_EQ(sink.Write(data, InternalDefs::LOG_LEVEL_INFO), 0);
+        }
+        ASSERT_EQ(sink.Flush(true), 0);
+        usleep(1100000);
+    }
+
+    const std::vector<std::string> packFiles = FindFiles(packPath, ".pack");
+    ASSERT_GE(packFiles.size(), 2U);
+
+    for (size_t index = 0; index < packFiles.size(); ++index) {
+        std::string fileName = packFiles[index];
+        if (fileName.rfind(".pack") != std::string::npos) {
+            fileName = fileName.substr(0, fileName.size() - 5);
+        }
+        const size_t lastDot = fileName.rfind('.');
+        if (lastDot != std::string::npos) {
+            const std::string suffix = fileName.substr(lastDot + 1);
+            char* end = nullptr;
+            const unsigned long value = std::strtoul(suffix.c_str(), &end, 10);
+            if (end != suffix.c_str() && *end == '\0' && value > 0) {
+                fileName = fileName.substr(0, lastDot);
+            }
+        }
+        packBases.insert(fileName);
+    }
+
+    EXPECT_GT(packBases.size(), 1U);
+
+    const std::vector<std::string> allFiles = FindFiles(path, "time");
+    for (size_t index = 0; index < allFiles.size(); ++index) {
+        remove((path + "/" + allFiles[index]).c_str());
+    }
+    const std::vector<std::string> packedFiles = FindFiles(packPath, "time");
+    for (size_t index = 0; index < packedFiles.size(); ++index) {
+        remove((packPath + "/" + packedFiles[index]).c_str());
+    }
+    rmdir(packPath.c_str());
+    rmdir(path.c_str());
+}
+
+// 测试 pack 文件数量与总空间双重限制，优先按数量裁剪，再按空间兜底
+TEST(LogM_LogSink, PackTotalSizeLimitTrimmed) {
+    const std::string path = "/tmp/sparrow_log_sink_pack_limit_" + std::to_string(getpid());
+    const std::string packPath = path + "_pack";
+    auto attrs = FileAttrs(path);
+    attrs[LOG_CONFIG_KEY_FILE_NAME] = "packlimit.log";
+    attrs[LOG_CONFIG_KEY_PACK_ENABLED] = LOG_CONFIG_VALUE_TRUE;
+    attrs[LOG_CONFIG_KEY_PACK_NAME] = "packlimit.pack";
+    attrs[LOG_CONFIG_KEY_PACK_DIR] = packPath;
+    attrs[LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE] = "tar -cf \"{dst}\" -C \"{dir}\" {name_list}";
+    attrs[LOG_CONFIG_KEY_FILE_NUM] = "2";
+    attrs[LOG_CONFIG_KEY_PACK_FILE_NUM] = "5";
+    attrs[LOG_CONFIG_KEY_PACK_TOTAL_SIZE_MB] = "1";
+
+    LogSink sink(attrs);
+    for (int i = 0; i < 10; ++i) {
+        const std::string data(600 * 1024, '0' + (i % 10));
+        ASSERT_EQ(sink.Write(data, InternalDefs::LOG_LEVEL_INFO), 0);
+    }
+    ASSERT_EQ(sink.Flush(true), 0);
+
+    const std::vector<std::string> packFiles = FindFiles(packPath, ".pack");
+    EXPECT_LE(packFiles.size(), 5U);
+    EXPECT_LE(TotalSize(packPath, packFiles), 1024U * 1024U);
+
+    const std::vector<std::string> allFiles = FindFiles(path, "packlimit");
+    for (size_t index = 0; index < allFiles.size(); ++index) {
+        remove((path + "/" + allFiles[index]).c_str());
+    }
+    const std::vector<std::string> packedFiles = FindFiles(packPath, "packlimit");
+    for (size_t index = 0; index < packedFiles.size(); ++index) {
+        remove((packPath + "/" + packedFiles[index]).c_str());
+    }
+    rmdir(packPath.c_str());
     rmdir(path.c_str());
 }
 

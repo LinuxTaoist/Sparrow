@@ -74,21 +74,25 @@ adb_push() {
         return 1
     fi
 
-    if adb shell test -L "$2/Release"; then
-        echo -e "${PURPLE}错误: $2/Release 是软链接；为避免覆盖 OTA 当前槽，拒绝直接推送。${NC}"
+    local platform="$1"
+    local root_path="${2%/}"
+    local target_path="${root_path}/ota/Slots/SlotA"
+
+    if adb shell test -L "${target_path}"; then
+        echo -e "${PURPLE}错误: ${target_path} 是软链接；为避免覆盖 OTA 当前槽，拒绝直接推送。${NC}"
         return 1
     fi
 
     echo -e "${PURPLE} 开始推送文件 ${NC}"
     adb shell killall -10 servicemanagersrv
     sleep 2
-    adb shell rm -rf $2/Release/Etc/*
-    adb shell rm -rf $2/Release/Bin/*
-    adb shell rm -rf $2/Release/Lib/*
-    adb shell mkdir -p $2/Release
-    adb push ../Release/$1/Etc  $2/Release/
-    adb push ../Release/$1/Bin  $2/Release/
-    adb push ../Release/$1/Lib  $2/Release/
+    adb shell rm -rf "${target_path}/Etc/*"
+    adb shell rm -rf "${target_path}/Bin/*"
+    adb shell rm -rf "${target_path}/Lib/*"
+    adb shell mkdir -p "${target_path}"
+    adb push ../Release/${platform}/Etc "${target_path}/"
+    adb push ../Release/${platform}/Bin "${target_path}/"
+    adb push ../Release/${platform}/Lib "${target_path}/"
 }
 
 # cmd commit-template

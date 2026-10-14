@@ -45,13 +45,13 @@ TEST_F(IniParserTest, LoadValuesAndSections) {
         "output=file\n"
         "\n"
         "[output.NetworkSrv]\n"
-        "file_path=/tmp/network\n");
+        "log_dir=/tmp/network\n");
 
     IniParser parser;
     EXPECT_EQ(parser.Load(TEST_INI_PATH), 0);
     EXPECT_EQ(parser.GetValue("logging", "level"), "debug");
     EXPECT_EQ(parser.GetValue("logging", "output"), "file");
-    EXPECT_EQ(parser.GetValue("output.NetworkSrv", "file_path"), "/tmp/network");
+    EXPECT_EQ(parser.GetValue("output.NetworkSrv", "log_dir"), "/tmp/network");
 
     const IniParser::Sections sections = parser.GetSections();
     ASSERT_EQ(sections.size(), 2U);

@@ -161,7 +161,7 @@ int Parcel::ReadString(std::string& value) {
     }
 
     value.resize(len);
-    char* data = const_cast<char*>(value.c_str());
+    char* data = &value[0];
     if (ERR_PARCEL_SUCCESS != mRingBuffer->Read(data, len)) {
         SPR_LOGE("Read string failed!\n");
         return ERR_PARCEL_READ_FAILED;

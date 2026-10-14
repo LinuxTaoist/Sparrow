@@ -27,11 +27,20 @@ int32_t LogConfiger::InitModules(LogModules& modules) const {
         {LOG_CONFIG_KEY_OUTPUT,             LOG_CONFIG_VALUE_FILE},
         {LOG_CONFIG_KEY_FILE_NAME,          LOG_CONFIG_DEFAULT_FILE_NAME},
         {LOG_CONFIG_KEY_FILE_NAME_FORMAT,   ""},
-        {LOG_CONFIG_KEY_FILE_PATH,          LOG_CONFIG_DEFAULT_FILE_PATH},
+        {LOG_CONFIG_KEY_LOG_DIR,            LOG_CONFIG_DEFAULT_LOG_DIR},
         {LOG_CONFIG_KEY_FILE_NUM,           "10"},
         {LOG_CONFIG_KEY_FILE_CAPACITY_MB,   "10"},
         {LOG_CONFIG_KEY_FLUSH_COUNT,        "64"},
         {LOG_CONFIG_KEY_FLUSH_INTERVAL_MS,  "1000"},
+        {LOG_CONFIG_KEY_PACK_ENABLED,       LOG_CONFIG_VALUE_FALSE},
+        {LOG_CONFIG_KEY_PACK_NAME,          LOG_CONFIG_DEFAULT_PACK_NAME},
+        {LOG_CONFIG_KEY_PACK_DIR,           LOG_CONFIG_DEFAULT_PACK_DIR},
+        {LOG_CONFIG_KEY_PACK_NAME_FORMAT,   ""},
+        {LOG_CONFIG_KEY_PACK_TYPE,          ""},
+        {LOG_CONFIG_KEY_PACK_COMMAND,       ""},
+        {LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE, ""},
+        {LOG_CONFIG_KEY_PACK_FILE_NUM,      "10"},
+        {LOG_CONFIG_KEY_PACK_TOTAL_SIZE_MB, "0"},
     };
     return 0;
 }

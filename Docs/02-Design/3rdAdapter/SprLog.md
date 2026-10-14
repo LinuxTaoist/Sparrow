@@ -4,7 +4,7 @@
 
 SprLog 是 Sparrow 提供给业务模块的日志接口层。
 
-它提供统一的日志宏和日志对象接口。业务代码只负责记录日志，日志级别、输出位置、文件命名和文件轮转由配置及后台日志服务处理。
+它提供统一的日志宏和日志对象接口。业务代码只负责记录日志，日志级别、输出位置、文件命名、文件轮转和历史日志压缩由配置及后台日志服务处理。
 
 ## 2. 什么时候会用到
 
@@ -59,6 +59,8 @@ file_path = /var/log/myservice
 ```
 
 常用配置是 `level`、`output`、`file_name` 和 `file_path`。配置由日志服务加载，修改后按系统启动方式重启或重新加载日志服务使其生效。
+
+如果需要自动压缩历史日志，还可以继续配置 `pack_enabled`、`pack_name`、`pack_dir` 和 `pack_type`。
 
 ### 3.3 配置多个模块
 
@@ -156,6 +158,7 @@ file_name_format = BN_ST-SI.FX  // service_20260922083035-12345.log
 |------|------|----------|
 | 快速接入日志 | 先把业务日志打出来，尽快跑通流程。 | 1. 定义 `LOG_TAG`。<br>2. 直接使用 `SPR_LOGD/I/W/E()`。 |
 | 文件输出 | 设备或服务器上需要长期保存日志文件。 | 1. 配置 `output = file`。<br>2. 设置 `file_name` 和 `file_path`。<br>3. 按需补充轮转参数。 |
+| 历史压缩 | 需要控制原始日志数量，并把旧日志归档保存。 | 1. 开启 `pack_enabled = true`。<br>2. 设置 `pack_name`、`pack_dir` 和 `pack_type`。 |
 | 多模块分流 | 同一进程里的不同模块，日志级别或文件不同。 | 1. 程序早期调用 `SPR_INIT()`。<br>2. 为不同模块配置 `[output.<module>]`。 |
 | 标准输出 | 调试期或容器环境，日志直接进终端。 | 1. 配置 `output = stdout`。<br>2. 按模块设置 `level`。 |
 
@@ -202,7 +205,8 @@ file_name_format = BN_ST-SI.FX  // service_20260922083035-12345.log
 - `file_capacity_mb` 控制单个日志文件的容量；
 - `file_num` 控制保留的历史文件数量；
 - 当前文件使用 `file_name` 和 `file_name_format` 生成；
-- 历史文件由日志服务追加 `.1`、`.2` 等轮转后缀。
+- 历史文件由日志服务追加 `.1`、`.2` 等轮转后缀；
+- 开启 `pack_enabled` 后，历史文件会按 `pack_name`、`pack_dir` 和 `pack_type` 配置压缩归档。
 
 ### 4.5 日志服务依赖
 

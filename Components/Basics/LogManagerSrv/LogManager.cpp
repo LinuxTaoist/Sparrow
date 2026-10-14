@@ -13,6 +13,10 @@
  *  LogManager only used to monitor real-time log status and manage log storage.
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <set>
+#include <tuple>
+#include <cstdlib>
+#include <limits>
 #include <memory>
 #include <vector>
 #include <algorithm>
@@ -26,10 +30,6 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <cstdlib>
-#include <limits>
-#include <set>
-#include <tuple>
 #include "SharedRingBuffer.h"
 #include "CommonMacros.h"
 #include "GeneralUtils.h"
@@ -294,16 +294,16 @@ std::string LogManager::GetSinkTarget(const LogConfiger::LogModuleAttrs& attrs) 
         return "";
     }
 
-    const auto filePath = attrs.find(LOG_CONFIG_KEY_FILE_PATH);
+    const auto logDir = attrs.find(LOG_CONFIG_KEY_LOG_DIR);
     const auto fileName = attrs.find(LOG_CONFIG_KEY_FILE_NAME);
-    if (filePath == attrs.end()     ||
+    if (logDir == attrs.end()       ||
         fileName == attrs.end()     ||
-        filePath->second.empty()    ||
+        logDir->second.empty()      ||
         fileName->second.empty()) {
         return "";
     }
 
-    std::string path = filePath->second;
+    std::string path = logDir->second;
     while (path.size() > 1 && path.back() == '/') {
         path.pop_back();
     }

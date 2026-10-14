@@ -11,12 +11,8 @@
  */
 #include <cerrno>
 #include <cstdio>
-#include <cstdlib>
 #include <limits>
-#include <utility>
-#include <vector>
 #include <unistd.h>
-#include <dirent.h>
 #include <sys/stat.h>
 #include "CoreTypeDefs.h"
 #include "LogConfigKeys.h"
@@ -25,10 +21,11 @@
 namespace {
 
 uint64_t GetMonotonicTickMs() {
-    struct timespec ts {};
+    struct timespec ts = {};
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) {
         return 0;
     }
+
     return static_cast<uint64_t>(ts.tv_sec) * 1000
          + static_cast<uint64_t>(ts.tv_nsec) / 1000000;
 }
@@ -43,17 +40,47 @@ bool MakeDirectory(const std::string& path) {
         && !MakeDirectory(path.substr(0, separator))) {
         return false;
     }
+
     return mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0
         || errno == EEXIST;
+}
+
+bool EndsWith(const std::string& value, const std::string& suffix) {
+    return value.size() >= suffix.size()
+        && value.compare(value.size() - suffix.size(), suffix.size(), suffix) == 0;
+}
+
+std::string GetPackExtension(const std::string& packType) {
+    if (packType == "tar.gz") {
+        return ".tar.gz";
+    }
+    if (packType == "zip") {
+        return ".zip";
+    }
+    return std::string();
+}
+
+std::string NormalizePackBaseName(const std::string& packName,
+                                  const std::string& extension) {
+    if (extension.empty()) {
+        return packName;
+    }
+    if (EndsWith(packName, extension)) {
+        return packName.substr(0, packName.size() - extension.size());
+    }
+    return packName;
 }
 
 } // namespace
 
 LogSink::LogSink(const LogConfiger::LogModuleAttrs& attrs)
     : mEnabled(true)
+    , mPackEnabled(false)
     , mLevel(InternalDefs::LOG_LEVEL_DEBUG)
     , mMaxFileCount(10)
+    , mPackFileCount(10)
     , mFileLimit(10 * 1024 * 1024)
+    , mPackTotalSizeLimit(0)
     , mFlushThreshold(64)
     , mFlushInterval(1000)
     , mPendingFlushes(0)
@@ -61,13 +88,38 @@ LogSink::LogSink(const LogConfiger::LogModuleAttrs& attrs)
     , mOutput(LOG_CONFIG_VALUE_FILE)
     , mFile(LOG_CONFIG_DEFAULT_FILE_NAME)
     , mCurrentFile(LOG_CONFIG_DEFAULT_FILE_NAME)
-    , mDirectory(LOG_CONFIG_DEFAULT_FILE_PATH) {
+    , mPackFile(LOG_CONFIG_DEFAULT_PACK_NAME)
+    , mPackDirectory(LOG_CONFIG_DEFAULT_PACK_DIR)
+    , mDirectory(LOG_CONFIG_DEFAULT_LOG_DIR) {
     LoadConfig(attrs);
-    if (mOutput == LOG_CONFIG_VALUE_FILE) {
-        MakeDirectory(mDirectory);
-        UpdateCurrentFileName();
-        mFiles = ListFiles(mDirectory, mFile);
+    if (mOutput != LOG_CONFIG_VALUE_FILE) {
+        return;
     }
+
+    MakeDirectory(mDirectory);
+    if (mPackEnabled) {
+        MakeDirectory(mPackDirectory);
+    }
+    UpdateCurrentFileName();
+    UpdatePackFileName();
+
+    LogPackerConfig config = {
+        mPackEnabled,
+        mMaxFileCount,
+        mPackFileCount,
+        mPackTotalSizeLimit,
+        mDirectory,
+        mPackDirectory,
+        mFile,
+        mPackFile,
+        mPackType,
+        mPackCommand,
+        mPackCommandOverride
+    };
+    mPacker.SetConfig(config);
+    mPacker.SetCurrentRawFile(mCurrentFile);
+    mPacker.ScanFiles();
+    mCurrentFile = mPacker.GetCurrentRawFile();
 }
 
 LogSink::~LogSink() {
@@ -112,16 +164,83 @@ int32_t LogSink::LoadConfig(const LogConfiger::LogModuleAttrs& attrs) {
     if (fileNameFormat != attrs.end()) {
         mFileNameFormat = fileNameFormat->second;
     }
-    const auto filePath = attrs.find(LOG_CONFIG_KEY_FILE_PATH);
-    if (filePath != attrs.end() && !filePath->second.empty()) {
-        mDirectory = filePath->second;
+    const auto logDir = attrs.find(LOG_CONFIG_KEY_LOG_DIR);
+    if (logDir != attrs.end() && !logDir->second.empty()) {
+        mDirectory = logDir->second;
     }
+
+    const auto packEnabled = attrs.find(LOG_CONFIG_KEY_PACK_ENABLED);
+    if (packEnabled != attrs.end()) {
+        mPackEnabled = packEnabled->second != LOG_CONFIG_VALUE_FALSE;
+    }
+    const auto packName = attrs.find(LOG_CONFIG_KEY_PACK_NAME);
+    if (packName != attrs.end() && !packName->second.empty()) {
+        mPackFile = packName->second;
+    }
+    const auto packDir = attrs.find(LOG_CONFIG_KEY_PACK_DIR);
+    if (packDir != attrs.end() && !packDir->second.empty()) {
+        mPackDirectory = packDir->second;
+    }
+    const auto packNameFormat = attrs.find(LOG_CONFIG_KEY_PACK_NAME_FORMAT);
+    if (packNameFormat != attrs.end()) {
+        mPackFileNameFormat = packNameFormat->second;
+    }
+    const auto packType = attrs.find(LOG_CONFIG_KEY_PACK_TYPE);
+    if (packType != attrs.end()) {
+        mPackType = packType->second;
+    }
+    const auto packCommand = attrs.find(LOG_CONFIG_KEY_PACK_COMMAND);
+    if (packCommand != attrs.end()) {
+        mPackCommand = packCommand->second;
+    }
+    const auto packCommandOverride = attrs.find(LOG_CONFIG_KEY_PACK_COMMAND_OVERRIDE);
+    if (packCommandOverride != attrs.end()) {
+        mPackCommandOverride = packCommandOverride->second;
+    }
+    if (mPackCommandOverride.empty()) {
+        mPackCommandOverride = mPackCommand;
+    }
+    if (mPackDirectory.empty()) {
+        mPackDirectory = mDirectory;
+    }
+
+    mPackFileCount = ReadUint32(attrs, LOG_CONFIG_KEY_PACK_FILE_NUM, mPackFileCount);
+    const uint32_t packTotalSizeMb = ReadUint32AllowZero(attrs,
+                                                         LOG_CONFIG_KEY_PACK_TOTAL_SIZE_MB,
+                                                         0);
+    mPackTotalSizeLimit = static_cast<uint64_t>(packTotalSizeMb) * 1024ULL * 1024ULL;
     return 0;
 }
 
 int32_t LogSink::UpdateCurrentFileName() {
     LogFileName fileName(mFile, mFileNameFormat);
     return fileName.Build(mCurrentFile);
+}
+
+int32_t LogSink::UpdatePackFileName() {
+    std::string currentPackFile;
+    const std::string extension = mPackCommandOverride.empty()
+                                ? GetPackExtension(mPackType) : std::string();
+    const std::string placeholderExt = "__packext__";
+    const std::string logicalPackName = extension.empty()
+                                      ? mPackFile
+                                      : NormalizePackBaseName(mPackFile, extension);
+    LogFileName fileName(extension.empty()
+                       ? logicalPackName
+                       : logicalPackName + "." + placeholderExt,
+                         mPackFileNameFormat);
+    int32_t ret = fileName.Build(currentPackFile);
+    if (ret == 0) {
+        if (!extension.empty()) {
+            const std::string placeholderSuffix = "." + placeholderExt;
+            if (EndsWith(currentPackFile, placeholderSuffix)) {
+                currentPackFile = currentPackFile.substr(
+                    0, currentPackFile.size() - placeholderSuffix.size()) + extension;
+            }
+        }
+        mPacker.SetCurrentPackFile(currentPackFile);
+    }
+    return ret;
 }
 
 int32_t LogSink::Write(const std::string& logData, int32_t level) {
@@ -189,11 +308,32 @@ int32_t LogSink::RotateIfNeeded(uint32_t dataSize) {
         return 0;
     }
 
-    Flush(true);
+    int32_t ret = Flush(true);
+    if (ret != 0) {
+        return -1;
+    }
     mStream.close();
-    ShiftFiles();
-    UpdateCurrentFileName();
-    mFiles.insert(mDirectory + '/' + mCurrentFile);
+
+    mPacker.SetCurrentRawFile(mCurrentFile);
+    ret = mPacker.RotateRawFile();
+    if (ret != 0) {
+        return -1;
+    }
+    if (mPackEnabled) {
+        ret = UpdatePackFileName();
+        if (ret != 0) {
+            return -1;
+        }
+        mPacker.PackFilesIfNeeded();
+        mPacker.TrimPackFiles();
+    }
+    mPacker.TrimRawFiles();
+
+    ret = UpdateCurrentFileName();
+    if (ret != 0) {
+        return -1;
+    }
+    mPacker.SetCurrentRawFile(mCurrentFile);
     mPendingFlushes = 0;
     mLastFlushMs = GetMonotonicTickMs();
     return OpenFile();
@@ -205,159 +345,6 @@ int32_t LogSink::WriteFile(const std::string& data) {
     }
     ++mPendingFlushes;
     return Flush(false);
-}
-
-int32_t LogSink::ShiftFiles() {
-    while (mFiles.size() >= mMaxFileCount) {
-        auto oldest = mFiles.end();
-        uint32_t oldestSuffix = 0;
-        for (auto it = mFiles.begin(); it != mFiles.end(); ++it) {
-            const size_t suffixPosition = it->rfind('.');
-            if (suffixPosition == std::string::npos) {
-                continue;
-            }
-
-            const std::string suffix = it->substr(suffixPosition + 1);
-            char* end = nullptr;
-            const unsigned long value = std::strtoul(suffix.c_str(), &end, 10);
-            if (end != suffix.c_str() && *end == '\0'
-                && (oldest == mFiles.end() || value > oldestSuffix)) {
-                oldest = it;
-                oldestSuffix = static_cast<uint32_t>(value);
-            }
-        }
-
-        if (oldest == mFiles.end()) {
-            oldest = mFiles.begin();
-        }
-        remove(oldest->c_str());
-        mFiles.erase(oldest);
-    }
-
-    const std::string currentPath = mDirectory + '/' + mCurrentFile;
-    std::vector<std::string> files;
-    const auto current = mFiles.find(currentPath);
-    if (current != mFiles.end()) {
-        files.push_back(*current);
-    }
-    for (const auto& path : mFiles) {
-        if (path != currentPath) {
-            files.push_back(path);
-        }
-    }
-
-    std::vector<std::string> temporaryFiles;
-    temporaryFiles.reserve(files.size());
-    for (size_t index = 0; index < files.size(); ++index) {
-        const std::string temporaryPath = files[index] + ".sprlog_rotating_"
-                                         + std::to_string(getpid()) + "_"
-                                         + std::to_string(index);
-        if (rename(files[index].c_str(), temporaryPath.c_str()) == 0) {
-            temporaryFiles.push_back(temporaryPath);
-        }
-    }
-
-    std::set<std::string> paths;
-    for (const auto& file : temporaryFiles) {
-        std::string path = file;
-        const size_t markerPos = path.rfind(".sprlog_rotating_");
-        if (markerPos != std::string::npos) {
-            path = path.substr(0, markerPos);
-        }
-
-        // Extract suffix number and increment
-        size_t dotPos = path.rfind('.');
-        uint32_t newSuffix = 1;
-        if (dotPos != std::string::npos && dotPos > 0) {
-            const std::string suffix = path.substr(dotPos + 1);
-            char* end = nullptr;
-            unsigned long value = std::strtoul(suffix.c_str(), &end, 10);
-            if (end != suffix.c_str() && *end == '\0') {
-                // Has numeric suffix, increment it
-                path = path.substr(0, dotPos);
-                newSuffix = static_cast<uint32_t>(value) + 1;
-            }
-        }
-
-        const std::string newPath = path + "." + std::to_string(newSuffix);
-        if (rename(file.c_str(), newPath.c_str()) == 0) {
-            paths.insert(newPath);
-        }
-    }
-
-    mFiles = std::move(paths);
-    return 0;
-}
-
-std::set<std::string> LogSink::ListFiles(const std::string& path,
-                                         const std::string& name) {
-    std::set<std::string> paths;
-    const size_t extensionPosition = name.rfind('.');
-    const std::string baseName = extensionPosition == std::string::npos
-                               ? name : name.substr(0, extensionPosition);
-    const std::string extension = extensionPosition == std::string::npos
-                                ? std::string() : name.substr(extensionPosition);
-    DIR* directory = opendir(path.c_str());
-    if (directory == nullptr) {
-        paths.insert(path + '/' + name);
-        return paths;
-    }
-
-    std::string latestFile;
-    struct dirent* entry = nullptr;
-    while ((entry = readdir(directory)) != nullptr) {
-        const std::string currentFile(entry->d_name);
-        if (currentFile == "." || currentFile == ".."
-            || currentFile.rfind(baseName, 0) != 0
-            || (currentFile.size() > baseName.size()
-                && currentFile[baseName.size()] != '.'
-                && currentFile[baseName.size()] != '_'
-                && currentFile[baseName.size()] != '-')) {
-            continue;
-        }
-
-        const size_t currentExtension = extension.empty()
-                                      ? currentFile.size()
-                                      : currentFile.find(extension, baseName.size());
-        if (currentExtension == std::string::npos
-            || (!extension.empty()
-                && currentExtension + extension.size() < currentFile.size()
-                && currentFile[currentExtension + extension.size()] != '.')) {
-            continue;
-        }
-
-        struct stat fileStat {};
-        if (stat((path + '/' + currentFile).c_str(), &fileStat) == 0
-            && S_ISREG(fileStat.st_mode)) {
-            const size_t suffixPosition = currentFile.rfind('.');
-            const std::string suffix = suffixPosition == std::string::npos
-                                     ? std::string()
-                                     : currentFile.substr(suffixPosition + 1);
-            char* end = nullptr;
-            std::strtoul(suffix.c_str(), &end, 10);
-            const bool isRotation = !suffix.empty() && end != suffix.c_str()
-                                  && *end == '\0';
-            paths.insert(path + '/' + currentFile);
-            if (!isRotation && currentFile == name) {
-                latestFile = currentFile;
-            } else if (!isRotation && latestFile != name
-                       && (latestFile.empty() || currentFile > latestFile)) {
-                latestFile = currentFile;
-            }
-        }
-    }
-
-    closedir(directory);
-    if (!latestFile.empty()) {
-        mCurrentFile = latestFile;
-    }
-
-    // Keep the selected active file in the managed set. For a dynamic name,
-    // this also removes the static placeholder that would otherwise be
-    // inserted when the directory is empty.
-    paths.erase(path + '/' + name);
-    paths.insert(path + '/' + mCurrentFile);
-    return paths;
 }
 
 uint32_t LogSink::ReadUint32(const LogConfiger::LogModuleAttrs& attrs,
@@ -373,6 +360,25 @@ uint32_t LogSink::ReadUint32(const LogConfiger::LogModuleAttrs& attrs,
     const unsigned long value = std::strtoul(attr->second.c_str(), &end, 10);
     if (errno == ERANGE || end == attr->second.c_str() || *end != '\0'
         || value == 0 || value > std::numeric_limits<uint32_t>::max()) {
+        return defaultValue;
+    }
+
+    return static_cast<uint32_t>(value);
+}
+
+uint32_t LogSink::ReadUint32AllowZero(const LogConfiger::LogModuleAttrs& attrs,
+                                      const std::string& key,
+                                      uint32_t defaultValue) const {
+    const auto attr = attrs.find(key);
+    if (attr == attrs.end() || attr->second.empty()) {
+        return defaultValue;
+    }
+
+    errno = 0;
+    char* end = nullptr;
+    const unsigned long value = std::strtoul(attr->second.c_str(), &end, 10);
+    if (errno == ERANGE || end == attr->second.c_str() || *end != '\0'
+        || value > std::numeric_limits<uint32_t>::max()) {
         return defaultValue;
     }
 

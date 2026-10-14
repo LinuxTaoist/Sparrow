@@ -43,11 +43,11 @@ TEST_F(LogM_LogConfiger, LoadAndMergeModuleConfiguration) {
         "enabled=true\n"
         "level=info\n"
         "output=file\n"
-        "file_path=/tmp/default\n"
+        "log_dir=/tmp/default\n"
         "file_name=default.log\n"
         "file_name_format=BN_BS-SI_MH_ST.FX\n"
         "[output.NetworkSrv]\n"
-        "file_path=/tmp/network\n"
+        "log_dir=/tmp/network\n"
         "flush_count=32\n"
         "[output.DebugSrv]\n"
         "output=stdout\n");
@@ -66,7 +66,8 @@ TEST_F(LogM_LogConfiger, LoadAndMergeModuleConfiguration) {
     EXPECT_EQ(config.at("NetworkSrv").at("file_name"), "default.log");
     EXPECT_EQ(config.at("NetworkSrv").at("file_name_format"),
               "BN_BS-SI_MH_ST.FX");
-    EXPECT_EQ(config.at("NetworkSrv").at("file_path"), "/tmp/network");
+    EXPECT_EQ(config.at("NetworkSrv").at("log_dir"), "/tmp/network");
+    EXPECT_EQ(config.at("NetworkSrv").at("pack_dir"), "");
     EXPECT_EQ(config.at("NetworkSrv").at("flush_count"), "32");
     EXPECT_EQ(config.at("DebugSrv").at("file_name"), "default.log");
     EXPECT_EQ(config.at("DebugSrv").at("output"), "stdout");
@@ -93,6 +94,27 @@ TEST_F(LogM_LogConfiger, MissingModuleKeysUseMergedDefaults) {
     EXPECT_EQ(config.at("flush_interval_ms"), "1000");
 }
 
+// 测试模块单独配置 pack_dir 时能够覆盖 default，未配置模块保持默认值
+TEST_F(LogM_LogConfiger, PackDirOverrideMergedIntoModuleConfiguration) {
+    WriteConfig(
+        "[output.default]\n"
+        "log_dir=/tmp/default\n"
+        "pack_dir=\n"
+        "pack_name=default.pack\n"
+        "[output.LogSrv]\n"
+        "pack_dir=/tmp/default/pack\n");
+
+    LogConfiger configer;
+    ASSERT_EQ(configer.Load(TEST_CONFIG_PATH), 0);
+    LogConfiger::LogModules allModules;
+    ASSERT_EQ(configer.GetLogModules(allModules), 0);
+
+    EXPECT_EQ(allModules.at("default").at("pack_dir"), "");
+    EXPECT_EQ(allModules.at("LogSrv").at("log_dir"), "/tmp/default");
+    EXPECT_EQ(allModules.at("LogSrv").at("pack_name"), "default.pack");
+    EXPECT_EQ(allModules.at("LogSrv").at("pack_dir"), "/tmp/default/pack");
+}
+
 // 测试没有配置文件时仍保留完整的 default 模块配置
 TEST_F(LogM_LogConfiger, MissingFileKeepsDefaultConfiguration) {
     LogConfiger configer;
@@ -102,5 +124,6 @@ TEST_F(LogM_LogConfiger, MissingFileKeepsDefaultConfiguration) {
     ASSERT_EQ(configer.GetLogModules(config), 0);
     ASSERT_EQ(config.size(), 1U);
     EXPECT_EQ(config.at("default").at("file_name"), "sprlog.log");
+    EXPECT_EQ(config.at("default").at("pack_dir"), "");
     EXPECT_EQ(config.at("default").at("flush_interval_ms"), "1000");
 }

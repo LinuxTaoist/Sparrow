@@ -23,6 +23,7 @@ aux_source_directory        (${PROJECT_PATH}/Util                               
 aux_source_directory        (${PROJECT_PATH}/UtilModules/Heartbeat                  SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${PROJECT_PATH}/PrivateAPIs/Event                      SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/Core                             SRC_TEST_INTERNAL_PATH)
+aux_source_directory        (${TEST_INTERNAL_PATH}/GTestEnvironment                SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/Util                             SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/PrivateAPIs/Event                SRC_TEST_INTERNAL_PATH)
 aux_source_directory        (${TEST_INTERNAL_PATH}/PrivateAPIs/Binder               SRC_TEST_INTERNAL_PATH)
@@ -37,6 +38,7 @@ aux_source_directory        (${TEST_INTERNAL_PATH}/UtilModules/IniParser        
 
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/LogManagerSrv/LogConfiger.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/LogManagerSrv/LogFileName.cpp)
+list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/LogManagerSrv/LogPacker.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/LogManagerSrv/LogSink.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/TimeManager/NtpProtocol.cpp)
 list(APPEND SRC_TEST_INTERNAL_PATH ${PROJECT_PATH}/Components/Basics/SparrowSrv/SprTimer.cpp)
