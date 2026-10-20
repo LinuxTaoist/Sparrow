@@ -15,10 +15,10 @@
 #ifndef __COMMON_TYPE_DEFS_H__
 #define __COMMON_TYPE_DEFS_H__
 
-#include <stdint.h>
-#include <mqueue.h>
 #include <string>
 #include <time.h>
+#include <stdint.h>
+#include <mqueue.h>
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CommonTypeDefs.h version

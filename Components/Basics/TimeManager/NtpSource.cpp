@@ -84,10 +84,10 @@ int32_t NtpSource::AddNtpServer(const std::string& addr, uint16_t port) {
 int32_t NtpSource::SendTimeRequest(NtpServer& srv) {
     if (!mIsReady) {
         SPR_LOGD("Creating UDP socket on port %d\n", mLocalPort);
-        int32_t openRet = mpSocket->AsUdp(mLocalPort);
-        if (openRet == -1) {
+        int32_t ret = mpSocket->AsUdp(mLocalPort);
+        if (ret == -1) {
             SPR_LOGE("Create UDP failed! port %d \n", mLocalPort);
-            return openRet;
+            return ret;
         }
         mIsReady = true;
     }
@@ -109,9 +109,9 @@ int32_t NtpSource::SendTimeRequest(NtpServer& srv) {
     // mutiple thread request
     // if other thread request success, the socket will be closed
     if (mIsReady) {
-        int32_t writeRet = mpSocket->Write(bytes, ip, srvPort);
+        int32_t ret = mpSocket->Write(bytes, ip, srvPort);
         SPR_LOGD("Request to %s:%u %d bytes %s\n", ip.c_str(), srvPort, bytes.size(),
-                 writeRet == -1 ? "failed" : "success");
+                 ret == -1 ? "failed" : "success");
     }
 
     return 0;

@@ -12,11 +12,11 @@
 #ifndef __STATUS_MONITOR_INTERFACE_H__
 #define __STATUS_MONITOR_INTERFACE_H__
 
-#include <stdint.h>
 #include <string>
 #include <vector>
-#include "CommonErrorCodes.h"
+#include <stdint.h>
 #include "CommonTypeDefs.h"
+#include "CommonErrorCodes.h"
 
 class StatusMonitorInterface {
 public:

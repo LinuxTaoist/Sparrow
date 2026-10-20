@@ -9,6 +9,8 @@
  *  @date       : 2024/03/26
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <iterator>
+#include <algorithm>
 #include <stdio.h>
 #include <errno.h>
 #include <unistd.h>
@@ -16,8 +18,6 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
-#include <algorithm>
-#include <iterator>
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
@@ -405,18 +405,3 @@ int32_t ServiceManager::ExitLoop() {
     SPR_LOGI("Stop work!\n");
     return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
