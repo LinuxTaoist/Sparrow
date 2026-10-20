@@ -15,18 +15,8 @@
 #include <stdint.h>
 #include <string>
 #include <vector>
-#include <time.h>
 #include "CommonErrorCodes.h"
-
-struct StatusEvent {
-    int32_t sModuleID;
-    time_t sTime;
-    int32_t sErrorCode;
-    std::string sText;
-
-    StatusEvent();
-    StatusEvent(int32_t moduleID, time_t time, int32_t errorCode, const std::string& text);
-};
+#include "CommonTypeDefs.h"
 
 class StatusMonitorInterface {
 public:

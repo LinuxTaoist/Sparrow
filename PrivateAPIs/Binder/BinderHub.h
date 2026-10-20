@@ -12,9 +12,9 @@
 #ifndef __BINDER_HUB_H__
 #define __BINDER_HUB_H__
 
-#include <thread>
-#include <string>
 #include <memory>
+#include <string>
+#include <thread>
 #include <stdint.h>
 #include "Parcel.h"
 

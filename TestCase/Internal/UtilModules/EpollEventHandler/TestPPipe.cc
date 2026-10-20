@@ -72,7 +72,7 @@ TEST_F(UtilModules_PPipe, EpollEventReadWriteRoundtrip) {
 
     ssize_t recvSize = 0;
     std::string recvBytes;
-    PPipe pipe(pipeFds[0], [&recvSize, &recvBytes](ssize_t size, std::string bytes, void*) {
+    PPipe pipe(pipeFds[0], [&recvSize, &recvBytes](ssize_t size, const std::string& bytes, void*) {
         recvSize = size;
         recvBytes = bytes;
     });

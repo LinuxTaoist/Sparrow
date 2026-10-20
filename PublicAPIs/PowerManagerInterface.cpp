@@ -9,17 +9,17 @@
  *  @date       : 2024/05/11
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <mutex>
 #include <atomic>
+#include <memory>
 #include <stdio.h>
-#include <memory.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include "Parcel.h"
-#include "ProcMutex.h"
-#include "CommonMacros.h"
-#include "CoreTypeDefs.h"
-#include "BindInterface.h"
 #include "AsyncEvent.h"
+#include "ProcMutex.h"
+#include "CoreTypeDefs.h"
+#include "CommonMacros.h"
+#include "BindInterface.h"
 #include "GeneralUtils.h"
 #include "PowerManagerInterface.h"
 
@@ -103,17 +103,9 @@ int PowerManagerInterface::RegisterCallback(void (*callback)(int32_t eventID, vo
     }
 
     ProcLockGuard lock(gPMutex, gTMutex);
-    NONZERO_CHECK_RET(pReqParcel->WriteInt(GENERAL_REGISTER_CALLBACK));
-    NONZERO_CHECK_RET(pReqParcel->WriteString(SRV_NAME_POWER_MANAGER));
-    NONZERO_CHECK_RET(pReqParcel->Post());
-    NONZERO_CHECK_RET(pRspParcel->TimedWait());
-
-    int ret = 0;
-    NONZERO_CHECK_RET(pRspParcel->ReadInt(ret));
-
+    int ret = AsyncEvent::GetInstance()->RegisterEventCallback(
+              SRV_NAME_POWER_MANAGER, pReqParcel, pRspParcel, callback);
     SPR_LOGD("ret: %d\n", ret);
-    AsyncEvent::GetInstance()->AsReader(SRV_NAME_POWER_MANAGER);
-    AsyncEvent::GetInstance()->RegisterEventCallback(callback);
     return ret;
 }
 
@@ -124,6 +116,9 @@ int PowerManagerInterface::UnRegisterCallback() {
         return -1;
     }
 
-    return AsyncEvent::GetInstance()->UnregisterEventCallback();
+    ProcLockGuard lock(gPMutex, gTMutex);
+    int ret = AsyncEvent::GetInstance()->UnregisterEventCallback(
+        SRV_NAME_POWER_MANAGER, pReqParcel, pRspParcel);
+    SPR_LOGD("ret: %d\n", ret);
+    return ret;
 }
-

@@ -387,9 +387,9 @@ TEST(LogM_LogSink, RotationSequential) {
     // Cleanup
     directory = opendir(path.c_str());
     if (directory != nullptr) {
-        struct dirent* entry = nullptr;
-        while ((entry = readdir(directory)) != nullptr) {
-            const std::string name(entry->d_name);
+        struct dirent* cleanupEntry = nullptr;
+        while ((cleanupEntry = readdir(directory)) != nullptr) {
+            const std::string name(cleanupEntry->d_name);
             if (name.find("seq_") == 0) {
                 remove((path + "/" + name).c_str());
             }
@@ -435,9 +435,9 @@ TEST(LogM_LogSink, RotationIntegrity) {
     // Cleanup
     directory = opendir(path.c_str());
     if (directory != nullptr) {
-        struct dirent* entry = nullptr;
-        while ((entry = readdir(directory)) != nullptr) {
-            const std::string name(entry->d_name);
+        struct dirent* cleanupEntry = nullptr;
+        while ((cleanupEntry = readdir(directory)) != nullptr) {
+            const std::string name(cleanupEntry->d_name);
             if (name.find("intact_") == 0) {
                 remove((path + "/" + name).c_str());
             }

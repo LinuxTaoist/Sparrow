@@ -66,7 +66,6 @@ private:
     int32_t StopAll();
     int32_t TryRestart(size_t idx);
     void MarkSrvAbnormal(const std::string& serviceName);
-    int32_t DumpPidMapInfo();
     std::string GetInitCfgPath();
 
 private:

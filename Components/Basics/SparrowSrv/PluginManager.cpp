@@ -13,6 +13,8 @@
 #include <string.h>
 #include <dirent.h>
 #include <unistd.h>
+#include <algorithm>
+#include <iterator>
 #include "SprLog.h"
 #include "SprDebugNode.h"
 #include "SprProcInfo.h"
@@ -183,9 +185,8 @@ void PluginManager::LoadAllPlugins() {
 void PluginManager::UnloadAllPlugins() {
     // Collect keys first to avoid iterator invalidation during erase
     std::vector<std::string> paths;
-    for (const auto& handle : mPluginHandles) {
-        paths.push_back(handle.first);
-    }
+    std::transform(mPluginHandles.begin(), mPluginHandles.end(), std::back_inserter(paths),
+                   [](const std::pair<const std::string, void*>& handle) { return handle.first; });
 
     for (const auto& path : paths) {
         UnloadPlugin(path);

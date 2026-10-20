@@ -12,8 +12,8 @@
 #ifndef __PARCEL_H__
 #define __PARCEL_H__
 
-#include <vector>
 #include <string>
+#include <vector>
 #include <fcntl.h>
 #include <semaphore.h>
 #include "SharedRingBuffer.h"
@@ -32,6 +32,7 @@ public:
     int Wait();
     int TimedWait(int timeout = PARCEL_TIMEOUT_MS);
     int Post();
+    bool IsReady() const;
     int WriteBool(bool value);
     int ReadBool(bool& value);
     int WriteInt(int value);
@@ -40,6 +41,7 @@ public:
     int ReadString(std::string& value);
     int WriteData(void* data, int size);
     int ReadData(void* data, int& size);
+    int ReadData(void* data, int& size, int capacity);
 
     template<typename T>
     int WriteVector(const std::vector<T>& vec) {

@@ -16,6 +16,8 @@
 #include <sys/stat.h>
 #include <sys/wait.h>
 #include <sys/resource.h>
+#include <algorithm>
+#include <iterator>
 #include "GeneralUtils.h"
 #include "CoreTypeDefs.h"
 #include "CommonMacros.h"
@@ -114,9 +116,8 @@ int32_t ServiceManager::LoadSrvsInfo() {
 
     mSrvs.clear();
     mSrvs.reserve(services.size());
-    for (const ServiceInfo& service : services) {
-        mSrvs.emplace_back(service);
-    }
+    std::transform(services.begin(), services.end(), std::back_inserter(mSrvs),
+                   [](const ServiceInfo& service) { return SrvInfo(service); });
 
     return 0;
 }
@@ -190,9 +191,8 @@ int32_t ServiceManager::ForkExec(const std::string& exePath,
         std::vector<char*> argv;
         argv.reserve(arguments.size() + 2);
         argv.push_back(const_cast<char*>(exePath.c_str()));
-        for (const std::string& argument : arguments) {
-            argv.push_back(const_cast<char*>(argument.c_str()));
-        }
+        std::transform(arguments.begin(), arguments.end(), std::back_inserter(argv),
+                       [](const std::string& argument) { return const_cast<char*>(argument.c_str()); });
 
         argv.push_back(nullptr);
         execv(exePath.c_str(), argv.data());
@@ -343,11 +343,10 @@ int32_t ServiceManager::TryRestart(size_t idx) {
 
 void ServiceManager::MarkSrvAbnormal(const std::string& serviceName) {
     std::lock_guard<std::mutex> lock(mSrvMutex);
-    for (SrvInfo& srv : mSrvs) {
-        if (srv.name == serviceName) {
-            srv.abnormal = true;
-            return;
-        }
+    const auto service = std::find_if(mSrvs.begin(), mSrvs.end(),
+        [&](const SrvInfo& srv) { return srv.name == serviceName; });
+    if (service != mSrvs.end()) {
+        service->abnormal = true;
     }
 }
 
@@ -407,16 +406,17 @@ int32_t ServiceManager::ExitLoop() {
     return 0;
 }
 
-int32_t ServiceManager::DumpPidMapInfo() {
-    SPR_LOGD("PID     PATH                RESTARTS\n");
-    SPR_LOGD("-----------------------------------------\n");
-    for (const auto& srv : mSrvs) {
-        if (srv.pid > 0) {
-            SPR_LOGD("%6d  %-20s %2d\n", srv.pid, srv.path.c_str(), srv.restartCount);
-        } else {
-            SPR_LOGD("  DEAD  %-20s %2d\n", srv.path.c_str(), srv.restartCount);
-        }
-    }
-    SPR_LOGD("-----------------------------------------\n");
-    return 0;
-}
+
+
+
+
+
+
+
+
+
+
+
+
+
+

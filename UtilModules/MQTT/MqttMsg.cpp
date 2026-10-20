@@ -26,8 +26,8 @@ MqttMsgBase::MqttMsgBase(uint8_t type, uint8_t flags, const std::string& payload
 }
 
 MqttMsgBase::MqttMsgBase(const std::string& bytes)
-    : mFixedHeader(0, 0) {
-    DecodeImpl(bytes);
+    : mFixedHeader(0, 0), mRemainLenValue(0) {
+    DecodeBaseImpl(bytes);
 }
 
 MqttMsgBase::MqttMsgBase(const MqttMsgBase& msg)
@@ -108,6 +108,14 @@ int32_t MqttMsgBase::DecodeImpl(const std::string& bytes) {
     CHECK_ADD_RESULT(DecodeFixedHeader(bytes), len);
     CHECK_ADD_RESULT(DecodeVariableHeader(bytes.substr(len)), len);
     CHECK_ADD_RESULT(DecodePayload(bytes.substr(len)), len);
+    return len;
+}
+
+int32_t MqttMsgBase::DecodeBaseImpl(const std::string& bytes) {
+    int32_t len = 0;
+    CHECK_ADD_RESULT(MqttMsgBase::DecodeFixedHeader(bytes), len);
+    CHECK_ADD_RESULT(MqttMsgBase::DecodeVariableHeader(bytes.substr(len)), len);
+    CHECK_ADD_RESULT(MqttMsgBase::DecodePayload(bytes.substr(len)), len);
     return len;
 }
 

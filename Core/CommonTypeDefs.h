@@ -17,6 +17,8 @@
 
 #include <stdint.h>
 #include <mqueue.h>
+#include <string>
+#include <time.h>
 
 // --------------------------------------------------------------------------------------------------------------------
 // - Common macros for CommonTypeDefs.h version
@@ -46,6 +48,17 @@ struct SMQueueDetails {
     int32_t usedPeak;
     char mqName[MQ_NAME_MAX_LENGTH];
     mq_attr mqAttr;
+};
+
+struct StatusEvent {
+    int32_t sModuleID;
+    time_t sTime;
+    int32_t sErrorCode;
+    std::string sText;
+
+    StatusEvent() : sModuleID(0), sTime(0), sErrorCode(0), sText() {}
+    StatusEvent(int32_t moduleID, time_t time, int32_t errorCode, const std::string& text)
+        : sModuleID(moduleID), sTime(time), sErrorCode(errorCode), sText(text) {}
 };
 
 enum EConfigScope {

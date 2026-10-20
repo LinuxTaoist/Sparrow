@@ -220,9 +220,9 @@ int32_t HttpMsgRequest::Encode(std::string& bytes) {
     //                  [ message-body ]                      ; Section 4.3
     bytes += mReqMethod + " " + mReqURI + " " + mHttpVersion + "\r\n";
 
-    for (const auto& pair : mMsgHeaders) {
-        bytes += pair.first + ": " + pair.second + "\r\n";
-    }
+    std::for_each(mMsgHeaders.begin(), mMsgHeaders.end(), [&bytes](const std::pair<const std::string, std::string>& header) {
+        bytes += header.first + ": " + header.second + "\r\n";
+    });
 
     bytes += "\r\n";
     bytes += mMsgBody;

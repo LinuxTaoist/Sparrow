@@ -9,6 +9,7 @@
  *  @date       : 2025/03/16
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <algorithm>
 #include "gtest/gtest.h"
 #include "GeneralConversions.h"
 
@@ -247,12 +248,7 @@ TEST(Util_DumpBytesAscall, MultiLineDump) {
     std::string out;
     EXPECT_EQ(DumpBytesAscall(input, out), 0);
 
-    int32_t newlineCount = 0;
-    for (char c : out) {
-        if (c == '\n') {
-            newlineCount++;
-        }
-    }
+    const int32_t newlineCount = static_cast<int32_t>(std::count(out.begin(), out.end(), '\n'));
     EXPECT_GE(newlineCount, 3);   // 40 字节 = 16+16+8，共 3 行
 
     // 第二行地址应为 00000010

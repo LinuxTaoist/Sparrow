@@ -66,7 +66,7 @@ int32_t NtpSource::InitSocket() {
         }
     });
 
-    return mpSocket ? 0 : -1;
+    return 0;
 }
 
 int32_t NtpSource::AddNtpServer(const std::string& addr, uint16_t port) {
@@ -82,13 +82,12 @@ int32_t NtpSource::AddNtpServer(const std::string& addr, uint16_t port) {
 }
 
 int32_t NtpSource::SendTimeRequest(NtpServer& srv) {
-    int32_t ret = -1;
     if (!mIsReady) {
         SPR_LOGD("Creating UDP socket on port %d\n", mLocalPort);
-        ret = mpSocket->AsUdp(mLocalPort);
-        if (ret == -1) {
+        int32_t openRet = mpSocket->AsUdp(mLocalPort);
+        if (openRet == -1) {
             SPR_LOGE("Create UDP failed! port %d \n", mLocalPort);
-            return ret;
+            return openRet;
         }
         mIsReady = true;
     }
@@ -110,8 +109,9 @@ int32_t NtpSource::SendTimeRequest(NtpServer& srv) {
     // mutiple thread request
     // if other thread request success, the socket will be closed
     if (mIsReady) {
-        ret = mpSocket->Write(bytes, ip, srvPort);
-        SPR_LOGD("Request to %s:%u %d bytes %s\n", ip.c_str(), srvPort, bytes.size(), ret == -1 ? "failed" : "success");
+        int32_t writeRet = mpSocket->Write(bytes, ip, srvPort);
+        SPR_LOGD("Request to %s:%u %d bytes %s\n", ip.c_str(), srvPort, bytes.size(),
+                 writeRet == -1 ? "failed" : "success");
     }
 
     return 0;

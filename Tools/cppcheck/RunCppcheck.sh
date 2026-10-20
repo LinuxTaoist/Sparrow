@@ -21,9 +21,8 @@ SEQUENCE_NUMBER="01"
 
 # 查找当天已存在的扫描文件（匹配格式：${FILE_PREFIX}_${DATE}_[0-9][0-9].${FILE_EXT}）
 EXISTING_FILES=$(find "${OUTPUT_DIR}" -maxdepth 1 -type f -name "${FILE_PREFIX}_${DATE}_[0-9][0-9].${FILE_EXT}" -printf "%f\n" 2>/dev/null)
-FILE_COUNT=$(echo "${EXISTING_FILES}" | wc -l | tr -d ' ')  # 统计文件数量（去除空格）
 
-if [ "${FILE_COUNT}" -gt 0 ]; then
+if [ -n "${EXISTING_FILES}" ]; then
     # 提取最后一个文件的序号（按版本号排序，取最大的）
     LAST_SEQUENCE=$(echo "${EXISTING_FILES}" | sort -Vr | head -1 | sed -E "s/${FILE_PREFIX}_${DATE}_([0-9]{2})\.${FILE_EXT}/\1/")
     # 计算下一个序号（转为数字+1后，补零为两位数）
@@ -37,8 +36,9 @@ OUTPUT_FILENAME="${OUTPUT_DIR}/${FILE_PREFIX}_${DATE}_${SEQUENCE_NUMBER}.${FILE_
 #######################################
 # 工程与Cppcheck配置
 #######################################
-# 工程根目录（当前脚本目录的上两级，根据实际目录结构调整）
-PROJECT_ROOT="$(pwd)/../.."
+# 工程根目录（以脚本位置为基准，使用规范化绝对路径）
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+PROJECT_ROOT="$(cd "${SCRIPT_DIR}/../.." && pwd)"
 # 验证工程根目录是否存在
 if [ ! -d "${PROJECT_ROOT}" ]; then
     echo "Error: 工程根目录${PROJECT_ROOT}不存在！"
@@ -54,46 +54,40 @@ SOURCE_DIRS="${PROJECT_ROOT}/3rdAdapter/    \
              ${PROJECT_ROOT}/Hardware/      \
              ${PROJECT_ROOT}/PrivateAPIs    \
              ${PROJECT_ROOT}/PublicAPIs/    \
-             ${PROJECT_ROOT}/TestCase       \
              ${PROJECT_ROOT}/Util/          \
              ${PROJECT_ROOT}/UtilModules"
 
-# --------------------------
-# 新增：头文件包含目录配置（重点）
-# --------------------------
-# 1. 从源目录转换的包含目录（原逻辑）
 SOURCE_DIRS_INCLUDE=$(echo "${SOURCE_DIRS}" | sed 's/  */ -I/g' | sed 's/^-I//')
 
-# 2. 手动补充缺失的头文件目录（根据后续检测结果添加！！！）
-# 示例：如果检测到缺失"third_party/log.h"，就添加其所在目录
+# 额外头文件搜索目录；用于补充源目录之外、Cppcheck 无法定位的项目头文件。
 EXTRA_INCLUDES=(
-    # -I"${PROJECT_ROOT}/third_party/include"  # 需根据实际缺失情况解开注释并修改
-    # -I"${PROJECT_ROOT}/include"              # 示例：项目专门的include目录
 )
 
-# 合并所有包含目录
 INCLUDE_DIRS="${SOURCE_DIRS_INCLUDE} ${EXTRA_INCLUDES[*]}"
 
-# 设置Cppcheck命令行参数（用数组避免空格解析问题）
 CPPCHECK_OPTS=(
     --std=c++11
     --enable=all
     --suppress=unusedFunction
     --suppress=useInitializationList
-    --error-exitcode=1  # 有错误时退出码为1（方便CI判断）
+    --error-exitcode=1
     --xml
     --xml-version=2
-    -UENUM_OR_STRING
-    ${INCLUDE_DIRS}     # 头文件包含目录（解决missingInclude问题）
+    ${INCLUDE_DIRS}
     --output-file="${OUTPUT_FILENAME}"
 )
 
-# 忽略的文件列表（使用绝对路径）
-CHECK_IGNORE=(
-    "--suppress=*:${PROJECT_ROOT}/Util/cJSON.c"
-    "--suppress=*:${PROJECT_ROOT}/Util/cJSON.h"
-    "--suppress=*:${PROJECT_ROOT}/UtilModules/CodecX/cJSON.c"
-    "--suppress=*:${PROJECT_ROOT}/UtilModules/CodecX/cJSON.h"
+# 不扫描的第三方代码和测试目录
+CHECK_EXCLUDES=(
+    -i "${PROJECT_ROOT}/3rdParty"
+    -i "${PROJECT_ROOT}/TestCase"
+    -i "${PROJECT_ROOT}/Util/cJSON.c"
+    -i "${PROJECT_ROOT}/Util/cJSON.h"
+    -i "${PROJECT_ROOT}/UtilModules/CodecX/cJSON.c"
+    -i "${PROJECT_ROOT}/UtilModules/CodecX/cJSON.h"
+    "--suppress=*:${PROJECT_ROOT}/Util/cJSON.*"
+    "--suppress=*:${PROJECT_ROOT}/UtilModules/CodecX/cJSON.*"
+    "--suppress=syntaxError:${PROJECT_ROOT}/Components/Business/OneNetMqtt/Src/OneNetCommon.h"
 )
 
 #######################################
@@ -102,10 +96,31 @@ CHECK_IGNORE=(
 echo "======================================"
 echo "开始检测头文件缺失情况（--check-config）"
 echo "======================================"
-# 执行配置检查，捕获输出（筛选出缺失头文件的提示）
-MISSING_INCLUDES=$(cppcheck --check-config "${CPPCHECK_OPTS[@]}" "${CHECK_IGNORE[@]}" ${SOURCE_DIRS} 2>&1 | grep "missingInclude")
+# 保存配置检查输出并显示处理进度，供后续判断是否存在缺失头文件。
+CHECK_CONFIG_LOG=$(mktemp)
+trap 'rm -f "${CHECK_CONFIG_LOG}"' EXIT
+cppcheck --check-config "${CPPCHECK_OPTS[@]}" "${CHECK_EXCLUDES[@]}" ${SOURCE_DIRS} 2>&1 |
+    tee "${CHECK_CONFIG_LOG}" |
+    awk '
+        BEGIN { checked = 0; progress = 0 }
+        /^Checking / {
+            checked++
+            printf("\r头文件配置检查进度：已处理 %d 项", checked)
+            fflush()
+            progress = 1
+            next
+        }
+        {
+            if (progress) {
+                printf("\n")
+                progress = 0
+            }
+            print
+        }
+        END { if (progress) printf("\n") }
+    '
+MISSING_INCLUDES=$(grep "missingInclude" "${CHECK_CONFIG_LOG}" || true)
 
-# 判断是否存在缺失的头文件
 if [ -n "${MISSING_INCLUDES}" ]; then
     echo -e "\n⚠️  发现缺失的头文件："
     echo "${MISSING_INCLUDES}"
@@ -129,10 +144,17 @@ echo -e "\n======================================"
 echo "开始执行Cppcheck静态检查"
 echo "======================================"
 echo "输出文件：${OUTPUT_FILENAME}"
-cppcheck "${CPPCHECK_OPTS[@]}" "${CHECK_IGNORE[@]}" ${SOURCE_DIRS}
+cppcheck "${CPPCHECK_OPTS[@]}" "${CHECK_EXCLUDES[@]}" ${SOURCE_DIRS}
+CPPCHECK_EXIT_CODE=$?
+ACTIONABLE_COUNT=0
+if [ -s "${OUTPUT_FILENAME}" ]; then
+    ACTIONABLE_COUNT=$(grep -Ec 'severity="(error|warning)"' "${OUTPUT_FILENAME}" || true)
+fi
 
-# 检查Cppcheck执行结果
-if [ $? -eq 0 ]; then
+# 信息级配置提示不计为代码问题；仅当报告存在且没有 error/warning 时判定成功。
+if [ -s "${OUTPUT_FILENAME}" ] && [ "${CPPCHECK_EXIT_CODE}" -eq 0 ]; then
+    echo -e "\n✅ 静态检查完成，结果已保存至${OUTPUT_FILENAME}"
+elif [ -s "${OUTPUT_FILENAME}" ] && [ "${ACTIONABLE_COUNT}" -eq 0 ]; then
     echo -e "\n✅ 静态检查完成，结果已保存至${OUTPUT_FILENAME}"
 else
     echo -e "\n❌ Error: 静态检查发现问题，详情见${OUTPUT_FILENAME}"

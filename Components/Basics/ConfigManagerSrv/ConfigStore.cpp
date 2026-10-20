@@ -10,6 +10,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <vector>
+#include <algorithm>
 #include <stdio.h>
 #include <unistd.h>
 #include "SprLog.h"
@@ -99,12 +100,9 @@ static bool HasColumn(SqliteAdapter* db, const char* tableName, const char* colu
     if (!db->Query(sql, rows)) {
         return false;
     }
-    for (const auto& row : rows) {
-        if (row.size() > 1 && row[1] == columnName) {
-            return true;
-        }
-    }
-    return false;
+    return std::any_of(rows.begin(), rows.end(), [&](const std::vector<std::string>& row) {
+        return row.size() > 1 && row[1] == columnName;
+    });
 }
 
 static int32_t EnsureItemTypeColumn(SqliteAdapter* db, const char* tableName) {
@@ -151,18 +149,6 @@ int32_t ConfigStore::CreateTables() {
         " ("
         "meta_key TEXT PRIMARY KEY NOT NULL,"
         "meta_value TEXT NOT NULL);";
-    std::string itemSql =
-        "CREATE TABLE IF NOT EXISTS %s ("
-        "namespace_name TEXT NOT NULL,"
-        "item_key TEXT NOT NULL,"
-        "item_value BLOB NOT NULL,"
-        "item_type INTEGER NOT NULL DEFAULT 0,"
-        "revision INTEGER NOT NULL,"
-        "schema_version INTEGER NOT NULL DEFAULT 1,"
-        "owner TEXT NOT NULL DEFAULT '',"
-        "update_time TEXT NOT NULL,"
-        "PRIMARY KEY(namespace_name, item_key));";
-
     NONZERO_CHECK_RET(mpDb->Execute(metaSql) ? 0 : -1);
     std::string defaultSql = std::string("CREATE TABLE IF NOT EXISTS ") + DEFAULT_TABLE + " ("
         "namespace_name TEXT NOT NULL,"

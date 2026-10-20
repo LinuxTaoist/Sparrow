@@ -337,17 +337,16 @@ void PowerManager::PostAEvent(uint32_t event, void* args, int32_t size) {
 }
 
 bool PowerManager::IsAllowStandbyWithAllObserver() {
-    bool ret = true;
-    for (const auto &obs : mStandbyObservers) {
-        if (obs.second.preStandbyAck != PRE_STANDBY_ACK_ALLOW) {
-            SPR_LOGD("%s standby state = %s!\n", GetSprModuleIDText(static_cast<ModuleIDType>(obs.first)).c_str(),
-                GetSprPreStandbyAckText(obs.second.preStandbyAck).c_str());
-            ret = false;
-            break;
-        }
+    const auto observer = std::find_if(mStandbyObservers.begin(), mStandbyObservers.end(),
+        [](const std::pair<const uint32_t, StandbyDetail>& item) {
+            return item.second.preStandbyAck != PRE_STANDBY_ACK_ALLOW;
+        });
+    if (observer != mStandbyObservers.end()) {
+        SPR_LOGD("%s standby state = %s!\n", GetSprModuleIDText(static_cast<ModuleIDType>(observer->first)).c_str(),
+            GetSprPreStandbyAckText(observer->second.preStandbyAck).c_str());
+        return false;
     }
-
-    return ret;
+    return true;
 }
 
 void PowerManager::ResetAllObserverPreStandbyAck() {

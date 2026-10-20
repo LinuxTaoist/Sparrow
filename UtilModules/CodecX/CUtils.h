@@ -18,6 +18,8 @@
 #include <sstream>
 #include <iomanip>
 #include <type_traits>
+#include <algorithm>
+#include <iterator>
 #include "CDefine.h"
 
 namespace CUtils {
@@ -267,9 +269,8 @@ int32_t VToS(const std::vector<T>& in, std::string& out, CEndianType type = CEND
     std::string tempStr;
     for (const auto& elem : in) {
         IToS(elem, tempStr, type);
-        for (char c : tempStr) {
-            srcBytes.push_back(static_cast<uint8_t>(c));
-        }
+        std::transform(tempStr.begin(), tempStr.end(), std::back_inserter(srcBytes),
+                       [](char ch) { return static_cast<uint8_t>(ch); });
     }
 
     const size_t srcTotalBytes = srcBytes.size();

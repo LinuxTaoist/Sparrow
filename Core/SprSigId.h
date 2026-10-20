@@ -14,6 +14,8 @@
 #ifndef __SPR_SIG_ID_H__
 #define __SPR_SIG_ID_H__
 
+#include <stdint.h>
+
 namespace InternalDefs {
 
 namespace {

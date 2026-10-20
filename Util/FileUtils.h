@@ -59,7 +59,7 @@ ssize_t ReadFileToVector(const std::string& path, std::vector<T>& out, bool isBi
     }
 
     if (isBigEndian) {
-        for (auto& v : out) v = SwapEndian(v);
+        std::transform(out.begin(), out.end(), out.begin(), [](const T& value) { return SwapEndian(value); });
     }
 
     return static_cast<ssize_t>(fileSize);

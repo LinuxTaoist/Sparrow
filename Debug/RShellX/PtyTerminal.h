@@ -28,7 +28,6 @@ public:
 private:
     int32_t BashProcess();
     int32_t MasterProcess();
-    int32_t EraseColor(const std::string& in, std::string& out);
     std::string GetCurShell();
 
 private:

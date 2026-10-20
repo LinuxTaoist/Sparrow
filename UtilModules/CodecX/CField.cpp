@@ -130,11 +130,6 @@ std::vector<std::shared_ptr<CNode>>& CField::GetChildNodes() {
 
 std::shared_ptr<CNode> CField::Clone() {
     std::shared_ptr<CField> pClone = std::make_shared<CField>(*this);
-    if (!pClone) {
-        CLOGE("Node[%s] pClone is nullptr!\n", GetName().c_str());
-        return nullptr;
-    }
-
     pClone->RelinkChildren(pClone);
     return pClone;
 }

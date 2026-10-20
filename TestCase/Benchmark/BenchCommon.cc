@@ -226,9 +226,6 @@ BenchResult RunBench(const std::function<void()>& fn, int iterations) {
     }
 
     std::sort(times.begin(), times.end());
-    uint64_t sum = 0;
-    for (size_t i = 0; i < times.size(); ++i) sum += times[i];
-
     int skip = iterations / 20;
     if (skip * 2 >= iterations) skip = 0;
     uint64_t trimmedSum = 0;

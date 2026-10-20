@@ -38,14 +38,6 @@ static ProcMutex gPMutex("IStatusMonitorMutex");
 static std::shared_ptr<Parcel> pReqParcel = nullptr;
 static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
-StatusEvent::StatusEvent()
-    : sModuleID(0), sTime(0), sErrorCode(0), sText() {
-}
-
-StatusEvent::StatusEvent(int32_t moduleID, time_t time, int32_t errorCode, const std::string& text)
-    : sModuleID(moduleID), sTime(time), sErrorCode(errorCode), sText(text) {
-}
-
 StatusMonitorInterface::StatusMonitorInterface() {
     mEnable = true;
     bool ret = BindInterface::GetInstance()->InitializeClientBinder(SRV_NAME_STATUS_MONITOR, pReqParcel, pRspParcel);

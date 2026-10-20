@@ -39,7 +39,7 @@ public:
     ~DebugCore() {
     }
 
-    int32_t ProcessMsg(const SprMsg& msg) {
+    int32_t ProcessMsg(const SprMsg& msg) override {
         switch(msg.GetMsgId()) {
             default:
                 SPR_LOGD("msg id: %s %s\n", GetSigName(msg.GetMsgId()), GetCurTimeStr().c_str());
@@ -50,7 +50,7 @@ public:
     }
 
 protected:
-    virtual int32_t Init() {
+    int32_t Init() override {
         return 0;
     }
 };

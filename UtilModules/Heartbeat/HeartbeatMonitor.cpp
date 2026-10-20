@@ -10,6 +10,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <map>
+#include <algorithm>
 #include <mutex>
 #include <cerrno>
 #include <chrono>
@@ -87,11 +88,12 @@ int32_t HeartbeatMonitor::StartInternal(const std::string& channel,
         return -1;
     }
 
-    for (const std::string& service : services) {
-        if (service.empty() || service.size() > HEARTBEAT_SERVICE_NAME_MAX_LENGTH) {
-            HBLOGE("Invalid service name %s!\n", service.c_str());
-            return -1;
-        }
+    const auto invalidService = std::find_if(services.begin(), services.end(), [](const std::string& service) {
+        return service.empty() || service.size() > HEARTBEAT_SERVICE_NAME_MAX_LENGTH;
+    });
+    if (invalidService != services.end()) {
+        HBLOGE("Invalid service name %s!\n", invalidService->c_str());
+        return -1;
     }
 
     std::lock_guard<std::mutex> lock(mImpl->mutex);

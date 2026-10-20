@@ -15,6 +15,8 @@
 #include <regex>
 #include <string>
 #include <algorithm>
+#include <iterator>
+#include <numeric>
 #include <cctype>
 #include <fstream>
 #include <sstream>
@@ -313,36 +315,43 @@ protected:
     }
 
     bool SearchLogs(const std::string& content) const {
-        for (const auto& path : LogFiles()) {
+        const std::vector<std::string> logFiles = LogFiles();
+        const bool foundInLogs = std::any_of(logFiles.begin(), logFiles.end(), [&](const std::string& path) {
             std::ifstream file(path);
-            std::string line;
+            std::string line = "";
             while (std::getline(file, line)) {
                 if (line.find(content) != std::string::npos) {
                     return true;
                 }
             }
+            return false;
+        });
+        if (foundInLogs) {
+            return true;
         }
-        for (const auto& path : PackFiles()) {
-            if (SearchArchiveLogs(path, content)) {
-                return true;
-            }
-        }
-        return false;
+
+        const std::vector<std::string> packFiles = PackFiles();
+        return std::any_of(packFiles.begin(), packFiles.end(), [&](const std::string& path) {
+            return SearchArchiveLogs(path, content);
+        });
     }
 
     int CountLogs(const std::string& content) const {
-        int count = 0;
-        for (const auto& path : LogFiles()) {
+        const std::vector<std::string> logFiles = LogFiles();
+        const std::vector<std::string> packFiles = PackFiles();
+        int count = std::accumulate(logFiles.begin(), logFiles.end(), 0,
+                                    [&](int total, const std::string& path) {
             std::ifstream file(path);
-            std::string line;
+            std::string line = "";
             while (std::getline(file, line)) {
-                count += line.find(content) != std::string::npos ? 1 : 0;
+                total += line.find(content) != std::string::npos ? 1 : 0;
             }
-        }
-        for (const auto& path : PackFiles()) {
-            count += CountArchiveLogs(path, content);
-        }
-        return count;
+            return total;
+        });
+        return std::accumulate(packFiles.begin(), packFiles.end(), count,
+                               [&](int total, const std::string& path) {
+            return total + CountArchiveLogs(path, content);
+        });
     }
 
     bool WaitForLog(const std::string& content, int timeoutSec = 10) const {
@@ -785,10 +794,6 @@ TEST_F(ThirdAdapter_SprLog, MultiLineContent) {
 // 测试前端级别过滤（SetLevel 后低于级别的日志不产出帧、不落盘）
 TEST_F(ThirdAdapter_SprLog, LevelFilter_AtProducer) {
     SprLog* pLog = SprLog::GetInstance();
-    if (!pLog) {
-        FAIL() << "SprLog::GetInstance() failed";
-    }
-
     if (!pLog) {
         FAIL() << "SprLog::GetInstance() failed";
     }
@@ -1240,12 +1245,13 @@ TEST_F(ThirdAdapter_SprLog, Rotation_ContentIntegrity) {
             }
         }
     }
-    for (const auto& path : PackFiles()) {
-        for (const auto& line : ReadArchiveLines(path)) {
-            if (line.find(uniqueMark) != std::string::npos) {
-                allLines.push_back(line);
-            }
-        }
+    const std::vector<std::string> packFiles = PackFiles();
+    for (const auto& path : packFiles) {
+        const std::vector<std::string> archiveLines = ReadArchiveLines(path);
+        std::copy_if(archiveLines.begin(), archiveLines.end(), std::back_inserter(allLines),
+                     [&](const std::string& line) {
+            return line.find(uniqueMark) != std::string::npos;
+        });
     }
 
     EXPECT_GE(allLines.size(), 1U) << "Should have at least one unique marker in the retained log set";

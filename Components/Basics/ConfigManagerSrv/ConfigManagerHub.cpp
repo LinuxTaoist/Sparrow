@@ -47,10 +47,6 @@ ConfigManagerHub::~ConfigManagerHub() {
 
 void ConfigManagerHub::handleCmd(const std::shared_ptr<Parcel>& pReqParcel,
                                  const std::shared_ptr<Parcel>& pRspParcel, int32_t cmd) {
-    if (cmd == GENERAL_REGISTER_CALLBACK) {
-        return;
-    }
-
     switch (cmd) {
         case CONFIG_CMD_SET_VALUE: {
             std::string nameSpace;

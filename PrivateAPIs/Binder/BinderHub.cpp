@@ -11,11 +11,11 @@
  */
 #include "SprLog.h"
 #include "BindCommon.h"
-#include "BinderHub.h"
-#include "CommonMacros.h"
-#include "CoreTypeDefs.h"
-#include "BindInterface.h"
 #include "AsyncEvent.h"
+#include "CoreTypeDefs.h"
+#include "CommonMacros.h"
+#include "BindInterface.h"
+#include "BinderHub.h"
 
 using namespace InternalDefs;
 
@@ -58,40 +58,56 @@ int32_t BinderHub::DestroyHub() {
 void BinderHub::BinderLoop() {
     bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSrvName, mReqParcel, mRspParcel);
     if (!rs) {
-        SPR_LOGE("Binder init failed!\n");
+        SPR_LOGE("Binder init failed!");
         return;
     }
 
-    SPR_LOGD("Start %s binder loop!\n", mSrvName.c_str());
+    SPR_LOGD("Start %s binder loop!", mSrvName.c_str());
     do {
         int32_t cmd = 0;
-        mReqParcel->Wait();
-        int32_t ret = mReqParcel->ReadInt(cmd);
+        int32_t ret = mReqParcel->Wait();
         if (ret != 0) {
-            SPR_LOGE("ReadInt failed!\n");
+            SPR_LOGE("Wait request failed! ret = %d", ret);
+            break;
+        }
+
+        ret = mReqParcel->ReadInt(cmd);
+        if (ret != 0) {
+            SPR_LOGE("ReadInt failed!");
             continue;
         }
 
         if (cmd == GENERAL_CMD_EXE_EXIT) {
             mRun = false;
-            SPR_LOGD("Binder loop exit!\n");
+            SPR_LOGD("Binder loop exit!");
             break;
-        } else if (cmd == GENERAL_REGISTER_CALLBACK) {
-            std::string name;
-            ret = mReqParcel->ReadString(name);
-
-            int32_t rc = -1;
-            if (ret == 0) {
-                rc = AsyncEvent::GetInstance()->AsWriter(name);
-                SPR_LOGD("Register callback %s, ret = %d\n", name.c_str(), ret);
+        } else if (cmd == GENERAL_REGISTER_CALLBACK || cmd == GENERAL_UNREGISTER_CALLBACK) {
+            std::string channelName;
+            ret = mReqParcel->ReadString(channelName);
+            if (ret != 0) {
+                SPR_LOGE("Read callback channel failed! ret = %d", ret);
+                continue;
             }
 
-            mRspParcel->WriteInt(rc);
+            AsyncEvent* pEvent = AsyncEvent::GetInstance();
+            if (!pEvent) {
+                SPR_LOGE("pEvent is nullptr!");
+                continue;
+            }
+
+            bool isRegister = (cmd == GENERAL_REGISTER_CALLBACK);
+            ret = isRegister ? pEvent->AddWriter(channelName)
+                             : pEvent->DelWriter(channelName);
+            SPR_LOGD("%s callback %s, ret = %d",
+                isRegister ? "Register" : "Unregister", channelName.c_str(), ret);
+
+            mRspParcel->WriteInt(ret);
             mRspParcel->Post();
+            continue;
         }
 
         handleCmd(mReqParcel, mRspParcel, cmd);
     } while(mRun);
 
-    SPR_LOGD("Exit %s binder loop!\n", mSrvName.c_str());
+    SPR_LOGD("Exit %s binder loop!", mSrvName.c_str());
 }

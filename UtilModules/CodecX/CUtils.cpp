@@ -11,6 +11,7 @@
  */
 #include <fstream>
 #include <algorithm>
+#include <numeric>
 #include "CUtils.h"
 
 namespace CUtils {
@@ -302,12 +303,8 @@ uint16_t Crc16(const std::vector<uint8_t>& bytes) {
 }
 
 uint8_t Bcc8(const std::vector<uint8_t>& bytes) {
-    uint8_t bcc = 0x00;
-    for (uint8_t byte : bytes) {
-        bcc ^= byte;
-    }
-
-    return bcc;
+    return std::accumulate(bytes.begin(), bytes.end(), static_cast<uint8_t>(0),
+                           [](uint8_t bcc, uint8_t byte) { return static_cast<uint8_t>(bcc ^ byte); });
 }
 
 } // namespace CUtils

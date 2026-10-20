@@ -171,10 +171,6 @@ void EpollEventHandler::EpollLoop() {
             }
 
             IEpollEvent* p = reinterpret_cast<IEpollEvent*>(ep[i].data.ptr);
-            if (p == nullptr) {
-                continue;
-            }
-
             HandleEpollEvent(*p);
         }
     }

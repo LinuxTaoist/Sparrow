@@ -128,9 +128,6 @@ int32_t PtyTerminal::MasterProcess() {
             return;
         }
 
-        // When erase color, the output is messed such as vi
-        // std::string out;
-        // EraseColor(bytes, out);
         if (mCb) {
             mCb(ret, bytes, mArg ? mArg : this);
         }
@@ -138,36 +135,6 @@ int32_t PtyTerminal::MasterProcess() {
 
     mPtyPipe->AddToPoll();
     return 0;
-}
-
-int32_t PtyTerminal::EraseColor(const std::string& in, std::string& out) {
-    out.clear();
-    out.reserve(in.size());
-
-    const size_t len = in.size();
-    size_t i = 0;
-
-    while (i < len) {
-        if (in[i] == '\033') {
-            i++;
-            if (i < len && in[i] == '[') {
-                i++;
-                while (i < len && !isalpha(static_cast<unsigned char>(in[i]))) {
-                    i++;
-                }
-                if (i < len) {
-                    i++;
-                }
-            } else if (i < len) {
-                i++;
-            }
-        } else {
-            out.push_back(in[i]);
-            i++;
-        }
-    }
-
-    return (int32_t)(out.size());
 }
 
 std::string PtyTerminal::GetCurShell() {

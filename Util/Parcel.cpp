@@ -9,7 +9,10 @@
  *  @date       : 2024/03/26
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <limits>
+#include <vector>
 #include <stdio.h>
+#include <time.h>
 #include <errno.h>
 #include <string.h>
 #include <arpa/inet.h>
@@ -171,12 +174,17 @@ int Parcel::ReadString(std::string& value) {
 }
 
 int Parcel::WriteData(void* data, int size) {
-    NODE_LENGTH_T len = size;
-    if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(&len, sizeof(NODE_LENGTH_T))) {
+    if (!IsReady() || data == nullptr || size <= 0 ||
+        static_cast<size_t>(size) > std::numeric_limits<NODE_LENGTH_T>::max()) {
         return ERR_PARCEL_WRITE_FAILED;
     }
 
-    if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(data, len)) {
+    NODE_LENGTH_T len = static_cast<NODE_LENGTH_T>(size);
+    std::vector<uint8_t> frame(sizeof(len) + static_cast<size_t>(size));
+    memcpy(frame.data(), &len, sizeof(len));
+    memcpy(frame.data() + sizeof(len), data, static_cast<size_t>(size));
+
+    if (ERR_PARCEL_SUCCESS != mRingBuffer->Write(frame.data(), static_cast<int32_t>(frame.size()))) {
         return ERR_PARCEL_WRITE_FAILED;
     }
 
@@ -184,10 +192,18 @@ int Parcel::WriteData(void* data, int size) {
 }
 
 int Parcel::ReadData(void* data, int& size) {
+    return ReadData(data, size, std::numeric_limits<NODE_LENGTH_T>::max());
+}
+
+int Parcel::ReadData(void* data, int& size, int capacity) {
+    if (!IsReady() || data == nullptr || capacity <= 0) {
+        return ERR_PARCEL_READ_FAILED;
+    }
+
     int ret = 0;
     NODE_LENGTH_T len = 0;
     ret = mRingBuffer->Read(&len, sizeof(NODE_LENGTH_T));
-    if (len == 0 || ERR_PARCEL_SUCCESS != ret) {
+    if (len == 0 || static_cast<int>(len) > capacity || ERR_PARCEL_SUCCESS != ret) {
         return ERR_PARCEL_READ_FAILED;
     }
 
@@ -213,12 +229,22 @@ int Parcel::Wait() {
 int Parcel::TimedWait(int timeout) {
     while (!mRingBuffer->IsReadable()) {
         struct timespec ts;
-        clock_gettime(CLOCK_REALTIME, &ts);
+        if (clock_gettime(CLOCK_REALTIME, &ts) != 0) {
+            SPR_LOGE("clock_gettime failed! (%s)\n", strerror(errno));
+            return ERR_PARCEL_WAIT_FAILED;
+        }
         ts.tv_sec += timeout / 1000;
         ts.tv_nsec += (timeout % 1000) * 1000000;
+        if (ts.tv_nsec >= 1000000000) {
+            ts.tv_sec += ts.tv_nsec / 1000000000;
+            ts.tv_nsec %= 1000000000;
+        }
         if (sem_timedwait(mSem, &ts) != 0) {
-            SPR_LOGE("sem_timedwait failed! (%s)\n", strerror(errno));
-            int ret = (errno == ETIMEDOUT) ? ERR_PARCEL_WAIT_TIMEOUT : ERR_PARCEL_WAIT_FAILED;
+            int waitError = errno;
+            if (waitError != ETIMEDOUT) {
+                SPR_LOGE("sem_timedwait failed! (%s)\n", strerror(waitError));
+            }
+            int ret = (waitError == ETIMEDOUT) ? ERR_PARCEL_WAIT_TIMEOUT : ERR_PARCEL_WAIT_FAILED;
             return ret;
         }
     }
@@ -233,4 +259,8 @@ int Parcel::Post() {
     }
 
     return ERR_PARCEL_SUCCESS;
+}
+
+bool Parcel::IsReady() const {
+    return mRingBuffer != nullptr && mRingBuffer->IsEnabled() && mSem != SEM_FAILED;
 }

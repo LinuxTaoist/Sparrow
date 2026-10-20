@@ -268,7 +268,7 @@ bool SharedRingBuffer::IsReadable() const noexcept
         return false;
     }
 
-    return ((mRoot->rwStatus == CMD_READABLE) && AvailData() != 0);
+    return AvailData() != 0;
 }
 
 bool SharedRingBuffer::IsWriteable() const noexcept

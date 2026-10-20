@@ -12,8 +12,8 @@
 #ifndef __BIND_INTERFACE_H__
 #define __BIND_INTERFACE_H__
 
-#include <string>
 #include <memory>
+#include <string>
 #include "Binder.h"
 #include "IBinder.h"
 

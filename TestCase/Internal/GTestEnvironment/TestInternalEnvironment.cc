@@ -10,6 +10,7 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <chrono>
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -124,13 +125,9 @@ bool WaitForProcessState(const std::string& processName, bool running, int timeo
 bool WaitForProcessStates(const std::vector<std::string>& names, bool running, int timeoutSec) {
     const auto start = std::chrono::steady_clock::now();
     while (std::chrono::steady_clock::now() - start < std::chrono::seconds(timeoutSec)) {
-        bool matched = true;
-        for (const auto& name : names) {
-            if (IsProcessRunning(name) != running) {
-                matched = false;
-                break;
-            }
-        }
+        const bool matched = std::all_of(names.begin(), names.end(), [&](const std::string& name) {
+            return IsProcessRunning(name) == running;
+        });
         if (matched) {
             return true;
         }
@@ -347,11 +344,6 @@ bool RestoreSprLogTestEnvironment() {
         unsetenv(ENV_SPR_ROOT_PATH);
     }
 
-    if (environmentState.smWasRunning) {
-        return StartServiceManager()
-            && WaitForProcessState(kServiceManagerName, true, 20)
-            && WaitForProcessState(kLogManagerName, true, 20);
-    }
     return true;
 }
 

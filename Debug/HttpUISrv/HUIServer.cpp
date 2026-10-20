@@ -14,6 +14,8 @@
 #include <iomanip>
 #include <memory>
 #include <sstream>
+#include <algorithm>
+#include <iterator>
 #include "PSocket.h"
 #include "EpollEventHandler.h"
 #include "HttpCommon.h"
@@ -146,9 +148,8 @@ std::string GetQueueDetails() {
 
     std::vector<std::string> jsonItems;
     if (pMediator != nullptr && pMediator->GetAllMQStatus(mqAttrVec) == 0) {
-        for (const auto& mq : mqAttrVec) {
-            jsonItems.push_back(BuildJsonQueue(mq));
-        }
+        std::transform(mqAttrVec.begin(), mqAttrVec.end(), std::back_inserter(jsonItems),
+                       [](const SMQueueDetails& mq) { return BuildJsonQueue(mq); });
     }
 
     std::ostringstream oss;
