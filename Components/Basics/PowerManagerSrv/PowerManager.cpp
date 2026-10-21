@@ -241,7 +241,7 @@ void PowerManager::HWPowerInit() {
         SPR_LOGD("Receive wakeup in edge: 0x%x\n", edge);
         if (edge == HW_LPM_EDGE_FALLING) {
             SPR_LOGD("Send poweroff (With reason: WakeupIn)\n");
-            SprMsg msg(SIG_ID_POWER_OFF);
+            SprMsg msg(SIG_ID_POWER_ON);
             msg.SetI32Value(STANDBY_REASON_WAKEUPIN);
             SendMsg(msg);
         }
