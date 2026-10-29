@@ -16,3 +16,14 @@ if(BUILD_TESTCASE)
         OUTPUT_VARIABLE output
     )
 endif()
+
+if(BUILD_CURL)
+    execute_process(
+        COMMAND mkdir -p ${LIBRARY_OUTPUT_PATH} ${EXECUTABLE_OUTPUT_PATH}
+        COMMAND cp -rf ${3RD_PATH}/curl/lib/${PROJECT_PLATFORM}/libcurl.a ${LIBRARY_OUTPUT_PATH}/
+        COMMAND cp -rf ${3RD_PATH}/curl/bin/${PROJECT_PLATFORM}/curl ${EXECUTABLE_OUTPUT_PATH}/curl
+        RESULT_VARIABLE result
+        OUTPUT_VARIABLE output
+    )
+endif()
+

@@ -36,19 +36,41 @@ using namespace InternalDefs;
 #define SYSTEM_PROP_PATH        "system.prop"
 #define DEFAULT_PROP_PATH       "default.prop"
 #define VENDOR_PROP_PATH        "vendor.prop"
+#define PERSIST_PROP_DIR        SYS_DATA_DIR
 #define SHARED_MEMORY_MAX_SIZE  (128 * 1024)    // 128KB
 
 static std::atomic<bool> gObjAlive(true);
 
 PropertyManager::PropertyManager(ModuleIDType id, const std::string& name)
     : SprObserverWithMQueue(id, name) {
-    mSharedMemoryPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "__property_shared_memory__";
-    mSharedPersistPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + "__property_shared_persist__";
+    std::string tmpDir = SYS_TEMP_DIR;
+    if (IsDataDirUsable()) {
+        tmpDir = PERSIST_PROP_DIR;
+        SPR_LOGD("Persist path use %s", tmpDir.c_str());
+    }
+
+    mSharedMemoryPath = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/__property_shared_memory__";
+    mSharedPersistPath = tmpDir + "/__property_shared_persist__";
 }
 
 PropertyManager::~PropertyManager() {
     gObjAlive = false;
     UnregisterDebugFuncs();
+}
+
+bool PropertyManager::IsDataDirUsable() {
+    const std::string dataDir = std::string(PERSIST_PROP_DIR);
+    if (mkdir(dataDir.c_str(), 0777) != 0 && errno != EEXIST) {
+        SPR_LOGW("Persist property dir %s is unavailable: %s", dataDir.c_str(), strerror(errno));
+        return false;
+    }
+
+    if (access(dataDir.c_str(), W_OK | X_OK) != 0) {
+        SPR_LOGW("Persist property dir %s is not writable: %s", dataDir.c_str(), strerror(errno));
+        return false;
+    }
+
+    return true;
 }
 
 PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name) {

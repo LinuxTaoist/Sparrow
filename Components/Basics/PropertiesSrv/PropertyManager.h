@@ -85,6 +85,7 @@ private:
     // Debug functions
     void DebugDumpPropertyList(const std::vector<std::string>& args);
 
+    bool IsDataDirUsable();
     int32_t DumpPropertyList();
     int32_t LoadPropertiesFromFile(const std::string& fileName);
     int32_t LoadPersistProperty();

@@ -1,11 +1,22 @@
 .repo/
 .vscode/
 Release/
-3rdParty/googletest/googletest/
-3rdParty/googletest/.gtest_build/
-3rdParty/googletest/lib/
-3rdParty/sqlite/lib/
 Components/Business/
+
+3rdParty/curl/*
+!/3rdParty/curl/include
+!/3rdParty/curl/build.sh
+!/3rdParty/curl/curl-8.10.1.tar.gz
+
+3rdParty/googletest/*
+!/3rdParty/googletest/include
+!/3rdParty/googletest/build.sh
+!/3rdParty/googletest/googletest-1.12.1.tar.gz
+
+3rdParty/sqlite/*
+!/3rdParty/sqlite/include
+!/3rdParty/sqlite/build.sh
+!/3rdParty/sqlite/sqlite-amalgamation-3450300.tar.gz
 
 Platform/*
 !/Platform/Default

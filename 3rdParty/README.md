@@ -6,6 +6,11 @@
 3. 提供对外库文件，放置对应Lib/{platform}目录下，例 `3rdParty/googletest/lib/Default/`
 4. 提供对应源码，压缩为tag.gz_{version}格式，放置第三方目录下，例 `3rdParty/googletest_v1.3.0.tag.gz`
 
+## 现有第三方
+- `sqlite`: 通过 `3rdParty/sqlite/build.sh` 自动源码交叉编译，产物为 `libsqlite3.a`。
+- `googletest`: 通过 `3rdParty/googletest/build.sh` 自动源码交叉编译，产物为 `libgtest.a`、`libgtest_main.a`。
+- `curl`: 通过 `3rdParty/curl/build.sh` 自动源码交叉编译，产物为 `libcurl.a`，使用条件为 `BUILD_CURL=ON`。
+
 ## 备注
 以下是选择仅导入第三方库和头文件加入工程编译的原因：
 - **维护编译环境的清洁**：由于不同第三方源码采用各自的编译方式，统一管理难度较大，且可能会影响现有编译环境。

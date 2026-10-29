@@ -50,6 +50,34 @@ endif()
 
 message(STATUS "sqlite 库路径: ${SQLITE_DST_LIB}")
 
+if(BUILD_CURL)
+    set(CURL_CROSS_FLAGS "-fPIC")
+    set(CURL_DST_LIB "${PROJECT_PATH}/3rdParty/curl/lib/${PROJECT_PLATFORM}")
+
+    if(NOT EXISTS "${CURL_DST_LIB}/libcurl.a")
+        message(STATUS "curl 库缺失，开始自动构建: ${PROJECT_PLATFORM}")
+        set(CURL_BUILD_ARGS
+            bash
+            ${PROJECT_PATH}/3rdParty/curl/build.sh
+            --project-path ${PROJECT_PATH}
+            --platform ${PROJECT_PLATFORM}
+            --c-compiler ${CMAKE_C_COMPILER}
+            --cxx-compiler ${CMAKE_CXX_COMPILER}
+            --c-flags "${CURL_CROSS_FLAGS}"
+            --cxx-flags "${CURL_CROSS_FLAGS}"
+        )
+        if(CMAKE_SYSROOT)
+            list(APPEND CURL_BUILD_ARGS --sysroot ${CMAKE_SYSROOT})
+        endif()
+        execute_process(COMMAND ${CURL_BUILD_ARGS} RESULT_VARIABLE curl_build_result)
+        if(NOT curl_build_result EQUAL 0)
+            message(FATAL_ERROR "curl 自动构建失败，平台: ${PROJECT_PLATFORM}")
+        endif()
+    endif()
+
+    message(STATUS "BUILD_CURL 已启用，curl 库路径: ${CURL_DST_LIB}")
+endif()
+
 if(BUILD_COVERAGE)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         message(STATUS "Coverage instrumentation enabled (Default platform)")
