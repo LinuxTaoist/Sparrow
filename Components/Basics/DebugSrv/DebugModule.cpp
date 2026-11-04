@@ -27,8 +27,8 @@ using namespace InternalDefs;
 
 #define BUFFER_SIZE 1024
 
-DebugModule::DebugModule(ModuleIDType id, const std::string& name)
-           : SprObserverWithMQueue(id, name) {
+DebugModule::DebugModule()
+           : SprObserverWithMQueue(MODULE_DEBUG, "DebugM") {
     mSleepSec = 0;
 }
 

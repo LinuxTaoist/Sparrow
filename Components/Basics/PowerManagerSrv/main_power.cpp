@@ -9,51 +9,19 @@
  *  @date       : 2023/12/21
  *---------------------------------------------------------------------------------------------------------------------
  */
-#include <signal.h>
 #include "SprLog.h"
-#include "GeneralUtils.h"
-#include "SprDebugNode.h"
 #include "CommonMacros.h"
-#include "SprProcPrepare.h"
 #include "PowerManager.h"
 #include "PowerManagerHub.h"
-#include "BacktraceMacros.h"
-#include "SprEpollSchedule.h"
-
-using namespace InternalDefs;
+#include "SprMainInterface.h"
 
 #define LOG_TAG "MainPower"
 
-int main(int argc, const char* argv[]) {
-    GeneralUtils::InitSignalHandler([](int signum) {
-        SPR_LOGI("Receive signal: %d!\n", signum);
-
-        switch (signum) {
-            case MAIN_EXIT_SIGNUM:
-                SprEpollSchedule::GetInstance()->ExitLoop();
-                break;
-            case SIGSEGV:
-            case SIGBUS:
-            case SIGILL:
-            case SIGFPE:
-            case SIGQUIT:
-                PRINT_BACKTRACE(signum, 20);
-                SprEpollSchedule::GetInstance()->ExitLoop();
-                exit(EXIT_FAILURE);
-                break;
-            default:
-                break;
-        }
-    });
-
+SPR_ENTRY(
     SPR_LOGI("Main start!\n");
-    PowerManager thePowerManager(MODULE_POWERM, "PowerM");
-    PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
-
-    SprProcPrepare::GetInstance()->Init(SRV_NAME_POWER_MANAGER);
+    PowerManager thePowerManager;
     thePowerManager.Initialize();
+
+    PowerManagerHub thePowerManagerHub(SRV_NAME_POWER_MANAGER, &thePowerManager);
     thePowerManagerHub.InitializeHub();
-    SprEpollSchedule::GetInstance()->EpollLoop();
-    SPR_LOGI("Exit main!\n");
-    return 0;
-}
+);

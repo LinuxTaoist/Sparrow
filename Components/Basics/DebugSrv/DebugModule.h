@@ -18,7 +18,7 @@
 
 class DebugModule : public SprObserverWithMQueue {
 public:
-    DebugModule(ModuleIDType id, const std::string& name);
+    DebugModule();
     ~DebugModule();
 
 protected:

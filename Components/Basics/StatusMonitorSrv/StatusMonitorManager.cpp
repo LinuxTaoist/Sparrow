@@ -26,8 +26,8 @@ using namespace InternalDefs;
 #define OWNER_STATUSMONITOR         "StatusMonitorManager"
 #define STATUS_EVENT_NUM_LIMIT      100
 
-StatusMonitorManager::StatusMonitorManager(ModuleIDType id, const std::string& name)
-            : SprObserverWithMQueue(id, name), mErasedNum(0) {
+StatusMonitorManager::StatusMonitorManager()
+            : SprObserverWithMQueue(MODULE_STATUS_MONITOR, "StatusM"), mErasedNum(0) {
 }
 
 StatusMonitorManager::~StatusMonitorManager() {

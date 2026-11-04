@@ -159,8 +159,8 @@ PowerManager::mStateTable = {
     }
 };
 
-PowerManager::PowerManager(ModuleIDType id, const std::string& name)
-                        : SprObserverWithMQueue(id, name),
+PowerManager::PowerManager()
+                        : SprObserverWithMQueue(MODULE_POWERM, "PowerM"),
                             mPreStandbyResponseTimer(false),
                             mStandbyTimerCnt(0),
                             mCurNotifyStartupEvent(SIG_ID_ANY),

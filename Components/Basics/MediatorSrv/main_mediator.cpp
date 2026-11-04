@@ -47,9 +47,10 @@ int main(int argc, const char* argv[]) {
     SprMediator *pMedObj = SprMediator::GetInstance();
     SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pMedObj);
 
-    SprProcPrepare::GetInstance()->Init(SRV_NAME_MEDIATOR);
     theMediatorHub.InitializeHub();
     pMedObj->Init();
+
+    SprProcPrepare::GetInstance()->Init(SRV_NAME_MEDIATOR);
     EpollEventHandler::GetInstance()->EpollLoop();
     SPR_LOGI("Exit main!\n");
     return 0;

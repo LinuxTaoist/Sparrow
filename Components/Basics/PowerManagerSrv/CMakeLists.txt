@@ -8,9 +8,10 @@ set_target_properties       (BinPowerManagerSrv PROPERTIES OUTPUT_NAME          
 target_include_directories  (BinPowerManagerSrv PRIVATE ${PROJECT_PATH}/Util
                                                         ${PROJECT_PATH}/Core
                                                         ${PROJECT_PATH}/3rdAdapter
+                                                        ${PROJECT_PATH}/PrivateAPIs
                                                         ${PROJECT_PATH}/PrivateAPIs/Event
                                                         ${PROJECT_PATH}/PrivateAPIs/Binder
                                                         ${PROJECT_PATH}/Hardware/Common/inc
                                                         ${PROJECT_PATH}/UtilModules/EpollEventHandler)
-target_link_libraries       (BinPowerManagerSrv pthread LibSprCore LibSprHal LibBinder)
-add_dependencies            (BinPowerManagerSrv LibSprCore LibBinder)
+target_link_libraries       (BinPowerManagerSrv pthread LibSprCore LibSprMain LibSprHal LibBinder)
+add_dependencies            (BinPowerManagerSrv LibSprCore LibSprMain LibBinder)

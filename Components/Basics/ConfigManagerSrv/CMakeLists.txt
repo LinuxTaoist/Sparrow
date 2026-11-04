@@ -6,8 +6,9 @@ add_executable              (BinConfigManagerSrv ${SRC_CONFIG_SRV_PATH})
 target_include_directories  (BinConfigManagerSrv PRIVATE ${PROJECT_PATH}/Util
                                                          ${PROJECT_PATH}/Core
                                                          ${PROJECT_PATH}/3rdAdapter
+                                                         ${PROJECT_PATH}/PrivateAPIs
                                                          ${PROJECT_PATH}/PrivateAPIs/Binder
                                                          ${PROJECT_PATH}/3rdParty/sqlite/include)
 set_target_properties       (BinConfigManagerSrv PROPERTIES OUTPUT_NAME "configmanagersrv")
-target_link_libraries       (BinConfigManagerSrv pthread rt LibSprCore LibBinder LibSqliteAdapter dl)
-add_dependencies            (BinConfigManagerSrv LibSprCore LibBinder LibSqliteAdapter)
+target_link_libraries       (BinConfigManagerSrv pthread rt LibSprCore LibSprMain LibBinder LibSqliteAdapter dl)
+add_dependencies            (BinConfigManagerSrv LibSprCore LibSprMain LibBinder LibSqliteAdapter)

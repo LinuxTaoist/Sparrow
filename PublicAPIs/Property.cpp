@@ -36,7 +36,7 @@ static std::shared_ptr<Parcel> pRspParcel = nullptr;
 
 Property::Property() {
     mEnable = true;
-    bool ret = BindInterface::GetInstance()->InitializeClientBinder("property_service", pReqParcel, pRspParcel);
+    bool ret = BindInterface::GetInstance()->InitializeClientBinder(SRV_NAME_PROPERTY, pReqParcel, pRspParcel);
     if (!ret || !pReqParcel || !pRspParcel) {
         mEnable = false;
     }

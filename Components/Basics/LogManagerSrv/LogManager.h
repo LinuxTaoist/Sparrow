@@ -19,6 +19,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <vector>
 #include <semaphore.h>
 #include "CoreTypeDefs.h"
 #include "LogSink.h"
@@ -30,6 +31,7 @@ class LogManager {
 public:
     LogManager();
     ~LogManager();
+    int32_t Init();
     int32_t MainLoop();
     static int32_t StopWork();
 
@@ -39,7 +41,6 @@ private:
     LogManager(LogManager&&) = delete;
     LogManager& operator = (LogManager&&) = delete;
 
-    int32_t EnvReady(const std::string& srvName);
     int32_t LoadConfig(const std::string& path);
     int32_t TryReadRecord(std::string& moduleName, std::string& data, int32_t& level);
     int32_t Write(const std::string& moduleName, const std::string& data, int32_t level);
@@ -47,8 +48,13 @@ private:
     std::string GetConfigPath();
     std::string GetSinkTarget(const LogConfiger::LogModuleAttrs& attrs) const;
 
+    void RegisterDebugFuncs();
+    void UnregisterDebugFuncs();
+    void DebugWriteLog(const std::vector<std::string>& args);
+
 private:
     static bool     mRunning;
+    std::string     mModuleName;
     uint32_t        mFrameLength;
     sem_t*          mReadSem;
     LogConfiger     mConfiger;

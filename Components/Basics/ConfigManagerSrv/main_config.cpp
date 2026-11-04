@@ -9,53 +9,19 @@
  *  @date       : 2026/06/20
  *---------------------------------------------------------------------------------------------------------------------
  */
-#include <signal.h>
 #include "SprLog.h"
-#include "GeneralUtils.h"
 #include "CommonMacros.h"
-#include "CoreTypeDefs.h"
-#include "SprProcPrepare.h"
-#include "BacktraceMacros.h"
 #include "ConfigManager.h"
 #include "ConfigManagerHub.h"
-
-using namespace InternalDefs;
+#include "SprMainInterface.h"
 
 #define LOG_TAG "MainConfig"
 
-int main(int argc, char*  argv[]) {
-    GeneralUtils::InitSignalHandler([](int signum) {
-        SPR_LOGI("Receive signal: %d!\n", signum);
-        switch (signum) {
-            case MAIN_EXIT_SIGNUM:
-                ConfigManager::StopWork();
-                break;
-            case SIGSEGV:
-            case SIGBUS:
-            case SIGILL:
-            case SIGFPE:
-            case SIGQUIT:
-                PRINT_BACKTRACE(signum, 20);
-                ConfigManager::StopWork();
-                exit(EXIT_FAILURE);
-                break;
-            default:
-                break;
-        }
-    });
-
+SPR_ENTRY(
     SPR_LOGI("Main start!\n");
     ConfigManager theConfigManager;
+    theConfigManager.Init();
+
     ConfigManagerHub theConfigManagerHub(SRV_NAME_CONFIG_MANAGER, &theConfigManager);
-
-    SprProcPrepare::GetInstance()->Init(SRV_NAME_CONFIG_MANAGER);
-    if (theConfigManager.Initialize() != 0) {
-        SPR_LOGE("ConfigManager initialize failed!\n");
-        return -1;
-    }
-
     theConfigManagerHub.InitializeHub();
-    theConfigManager.MainLoop();
-    SPR_LOGI("Exit main!\n");
-    return 0;
-}
+);

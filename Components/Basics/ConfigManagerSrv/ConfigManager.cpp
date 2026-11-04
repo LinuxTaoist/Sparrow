@@ -10,10 +10,12 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <unistd.h>
+#include <sys/stat.h>
 #include <fstream>
 #include <sstream>
 #include <vector>
 #include <string.h>
+#include <errno.h>
 #include "SprLog.h"
 #include "CommonMacros.h"
 #include "CoreTypeDefs.h"
@@ -25,8 +27,6 @@
 using namespace InternalDefs;
 
 #define LOG_TAG "ConfigM"
-
-std::atomic<bool> ConfigManager::mRunning(true);
 
 static const char* CONFIG_DB_PATH = "/tmp/config_manager.db";
 static const char* CONFIG_BACKUP_PATH = "/tmp/config_manager.db.bak";
@@ -63,6 +63,36 @@ static bool ParseSeedValue(const std::string& valueText,
     return !nameSpace.empty() && !key.empty();
 }
 
+static bool EnsureParentDirectory(const std::string& filePath) {
+    if (filePath.empty()) {
+        return true;
+    }
+
+    std::string dirPath = filePath;
+    const size_t pos = dirPath.find_last_of('/');
+    if (pos == std::string::npos) {
+        return true;
+    }
+    dirPath = dirPath.substr(0, pos);
+    if (dirPath.empty() || dirPath == "/") {
+        return true;
+    }
+    if (access(dirPath.c_str(), F_OK) == 0) {
+        return true;
+    }
+
+    if (!EnsureParentDirectory(dirPath)) {
+        return false;
+    }
+
+    if (mkdir(dirPath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH) == 0 || errno == EEXIST) {
+        return true;
+    }
+
+    SPR_LOGW("Create dir failed: %s (%s)", dirPath.c_str(), strerror(errno));
+    return false;
+}
+
 ConfigManager::ConfigManager()
     : mStore(nullptr), mDbPath(CONFIG_DB_PATH), mBackupPath(CONFIG_BACKUP_PATH) {
     SprProcInfo* pProcInfo = SprProcInfo::GetInstance();
@@ -77,8 +107,10 @@ ConfigManager::ConfigManager()
 ConfigManager::~ConfigManager() {
 }
 
-int32_t ConfigManager::Initialize() {
+int32_t ConfigManager::Init() {
     NONZERO_CHECK_RET(LoadCfgFile());
+    NONTRUE_CHECK_ERR(EnsureParentDirectory(mDbPath), -1);
+    NONTRUE_CHECK_ERR(EnsureParentDirectory(mBackupPath), -1);
 
     mStore.reset(new (std::nothrow) ConfigStore(mDbPath));
     POINTER_CHECK_ERR(mStore, -1);
@@ -170,20 +202,6 @@ int32_t ConfigManager::ApplySeedItems() {
         }
     }
 
-    return 0;
-}
-
-int32_t ConfigManager::MainLoop() {
-    mRunning = true;
-    while (mRunning) {
-        usleep(100 * 1000);
-    }
-
-    return 0;
-}
-
-int32_t ConfigManager::StopWork() {
-    mRunning = false;
     return 0;
 }
 

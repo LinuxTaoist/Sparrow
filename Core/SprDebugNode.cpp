@@ -211,9 +211,10 @@ void SprDebugNode::DebugDumpProcInfo(const std::vector<std::string>& args) {
     SPR_LOGI("==============================================================================\n");
     SPR_LOGI("\n");
     SPR_LOGI("  LogLevel  : %s(%d)\n", levelStr.c_str(), level);
+    SPR_LOGI("  BootTime  : %s\n", pObj->GetBootTimeString().c_str());
     SPR_LOGI("  RunTime   : %s\n", pObj->GetRunTimeString().c_str());
     SPR_LOGI("  DebugPath : %s\n", pObj->GetDebugPath().c_str());
-    SPR_LOGI("  RunPath   : %s\n", pObj->GetRunRootPath().c_str());
+    SPR_LOGI("  RunPath   : %s\n", pObj->GetRunExePath().c_str());
     SPR_LOGI("\n");
     SPR_LOGI("==============================================================================\n");
 }

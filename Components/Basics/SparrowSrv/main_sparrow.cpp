@@ -9,42 +9,13 @@
  *  @date       : 2023/11/25
  *---------------------------------------------------------------------------------------------------------------------
  */
-#include <signal.h>
 #include "SprLog.h"
 #include "SprSystem.h"
-#include "GeneralUtils.h"
-#include "CommonMacros.h"
-#include "CoreTypeDefs.h"
-#include "BacktraceMacros.h"
-#include "SprEpollSchedule.h"
+#include "SprMainInterface.h"
 
 #define LOG_TAG "MainSparrow"
 
-int main(int argc, const char* argv[]) {
-    GeneralUtils::InitSignalHandler([](int signum) {
-        SPR_LOGI("Receive signal: %d!\n", signum);
-
-        switch (signum) {
-            case MAIN_EXIT_SIGNUM:
-                SprEpollSchedule::GetInstance()->ExitLoop();
-                break;
-            case SIGSEGV:
-            case SIGBUS:
-            case SIGILL:
-            case SIGFPE:
-            case SIGQUIT:
-                PRINT_BACKTRACE(signum, 20);
-                SprEpollSchedule::GetInstance()->ExitLoop();
-                exit(EXIT_FAILURE);
-                break;
-            default:
-                break;
-        }
-    });
-
+SPR_ENTRY(
     SPR_LOGI("Main start!\n");
     SprSystem::GetInstance()->Init();
-    SprEpollSchedule::GetInstance()->EpollLoop();
-    SPR_LOGI("Main exit!\n");
-    return 0;
-}
+);

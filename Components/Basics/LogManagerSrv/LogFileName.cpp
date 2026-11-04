@@ -120,13 +120,17 @@ std::string LogFileName::GetStartTimeText() const {
     std::string startTime = "000000000000";
     const time_t currentTime = time(nullptr);
     struct tm localTime = {};
-    if (localtime_r(&currentTime, &localTime) != nullptr
-        && localTime.tm_year >= 120) {
-        char startTimeBuf[32] = {};
-        if (strftime(startTimeBuf, sizeof(startTimeBuf), "%y%m%d%H%M%S", &localTime) != 0) {
-            startTime = startTimeBuf;
-        }
+    struct tm* pTime = localtime_r(&currentTime, &localTime);
+    if (!pTime) {
+        return startTime;
     }
+
+    char startTimeBuf[32] = {};
+    int32_t ret = strftime(startTimeBuf, sizeof(startTimeBuf), "%y%m%d%H%M%S", &localTime);
+    if (ret > 0) {
+        startTime = startTimeBuf;
+    }
+
     return startTime;
 }
 

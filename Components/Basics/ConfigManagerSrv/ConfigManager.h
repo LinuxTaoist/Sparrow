@@ -26,10 +26,7 @@ public:
     ConfigManager();
     ~ConfigManager();
 
-    int32_t Initialize();
-    int32_t MainLoop();
-    static int32_t StopWork();
-
+    int32_t Init();
     int32_t SetValue(const std::string& nameSpace, const std::string& key,
                      const std::string& value, int32_t scope, int32_t& revision);
     int32_t GetValue(const std::string& nameSpace, const std::string& key,

@@ -41,8 +41,8 @@ using namespace InternalDefs;
 
 static std::atomic<bool> gObjAlive(true);
 
-PropertyManager::PropertyManager(ModuleIDType id, const std::string& name)
-    : SprObserverWithMQueue(id, name) {
+PropertyManager::PropertyManager()
+    : SprObserverWithMQueue(MODULE_PROPERTYM, "ProperM") {
     std::string tmpDir = SYS_TEMP_DIR;
     if (IsDataDirUsable()) {
         tmpDir = PERSIST_PROP_DIR;
@@ -73,12 +73,12 @@ bool PropertyManager::IsDataDirUsable() {
     return true;
 }
 
-PropertyManager* PropertyManager::GetInstance(ModuleIDType id, const std::string& name) {
+PropertyManager* PropertyManager::GetInstance() {
     if (!gObjAlive) {
         return nullptr;
     }
 
-    static PropertyManager instance(id, name);
+    static PropertyManager instance;
     return &instance;
 }
 

@@ -25,6 +25,7 @@ public:
     std::string GetRunTimeString();
     std::string GetProcName();
     std::string GetDebugPath();
+    std::string GetRunExePath();
     std::string GetRunRootPath();
     std::string GetRunEtcPath();
 

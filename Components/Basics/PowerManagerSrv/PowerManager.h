@@ -56,7 +56,7 @@ struct StandbyDetail {
 
 class PowerManager : public SprObserverWithMQueue {
 public:
-    PowerManager(ModuleIDType id, const std::string& name);
+    PowerManager();
     virtual ~PowerManager();
 
     int32_t Init() override;

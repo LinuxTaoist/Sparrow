@@ -32,7 +32,6 @@ private:
     SprSystem();
     ~SprSystem();
     void InitEnv();
-    void InitOthers();
     void LoadReleaseInformation();
 
 private:

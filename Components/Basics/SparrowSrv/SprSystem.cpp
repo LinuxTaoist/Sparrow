@@ -54,10 +54,6 @@ void SprSystem::InitEnv() {
     LoadReleaseInformation();
 }
 
-void SprSystem::InitOthers() {
-    SprProcPrepare::GetInstance()->Init(SRV_NAME_SPARROW);
-}
-
 void SprSystem::LoadReleaseInformation() {
     std::string projectInfo     = PROJECT_INFO;
     std::string cxxStandard     = CXX_STANDARD;
@@ -113,5 +109,4 @@ void SprSystem::Init() {
 
     SprContext ctx;
     mPluginMgr.Init();
-    InitOthers();
 }

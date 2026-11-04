@@ -22,7 +22,7 @@
 
 class StatusMonitorManager : public SprObserverWithMQueue {
 public:
-    StatusMonitorManager(ModuleIDType id, const std::string& name);
+    StatusMonitorManager();
     ~StatusMonitorManager();
 
     int32_t GetStatusEventsWithFilter(int32_t moduleID, int32_t level, int32_t errCode, std::vector<StatusEvent>& events);

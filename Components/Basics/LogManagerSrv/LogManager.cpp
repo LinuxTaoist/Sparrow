@@ -21,6 +21,7 @@
 #include <vector>
 #include <algorithm>
 #include <sstream>
+#include <functional>
 #include <time.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -35,6 +36,8 @@
 #include "GeneralUtils.h"
 #include "LogConfigKeys.h"
 #include "LogManager.h"
+#include "SprDebugNode.h"
+#include "SprProcInfo.h"
 
 using namespace std;
 using namespace GeneralUtils;
@@ -90,26 +93,21 @@ static int32_t WaitSemTimeout(sem_t* sem, int32_t timeoutMs) {
     }
 }
 
-LogManager::LogManager() : mFrameLength(1024) {
+LogManager::LogManager() : mModuleName("LOGM"), mFrameLength(1024) {
     mReadSem = sem_open(LOG_WRITE_SEMAPHORE_NAME, O_CREAT, 0600, 1);
     LoadConfig(GetConfigPath());
     mCache.reset(new SharedRingBuffer(LOG_CACHE_MEMORY_PATH, LOG_CACHE_MEMORY_SIZE));
-    EnvReady(SRV_NAME_LOG);
 }
 
 LogManager::~LogManager() {
+    UnregisterDebugFuncs();
     if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
         sem_close(mReadSem);
     }
 }
 
-int32_t LogManager::EnvReady(const std::string& srvName) {
-    std::string node = DEFAULT_DEBUG_ROOT_DIR + std::string("/") + srvName;
-    int32_t fd = creat(node.c_str(), 0644);
-    if (fd != -1) {
-        close(fd);
-    }
-
+int32_t LogManager::Init() {
+    RegisterDebugFuncs();
     return 0;
 }
 
@@ -264,6 +262,7 @@ int32_t LogManager::TryReadRecord(std::string& moduleName,
     if (mReadSem != SEM_FAILED && mReadSem != nullptr) {
         sem_post(mReadSem);
     }
+
     return -1;
 }
 
@@ -338,4 +337,58 @@ int32_t LogManager::MainLoop() {
 
     Flush(true);
     return 0;
+}
+
+void LogManager::RegisterDebugFuncs() {
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->RegisterCmd(mModuleName, "WriteLog", "Write log", std::bind(&LogManager::DebugWriteLog, this, std::placeholders::_1));
+}
+
+void LogManager::UnregisterDebugFuncs() {
+    SprDebugNode* p = SprDebugNode::GetInstance();
+    if (!p) {
+        SPR_LOGE("p is nullptr!\n");
+        return;
+    }
+
+    p->UnregisterCmd(mModuleName);
+}
+
+// echo "01-06 05:34:03.034   7264 OtaManager   D:  284 Init ota manager" > /tmp/logmanagersrv
+void LogManager::DebugWriteLog(const std::vector<std::string>& args) {
+    if (args.empty()) {
+        return;
+    }
+
+    std::string message;
+    for (size_t index = 0; index < args.size(); ++index) {
+        if (!message.empty()) {
+            message.push_back(' ');
+        }
+        message += args[index];
+    }
+
+    if (message.empty()) {
+        return;
+    }
+
+    int32_t level = InternalDefs::LOG_LEVEL_INFO;
+    if (message.find(" E:") != std::string::npos || message.find("ERROR") != std::string::npos) {
+        level = InternalDefs::LOG_LEVEL_ERROR;
+    } else if (message.find(" W:") != std::string::npos || message.find("WARN") != std::string::npos) {
+        level = InternalDefs::LOG_LEVEL_WARN;
+    } else if (message.find(" D:") != std::string::npos || message.find("DEBUG") != std::string::npos) {
+        level = InternalDefs::LOG_LEVEL_DEBUG;
+    } else if (message.find(" I:") != std::string::npos || message.find("INFO") != std::string::npos) {
+        level = InternalDefs::LOG_LEVEL_INFO;
+    }
+
+    if (Write(mModuleName, message, level) != 0) {
+        SPR_LOGE("Write log to file failed, module=%s\n", mModuleName.c_str());
+    }
 }

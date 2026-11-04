@@ -13,8 +13,9 @@ target_include_directories  (BinMainSpr PRIVATE ${TIME_MANAGER_PATH}
                                                 ${PROJECT_PATH}/Util
                                                 ${PROJECT_PATH}/Core
                                                 ${PROJECT_PATH}/3rdAdapter
+                                                ${PROJECT_PATH}/PrivateAPIs
                                                 ${PROJECT_PATH}/UtilModules/EpollEventHandler)
 
 set_target_properties       (BinMainSpr PROPERTIES OUTPUT_NAME "sparrowsrv")
-target_link_libraries       (BinMainSpr LibSprCore dl rt pthread)
-add_dependencies            (BinMainSpr LibSprCore)
+target_link_libraries       (BinMainSpr LibSprCore LibSprMain dl rt pthread)
+add_dependencies            (BinMainSpr LibSprCore LibSprMain)

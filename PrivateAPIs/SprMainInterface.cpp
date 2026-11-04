@@ -25,6 +25,9 @@
 void (*pSprUserEntry)() = nullptr;
 
 void SprRunEventLoop() {
+    // Init proc information after business finished
+    std::string proc = SprProcInfo::GetInstance()->GetProcName();
+    SprProcPrepare::GetInstance()->Init(proc);
     SprEpollSchedule::GetInstance()->EpollLoop();
 }
 
@@ -56,8 +59,6 @@ int main(int argc, const char* argv[]) {
         }
     });
 
-    std::string proc = SprProcInfo::GetInstance()->GetProcName();
-    SprProcPrepare::GetInstance()->Init(proc);
     pSprUserEntry();
     SPR_LOGI("Main exit!\n");
     return 0;

@@ -25,7 +25,7 @@ public:
      * @return PropertyManager*
      *
      */
-    static PropertyManager* GetInstance(ModuleIDType id, const std::string& name);
+    static PropertyManager* GetInstance();
 
     /**
      * @brief SetProperty
@@ -65,7 +65,7 @@ public:
     int32_t DumpProperties();
 
 private:
-    PropertyManager(ModuleIDType id, const std::string& name);
+    PropertyManager();
     ~PropertyManager();
     PropertyManager(const PropertyManager&) = delete;
     PropertyManager& operator=(const PropertyManager&) = delete;

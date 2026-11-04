@@ -23,15 +23,6 @@ set(ETC_OUTPUT_PATH         ${OUTPUT_PATH}/Etc)
 set(LIBRARY_OUTPUT_PATH     ${OUTPUT_PATH}/Lib)
 set(EXECUTABLE_OUTPUT_PATH  ${OUTPUT_PATH}/Bin)
 
-## 打印所有开关状态
-message(STATUS "BUILD_DEBUG    = ${BUILD_DEBUG}")
-message(STATUS "BUILD_TESTCASE = ${BUILD_TESTCASE}")
-message(STATUS "BUILD_CURL     = ${BUILD_CURL}")
-message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
-message(STATUS "BUILD_COVERAGE = ${BUILD_COVERAGE}")
-message(STATUS "BUILD_ASAN     = ${BUILD_ASAN}")
-message(STATUS "BUILD_STRIP    = ${BUILD_STRIP}")
-
 ## 链接库路径
 link_directories(${OUTPUT_PATH}/Lib)
 
@@ -62,6 +53,22 @@ message("Build Platform : ${CMAKE_SYSTEM_NAME} ${CMAKE_SYSTEM_VERSION} ${CMAKE_S
 message("Module Config  : ${MODULE_CONFIG_VERSION}")
 message("OUTPUT_PATH    : ${OUTPUT_PATH}")
 message("======================================================================")
+
+## 打印编译开关
+message(STATUS "[Build Options]")
+message(STATUS "BUILD_DEBUG    = ${BUILD_DEBUG}")
+message(STATUS "BUILD_TESTCASE = ${BUILD_TESTCASE}")
+message(STATUS "BUILD_CURL     = ${BUILD_CURL}")
+message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
+message(STATUS "BUILD_COVERAGE = ${BUILD_COVERAGE}")
+message(STATUS "BUILD_ASAN     = ${BUILD_ASAN}")
+message(STATUS "BUILD_STRIP    = ${BUILD_STRIP}")
+
+## 版本构建说明文件
+set(VERSION_TXT "${OUTPUT_PATH}/Version")
+file(WRITE "${VERSION_TXT}" "")
+file(APPEND "${VERSION_TXT}" "Version    : ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}-${VERSION_PRELEASE}\n")
+file(APPEND "${VERSION_TXT}" "Build Date : ${CURRENT_TIME}\n")
 
 add_definitions(-DPROJECT_INFO="${PROJECT_NAME} ${VERSION_MAJOR}.${VERSION_MINOR}.${VERSION_REVISION}-${VERSION_PRELEASE}")
 add_definitions(-DCXX_STANDARD="${CMAKE_CXX_STANDARD}")
