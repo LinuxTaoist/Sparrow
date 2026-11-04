@@ -35,7 +35,12 @@ BinderHub::~BinderHub() {
 int32_t BinderHub::InitializeHub() {
     int32_t ret = -1;
     if (!mBindThread.joinable()) {
-        mRun = true;
+        bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSrvName, mReqParcel, mRspParcel);
+        if (!rs) {
+            SPR_LOGE("Binder init failed!");
+            return -1;
+        }
+
         mBindThread = std::thread([this]() {
             BinderLoop();
         });
@@ -56,12 +61,7 @@ int32_t BinderHub::DestroyHub() {
 }
 
 void BinderHub::BinderLoop() {
-    bool rs = BindInterface::GetInstance()->InitializeServiceBinder(mSrvName, mReqParcel, mRspParcel);
-    if (!rs) {
-        SPR_LOGE("Binder init failed!");
-        return;
-    }
-
+    mRun = true;
     SPR_LOGD("Start %s binder loop!", mSrvName.c_str());
     do {
         int32_t cmd = 0;
