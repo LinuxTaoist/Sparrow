@@ -27,6 +27,8 @@ void PowerManagerWatch::Usage() {
             "\n"
             "    1. PowerOn \n"
             "    2. PowerOff \n"
+            "    3. Register callback\n"
+            "    4. Unregister callback\n"
             "\n"
             "    [Q] Quit\n"
             "\n"
@@ -41,6 +43,16 @@ void PowerManagerWatch::Menu(char input) {
         }
         case '2': {
             PowerManagerInterface::GetInstance()->PowerOff();
+            break;
+        }
+        case '3': {
+            PowerManagerInterface::GetInstance()->RegisterCallback([](int32_t eventID, void* data, int32_t size){
+                SPR_LOG("Recv eventId: %d\n", eventID);
+            });
+            break;
+        }
+        case '4': {
+            PowerManagerInterface::GetInstance()->UnRegisterCallback();
             break;
         }
         case 'q': {

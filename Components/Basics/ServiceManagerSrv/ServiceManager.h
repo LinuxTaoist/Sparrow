@@ -61,6 +61,8 @@ private:
     int32_t IsValidExecFile(const std::string& exePath);
     int32_t StartAllExes();
     int32_t StartOne(SrvInfo& service);
+    int32_t WaitServiceNode(const SrvInfo& service);
+    int32_t ClearServiceNode(const SrvInfo& service);
     int32_t ForkExec(const std::string& exePath, const std::vector<std::string>& arguments);
     int32_t StopOne(SrvInfo& service);
     int32_t StopAll();

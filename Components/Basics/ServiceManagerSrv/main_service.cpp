@@ -9,6 +9,7 @@
  *  @date       : 2024/03/26
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 #include "GeneralUtils.h"
@@ -35,7 +36,10 @@ int main(int argc, char* argv[]) {
     });
 
     ServiceManager theServiceManager;
-    theServiceManager.Init();
+    int32_t ret = theServiceManager.Init();
+    if (ret != 0) {
+        return EXIT_FAILURE;
+    }
     theServiceManager.WorkLoop();
     SPR_LOGI("Main exit!\n");
     return 0;

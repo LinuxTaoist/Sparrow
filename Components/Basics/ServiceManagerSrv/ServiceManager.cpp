@@ -31,9 +31,10 @@ using namespace GeneralUtils;
 #define SPR_LOGW(fmt, args...) printf("%s %6d %-12s W: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 #define SPR_LOGE(fmt, args...) printf("%s %6d %-12s E: %4d " fmt, GetCurTimeStr().c_str(), getpid(), "SrvMgr", __LINE__, ##args)
 
-#define SRV_GRACEFUL_STOP_POLL_CNT       50
-#define SRV_RESTART_DELAY_US             500000   // 500ms delay before restart to avoid flooding
-#define SRV_DEPENDENCY_START_GAP_US      100000   // 100ms
+#define SRV_GRACEFUL_STOP_POLL_CNT      50
+#define SRV_RESTART_DELAY_US            500000      // 500ms delay before restart to avoid flooding
+#define SERVICE_NODE_TIMEOUT_US         10000000    // 10s timeout for service ready node
+#define SERVICE_NODE_POLL_US            50000       // 50ms poll interval for service ready node
 #define INIT_CONFIGURE_FILE             "init.conf"
 
 bool ServiceManager::mRunning = false;
@@ -67,7 +68,7 @@ int32_t ServiceManager::Init() {
 
     ret = StartAllExes();
     if (ret < 0) {
-        SPR_LOGE("Start services failed!\n");
+        SPR_LOGE("Start all services failed!\n");
         return -1;
     }
 
@@ -153,22 +154,44 @@ int32_t ServiceManager::InitHeartbeatMonitor() {
 }
 
 int32_t ServiceManager::StartAllExes() {
-    bool waitPrev = false;
-    for (SrvInfo& service : mSrvs) {
-        if (service.dependency && waitPrev) {
-            usleep(SRV_DEPENDENCY_START_GAP_US);
+    for (size_t i = 0; i < mSrvs.size(); ++i) {
+        SrvInfo& service = mSrvs[i];
+        if (service.dependency && i > 0) {
+            WaitServiceNode(mSrvs[i - 1]);
         }
 
         int32_t ret = StartOne(service);
-        if (ret == 0) {
-            waitPrev = service.dependency;
-        } else {
+        if (ret != 0) {
             SPR_LOGE("Start %s failed!\n", service.path.c_str());
         }
     }
 
     SPR_LOGI("Started %zu services\n", mSrvs.size());
     return (int32_t)mSrvs.size();
+}
+
+int32_t ServiceManager::WaitServiceNode(const SrvInfo& service) {
+    std::string node = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + service.name;
+    for (int32_t i = 0; i < SERVICE_NODE_TIMEOUT_US / SERVICE_NODE_POLL_US; ++i) {
+        if (access(node.c_str(), F_OK) == 0) {
+            return 0;
+        }
+        usleep(SERVICE_NODE_POLL_US);
+    }
+
+    SPR_LOGW("Wait %s ready timeout! node = %s, timeout = %d us\n",
+             service.name.c_str(), node.c_str(), SERVICE_NODE_TIMEOUT_US);
+    return 0;
+}
+
+int32_t ServiceManager::ClearServiceNode(const SrvInfo& service) {
+    std::string node = std::string(DEFAULT_DEBUG_ROOT_DIR) + "/" + service.name;
+    int32_t ret = unlink(node.c_str());
+    if (ret != 0 && errno != ENOENT) {
+        SPR_LOGE("Clear ready node %s failed! (%s)\n", node.c_str(), strerror(errno));
+        return -1;
+    }
+    return 0;
 }
 
 int32_t ServiceManager::ForkExec(const std::string& exePath,
@@ -233,6 +256,11 @@ int32_t ServiceManager::StartOne(SrvInfo& service) {
     if (ret < 0) {
         SPR_LOGE("Exec %s is invalid!\n", service.path.c_str());
         return -1;
+    }
+
+    ret = ClearServiceNode(service);
+    if (ret != 0) {
+        return ret;
     }
 
     int32_t pid = ForkExec(service.path, service.arguments);
@@ -322,6 +350,11 @@ int32_t ServiceManager::TryRestart(size_t idx) {
     }
 
     SPR_LOGI("Restarting %s (attempt %d)\n", service.path.c_str(), service.restartCount + 1);
+    int32_t ret = ClearServiceNode(service);
+    if (ret != 0) {
+        return ret;
+    }
+
     int32_t pid = ForkExec(service.path, service.arguments);
     if (pid == -1) {
         SPR_LOGE("ForkExec %s failed\n", service.path.c_str());
