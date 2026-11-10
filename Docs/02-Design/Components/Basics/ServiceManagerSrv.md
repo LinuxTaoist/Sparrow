@@ -20,6 +20,7 @@ ServiceManagerSrv 是 Sparrow 的服务管理进程，用于：
 logmanagersrv
 bindermanagersrv    [d]
 mediatorsrv         [d] [argv: --heartbeat=on]
+timemanagersrv      [d] [argv: --heartbeat=on]
 propertiessrv       [d] [argv: --heartbeat=on]
 configmanagersrv    [d] [argv: --heartbeat=on]
 powermanagersrv     [d] [argv: --heartbeat=on]
@@ -32,6 +33,8 @@ statusmonitorsrv        [argv: --heartbeat=on]
 - `[argv: ...]` 用于传递服务启动参数。
 - `[argv: --heartbeat=on]` 开启心跳监控。
 - 支持空行和 `#` 注释。
+
+`timemanagersrv` 提供全局消息定时器和系统校时，位于消息中介之后、电源服务之前；`sparrowsrv` 负责业务插件装配，位于所需基础服务之后。平台同名配置优先于通用配置。
 
 ### 3.2 启动服务管理进程
 

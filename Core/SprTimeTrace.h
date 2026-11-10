@@ -18,7 +18,7 @@
 #include <time.h>
 
 typedef struct {
-    int32_t         eId;
+    int32_t     eId;
     timespec    eTimeStamp;
     std::string eText;
 } EntryInfo;

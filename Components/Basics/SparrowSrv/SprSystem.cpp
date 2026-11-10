@@ -10,25 +10,15 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <atomic>
-#include <memory>
 #include <fstream>
 #include "SprLog.h"
 #include "SprContext.h"
 #include "CommonMacros.h"
 #include "SprSystem.h"
-#include "SprTimeTrace.h"
-#include "CoreTypeDefs.h"
-#include "TimeManager.h"
-#include "SprSystemTimer.h"
-#include "SprProcPrepare.h"
-#include "SprTimerManager.h"
 
 using namespace std;
-using namespace InternalDefs;
 
 #define LOG_TAG "SprSystem"
-
-#define TTP(ID, TEXT) SprTimeTrace::GetInstance()->TimeTracePoint(ID, TEXT)
 
 static std::atomic<bool> gObjAlive(true);
 
@@ -96,16 +86,6 @@ void SprSystem::Init() {
     SPR_LOGD("=============================================\n");
 
     InitEnv();
-
-    TTP(8, "pSystemTimer->Initialize()");
-    shared_ptr<SprSystemTimer> pSystemTimer = make_shared<SprSystemTimer>(MODULE_SYSTEM_TIMER, "SysTimer");
-    pSystemTimer->Initialize();
-
-    TTP(9, "TimerManager->Initialize()");
-    SprTimerManager::GetInstance(MODULE_TIMERM, "TimerM", pSystemTimer)->Initialize();
-
-    TTP(10, "TimeManager->Initialize()");
-    TimeManager::GetInstance(MODULE_TIMEM, "TimeM")->Initialize();
 
     SprContext ctx;
     mPluginMgr.Init();

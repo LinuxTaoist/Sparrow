@@ -152,7 +152,7 @@ uint32_t SprTimerManager::NextExpireTimes() {
 }
 
 int32_t SprTimerManager::InitSystemTimer() {
-    // systemTimer already initialized in sprSystem.Init()
+    // The service entry initializes the system timer before TimerManager.
     if (mpSystemTimer == nullptr) {
         SPR_LOGE("mpSystemTimer is nullptr!");
         return -1;
