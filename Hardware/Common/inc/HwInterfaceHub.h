@@ -21,15 +21,14 @@
 
 #include <memory>
 #include <functional>
-
-class IHwPower;
-class IHwGpio;
-class IHwUart;
-class IHwWatchdog;
-class IHwRtc;
-class IHwNetwork;
-class IHwDevice;
-class IHwSim;
+#include "IHwPower.h"
+#include "IHwGpio.h"
+#include "IHwWatchdog.h"
+#include "IHwRtc.h"
+#include "IHwNetwork.h"
+#include "IHwDevice.h"
+#include "IHwSim.h"
+#include "IHwUart.h"
 
 class HwInterfaceHub {
 public:

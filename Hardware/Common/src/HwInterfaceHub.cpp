@@ -9,7 +9,6 @@
  *  @date       : 2026/07/29
  *---------------------------------------------------------------------------------------------------------------------
  */
-#include "IHwUart.h"
 #include "HwInterfaceHub.h"
 
 HwInterfaceHub::PowerCreator    HwInterfaceHub::mPowerCreator    = nullptr;

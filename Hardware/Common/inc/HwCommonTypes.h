@@ -15,9 +15,9 @@
 #ifndef __HW_COMMON_TYPES_H__
 #define __HW_COMMON_TYPES_H__
 
-#include <cstdint>
-#include <functional>
 #include <string>
+#include <functional>
+#include <stdint.h>
 
 #define HW_COMMON_TYPES_VERSION   "HW_COMMON_TYPES_R1002"
 
