@@ -23,7 +23,7 @@ public:
     std::string GetVersion() const override;
     int32_t Open(const std::string& port, const SHwUartConfig& config) override;
     int32_t Close() override;
-    int32_t Send(const uint8_t* data, int32_t len) override;
+    int32_t Send(const std::vector<uint8_t>& data) override;
     int32_t RegisterRecvCallback(HwUartRecvCb cb) override;
     int32_t Flush() override;
     bool IsOpen() const override;

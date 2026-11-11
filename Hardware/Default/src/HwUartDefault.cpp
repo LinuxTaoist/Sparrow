@@ -27,7 +27,7 @@ int32_t HwUartDefault::Close() {
     return HW_ERR_NOT_IMPL;
 }
 
-int32_t HwUartDefault::Send(const uint8_t*, int32_t) {
+int32_t HwUartDefault::Send(const std::vector<uint8_t>&) {
     return HW_ERR_NOT_IMPL;
 }
 

@@ -12,8 +12,8 @@
  *  The static global object guarantees registration before main().
  *
  *  Real platforms provide their own HwRegister*.cpp in Hardware/<Family>/.
- *  They must follow the same pattern: each factory uses a function-local
- *  static instance and returns a reference.
+ *  UART factories create an independently owned instance per call. Other
+ *  device factories return a function-local static instance.
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include "HwInterfaceHub.h"
@@ -43,9 +43,8 @@ struct HwRegisterDefault {
             });
 
         HwInterfaceHub::RegisterUart(
-            []() -> IHwUart* {
-                static HwUartDefault instance;
-                return &instance;
+            []() -> std::unique_ptr<IHwUart> {
+                return std::unique_ptr<IHwUart>(new HwUartDefault());
             });
 
         HwInterfaceHub::RegisterWatchdog(

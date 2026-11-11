@@ -11,9 +11,9 @@
  *  UART HAL interface.
  *
  *  Typical call sequence:
- *    1. Open(port, &config)                 — open and configure
- *    2. RegisterRecvCallback()               — set async receive callback
- *    3. Send(data, len)                     — transmit
+ *    1. Open(port, config)                  — open and configure
+ *    2. RegisterRecvCallback()              — set async receive callback
+ *    3. Send(data)                          — queue data for transmission
  *    4. recvHandler fires on incoming data  — receive
  *    5. Flush() / Close()                   — tear down
  *
@@ -26,10 +26,12 @@
 #define __IHW_UART_H__
 
 #include <cstdint>
+#include <functional>
 #include <string>
+#include <vector>
 #include "HwCommonTypes.h"
 
-using HwUartRecvCb = std::function<void(const uint8_t* data, int32_t len)>;
+using HwUartRecvCb = std::function<void(const std::vector<uint8_t>& data)>;
 
 class IHwUart {
 public:
@@ -41,7 +43,8 @@ public:
      * @brief Open a UART port with the given configuration.
      *
      * @param  port    platform-specific port identifier (e.g. "/dev/ttyHS0", "UART1")
-     * @param  config  port parameters; if nullptr, defaults are used
+        * @param  config  port parameters; default construction selects 115200/8N1,
+        *                 no flow control, VMIN=1 and VTIME=0; override fields as needed
      * @return HW_OK on success, HW_ERR_UART_OPEN_FAILED / HW_ERR_UART_CONFIG_FAILED
      */
     virtual int32_t Open(const std::string& port, const SHwUartConfig& config) = 0;
@@ -55,20 +58,21 @@ public:
     /**
      * @brief Send a block of data.
      *
-     * The implementation may buffer and return immediately.
-     * The caller retains ownership of data.
+    * Data is copied into the instance's send queue. The caller retains ownership
+    * of data; a successful return means queued, not physically transmitted.
      *
-     * @param  data   pointer to send buffer
-     * @param  len    number of bytes to send
+    * @param  data   bytes to send
      * @return number of bytes actually queued, or negative error code
      */
-    virtual int32_t Send(const uint8_t* data, int32_t len) = 0;
+    virtual int32_t Send(const std::vector<uint8_t>& data) = 0;
 
     /**
      * @brief Register a callback for asynchronous received data.
      *
      * The callback fires from an internal read thread / epoll context;
-     * heavy work MUST be deferred.
+    * heavy work MUST be deferred. Each instance has its own callback.
+    * Data is valid during the callback; copy it when deferring processing.
+    * Close and instance destruction must run outside the receive callback.
      *
      * @param  handler   receive callback object
      * @return HW_OK on success

@@ -10,18 +10,16 @@
  *
  *  Central registry for HAL implementations (pure static class).
  *
- *  All HAL devices are SINGLETON — one instance per device type manages
- *  all underlying hardware resources exclusively, avoiding resource contention.
- *
  *  Registration happens once before main() via a static HwRegister* global.
- *  After that, business code calls GetXxx() to obtain a reference to the
- *  singleton instance.  C++11 guarantees thread-safe initialisation of
- *  function-local statics, so no explicit locking is needed.
+ *  GetXxx() returns a platform singleton, except for UART: CreateUart() creates
+ *  an independently owned instance for one port. Its owner controls the port,
+ *  receive callback and lifetime without affecting other UART instances.
  *---------------------------------------------------------------------------------------------------------------------
  */
 #ifndef __HW_INTERFACE_HUB_H__
 #define __HW_INTERFACE_HUB_H__
 
+#include <memory>
 #include <functional>
 
 class IHwPower;
@@ -42,49 +40,49 @@ public:
 
     using PowerCreator    = std::function<IHwPower*()>;
     using GpioCreator     = std::function<IHwGpio*()>;
-    using UartCreator     = std::function<IHwUart*()>;
     using WatchdogCreator = std::function<IHwWatchdog*()>;
     using RtcCreator      = std::function<IHwRtc*()>;
     using NetworkCreator  = std::function<IHwNetwork*()>;
     using DeviceCreator   = std::function<IHwDevice*()>;
     using SimCreator      = std::function<IHwSim*()>;
+    using UartCreator     = std::function<std::unique_ptr<IHwUart>()>;
 
     static void RegisterPower(PowerCreator c);
     static void RegisterGpio(GpioCreator c);
-    static void RegisterUart(UartCreator c);
     static void RegisterWatchdog(WatchdogCreator c);
     static void RegisterRtc(RtcCreator c);
     static void RegisterNetwork(NetworkCreator c);
     static void RegisterDevice(DeviceCreator c);
     static void RegisterSim(SimCreator c);
+    static void RegisterUart(UartCreator c);
 
     static void UnregisterPower();
     static void UnregisterGpio();
-    static void UnregisterUart();
     static void UnregisterWatchdog();
     static void UnregisterRtc();
     static void UnregisterNetwork();
     static void UnregisterDevice();
     static void UnregisterSim();
+    static void UnregisterUart();
 
     static IHwPower*     GetPower();
     static IHwGpio*      GetGpio();
-    static IHwUart*      GetUart();
     static IHwWatchdog*  GetWatchdog();
     static IHwRtc*       GetRtc();
     static IHwNetwork*   GetNetwork();
     static IHwDevice*    GetDevice();
     static IHwSim*       GetSim();
+    static std::unique_ptr<IHwUart> CreateUart();
 
 private:
     static PowerCreator    mPowerCreator;
     static GpioCreator     mGpioCreator;
-    static UartCreator     mUartCreator;
     static WatchdogCreator mWatchdogCreator;
     static RtcCreator      mRtcCreator;
     static NetworkCreator  mNetworkCreator;
     static DeviceCreator   mDeviceCreator;
     static SimCreator      mSimCreator;
+    static UartCreator     mUartCreator;
 };
 
 #endif // __HW_INTERFACE_HUB_H__

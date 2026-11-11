@@ -158,6 +158,16 @@ enum EHwUartFlowControl {
 };
 
 struct SHwUartConfig {
+    SHwUartConfig()
+        : baud(HW_UART_BAUD_115200),
+          dataBits(HW_UART_DATA_8),
+          parity(HW_UART_PARITY_NONE),
+          stopBits(HW_UART_STOP_1),
+          flowCtrl(HW_UART_FLOW_NONE),
+          vmin(1),
+          vtime(0) {
+    }
+
     EHwUartBaudRate      baud;
     EHwUartDataBits      dataBits;
     EHwUartParity        parity;

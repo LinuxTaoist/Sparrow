@@ -12,7 +12,9 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <iostream>
+#include <limits>
 #include <string>
+#include <utility>
 #include <vector>
 #include <stdio.h>
 #include "HwInterfaceHub.h"
@@ -99,29 +101,38 @@ void TestUart() {
     SPR_LOG("--------------------------------------------------\n");
     SPR_LOG("  [ UART ]\n");
 
-    IHwUart* uart = HwInterfaceHub::GetUart();
-    if (!uart) {
-        SPR_LOG("  not registered\n");
-        return;
+    std::vector<std::unique_ptr<IHwUart>> uarts;
+    std::vector<std::string> ports{"/dev/ttyS0", "/dev/ttyS1"};
+    std::vector<uint8_t> data{'A', 'T', '\r', '\n'};
+    SHwUartConfig config;
+    for (const auto& port : ports) {
+        auto uart = HwInterfaceHub::CreateUart();
+        if (!uart) {
+            SPR_LOG("  UART not registered\n");
+            return;
+        }
+
+        int32_t ret = uart->RegisterRecvCallback([port](const std::vector<uint8_t>& received) {
+            SPR_LOG("  %s recv: %zu bytes\n", port.c_str(), received.size());
+        });
+        if (ret == HW_OK) {
+            ret = uart->Open(port, config);
+        }
+        if (ret != HW_OK) {
+            SPR_LOG("  Open %s: ERR(%d)\n", port.c_str(), ret);
+            continue;
+        }
+
+        ret = uart->Send(data);
+        SPR_LOG("  %s queued: %d bytes\n", port.c_str(), ret);
+        uarts.push_back(std::move(uart));
     }
 
-    string version = uart->GetVersion();
-    SPR_LOG("  version  : %s\n", version.c_str());
-
-    SHwUartConfig cfg;
-    cfg.baud      = HW_UART_BAUD_115200;
-    cfg.dataBits  = HW_UART_DATA_8;
-    cfg.parity    = HW_UART_PARITY_NONE;
-    cfg.stopBits  = HW_UART_STOP_1;
-    cfg.flowCtrl  = HW_UART_FLOW_NONE;
-    cfg.vmin      = 1;
-    cfg.vtime     = 10;
-
-    SPR_LOG("  Open     : %s\n", uart->Open("/dev/ttyS0", cfg) == HW_OK ? "OK" : "ERR");
-    SPR_LOG("  IsOpen   : %s\n", uart->IsOpen() ? "true" : "false");
-    SPR_LOG("  Send     : %s\n", uart->Send((const uint8_t*)"AT\r\n", 4) == HW_OK ? "OK" : "ERR");
-    SPR_LOG("  Flush    : %s\n", uart->Flush() == HW_OK ? "OK" : "ERR");
-    SPR_LOG("  Close    : %s\n", uart->Close() == HW_OK ? "OK" : "ERR");
+    if (!uarts.empty()) {
+        SPR_LOG("  Press Enter to close UART ports\n");
+        std::cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+        std::cin.get();
+    }
 }
 
 void TestWatchdog() {
@@ -215,7 +226,7 @@ void ShowVersions() {
     auto* gpio = HwInterfaceHub::GetGpio();
     items[1] = {"GPIO    ", !!gpio, gpio ? gpio->GetVersion() : "-"};
 
-    auto* uart = HwInterfaceHub::GetUart();
+    auto uart = HwInterfaceHub::CreateUart();
     items[2] = {"UART    ", !!uart, uart ? uart->GetVersion() : "-"};
 
     auto* wdt = HwInterfaceHub::GetWatchdog();

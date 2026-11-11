@@ -9,6 +9,7 @@
  *  @date       : 2026/07/29
  *---------------------------------------------------------------------------------------------------------------------
  */
+#include "IHwUart.h"
 #include "HwInterfaceHub.h"
 
 HwInterfaceHub::PowerCreator    HwInterfaceHub::mPowerCreator    = nullptr;
@@ -26,10 +27,6 @@ void HwInterfaceHub::RegisterPower(PowerCreator c) {
 
 void HwInterfaceHub::RegisterGpio(GpioCreator c) {
     mGpioCreator = std::move(c);
-}
-
-void HwInterfaceHub::RegisterUart(UartCreator c) {
-    mUartCreator = std::move(c);
 }
 
 void HwInterfaceHub::RegisterWatchdog(WatchdogCreator c) {
@@ -52,16 +49,16 @@ void HwInterfaceHub::RegisterSim(SimCreator c) {
     mSimCreator = std::move(c);
 }
 
+void HwInterfaceHub::RegisterUart(UartCreator c) {
+    mUartCreator = std::move(c);
+}
+
 void HwInterfaceHub::UnregisterPower() {
     mPowerCreator = nullptr;
 }
 
 void HwInterfaceHub::UnregisterGpio() {
     mGpioCreator = nullptr;
-}
-
-void HwInterfaceHub::UnregisterUart() {
-    mUartCreator = nullptr;
 }
 
 void HwInterfaceHub::UnregisterWatchdog() {
@@ -84,16 +81,16 @@ void HwInterfaceHub::UnregisterSim() {
     mSimCreator = nullptr;
 }
 
+void HwInterfaceHub::UnregisterUart() {
+    mUartCreator = nullptr;
+}
+
 IHwPower* HwInterfaceHub::GetPower() {
     return mPowerCreator ? mPowerCreator() : nullptr;
 }
 
 IHwGpio* HwInterfaceHub::GetGpio() {
     return mGpioCreator ? mGpioCreator() : nullptr;
-}
-
-IHwUart* HwInterfaceHub::GetUart() {
-    return mUartCreator ? mUartCreator() : nullptr;
 }
 
 IHwWatchdog* HwInterfaceHub::GetWatchdog() {
@@ -114,4 +111,8 @@ IHwDevice* HwInterfaceHub::GetDevice() {
 
 IHwSim* HwInterfaceHub::GetSim() {
     return mSimCreator ? mSimCreator() : nullptr;
+}
+
+std::unique_ptr<IHwUart> HwInterfaceHub::CreateUart() {
+    return mUartCreator ? mUartCreator() : nullptr;
 }
