@@ -21,7 +21,7 @@ public:
     CField& operator = (const CField& field);
     CField(CField&& field) = delete;
     CField& operator = (CField&& field) = delete;
-    ~CField();
+    ~CField() override;
 
     void SetLenReference(const std::string& lenReference);
     std::string GetLenReference();

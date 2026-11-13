@@ -19,7 +19,7 @@
 class PropertyManagerHub : public BinderHub {
 public:
     PropertyManagerHub(const std::string& srvName, PropertyManager* powerManager);
-    virtual ~PropertyManagerHub();
+    ~PropertyManagerHub() override;
 
     void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd);
 

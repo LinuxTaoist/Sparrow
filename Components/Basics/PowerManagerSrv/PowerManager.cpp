@@ -336,17 +336,44 @@ void PowerManager::PostAEvent(uint32_t event, void* args, int32_t size) {
     SPR_LOGI("Post event (%u) %s!\n", event, (ret == 0) ? "success" : "failed");
 }
 
-bool PowerManager::IsAllowStandbyWithAllObserver() {
-    const auto observer = std::find_if(mStandbyObservers.begin(), mStandbyObservers.end(),
-        [](const std::pair<const uint32_t, StandbyDetail>& item) {
-            return item.second.preStandbyAck != PRE_STANDBY_ACK_ALLOW;
-        });
-    if (observer != mStandbyObservers.end()) {
-        SPR_LOGD("%s standby state = %s!\n", GetSprModuleIDText(static_cast<ModuleIDType>(observer->first)).c_str(),
-            GetSprPreStandbyAckText(observer->second.preStandbyAck).c_str());
-        return false;
+InternalDefs::EPreStandbyAck PowerManager::CheckPreStandbyAcks() {
+    bool hasRefuse = false;
+    bool hasDelay = false;
+    bool hasInvalid = false;
+
+    for (const auto& item : mStandbyObservers) {
+        switch (item.second.preStandbyAck) {
+            case PRE_STANDBY_ACK_REFUSE:
+                hasRefuse = true;
+                break;
+            case PRE_STANDBY_ACK_DELAY:
+                hasDelay = true;
+                break;
+            case PRE_STANDBY_ACK_ALLOW:
+                break;
+            case PRE_STANDBY_ACK_BUTT:
+            default:
+                hasInvalid = true;
+                break;
+        }
+
+        if (hasRefuse) {
+            SPR_LOGD("%s standby state = %s!\n",
+                GetSprModuleIDText((int32_t)(item.first)).c_str(),
+                GetSprPreStandbyAckText(item.second.preStandbyAck).c_str());
+            return PRE_STANDBY_ACK_REFUSE;
+        }
     }
-    return true;
+
+    if (hasDelay) {
+        return PRE_STANDBY_ACK_DELAY;
+    }
+
+    if (hasInvalid) {
+        return PRE_STANDBY_ACK_BUTT;
+    }
+
+    return PRE_STANDBY_ACK_ALLOW;
 }
 
 void PowerManager::ResetAllObserverPreStandbyAck() {
@@ -488,7 +515,7 @@ void PowerManager::MsgRespondPreStandbyResponse(const SprMsg& msg) {
         case PRE_STANDBY_ACK_ALLOW:
             SPR_LOGD("Allow standby from %s!\n", moduleIDText.c_str());
             observer->second.preStandbyAck = PRE_STANDBY_ACK_ALLOW;
-            if (IsAllowStandbyWithAllObserver()) {
+            if (CheckPreStandbyAcks() == PRE_STANDBY_ACK_ALLOW) {
                 SPR_LOGD("All observers allow to standby!\n");
                 unregisterTimer = true;
                 NotifyAllWithStandby();
@@ -527,11 +554,13 @@ void PowerManager::MsgRespondPreStandbyResponse(const SprMsg& msg) {
  */
 void PowerManager::MsgRespondPreStandbyResponseTimeout(const SprMsg& msg) {
     // 1. Request all observers to see if they are allowed to standby
-    mStandbyTimerCnt++;
-    const int32_t elapsedTimeout = mStandbyTimerCnt * STANDBY_RESPONSE_TIMEOUT;
-    if (elapsedTimeout <= STANDBY_RESPONSE_TIMEOUT_TOTAL) {
-        SPR_LOGD("resend SIG_ID_POWER_PRE_STANDBY_REQUEST, timeout = %dms cnt = %d\n",
-            STANDBY_RESPONSE_TIMEOUT, mStandbyTimerCnt);
+    const auto standbyAckResult = CheckPreStandbyAcks();
+    int32_t elapsedTimeout = mStandbyTimerCnt * STANDBY_RESPONSE_TIMEOUT;
+    if (standbyAckResult != PRE_STANDBY_ACK_ALLOW &&
+        elapsedTimeout <= STANDBY_RESPONSE_TIMEOUT_TOTAL) {
+        mStandbyTimerCnt++;
+        SPR_LOGD("Send SIG_ID_POWER_PRE_STANDBY_REQUEST [%d %dms], current result = %s\n",
+            mStandbyTimerCnt, STANDBY_RESPONSE_TIMEOUT, GetSprPreStandbyAckText(standbyAckResult).c_str());
 
         NotifyEvent(SIG_ID_POWER_PRE_STANDBY_REQUEST);
         return;

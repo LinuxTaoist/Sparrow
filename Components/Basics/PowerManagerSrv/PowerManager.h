@@ -57,7 +57,7 @@ struct StandbyDetail {
 class PowerManager : public SprObserverWithMQueue {
 public:
     PowerManager();
-    virtual ~PowerManager();
+    ~PowerManager() override;
 
     int32_t Init() override;
     int32_t ProcessMsg(const SprMsg& msg) override;
@@ -85,8 +85,8 @@ private:
     void NotifyAllWithSleep();
     void NotifyEvent(uint32_t event);
     void PostAEvent(uint32_t event, void* args = nullptr, int32_t size = 0);
-    bool IsAllowStandbyWithAllObserver();
     void ResetAllObserverPreStandbyAck();
+    InternalDefs::EPreStandbyAck CheckPreStandbyAcks();
 
     /* 消息响应函数 */
     void MsgRespondObserverRegister(const SprMsg& msg);

@@ -131,8 +131,8 @@ std::string GetCurTimeStr() {
     int milliseconds = currentTime.tv_nsec / 1000000;
 
     char buffer[80];
-    sprintf(buffer, "%04d-%02d-%02d %02d:%02d:%02d.%03d",
-            localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday,
+    sprintf(buffer, "%02d-%02d %02d:%02d:%02d.%03d",
+            localTime->tm_mon + 1, localTime->tm_mday,
             localTime->tm_hour, localTime->tm_min, localTime->tm_sec, milliseconds);
 
     return std::string(buffer);

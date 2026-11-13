@@ -9,49 +9,19 @@
  *  @date       : 2023/11/25
  *---------------------------------------------------------------------------------------------------------------------
  */
-#include <signal.h>
+
 #include "SprLog.h"
 #include "CommonMacros.h"
-#include "GeneralUtils.h"
-#include "SprProcPrepare.h"
 #include "SprMediator.h"
 #include "SprMediatorHub.h"
-#include "BacktraceMacros.h"
-#include "EpollEventHandler.h"
+#include "SprMainInterface.h"
 
 #define LOG_TAG "MainMediator"
 
-int main(int argc, const char* argv[]) {
-    GeneralUtils::InitSignalHandler([](int signum) {
-        SPR_LOGI("Receive signal: %d!\n", signum);
-        switch (signum) {
-            case MAIN_EXIT_SIGNUM:
-            case SIGTERM:
-                EpollEventHandler::GetInstance()->ExitLoop();
-                break;
-            case SIGSEGV:
-            case SIGBUS:
-            case SIGILL:
-            case SIGFPE:
-            case SIGQUIT:
-                PRINT_BACKTRACE(signum, 20);
-                EpollEventHandler::GetInstance()->ExitLoop();
-                exit(EXIT_FAILURE);
-                break;
-            default:
-                break;
-        }
-    });
-
+SPR_ENTRY(
     SPR_LOGI("Main start!\n");
-    SprMediator *pMedObj = SprMediator::GetInstance();
+    SprMediator* pMedObj = SprMediator::GetInstance();
     SprMediatorHub theMediatorHub(SRV_NAME_MEDIATOR, pMedObj);
-
     theMediatorHub.InitializeHub();
     pMedObj->Init();
-
-    SprProcPrepare::GetInstance()->Init(SRV_NAME_MEDIATOR);
-    EpollEventHandler::GetInstance()->EpollLoop();
-    SPR_LOGI("Exit main!\n");
-    return 0;
-}
+);

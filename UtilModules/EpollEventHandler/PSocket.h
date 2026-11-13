@@ -49,7 +49,7 @@ public:
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {}
     explicit PUdp(const std::function<void(ssize_t, std::string, std::string addr, uint16_t port, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {}
-    virtual ~PUdp();
+    ~PUdp() override;
 
     /**
      * @brief 初始化socket
@@ -108,7 +108,7 @@ public:
      */
     explicit PTcpServer(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb) {}
-    virtual ~PTcpServer();
+    ~PTcpServer() override;
 
     /**
      * @brief 初始化socket
@@ -156,7 +156,7 @@ public:
      */
     explicit PTcpClient(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr);
     explicit PTcpClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
-    virtual ~PTcpClient();
+    ~PTcpClient() override;
 
     int32_t AsTcpClient(bool con = false, const std::string& srvAddr = "", uint16_t srvPort = 0,
                         int32_t rcvLen = DEFAULT_BUFFER_LIMIT, int32_t sndLen = DEFAULT_BUFFER_LIMIT, int32_t timeoutMs = 5000);
@@ -188,7 +188,7 @@ public:
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(cb), mCb2(nullptr) {}
     explicit PUnixDgram(const std::function<void(ssize_t, std::string, std::string, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb1(nullptr), mCb2(cb) {}
-    virtual ~PUnixDgram();
+    ~PUnixDgram() override;
 
     /**
      * @brief 初始化socket
@@ -239,7 +239,7 @@ class PUnixStreamServer : public IEpollEvent {
 public:
     explicit PUnixStreamServer(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr)
         : IEpollEvent(-1, EPOLL_TYPE_SOCKET, arg), mCb(cb) {}
-    virtual ~PUnixStreamServer();
+    ~PUnixStreamServer() override;
 
     /**
      * @brief 初始化socket
@@ -285,7 +285,7 @@ public:
      */
     explicit PUnixStreamClient(const std::function<void(int32_t, void*)>& cb, void* arg = nullptr);
     explicit PUnixStreamClient(const std::function<void(ssize_t, std::string, void*)>& cb, void* arg = nullptr);
-    virtual ~PUnixStreamClient();
+    ~PUnixStreamClient() override;
 
     int32_t AsUnixStreamClient(bool con = false, const std::string& srvPath = "", const std::string& cliPath = "", int32_t timeoutMs = 5000);
     void*   EpollEvent(int32_t fd, EpollType eType, void* arg) override;

@@ -25,7 +25,7 @@ public:
      * @param proxyType message proxy type
      */
     SprObserverWithTimerfd(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
-    virtual ~SprObserverWithTimerfd();
+    ~SprObserverWithTimerfd() override;
 
     /**
      * @brief  Process message event called by epoll

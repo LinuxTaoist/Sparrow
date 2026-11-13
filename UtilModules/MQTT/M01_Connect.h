@@ -19,7 +19,7 @@
 class MqttConnect : public MqttMsgBase {
 public:
     MqttConnect(const std::string& protocolName, uint8_t version, uint8_t flags, uint16_t keepalive);
-    virtual ~MqttConnect();
+    ~MqttConnect() override;
 
     uint16_t GetProtocolNameLength() { return mProtocolNameLength; };
     std::string GetProtocolName() { return mProtocolName; };

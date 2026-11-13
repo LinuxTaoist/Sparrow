@@ -19,7 +19,7 @@
 class StatusMonitorHub : public BinderHub {
 public:
     StatusMonitorHub(const std::string& srvName, StatusMonitorManager* statusMonitorManager);
-    virtual ~StatusMonitorHub();
+    ~StatusMonitorHub() override;
 
     void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) override;
 

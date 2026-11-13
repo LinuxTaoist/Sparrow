@@ -19,7 +19,7 @@
 class MqttDisconnect : public MqttMsgBase {
 public:
     MqttDisconnect();
-    virtual ~MqttDisconnect();
+    ~MqttDisconnect() override;
 };
 
 #endif // __M14_DISCONNECT_H__

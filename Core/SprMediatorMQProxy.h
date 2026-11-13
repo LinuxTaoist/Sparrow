@@ -48,7 +48,7 @@ protected:
     /**
      * @brief Destruct
      */
-    virtual ~SprMediatorMQProxy();
+    ~SprMediatorMQProxy() override;
 
     /**
      * @brief Connect to SprMediator

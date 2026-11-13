@@ -51,6 +51,8 @@ ENUM_OR_STRING(SIG_ID_SYSTEM_TIMER_NOTIFY),                     \
 //-----------------------------------------------------------------------------
 // TIME_MANAGER
 //-----------------------------------------------------------------------------
+ENUM_OR_STRING(SIG_ID_TIMEM_START_SYNC),                        \
+ENUM_OR_STRING(SIG_ID_TIMEM_STOP_SYNC),                         \
 ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT),        \
 ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_TIME_TIMER_EVENT),             \
 ENUM_OR_STRING(SIG_ID_TIMEM_SYNC_SYSTEM_TIME),                  \

@@ -269,14 +269,13 @@ TEST(Util_GetCharAfterNthTarget, BoundaryCases) {
 // 测试当前时间字符串格式
 TEST(Util_GetCurTimeStr, FormatCheck) {
     std::string timeStr = GetCurTimeStr();
-    // 格式: YYYY-MM-DD HH:MM:SS.mmm
-    ASSERT_EQ(timeStr.size(), 23u);
-    EXPECT_EQ(timeStr[4], '-');
-    EXPECT_EQ(timeStr[7], '-');
-    EXPECT_EQ(timeStr[10], ' ');
-    EXPECT_EQ(timeStr[13], ':');
-    EXPECT_EQ(timeStr[16], ':');
-    EXPECT_EQ(timeStr[19], '.');
+    // Format: MM-DD HH:MM:SS.mmm
+    ASSERT_EQ(timeStr.size(), 18u);
+    EXPECT_EQ(timeStr[2], '-');
+    EXPECT_EQ(timeStr[5], ' ');
+    EXPECT_EQ(timeStr[8], ':');
+    EXPECT_EQ(timeStr[11], ':');
+    EXPECT_EQ(timeStr[14], '.');
 }
 
 // --------------------------------------------------------------------------------------------------------------------

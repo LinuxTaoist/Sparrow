@@ -22,7 +22,7 @@
 class TestModule : public SprObserverWithMQueue {
 public:
     TestModule();
-    virtual ~TestModule();
+    ~TestModule() override;
 
     int32_t CondNotify();
     int32_t CondWait(int32_t timeoutMs);

@@ -65,11 +65,11 @@ list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_DEPS)
 list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_INCS)
 
 ## Bin test_internal
-add_executable              (test_internal ${SRC_TEST_INTERNAL_PATH})
-target_include_directories  (test_internal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include ${TEST_INTERNAL_APPEND_INCS})
-set_target_properties       (test_internal PROPERTIES OUTPUT_NAME "test_internal")
-target_link_libraries       (test_internal c LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser
+add_executable              (BinTestInternal ${SRC_TEST_INTERNAL_PATH})
+target_include_directories  (BinTestInternal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include ${TEST_INTERNAL_APPEND_INCS})
+set_target_properties       (BinTestInternal PROPERTIES OUTPUT_NAME "test_internal")
+target_link_libraries       (BinTestInternal c LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser
                                            LibSqliteAdapter gtest gtest_main pthread rt dl ${TEST_INTERNAL_APPEND_LIBS})
-add_dependencies            (test_internal LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser
+add_dependencies            (BinTestInternal LibSprLog LibEpollEvent LibCodecX LibHeartbeat LibIniParser
                                            LibSqliteAdapter ${TEST_INTERNAL_APPEND_DEPS})
-add_test                    (NAME test_internal COMMAND test_internal)
+add_test                    (NAME test_internal COMMAND BinTestInternal)

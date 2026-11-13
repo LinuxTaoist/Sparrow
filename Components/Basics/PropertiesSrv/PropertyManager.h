@@ -66,7 +66,7 @@ public:
 
 private:
     PropertyManager();
-    ~PropertyManager();
+    ~PropertyManager() override;
     PropertyManager(const PropertyManager&) = delete;
     PropertyManager& operator=(const PropertyManager&) = delete;
 

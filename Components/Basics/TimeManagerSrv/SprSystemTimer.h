@@ -21,7 +21,7 @@
 class SprSystemTimer : public SprObserverWithTimerfd {
 public:
     explicit SprSystemTimer(ModuleIDType id, const std::string& name);
-    virtual ~SprSystemTimer();
+    ~SprSystemTimer() override;
 
     SprSystemTimer(const SprSystemTimer&) = delete;
     SprSystemTimer& operator=(const SprSystemTimer&) = delete;

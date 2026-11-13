@@ -239,11 +239,11 @@ int32_t TimeManager::ProcessMsg(const SprMsg& msg) {
         case SIG_ID_TIMEM_SYNC_TIME_POLL_TIMER_EVENT:
             MsgRespondSyncTimePollerTimerEvent(msg);
             break;
-        case SIG_ID_POWER_STARTUP_HIGH:
-            MsgRespondPowerStartupHigh(msg);
+        case SIG_ID_TIMEM_START_SYNC:
+            MsgRespondStartSync(msg);
             break;
-        case SIG_ID_POWER_STANDBY_LOW:
-            MsgRespondPowerStandbyLow(msg);
+        case SIG_ID_TIMEM_STOP_SYNC:
+            MsgRespondStopSync(msg);
             break;
         default:
             break;
@@ -314,24 +314,24 @@ void TimeManager::MsgRespondSyncTimePollerTimerEvent(const SprMsg& msg) {
 }
 
 /**
- * @brief Process SIG_ID_POWER_STARTUP_HIGH
+ * @brief Process SIG_ID_TIMEM_START_SYNC
  *
  * @param[in] msg
  * @return none
  */
-void TimeManager::MsgRespondPowerStartupHigh(const SprMsg& msg) {
-    SPR_LOGD("Receive power startup high\n");
+void TimeManager::MsgRespondStartSync(const SprMsg& msg) {
+    SPR_LOGD("Receive start sync\n");
     StartSyncTimePoller();
 }
 
 /**
- * @brief Process SIG_ID_POWER_STANDBY_LOW
+ * @brief Process SIG_ID_TIMEM_STOP_SYNC
  *
  * @param[in] msg
  * @return none
  */
-void TimeManager::MsgRespondPowerStandbyLow(const SprMsg& msg) {
-    SPR_LOGD("Receive power standby low\n");
+void TimeManager::MsgRespondStopSync(const SprMsg& msg) {
+    SPR_LOGD("Receive stop sync\n");
     StopSyncTimePoller();
 }
 

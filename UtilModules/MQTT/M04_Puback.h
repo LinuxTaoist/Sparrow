@@ -18,7 +18,7 @@ class MqttPuback : public MqttMsgBase {
 public:
     MqttPuback();
     MqttPuback(uint8_t flags, uint16_t identifier);
-    virtual ~MqttPuback();
+    ~MqttPuback() override;
 
     uint16_t GetIdentifier() { return mIdentifier; }
 

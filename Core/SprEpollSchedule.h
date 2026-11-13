@@ -45,7 +45,7 @@ private:
     /**
      * @brief Destrcuct
      */
-    virtual ~SprEpollSchedule();
+    ~SprEpollSchedule() override;
 
     /**
      * @brief Init plog

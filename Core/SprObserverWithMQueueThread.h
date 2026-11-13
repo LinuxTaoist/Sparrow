@@ -40,7 +40,7 @@ public:
      * @param proxyType message proxy type
      */
     SprObserverWithMQueueThread(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
-    virtual ~SprObserverWithMQueueThread();
+    ~SprObserverWithMQueueThread() override;
 
     /**
      * @brief  Initialize function for derived class called in Initialize

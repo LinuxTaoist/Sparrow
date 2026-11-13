@@ -33,7 +33,7 @@ public:
     HttpMsgRequest() = default;
     explicit HttpMsgRequest(const std::string& bytes);
     HttpMsgRequest(const std::string& method, const std::string& uri, const std::string& version);
-    virtual ~HttpMsgRequest();
+    ~HttpMsgRequest() override;
 
     int32_t SetMethod(const std::string& method);
     int32_t SetURI(const std::string& uri);
@@ -65,7 +65,7 @@ public:
     HttpMsgResponse() = default;
     explicit HttpMsgResponse(const std::string& bytes);
     HttpMsgResponse(const std::string& version, int32_t status, const std::string& body = "");
-    virtual ~HttpMsgResponse();
+    ~HttpMsgResponse() override;
 
     int32_t SetHttpVersion(const std::string& version);
     int32_t SetStatusCode(int32_t status);

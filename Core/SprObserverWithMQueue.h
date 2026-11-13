@@ -28,7 +28,7 @@ public:
      * @param proxyType message proxy type
      */
     SprObserverWithMQueue(ModuleIDType id, const std::string& name, InternalDefs::EProxyType proxyType = InternalDefs::MEDIATOR_PROXY_MQUEUE);
-    virtual ~SprObserverWithMQueue();
+    ~SprObserverWithMQueue() override;
 
     /**
      * @brief  Check if the observer is connected to the mediator

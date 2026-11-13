@@ -59,7 +59,7 @@ private:
     * @brief Destroy the Spr Timer Manager object
     *
     */
-    virtual ~SprTimerManager();
+    ~SprTimerManager() override;
 
     /**
      * @brief  InitSystemTimer

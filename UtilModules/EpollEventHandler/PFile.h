@@ -23,7 +23,7 @@ public:
     explicit PFile(const std::string& fileName, const std::function<void(int32_t, ssize_t, std::string, void*)>& cb = nullptr,
           void* arg = nullptr, int32_t flags = O_RDWR | O_CREAT | O_TRUNC, mode_t mode = 0777);
 
-    virtual ~PFile();
+    ~PFile() override;
     void* EpollEvent(int32_t fd, EpollType eType, void* arg) override;
 
 private:

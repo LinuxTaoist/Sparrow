@@ -18,11 +18,11 @@
 #include <atomic>
 
 struct SharedData {
-    std::atomic<int> initialized; // 0=未初始化, 1=初始化中, 2=已就绪
-    std::atomic<int> refCnt;
-    std::atomic<int> waitCnt;
-    pthread_mutex_t dataMutex;  // Mutex for critical section protection
-    pthread_mutex_t waitMutex;  // Mutex for protecting the wait count
+    std::atomic<int> initialized; // 0=uninitialized, 1=initializing, 2=ready
+    std::atomic<int> refCnt;      // Number of processes currently holding the shared mutex
+    std::atomic<int> waitCnt;     // Number of waiting lock attempts
+    pthread_mutex_t dataMutex;    // Mutex for critical section protection
+    pthread_mutex_t waitMutex;    // Mutex for wait count protection
 };
 
 class ProcMutex {

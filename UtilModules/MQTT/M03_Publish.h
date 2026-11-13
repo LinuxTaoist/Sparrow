@@ -18,7 +18,7 @@ class MqttPublish : public MqttMsgBase {
 public:
     MqttPublish();
     MqttPublish(uint8_t flags, uint16_t identifier, const std::string& topic, const std::string& payload);
-    virtual ~MqttPublish();
+    ~MqttPublish() override;
 
     std::string GetTopic() const { return mTopic; }
 

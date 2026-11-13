@@ -22,7 +22,7 @@ public:
     CAtom(const CAtom& atom);
     CAtom& operator = (const CAtom& atom);
     CAtom(const std::shared_ptr<CNode>& parent, const std::string& name, const std::vector<uint8_t>& value);
-    ~CAtom();
+    ~CAtom() override;
 
     int32_t SetValue(const std::vector<uint8_t>& value);
     int32_t GetValue(std::vector<uint8_t>& value);

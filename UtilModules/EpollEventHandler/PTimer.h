@@ -19,7 +19,7 @@
 class PTimer : public IEpollEvent {
 public:
     PTimer(const std::function<void(int32_t, uint64_t, void*)>& cb = nullptr, void* arg = nullptr);
-    virtual ~PTimer();
+    ~PTimer() override;
 
     int32_t InitTimer(bool isWakeup = false);
     int32_t StartTimer(uint32_t delayInMSec, uint32_t intervalInMSec = 0);

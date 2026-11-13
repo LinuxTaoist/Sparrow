@@ -22,7 +22,7 @@ public:
               const std::function<void(int32_t, const std::string&, void*)>& cb = nullptr,
               void* arg = nullptr, bool clearOnOpen = true);
 
-    virtual ~PMsgQueue();
+    ~PMsgQueue() override;
 
     virtual int32_t Clear();
     virtual int32_t Send(int32_t fd, const char* data, size_t size, uint32_t prio = 1);

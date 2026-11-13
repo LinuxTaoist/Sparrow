@@ -40,6 +40,10 @@ public:
           mRecvCount(0),
           mSlowMs(0) {}
 
+    ~TestObsThread() override {
+        Deinitialize();
+    }
+
     bool  IsRcved() const {
         return mIsRcved.load();
     }

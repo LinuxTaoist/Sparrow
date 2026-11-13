@@ -19,7 +19,7 @@
 class ConfigManagerHub : public BinderHub {
 public:
     ConfigManagerHub(const std::string& srvName, ConfigManager* pManager);
-    virtual ~ConfigManagerHub();
+    ~ConfigManagerHub() override;
 
     void handleCmd(const std::shared_ptr<Parcel>& pReqParcel,
                    const std::shared_ptr<Parcel>& pRspParcel, int32_t cmd) override;

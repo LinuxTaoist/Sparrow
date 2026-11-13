@@ -47,7 +47,7 @@ private:
      * @param[in] name
      */
     TimeManager(ModuleIDType id, const std::string& name);
-    virtual ~TimeManager();
+    ~TimeManager() override;
 
      /**
      * @brief Initializes the business module with overrides from derived business modules
@@ -86,8 +86,8 @@ private:
     void MsgRespondSyncTimeTimerEvent(const SprMsg& msg);
     void MsgRespondSyncSystemTime(const SprMsg& msg);
     void MsgRespondSyncTimePollerTimerEvent(const SprMsg& msg);
-    void MsgRespondPowerStartupHigh(const SprMsg& msg);
-    void MsgRespondPowerStandbyLow(const SprMsg& msg);
+    void MsgRespondStartSync(const SprMsg& msg);
+    void MsgRespondStopSync(const SprMsg& msg);
 
     /**
      * @brief Register / Unregister debug functions

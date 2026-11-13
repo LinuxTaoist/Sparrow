@@ -19,7 +19,7 @@
 class SprMediatorHub : public BinderHub {
 public:
     SprMediatorHub(const std::string& srvName, SprMediator* mediator);
-    virtual ~SprMediatorHub();
+    ~SprMediatorHub() override;
 
     void handleCmd(const std::shared_ptr<Parcel>& pReqParcel, const std::shared_ptr<Parcel>& pRspParcel, int cmd) override;
 

@@ -257,6 +257,8 @@ TEST_F(Util_ProcMutex, MultiProcessCrashRecovery) {
             perror("fork failed");
             // Clean up already created child processes
             for (pid_t p : child_pids) {
+                usleep(500000);
+                SPR_LOGD("Killing child process %d", p);
                 kill(p, SIGKILL);
             }
             FAIL() << "Failed to create child process";

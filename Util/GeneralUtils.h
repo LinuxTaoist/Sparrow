@@ -72,7 +72,7 @@ int SystemCmd(std::string& out, const char* format, ...);
  *
  * @return  current time string
  *
- * The format of the returned string is "2024-08-03 10:36:36.397".
+ * The format of the returned string is "11-12 14:39:17.034".
  */
 std::string GetCurTimeStr();
 
