@@ -20,6 +20,7 @@
 #include <type_traits>
 #include <algorithm>
 #include <iterator>
+#include <stdint.h>
 #include "CDefine.h"
 
 namespace CUtils {

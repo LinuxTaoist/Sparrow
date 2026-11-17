@@ -10,6 +10,8 @@
  *---------------------------------------------------------------------------------------------------------------------
  */
 #include <atomic>
+#include <time.h>
+#include <errno.h>
 #include <unistd.h>
 #include <string.h>
 #include "SprLog.h"

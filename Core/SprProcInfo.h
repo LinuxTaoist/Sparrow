@@ -13,6 +13,7 @@
 #define __SPR_PROC_INFO_H__
 
 #include <string>
+#include <stdint.h>
 
 class SprProcInfo {
 public:

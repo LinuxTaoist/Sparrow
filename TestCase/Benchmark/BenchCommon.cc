@@ -137,13 +137,13 @@ void WriteTxtReport() {
         const BenchCaseResult& r = store[i];
         std::string countDisplay = FormatCountDisplay(r);
         snprintf(line, sizeof(line),
-             "| %-12s | %-28s | %13s | %10.1f | %7llu | %7llu | %7llu | %7llu | %7llu | %7llu | %7.4f |\n",
-                 r.module.c_str(), r.scenario.c_str(),
-             countDisplay.c_str(), r.throughput,
-                 (unsigned long long)r.avgUs, (unsigned long long)r.p50Us,
-                 (unsigned long long)r.p90Us, (unsigned long long)r.p99Us,
-                 (unsigned long long)r.minUs, (unsigned long long)r.maxUs,
-                 r.lossRate * 100.0);
+            "| %-12s | %-28s | %13s | %10.1f | %7llu | %7llu | %7llu | %7llu | %7llu | %7llu | %7.4f | ",
+                r.module.c_str(), r.scenario.c_str(),
+                countDisplay.c_str(), r.throughput,
+                (unsigned long long)r.avgUs, (unsigned long long)r.p50Us,
+                (unsigned long long)r.p90Us, (unsigned long long)r.p99Us,
+                (unsigned long long)r.minUs, (unsigned long long)r.maxUs,
+                r.lossRate * 100.0);
         ofs << line;
         if (!r.note.empty()) {
             ofs << "  note: " << r.note << "\n";

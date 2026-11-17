@@ -6,14 +6,14 @@ set(OTHER_SRC_FILES         ${PROJECT_PATH}/Util/Backtrace.cpp
 aux_source_directory        (${PROJECT_PATH}/Components/Basics/LogManagerSrv    SRC_LOG_SRV_PATH)
 
 ## Bin logmanagersrv
-add_executable  (BinLogSrv  ${SRC_LOG_SRV_PATH}
-                            ${OTHER_SRC_FILES})
-target_include_directories  (BinLogSrv PRIVATE  ${PROJECT_PATH}/Util
-                                                ${PROJECT_PATH}/Core
-                                                ${PROJECT_PATH}/3rdAdapter
-                                                ${PROJECT_PATH}/PrivateAPIs
-                                                ${PROJECT_PATH}/UtilModules/IniParser
-                                                ${PROJECT_PATH}/UtilModules/EpollEventHandler)
-set_target_properties       (BinLogSrv PROPERTIES OUTPUT_NAME "logmanagersrv")
-target_link_libraries       (BinLogSrv LibSprMain LibIniParser pthread dl)
-add_dependencies            (BinLogSrv LibSprMain LibIniParser)
+add_executable  (BinLogManagerSrv  ${SRC_LOG_SRV_PATH}
+                                   ${OTHER_SRC_FILES})
+target_include_directories  (BinLogManagerSrv PRIVATE  ${PROJECT_PATH}/Util
+                                                        ${PROJECT_PATH}/Core
+                                                        ${PROJECT_PATH}/3rdAdapter
+                                                        ${PROJECT_PATH}/PrivateAPIs
+                                                        ${PROJECT_PATH}/UtilModules/IniParser
+                                                        ${PROJECT_PATH}/UtilModules/EpollEventHandler)
+set_target_properties       (BinLogManagerSrv PROPERTIES OUTPUT_NAME "logmanagersrv")
+target_link_libraries       (BinLogManagerSrv LibSprMain LibIniParser pthread dl)
+add_dependencies            (BinLogManagerSrv LibSprMain LibIniParser)

@@ -12,9 +12,10 @@
 #ifndef __SHARED_BINARY_TREE_H__
 #define __SHARED_BINARY_TREE_H__
 
-#include <semaphore.h>
 #include <map>
 #include <string>
+#include <stdint.h>
+#include <semaphore.h>
 
 #define SHARED_BTREE_KEY_MAX_LEN    32
 #define SHARED_BTREE_VALUE_MAX_LEN  64
