@@ -60,10 +60,6 @@ foreach(module IN LISTS BUSINESS_MODULES)
     endif()
 endforeach()
 
-list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_LIBS)
-list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_DEPS)
-list(REMOVE_DUPLICATES TEST_INTERNAL_APPEND_INCS)
-
 ## Bin test_internal
 add_executable              (BinTestInternal ${SRC_TEST_INTERNAL_PATH})
 target_include_directories  (BinTestInternal PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include ${TEST_INTERNAL_APPEND_INCS})
