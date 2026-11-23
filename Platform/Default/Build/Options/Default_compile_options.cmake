@@ -78,6 +78,66 @@ if(BUILD_CURL)
     message(STATUS "BUILD_CURL 已启用，curl 库路径: ${CURL_DST_LIB}")
 endif()
 
+if(BUILD_GDB)
+    set(GDB_CROSS_FLAGS "-fPIC")
+    set(GDB_DST_BIN "${PROJECT_PATH}/3rdParty/gdb/bin/${PROJECT_PLATFORM}")
+
+    if(NOT EXISTS "${GDB_DST_BIN}/gdb")
+        message(STATUS "gdb 二进制缺失，开始自动构建: ${PROJECT_PLATFORM}")
+        set(GDB_BUILD_ARGS
+            bash
+            ${PROJECT_PATH}/3rdParty/gdb/build.sh
+            --project-path ${PROJECT_PATH}
+            --platform ${PROJECT_PLATFORM}
+            --c-compiler ${CMAKE_C_COMPILER}
+            --cxx-compiler ${CMAKE_CXX_COMPILER}
+            --c-flags "${GDB_CROSS_FLAGS}"
+            --cxx-flags "${GDB_CROSS_FLAGS}"
+        )
+        if(CMAKE_SYSROOT)
+            list(APPEND GDB_BUILD_ARGS --sysroot ${CMAKE_SYSROOT})
+        endif()
+        execute_process(COMMAND ${GDB_BUILD_ARGS} RESULT_VARIABLE gdb_build_result)
+        if(NOT gdb_build_result EQUAL 0)
+            message(FATAL_ERROR "gdb 自动构建失败，平台: ${PROJECT_PLATFORM}")
+        endif()
+    endif()
+
+    message(STATUS "BUILD_GDB 已启用，gdb 路径: ${GDB_DST_BIN}/gdb")
+endif()
+
+if(BUILD_I2C_TOOLS)
+    set(I2C_TOOLS_CROSS_FLAGS "-fPIC")
+    set(I2C_TOOLS_DST_BIN "${PROJECT_PATH}/3rdParty/i2c-tools/bin/${PROJECT_PLATFORM}")
+
+    if(NOT EXISTS "${I2C_TOOLS_DST_BIN}/i2cdetect"
+       OR NOT EXISTS "${I2C_TOOLS_DST_BIN}/i2cdump"
+       OR NOT EXISTS "${I2C_TOOLS_DST_BIN}/i2cget"
+       OR NOT EXISTS "${I2C_TOOLS_DST_BIN}/i2cset"
+       OR NOT EXISTS "${I2C_TOOLS_DST_BIN}/i2ctransfer")
+        message(STATUS "i2c-tools 二进制缺失，开始自动构建: ${PROJECT_PLATFORM}")
+        set(I2C_TOOLS_BUILD_ARGS
+            bash
+            ${PROJECT_PATH}/3rdParty/i2c-tools/build.sh
+            --project-path ${PROJECT_PATH}
+            --platform ${PROJECT_PLATFORM}
+            --c-compiler ${CMAKE_C_COMPILER}
+            --cxx-compiler ${CMAKE_CXX_COMPILER}
+            --c-flags "${I2C_TOOLS_CROSS_FLAGS}"
+            --cxx-flags "${I2C_TOOLS_CROSS_FLAGS}"
+        )
+        if(CMAKE_SYSROOT)
+            list(APPEND I2C_TOOLS_BUILD_ARGS --sysroot ${CMAKE_SYSROOT})
+        endif()
+        execute_process(COMMAND ${I2C_TOOLS_BUILD_ARGS} RESULT_VARIABLE i2c_tools_build_result)
+        if(NOT i2c_tools_build_result EQUAL 0)
+            message(FATAL_ERROR "i2c-tools 自动构建失败，平台: ${PROJECT_PLATFORM}")
+        endif()
+    endif()
+
+    message(STATUS "BUILD_I2C_TOOLS 已启用，i2c-tools 路径: ${I2C_TOOLS_DST_BIN}")
+endif()
+
 if(BUILD_COVERAGE)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         message(STATUS "Coverage instrumentation enabled (Default platform)")

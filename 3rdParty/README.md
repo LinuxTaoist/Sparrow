@@ -10,6 +10,8 @@
 - `sqlite`: 通过 `3rdParty/sqlite/build.sh` 自动源码交叉编译，产物为 `libsqlite3.a`。
 - `googletest`: 通过 `3rdParty/googletest/build.sh` 自动源码交叉编译，产物为 `libgtest.a`、`libgtest_main.a`。
 - `curl`: 通过 `3rdParty/curl/build.sh` 自动源码交叉编译，产物为 `libcurl.a`，使用条件为 `BUILD_CURL=ON`。
+- `gdb`: 通过 `3rdParty/gdb/build.sh` 自动源码交叉编译，产物为设备端 `gdb` 可执行文件，使用条件为 `BUILD_GDB=ON`。
+- `i2c-tools`: 通过 `3rdParty/i2c-tools/build.sh` 自动源码交叉编译，产物为设备端 I2C 调试工具，使用条件为 `BUILD_I2C_TOOLS=ON`。
 
 ## 备注
 以下是选择仅导入第三方库和头文件加入工程编译的原因：

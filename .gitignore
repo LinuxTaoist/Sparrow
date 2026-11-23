@@ -18,6 +18,14 @@ Components/Business/
 !/3rdParty/sqlite/build.sh
 !/3rdParty/sqlite/sqlite-amalgamation-3450300.tar.gz
 
+3rdParty/gdb/*
+!/3rdParty/gdb/build.sh
+!/3rdParty/gdb/gdb-10.2.tar.xz
+
+3rdParty/i2c-tools/*
+!/3rdParty/i2c-tools/build.sh
+!/3rdParty/i2c-tools/i2c-tools-4.4.tar.xz
+
 Platform/*
 !/Platform/Default
 

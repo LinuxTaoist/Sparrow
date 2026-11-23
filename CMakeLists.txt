@@ -56,13 +56,15 @@ message("======================================================================"
 
 ## 打印编译开关
 message(STATUS "[Build Options]")
-message(STATUS "BUILD_DEBUG    = ${BUILD_DEBUG}")
-message(STATUS "BUILD_TESTCASE = ${BUILD_TESTCASE}")
-message(STATUS "BUILD_CURL     = ${BUILD_CURL}")
-message(STATUS "BUILD_EXAMPLES = ${BUILD_EXAMPLES}")
-message(STATUS "BUILD_COVERAGE = ${BUILD_COVERAGE}")
-message(STATUS "BUILD_ASAN     = ${BUILD_ASAN}")
-message(STATUS "BUILD_STRIP    = ${BUILD_STRIP}")
+message(STATUS "BUILD_DEBUG     = ${BUILD_DEBUG}")
+message(STATUS "BUILD_TESTCASE  = ${BUILD_TESTCASE}")
+message(STATUS "BUILD_CURL      = ${BUILD_CURL}")
+message(STATUS "BUILD_GDB       = ${BUILD_GDB}")
+message(STATUS "BUILD_I2C_TOOLS = ${BUILD_I2C_TOOLS}")
+message(STATUS "BUILD_EXAMPLES  = ${BUILD_EXAMPLES}")
+message(STATUS "BUILD_COVERAGE  = ${BUILD_COVERAGE}")
+message(STATUS "BUILD_ASAN      = ${BUILD_ASAN}")
+message(STATUS "BUILD_STRIP     = ${BUILD_STRIP}")
 
 ## 版本构建说明文件
 set(VERSION_TXT "${OUTPUT_PATH}/Version")

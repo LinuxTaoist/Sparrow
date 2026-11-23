@@ -31,6 +31,8 @@ set(BUILD_DEBUG ON)       # 调试工具集（含调试符号与增强日志）
 set(BUILD_EXAMPLES ON)    # 示例程序（演示API用法，非生产环境）
 set(BUILD_TESTCASE ON)    # 单元测试套件（依赖gtest库）
 # set(BUILD_CURL ON)        # HTTP客户端库（依赖curl源码交叉编译）
+# set(BUILD_GDB ON)         # 目标设备 GDB（依赖 GDB 源码交叉编译）
+# set(BUILD_I2C_TOOLS ON)   # 目标设备 I2C 调试工具（依赖 i2c-tools 源码交叉编译）
 # set(BUILD_COVERAGE ON)    # 覆盖率开关（仅在需要生成覆盖率报告时开启）
 # set(BUILD_ASAN ON)        # ASan内存检测 （依赖libasan.so）
 # set(BUILD_STRIP ON)       # 发布包裁剪符号表（影响gdb使用）
