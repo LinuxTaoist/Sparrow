@@ -138,6 +138,34 @@ if(BUILD_I2C_TOOLS)
     message(STATUS "BUILD_I2C_TOOLS 已启用，i2c-tools 路径: ${I2C_TOOLS_DST_BIN}")
 endif()
 
+if(BUILD_STRACE)
+    set(STRACE_CROSS_FLAGS "-fPIC")
+    set(STRACE_DST_BIN "${PROJECT_PATH}/3rdParty/strace/bin/${PROJECT_PLATFORM}")
+
+    if(NOT EXISTS "${STRACE_DST_BIN}/strace")
+        message(STATUS "strace 二进制缺失，开始自动构建: ${PROJECT_PLATFORM}")
+        set(STRACE_BUILD_ARGS
+            bash
+            ${PROJECT_PATH}/3rdParty/strace/build.sh
+            --project-path ${PROJECT_PATH}
+            --platform ${PROJECT_PLATFORM}
+            --c-compiler ${CMAKE_C_COMPILER}
+            --cxx-compiler ${CMAKE_CXX_COMPILER}
+            --c-flags "${STRACE_CROSS_FLAGS}"
+            --cxx-flags "${STRACE_CROSS_FLAGS}"
+        )
+        if(CMAKE_SYSROOT)
+            list(APPEND STRACE_BUILD_ARGS --sysroot ${CMAKE_SYSROOT})
+        endif()
+        execute_process(COMMAND ${STRACE_BUILD_ARGS} RESULT_VARIABLE strace_build_result)
+        if(NOT strace_build_result EQUAL 0)
+            message(FATAL_ERROR "strace 自动构建失败，平台: ${PROJECT_PLATFORM}")
+        endif()
+    endif()
+
+    message(STATUS "BUILD_STRACE 已启用，strace 路径: ${STRACE_DST_BIN}/strace")
+endif()
+
 if(BUILD_COVERAGE)
     if(CMAKE_C_COMPILER_ID MATCHES "GNU|Clang")
         message(STATUS "Coverage instrumentation enabled (Default platform)")

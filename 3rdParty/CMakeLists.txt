@@ -50,3 +50,12 @@ if(BUILD_I2C_TOOLS)
         OUTPUT_VARIABLE output
     )
 endif()
+
+if(BUILD_STRACE)
+    execute_process(
+        COMMAND mkdir -p ${EXECUTABLE_OUTPUT_PATH}
+        COMMAND cp -rf ${3RD_PATH}/strace/bin/${PROJECT_PLATFORM}/strace ${EXECUTABLE_OUTPUT_PATH}/strace
+        RESULT_VARIABLE result
+        OUTPUT_VARIABLE output
+    )
+endif()

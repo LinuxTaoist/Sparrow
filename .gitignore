@@ -26,6 +26,10 @@ Components/Business/
 !/3rdParty/i2c-tools/build.sh
 !/3rdParty/i2c-tools/i2c-tools-4.4.tar.xz
 
+3rdParty/strace/*
+!/3rdParty/strace/build.sh
+!/3rdParty/strace/strace-7.3.tar.xz
+
 Platform/*
 !/Platform/Default
 
