@@ -59,7 +59,7 @@ bool ReadAll(int fd, void* buf, size_t len) {
     return true;
 }
 
-class Core_LogBench : public ::testing::Test {
+class Core_LogBench : public ::testing::TestWithParam<int32_t> {
 protected:
     static void SetUpTestSuite() {
         BenchInstallReportListener();
@@ -244,22 +244,16 @@ protected:
 
 } // namespace
 
-// 测试 1 秒内打印 200 条日志的吞吐和丢包情况
-TEST_F(Core_LogBench, Load1s200Ops) {
-    RunLoad1sScenario("Load1s200Ops", 200);
+TEST_P(Core_LogBench, Load1sOps) {
+    const int32_t targetOps = GetParam();
+    const std::string scenario = "Load1s" + std::to_string(targetOps) + "Ops";
+    RunLoad1sScenario(scenario.c_str(), targetOps);
 }
 
-// 测试 1 秒内打印 500 条日志的吞吐和丢包情况
-TEST_F(Core_LogBench, Load1s500Ops) {
-    RunLoad1sScenario("Load1s500Ops", 500);
-}
-
-// 测试 1 秒内打印 1000 条日志的吞吐和丢包情况
-TEST_F(Core_LogBench, Load1s1000Ops) {
-    RunLoad1sScenario("Load1s1000Ops", 1000);
-}
-
-// 测试 1 秒内打印 10000 条日志的吞吐和丢包情况
-TEST_F(Core_LogBench, Load1s10000Ops) {
-    RunLoad1sScenario("Load1s10000Ops", 10000);
-}
+INSTANTIATE_TEST_SUITE_P(
+    Load,
+    Core_LogBench,
+    ::testing::Values(200, 500, 1000, 10000),
+    [](const ::testing::TestParamInfo<int32_t>& info) {
+        return std::to_string(info.param);
+    });

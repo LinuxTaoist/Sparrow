@@ -24,7 +24,7 @@ namespace {
 constexpr int32_t THREADPOOL_DRAIN_TIMEOUT_MS = 5000;
 }
 
-class Core_ThreadPoolBench : public ::testing::Test {
+class Core_ThreadPoolBench : public ::testing::TestWithParam<int32_t> {
 protected:
     static void SetUpTestSuite() {
         BenchInstallReportListener();
@@ -101,22 +101,17 @@ protected:
     SprThreadPool* mPool;
 };
 
-// 测试 1 秒内发送 200 条任务的吞吐和丢包情况
-TEST_F(Core_ThreadPoolBench, Load1s200Ops) {
-    RunLoad1sScenario("Load1s200Ops", 200);
+TEST_P(Core_ThreadPoolBench, Load1sOps) {
+    const int32_t targetOps = GetParam();
+    const std::string scenario = "Load1s" + std::to_string(targetOps) + "Ops";
+    RunLoad1sScenario(scenario.c_str(), targetOps);
 }
 
-// 测试 1 秒内发送 500 条任务的吞吐和丢包情况
-TEST_F(Core_ThreadPoolBench, Load1s500Ops) {
-    RunLoad1sScenario("Load1s500Ops", 500);
-}
-
-// 测试 1 秒内发送 1000 条任务的吞吐和丢包情况
-TEST_F(Core_ThreadPoolBench, Load1s1000Ops) {
-    RunLoad1sScenario("Load1s1000Ops", 1000);
-}
-
-// 测试 1 秒内发送 10000 条任务的吞吐和丢包情况
-TEST_F(Core_ThreadPoolBench, Load1s10000Ops) {
-    RunLoad1sScenario("Load1s10000Ops", 10000);
-}
+INSTANTIATE_TEST_SUITE_P(
+    Load,
+    Core_ThreadPoolBench,
+    ::testing::Values(200, 500, 1000, 10000),
+    [](const ::testing::TestParamInfo<int32_t>& info) {
+        return std::to_string(info.param);
+    }
+);

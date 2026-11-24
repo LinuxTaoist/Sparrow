@@ -20,7 +20,7 @@
 #include "SprMsg.h"
 #include "BenchCommon.h"
 
-class Core_SprMsgBench : public testing::Test {
+class Core_SprMsgBench : public testing::TestWithParam<int32_t> {
 protected:
     static void SetUpTestSuite() {
         BenchInstallReportListener();
@@ -112,22 +112,17 @@ void RunLoad1sScenario(const char* scenario, int32_t targetOps, SprMsg& msg) {
              elapsedUs > 0 ? (double)success * 1000000.0 / (double)elapsedUs : 0.0);
 }
 
-// 测试 1 秒内发送 200 条消息的吞吐和丢包情况
-TEST_F(Core_SprMsgBench, Load1s200Ops) {
-    RunLoad1sScenario("Load1s200Ops", 200, msg);
+TEST_P(Core_SprMsgBench, Load1sOps) {
+    const int32_t targetOps = GetParam();
+    const std::string scenario = "Load1s" + std::to_string(targetOps) + "Ops";
+    RunLoad1sScenario(scenario.c_str(), targetOps, msg);
 }
 
-// 测试 1 秒内发送 500 条消息的吞吐和丢包情况
-TEST_F(Core_SprMsgBench, Load1s500Ops) {
-    RunLoad1sScenario("Load1s500Ops", 500, msg);
-}
-
-// 测试 1 秒内发送 1000 条消息的吞吐和丢包情况
-TEST_F(Core_SprMsgBench, Load1s1000Ops) {
-    RunLoad1sScenario("Load1s1000Ops", 1000, msg);
-}
-
-// 测试 1 秒内发送 10000 条消息的吞吐和丢包情况
-TEST_F(Core_SprMsgBench, Load1s10000Ops) {
-    RunLoad1sScenario("Load1s10000Ops", 10000, msg);
-}
+INSTANTIATE_TEST_SUITE_P(
+    Load,
+    Core_SprMsgBench,
+    testing::Values(200, 500, 1000, 10000),
+    [](const testing::TestParamInfo<int32_t>& info) {
+        return std::to_string(info.param);
+    }
+);

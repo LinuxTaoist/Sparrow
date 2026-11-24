@@ -19,9 +19,9 @@ aux_source_directory        (${PROJECT_PATH}/PrivateAPIs/Binder SRC_TEST_BENCHMA
 aux_source_directory        (${PROJECT_PATH}/PrivateAPIs/Event  SRC_TEST_BENCHMARK_PATH)
 
 ## Bin test_benchmark
-add_executable              (test_benchmark ${SRC_TEST_BENCHMARK_PATH})
-target_include_directories  (test_benchmark PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include)
-set_target_properties       (test_benchmark PROPERTIES OUTPUT_NAME "test_benchmark")
-target_link_libraries       (test_benchmark c LibSprLog LibEpollEvent LibConfigAPI LibHeartbeat gtest gtest_main pthread rt dl)
-add_dependencies            (test_benchmark LibSprLog LibEpollEvent LibConfigAPI LibHeartbeat)
-add_test                    (NAME test_benchmark COMMAND test_benchmark)
+add_executable              (BinTestBenchmark ${SRC_TEST_BENCHMARK_PATH})
+target_include_directories  (BinTestBenchmark PRIVATE ${PROJECT_PATH}/3rdParty/googletest/include)
+set_target_properties       (BinTestBenchmark PROPERTIES OUTPUT_NAME "test_benchmark")
+target_link_libraries       (BinTestBenchmark c LibSprLog LibEpollEvent LibConfigAPI LibHeartbeat gtest gtest_main pthread rt dl)
+add_dependencies            (BinTestBenchmark LibSprLog LibEpollEvent LibConfigAPI LibHeartbeat)
+add_test                    (NAME test_benchmark COMMAND BinTestBenchmark)

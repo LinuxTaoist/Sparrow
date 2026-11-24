@@ -85,7 +85,7 @@ private:
 };
 } // namespace
 
-class Core_SprObsMQThreadBench : public ::testing::Test {
+class Core_SprObsMQThreadBench : public ::testing::TestWithParam<int32_t> {
 protected:
     Core_SprObsMQThreadBench()
         : mSender(SPARROW_BENCH_MQTHREAD_ID_BASE_START),
@@ -269,22 +269,17 @@ protected:
 
 std::thread Core_SprObsMQThreadBench::sEpollThread;
 
-// 测试 1 秒内发送 200 条消息的吞吐和丢包情况
-TEST_F(Core_SprObsMQThreadBench, Load1s200OpsDualThread) {
-    RunDualThreadLoad1sScenario("Load1s200Ops", 200);
+TEST_P(Core_SprObsMQThreadBench, Load1sOpsDualThread) {
+    const int32_t targetOps = GetParam();
+    const std::string scenario = "Load1s" + std::to_string(targetOps) + "Ops";
+    RunDualThreadLoad1sScenario(scenario.c_str(), targetOps);
 }
 
-// 测试 1 秒内发送 500 条消息的吞吐和丢包情况
-TEST_F(Core_SprObsMQThreadBench, Load1s500OpsDualThread) {
-    RunDualThreadLoad1sScenario("Load1s500Ops", 500);
-}
-
-// 测试 1 秒内发送 1000 条消息的吞吐和丢包情况
-TEST_F(Core_SprObsMQThreadBench, Load1s1000OpsDualThread) {
-    RunDualThreadLoad1sScenario("Load1s1000Ops", 1000);
-}
-
-// 测试 1 秒内发送 10000 条消息的吞吐和丢包情况
-TEST_F(Core_SprObsMQThreadBench, Load1s10000OpsDualThread) {
-    RunDualThreadLoad1sScenario("Load1s10000Ops", 10000);
-}
+INSTANTIATE_TEST_SUITE_P(
+    Load,
+    Core_SprObsMQThreadBench,
+    ::testing::Values(200, 500, 800, 1000, 2000, 5000, 8000, 10000),
+    [](const ::testing::TestParamInfo<int32_t>& info) {
+        return std::to_string(info.param);
+    }
+);
